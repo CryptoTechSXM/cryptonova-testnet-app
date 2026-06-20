@@ -1219,6 +1219,13 @@
       <button class="btn btn-green" onclick="showTab('register')" data-i18n="dash.not_reg_btn">Register Now</button>
     </div>
 
+    <div id="dash-unknown" class="card" style="text-align:center;padding:40px;display:none">
+      <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--yellow)">Couldn't load your status</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:20px">The RPC node didn't respond after several retries — this is NOT a confirmation that you're unregistered. If you've already joined, your data is safe on-chain.</div>
+      <button class="btn btn-ghost" onclick="loadDashboardData()">↻ Try Again</button>
+    </div>
+
     <div id="dash-content" style="display:none">
       <!-- Earnings cards -->
       <div class="grid-4" style="margin-bottom:24px">
@@ -2911,7 +2918,14 @@ async function loadUserData() {
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const joined = await tr.globalJoined(userAddr).catch(()=>false);
+    // v8.19 fix (2026-06-20): a non-retried globalJoined() that silently defaults to
+    // `false` would flip an ALREADY-registered wallet into seeing the registration form
+    // (risking a confusing/wasted re-register attempt) whenever the RPC call hiccupped.
+    // Retry it, and on persistent failure leave both panels exactly as they already are
+    // instead of guessing — better to show nothing new than to assert the wrong state.
+    const joinedRead = await retryRead(() => tr.globalJoined(userAddr));
+    const joinedReadFailed = !joinedRead.ok;
+    const joined = joinedRead.ok ? joinedRead.value : null;
 
     // Auto-fill referrer from URL or T1 MatA root
     const refInput = document.getElementById('input-referrer');
@@ -2930,7 +2944,9 @@ async function loadUserData() {
       }
     }
 
-    if (joined) {
+    if (joinedReadFailed) {
+      console.warn('loadUserData: globalJoined read failed after retries — leaving register tab state unchanged');
+    } else if (joined) {
       // Show "already registered" state on register tab
       const regAlready = document.getElementById('register-already');
       const regForm = document.getElementById('reg-form-wrap');
@@ -2960,11 +2976,16 @@ async function loadRegisterTab() {
   try {
     const tr   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-    const [joined, bal, allowance] = await Promise.all([
-      tr.globalJoined(userAddr).catch(()=>false),
+    const [joinedRead, bal, allowance] = await Promise.all([
+      retryRead(() => tr.globalJoined(userAddr)),
       usdc.balanceOf(userAddr),
       usdc.allowance(userAddr, ADDRS.T1.pm),
     ]);
+    // v8.19 fix (2026-06-20): on persistent RPC failure, default to `true` (already
+    // registered) rather than `false` — worst case an already-registered user sees
+    // disabled buttons for a moment, instead of being invited to submit a register()
+    // tx that would just revert and burn their gas.
+    const joined = joinedRead.ok ? joinedRead.value : true;
 
     const btnApprove = document.getElementById('btn-approve');
     const btnReg     = document.getElementById('btn-register');
@@ -3172,7 +3193,10 @@ async function doRegister() {
   try {
     const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
     const tr0 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const alreadyJoined = await tr0.globalJoined(userAddr).catch(()=>false);
+    // Retry so a flaky RPC doesn't skip this gas-saving guard; on persistent failure
+    // fall through to false — worst case the on-chain register() call reverts safely.
+    const alreadyJoinedRead = await retryRead(() => tr0.globalJoined(userAddr));
+    const alreadyJoined = alreadyJoinedRead.ok ? alreadyJoinedRead.value : false;
     if (alreadyJoined) {
       setStatus('reg-status', '✅ Wallet already registered — <a href="#" onclick="showTab(\'dashboard\')" style="color:var(--green)">view Dashboard</a>', 'ok');
       await loadUserData();
@@ -3213,19 +3237,29 @@ async function doRegister() {
 // ═══════════════════════════════════════════════════════════════════════
 async function loadDashboardData() {
   if (!userAddr) {
-    showEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-content'); return;
+    showEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
   }
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
 
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const joined = await tr.globalJoined(userAddr).catch(()=>false);
+    // v8.19 fix (2026-06-20): globalJoined() used to be a single non-retried call that
+    // silently defaulted to `false` on any RPC hiccup — for an ALREADY-registered member
+    // that meant the dashboard would flash "Not Yet Registered" (actively wrong, not just
+    // missing data) until a refresh happened to land on a working RPC call. Retry it, and
+    // if it still fails, show an honest "couldn't load" state instead of a false claim.
+    const joinedRead = await retryRead(() => tr.globalJoined(userAddr));
+
+    if (!joinedRead.ok) {
+      hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-content'); showEl('dash-unknown'); return;
+    }
+    const joined = joinedRead.value;
 
     if (!joined) {
-      hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-content'); return;
+      hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
     }
 
-    hideEl('dash-no-wallet'); hideEl('dash-not-registered'); showEl('dash-content');
+    hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); showEl('dash-content');
 
     // Fetch T1 cycles from TierRouter (manual upgrade gate)
     const t1CyclesTR = await tr.tierCycles(userAddr, 0).catch(() => 0n);
@@ -3473,7 +3507,10 @@ async function loadDashboardData() {
       const canUpgrade = (Number(curTierCycles) >= 1 || _inCurMatBDash) && highestTier < MAX_DEPLOYED_TIER;
       upgradeSection.style.display = canUpgrade ? 'block' : 'none';
       if (canUpgrade) {
-        const UPGRADE_NAMES = ['--','T2 -- Nova Rise','T3 -- Nova Star','T4 -- Nova Prime','T5 -- SuperNova Genesis','T6 -- SuperNova Elite','T7 -- SuperNova Spark'];
+        // v8.19 fix (2026-06-20): UPGRADE_NAMES used to be a separate hardcoded list that
+        // only covered T2-T7, so upgrading from T8/T9 (-> T9/T10) silently fell back to the
+        // generic "Next Tier" label. Reuse the complete, already-correct TIER_NAMES array
+        // (covers T1-T10) instead of maintaining a second list that can drift out of sync.
         const nextIdx = highestTier;
         const nextFeeRaw = await tr.tierEntryFees(nextIdx).catch(() => 25_000_000n);
         window._dashUpgradeFee       = nextFeeRaw;
@@ -3483,7 +3520,8 @@ async function loadDashboardData() {
           usdc2.balanceOf(userAddr).catch(() => 0n),
           usdc2.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
         ]);
-        setText('upgrade-target-name', UPGRADE_NAMES[nextIdx] || 'Next Tier');
+        const nextTierNum = nextIdx + 1;
+        setText('upgrade-target-name', TIER_NAMES[nextTierNum] ? `T${nextTierNum} -- ${TIER_NAMES[nextTierNum]}` : 'Next Tier');
         setText('upgrade-fee',         fmt6(nextFeeRaw));
         setText('upgrade-usdc-bal',    fmt6(uBal));
         const c = Number(curTierCycles);
