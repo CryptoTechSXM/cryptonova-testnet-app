@@ -221,7 +221,7 @@
     "usdc_bal": "USDC Bakiyesi",
     "usdc_approved": "USDC Onaylandı",
     "usdc_low": "⚠️ Bu testnette kayıt olmak için test USDC'ye ihtiyacın var.",
-    "faucet_btn": "🚰 $50 Test USDC Al (Ücretsiz — Sadece Testnet)",
+    "faucet_btn": "🚰 $20 Test USDC Al (Ücretsiz — Sadece Testnet)",
     "step1_btn": "Adım 1: $10 USDC Onayla 🔒",
     "step2_btn": "Adım 2: Kaydol ($10 USDC)",
     "ref_link_title": "🔗 Referans Bağlantın",

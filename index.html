@@ -1094,7 +1094,7 @@
             <div id="usdc-low-warn" style="display:none;margin-top:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--yellow)">
               <span data-i18n="reg.usdc_low">⚠️ You need test USDC to register on this testnet.</span>
               <button id="btn-faucet" onclick="claimTestUsdc()" style="display:block;width:100%;margin-top:10px;background:rgba(245,158,11,.2);border:1px solid var(--yellow);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:var(--yellow);cursor:pointer" data-i18n="reg.faucet_btn">
-                🚰 Get $50 Test USDC (Free — Testnet Only)
+                🚰 Get $20 Test USDC (Free — Testnet Only)
               </button>
               <div id="faucet-status" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
             </div>
@@ -3144,11 +3144,11 @@ async function claimTestUsdc() {
     if (!res.ok) throw new Error(data.error || 'Faucet request failed');
     if (btn) { btn.textContent = '✅ USDC Sent!'; }
     if (statusEl) statusEl.innerHTML = `✅ ${data.message} — <a href="https://sepolia.basescan.org/tx/${data.tx}" target="_blank" rel="noopener" style="color:var(--green)">View TX</a>`;
-    toast('$50 Test USDC sent to your wallet!', 'success');
+    toast(data.message || 'Test USDC sent to your wallet!', 'success');
     // Refresh balances after a short delay
     setTimeout(() => loadRegisterTab(), 4000);
   } catch(e) {
-    if (btn) { btn.disabled = false; btn.textContent = '🚰 Get $50 Test USDC (Free — Testnet Only)'; }
+    if (btn) { btn.disabled = false; btn.textContent = '🚰 Get $20 Test USDC (Free — Testnet Only)'; }
     if (statusEl) statusEl.textContent = '❌ ' + (e.message || 'Failed — try again');
     toast(e.message || 'Faucet failed', 'error');
   }

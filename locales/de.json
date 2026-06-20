@@ -221,7 +221,7 @@
     "usdc_bal": "USDC-Guthaben",
     "usdc_approved": "USDC Genehmigt",
     "usdc_low": "⚠️ Du benötigst Test-USDC, um dich auf diesem Testnetz zu registrieren.",
-    "faucet_btn": "🚰 $50 Test-USDC erhalten (Kostenlos — Nur Testnetz)",
+    "faucet_btn": "🚰 $20 Test-USDC erhalten (Kostenlos — Nur Testnetz)",
     "step1_btn": "Schritt 1: $10 USDC genehmigen 🔒",
     "step2_btn": "Schritt 2: Registrieren ($10 USDC)",
     "ref_link_title": "🔗 Dein Empfehlungslink",
