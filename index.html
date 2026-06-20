@@ -3455,15 +3455,21 @@ async function loadDashboardData() {
     if (upgradeSection) {
       // Max deployed tier: 3 (T3 live). Increase when T4+ deployed.
       const MAX_DEPLOYED_TIER = 10; // v8.7: all 10 tiers live
-      const curTierCycles = await tr.tierCycles(userAddr, Math.max(highestTier - 1, 0)).catch(() => 0n);
+      const curTierCyclesRead = await retryRead(() => tr.tierCycles(userAddr, Math.max(highestTier - 1, 0)));
+      const curTierCycles = curTierCyclesRead.ok ? curTierCyclesRead.value : 0n;
       // v8.19 fix (2026-06-20): was hardcoded to ADDRS.T1.matB + "highestTier === 1" so the
       // V8.14/V8.15 "crossed to MatB = eligible now" rule only ever applied to the T1->T2
       // step. Generalized to whichever tier the member currently sits in, so T2->T3,
       // T3->T4, etc. unlock immediately on crossing too, instead of requiring a full cycle.
+      // v8.19 fix #2 (2026-06-20): isActiveInMatrix() below was a single non-retried call —
+      // on a flaky public RPC it could silently fall back to false and hide this whole
+      // section even for a genuinely-eligible member (curTierCycles=0 + a dropped read =
+      // canUpgrade false). Retried like every other read in this function now.
       const _curMatBAddrDash = ADDRS['T' + highestTier] ? ADDRS['T' + highestTier].matB : null;
-      const _inCurMatBDash = _curMatBAddrDash
-        ? await new ethers.Contract(_curMatBAddrDash, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false)
-        : false;
+      const _inCurMatBDashRead = _curMatBAddrDash
+        ? await retryRead(() => new ethers.Contract(_curMatBAddrDash, MATRIX_ABI, rp).isActiveInMatrix(userAddr))
+        : { ok: true, value: false };
+      const _inCurMatBDash = _inCurMatBDashRead.ok ? _inCurMatBDashRead.value : false;
       const canUpgrade = (Number(curTierCycles) >= 1 || _inCurMatBDash) && highestTier < MAX_DEPLOYED_TIER;
       upgradeSection.style.display = canUpgrade ? 'block' : 'none';
       if (canUpgrade) {
