@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CryptoNova — The Matrix</title>
+  <title data-i18n="idx.title">CryptoNova — The Matrix</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
@@ -39,6 +39,8 @@
     }
     .theme-toggle { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all .2s; }
     .theme-toggle:hover { color: var(--text); border-color: var(--green); }
+    .lang-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; color: var(--text); cursor: pointer; transition: border-color .2s; outline: none; }
+    .lang-select:hover, .lang-select:focus { border-color: var(--green); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
 
@@ -387,14 +389,14 @@
 
   <!-- ══ LAUNCH ANNOUNCEMENT BANNER ══════════════════════════════════════ -->
   <div id="launch-banner">
-    <div class="bn-title">&#x1F680; CryptoNova &mdash; Mainnet Launch Thursday June 25</div>
+    <div class="bn-title">&#x1F680; CryptoNova &mdash; Mainnet Launch Friday June 25</div>
     <div class="bn-cd">
       <span id="bn-h">00</span>h
       <span id="bn-m">00</span>m
       <span id="bn-s">00</span>s
     </div>
     <div class="bn-sep">|</div>
-    <div class="bn-date">Thursday June 25 &bull; 12:00 PM Eastern</div>
+    <div class="bn-date">Friday June 25 &bull; 12:00 PM Eastern</div>
     <div class="bn-live" id="bn-live">&#x1F7E2; We&rsquo;re Live &mdash; Register Now!</div>
   </div>
 
@@ -402,7 +404,7 @@
   <div id="launch-gate">
     <h2>&#x1F680; CryptoNova Matrix</h2>
     <p style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">
-      Mainnet Launch &mdash; Thursday, June 25 at 12 PM ET
+      Mainnet Launch &mdash; Friday, June 25 at 12 PM ET
     </p>
     <p style="max-width:440px">
       Register, earn, and redeem <strong style="color:var(--green)">CryptoNova Tokens</strong> across 10 live tiers.<br><br>
@@ -416,7 +418,7 @@
       <div class="cd-box"><span class="cd-num" id="cd-m">00</span><div class="cd-lbl">Minutes</div></div>
       <div class="cd-box"><span class="cd-num" id="cd-s">00</span><div class="cd-lbl">Seconds</div></div>
     </div>
-    <div class="launch-sub" id="cd-date-label">12:00 PM Eastern &bull; Thursday, June 25 2026</div>
+    <div class="launch-sub" id="cd-date-label">12:00 PM Eastern &bull; Friday, June 25 2026</div>
 
     <!-- City timezone grid -->
     <div id="cd-cities-wrap" style="margin-top:14px;max-width:400px;width:100%;text-align:left">
@@ -662,6 +664,7 @@
     <span style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px">V8.18 PREVIEW</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
+    <div id="lang-switcher"></div>
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
     <button id="btn-switch-network" onclick="switchToBaseSepolia()" style="display:none;background:var(--yellow);color:#000;border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:12px;cursor:pointer;transition:opacity .2s">⚠️ Wrong Network</button>
     <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
@@ -669,12 +672,15 @@
 </header>
 
 <nav>
-  <button class="active" onclick="showTab('home')">🏠 Home</button>
-  <button onclick="showTab('register')">✅ Register</button>
-  <button onclick="showTab('dashboard')">📊 Dashboard</button>
-  <button onclick="showTab('matrix')">🌐 Matrix</button>
-  <button onclick="showTab('tiers')">🏆 Tiers</button>
-  <button onclick="showTab('roadmap')">🗺️ Roadmap</button>
+  <button class="active" onclick="showTab('home')" data-i18n="idx.nav_home">🏠 Home</button>
+  <button onclick="showTab('register')" data-i18n="idx.nav_register">✅ Register</button>
+  <button onclick="showTab('dashboard')" data-i18n="idx.nav_dashboard">📊 Dashboard</button>
+  <button onclick="showTab('matrix')" data-i18n="idx.nav_matrix">🌐 Matrix</button>
+  <button onclick="showTab('tiers')" data-i18n="idx.nav_tiers">🏆 Tiers</button>
+  <button onclick="showTab('roadmap')" data-i18n="idx.nav_roadmap">🗺️ Roadmap</button>
+  <button onclick="window.location.href='status.html'" data-i18n="idx.nav_status">🛡️ Status</button>
+  <button onclick="window.location.href='buy.html'">💎 Buy CNOVA</button>
+  <button onclick="window.location.href='governance.html'">⚖️ Governance</button>
 </nav>
 
 <main>
@@ -705,11 +711,11 @@
   <!-- ══ HOME TAB ══════════════════════════════════════════════════════ -->
   <div id="tab-home" class="tab-panel active">
     <div class="hero">
-      <h1>CryptoNova Matrix<br><span>on Base Chain</span></h1>
-      <p>Join the CryptoNova Matrix. Start at T1 ($10 USDC) and auto-upgrade through 10 tiers. Earn referral bonuses, chain pay, and CNOVA tokens — all on Base Chain.</p>
+      <h1 data-i18n="idx.hero_h1">CryptoNova Matrix<br><span>on Base Chain</span></h1>
+      <p data-i18n="idx.hero_sub">Join the CryptoNova Matrix. Start at T1 ($10 USDC) and auto-upgrade through 10 tiers. Earn referral bonuses, chain pay, and CNOVA tokens — all on Base Chain.</p>
       <div class="hero-actions">
-        <button class="btn-primary" onclick="showTab('register')">Join Now — $10 USDC</button>
-        <button class="btn-outline" onclick="showTab('dashboard')">View Dashboard</button>
+        <button class="btn-primary" onclick="showTab('register')" data-i18n="idx.hero_join">Join Now — $10 USDC</button>
+        <button class="btn-outline" onclick="showTab('dashboard')" data-i18n="idx.hero_dashboard">View Dashboard</button>
       </div>
       <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
         <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:9px 16px;color:var(--blue);font-weight:600;font-size:13px;transition:background .2s" onmouseover="this.style.background='rgba(59,130,246,.22)'" onmouseout="this.style.background='rgba(59,130,246,.12)'">
@@ -757,14 +763,14 @@
     </div>
 
     <!-- Live Stats -->
-    <div class="section-title"><div class="dot"></div> Live Stats <span id="stats-refresh" style="font-size:12px;color:var(--text3);font-weight:400;margin-left:8px;cursor:pointer" onclick="loadHomeStats(); setTimeout(loadTiersStats, 800);">↻ Refresh</span></div>
+    <div class="section-title"><div class="dot"></div> <span data-i18n="stats.live_title">Live Stats</span> <span id="stats-refresh" style="font-size:12px;color:var(--text3);font-weight:400;margin-left:8px;cursor:pointer" onclick="loadHomeStats(); loadDaoWidget(); setTimeout(loadTiersStats, 800);">↻ Refresh</span></div>
     <div class="grid-4" id="stats-grid">
-      <div class="card-sm"><div class="stat-label">Total Registered</div><div class="stat-value" id="stat-members"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub">all-time joins</div></div>
-      <div class="card-sm"><div class="stat-label">CNOVA Minted</div><div class="stat-value green" id="stat-minted"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub">50 per T1 join</div></div>
-      <div class="card-sm" title="CNOVA Treasury holds 15% of all entry fees — it backs the CNOVA floor price. Floor price = Treasury USDC ÷ total CNOVA supply."><div class="stat-label">CNOVA USDC Treasury 🏦</div><div class="stat-value green" id="stat-treasury-usdc"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub">backing the CNOVA value</div></div>
-      <div class="card-sm" title="Guaranteed minimum redemption price — Treasury USDC ÷ total CNOVA supply."><div class="stat-label">CNOVA Floor Price</div><div class="stat-value green" id="stat-floor-price"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub">per CNOVA token</div></div>
-      <div class="card-sm"><div class="stat-label">CNOVA Total Supply</div><div class="stat-value" id="stat-supply"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub">circulating CNOVA</div></div>
-      <div class="card-sm" style="border-color:rgba(245,158,11,.4)"><div class="stat-label">System Cycles</div><div class="stat-value" id="stat-cycles" style="color:var(--yellow)"><span class="spinner" style="color:var(--yellow)"></span></div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.total_registered">Total Registered</div><div class="stat-value" id="stat-members"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub" data-i18n="stats.all_time_joins">all-time joins</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.cnova_minted">CNOVA Minted</div><div class="stat-value green" id="stat-minted"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.per_join">50 per T1 join</div></div>
+      <div class="card-sm" title="CNOVA Treasury holds 10% of all entry fees — it backs the CNOVA floor price. Floor price = Treasury USDC ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.cnova_treasury">CNOVA USDC Treasury 🏦</div><div class="stat-value green" id="stat-treasury-usdc"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.backing_cnova">backing the CNOVA value</div></div>
+      <div class="card-sm" title="Guaranteed minimum redemption price — Treasury USDC ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.floor_price">CNOVA Floor Price</div><div class="stat-value green" id="stat-floor-price"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.per_cnova">per CNOVA token</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.total_supply">CNOVA Total Supply</div><div class="stat-value" id="stat-supply"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub" data-i18n="stats.circulating">circulating CNOVA</div></div>
+      <div class="card-sm" style="border-color:rgba(245,158,11,.4)"><div class="stat-label" data-i18n="stats.system_cycles">System Cycles</div><div class="stat-value" id="stat-cycles" style="color:var(--yellow)"><span class="spinner" style="color:var(--yellow)"></span></div></div>
     </div>
 
 
@@ -789,42 +795,64 @@
 
     <!-- CNOVA Mining Stats -->
     <div class="grid-4" style="margin-bottom:24px">
-      <div class="card-sm"><div class="stat-label">Current Epoch</div><div class="stat-value" id="stat-epoch" style="color:var(--yellow)">—</div></div>
-      <div class="card-sm"><div class="stat-label">CNOVA Reward / Entry</div><div class="stat-value green" id="stat-reward">—</div></div>
-      <div class="card-sm"><div class="stat-label">Stability Rescue Fund</div><div class="stat-value" id="stat-reserve">—</div></div>
-      <div class="card-sm"><div class="stat-label">Community Wallet</div><div class="stat-value" id="stat-cw-balance" style="color:#a855f7">—</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.current_epoch">Current Epoch</div><div class="stat-value" id="stat-epoch" style="color:var(--yellow)">—</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.reward_per_entry">CNOVA Reward / Entry</div><div class="stat-value green" id="stat-reward">—</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.stability_fund">Stability Rescue Fund</div><div class="stat-value" id="stat-reserve">—</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.community_wallet">Community Wallet</div><div class="stat-value" id="stat-cw-balance" style="color:#a855f7">—</div></div>
+      <div class="card-sm" title="Accumulated USDC dedicated to buying back and burning CNOVA tokens — supports the floor price."><div class="stat-label" data-i18n="stats.buyback_reserve">Buyback Reserve</div><div class="stat-value" id="stat-buyback" style="color:var(--green)">—</div></div>
+      <div class="card-sm" title="Protocol-owned USDC reserved for adding permanent liquidity to the CNOVA/USDC trading pair."><div class="stat-label">Liquidity Reserve</div><div class="stat-value" id="stat-lq-reserve" style="color:#3b82f6">—</div></div>
+    </div>
+
+    <!-- DAO widget -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="section-title" style="margin-bottom:14px"><div class="dot"></div> ⚖️ DAO Governance</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:160px">
+          <div style="font-size:13px;color:var(--text3);margin-bottom:4px">Active Proposals</div>
+          <div id="dao-active-count" style="font-size:28px;font-weight:700;color:var(--green)">—</div>
+        </div>
+        <div style="flex:1;min-width:160px">
+          <div style="font-size:13px;color:var(--text3);margin-bottom:4px">Pending Execution</div>
+          <div id="dao-timelocked-count" style="font-size:28px;font-weight:700;color:var(--yellow)">—</div>
+        </div>
+        <div style="flex:2;min-width:200px;text-align:right">
+          <div id="dao-latest-label" style="font-size:12px;color:var(--text3);margin-bottom:8px">—</div>
+          <button onclick="window.location.href='governance.html'" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:14px">View Proposals →</button>
+        </div>
+      </div>
     </div>
 
     <!-- Entry split -->
     <div class="card">
-      <div class="section-title"><div class="dot"></div> Entry Fee Split — per $10 at T1</div>
-      <div class="split-row"><span class="split-label">🌀 Equalization Pool</span><span><span class="split-amount">33%</span> <span class="split-pct">$3.30</span></span></div>
-      <div class="split-row"><span class="split-label">⛓️ Chain Pay (6 upline levels)</span><span><span class="split-amount">20%</span> <span class="split-pct">$2.00</span></span></div>
-      <div class="split-row"><span class="split-label">🤝 L1 Direct Referrer</span><span><span class="split-amount">20%</span> <span class="split-pct">$2.00</span></span></div>
-      <div class="split-row"><span class="split-label">🏦 CNOVA Treasury <span style="font-size:10px;color:var(--text3)">(floor backing)</span></span><span><span class="split-amount">15%</span> <span class="split-pct">$1.50</span></span></div>
-      <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund <span style="font-size:10px;color:var(--text3)">(rescue reserve)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
-      <div class="split-row"><span class="split-label">⚙️ Dev</span><span><span class="split-amount">3%</span> <span class="split-pct">$0.30</span></span></div>
-      <div class="split-row"><span class="split-label">⚙️ Ops</span><span><span class="split-amount">2%</span> <span class="split-pct">$0.20</span></span></div>
-      <div class="split-row"><span class="split-label">🏛️ Community</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
-      <div class="split-row"><span class="split-label">🔥 CNOVA Buyback Reserve</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
+      <div class="section-title"><div class="dot"></div> <span data-i18n="split.title">Entry Fee Split — per $10 at T1</span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool</span><span><span class="split-amount">44%</span> <span class="split-pct">$4.40</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.chain_pay">⛓️ Chain Pay (6 upline levels)</span><span><span class="split-amount">17%</span> <span class="split-pct">$1.70</span></span></div>
+      <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund <span style="font-size:10px;color:var(--text3)" data-i18n="split.stability_sub">(rescue reserve)</span></span><span><span class="split-amount">12%</span> <span class="split-pct">$1.20</span></span></div>
+      <div class="split-row"><span class="split-label">💧 Liquidity Reserve <span style="font-size:10px;color:var(--text3)">(CNOVA/USDC pool)</span></span><span><span class="split-amount">2%</span> <span class="split-pct">$0.20</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.referrer">🤝 L1 Direct Referrer</span><span><span class="split-amount">10%</span> <span class="split-pct">$1.00</span></span></div>
+      <div class="split-row"><span class="split-label">🏦 CNOVA Treasury <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">10%</span> <span class="split-pct">$1.00</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.dev">⚙️ Dev</span><span><span class="split-amount">2%</span> <span class="split-pct">$0.20</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.ops">⚙️ Ops</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.community">🏛️ Community</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.buyback">🔥 CNOVA Buyback Reserve</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
       <div style="margin-top:14px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green2);border-radius:8px;font-size:13px;color:var(--text2)">
-        💡 <strong style="color:var(--green)">CryptoNova Matrix mechanic:</strong> Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.
+        💡 <strong style="color:var(--green)" data-i18n="split.mechanic_label">CryptoNova Matrix mechanic:</strong> <span data-i18n="split.mechanic_body">Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.</span>
       </div>
     </div>
   </div>
 
   <!-- ══ TIERS TAB ═══════════════════════════════════════════════════════ -->
   <div id="tab-tiers" class="tab-panel">
-    <div class="section-title" style="margin-bottom:16px"><div class="dot"></div> 10-Tier CryptoNova Matrix &#8212; Live Stats</div>
+    <div class="section-title" style="margin-bottom:16px"><div class="dot"></div> <span data-i18n="tiers.title">10-Tier CryptoNova Matrix &#8212; Live Stats</span></div>
     <div class="card" style="margin-bottom:24px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead><tr style="border-bottom:1px solid var(--border)">
-          <th style="text-align:left;padding:8px 10px;color:var(--text3)">Tier</th>
-          <th style="text-align:left;padding:8px 10px;color:var(--text3)">Name</th>
-          <th style="text-align:right;padding:8px 10px;color:var(--text3)">Entry</th>
-          <th style="text-align:right;padding:8px 10px;color:var(--text3)">MatA Fill</th>
-          <th style="text-align:right;padding:8px 10px;color:var(--text3)">MatB Fill</th>
-          <th style="text-align:left;padding:8px 10px;color:var(--text3)">Gate</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_tier">Tier</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_name">Name</th>
+          <th style="text-align:right;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_entry">Entry</th>
+          <th style="text-align:right;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_mata_fill">MatA Fill</th>
+          <th style="text-align:right;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_matb_fill">MatB Fill</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_gate">Gate</th>
         </tr></thead>
         <tbody>
           <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)">T1</td><td style="padding:8px 10px">Nova Seed</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$10</td><td style="padding:8px 10px;text-align:right" id="tier-t1a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t1b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t1-gate" class="pill pill-green" style="font-size:10px">Open</span></td></tr>
@@ -1025,54 +1053,59 @@
 
   <!-- ══ REGISTER TAB ════════════════════════════════════════════════════ -->
   <div id="tab-register" class="tab-panel">
-    <div class="section-title"><div class="dot"></div> Join CryptoNova V8</div>
+    <div class="section-title"><div class="dot"></div> <span data-i18n="idx.reg_tab_title">Join CryptoNova V8</span></div>
 
     <div class="grid-2">
       <div>
         <!-- Registration flow -->
         <div class="card" style="margin-bottom:20px">
-          <div style="font-size:15px;font-weight:700;margin-bottom:16px">Register — $10 USDC</div>
+          <div style="font-size:15px;font-weight:700;margin-bottom:16px" data-i18n="idx.reg_title">Register — $10 USDC</div>
 
-          <div id="register-wallet-warn" style="display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:14px;font-size:14px;color:var(--yellow);margin-bottom:16px">
+          <div id="register-wallet-warn" style="display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:14px;font-size:14px;color:var(--yellow);margin-bottom:16px" data-i18n="reg.wallet_warn">
             ⚠️ Connect your wallet first to register.
           </div>
 
           <div id="register-already" style="display:none;background:var(--green-dim);border:1px solid var(--green2);border-radius:8px;padding:14px;font-size:14px;color:var(--green);margin-bottom:16px">
-            ✅ You are already registered! Check your <a href="#" onclick="showTab('dashboard')" style="color:var(--green);text-decoration:underline">Dashboard</a>.
+            <span data-i18n="reg.already_pre">✅ You are already registered! Check your</span> <a href="#" onclick="showTab('dashboard')" style="color:var(--green);text-decoration:underline" data-i18n="reg.already_link">Dashboard</a>.
           </div>
 
           <div class="form-group">
-            <label style="color:var(--green);font-weight:700;font-size:14px">🔗 Referrer Address <span style="color:var(--text3);font-weight:400;font-size:12px">(required — ask the person who invited you)</span></label>
+            <label style="color:var(--green);font-weight:700;font-size:14px"><span data-i18n="reg.ref_label">🔗 Referrer Address</span> <span style="color:var(--text3);font-weight:400;font-size:12px" data-i18n="reg.ref_required">(required — ask the person who invited you)</span></label>
             <input type="text" id="input-referrer" placeholder="0x... paste your referrer's wallet address here"
+              data-i18n-placeholder="reg.ref_placeholder"
               style="border:2px solid var(--green2);background:rgba(0,229,160,0.05);font-size:14px;padding:13px 14px;"
               onfocus="this.style.borderColor='var(--green)';this.style.boxShadow='0 0 0 3px rgba(0,229,160,0.15)'"
               onblur="this.style.borderColor='var(--green2)';this.style.boxShadow='none'"
               oninput="checkDefaultSponsorWarn()" />
-            <div class="form-hint" style="color:var(--text2)">⚠️ This is permanent — your referrer is locked on-chain for life.</div>
+            <div class="form-hint" style="color:var(--text2)" data-i18n="reg.ref_permanent">⚠️ This is permanent — your referrer is locked on-chain for life.</div>
             <div id="default-sponsor-warn" style="display:none;margin-top:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--yellow)">
-              ⚠️ <strong style="color:var(--yellow)">No referrer entered.</strong> You will be assigned to a default founding member as your permanent sponsor. If someone invited you, enter their address above before continuing.
+              ⚠️ <strong style="color:var(--yellow)" data-i18n="reg.no_ref_title">No referrer entered.</strong> <span data-i18n="reg.no_ref_body">You will be assigned to a default founding member as your permanent sponsor. If someone invited you, enter their address above before continuing.</span>
               <div style="margin-top:8px;display:flex;gap:8px">
-                <button onclick="document.getElementById('input-referrer').focus();document.getElementById('default-sponsor-warn').style.background='rgba(245,158,11,.14)'" style="background:none;border:1px solid var(--yellow);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600">Enter a Referrer</button>
-                <button onclick="document.getElementById('default-sponsor-warn').style.display='none';document.getElementById('btn-approve').disabled=false;document.getElementById('btn-approve').className='btn btn-green full-w'" style="background:var(--yellow);border:none;border-radius:6px;padding:5px 14px;font-size:12px;color:#000;cursor:pointer;font-weight:700">Continue with Default</button>
+                <button onclick="document.getElementById('input-referrer').focus();document.getElementById('default-sponsor-warn').style.background='rgba(245,158,11,.14)'" style="background:none;border:1px solid var(--yellow);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600" data-i18n="reg.no_ref_enter">Enter a Referrer</button>
+                <button onclick="document.getElementById('default-sponsor-warn').style.display='none';document.getElementById('btn-approve').disabled=false;document.getElementById('btn-approve').className='btn btn-green full-w'" style="background:var(--yellow);border:none;border-radius:6px;padding:5px 14px;font-size:12px;color:#000;cursor:pointer;font-weight:700" data-i18n="reg.no_ref_continue">Continue with Default</button>
               </div>
             </div>
           </div>
 
           <div style="margin-bottom:20px">
-            <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)">Your balances</div>
-            <div class="info-row"><span class="info-key">USDC Balance</span><span class="info-val" id="reg-usdc-bal">—</span></div>
-            <div class="info-row"><span class="info-key">USDC Approved</span><span class="info-val" id="reg-approved">—</span></div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)" data-i18n="reg.your_balances">Your balances</div>
+            <div class="info-row"><span class="info-key" data-i18n="reg.usdc_bal">USDC Balance</span><span class="info-val" id="reg-usdc-bal">—</span></div>
+            <div class="info-row"><span class="info-key" data-i18n="reg.usdc_approved">USDC Approved</span><span class="info-val" id="reg-approved">—</span></div>
             <div id="usdc-low-warn" style="display:none;margin-top:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--yellow)">
-              ⚠️ Your USDC balance is too low to register. Need test USDC? <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" style="color:var(--yellow)">Contact us on Telegram Support</a> — we'll get you sorted. 💬
+              <span data-i18n="reg.usdc_low">⚠️ You need test USDC to register on this testnet.</span>
+              <button id="btn-faucet" onclick="claimTestUsdc()" style="display:block;width:100%;margin-top:10px;background:rgba(245,158,11,.2);border:1px solid var(--yellow);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:var(--yellow);cursor:pointer" data-i18n="reg.faucet_btn">
+                🚰 Get $50 Test USDC (Free — Testnet Only)
+              </button>
+              <div id="faucet-status" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
             </div>
           </div>
 
           <!-- Step buttons -->
           <div style="display:flex;flex-direction:column;gap:10px">
-            <button class="btn btn-ghost full-w" id="btn-approve" onclick="approveUSDC()" disabled title="Approves exactly $10 USDC — the contract cannot take more than this amount">
+            <button class="btn btn-ghost full-w" id="btn-approve" onclick="approveUSDC()" disabled title="Approves exactly $10 USDC — the contract cannot take more than this amount" data-i18n="reg.step1_btn">
               Step 1: Approve $10 USDC 🔒
             </button>
-            <button class="btn btn-ghost full-w" id="btn-register" onclick="doRegister()" disabled>
+            <button class="btn btn-ghost full-w" id="btn-register" onclick="doRegister()" disabled data-i18n="reg.step2_btn">
               Step 2: Register ($10 USDC)
             </button>
           </div>
@@ -1082,38 +1115,38 @@
 
         <!-- URL referral tool -->
         <div class="card" id="referral-link-card" style="display:none">
-          <div style="font-size:15px;font-weight:700;margin-bottom:12px">🔗 Your Referral Link</div>
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px" data-i18n="reg.ref_link_title">🔗 Your Referral Link</div>
           <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px">
             <input type="text" id="referral-url" readonly style="cursor:pointer;color:var(--green);flex:1" onclick="copyReferralLink()" />
-            <button onclick="copyReferralLink()" id="copy-ref-btn" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:0 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0">Copy</button>
+            <button onclick="copyReferralLink()" id="copy-ref-btn" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:0 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0" data-i18n="reg.copy_btn">Copy</button>
           </div>
-          <div class="form-hint">Tap the <strong>Copy</strong> button, then share with your network. When someone opens your link, your address auto-fills as their referrer.</div>
+          <div class="form-hint" data-i18n="reg.ref_link_hint">Tap the <strong>Copy</strong> button, then share with your network. When someone opens your link, your address auto-fills as their referrer.</div>
         </div>
 
         <!-- Tier Upgrade Card — shown after Tier 1 registration -->
         <div class="card" id="upgrade-card" style="display:none;margin-top:20px">
-          <div style="font-size:15px;font-weight:700;margin-bottom:4px">⬆️ Upgrade Tier</div>
-          <div style="font-size:13px;color:var(--text3);margin-bottom:14px">Complete your cycle requirement, then pay the next tier's fee to earn in a bigger pool.</div>
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px" data-i18n="reg.upgrade_title">⬆️ Upgrade Tier</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:14px" data-i18n="reg.upgrade_desc">Complete your cycle requirement, then pay the next tier's fee to earn in a bigger pool.</div>
           <div id="upgrade-whale-gate" style="display:none;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--yellow)">
-            🐋 <strong>Whale Gate</strong> — Tiers 5–7 require sequential progression until <span id="upgrade-whale-progress">0</span> / 25 SuperNova Genesis members reached. <span id="upgrade-fasttrack-badge"></span>
+            <span data-i18n="reg.whale_gate_pre">🐋 <strong>Whale Gate</strong> — Tiers 5–7 require sequential progression until</span> <span id="upgrade-whale-progress">0</span> / 25 <span data-i18n="reg.whale_gate_suf">SuperNova Genesis members reached.</span> <span id="upgrade-fasttrack-badge"></span>
           </div>
           <div class="form-group">
-            <label>Target Tier</label>
+            <label data-i18n="reg.target_tier">Target Tier</label>
             <select id="upgrade-tier-select" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;outline:none" onchange="onUpgradeTierChange()">
-              <option value="">Select a tier…</option>
+              <option value="" data-i18n="reg.select_tier">Select a tier…</option>
             </select>
             <div class="form-hint" id="upgrade-tier-hint"></div>
           </div>
           <div class="form-group">
-            <label>Referrer <span style="color:var(--green);font-weight:600;font-size:11px">🔒 Locked — same as Tier 1</span></label>
+            <label><span data-i18n="reg.referrer_lbl">Referrer</span> <span style="color:var(--green);font-weight:600;font-size:11px" data-i18n="reg.referrer_locked">🔒 Locked — same as Tier 1</span></label>
             <input type="text" id="upgrade-referrer" readonly style="background:var(--bg3);opacity:.7;cursor:not-allowed;font-family:monospace;font-size:12px" placeholder="Loading referrer…" />
           </div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="display:flex;gap:8px">
-              <button class="btn btn-ghost" style="flex:1" id="btn-upgrade-approve" onclick="approveUSDCForUpgrade()" disabled>Step 1: Approve USDC 🔒</button>
+              <button class="btn btn-ghost" style="flex:1" id="btn-upgrade-approve" onclick="approveUSDCForUpgrade()" disabled data-i18n="reg.upgrade_step1">Step 1: Approve USDC 🔒</button>
               <button class="btn btn-ghost" style="padding:0 14px" onclick="checkUpgradeAllowance()" title="Check approval status">↻</button>
             </div>
-            <button class="btn btn-ghost full-w" id="btn-upgrade" onclick="doUpgrade()" disabled>Step 2: Upgrade Tier</button>
+            <button class="btn btn-ghost full-w" id="btn-upgrade" onclick="doUpgrade()" disabled data-i18n="reg.upgrade_step2">Step 2: Upgrade Tier</button>
           </div>
           <div id="upgrade-status" style="margin-top:14px;font-size:13px;color:var(--text2)"></div>
         </div>
@@ -1121,46 +1154,48 @@
 
       <!-- How it works -->
       <div class="card">
-        <div style="font-size:15px;font-weight:700;margin-bottom:16px">How to Register</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:16px" data-i18n="idx.how_title">How to Register</div>
         <ul class="step-list">
           <li>
             <div class="step-content">
-              <strong>Connect Your Wallet</strong>
-              <span>Click "Connect Wallet" in the top-right. MetaMask and Rabby are both supported. Make sure you're on Base Sepolia testnet.</span>
+              <strong data-i18n="idx.how_s1_h">Connect Your Wallet</strong>
+              <span data-i18n="idx.how_s1_b">Click "Connect Wallet" in the top-right. MetaMask and Rabby are both supported. Make sure you're on Base Sepolia testnet.</span>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <strong>Get Test USDC</strong>
-              <span>On testnet, the MockUSDC contract minted $10,000 to the deployer. Ask for a test transfer, or mint directly.</span>
+              <strong data-i18n="idx.how_s2_h">Get Test USDC</strong>
+              <span data-i18n="idx.how_s2_b">On testnet, the MockUSDC contract minted $10,000 to the deployer. Ask for a test transfer, or use the faucet button.</span>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <strong>Approve USDC</strong>
-              <span>Allow the Matrix contract to spend $10 USDC on your behalf. One MetaMask confirmation.</span>
+              <strong data-i18n="idx.how_s3_h">Approve USDC</strong>
+              <span data-i18n="idx.how_s3_b">Allow the Matrix contract to spend $10 USDC on your behalf. One MetaMask confirmation.</span>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <strong>Register</strong>
-              <span>Confirm the register transaction. You'll be placed into the CryptoNova Matrix at the next available seat.</span>
+              <strong data-i18n="idx.how_s4_h">Register</strong>
+              <span data-i18n="idx.how_s4_b">Confirm the register transaction. You'll be placed into the CryptoNova Matrix at the next available seat.</span>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <strong>Earn &amp; Withdraw</strong>
-              <span>As new members register, USDC flows through the chain to you. Withdraw any time from the Dashboard.</span>
+              <strong data-i18n="idx.how_s5_h">Earn &amp; Withdraw</strong>
+              <span data-i18n="idx.how_s5_b">As new members register, USDC flows through the chain to you. Withdraw any time from the Dashboard.</span>
             </div>
           </li>
         </ul>
 
         <div style="margin-top:20px;padding:14px;background:var(--bg3);border-radius:8px;font-size:13px">
-          <div style="color:var(--green);font-weight:700;margin-bottom:6px">💡 Tier 1 Earnings Potential (per 127-seat cycle)</div>
-          <div style="color:var(--text2);line-height:1.6">Passive (0 referrals): <strong style="color:var(--text)">$3.60</strong> chain pay per cycle (36% ROI)<br>
-          Active (2 referrals): <strong style="color:var(--text)">$7.60</strong> per cycle (76% ROI)<br>
-          Power (5 referrals): <strong style="color:var(--text)">$13.60</strong> per cycle (136% ROI)<br>
-          <span style="font-size:11px;color:var(--text3)">Based on mid-level position. Chain pay BPS: L1 10% · L2 4% · L3 3% · L4 1.5% · L5-L6 0.75%. Upgrade tiers = bigger fees = bigger chain pay.</span></div>
+          <div style="color:var(--green);font-weight:700;margin-bottom:6px" data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)</div>
+          <div style="color:var(--text2);line-height:1.6">
+            <span data-i18n="reg.earn_passive">Passive (0 referrals): <strong style="color:var(--text)">$3.06</strong> chain pay + equalization per cycle (~31% ROI)</span><br>
+            <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">$5.06</strong> per cycle (~51% ROI)</span><br>
+            <span data-i18n="reg.earn_power">Power (5 referrals): <strong style="color:var(--text)">$8.06</strong> per cycle (~81% ROI)</span><br>
+            <span style="font-size:11px;color:var(--text3)" data-i18n="reg.earn_disclaimer">Based on mid-level position. Chain pay BPS: L1 8.5% · L2 3.4% · L3 2.55% · L4 1.27% · L5-L6 0.64%. Pool=45% equalization at each cycle-out. Upgrade tiers = bigger fees = bigger chain pay.</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1168,59 +1203,60 @@
 
   <!-- ══ DASHBOARD TAB ═══════════════════════════════════════════════════ -->
   <div id="tab-dashboard" class="tab-panel">
-    <div class="section-title"><div class="dot"></div> My Dashboard</div>
+    <div class="section-title"><div class="dot"></div> <span data-i18n="dash.title">My Dashboard</span></div>
 
     <div id="dash-no-wallet" class="card" style="text-align:center;padding:40px;display:none">
       <div style="font-size:32px;margin-bottom:12px"><span style="filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(0.85)">👛</span></div>
-      <div style="font-size:16px;font-weight:600;margin-bottom:8px">Connect Your Wallet</div>
-      <div style="color:var(--text2);font-size:14px;margin-bottom:20px">Connect MetaMask to view your dashboard and earnings.</div>
-      <button class="btn btn-green" onclick="window.ethereum ? connectWallet() : showMetaMaskModal()">Connect Wallet</button>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px" data-i18n="dash.no_wallet_h">Connect Your Wallet</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:20px" data-i18n="dash.no_wallet_body">Connect MetaMask to view your dashboard and earnings.</div>
+      <button class="btn btn-green" onclick="window.ethereum ? connectWallet() : showMetaMaskModal()" data-i18n="dash.no_wallet_btn">Connect Wallet</button>
     </div>
 
     <div id="dash-not-registered" class="card" style="text-align:center;padding:40px;display:none">
       <div style="font-size:32px;margin-bottom:12px">🚀</div>
-      <div style="font-size:16px;font-weight:600;margin-bottom:8px">Not Yet Registered</div>
-      <div style="color:var(--text2);font-size:14px;margin-bottom:20px">You haven't joined the matrix yet. Register with $10 USDC to get started.</div>
-      <button class="btn btn-green" onclick="showTab('register')">Register Now</button>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px" data-i18n="dash.not_reg_h">Not Yet Registered</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:20px" data-i18n="dash.not_reg_body">You haven't joined the matrix yet. Register with $10 USDC to get started.</div>
+      <button class="btn btn-green" onclick="showTab('register')" data-i18n="dash.not_reg_btn">Register Now</button>
     </div>
 
     <div id="dash-content" style="display:none">
       <!-- Earnings cards -->
       <div class="grid-4" style="margin-bottom:24px">
         <div class="card-sm clickable" style="border-color:var(--green2)" onclick="openDashDetail('withdrawable',this)" title="Click for breakdown">
-          <div class="stat-label">Withdrawable</div>
+          <div class="stat-label" data-i18n="dash.withdrawable">Withdrawable</div>
           <div class="stat-value green" id="dash-withdrawable">—</div>
-          <div class="stat-sub">Ready to claim</div>
+          <div id="dash-reserved-badge" style="display:none;color:var(--yellow);font-size:11px;font-weight:600;margin-top:2px"></div>
+          <div class="stat-sub" id="dash-ready-label" data-i18n="dash.ready_to_claim">Ready to claim</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('earned',this)" title="Click for tier breakdown">
-          <div class="stat-label">Total Earned</div>
+          <div class="stat-label" data-i18n="dash.total_earned">Total Earned</div>
           <div class="stat-value" id="dash-total-earned">—</div>
-<div class="stat-sub" id="dash-total-earned-sub" title="Total USDC ever credited to your account. Includes current balance, amounts auto-deducted for tier upgrades, and past withdrawals.">All tiers lifetime</div>
+          <div class="stat-sub" id="dash-total-earned-sub" data-i18n="dash.all_tiers_lifetime" title="Total USDC ever credited to your account. Includes current balance, amounts auto-deducted for tier upgrades, and past withdrawals.">All tiers lifetime</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
-          <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg>CNOVA Balance</div>
+          <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span></div>
           <div class="stat-value green" id="dash-cnova">—</div>
-          <div class="stat-sub">Mined tokens</div>
+          <div class="stat-sub" data-i18n="dash.mined_tokens">Mined tokens</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
-          <div class="stat-label">CNOVA Value</div>
+          <div class="stat-label" data-i18n="dash.cnova_value">CNOVA Value</div>
           <div class="stat-value" id="dash-cnova-val">—</div>
-          <div class="stat-sub">At current floor</div>
+          <div class="stat-sub" data-i18n="dash.at_current_floor">At current floor</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('burned',this)" title="Click for redemption history">
-          <div class="stat-label">🔥 CNOVA Burned</div>
+          <div class="stat-label" data-i18n="dash.cnova_burned">🔥 CNOVA Burned</div>
           <div class="stat-value" id="dash-cnova-burned" style="color:var(--red)">—</div>
-          <div class="stat-sub">Redeemed lifetime</div>
+          <div class="stat-sub" data-i18n="dash.redeemed_lifetime">Redeemed lifetime</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" style="border-color:rgba(168,85,247,.4)" onclick="openDashDetail('community',this)" title="Click for eligibility details">
-          <div class="stat-label">🏛️ Community Pool</div>
+          <div class="stat-label" data-i18n="dash.community_pool">🏛️ Community Pool</div>
           <div class="stat-value" id="dash-cw-pool" style="color:#a855f7">—</div>
-          <div class="stat-sub">Orphan fees collected</div>
+          <div class="stat-sub" data-i18n="dash.orphan_fees">Orphan fees collected</div>
           <div class="detail-hint">Details ↗</div>
         </div>
       </div>
@@ -1237,15 +1273,22 @@
       <!-- Withdraw + member info -->
       <div class="grid-2" style="margin-bottom:24px">
         <div class="card">
-          <div class="section-title" style="margin-bottom:16px"><div class="dot"></div> Withdraw Earnings</div>
+          <div class="section-title" style="margin-bottom:16px"><div class="dot"></div> <span data-i18n="dash.withdraw_title">Withdraw Earnings</span></div>
           <div style="font-size:28px;font-weight:800;color:var(--green);margin-bottom:4px" id="dash-withdraw-amount">$0.00</div>
-          <div style="font-size:13px;color:var(--text3);margin-bottom:10px">Available USDC</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:10px" data-i18n="dash.available_usdc">Available USDC</div>
+
+          <!-- Protocol reserve notice -->
+          <div id="withdraw-reserve-notice" style="display:none;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:10px">
+            <div style="font-weight:700;color:var(--yellow);margin-bottom:4px">⚙ Protocol Reserve Active</div>
+            <div id="reserve-detail-text" style="color:var(--text2);line-height:1.6"></div>
+            <div id="reserve-total-text" style="color:var(--yellow);font-weight:600;margin-top:6px;font-size:11px"></div>
+          </div>
 
           <!-- Withdrawal fee breakdown -->
           <div id="withdraw-fee-breakdown" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:14px;display:none">
-            <div class="info-row" style="margin-bottom:4px"><span class="info-key">Gross Amount</span><span class="info-val" id="wfee-gross">—</span></div>
-            <div class="info-row" style="margin-bottom:6px"><span class="info-key" style="color:var(--yellow)">Health Fee (<span id="wfee-pct">1.5</span>%)</span><span class="info-val" style="color:var(--yellow)" id="wfee-fee">—</span></div>
-            <div class="info-row" style="border-top:1px solid var(--border);padding-top:6px;margin:0"><span class="info-key" style="font-weight:700">You Receive</span><span class="info-val green" style="font-weight:800;font-size:13px" id="wfee-net">—</span></div>
+            <div class="info-row" style="margin-bottom:4px"><span class="info-key" data-i18n="dash.gross_amount">Gross Amount</span><span class="info-val" id="wfee-gross">—</span></div>
+            <div class="info-row" style="margin-bottom:6px"><span class="info-key" style="color:var(--yellow)"><span data-i18n="dash.health_fee">Health Fee</span> (<span id="wfee-pct">1.5</span>%)</span><span class="info-val" style="color:var(--yellow)" id="wfee-fee">—</span></div>
+            <div class="info-row" style="border-top:1px solid var(--border);padding-top:6px;margin:0"><span class="info-key" style="font-weight:700" data-i18n="dash.you_receive">You Receive</span><span class="info-val green" style="font-weight:800;font-size:13px" id="wfee-net">—</span></div>
           </div>
 
           <!-- Destination wallet (expandable custom address) -->
@@ -1287,14 +1330,14 @@
 
           <!-- Redeem CNOVA for USDC at floor price -->
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-            <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔥 Redeem CNOVA → USDC</div>
-            <div style="font-size:12px;color:var(--text3);margin-bottom:8px">Burn CNOVA at the current floor price to receive USDC from the CNOVA Treasury.</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px" data-i18n="dash.redeem_title">🔥 Redeem CNOVA → USDC</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:8px" data-i18n="dash.redeem_desc">Burn CNOVA at the current floor price to receive USDC from the CNOVA Treasury.</div>
             <div id="redeem-penalty-info" style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px"></div>
-            <div class="info-row"><span class="info-key">Your CNOVA</span><span class="info-val green" id="redeem-cnova-bal">—</span></div>
-            <div class="info-row"><span class="info-key">Floor Price</span><span class="info-val" id="redeem-floor">—</span></div>
-            <div class="info-row"><span class="info-key">Gross Value</span><span class="info-val" id="redeem-gross">—</span></div>
-            <div class="info-row" id="redeem-penalty-row"><span class="info-key" style="color:var(--yellow)">Early Unlock Penalty</span><span class="info-val" style="color:var(--yellow)" id="redeem-penalty-amt">—</span></div>
-            <div class="info-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px"><span class="info-key" style="font-weight:700">Est. Net Receive</span><span class="info-val green" style="font-weight:800;font-size:15px" id="redeem-out">—</span></div>
+            <div class="info-row"><span class="info-key" data-i18n="dash.your_cnova">Your CNOVA</span><span class="info-val green" id="redeem-cnova-bal">—</span></div>
+            <div class="info-row"><span class="info-key" data-i18n="dash.floor_price">Floor Price</span><span class="info-val" id="redeem-floor">—</span></div>
+            <div class="info-row"><span class="info-key" data-i18n="dash.gross_value">Gross Value</span><span class="info-val" id="redeem-gross">—</span></div>
+            <div class="info-row" id="redeem-penalty-row"><span class="info-key" style="color:var(--yellow)" data-i18n="dash.early_unlock_penalty">Early Unlock Penalty</span><span class="info-val" style="color:var(--yellow)" id="redeem-penalty-amt">—</span></div>
+            <div class="info-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px"><span class="info-key" style="font-weight:700" data-i18n="dash.est_net_receive">Est. Net Receive</span><span class="info-val green" style="font-weight:800;font-size:15px" id="redeem-out">—</span></div>
             <div style="display:flex;gap:8px;margin-top:12px">
               <input type="text" id="redeem-amount" placeholder="CNOVA to redeem"
                 style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none"
@@ -1302,23 +1345,23 @@
               <button class="btn btn-ghost" onclick="setMaxRedeem()" style="padding:9px 14px;font-size:12px">Max</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-              <button class="btn btn-ghost full-w" id="btn-redeem-approve" onclick="approveCNOVAForRedeem()" disabled>Step 1: Approve CNOVA</button>
-              <button class="btn btn-ghost full-w" id="btn-redeem" onclick="doRedeemAtFloor()" disabled>Step 2: Redeem for USDC</button>
+              <button class="btn btn-ghost full-w" id="btn-redeem-approve" onclick="approveCNOVAForRedeem()" disabled data-i18n="dash.step1_approve_cnova">Step 1: Approve CNOVA</button>
+              <button class="btn btn-ghost full-w" id="btn-redeem" onclick="doRedeemAtFloor()" disabled data-i18n="dash.step2_redeem">Step 2: Redeem for USDC</button>
             </div>
             <div id="redeem-status" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
           </div>
         </div>
         <div class="card">
-          <div class="section-title" style="margin-bottom:12px"><div class="dot"></div> Member Info — <span id="dash-tier-name" style="color:var(--green);font-size:14px">—</span></div>
-          <div class="info-row"><span class="info-key">Member ID</span><span class="info-val" id="dash-id">—</span></div>
-          <div class="info-row"><span class="info-key">Active Matrix</span><span class="info-val" id="dash-matrix">—</span></div>
-          <div class="info-row"><span class="info-key">BFS Position</span><span class="info-val" id="dash-bfs">—</span></div>
-          
-          <div class="info-row"><span class="info-key">Tier Cycles</span><span class="info-val" id="dash-cycles">—</span></div>
+          <div class="section-title" style="margin-bottom:12px"><div class="dot"></div> <span data-i18n="dash.member_info">Member Info</span> — <span id="dash-tier-name" style="color:var(--green);font-size:14px">—</span></div>
+          <div class="info-row"><span class="info-key" data-i18n="dash.member_id">Member ID</span><span class="info-val" id="dash-id">—</span></div>
+          <div class="info-row"><span class="info-key" data-i18n="dash.active_matrix">Active Matrix</span><span class="info-val" id="dash-matrix">—</span></div>
+          <div class="info-row"><span class="info-key" data-i18n="dash.bfs_position">BFS Position</span><span class="info-val" id="dash-bfs">—</span></div>
+
+          <div class="info-row"><span class="info-key" data-i18n="dash.tier_cycles">Tier Cycles</span><span class="info-val" id="dash-cycles">—</span></div>
           <div id="dash-cycles-breakdown" style="font-size:12px;color:var(--text3);padding:4px 10px;background:var(--bg3);border-radius:6px;margin:-4px 0 6px 0;display:none"></div>
           
-          <div class="info-row"><span class="info-key">Referrer</span><span class="info-val addr" id="dash-orig-referrer">—</span></div>
-          <div class="info-row"><span class="info-key">Direct Referrals</span><span class="info-val" id="dash-directs">—</span></div>
+          <div class="info-row"><span class="info-key" data-i18n="dash.referrer">Referrer</span><span class="info-val addr" id="dash-orig-referrer">—</span></div>
+          <div class="info-row"><span class="info-key" data-i18n="dash.direct_referrals">Direct Referrals</span><span class="info-val" id="dash-directs">—</span></div>
           <div class="info-row" style="padding-top:10px;margin-top:6px;border-top:1px solid var(--border)">
             <span class="info-key" title="When enabled, if your cycle surplus covers the entry fee, a second registration fires automatically on your next cycle-out.">Double Reentry ⓘ</span>
             <span class="info-val" style="display:flex;align-items:center;gap:8px">
@@ -1358,6 +1401,28 @@
               <button class="btn btn-ghost full-w" id="btn-manual-upgrade" onclick="doManualUpgrade()" disabled>Step 2: Upgrade Tier</button>
             </div>
             <div id="upgrade-status-dash" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parked / Rescue Section -->
+      <div id="rescue-section" class="card" style="margin-bottom:24px;display:none;border:1px solid #f97316;background:rgba(249,115,22,0.06)">
+        <div class="section-title" style="margin-bottom:14px;color:#f97316"><div class="dot" style="background:#f97316"></div> ⏳ Re-Entry Queue</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px" id="rescue-desc">
+          You cycled out of your matrix but didn't have enough earnings to auto re-enter. You're in the rescue queue.
+        </div>
+        <div class="info-row"><span class="info-key">Stuck In</span><span class="info-val" id="rescue-matrix">—</span></div>
+        <div class="info-row"><span class="info-key">Your Withdrawable</span><span class="info-val green" id="rescue-withdrawable">—</span></div>
+        <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
+        <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:12px;color:var(--text3);line-height:1.6">
+            <strong>Option 1 — Request Admin Rescue (Free):</strong> The system will fund your re-entry. One per wallet — processed within minutes.
+          </div>
+          <button class="btn btn-green full-w" id="btn-request-rescue" onclick="requestRescue()">🚑 Request Rescue (Free)</button>
+          <div id="rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
+            <strong>Coming Soon — Pay Shortfall:</strong> In the next contract upgrade you'll be able to pay just the shortfall amount directly to jump the queue instantly.
           </div>
         </div>
       </div>
@@ -1416,18 +1481,18 @@
       <div class="card">
         <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:16px">These amounts flow upward from each new member registration through your position.</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">20% of each entry fee flows up to 6 upline levels in your matrix chain</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">17% of each entry fee flows up to 6 upline levels in your matrix chain</div>
         <div id="chain-pay-table">
-          <div class="chain-row"><span style="color:var(--text2)">Level 1 (50% of chain pay — direct upline)</span><span><span style="font-weight:600;color:var(--green)">$1.00</span> <span style="font-size:11px;color:var(--text3)">per entry below you</span></span></div>
-          <div class="chain-row"><span style="color:var(--text2)">Level 2 (20% of chain pay)</span><span><span style="font-weight:600">$0.40</span></span></div>
-          <div class="chain-row"><span style="color:var(--text2)">Level 3 (15% of chain pay)</span><span><span style="font-weight:600">$0.30</span></span></div>
-          <div class="chain-row"><span style="color:var(--text2)">Level 4 (7.5% of chain pay)</span><span><span style="font-weight:600">$0.15</span></span></div>
-          <div class="chain-row"><span style="color:var(--text2)">Level 5 (3.75% of chain pay)</span><span><span style="font-weight:600">$0.08</span></span></div>
-          <div class="chain-row"><span style="color:var(--text2)">Level 6 (3.75% of chain pay)</span><span><span style="font-weight:600">$0.08</span></span></div>
-          <div class="chain-row" style="border-top:1px solid var(--green2)"><span style="font-weight:700">Total chain pay per T1 entry</span><span style="font-weight:700;color:var(--green)">$2.00 <span style="font-size:11px;color:var(--text3);font-weight:400">(20% of $10)</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">Level 1 (50% of chain pay — direct upline)</span><span><span style="font-weight:600;color:var(--green)">$0.85</span> <span style="font-size:11px;color:var(--text3)">per entry below you</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">Level 2 (20% of chain pay)</span><span><span style="font-weight:600">$0.34</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">Level 3 (15% of chain pay)</span><span><span style="font-weight:600">$0.26</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">Level 4 (7.5% of chain pay)</span><span><span style="font-weight:600">$0.13</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">Level 5 (3.75% of chain pay)</span><span><span style="font-weight:600">$0.06</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">Level 6 (3.75% of chain pay)</span><span><span style="font-weight:600">$0.06</span></span></div>
+          <div class="chain-row" style="border-top:1px solid var(--green2)"><span style="font-weight:700">Total chain pay per T1 entry</span><span style="font-weight:700;color:var(--green)">$1.70 <span style="font-size:11px;color:var(--text3);font-weight:400">(17% of $10)</span></span></div>
         </div>
         <div style="margin-top:10px;font-size:12px;color:var(--text3);padding:8px 12px;background:var(--bg3);border-radius:8px">
-          💡 You also earn <strong style="color:var(--green)">$2.00 L1 referral</strong> for every direct you personally bring in, plus $0.40 L2 and $0.30 L3 from your network.
+          💡 You also earn <strong style="color:var(--green)">$1.85 L1 referral</strong> for every direct you personally bring in, plus $0.34 L2 and $0.26 L3 from your network.
         </div>
       </div>
     </div>
@@ -1758,12 +1823,12 @@
 // ═══════════════════════════════════════════════════════════════════════
 const CHAIN_ID = 84532;
 
-// ── Countdown to 12 PM (noon) Eastern Thursday June 25 ──────────────────────
+// ── Countdown to 12 PM (noon) Eastern Friday June 12 ────────────────────────
 (function initCountdown() {
-  // 12:00 PM EDT (noon Eastern) = 16:00 UTC on June 25 2026.
+  // 12:00 PM EDT (noon Eastern) = 16:00 UTC on June 12 2026.
   // This is a FIXED UTC timestamp — same countdown for every viewer worldwide.
   // To reschedule: update this ISO string.
-  const LAUNCH_UTC = new Date('2026-06-25T16:00:00Z'); // noon EDT = 16:00 UTC
+  const LAUNCH_UTC = new Date('2026-06-25T16:00:00Z'); // noon EDT = 16:00 UTC — Early Access opens
 
   // Major city local equivalents — shown below the countdown
   const CITY_ZONES = [
@@ -1847,10 +1912,8 @@ const RPC_URL      = 'https://base-sepolia.public.blastapi.io';
 const RPC_FALLBACK = 'https://sepolia.base.org';
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
-// v8.19-preview-fix: swapped from V8.13 to V8.18 (the version actually deployed
-// and running bigfill right now) so this preview channel reflects real on-chain
-// progress. Source: scripts/deployed_addresses_v8_18.json, deployed 2026-06-18.
 const ADDRS = {
+  // V8.18 — deployed 2026-06-18 — Pool=45% Chain=17% SF=13%
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
   cnova:         '0xEab971fAEc2D2c81EFF732f01E6bDe3eF563cD7c',
   treasury:      '0x38d400F8CF449FBfc1A55455Bfe8F4cfaC46F710',
@@ -1873,7 +1936,7 @@ const ADDRS = {
   T3: {
     pm:   '0x1739Ad1E4480006726c8d3Ec23e46247510f1412',
     matA: '0x302750EC0b7fE457B0Bc560D92656c6A7556c6b0',
-    matB: '0x5338E5aAac713FD378B7DEce69163352F327Cd4e6',
+    matB: '0x5338E5aAc713FD378B7DEce69163352F327Cd4e6',
   },
   T4: {
     pm:   '0x1C3Cc37218caa57978f2fD4FeC71CA9E7736388c',
@@ -1939,6 +2002,7 @@ const TIER_ROUTER_ABI = [
   'function setDoubleEntry(bool enabled) external',
   'function setMemberOptions(bool disableUpgrade, bool enableReentry, bool enableDouble) external',
   'function tierVelocityGreen(uint8 tierIdx) external view returns (bool)',
+  'function globalJoinedCount() external view returns (uint256)',
 ];
 
 const MATRIX_ABI = [
@@ -1958,6 +2022,9 @@ const MATRIX_ABI = [
   'function withdrawTo(address recipient) external',
   'function withdrawPartialTo(address recipient, uint256 amount) external',
   'function withdrawalFeeBps() external view returns (uint256)',
+  'function parkedAt(address) external view returns (uint256)',
+  'function isParked(address) external view returns (bool)',
+  'function getParkedCount() external view returns (uint256)',
 ];
 
 const CNOVA_ABI = [
@@ -2016,11 +2083,59 @@ const CW_ABI = [
 let provider=null, signer=null, userAddr=null, readProvider=null, isConnecting=false;
 
 // ═══════════════════════════════════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════════════════════════════════
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+  try { localStorage.setItem('cnova_theme', isLight ? 'light' : 'dark'); } catch(_) {}
+}
+(function restoreTheme() {
+  try {
+    if (localStorage.getItem('cnova_theme') === 'light') {
+      document.body.classList.add('light');
+      // Button may not exist yet at parse time — use DOMContentLoaded
+      document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('theme-btn');
+        if (btn) btn.textContent = '🌙 Dark';
+      });
+    }
+  } catch(_) {}
+})();
+
+// ═══════════════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════════
 function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = val;
+}
+
+// Retry a flaky on-chain read a few times before giving up. Base Sepolia's public RPC
+// is load-balanced across nodes and individual reads occasionally fail/time out — without
+// this, callers doing `.catch(() => 0n)` or `.catch(() => ethers.ZeroAddress)` can't tell
+// a real zero/empty result apart from "the RPC call failed", which silently shows wrong
+// data (e.g. BFS Position or Direct Referrals flipping between page loads with no
+// indication anything went wrong). Returns { value, ok } so callers can render an
+// honest "unknown" state instead of a confident-looking but possibly-wrong default.
+async function retryRead(fn, attempts = 3, delayMs = 400) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return { value: await fn(), ok: true };
+    } catch (e) {
+      lastErr = e;
+      if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+    }
+  }
+  return { value: undefined, ok: false, error: lastErr };
+}
+
+// Small "read failed" badge with a tooltip explaining why — used wherever a retried
+// read still comes back unknown, so the UI never silently shows a wrong number.
+function unknownBadge(tooltip) {
+  return `<span title="${tooltip}" style="color:var(--yellow);cursor:help">⚠ retry</span>`;
 }
 
 function fmt6(raw) {
@@ -2095,6 +2210,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     readProvider = _mkRpc(RPC_URL);
   }
   loadHomeStats();
+  setTimeout(loadDaoWidget, 1200);   // DAO widget — lightweight, stagger after loadHomeStats
   setTimeout(loadTiersStats, 1500);  // stagger after loadHomeStats to avoid RPC rate-limiting
 
   // Auto-reconnect if wallet was previously connected (silent — no popup)
@@ -2258,10 +2374,10 @@ function _renderPriceSparkline(history, currentPrice) {
   const maxP = Math.max(...prices);
 
   // Low / High / Current labels
-  setText('price-chart-low',     'Low: $' + minP.toFixed(6));
-  setText('price-chart-current', 'Now: $' + currentPrice.toFixed(6));
-  setText('price-chart-high',    'High: $' + maxP.toFixed(6));
-  setText('price-chart-subtitle', `${history.length} sample${history.length !== 1 ? 's' : ''} · stored locally`);
+  setText('price-chart-low',     (window.t ? window.t('chart.low','Low') : 'Low') + ': $' + minP.toFixed(6));
+  setText('price-chart-current', (window.t ? window.t('chart.now','Now') : 'Now') + ': $' + currentPrice.toFixed(6));
+  setText('price-chart-high',    (window.t ? window.t('chart.high','High') : 'High') + ': $' + maxP.toFixed(6));
+  setText('price-chart-subtitle', `${history.length} ${history.length !== 1 ? (window.t ? window.t('chart.samples','samples') : 'samples') : (window.t ? window.t('chart.sample','sample') : 'sample')} · ${window.t ? window.t('chart.stored_locally','stored locally') : 'stored locally'}`);
 
   const cfg = {
     type: 'line',
@@ -2451,7 +2567,7 @@ async function loadHomeStats() {
   const _net = ethers.Network.from(84532);
 
   const STAT_IDS = ['stat-members','stat-minted','stat-burned','stat-reserve','stat-cw-balance',
-                    'stat-cycles','stat-epoch','stat-supply','stat-treasury-usdc','stat-floor-price','stat-reward'];
+                    'stat-cycles','stat-epoch','stat-supply','stat-treasury-usdc','stat-floor-price','stat-reward','stat-buyback'];
 
   async function _fetchStats(provider) {
     const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, provider);
@@ -2475,13 +2591,13 @@ async function loadHomeStats() {
       occA2, cyclesA2, occB2, poolB2,
       sysCycles, supply, epoch, sfBal, treasUsdc,
       occA3, cyclesA3, occB3, poolB3,
-      cwPoolBal, allTimeMinted, allTimeBurned
+      cwPoolBal, allTimeMinted, allTimeBurned, buybackBal
     ] = await Promise.all([
       rpc(matA1.occupancy()).catch(()=>0n),
       rpc(matA1.rotationCount()).catch(()=>0n),
       rpc(matB1.occupancy()).catch(()=>0n),
       rpc(matB1.poolAccumulator()).catch(()=>0n),
-      rpc(matA1.totalJoined()).catch(()=>0n),
+      rpc(tr.globalJoinedCount()).catch(()=>0n),
       rpc(matA2.occupancy()).catch(()=>0n),
       rpc(matA2.rotationCount()).catch(()=>0n),
       rpc(matB2.occupancy()).catch(()=>0n),
@@ -2498,6 +2614,7 @@ async function loadHomeStats() {
       rpc(usdc.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress)).catch(()=>0n),
       rpc(cnova.totalMinted()).catch(()=>0n),
       rpc(cnova.totalBurned()).catch(()=>0n),
+      rpc(usdc.balanceOf(ADDRS.buybackReserve || ethers.ZeroAddress)).catch(()=>0n),
     ]);
 
     // Stat cards
@@ -2506,6 +2623,7 @@ async function loadHomeStats() {
     setText('stat-burned',   Number(ethers.formatEther(allTimeBurned)).toLocaleString(undefined,{maximumFractionDigits:0})); // V8.9 totalBurned()
     setText('stat-reserve',  fmt6(sfBal));
     setText('stat-cw-balance', fmt6(cwPoolBal));
+    setText('stat-buyback',  fmt6(buybackBal));
     setText('stat-cycles',   sysCycles.toString());
 
     // T1A progress
@@ -2577,7 +2695,9 @@ async function loadHomeStats() {
       setText('stat-floor-price', floorStr);
       // ── Price sparkline — sample + render ─────────────────────────────
       try {
-        const PRICE_KEY = 'cnova_price_history';
+        // Key is scoped to the TierRouter address so each fresh deploy starts with a clean chart
+        const DEPLOY_TAG = (ADDRS.tierRouter || '').slice(2, 10).toLowerCase();
+        const PRICE_KEY = 'cnova_price_history_' + DEPLOY_TAG;
         const MAX_SAMPLES = 60;
         const now = Date.now();
         let history = [];
@@ -2626,6 +2746,51 @@ async function loadHomeStats() {
         console.log('loadHomeStats: fallback RPC succeeded');
       } catch(_) { /* fallback also failed — dashes already shown */ }
     }
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// DAO WIDGET — active / timelocked proposal counts
+// ═══════════════════════════════════════════════════════════════════════
+async function loadDaoWidget() {
+  if (!ADDRS.v8Governance) return;
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  try {
+    const GOV_MIN_ABI = [
+      'function proposalCount() view returns (uint256)',
+      'function proposals(uint256) view returns (uint256 id,address proposer,uint8 paramId,uint256 newValue,address target,uint256 votesFor,uint256 votesAgainst,uint256 startTime,uint8 state,bool executed)',
+    ];
+    const gov = new ethers.Contract(ADDRS.v8Governance, GOV_MIN_ABI, rp);
+    const count = await gov.proposalCount().catch(() => 0n);
+    const total = Number(count);
+    if (total === 0) {
+      setText('dao-active-count', '0');
+      setText('dao-timelocked-count', '0');
+      setText('dao-latest-label', 'No proposals yet');
+      return;
+    }
+    // Fetch last 20 proposals (or fewer)
+    const toFetch = Math.min(total, 20);
+    const ids = Array.from({ length: toFetch }, (_, i) => total - i);
+    const props = await Promise.all(ids.map(id => gov.proposals(id).catch(() => null)));
+    // state: 0=Active, 1=Timelocked, 2=Executed, 3=Rejected, 4=Expired
+    let active = 0, timelocked = 0;
+    let latestLabel = '';
+    for (const p of props) {
+      if (!p) continue;
+      if (p.state === 0n) active++;
+      if (p.state === 1n) timelocked++;
+      if (!latestLabel) latestLabel = `Latest: Proposal #${p.id} — ${['Active','Timelocked','Executed','Rejected','Expired'][Number(p.state)] || ''}`;
+    }
+    setText('dao-active-count', active.toString());
+    setText('dao-timelocked-count', timelocked.toString());
+    setText('dao-latest-label', latestLabel || `${total} proposal${total !== 1 ? 's' : ''} on-chain`);
+  } catch(e) {
+    console.warn('loadDaoWidget:', e.message);
+    setText('dao-active-count', '—');
+    setText('dao-timelocked-count', '—');
+    setText('dao-latest-label', '');
   }
 }
 
@@ -2862,9 +3027,9 @@ async function loadRegisterTab() {
           if (hint) hint.innerHTML = '<span style="color:var(--green)">&#x2705; ' + cycles + ' cycle' + (cycles !== 1 ? 's' : '') + ' complete &#8212; you qualify for T2 upgrade!</span>';
           if (btnApp) { btnApp.disabled = false; btnApp.textContent = 'Step 1: Approve USDC'; btnApp.className = 'btn btn-green'; btnApp.style.flex = '1'; }
         } else if (inT1MatB) {
-          // Crossed to MatB — cycle still running, upgrade unlocks when MatB completes
-          if (hint) hint.innerHTML = '<span style="color:#f59e0b">&#x23F3; You\'ve crossed to Matrix B &mdash; T2 upgrade unlocks once your MatB cycle completes. Keep earning!</span>';
-          if (btnApp) { btnApp.disabled = true; btnApp.textContent = 'Cycle in progress…'; btnApp.className = 'btn'; btnApp.style.flex = '1'; }
+          // V8.14: Crossed to MatB — upgrade available NOW (no need to wait for full MatB cycle)
+          if (hint) hint.innerHTML = '<span style="color:var(--green)">&#x1F7E2; You\'ve crossed to Matrix B &mdash; T2 upgrade is available now!</span>';
+          if (btnApp) { btnApp.disabled = false; btnApp.textContent = 'Step 1: Approve USDC'; btnApp.className = 'btn btn-green'; btnApp.style.flex = '1'; }
           if (btnUp)  { btnUp.disabled = true; }
         } else {
           if (hint) hint.textContent = 'Locked until your first T1 cycle completes. A full cycle runs in two stages: MatA fills (126 members), then MatB fills (127 members). Once both stages complete for your position, this unlocks automatically.';
@@ -2963,9 +3128,46 @@ async function approveUSDC() {
   }
 }
 
+async function claimTestUsdc() {
+  if (!userAddr) { toast('Connect wallet first', 'error'); return; }
+  const btn = document.getElementById('btn-faucet');
+  const statusEl = document.getElementById('faucet-status');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Requesting USDC…'; }
+  if (statusEl) statusEl.textContent = '';
+  try {
+    const res = await fetch('/api/faucet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: userAddr }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Faucet request failed');
+    if (btn) { btn.textContent = '✅ USDC Sent!'; }
+    if (statusEl) statusEl.innerHTML = `✅ ${data.message} — <a href="https://sepolia.basescan.org/tx/${data.tx}" target="_blank" rel="noopener" style="color:var(--green)">View TX</a>`;
+    toast('$50 Test USDC sent to your wallet!', 'success');
+    // Refresh balances after a short delay
+    setTimeout(() => loadRegisterTab(), 4000);
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '🚰 Get $50 Test USDC (Free — Testnet Only)'; }
+    if (statusEl) statusEl.textContent = '❌ ' + (e.message || 'Failed — try again');
+    toast(e.message || 'Faucet failed', 'error');
+  }
+}
+
 async function doRegister() {
   if (!signer) { toast('Connect wallet first', 'error'); return; }
   const btn = document.getElementById('btn-register');
+  // Guard: check on-chain before wasting a TX
+  try {
+    const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const tr0 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const alreadyJoined = await tr0.globalJoined(userAddr).catch(()=>false);
+    if (alreadyJoined) {
+      setStatus('reg-status', '✅ Wallet already registered — <a href="#" onclick="showTab(\'dashboard\')" style="color:var(--green)">view Dashboard</a>', 'ok');
+      await loadUserData();
+      return;
+    }
+  } catch(_) {}
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Joining CryptoNova…';
   try {
     const refInput = document.getElementById('input-referrer');
@@ -3035,40 +3237,75 @@ async function loadDashboardData() {
     ];
 
     let totalW = 0n, totalE = 0n, totalEscrow = 0n;
-    let activeMat = null, activeLabel = '', activeBFS = 0n, activeCycles = 0n;
+    let activeMat = null, activeLabel = '', activeBFS = 0n, activeCycles = 0n, activeBFSUnknown = false;
     let highestTier = 0;
     let memberId = 0, memberReferrer = ethers.ZeroAddress;
+    let parkedInfo = null; // { label, addr, withdrawable, fee, shortfall }
 
-    for (const m of matrices) {
-      const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
-      const [member, escrow] = await Promise.all([
-        mc.getMember(userAddr).catch(()=>null),
-        mc.escrowOf(userAddr).catch(()=>0n),
-      ]);
+    // Show loading placeholders while fetching
+    ['dash-withdrawable','dash-total-earned','dash-cnova','dash-cnova-val','dash-cw-pool'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '…';
+    });
+
+    // Fetch all 20 matrices in parallel with per-call timeout
+    // Public testnet RPC silently drops requests under load → promise hangs forever without this
+    const raceTimeout = (p, ms = 8000) =>
+      Promise.race([p, new Promise(res => setTimeout(() => res(null), ms))]);
+
+    const matContracts = matrices.map(m => new ethers.Contract(m.addr, MATRIX_ABI, rp));
+    const matResults = await Promise.all(
+      matContracts.map(mc => raceTimeout(mc.getMember(userAddr).catch(() => null)))
+    );
+
+    // Process results; only follow-up calls on matrices where user exists
+    const followUps = [];
+    for (let i = 0; i < matrices.length; i++) {
+      const m      = matrices[i];
+      const mc     = matContracts[i];
+      const member = matResults[i];
       if (member && member.hasEverJoined) {
         totalW += BigInt(member.withdrawable);
         totalE += BigInt(member.totalEarned);
-        totalEscrow += BigInt(escrow);
         if (!memberId) { memberId = Number(member.id); memberReferrer = member.referrer; }
-        if (member.isInMatrix) {
-          activeMat = member; activeLabel = m.label;
-          activeBFS = await mc.matrixPos(userAddr).catch(()=>0n); // BFS pos is separate mapping
-          activeCycles = BigInt(member.cyclesCompleted);
-        }
         const tNum = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
         highestTier = Math.max(highestTier, tNum);
+        if (member.isInMatrix) {
+          activeMat = member; activeLabel = m.label;
+          followUps.push(
+            retryRead(() => mc.matrixPos(userAddr)).then(({ value, ok }) => {
+              activeBFS = ok ? value : 0n;
+              activeBFSUnknown = !ok;
+              activeCycles = BigInt(member.cyclesCompleted);
+            })
+          );
+        } else if (!parkedInfo) {
+          followUps.push((async () => {
+            const parkedAt = await mc.parkedAt(userAddr).catch(()=>0n);
+            if (BigInt(parkedAt) > 0n) {
+              const fee = await mc.ENTRY_FEE().catch(()=>0n);
+              const w   = BigInt(member.withdrawable);
+              parkedInfo = {
+                label: m.label, addr: m.addr,
+                withdrawable: w,
+                fee: BigInt(fee),
+                shortfall: BigInt(fee) > w ? BigInt(fee) - w : 0n,
+              };
+            }
+          })());
+        }
       }
     }
+    if (followUps.length) await Promise.allSettled(followUps); // allSettled — never throws
 
     // CNOVA balance + floor price (treasuryUsdc / cnovaSupply)
-    // v8.7: floor is backed by Treasury USDC (15% BPS), not SF
+    // v8.7: floor is backed by Treasury USDC (10% BPS), not SF
     const cnova = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
     const usdcT = new ethers.Contract(ADDRS.usdc,  USDC_ABI,  rp);
     const [cnovabal, treasuryUsdc, cnovaSupply, cwPoolDash] = await Promise.all([
-      cnova.balanceOf(userAddr).catch(()=>0n),
-      usdcT.balanceOf(ADDRS.treasury).catch(()=>0n),
-      cnova.totalSupply().catch(()=>0n),
-      usdcT.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress).catch(()=>0n),
+      raceTimeout(cnova.balanceOf(userAddr).catch(()=>0n), 8000).then(v => v ?? 0n),
+      raceTimeout(usdcT.balanceOf(ADDRS.treasury).catch(()=>0n), 8000).then(v => v ?? 0n),
+      raceTimeout(cnova.totalSupply().catch(()=>0n), 8000).then(v => v ?? 0n),
+      raceTimeout(usdcT.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress).catch(()=>0n), 8000).then(v => v ?? 0n),
     ]);
     // cnovabal=18dec, treasuryUsdc=6dec, cnovaSupply=18dec → result is 6dec USDC
     const cnovaValRaw = cnovaSupply > 0n ? (cnovabal * treasuryUsdc) / cnovaSupply : 0n;
@@ -3126,14 +3363,20 @@ async function loadDashboardData() {
     setText('dash-tier',           highestTier > 0 ? `T${highestTier}` : 'T1');
     setText('dash-tier-name',      TIER_NAMES[highestTier] || '—');
     setText('dash-matrix',         activeMat ? activeLabel : '—');
-    setText('dash-bfs',            activeBFS > 0n ? '#'+activeBFS.toString() : '—');
+    setText('dash-bfs',            activeBFSUnknown
+      ? unknownBadge('Could not read your matrix position after retries — likely a flaky RPC node. Refresh to try again.')
+      : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
     setText('dash-cycles',         activeCycles.toString());
     setText('dash-id',             memberId > 0 ? '#' + memberId : '—');
     setText('dash-orig-referrer',  memberReferrer && memberReferrer !== ethers.ZeroAddress
       ? memberReferrer.slice(0,6)+'…'+memberReferrer.slice(-4) : 'Direct');
 
-    // Direct referrals count — scan memberReferrer mapping (event logs too stale on public RPC)
+    // Direct referrals count — scan memberReferrer mapping (event logs too stale on public RPC).
+    // Every read here is retried before giving up, and if any read still fails after
+    // retries we flag the count as incomplete instead of silently undercounting —
+    // a flaky RPC node should never look identical to "this member really has 0 referrals".
     (async () => {
+      let incomplete = false;
       try {
         const trD = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
         const mats = [ADDRS.T1.matA, ADDRS.T1.matB,
@@ -3145,16 +3388,31 @@ async function loadDashboardData() {
         const seen = new Set();
         for (const m of mats) {
           const mc = new ethers.Contract(m, MATRIX_ABI, rp);
-          const occ = Number(await mc.occupancy().catch(()=>0n));
+          const occRes = await retryRead(() => mc.occupancy());
+          if (!occRes.ok) { incomplete = true; continue; }
+          const occ = Number(occRes.value);
           if (!occ) continue;
-          const addrs = await Promise.all(Array.from({length:occ},(_,i)=>mc.posToMember(i+1).catch(()=>ethers.ZeroAddress)));
-          for (const a of addrs) { if (a && a !== ethers.ZeroAddress) seen.add(a.toLowerCase()); }
+          const posResults = await Promise.all(
+            Array.from({length:occ}, (_,i) => retryRead(() => mc.posToMember(i+1)))
+          );
+          for (const r of posResults) {
+            if (!r.ok) { incomplete = true; continue; }
+            if (r.value && r.value !== ethers.ZeroAddress) seen.add(r.value.toLowerCase());
+          }
         }
         const uniq = [...seen];
-        const refs = await Promise.all(uniq.map(a=>trD.memberReferrer(a).catch(()=>ethers.ZeroAddress)));
-        const count = refs.filter(r=>r.toLowerCase()===userAddr.toLowerCase()).length;
-        setText('dash-directs', count.toString());
-      } catch(_) { setText('dash-directs', '0'); }
+        const refResults = await Promise.all(uniq.map(a => retryRead(() => trD.memberReferrer(a))));
+        let count = 0;
+        for (const r of refResults) {
+          if (!r.ok) { incomplete = true; continue; }
+          if (r.value.toLowerCase() === userAddr.toLowerCase()) count++;
+        }
+        setText('dash-directs', incomplete
+          ? `${count} ` + unknownBadge('Some reads failed after retries — this count may be missing referrals. Refresh to try again.')
+          : count.toString());
+      } catch(_) {
+        setText('dash-directs', unknownBadge('Could not load referral data — RPC error. Refresh to try again.'));
+      }
     })();
 
     // Withdraw button
@@ -3176,10 +3434,10 @@ async function loadDashboardData() {
       // Max deployed tier: 3 (T3 live). Increase when T4+ deployed.
       const MAX_DEPLOYED_TIER = 10; // v8.7: all 10 tiers live
       const curTierCycles = await tr.tierCycles(userAddr, Math.max(highestTier - 1, 0)).catch(() => 0n);
-      // v8.19 fix: was hardcoded to ADDRS.T1.matB + "highestTier === 1" so the
-      // V8.14/V8.15 "crossed to MatB = eligible now" rule only ever applied to
-      // the T1->T2 step. Generalized to whichever tier the member currently sits
-      // in, so T2->T3, T3->T4, etc. unlock immediately on crossing too.
+      // v8.19 fix (2026-06-20): was hardcoded to ADDRS.T1.matB + "highestTier === 1" so the
+      // V8.14/V8.15 "crossed to MatB = eligible now" rule only ever applied to the T1->T2
+      // step. Generalized to whichever tier the member currently sits in, so T2->T3,
+      // T3->T4, etc. unlock immediately on crossing too, instead of requiring a full cycle.
       const _curMatBAddrDash = ADDRS['T' + highestTier] ? ADDRS['T' + highestTier].matB : null;
       const _inCurMatBDash = _curMatBAddrDash
         ? await new ethers.Contract(_curMatBAddrDash, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false)
@@ -3192,8 +3450,11 @@ async function loadDashboardData() {
         const nextFeeRaw = await tr.tierEntryFees(nextIdx).catch(() => 25_000_000n);
         window._dashUpgradeFee       = nextFeeRaw;
         window._dashUpgradeTierIndex = nextIdx;
-        const usdc2  = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-        const uBal   = await usdc2.balanceOf(userAddr).catch(() => 0n);
+        const usdc2      = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+        const [uBal, uAllowance] = await Promise.all([
+          usdc2.balanceOf(userAddr).catch(() => 0n),
+          usdc2.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
+        ]);
         setText('upgrade-target-name', UPGRADE_NAMES[nextIdx] || 'Next Tier');
         setText('upgrade-fee',         fmt6(nextFeeRaw));
         setText('upgrade-usdc-bal',    fmt6(uBal));
@@ -3202,8 +3463,35 @@ async function loadDashboardData() {
           ? `You have completed ${c} T${highestTier} cycle${c !== 1 ? 's' : ''} and qualify for a manual tier upgrade.`
           : `You've crossed to T${highestTier} Matrix B and qualify for a manual tier upgrade now — no need to wait for the cycle to finish.`;
         setText('upgrade-desc', `${_qualifyDesc} Pay ${fmt6(nextFeeRaw)} USDC from your wallet to enter the next tier.`);
-        const approveBtn = document.getElementById('btn-dash-approve');
+        const approveBtn  = document.getElementById('btn-dash-approve');
+        const upgradeBtn  = document.getElementById('btn-manual-upgrade');
         if (approveBtn) { approveBtn.disabled = false; approveBtn.classList.remove('btn-ghost'); approveBtn.classList.add('btn-green'); }
+        // Pre-enable Step 2 if allowance already covers fee (e.g. after page reload)
+        if (upgradeBtn && uAllowance >= nextFeeRaw) {
+          upgradeBtn.disabled = false;
+          upgradeBtn.classList.remove('btn-ghost');
+          upgradeBtn.classList.add('btn-green');
+          const stDash = document.getElementById('upgrade-status-dash');
+          if (stDash && !stDash.textContent) stDash.textContent = '✅ USDC already approved — click Step 2 to upgrade.';
+        }
+      }
+    }
+
+    // ── Parked / Rescue section ──────────────────────────────────────────
+    const rescueSection = document.getElementById('rescue-section');
+    if (rescueSection) {
+      if (parkedInfo) {
+        rescueSection.style.display = 'block';
+        window._parkedMatrixAddr    = parkedInfo.addr;
+        window._parkedMatrixLabel   = parkedInfo.label;
+        setText('rescue-matrix',      parkedInfo.label);
+        setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
+        setText('rescue-fee',          fmt6(parkedInfo.fee));
+        setText('rescue-shortfall',    fmt6(parkedInfo.shortfall));
+        const rBtn = document.getElementById('btn-request-rescue');
+        if (rBtn) rBtn.disabled = false;
+      } else {
+        rescueSection.style.display = 'none';
       }
     }
 
@@ -3252,6 +3540,81 @@ async function loadDashboardData() {
       if (chkRe) chkRe.checked = Boolean(info.autoReentryEnabled);
       if (lblRe) lblRe.textContent = info.autoReentryEnabled ? 'Enabled' : 'Disabled';
     } catch(_) {}
+
+    // ── Protocol Reserve — lock automation fees so members aren't surprised ──
+    try {
+      const opts       = window._memberOptions || {};
+      const autoUpgrade = !opts.disableUpgrade;   // disableUpgrade is INVERTED flag
+      const reentry    = Boolean(opts.enableReentry);
+      const doubleE    = Boolean(opts.enableDouble);
+
+      window._protocolReserved = 0n; // default: reset
+
+      if (autoUpgrade || reentry) {
+        const curFeeRaw  = await tr.tierEntryFees(Math.max(highestTier - 1, 0)).catch(() => 10_000_000n);
+        const nextFeeRaw = window._dashUpgradeFee || 25_000_000n;
+
+        let reserved = 0n;
+        const details = [];
+
+        if (doubleE) {
+          if (autoUpgrade) {
+            // Slot 1 upgrades (next fee) + Slot 2 re-enters (cur fee)
+            reserved = nextFeeRaw + curFeeRaw;
+            details.push(`Position 1 auto-upgrade: $${fmt6(nextFeeRaw)}`);
+            details.push(`Position 2 auto re-entry: $${fmt6(curFeeRaw)}`);
+          } else if (reentry) {
+            // Both slots re-enter
+            reserved = 2n * curFeeRaw;
+            details.push(`Double re-entry (×2): $${fmt6(curFeeRaw)} each`);
+          }
+        } else {
+          if (autoUpgrade) {
+            reserved = nextFeeRaw;
+            details.push(`Auto-upgrade to next tier: $${fmt6(nextFeeRaw)}`);
+          } else if (reentry) {
+            reserved = curFeeRaw;
+            details.push(`Auto re-entry: $${fmt6(curFeeRaw)}`);
+          }
+        }
+
+        if (reserved > 0n) {
+          const free = totalW > reserved ? totalW - reserved : 0n;
+          window._maxWithdrawable  = free;   // cap partial withdraw to free amount
+          window._protocolReserved = reserved;
+
+          // Withdrawable card — show free amount and reserved badge
+          setText('dash-withdrawable',   fmt6(free));
+          setText('dash-withdraw-amount', fmt6(free));
+          const badge = document.getElementById('dash-reserved-badge');
+          const lbl   = document.getElementById('dash-ready-label');
+          if (badge) { badge.textContent = `⚙ $${fmt6(reserved)} reserved`; badge.style.display = 'block'; }
+          if (lbl)   lbl.textContent = `$${fmt6(free)} free to claim`;
+
+          // Reserve notice banner in withdraw panel
+          const notice = document.getElementById('withdraw-reserve-notice');
+          const detEl  = document.getElementById('reserve-detail-text');
+          const totEl  = document.getElementById('reserve-total-text');
+          if (notice) notice.style.display = 'block';
+          if (detEl)  detEl.innerHTML = details.map(d => `• ${d}`).join('<br>');
+          if (totEl)  totEl.textContent = `Total reserved: $${fmt6(reserved)} — held for your automation settings`;
+
+          // Re-render fee breakdown against the free amount
+          try {
+            const feeBps = window._withdrawFeeBps || 150n;
+            const feeAmt = free * feeBps / 10000n;
+            const netAmt = free - feeAmt;
+            const breakdown = document.getElementById('withdraw-fee-breakdown');
+            if (breakdown) {
+              document.getElementById('wfee-gross').textContent = fmt6(free);
+              document.getElementById('wfee-fee').textContent   = '−' + fmt6(feeAmt);
+              document.getElementById('wfee-net').textContent   = fmt6(netAmt);
+              breakdown.style.display = free > 0n ? 'block' : 'none';
+            }
+          } catch(_) {}
+        }
+      }
+    } catch(e) { console.warn('reserve calc:', e.message); }
 
     // Tier cycles breakdown — use on-chain memberHighestTier (authoritative)
     try {
@@ -3348,11 +3711,11 @@ async function openDashDetail(type, cardEl) {
 
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
-    if      (type === 'withdrawable') { titleEl.textContent = '💰 Withdrawable — Balance Breakdown';      await renderWithdrawableDetail(bodyEl, rp); }
-    else if (type === 'earned')       { titleEl.textContent = '📈 Total Earned — Tier Breakdown';          await renderEarnedDetail(bodyEl, rp); }
-    else if (type === 'cnova')        { titleEl.textContent = '◈ CNOVA — Balance & Epoch Breakdown';       await renderCnovaDetail(bodyEl, rp); }
-    else if (type === 'burned')       { titleEl.textContent = '🔥 CNOVA Burned — Redemption History';      await renderBurnedDetail(bodyEl, rp); }
-    else if (type === 'community')    { titleEl.textContent = '🏛️ Community Pool — Your Eligibility';     await renderCommunityDetail(bodyEl, rp); }
+    if      (type === 'withdrawable') { titleEl.textContent = window.t ? window.t('modal.withdrawable_title','💰 Withdrawable — Balance Breakdown')   : '💰 Withdrawable — Balance Breakdown';    await renderWithdrawableDetail(bodyEl, rp); }
+    else if (type === 'earned')       { titleEl.textContent = window.t ? window.t('modal.earned_title','📈 Total Earned — Tier Breakdown')             : '📈 Total Earned — Tier Breakdown';        await renderEarnedDetail(bodyEl, rp); }
+    else if (type === 'cnova')        { titleEl.textContent = window.t ? window.t('modal.cnova_title','◈ CNOVA — Balance & Epoch Breakdown')           : '◈ CNOVA — Balance & Epoch Breakdown';     await renderCnovaDetail(bodyEl, rp); }
+    else if (type === 'burned')       { titleEl.textContent = window.t ? window.t('modal.burned_title','🔥 CNOVA Burned — Redemption History')          : '🔥 CNOVA Burned — Redemption History';    await renderBurnedDetail(bodyEl, rp); }
+    else if (type === 'community')    { titleEl.textContent = window.t ? window.t('modal.community_title','🏛️ Community Pool — Your Eligibility')      : '🏛️ Community Pool — Your Eligibility';   await renderCommunityDetail(bodyEl, rp); }
   } catch(e) {
     bodyEl.innerHTML = `<div class="detail-note">⚠️ Failed to load: ${e.message.slice(0,120)}</div>`;
   }
@@ -3401,17 +3764,18 @@ async function renderWithdrawableDetail(el, rp) {
   const joinDate   = joinedAt > 0n ? new Date(Number(joinedAt) * 1000).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
   const daysSince  = joinedAt > 0n ? Math.floor((Date.now()/1000 - Number(joinedAt)) / 86400) : 0;
 
+  const _t = window.t || ((k, fb) => fb || k);
   el.innerHTML = `
-    <div class="detail-row"><span class="detail-key">Total Ever Earned</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
-    <div class="detail-row"><span class="detail-key">Previously Withdrawn</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
-    <div class="detail-row"><span class="detail-key">Auto-Deducted (upgrades)</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>
-    <div class="detail-row total"><span class="detail-key">= Available to Claim</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
+    <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
+    <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
+    <div class="detail-row"><span class="detail-key">${_t('modal.auto_deducted','Auto-Deducted (upgrades)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>
+    <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
     ${totalWithdrawable > 0n ? `
-    <div class="detail-section">After ${feePct}% Withdrawal Fee</div>
-    <div class="detail-row"><span class="detail-key">Fee Deducted</span><span class="detail-val red">− ${fmt6(feeAmt)}</span></div>
-    <div class="detail-row total"><span class="detail-key">You Receive</span><span class="detail-val green">${fmt6(netAmt)}</span></div>
+    <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
+    <div class="detail-row"><span class="detail-key">${_t('modal.fee_deducted','Fee Deducted')}</span><span class="detail-val red">− ${fmt6(feeAmt)}</span></div>
+    <div class="detail-row total"><span class="detail-key">${_t('modal.you_receive','You Receive')}</span><span class="detail-val green">${fmt6(netAmt)}</span></div>
     ` : ''}
-    <div class="detail-note">📅 Member since ${joinDate}${daysSince > 0 ? ` · ${daysSince} days in the matrix` : ''}</div>`;
+    <div class="detail-note">📅 ${_t('modal.member_since','Member since')} ${joinDate}${daysSince > 0 ? ` · ${daysSince} ${_t('modal.days_in_matrix','days in the matrix')}` : ''}</div>`;
 }
 
 // ── Total Earned breakdown (tier-by-tier) ────────────────────────────
@@ -3699,6 +4063,18 @@ async function doWithdrawPartial() {
 
 async function doWithdraw() {
   if (!signer) return;
+  // If a protocol reserve is active, cap withdraw to the free amount
+  if (window._protocolReserved && window._protocolReserved > 0n) {
+    const free = window._maxWithdrawable || 0n;
+    if (free === 0n) {
+      toast('All funds are currently reserved for your automation settings', 'info');
+      return;
+    }
+    const inp = document.getElementById('withdraw-amount-input');
+    if (inp) inp.value = (Number(free) / 1e6).toFixed(2);
+    await doWithdrawPartial();
+    return;
+  }
   const btn = document.getElementById('btn-withdraw');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Withdrawing…';
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
@@ -3917,20 +4293,31 @@ async function loadMyTree() {
       ...(ADDRS.T9.matA ? [{addr:ADDRS.T9.matA,label:'T9 Matrix A'},{addr:ADDRS.T9.matB,label:'T9 Matrix B'}] : []),
       ...(ADDRS.T10.matA ? [{addr:ADDRS.T10.matA,label:'T10 Matrix A'},{addr:ADDRS.T10.matB,label:'T10 Matrix B'}] : []),
     ];
-    let activeMat = null, activeBFS = 0n, activeLabel = '', activeMSize = 64n;
+    let activeMat = null, activeBFS = 0n, activeLabel = '', activeMSize = 64n, activeBFSUnknown = false;
+    let anyReadFailed = false;
     for (const m of allMats) {
       const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
-      const member = await mc.getMember(userAddr).catch(()=>null);
+      const memberRes = await retryRead(() => mc.getMember(userAddr));
+      if (!memberRes.ok) { anyReadFailed = true; continue; } // can't tell if this is the active matrix — don't assume "not a member"
+      const member = memberRes.value;
       if (member && member.isInMatrix) {
         activeMat = m.addr;
         activeLabel = m.label;
-        activeBFS = await mc.matrixPos(userAddr).catch(()=>0n);
-        activeMSize = await mc.MATRIX_SIZE().catch(()=>64n);
+        const bfsRes = await retryRead(() => mc.matrixPos(userAddr));
+        activeBFS = bfsRes.ok ? bfsRes.value : 0n;
+        activeBFSUnknown = !bfsRes.ok;
+        const sizeRes = await retryRead(() => mc.MATRIX_SIZE());
+        activeMSize = sizeRes.ok ? sizeRes.value : 64n;
         break;
       }
     }
     if (!activeMat) {
-      if (loadingEl) { loadingEl.style.display='block'; loadingEl.textContent='You are not currently active in any matrix. Check back after registration.'; }
+      if (loadingEl) {
+        loadingEl.style.display='block';
+        loadingEl.innerHTML = anyReadFailed
+          ? unknownBadge('Some reads failed after retries — could not confirm your matrix position. Refresh to try again.')
+          : 'You are not currently active in any matrix. Check back after registration.';
+      }
       return;
     }
     const mc   = new ethers.Contract(activeMat, MATRIX_ABI, rp);
@@ -3940,12 +4327,16 @@ async function loadMyTree() {
     setText('matrix-nodes', n.toString());
     setText('matrix-fill',  n + ' / ' + Number(activeMSize));
     setText('matrix-bfs',   Number(activeMSize) + ' seats');
-    setText('matrix-my-node', activeBFS > 0n ? '#'+activeBFS.toString() : '—');
+    setText('matrix-my-node', activeBFSUnknown
+      ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
+      : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
     const banner = document.getElementById('matrix-pos-banner');
     if (banner) {
       banner.style.display='block';
       setText('matrix-pos-level', activeLabel);
-      setText('matrix-pos-slots', 'Position #' + activeBFS.toString());
+      setText('matrix-pos-slots', activeBFSUnknown
+        ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
+        : 'Position #' + activeBFS.toString());
       setText('matrix-pos-cycle', 'Cycle ' + cycles.toString());
     }
     if (loadingEl) loadingEl.style.display='none';
@@ -4194,7 +4585,7 @@ function showTab(name) {
   if (name === 'register') { if (userAddr) loadRegisterTab(); }
   if (name === 'dashboard') { loadDashboardData(); loadRedeemData(); }
   if (name === 'matrix') { loadQueueView(); setActiveMatrixBtn('btn-load-tree'); }
-  if (name === 'home') loadHomeStats();
+  if (name === 'home') { loadHomeStats(); loadDaoWidget(); }
   if (name === 'tiers') loadTiersStats();
 }
 
@@ -4233,7 +4624,7 @@ function friendlyError(e) {
   const msg = e.reason || e.data?.message || e.message || String(e);
   if (msg.includes('user rejected') || e.code === 4001) return 'Transaction cancelled.';
   if (msg.includes('insufficient funds')) return 'Insufficient ETH for gas.';
-  if (msg.includes('already registered') || msg.includes('AlreadyJoined')) return 'This wallet is already registered.';
+  if (msg.includes('already registered') || msg.includes('AlreadyJoined') || msg.includes('already joined')) return 'This wallet is already registered — view your Dashboard.';
   if (msg.includes('USDC') && msg.includes('allowance')) return 'USDC not approved — complete Step 1 first.';
   if (msg.includes('execution reverted')) return 'Transaction reverted: ' + (msg.split('execution reverted:')[1]||'').trim().slice(0,80);
   return msg.slice(0, 120);
@@ -4334,49 +4725,7 @@ async function doManualUpgrade() {
     const tx = await tr.manualUpgrade(idx, { gasLimit: 3_000_000 });
     status.textContent = 'Transaction submitted. Waiting for confirmation...';
     await tx.wait();
-    status.textContent = '\U0001f389 Tier upgrade confirmed! Refreshing dashboard...';
-    setTimeout(() => loadDashboardData(), 2000);
-  } catch(e) {
-    status.textContent = '❌ ' + (e.reason || e.message);
-    btn.disabled = false;
-  }
-}
-
-function onUpgradeTierChange() {
-  const sel  = document.getElementById('upgrade-tier-select');
-  const hint = document.getElementById('upgrade-tier-hint');
-  if (!sel || !sel.value) { if (hint) hint.textContent = ''; return; }
-  const fees = { '1': 25_000_000n, '2': 50_000_000n, '3': 100_000_000n };
-  const fee  = fees[sel.value] || 25_000_000n;
-  window._upgradeCardFee     = fee;
-  window._upgradeCardTierIdx = Number(sel.value);
-  if (hint) hint.textContent = 'Entry fee: ' + (Number(fee) / 1_000_000) + ' USDC from your wallet';
-}
-
-async function checkUpgradeAllowance() {
-  if (!userAddr) { toast('Connect wallet first', 'error'); return; }
-  const rp   = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-  const fee  = window._upgradeCardFee || 25_000_000n;
-  const al   = await usdc.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n);
-  const btn  = document.getElementById('btn-upgrade');
-  if (btn) btn.disabled = al < fee;
-  toast(al >= fee ? '✅ Allowance confirmed — ready to upgrade' : '⏳ Not yet approved', al >= fee ? 'success' : 'info');
-}
-
-async function doUpgrade() {
-  if (!signer) { toast('Connect wallet first', 'error'); return; }
-  const btn    = document.getElementById('btn-upgrade');
-  const status = document.getElementById('upgrade-status');
-  const idx    = window._upgradeCardTierIdx ?? 1;
-  try {
-    if (btn) btn.disabled = true;
-    if (status) status.textContent = 'Submitting upgrade transaction...';
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.manualUpgrade(idx, { gasLimit: 3_000_000 });
-    if (status) status.textContent = 'Waiting for confirmation...';
-    await tx.wait();
-    if (status) status.innerHTML = '<span style="color:var(--green)">\U0001f389 Upgraded to T' + (idx + 1) + '! Check your Dashboard.</span>';
+    if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (idx + 1) + '! Check your Dashboard.</span>';
     toast('Tier upgraded successfully!', 'success');
     setTimeout(() => loadDashboardData(), 2000);
   } catch(e) {
@@ -4403,5 +4752,5 @@ function updateAddrsFromDeployed(d) {
   console.log('[v8.8] ADDRS updated from deployed JSON');
 }
 </script>
-</body>
-</html>
+<script src="/i18n.js" defer></script>
+</body></html>

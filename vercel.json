@@ -24,6 +24,8 @@
     { "source": "/faq.html",   "destination": "/faq.html" },
     { "source": "/early",      "destination": "/early.html" },
     { "source": "/early.html", "destination": "/early.html" },
+    { "source": "/status",      "destination": "/status.html" },
+    { "source": "/status.html", "destination": "/status.html" },
     { "source": "/(.*)\\.html", "destination": "/$1.html" },
     { "source": "/(.*)",       "destination": "/index.html" }
   ]
