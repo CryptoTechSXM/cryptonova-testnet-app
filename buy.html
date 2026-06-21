@@ -505,7 +505,13 @@ async function loadPriceData() {
     document.getElementById('current-mult-label').textContent = `${currentMult}× floor (Tier ${currentTierIdx+1})`;
     document.getElementById('treasury-bal').textContent  = treasuryF > 0 ? '$' + treasuryF.toLocaleString('en-US', {maximumFractionDigits:0}) : '—';
     document.getElementById('circ-supply').textContent   = supplyF > 0 ? fmtK(supplyF) : '—';
-    document.getElementById('supply-sub').textContent    = supplyF > 0 ? `${fmtK(supplyF)} / 20M at this tier` : 'CNOVA tokens';
+    document.getElementById('supply-sub').textContent    = (() => {
+      if (supplyF <= 0) return 'CNOVA tokens';
+      const ceiling = CURVE_TIERS[currentTierIdx].ceiling;
+      return ceiling === Infinity
+        ? `${fmtK(supplyF)} CNOVA — Tier ${currentTierIdx+1} (no ceiling)`
+        : `${fmtK(supplyF)} / ${fmtK(ceiling)} at this tier`;
+    })();
 
     renderTiers(supplyF);
     onAmountChange(); // refresh preview if amount was pre-filled
