@@ -284,6 +284,44 @@
           <option value="12">Timelock Period (seconds)</option>
           <option value="13">Quorum (BPS)</option>
         </optgroup>
+        <optgroup label="TierRouter — Whale &amp; Inactivity">
+          <option value="15">Whale Gate Threshold</option>
+          <option value="16">Inactivity Days Threshold</option>
+          <option value="17">Inactivity Cycles Threshold</option>
+          <option value="18">Inactivity Guard Enabled</option>
+        </optgroup>
+        <optgroup label="MatrixKeeper — Parked Rescue">
+          <option value="19">Parked Grace Period (seconds)</option>
+          <option value="20">Rescue Ratio (BPS)</option>
+        </optgroup>
+        <optgroup label="StabilityFund">
+          <option value="21">SF Target (USDC)</option>
+          <option value="22">SF Community Carve-Out (BPS)</option>
+          <option value="23">SF Stability Floor (USDC)</option>
+        </optgroup>
+        <optgroup label="Buyback Reserve">
+          <option value="24">Buyback Trigger Threshold (USDC)</option>
+          <option value="25">Buyback Max Slippage (BPS)</option>
+        </optgroup>
+        <optgroup label="Direct Sale">
+          <option value="26">Direct Sale Max Tx (BPS)</option>
+          <option value="27">Direct Sale Max Wallet (BPS)</option>
+          <option value="28">Direct Sale SF Target (USDC)</option>
+          <option value="29">Direct Sale LQ Target (USDC)</option>
+        </optgroup>
+        <optgroup label="CNOVAToken">
+          <option value="30">Reward % per Epoch</option>
+          <option value="31">Epoch Mint Limit</option>
+          <option value="32">Epoch Member Limit</option>
+          <option value="33">Epoch Time Limit</option>
+          <option value="34">Vest Duration</option>
+          <option value="35">Max Early-Exit Penalty (BPS)</option>
+        </optgroup>
+        <optgroup label="Community Wallet">
+          <option value="37">Genesis Split (BPS)</option>
+          <option value="38">Distribute Ratio (BPS)</option>
+          <option value="39">Distribute Interval (seconds)</option>
+        </optgroup>
       </select>
     </div>
 
@@ -355,6 +393,18 @@ const GOV_ADDR    = '0x6564fC8D82A3cF6873177FA8fF062896a917A888';
 const CNOVA_ADDR  = '0x9C5Fce654456B40236071D2d2C97eB48643D0B3f';
 const TIER_ROUTER = '0x03380633749c00Fe5937309C3CEc7287DE10c1e9';
 const MK_ADDR     = '0x52090a1a0131D16519427613D3876D1b4C52841B';
+// V8.20 second-wave governance targets (StabilityFund, CNOVABuybackReserve,
+// CNOVADirectSale, CommunityWallet -- CNOVAToken reuses CNOVA_ADDR above).
+const SF_ADDR     = '0xE39b04480C5a5Adf3B0F0073F86F9f65d6621b6F';
+const BBR_ADDR    = '0xD8C6aA30e4EC6e7D6b52bc34729C91B286A1b36D';
+const DS_ADDR     = '0x41E61A6ec6201b72f7aD008184fABc17F84Fbd05';
+const CW_ADDR     = '0x28CF79E345bad84Cf9Fed8C21Bb29fBf8E8761B3';
+
+// Real ethers.Network object for staticNetwork -- passing the literal boolean
+// 'true' throws 'staticNetwork.matches is not a function' in ethers v6.7.1 and
+// silently kills every read-only call (proposals list, voting power, allowed
+// values). Same bug class fixed in buy.html -- see commit 9519939.
+const _NET_STATIC = ethers.Network.from(CHAIN_ID);
 
 // Param → { label, target, hint, formatFn }
 const PARAM_META = {
@@ -371,6 +421,38 @@ const PARAM_META = {
   11: { label:'Voting Period (s)',            target: GOV_ADDR,     hint:'Duration of the voting window in seconds.' },
   12: { label:'Timelock Period (s)',          target: GOV_ADDR,     hint:'Delay between proposal passing and execution in seconds.' },
   13: { label:'Quorum BPS',                  target: GOV_ADDR,     hint:'Minimum % of CNOVA supply that must vote (200 = 2%).' },
+
+  // ── V8.20 second wave: TierRouter (whale gate + inactivity guard) ─────────
+  15: { label:'Whale Gate Threshold',         target: TIER_ROUTER,  hint:'Number of T5-first-entry members that activates the whale gate (extra anti-abuse check).' },
+  16: { label:'Inactivity Days Threshold',    target: TIER_ROUTER,  hint:'Days of inactivity before the days-based guard pauses a wallet. 0 disables this guard.' },
+  17: { label:'Inactivity Cycles Threshold',  target: TIER_ROUTER,  hint:'Cycles of inactivity before the cycles-based guard pauses a wallet. 0 disables this guard.' },
+  18: { label:'Inactivity Guard Enabled',     target: TIER_ROUTER,  hint:'Master on/off switch for the inactivity guard (1 = enabled, 0 = disabled).' },
+  // ── V8.20 second wave: MatrixKeeper (parked-rescue tuning) ─────────────────
+  19: { label:'Parked Grace Period',          target: MK_ADDR,      hint:'Seconds a parked member must wait before becoming eligible for rescue or eviction.' },
+  20: { label:'Rescue Ratio BPS',             target: MK_ADDR,      hint:'Withdrawal ratio (BPS of total earned) above which a parked member is evicted instead of rescued.' },
+  // ── V8.20 second wave: StabilityFund ───────────────────────────────────────
+  21: { label:'SF Target',                    target: SF_ADDR,      hint:'StabilityFund health target in USDC. 100% of withdrawal fees route to the Buyback Reserve once balance reaches this.' },
+  22: { label:'SF Community Carve-Out BPS',   target: SF_ADDR,      hint:'Share of SF inflow routed to CommunityWallet (BPS). 0 pauses routing without unsetting CommunityWallet.' },
+  23: { label:'SF Stability Floor',           target: SF_ADDR,      hint:'Minimum SF balance reserved before any payouts. Capped at SF Target — can never exceed it.' },
+  // ── V8.20 second wave: CNOVABuybackReserve ──────────────────────────────────
+  24: { label:'Buyback Trigger Threshold',    target: BBR_ADDR,     hint:'USDC balance in the Buyback Reserve required to trigger a CNOVA buyback.' },
+  25: { label:'Buyback Max Slippage BPS',     target: BBR_ADDR,     hint:'Maximum slippage allowed (BPS) on a buyback swap before it reverts.' },
+  // ── V8.20 second wave: CNOVADirectSale (whale caps + SF/LQ split targets) ──
+  26: { label:'Direct Sale Max Tx BPS',       target: DS_ADDR,      hint:'Per-transaction whale cap on CNOVADirectSale, as a % of CNOVA total supply. 0 disables the cap.' },
+  27: { label:'Direct Sale Max Wallet BPS',   target: DS_ADDR,      hint:'Per-wallet whale cap on CNOVADirectSale, as a % of resulting CNOVA total supply. 0 disables the cap.' },
+  28: { label:'Direct Sale SF Target',        target: DS_ADDR,      hint:'StabilityFund USDC target used to split each purchase\u2019s premium between SF and the liquidity reserve.' },
+  29: { label:'Direct Sale LQ Target',        target: DS_ADDR,      hint:'Liquidity reserve USDC target used to split each purchase\u2019s premium between SF and the liquidity reserve.' },
+  // ── V8.20 second wave: CNOVAToken (epochs, vesting, rewards) ────────────────
+  30: { label:'CNOVA Reward %',               target: CNOVA_ADDR,   hint:'Final Frontier reward percentage paid out per epoch (range 10\u201375%).' },
+  31: { label:'Epoch Mint Limit',              target: CNOVA_ADDR,   hint:'CNOVA minted in an epoch that triggers the next halving epoch. Lower = faster halvings.' },
+  32: { label:'Epoch Member Limit',            target: CNOVA_ADDR,   hint:'Unique members joined in an epoch that triggers the next halving epoch.' },
+  33: { label:'Epoch Time Limit',               target: CNOVA_ADDR,   hint:'Maximum time an epoch can run before auto-advancing, even with zero activity.' },
+  34: { label:'Vest Duration',                  target: CNOVA_ADDR,   hint:'Cliff vesting duration applied to future mints. Does not affect already-vesting batches.' },
+  35: { label:'Max Early-Exit Penalty BPS',     target: CNOVA_ADDR,   hint:'Penalty applied at day 0 of vesting if a member exits early, sliding to 0 by the cliff date.' },
+  // ── V8.20 second wave: CommunityWallet ───────────────────────────────────────
+  37: { label:'Community Genesis Split BPS',    target: CW_ADDR,      hint:'Genesis members\u2019 share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 \u2212 this).' },
+  38: { label:'Community Distribute Ratio BPS', target: CW_ADDR,      hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
+  39: { label:'Community Distribute Interval',  target: CW_ADDR,      hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
 };
 
 // Value formatters for display
@@ -382,6 +464,31 @@ const VALUE_LABELS = {
   9:  v => `${v} BPS (${(v/100).toFixed(2)}%)`,
   10: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
   13: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
+  // V8.20 second wave
+  15: v => `${v} members`,
+  16: v => v === 0 ? 'Disabled' : `${v} days`,
+  17: v => v === 0 ? 'Disabled' : `${v} cycles`,
+  18: v => v === 1 ? 'Enabled' : 'Disabled',
+  19: v => v === 0 ? 'Disabled (instant)' : (v/86400 >= 1 ? `${(v/86400).toFixed(1)}d` : `${(v/3600).toFixed(1)}h`),
+  20: v => `${v} BPS (${(v/100).toFixed(0)}%)`,
+  21: v => `$${(v/1e6).toLocaleString()}`,
+  22: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
+  23: v => `$${(v/1e6).toLocaleString()}`,
+  24: v => `$${(v/1e6).toLocaleString()}`,
+  25: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
+  26: v => v === 0 ? 'Disabled' : `${v} BPS (${(v/100).toFixed(1)}%)`,
+  27: v => v === 0 ? 'Disabled' : `${v} BPS (${(v/100).toFixed(1)}%)`,
+  28: v => v === 0 ? 'Disabled' : `$${(v/1e6).toLocaleString()}`,
+  29: v => v === 0 ? 'Disabled' : `$${(v/1e6).toLocaleString()}`,
+  30: v => `${v}%`,
+  31: v => `${(v/1e18).toLocaleString()} CNOVA`,
+  32: v => `${v.toLocaleString()} members`,
+  33: v => `${(v/86400).toFixed(0)} days`,
+  34: v => `${(v/86400).toFixed(0)} days`,
+  35: v => `${v} BPS (${(v/100).toFixed(0)}%)`,
+  37: v => `${(v/100).toFixed(0)}% Genesis / ${((10000-v)/100).toFixed(0)}% Pioneer`,
+  38: v => `${v} BPS (${(v/100).toFixed(0)}%)`,
+  39: v => `${(v/86400).toFixed(0)} days`,
 };
 function fmtValue(paramId, v) {
   return VALUE_LABELS[paramId] ? VALUE_LABELS[paramId](v) : String(v);
@@ -450,8 +557,8 @@ async function connectWallet() {
 // ── Voting power ─────────────────────────────────────────────────────────────
 async function refreshVotingPower() {
   try {
-    const cnova = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: true }));
-    const gov   = new ethers.Contract(GOV_ADDR,   GOV_ABI,   ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: true }));
+    const cnova = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC }));
+    const gov   = new ethers.Contract(GOV_ADDR,   GOV_ABI,   ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC }));
 
     totalSupply = await cnova.totalSupply();
     quorumBps   = await gov.quorumBps();
@@ -477,7 +584,7 @@ async function refreshVotingPower() {
 
 // ── Load proposals ────────────────────────────────────────────────────────────
 async function loadProposals() {
-  ro = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: true });
+  ro = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
   const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, ro);
 
   await refreshVotingPower();
@@ -698,7 +805,7 @@ async function onParamChange() {
   const avDiv = document.getElementById('allowed-vals');
   avDiv.innerHTML = '<span style="color:var(--text3);font-size:12px;">Loading…</span>';
   try {
-    const _ro  = ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: true });
+    const _ro  = ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
     const gov  = new ethers.Contract(GOV_ADDR, GOV_ABI, _ro);
     const vals = await gov.getAllowedValues(paramId);
     avDiv.innerHTML = vals.map(v =>
