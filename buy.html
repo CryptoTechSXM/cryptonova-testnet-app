@@ -659,14 +659,64 @@ async function approveUSDC() {
 }
 
 // ── Buy ───────────────────────────────────────────────────────────────────────
+
+// Maps known CNOVADirectSale revert reasons (and common wallet/ERC20 errors) to
+// plain-English explanations, so members see something useful instead of a raw
+// ethers/JSON-RPC error dump. Add new cases here as the contract gains more
+// require() strings — see CNOVADirectSale.sol for the authoritative list.
+function friendlyDirectSaleError(e) {
+  const raw = [e?.reason, e?.shortMessage, e?.message, e?.info?.error?.message]
+    .filter(Boolean).join(' | ').toLowerCase();
+
+  if (raw.includes('exceeds per-tx cap')) {
+    return '⚠️ Purchase limited: CNOVA total supply is still very small during this early ' +
+           'bootstrap phase, so the per-transaction whale-protection cap (a % of supply) is ' +
+           'very tight right now. This loosens automatically as more members join and supply ' +
+           'grows — try a smaller amount, or check back later.';
+  }
+  if (raw.includes('exceeds per-wallet cap')) {
+    return '⚠️ Purchase limited: holding this much CNOVA would put your wallet over the ' +
+           'per-wallet whale-protection cap relative to today’s small supply. This loosens ' +
+           'automatically as more members join — try a smaller amount for now.';
+  }
+  if (raw.includes('minimum $1 usdc')) {
+    return '⚠️ Minimum purchase is $1 USDC.';
+  }
+  if (raw.includes('zero cnova out')) {
+    return '⚠️ That amount is too small to mint any CNOVA at the current price — try a larger amount.';
+  }
+  if (raw.includes('pausable: paused') || raw.includes('enforcedpause')) {
+    return '⚠️ Direct purchases are temporarily paused. Please check back shortly.';
+  }
+  if (raw.includes('insufficient allowance') || raw.includes('exceeds allowance')) {
+    return '⚠️ USDC approval needed — click Approve USDC, then try again.';
+  }
+  if (raw.includes('transfer amount exceeds balance') || raw.includes('insufficient balance')) {
+    return '⚠️ Insufficient USDC balance in your wallet.';
+  }
+  if (raw.includes('user rejected') || raw.includes('action_rejected')) {
+    return 'Transaction cancelled.';
+  }
+  // Fallback — still avoid dumping the full raw error object onto the page.
+  return '⚠️ Purchase failed: ' + (e?.reason || e?.shortMessage || 'unexpected error — see browser console for details.');
+}
+
 async function executeBuy() {
   const amount = parseFloat(document.getElementById('usdc-input').value);
   if (!signer || !amount || !DIRECT_SALE_ADDR) return;
+  const ds  = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, signer);
+  const raw = ethers.parseUnits(amount.toString(), 6);
+  try {
+    // Pre-flight simulate first so a guaranteed-fail purchase shows a friendly
+    // reason without spending gas or prompting a wallet confirmation at all.
+    await ds.buyCNOVA.staticCall(raw);
+  } catch (simErr) {
+    setStatus(friendlyDirectSaleError(simErr), 'error');
+    return;
+  }
   try {
     setStatus('Sending purchase… please confirm in wallet.', 'info');
-    const ds   = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, signer);
-    const raw  = ethers.parseUnits(amount.toString(), 6);
-    const tx   = await ds.buyCNOVA(raw, { gasLimit: 300_000 });
+    const tx = await ds.buyCNOVA(raw, { gasLimit: 300_000 });
     setStatus(`TX submitted: ${tx.hash.slice(0,18)}…`, 'info');
     await tx.wait();
     setStatus(`✅ Success! CNOVA sent to your wallet. TX: ${tx.hash.slice(0,18)}…`, 'success');
@@ -676,7 +726,7 @@ async function executeBuy() {
     loadActivity();
     loadPriceData();
   } catch(e) {
-    setStatus('Purchase failed: ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setStatus(friendlyDirectSaleError(e), 'error');
   }
 }
 
