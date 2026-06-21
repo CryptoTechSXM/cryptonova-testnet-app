@@ -358,6 +358,10 @@
 // CONFIG — swap addresses once V8.19 deploys
 // ─────────────────────────────────────────────────────────────────────────────
 const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
+// Real ethers.Network object for staticNetwork — passing the literal boolean
+// 'true' here throws 'staticNetwork.matches is not a function' in ethers v6.7.1
+// and silently kills every read-only call downstream (loadPriceData, loadActivity).
+const _NET_STATIC      = ethers.Network.from(CHAIN_ID);
 const RPC_URL           = 'https://sepolia.base.org';
 
 // V8.20 live addresses
@@ -459,7 +463,7 @@ async function refreshWalletState() {
 // ── On-chain price data ───────────────────────────────────────────────────────
 async function loadPriceData() {
   try {
-    const ro       = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: true });
+    const ro       = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
     const cnova    = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, ro);
     const treasury = new ethers.Contract(TREASURY_ADDR, ERC20_ABI, ro); // USDC held by treasury
     const usdc     = new ethers.Contract(USDC_ADDR, ERC20_ABI, ro);
@@ -738,7 +742,7 @@ async function loadActivity() {
     return;
   }
   try {
-    const ro  = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: true });
+    const ro  = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
     const ds  = new ethers.Contract(DIRECT_SALE_ADDR, [
       'event CNOVAPurchased(address indexed buyer, uint256 usdcPaid, uint256 cnovaOut, uint256 tier)'
     ], ro);
