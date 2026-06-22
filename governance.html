@@ -330,6 +330,19 @@
       </select>
     </div>
 
+    <div class="form-row" id="matrix-instance-row" style="display:none;">
+      <label class="form-label">Tier Instance <span style="font-weight:400;color:var(--text3);">(this fee is set per matrix, not protocol-wide)</span></label>
+      <select class="form-input" id="matrix-instance-select" onchange="onMatrixInstanceChange()">
+        <!-- populated by onParamChange() -->
+      </select>
+      <div class="form-hint">Each tier's MatA/MatB pair stores its own value — pick which instance to view and target.</div>
+    </div>
+
+    <div class="form-row" id="current-value-row" style="display:none;">
+      <label class="form-label">Current Value</label>
+      <div id="current-value-display" style="font-size:14px;font-weight:700;color:var(--green);font-family:monospace;padding:8px 0;">Loading…</div>
+    </div>
+
     <div class="form-row" id="allowed-row" style="display:none;">
       <label class="form-label">Allowed Values <span style="font-weight:400;color:var(--text3);">(select one)</span></label>
       <div class="allowed-vals" id="allowed-vals"></div>
@@ -443,7 +456,7 @@ const PARAM_META = {
   // ── V8.20: array-valued params (different proposal mechanism -- see the
   //    "Array Values" builder below, not the Allowed Values chip picker) ────
   14: { label:'SF Rescue Ladder', target: MK_ADDR, isArray: true, arrayKind: 'ladder',
-        hint:'Maps each parked member\u2019s withdrawal ratio to how much StabilityFund coverage they get on rescue. Lower withdrawal ratio (less already claimed) \u2192 higher SF coverage.',
+        hint:'Maps each parked member’s withdrawal ratio to how much StabilityFund coverage they get on rescue. Lower withdrawal ratio (less already claimed) → higher SF coverage.',
         col1Label: 'Withdrawal % Threshold (desc)', col2Label: 'SF Coverage BPS (asc)',
         col1Hint: 'BPS of total earned already withdrawn. Row 1 is fixed at 10000/0 (full withdrawal = no rescue). Each row after must be strictly lower.',
         col2Hint: 'BPS of the remaining shortfall StabilityFund covers at this threshold. Must strictly increase, capped at 10000 (100%).' },
@@ -466,10 +479,10 @@ const PARAM_META = {
   // ── V8.20 second wave: CNOVADirectSale (whale caps + SF/LQ split targets) ──
   26: { label:'Direct Sale Max Tx BPS',       target: DS_ADDR,      hint:'Per-transaction whale cap on CNOVADirectSale, as a % of CNOVA total supply. 0 disables the cap.' },
   27: { label:'Direct Sale Max Wallet BPS',   target: DS_ADDR,      hint:'Per-wallet whale cap on CNOVADirectSale, as a % of resulting CNOVA total supply. 0 disables the cap.' },
-  28: { label:'Direct Sale SF Target',        target: DS_ADDR,      hint:'StabilityFund USDC target used to split each purchase\u2019s premium between SF and the liquidity reserve.' },
-  29: { label:'Direct Sale LQ Target',        target: DS_ADDR,      hint:'Liquidity reserve USDC target used to split each purchase\u2019s premium between SF and the liquidity reserve.' },
+  28: { label:'Direct Sale SF Target',        target: DS_ADDR,      hint:'StabilityFund USDC target used to split each purchase’s premium between SF and the liquidity reserve.' },
+  29: { label:'Direct Sale LQ Target',        target: DS_ADDR,      hint:'Liquidity reserve USDC target used to split each purchase’s premium between SF and the liquidity reserve.' },
   // ── V8.20 second wave: CNOVAToken (epochs, vesting, rewards) ────────────────
-  30: { label:'CNOVA Reward %',               target: CNOVA_ADDR,   hint:'Final Frontier reward percentage paid out per epoch (range 10\u201375%).' },
+  30: { label:'CNOVA Reward %',               target: CNOVA_ADDR,   hint:'Final Frontier reward percentage paid out per epoch (range 10–75%).' },
   31: { label:'Epoch Mint Limit',              target: CNOVA_ADDR,   hint:'CNOVA minted in an epoch that triggers the next halving epoch. Lower = faster halvings.' },
   32: { label:'Epoch Member Limit',            target: CNOVA_ADDR,   hint:'Unique members joined in an epoch that triggers the next halving epoch.' },
   33: { label:'Epoch Time Limit',               target: CNOVA_ADDR,   hint:'Maximum time an epoch can run before auto-advancing, even with zero activity.' },
@@ -481,7 +494,7 @@ const PARAM_META = {
         col1Hint: 'CNOVA amount breakpoint. Each row after the first must be strictly higher than the previous.',
         col2Hint: 'Boost rate in BPS applied at or above this threshold. Max 10000 (100%).' },
   // ── V8.20 second wave: CommunityWallet ───────────────────────────────────────
-  37: { label:'Community Genesis Split BPS',    target: CW_ADDR,      hint:'Genesis members\u2019 share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 \u2212 this).' },
+  37: { label:'Community Genesis Split BPS',    target: CW_ADDR,      hint:'Genesis members’ share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
   38: { label:'Community Distribute Ratio BPS', target: CW_ADDR,      hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
   39: { label:'Community Distribute Interval',  target: CW_ADDR,      hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
 };
@@ -548,6 +561,76 @@ const ERC20_ABI = [
   'function balanceOf(address) external view returns (uint256)',
   'function totalSupply() external view returns (uint256)',
 ];
+
+// Superset of read-only getters across every governance target contract --
+// safe to share one ABI across different addresses since ethers only calls
+// whatever function name you invoke (unused fragments are simply ignored).
+const READ_ABI = [
+  // TierRouter
+  'function autoUpgradeCycleThreshold() external view returns (uint256)',
+  'function reentryMinCycles() external view returns (uint256)',
+  'function escrowFloorMultiplier() external view returns (uint256)',
+  'function whaleGateThreshold() external view returns (uint256)',
+  'function inactivityDaysThreshold() external view returns (uint256)',
+  'function inactivityCyclesThreshold() external view returns (uint256)',
+  'function inactivityGuardEnabled() external view returns (bool)',
+  'function tierMatrixAAddr(uint256) external view returns (address)',
+  'function tierMatrixBAddr(uint256) external view returns (address)',
+  // MatrixKeeper
+  'function velocityWindow() external view returns (uint256)',
+  'function velocityThreshold() external view returns (uint256)',
+  'function deflationThreshold() external view returns (uint256)',
+  'function idleSlotTimeout() external view returns (uint256)',
+  'function maxItemsPerUpkeep() external view returns (uint256)',
+  'function parkedGracePeriod() external view returns (uint256)',
+  'function rescueRatioBps() external view returns (uint256)',
+  // StabilityFund / CNOVADirectSale (sfTarget name collides across both -- harmless)
+  'function sfTarget() external view returns (uint256)',
+  'function communityCarveOutBps() external view returns (uint256)',
+  'function stabilityFloor() external view returns (uint256)',
+  // CNOVABuybackReserve
+  'function triggerThreshold() external view returns (uint256)',
+  'function maxSlippageBps() external view returns (uint256)',
+  // CNOVADirectSale
+  'function maxTxBps() external view returns (uint256)',
+  'function maxWalletBps() external view returns (uint256)',
+  'function lqTarget() external view returns (uint256)',
+  // CNOVAToken
+  'function rewardPct() external view returns (uint256)',
+  'function epochMintLimit() external view returns (uint256)',
+  'function epochMemberLimit() external view returns (uint256)',
+  'function epochTimeLimit() external view returns (uint256)',
+  'function vestDuration() external view returns (uint256)',
+  'function maxPenaltyBps() external view returns (uint256)',
+  // CommunityWallet
+  'function genesisBps() external view returns (uint256)',
+  'function distributeRatioBps() external view returns (uint256)',
+  'function distributeInterval() external view returns (uint256)',
+  // Matrix instance (params 9/10 -- per-tier, not protocol-wide; see PARAM_META)
+  'function withdrawalFeeBps() external view returns (uint256)',
+  'function earlyExitPenaltyBps() external view returns (uint256)',
+];
+
+// paramId -> getter function name on PARAM_META[paramId].target (READ_ABI above).
+// Params 9 and 10 are intentionally absent -- they resolve via the matrix
+// instance picker (see matrix-instance-row) instead of a fixed target.
+const PARAM_GETTER = {
+  1: 'autoUpgradeCycleThreshold', 2: 'reentryMinCycles', 3: 'escrowFloorMultiplier',
+  4: 'velocityWindow', 5: 'velocityThreshold', 6: 'deflationThreshold',
+  7: 'idleSlotTimeout', 8: 'maxItemsPerUpkeep',
+  11: 'votingPeriod', 12: 'timelockPeriod', 13: 'quorumBps',
+  15: 'whaleGateThreshold', 16: 'inactivityDaysThreshold', 17: 'inactivityCyclesThreshold',
+  18: 'inactivityGuardEnabled',
+  19: 'parkedGracePeriod', 20: 'rescueRatioBps',
+  21: 'sfTarget', 22: 'communityCarveOutBps', 23: 'stabilityFloor',
+  24: 'triggerThreshold', 25: 'maxSlippageBps',
+  26: 'maxTxBps', 27: 'maxWalletBps', 28: 'sfTarget', 29: 'lqTarget',
+  30: 'rewardPct', 31: 'epochMintLimit', 32: 'epochMemberLimit', 33: 'epochTimeLimit',
+  34: 'vestDuration', 35: 'maxPenaltyBps',
+  37: 'genesisBps', 38: 'distributeRatioBps', 39: 'distributeInterval',
+};
+// paramId -> getter name for the matrix-instance-resolved params (9, 10)
+const MATRIX_INSTANCE_GETTER = { 9: 'withdrawalFeeBps', 10: 'earlyExitPenaltyBps' };
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let provider, signer, userAddr;
@@ -820,27 +903,35 @@ async function executeProposal(proposalId) {
 }
 
 // ── Create proposal ───────────────────────────────────────────────────────────
+function getRo() {
+  return ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
+}
+
 async function onParamChange() {
   selectedParamValue = null;
   arrayRows = [];
   const paramId = parseInt(document.getElementById('param-select').value);
   if (!paramId) {
-    document.getElementById('allowed-row').style.display = 'none';
-    document.getElementById('target-row').style.display  = 'none';
-    document.getElementById('array-row').style.display   = 'none';
+    document.getElementById('allowed-row').style.display        = 'none';
+    document.getElementById('target-row').style.display         = 'none';
+    document.getElementById('array-row').style.display          = 'none';
+    document.getElementById('current-value-row').style.display  = 'none';
+    document.getElementById('matrix-instance-row').style.display = 'none';
     updateProposeGate();
     return;
   }
   const meta = PARAM_META[paramId];
-  document.getElementById('target-input').value         = meta.target;
   document.getElementById('target-row').style.display   = 'block';
 
   if (meta.isArray) {
     // Ladder / boost-table params use proposeLadder()/proposeBoostTable(), not
     // propose() -- no on-chain allowed-values list exists for these, so skip
     // the chip fetch entirely and show the row builder instead.
+    document.getElementById('target-input').value            = meta.target;
+    document.getElementById('current-value-row').style.display = 'none';
+    document.getElementById('matrix-instance-row').style.display = 'none';
     document.getElementById('allowed-row').style.display     = 'none';
-    document.getElementById('array-row').style.display       = 'block';
+    document.getElementById('array-row').style.display        = 'block';
     document.getElementById('array-hint').textContent        = meta.hint;
     document.getElementById('array-col1-label').textContent  = meta.col1Label;
     document.getElementById('array-col2-label').textContent  = meta.col2Label;
@@ -854,12 +945,31 @@ async function onParamChange() {
   document.getElementById('param-hint').textContent     = meta.hint;
   document.getElementById('allowed-row').style.display  = 'block';
 
+  if (MATRIX_INSTANCE_GETTER[paramId]) {
+    // Params 9/10 are stored per-matrix-instance, not on TierRouter itself --
+    // show a tier/side picker and resolve target + current value from that.
+    document.getElementById('matrix-instance-row').style.display = 'block';
+    const sel = document.getElementById('matrix-instance-select');
+    if (sel.options.length === 0) {
+      const opts = [];
+      for (let t = 1; t <= 10; t++) {
+        opts.push(`<option value="${t-1}|A">T${t} MatA</option>`);
+        opts.push(`<option value="${t-1}|B">T${t} MatB</option>`);
+      }
+      sel.innerHTML = opts.join('');
+    }
+    await onMatrixInstanceChange();
+  } else {
+    document.getElementById('matrix-instance-row').style.display = 'none';
+    document.getElementById('target-input').value = meta.target;
+    await loadCurrentValue(paramId, meta.target);
+  }
+
   // Fetch allowed values from contract
   const avDiv = document.getElementById('allowed-vals');
   avDiv.innerHTML = '<span style="color:var(--text3);font-size:12px;">Loading…</span>';
   try {
-    const _ro  = ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
-    const gov  = new ethers.Contract(GOV_ADDR, GOV_ABI, _ro);
+    const gov  = new ethers.Contract(GOV_ADDR, GOV_ABI, getRo());
     const vals = await gov.getAllowedValues(paramId);
     avDiv.innerHTML = vals.map(v =>
       `<div class="av-chip" onclick="selectValue(this, ${v})">${fmtValue(paramId, Number(v))}</div>`
@@ -868,6 +978,49 @@ async function onParamChange() {
     avDiv.innerHTML = '<span style="color:var(--red);font-size:12px;">Could not load allowed values.</span>';
   }
   updateProposeGate();
+}
+
+// Resolves the picked tier/side to a real matrix address via TierRouter,
+// updates the (now-correct) target field, and loads that instance's value.
+async function onMatrixInstanceChange() {
+  const paramId = parseInt(document.getElementById('param-select').value);
+  const getter  = MATRIX_INSTANCE_GETTER[paramId];
+  if (!getter) return;
+  const [tierIdxStr, side] = document.getElementById('matrix-instance-select').value.split('|');
+  const tierIdx = parseInt(tierIdxStr);
+  const cvDiv   = document.getElementById('current-value-display');
+  document.getElementById('current-value-row').style.display = 'block';
+  cvDiv.textContent = 'Loading…';
+  try {
+    const tr = new ethers.Contract(TIER_ROUTER, READ_ABI, getRo());
+    const matrixAddr = side === 'A' ? await tr.tierMatrixAAddr(tierIdx) : await tr.tierMatrixBAddr(tierIdx);
+    document.getElementById('target-input').value = matrixAddr;
+    if (!matrixAddr || matrixAddr === ethers.ZeroAddress) {
+      cvDiv.textContent = 'Tier not deployed yet.';
+      return;
+    }
+    await loadCurrentValue(paramId, matrixAddr, getter);
+  } catch (e) {
+    console.warn('onMatrixInstanceChange:', e);
+    cvDiv.textContent = 'Could not load — check console.';
+  }
+}
+
+// Generic current-value loader used by every scalar param.
+async function loadCurrentValue(paramId, targetAddr, getterOverride) {
+  const cvDiv = document.getElementById('current-value-display');
+  document.getElementById('current-value-row').style.display = 'block';
+  cvDiv.textContent = 'Loading…';
+  const getter = getterOverride || PARAM_GETTER[paramId];
+  if (!getter) { cvDiv.textContent = '—'; return; }
+  try {
+    const c = new ethers.Contract(targetAddr, READ_ABI, getRo());
+    const v = await c[getter]();
+    cvDiv.textContent = fmtValue(paramId, typeof v === 'boolean' ? (v ? 1 : 0) : Number(v));
+  } catch (e) {
+    console.warn('loadCurrentValue:', paramId, getter, e);
+    cvDiv.textContent = 'Could not load — check console.';
+  }
 }
 
 function selectValue(chip, val) {

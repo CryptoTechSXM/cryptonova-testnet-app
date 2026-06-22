@@ -239,6 +239,11 @@
         <div class="floor-stat-value" id="circ-supply">—</div>
         <div class="floor-stat-sub" id="supply-sub">CNOVA tokens</div>
       </div>
+      <div class="floor-stat">
+        <div class="floor-stat-label">Purchase Limits</div>
+        <div class="floor-stat-value" style="font-size:16px;"><span id="limit-min">—</span> <span style="color:var(--text3);font-weight:400;">–</span> <span style="color:var(--green);" id="limit-max">—</span></div>
+        <div class="floor-stat-sub" id="limit-sub">Min / max per purchase</div>
+      </div>
     </div>
   </div>
 
@@ -402,6 +407,9 @@ const DIRECT_SALE_ABI = [
   'function sfBalance() external view returns (uint256)',
   'function lqBalance() external view returns (uint256)',
   'function previewPurchase(uint256 usdcAmount) external view returns (uint256 cnovaOut, uint256 toTreasury, uint256 toSF, uint256 toLQ)',
+  'function maxTxBps() external view returns (uint256)',
+  'function maxWalletBps() external view returns (uint256)',
+  'function remainingAllowance(address buyer) external view returns (uint256 maxCnovaOut)',
 ];
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -413,6 +421,9 @@ let sfBalUSD      = 0;
 let lqBalUSD      = 0;
 let approvalNeeded = true;
 let usdcBalance   = 0;
+let totalSupplyRaw = 0n;  // bigint, 18-dec CNOVA -- needed for whale-cap math
+let maxTxBpsVal    = 0n;
+let maxWalletBpsVal = 0n;
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -438,6 +449,7 @@ async function connectWallet() {
     btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
     btn.classList.add('connected');
     await refreshWalletState();
+    await refreshPurchaseLimits();
     renderActionArea();
   } catch(e) {
     setStatus('Connection failed: ' + (e.message || e), 'error');
@@ -485,13 +497,19 @@ async function loadPriceData() {
     if (currentTierIdx < 0) currentTierIdx = CURVE_TIERS.length - 1;
     currentMult = CURVE_TIERS[currentTierIdx].mult;
 
-    // If direct sale live, read SF/LQ balances for dynamic split
+    totalSupplyRaw = totalSupply; // bigint, for whale-cap math below
+
+    // If direct sale live, read SF/LQ balances for dynamic split + whale caps
     if (DIRECT_SALE_ADDR) {
       try {
         const ds = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, ro);
-        const [sfB, lqB] = await Promise.all([ds.sfBalance(), ds.lqBalance()]);
+        const [sfB, lqB, txBps, walletBps] = await Promise.all([
+          ds.sfBalance(), ds.lqBalance(), ds.maxTxBps(), ds.maxWalletBps(),
+        ]);
         sfBalUSD = Number(sfB) / 1e6;
         lqBalUSD = Number(lqB) / 1e6;
+        maxTxBpsVal     = txBps;
+        maxWalletBpsVal = walletBps;
       } catch {}
     }
 
@@ -516,10 +534,76 @@ async function loadPriceData() {
 
     renderTiers(supplyF);
     onAmountChange(); // refresh preview if amount was pre-filled
+    await refreshPurchaseLimits();
 
   } catch(e) {
     console.error('loadPriceData:', e);
   }
+}
+
+// ── Min/max purchase display ────────────────────────────────────────────────
+// Minimum is a flat on-chain constant (CNOVADirectSale.sol: USDC_DEC, $1.00 --
+// not exposed via a getter, hardcoded here from source). Maximum comes from
+// the per-tx whale cap (maxTxBps) and, once a wallet is connected, the more
+// precise per-wallet remaining allowance from the contract itself.
+const MIN_PURCHASE_USD = 1;
+
+function _approxWalletCapTokens() {
+  // Used only when no wallet is connected -- estimates what a fresh wallet's
+  // cap would be. Once connected we use the contract's own remainingAllowance()
+  // instead, which is exact and already accounts for past purchases.
+  if (maxWalletBpsVal === 0n) return null;
+  return (totalSupplyRaw * maxWalletBpsVal) / 10000n;
+}
+
+async function refreshPurchaseLimits() {
+  const minEl = document.getElementById('limit-min');
+  const maxEl = document.getElementById('limit-max');
+  const subEl = document.getElementById('limit-sub');
+  if (!minEl) return;
+  minEl.textContent = '$' + MIN_PURCHASE_USD.toFixed(2);
+
+  const currentPrice = floorPrice * currentMult; // USDC per CNOVA, current tier
+  if (currentPrice <= 0 || !DIRECT_SALE_ADDR) {
+    maxEl.textContent = '—';
+    subEl.textContent = 'Direct sale not live yet.';
+    return;
+  }
+
+  let capTokens = null; // bigint or null (null = no cap active)
+  let usingWalletCap = false;
+  try {
+    if (userAddr) {
+      const ro = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
+      const ds = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, ro);
+      capTokens = await ds.remainingAllowance(userAddr);
+      usingWalletCap = true;
+    } else {
+      const txCap     = maxTxBpsVal > 0n ? (totalSupplyRaw * maxTxBpsVal) / 10000n : null;
+      const walletCap = _approxWalletCapTokens();
+      if (txCap === null && walletCap === null) capTokens = null;
+      else if (txCap === null) capTokens = walletCap;
+      else if (walletCap === null) capTokens = txCap;
+      else capTokens = txCap < walletCap ? txCap : walletCap;
+    }
+  } catch (e) { console.warn('refreshPurchaseLimits:', e); }
+
+  // remainingAllowance() returns type(uint256).max as a sentinel when both
+  // caps are disabled -- guard against converting that to Number().
+  const capF = capTokens === null ? null : Number(capTokens) / 1e18;
+  if (capTokens === null || !isFinite(capF) || capF > 1e15) {
+    maxEl.textContent = 'No limit';
+    subEl.textContent = usingWalletCap
+      ? 'No per-tx or per-wallet cap currently active.'
+      : 'No per-tx cap active — connect wallet to check your personal cap.';
+    return;
+  }
+
+  const maxUSD = capF * currentPrice;
+  maxEl.textContent = '$' + maxUSD.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  subEl.textContent = usingWalletCap
+    ? 'Your remaining allowance at current price — re-checked on submit.'
+    : 'Per-tx cap at current price — connect wallet to see your personal cap.';
 }
 
 // ── Tier grid ─────────────────────────────────────────────────────────────────
