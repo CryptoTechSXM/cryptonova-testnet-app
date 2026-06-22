@@ -161,17 +161,17 @@
   </a>
   <div class="header-right">
     <div id="lang-switcher"></div>
-    <a href="index.html" class="btn-home">← Dashboard</a>
-    <button class="theme-toggle" onclick="toggleTheme()">☀ Light</button>
+    <a href="index.html" class="btn-home">← <span data-i18n="common.dashboard">Dashboard</span></a>
+    <button class="theme-toggle" onclick="toggleTheme()">☀ <span data-i18n="common.light">Light</span></button>
   </div>
 </header>
 
 <main>
   <div class="page-title">
-    <h1><div class="dot"></div>System Status</h1>
+    <h1><div class="dot"></div><span data-i18n="statusPage.title">System Status</span></h1>
     <div class="refresh-info">
-      <span id="last-updated">Loading…</span>
-      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+      <span id="last-updated" data-i18n="statusPage.js.loading">Loading…</span>
+      <button class="refresh-btn" onclick="loadAll()" data-i18n="statusPage.refresh_btn">↻ Refresh</button>
       <span id="countdown"></span>
     </div>
   </div>
@@ -181,33 +181,33 @@
     <div class="summary-pill" onclick="toggleCard('card-keeper')">
       <div class="pill-indicator" id="pill-keeper"></div>
       <div>
-        <div class="pill-label">Keeper</div>
+        <div class="pill-label" data-i18n="statusPage.pill_keeper_label">Keeper</div>
         <div class="pill-value" id="pill-keeper-val">—</div>
-        <div class="pill-sub" id="pill-keeper-sub">Checking…</div>
+        <div class="pill-sub" id="pill-keeper-sub" data-i18n="statusPage.pill_keeper_sub_checking">Checking…</div>
       </div>
     </div>
     <div class="summary-pill" onclick="toggleCard('card-parked')">
       <div class="pill-indicator" id="pill-parked"></div>
       <div>
-        <div class="pill-label">Parked Members</div>
+        <div class="pill-label" data-i18n="statusPage.pill_parked_label">Parked Members</div>
         <div class="pill-value" id="pill-parked-val">—</div>
-        <div class="pill-sub" id="pill-parked-sub">Checking…</div>
+        <div class="pill-sub" id="pill-parked-sub" data-i18n="statusPage.pill_parked_sub_checking">Checking…</div>
       </div>
     </div>
     <div class="summary-pill" onclick="toggleCard('card-sf')">
       <div class="pill-indicator" id="pill-sf"></div>
       <div>
-        <div class="pill-label">Stability Fund</div>
+        <div class="pill-label" data-i18n="statusPage.pill_sf_label">Stability Fund</div>
         <div class="pill-value" id="pill-sf-val">—</div>
-        <div class="pill-sub" id="pill-sf-sub">Rescue reserve</div>
+        <div class="pill-sub" id="pill-sf-sub" data-i18n="statusPage.pill_sf_sub_default">Rescue reserve</div>
       </div>
     </div>
     <div class="summary-pill" onclick="toggleCard('card-matrix')">
       <div class="pill-indicator" id="pill-matrix"></div>
       <div>
-        <div class="pill-label">T1 Fill Progress</div>
+        <div class="pill-label" data-i18n="statusPage.pill_matrix_label">T1 Fill Progress</div>
         <div class="pill-value" id="pill-matrix-val">—</div>
-        <div class="pill-sub" id="pill-matrix-sub">MatA / MatB</div>
+        <div class="pill-sub" id="pill-matrix-sub" data-i18n="statusPage.pill_matrix_sub_default">MatA / MatB</div>
       </div>
     </div>
   </div>
@@ -221,45 +221,45 @@
         <div class="card-header-left">
           <div class="card-icon">⚙️</div>
           <div>
-            <div class="card-title-text">Keeper Status <span class="card-badge" id="badge-keeper">—</span></div>
-            <div class="card-summary" id="summary-keeper">Checks and runs pending matrix work</div>
+            <div class="card-title-text"><span data-i18n="statusPage.keeper_card_title">Keeper Status</span> <span class="card-badge" id="badge-keeper">—</span></div>
+            <div class="card-summary" id="summary-keeper" data-i18n="statusPage.keeper_summary_default">Checks and runs pending matrix work</div>
           </div>
         </div>
         <div class="chevron" id="chev-card-keeper">▼</div>
       </div>
       <div class="card-body" id="body-card-keeper">
-        <div class="detail-section">Current Check</div>
+        <div class="detail-section" data-i18n="statusPage.section_current_check">Current Check</div>
         <div class="detail-row">
-          <span class="detail-key">Work pending now</span>
+          <span class="detail-key" data-i18n="statusPage.row_work_pending">Work pending now</span>
           <span class="detail-val" id="kp-work-needed">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Work type</span>
+          <span class="detail-key" data-i18n="statusPage.row_work_type">Work type</span>
           <span class="detail-val" id="kp-work-type">—</span>
         </div>
-        <div class="detail-section">Recent Activity</div>
+        <div class="detail-section" data-i18n="statusPage.section_recent_activity">Recent Activity</div>
         <div class="detail-row">
-          <span class="detail-key">Last rescue</span>
+          <span class="detail-key" data-i18n="statusPage.row_last_rescue">Last rescue</span>
           <span class="detail-val" id="kp-last-rescue">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Total rescues (last 50k blocks)</span>
+          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (last 50k blocks)</span>
           <span class="detail-val blue" id="kp-rescue-count">—</span>
         </div>
-        <div class="detail-section">Infrastructure</div>
+        <div class="detail-section" data-i18n="statusPage.section_infrastructure">Infrastructure</div>
         <div class="detail-row">
-          <span class="detail-key">MatrixKeeper contract</span>
+          <span class="detail-key" data-i18n="statusPage.row_matrixkeeper_contract">MatrixKeeper contract</span>
           <span class="detail-val"><span class="addr-short">0x2fBF…EF0</span></span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Automation method</span>
-          <span class="detail-val blue" id="kp-method">Local keeper (2 min)</span>
+          <span class="detail-key" data-i18n="statusPage.row_automation_method">Automation method</span>
+          <span class="detail-val blue" id="kp-method" data-i18n="statusPage.val_local_keeper">Local keeper (2 min)</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">CRE migration</span>
-          <span class="detail-val yellow">Pending approval</span>
+          <span class="detail-key" data-i18n="statusPage.row_cre_migration">CRE migration</span>
+          <span class="detail-val yellow" data-i18n="statusPage.val_pending_approval">Pending approval</span>
         </div>
-        <div class="info-note">The keeper runs <strong>checkUpkeep → performUpkeep</strong> on a schedule. When it detects pending work (parked rescues, force crosses, distributions), it submits a transaction automatically.</div>
+        <div class="info-note" data-i18n="statusPage.keeper_info_note">The keeper runs <strong>checkUpkeep → performUpkeep</strong> on a schedule. When it detects pending work (parked rescues, force crosses, distributions), it submits a transaction automatically.</div>
       </div>
     </div>
 
@@ -269,31 +269,31 @@
         <div class="card-header-left">
           <div class="card-icon">🅿️</div>
           <div>
-            <div class="card-title-text">Parked Members <span class="card-badge" id="badge-parked">—</span></div>
-            <div class="card-summary" id="summary-parked">Members awaiting re-entry rescue</div>
+            <div class="card-title-text"><span data-i18n="statusPage.parked_card_title">Parked Members</span> <span class="card-badge" id="badge-parked">—</span></div>
+            <div class="card-summary" id="summary-parked" data-i18n="statusPage.parked_summary_default">Members awaiting re-entry rescue</div>
           </div>
         </div>
         <div class="chevron" id="chev-card-parked">▼</div>
       </div>
       <div class="card-body" id="body-card-parked">
-        <div class="detail-section">Overview</div>
+        <div class="detail-section" data-i18n="statusPage.section_overview">Overview</div>
         <div class="detail-row">
-          <span class="detail-key">T1 MatB parked count</span>
+          <span class="detail-key" data-i18n="statusPage.row_t1_matb_parked">T1 MatB parked count</span>
           <span class="detail-val" id="pk-count">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">SF rescue capacity</span>
+          <span class="detail-key" data-i18n="statusPage.row_sf_rescue_capacity">SF rescue capacity</span>
           <span class="detail-val green" id="pk-capacity">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Avg shortfall per member</span>
+          <span class="detail-key" data-i18n="statusPage.row_avg_shortfall">Avg shortfall per member</span>
           <span class="detail-val" id="pk-shortfall">—</span>
         </div>
-        <div class="detail-section">Parked Wallet List</div>
+        <div class="detail-section" data-i18n="statusPage.section_parked_wallet_list">Parked Wallet List</div>
         <div id="parked-list-wrap">
-          <div class="loading-row">Loading…</div>
+          <div class="loading-row" data-i18n="statusPage.js.loading">Loading…</div>
         </div>
-        <div class="info-note"><strong>Parked</strong> members have cycled out of MatB but lacked enough withdrawable balance to re-enter T1 ($10). The Stability Fund contributes to rescue them. The keeper processes rescues automatically.</div>
+        <div class="info-note" data-i18n="statusPage.parked_info_note"><strong>Parked</strong> members have cycled out of MatB but lacked enough withdrawable balance to re-enter T1 ($10). The Stability Fund contributes to rescue them. The keeper processes rescues automatically.</div>
       </div>
     </div>
 
@@ -303,40 +303,40 @@
         <div class="card-header-left">
           <div class="card-icon">📊</div>
           <div>
-            <div class="card-title-text">Matrix Fill Progress <span class="card-badge" id="badge-matrix">—</span></div>
-            <div class="card-summary" id="summary-matrix">T1 MatA → MatB progression</div>
+            <div class="card-title-text"><span data-i18n="statusPage.matrix_card_title">Matrix Fill Progress</span> <span class="card-badge" id="badge-matrix">—</span></div>
+            <div class="card-summary" id="summary-matrix" data-i18n="statusPage.matrix_summary_default">T1 MatA → MatB progression</div>
           </div>
         </div>
         <div class="chevron" id="chev-card-matrix">▼</div>
       </div>
       <div class="card-body" id="body-card-matrix">
-        <div class="detail-section">T1 Tier — Active Matrices</div>
+        <div class="detail-section" data-i18n="statusPage.section_active_matrices">T1 Tier — Active Matrices</div>
         <div id="matrix-progress-wrap">
-          <div class="loading-row">Loading…</div>
+          <div class="loading-row" data-i18n="statusPage.js.loading">Loading…</div>
         </div>
-        <div class="detail-section">Pool Accumulators</div>
+        <div class="detail-section" data-i18n="statusPage.section_pool_accumulators">Pool Accumulators</div>
         <div class="detail-row">
-          <span class="detail-key">T1 MatA pool</span>
+          <span class="detail-key" data-i18n="statusPage.row_t1_mata_pool">T1 MatA pool</span>
           <span class="detail-val green" id="mx-pool-a">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">T1 MatB pool</span>
+          <span class="detail-key" data-i18n="statusPage.row_t1_matb_pool">T1 MatB pool</span>
           <span class="detail-val green" id="mx-pool-b">—</span>
         </div>
-        <div class="detail-section">Totals</div>
+        <div class="detail-section" data-i18n="statusPage.section_totals">Totals</div>
         <div class="detail-row">
-          <span class="detail-key">Total system cycles</span>
+          <span class="detail-key" data-i18n="statusPage.row_total_cycles">Total system cycles</span>
           <span class="detail-val blue" id="mx-cycles">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Total T1 registered</span>
+          <span class="detail-key" data-i18n="statusPage.row_total_registered">Total T1 registered</span>
           <span class="detail-val" id="mx-total">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">T2 MatA occupancy</span>
+          <span class="detail-key" data-i18n="statusPage.row_t2_mata_occupancy">T2 MatA occupancy</span>
           <span class="detail-val" id="mx-t2a">—</span>
         </div>
-        <div class="info-note"><strong>MatA fills first</strong> (127 members), then force-crosses to MatB. When MatB fills to 127, the pool distributes and members cycle back to MatA. The keeper drives the crossing.</div>
+        <div class="info-note" data-i18n="statusPage.matrix_info_note"><strong>MatA fills first</strong> (127 members), then force-crosses to MatB. When MatB fills to 127, the pool distributes and members cycle back to MatA. The keeper drives the crossing.</div>
       </div>
     </div>
 
@@ -346,49 +346,49 @@
         <div class="card-header-left">
           <div class="card-icon">🛡️</div>
           <div>
-            <div class="card-title-text">Stability Fund <span class="card-badge" id="badge-sf">—</span></div>
-            <div class="card-summary" id="summary-sf">Reserve for rescuing parked members</div>
+            <div class="card-title-text"><span data-i18n="statusPage.sf_card_title">Stability Fund</span> <span class="card-badge" id="badge-sf">—</span></div>
+            <div class="card-summary" id="summary-sf" data-i18n="statusPage.sf_summary_default">Reserve for rescuing parked members</div>
           </div>
         </div>
         <div class="chevron" id="chev-card-sf">▼</div>
       </div>
       <div class="card-body" id="body-card-sf">
-        <div class="detail-section">Balance</div>
+        <div class="detail-section" data-i18n="statusPage.section_balance">Balance</div>
         <div class="detail-row">
-          <span class="detail-key">SF total balance (USDC)</span>
+          <span class="detail-key" data-i18n="statusPage.row_sf_total_balance">SF total balance (USDC)</span>
           <span class="detail-val green" id="sf-bal">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Rescue capacity (est.)</span>
+          <span class="detail-key" data-i18n="statusPage.row_rescue_capacity_est">Rescue capacity (est.)</span>
           <span class="detail-val" id="sf-rescue-cap">—</span>
         </div>
-        <div class="detail-section">Health</div>
+        <div class="detail-section" data-i18n="statusPage.section_health">Health</div>
         <div class="sf-health">
           <div style="flex:1">
             <div class="prog-wrap" style="margin:0">
-              <div class="prog-label"><span>Fund Health</span><span id="sf-pct">—</span></div>
+              <div class="prog-label"><span data-i18n="statusPage.fund_health_label">Fund Health</span><span id="sf-pct">—</span></div>
               <div class="prog-track"><div class="prog-fill" id="sf-bar" style="width:0%"></div></div>
             </div>
           </div>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Status</span>
+          <span class="detail-key" data-i18n="statusPage.row_status">Status</span>
           <span class="detail-val" id="sf-status">—</span>
         </div>
-        <div class="detail-section">Reserves</div>
+        <div class="detail-section" data-i18n="statusPage.section_reserves">Reserves</div>
         <div class="detail-row">
-          <span class="detail-key">Treasury USDC</span>
+          <span class="detail-key" data-i18n="statusPage.row_treasury_usdc">Treasury USDC</span>
           <span class="detail-val" id="sf-treasury">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">Buyback Reserve</span>
+          <span class="detail-key" data-i18n="statusPage.row_buyback_reserve">Buyback Reserve</span>
           <span class="detail-val" id="sf-buyback">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key">CNOVA total supply</span>
+          <span class="detail-key" data-i18n="statusPage.row_cnova_total_supply">CNOVA total supply</span>
           <span class="detail-val blue" id="sf-cnova">—</span>
         </div>
-        <div class="info-note">The Stability Fund receives 5% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $200 can rescue 20+ members.</div>
+        <div class="info-note" data-i18n="statusPage.sf_info_note">The Stability Fund receives 5% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $200 can rescue 20+ members.</div>
       </div>
     </div>
 
@@ -460,7 +460,7 @@
   let _timer, _countdown = 30;
 
   async function loadAll() {
-    setText('last-updated', 'Refreshing…');
+    setText('last-updated', t('statusPage.js.refreshing', 'Refreshing…'));
     clearInterval(_timer);
     _countdown = 30;
     try {
@@ -474,14 +474,14 @@
         loadSF(provider),
       ]);
 
-      setText('last-updated', 'Updated ' + new Date().toLocaleTimeString());
+      setText('last-updated', t('statusPage.js.updated', 'Updated') + ' ' + new Date().toLocaleTimeString());
     } catch(e) {
-      setText('last-updated', 'Error — retrying in 30s');
+      setText('last-updated', t('statusPage.js.error_retry', 'Error — retrying in 30s'));
       console.error(e);
     }
     _timer = setInterval(() => {
       _countdown--;
-      setText('countdown', `(auto-refresh in ${_countdown}s)`);
+      setText('countdown', t('statusPage.js.countdown', '(auto-refresh in {n}s)').replace('{n}', _countdown));
       if (_countdown <= 0) loadAll();
     }, 1000);
   }
@@ -498,6 +498,7 @@
         upkeepNeeded = needed;
         if (needed && perfData && perfData.length >= 66) {
           // performData encodes work type as first byte after selector
+          // (kept as English contract-state identifiers — not user-facing prose)
           const wt = parseInt(perfData.slice(2, 4), 16);
           const types = ['None','ForceCross','RescueParked','Distribute','VelocityGate','Reclaim','EvictParked','CommunityDist'];
           workType = types[wt] || `Type ${wt}`;
@@ -520,23 +521,23 @@
       const pillInd = document.getElementById('pill-keeper');
       if (upkeepNeeded) {
         pillInd.className = 'pill-indicator yellow';
-        setText('pill-keeper-val', 'Work Pending');
-        setText('pill-keeper-sub', workType + ' queued');
+        setText('pill-keeper-val', t('statusPage.js.work_pending', 'Work Pending'));
+        setText('pill-keeper-sub', workType + ' ' + t('statusPage.js.queued_suffix', 'queued'));
         document.getElementById('card-keeper').classList.add('warning');
         document.getElementById('badge-keeper').className = 'card-badge badge-yellow';
-        setText('badge-keeper', 'PENDING');
+        setText('badge-keeper', t('statusPage.js.badge_pending', 'PENDING'));
       } else {
         pillInd.className = 'pill-indicator green';
-        setText('pill-keeper-val', 'Up to Date');
-        setText('pill-keeper-sub', 'No work queued');
+        setText('pill-keeper-val', t('statusPage.js.up_to_date', 'Up to Date'));
+        setText('pill-keeper-sub', t('statusPage.js.no_work_queued', 'No work queued'));
         document.getElementById('badge-keeper').className = 'card-badge badge-green';
-        setText('badge-keeper', 'OK');
+        setText('badge-keeper', t('statusPage.js.badge_ok', 'OK'));
       }
 
-      setText('kp-work-needed', upkeepNeeded ? 'YES' : 'No');
+      setText('kp-work-needed', upkeepNeeded ? t('statusPage.js.yes', 'YES') : t('statusPage.js.no', 'No'));
       setClass('kp-work-needed', upkeepNeeded ? 'yellow' : 'green');
       setText('kp-work-type', upkeepNeeded ? workType : '—');
-      setText('kp-last-rescue', lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? 'No rescues yet' : '—');
+      setText('kp-last-rescue', lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—');
       setText('kp-rescue-count', rescueCount.toString());
 
     } catch(e) {
@@ -557,28 +558,28 @@
       const pillInd = document.getElementById('pill-parked');
       if (count === 0) {
         pillInd.className = 'pill-indicator green';
-        setText('pill-parked-val', '0 parked');
-        setText('pill-parked-sub', 'All members active');
+        setText('pill-parked-val', '0 ' + t('statusPage.js.parked_word', 'parked'));
+        setText('pill-parked-sub', t('statusPage.js.all_members_active', 'All members active'));
         document.getElementById('badge-parked').className = 'card-badge badge-green';
-        setText('badge-parked', 'CLEAR');
-        setText('summary-parked', 'No members awaiting rescue');
+        setText('badge-parked', t('statusPage.js.badge_clear', 'CLEAR'));
+        setText('summary-parked', t('statusPage.js.all_members_active', 'All members active'));
       } else if (count <= 5) {
         pillInd.className = 'pill-indicator yellow';
-        setText('pill-parked-val', count + ' parked');
-        setText('pill-parked-sub', 'Rescue in progress');
+        setText('pill-parked-val', count + ' ' + t('statusPage.js.parked_word', 'parked'));
+        setText('pill-parked-sub', t('statusPage.js.rescue_in_progress', 'Rescue in progress'));
         document.getElementById('card-parked').classList.add('warning');
         document.getElementById('badge-parked').className = 'card-badge badge-yellow';
-        setText('badge-parked', count + ' WAITING');
+        setText('badge-parked', count + ' ' + t('statusPage.js.badge_waiting_suffix', 'WAITING'));
       } else {
         pillInd.className = 'pill-indicator red';
-        setText('pill-parked-val', count + ' parked');
-        setText('pill-parked-sub', 'Needs attention');
+        setText('pill-parked-val', count + ' ' + t('statusPage.js.parked_word', 'parked'));
+        setText('pill-parked-sub', t('statusPage.js.needs_attention', 'Needs attention'));
         document.getElementById('card-parked').classList.add('has-issue');
         document.getElementById('badge-parked').className = 'card-badge badge-red';
-        setText('badge-parked', count + ' WAITING');
+        setText('badge-parked', count + ' ' + t('statusPage.js.badge_waiting_suffix', 'WAITING'));
       }
 
-      setText('pk-count', count > 0 ? count + ' member' + (count>1?'s':'') : '0 — all clear');
+      setText('pk-count', count > 0 ? count + ' ' + (count>1 ? t('statusPage.js.members_suffix','members') : t('statusPage.js.member_suffix','member')) : '0 — ' + t('statusPage.js.all_clear_suffix', 'all clear'));
       setClass('pk-count', count === 0 ? 'green' : count <= 5 ? 'yellow' : 'red');
 
       // Scan MemberParked events to get wallet list
@@ -629,7 +630,7 @@
         const sfNum = Number(BigInt(sfBal)) / 1e6;
         // Rough estimate: SF covers ~50% shortfall per member, rest from member's withdrawable
         const estimatedCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0; // ~$5 avg SF contribution
-        setText('pk-capacity', `~${estimatedCap} members can be rescued`);
+        setText('pk-capacity', `~${estimatedCap} ${t('statusPage.js.members_can_be_rescued', 'members can be rescued')}`);
       } catch(e) {
         setText('pk-capacity', '—');
       }
@@ -637,7 +638,7 @@
       // Render table
       const wrap = document.getElementById('parked-list-wrap');
       if (stillParked.length === 0) {
-        wrap.innerHTML = '<div class="empty-state">✅ No parked members — system is clear</div>';
+        wrap.innerHTML = `<div class="empty-state">${t('statusPage.js.no_parked_clear', '✅ No parked members — system is clear')}</div>`;
       } else {
         const rows = stillParked.map(p => `
           <tr>
@@ -651,18 +652,18 @@
         `).join('');
         wrap.innerHTML = `
           <table class="parked-table">
-            <thead><tr><th>Wallet</th><th>Shortfall</th><th>Parked</th></tr></thead>
+            <thead><tr><th>${t('statusPage.js.th_wallet','Wallet')}</th><th>${t('statusPage.js.th_shortfall','Shortfall')}</th><th>${t('statusPage.js.th_parked','Parked')}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
           <div style="font-size:11px;color:var(--text3);margin-top:8px">
-            ${stillParked.length} of ${count} confirmed parked (${count - stillParked.length} resolved since last event scan)
+            ${stillParked.length} of ${count} ${t('statusPage.js.confirmed_parked_suffix','confirmed parked')} (${count - stillParked.length} ${t('statusPage.js.resolved_since_scan_suffix','resolved since last event scan')})
           </div>
         `;
       }
 
     } catch(e) {
       console.error('Parked load error:', e);
-      document.getElementById('parked-list-wrap').innerHTML = '<div class="loading-row">Error loading parked data</div>';
+      document.getElementById('parked-list-wrap').innerHTML = `<div class="loading-row">${t('statusPage.js.error_loading_parked', 'Error loading parked data')}</div>`;
     }
   }
 
@@ -694,7 +695,7 @@
       setText('pill-matrix-val', `${occA}/${MATRIX_SIZE} · ${occB}/${MATRIX_SIZE}`);
       setText('pill-matrix-sub', `MatA ${pctA}% · MatB ${pctB}%`);
       document.getElementById('badge-matrix').className = 'card-badge badge-blue';
-      setText('badge-matrix', `${Number(cycles)} CYCLES`);
+      setText('badge-matrix', `${Number(cycles)} ${t('statusPage.js.cycles_suffix', 'CYCLES')}`);
 
       // Progress bars
       const colorA = pctA >= 95 ? 'yellow' : 'green';
@@ -703,14 +704,14 @@
       wrap.innerHTML = `
         <div class="prog-wrap">
           <div class="prog-label">
-            <span>T1 MatA</span>
+            <span>${t('statusPage.label_t1_mata','T1 MatA')}</span>
             <span>${occA} / ${MATRIX_SIZE} (${pctA}%)</span>
           </div>
           <div class="prog-track"><div class="prog-fill ${colorA}" style="width:${pctA}%"></div></div>
         </div>
         <div class="prog-wrap">
           <div class="prog-label">
-            <span>T1 MatB</span>
+            <span>${t('statusPage.label_t1_matb','T1 MatB')}</span>
             <span>${occB} / ${MATRIX_SIZE} (${pctB}%)</span>
           </div>
           <div class="prog-track"><div class="prog-fill ${colorB}" style="width:${pctB}%"></div></div>
@@ -722,7 +723,7 @@
       setText('mx-cycles', Number(cycles).toString());
       setText('mx-total', Number(totalJoined).toString());
       setText('mx-t2a', `${occT2A} / ${MATRIX_SIZE}`);
-      setText('summary-matrix', `MatA ${pctA}% · MatB ${pctB}% · ${cycles} cycles`);
+      setText('summary-matrix', `MatA ${pctA}% · MatB ${pctB}% · ${cycles} ${t('statusPage.js.cycles_suffix','CYCLES').toLowerCase()}`);
 
     } catch(e) {
       console.error('Matrix load error:', e);
@@ -748,7 +749,7 @@
 
       // Health: >$500 = green, $100-500 = yellow, <$100 = red
       const health = sfNum >= 500 ? 'green' : sfNum >= 100 ? 'yellow' : 'red';
-      const healthLabel = sfNum >= 500 ? 'Healthy' : sfNum >= 100 ? 'Low' : 'Critical';
+      const healthLabel = sfNum >= 500 ? t('statusPage.js.healthy','Healthy') : sfNum >= 100 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
       const pct = Math.min(100, Math.round(sfNum / 10)); // 10% per $100
 
       const pillInd = document.getElementById('pill-sf');
@@ -763,7 +764,7 @@
       setText('sf-bal', fmt6(sfBal));
       setClass('sf-bal', health);
       const rescueCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0;
-      setText('sf-rescue-cap', `~${rescueCap} member${rescueCap !== 1 ? 's' : ''}`);
+      setText('sf-rescue-cap', `~${rescueCap} ${rescueCap !== 1 ? t('statusPage.js.members_suffix','members') : t('statusPage.js.member_suffix','member')}`);
       setText('sf-pct', pct + '%');
       const bar = document.getElementById('sf-bar');
       if (bar) { bar.style.width = pct + '%'; bar.className = `prog-fill ${health}`; }
@@ -772,7 +773,7 @@
       setText('sf-treasury', fmt6(treaBal));
       setText('sf-buyback', fmt6(bbBal));
       setText('sf-cnova', fmt18(cnovaSup) + ' CNOVA');
-      setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} rescue capacity`);
+      setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
 
     } catch(e) {
       console.error('SF load error:', e);
@@ -782,12 +783,12 @@
   // ── Theme ─────────────────────────────────────────────────
   function toggleTheme() {
     const isLight = document.body.classList.toggle('light');
-    document.querySelector('.theme-toggle').textContent = isLight ? '🌙 Dark' : '☀ Light';
+    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
   }
   if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light');
-    document.querySelector('.theme-toggle').textContent = '🌙 Dark';
+    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
   }
 
   // ── Boot ──────────────────────────────────────────────────

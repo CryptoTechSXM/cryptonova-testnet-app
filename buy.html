@@ -6,6 +6,7 @@
   <title>Buy CNOVA — CryptoNova</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+  <script src="/i18n.js" defer></script>
   <style>
     :root {
       --bg:        #0a0e1a;
@@ -195,11 +196,12 @@
     <span class="logo-badge">CNOVA</span>
   </a>
   <div class="header-right">
-    <a href="index.html" class="nav-link">Dashboard</a>
-    <a href="buy.html" class="nav-link active">Buy CNOVA</a>
-    <a href="governance.html" class="nav-link">Governance</a>
+    <div id="lang-switcher"></div>
+    <a href="index.html" class="nav-link" data-i18n="common.dashboard">Dashboard</a>
+    <a href="buy.html" class="nav-link active" data-i18n="common.buy_cnova">Buy CNOVA</a>
+    <a href="governance.html" class="nav-link" data-i18n="common.governance">Governance</a>
     <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
-    <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
+    <button id="btn-connect" onclick="connectWallet()" data-i18n="common.connect_wallet">Connect Wallet</button>
   </div>
 </header>
 
@@ -209,76 +211,76 @@
   <!-- Hero -->
   <div class="hero">
     <div class="hero-badge">
-      <span class="pulse">●</span> Live Bonding Curve
+      <span class="pulse">●</span> <span data-i18n="buyPage.hero_badge">Live Bonding Curve</span>
     </div>
-    <h1>Buy <span>CNOVA</span> Tokens</h1>
-    <p>Purchase CNOVA at a guaranteed price above floor. Every purchase strengthens the treasury and adds liquidity to the protocol.</p>
+    <h1><span data-i18n="buyPage.hero_title_pre">Buy</span> <span>CNOVA</span> <span data-i18n="buyPage.hero_title_post">Tokens</span></h1>
+    <p data-i18n="buyPage.hero_subtitle">Purchase CNOVA at a guaranteed price above floor. Every purchase strengthens the treasury and adds liquidity to the protocol.</p>
   </div>
 
   <!-- Live Price Stats -->
   <div class="card" style="margin-bottom:20px;">
-    <div class="card-title"><span class="dot"></span> Live Price Data</div>
+    <div class="card-title"><span class="dot"></span> <span data-i18n="buyPage.live_price_title">Live Price Data</span></div>
     <div class="floor-grid">
       <div class="floor-stat">
-        <div class="floor-stat-label">Floor Price</div>
+        <div class="floor-stat-label" data-i18n="buyPage.floor_price_label">Floor Price</div>
         <div class="floor-stat-value green" id="floor-price">—</div>
-        <div class="floor-stat-sub">Treasury USDC ÷ Supply</div>
+        <div class="floor-stat-sub" data-i18n="buyPage.floor_price_sub">Treasury USDC ÷ Supply</div>
       </div>
       <div class="floor-stat">
-        <div class="floor-stat-label">Current Tier Price</div>
+        <div class="floor-stat-label" data-i18n="buyPage.current_price_label">Current Tier Price</div>
         <div class="floor-stat-value" id="current-price">—</div>
-        <div class="floor-stat-sub" id="current-mult-label">Bonding curve multiplier</div>
+        <div class="floor-stat-sub" id="current-mult-label" data-i18n="buyPage.current_price_sub_default">Bonding curve multiplier</div>
       </div>
       <div class="floor-stat">
-        <div class="floor-stat-label">Treasury USDC</div>
+        <div class="floor-stat-label" data-i18n="buyPage.treasury_label">Treasury USDC</div>
         <div class="floor-stat-value" id="treasury-bal">—</div>
-        <div class="floor-stat-sub">Protocol backing</div>
+        <div class="floor-stat-sub" data-i18n="buyPage.treasury_sub">Protocol backing</div>
       </div>
       <div class="floor-stat">
-        <div class="floor-stat-label">Circulating Supply</div>
+        <div class="floor-stat-label" data-i18n="buyPage.supply_label">Circulating Supply</div>
         <div class="floor-stat-value" id="circ-supply">—</div>
-        <div class="floor-stat-sub" id="supply-sub">CNOVA tokens</div>
+        <div class="floor-stat-sub" id="supply-sub" data-i18n="buyPage.supply_sub_default">CNOVA tokens</div>
       </div>
       <div class="floor-stat">
-        <div class="floor-stat-label">Purchase Limits</div>
+        <div class="floor-stat-label" data-i18n="buyPage.limits_label">Purchase Limits</div>
         <div class="floor-stat-value" style="font-size:16px;"><span id="limit-min">—</span> <span style="color:var(--text3);font-weight:400;">–</span> <span style="color:var(--green);" id="limit-max">—</span></div>
-        <div class="floor-stat-sub" id="limit-sub">Min / max per purchase</div>
+        <div class="floor-stat-sub" id="limit-sub" data-i18n="buyPage.limits_sub_default">Min / max per purchase</div>
       </div>
     </div>
   </div>
 
   <!-- Bonding Curve Tiers -->
   <div class="card" style="margin-bottom:20px;">
-    <div class="card-title"><span class="dot"></span> Bonding Curve Tiers</div>
+    <div class="card-title"><span class="dot"></span> <span data-i18n="buyPage.tiers_title">Bonding Curve Tiers</span></div>
     <div class="tiers-grid" id="tiers-grid">
       <!-- injected by JS -->
     </div>
     <div style="margin-top:12px; font-size:12px; color:var(--text3); line-height:1.6;">
-      Price rises automatically as circulating supply grows. Each tier locks in higher minimum backing per token.
+      <span data-i18n="buyPage.tiers_footer">Price rises automatically as circulating supply grows. Each tier locks in higher minimum backing per token.</span>
       <span id="next-tier-hint"></span>
     </div>
   </div>
 
   <!-- Buy Form -->
   <div class="card">
-    <div class="card-title"><span class="dot"></span> Purchase CNOVA</div>
+    <div class="card-title"><span class="dot"></span> <span data-i18n="buyPage.purchase_title">Purchase CNOVA</span></div>
 
     <div class="buy-grid">
       <!-- Input side -->
       <div>
-        <div class="input-label">You pay</div>
+        <div class="input-label" data-i18n="buyPage.you_pay">You pay</div>
         <div class="input-wrap">
           <input type="number" id="usdc-input" placeholder="0.00" min="1" step="any" oninput="onAmountChange()" />
           <span class="input-token">USDC</span>
         </div>
-        <div class="input-hint" id="wallet-bal-hint">Connect wallet to see balance</div>
+        <div class="input-hint" id="wallet-bal-hint" data-i18n="buyPage.wallet_bal_default">Connect wallet to see balance</div>
       </div>
 
       <!-- Output side -->
       <div>
-        <div class="input-label">You receive</div>
+        <div class="input-label" data-i18n="buyPage.you_receive">You receive</div>
         <div class="output-box">
-          <span class="output-placeholder" id="cnova-out-placeholder">Enter USDC amount</span>
+          <span class="output-placeholder" id="cnova-out-placeholder" data-i18n="buyPage.enter_amount_placeholder">Enter USDC amount</span>
           <span class="output-value" id="cnova-out" style="display:none;"></span>
           <span class="output-token" id="cnova-token-label" style="display:none;">CNOVA</span>
         </div>
@@ -289,19 +291,19 @@
     <!-- Premium breakdown -->
     <div class="breakdown" id="breakdown" style="display:none;">
       <div class="breakdown-row">
-        <span class="breakdown-key"><span class="swatch swatch-green"></span>Floor value → Treasury</span>
+        <span class="breakdown-key"><span class="swatch swatch-green"></span><span data-i18n="buyPage.bd_treasury">Floor value → Treasury</span></span>
         <span class="breakdown-val" id="bd-treasury">—</span>
       </div>
       <div class="breakdown-row">
-        <span class="breakdown-key"><span class="swatch swatch-blue"></span>Premium → Stability Fund</span>
+        <span class="breakdown-key"><span class="swatch swatch-blue"></span><span data-i18n="buyPage.bd_sf">Premium → Stability Fund</span></span>
         <span class="breakdown-val" id="bd-sf">—</span>
       </div>
       <div class="breakdown-row">
-        <span class="breakdown-key"><span class="swatch swatch-purple"></span>Premium → Liquidity Reserve</span>
+        <span class="breakdown-key"><span class="swatch swatch-purple"></span><span data-i18n="buyPage.bd_lq">Premium → Liquidity Reserve</span></span>
         <span class="breakdown-val" id="bd-lq">—</span>
       </div>
       <div class="breakdown-row">
-        <span class="breakdown-key">Total paid</span>
+        <span class="breakdown-key" data-i18n="buyPage.bd_total">Total paid</span>
         <span class="breakdown-val green" id="bd-total">—</span>
       </div>
     </div>
@@ -314,34 +316,34 @@
     <div id="tx-status"></div>
 
     <!-- Coming soon note — hidden once contract is live -->
-    <div class="coming-soon-note" id="coming-soon-note" style="display:none;">
+    <div class="coming-soon-note" id="coming-soon-note" style="display:none;" data-i18n="buyPage.coming_soon_note">
       ⏳ Direct sale contract deploying with V8.19 — check back at launch
     </div>
   </div>
 
   <!-- How it works -->
   <div class="card" style="margin-top:20px;">
-    <div class="card-title"><span class="dot"></span> How It Works</div>
+    <div class="card-title"><span class="dot"></span> <span data-i18n="buyPage.how_title">How It Works</span></div>
     <div class="how-grid">
       <div class="how-step">
         <div class="how-num">1</div>
-        <h4>Price Discovery</h4>
-        <p>Floor price = Treasury USDC ÷ circulating supply. You always buy above floor — treasury never loses backing.</p>
+        <h4 data-i18n="buyPage.how1_h">Price Discovery</h4>
+        <p data-i18n="buyPage.how1_p">Floor price = Treasury USDC ÷ circulating supply. You always buy above floor — treasury never loses backing.</p>
       </div>
       <div class="how-step">
         <div class="how-num">2</div>
-        <h4>Bonding Curve</h4>
-        <p>Price tier rises with supply: 1.25× → 1.50× → 1.75× → 2.00× floor. Early buyers pay the lowest premium.</p>
+        <h4 data-i18n="buyPage.how2_h">Bonding Curve</h4>
+        <p data-i18n="buyPage.how2_p">Price tier rises with supply: 1.25× → 1.50× → 1.75× → 2.00× floor. Early buyers pay the lowest premium.</p>
       </div>
       <div class="how-step">
         <div class="how-num">3</div>
-        <h4>Premium Split</h4>
-        <p>The amount above floor value is split dynamically between the Stability Fund and Liquidity Reserve based on each fund's deficit.</p>
+        <h4 data-i18n="buyPage.how3_h">Premium Split</h4>
+        <p data-i18n="buyPage.how3_p">The amount above floor value is split dynamically between the Stability Fund and Liquidity Reserve based on each fund's deficit.</p>
       </div>
       <div class="how-step">
         <div class="how-num">4</div>
-        <h4>You Own CNOVA</h4>
-        <p>No matrix participation required. Hold, trade, or use CNOVA for DAO governance. No lock-up period.</p>
+        <h4 data-i18n="buyPage.how4_h">You Own CNOVA</h4>
+        <p data-i18n="buyPage.how4_p">No matrix participation required. Hold, trade, or use CNOVA for DAO governance. No lock-up period.</p>
       </div>
     </div>
   </div>
@@ -349,11 +351,11 @@
   <!-- Recent Purchases -->
   <div class="card" style="margin-top:20px;">
     <div class="card-title" style="justify-content:space-between;">
-      <span style="display:flex;align-items:center;gap:8px;"><span class="dot"></span> Recent Purchases</span>
-      <span style="font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">Last 10 transactions</span>
+      <span style="display:flex;align-items:center;gap:8px;"><span class="dot"></span> <span data-i18n="buyPage.recent_title">Recent Purchases</span></span>
+      <span style="font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="buyPage.recent_sub">Last 10 transactions</span>
     </div>
     <div id="activity-list">
-      <div class="activity-empty">No purchases yet — be the first buyer.</div>
+      <div class="activity-empty" data-i18n="buyPage.recent_empty">No purchases yet — be the first buyer.</div>
     </div>
   </div>
 
@@ -434,13 +436,13 @@ if (localStorage.getItem('theme') === 'light') document.body.classList.add('ligh
 
 // ── Wallet ───────────────────────────────────────────────────────────────────
 async function connectWallet() {
-  if (!window.ethereum) { setStatus('No wallet detected. Please install MetaMask.', 'error'); return; }
+  if (!window.ethereum) { setStatus(t('buyPage.js.no_wallet', 'No wallet detected. Please install MetaMask.'), 'error'); return; }
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send('eth_requestAccounts', []);
     const net = await provider.getNetwork();
     if (Number(net.chainId) !== CHAIN_ID) {
-      setStatus(`Wrong network. Please switch to Base Sepolia (chainId ${CHAIN_ID}).`, 'error');
+      setStatus(t('buyPage.js.wrong_network', 'Wrong network. Please switch to Base Sepolia (chainId {n}).').replace('{n}', CHAIN_ID), 'error');
       return;
     }
     signer  = await provider.getSigner();
@@ -452,7 +454,7 @@ async function connectWallet() {
     await refreshPurchaseLimits();
     renderActionArea();
   } catch(e) {
-    setStatus('Connection failed: ' + (e.message || e), 'error');
+    setStatus(t('buyPage.js.connection_failed', 'Connection failed:') + ' ' + (e.message || e), 'error');
   }
 }
 
@@ -463,7 +465,7 @@ async function refreshWalletState() {
     const bal  = await usdc.balanceOf(userAddr);
     usdcBalance = Number(bal) / 1e6;
     document.getElementById('wallet-bal-hint').textContent =
-      `Wallet balance: $${usdcBalance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} USDC`;
+      `${t('buyPage.js.wallet_balance_prefix', 'Wallet balance: $')}${usdcBalance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${t('buyPage.js.usdc_suffix', 'USDC')}`;
 
     if (DIRECT_SALE_ADDR) {
       const allowance = await usdc.allowance(userAddr, DIRECT_SALE_ADDR);
@@ -525,7 +527,7 @@ async function loadPriceData() {
     document.getElementById('treasury-bal').textContent  = treasuryF > 0 ? '$' + treasuryF.toLocaleString('en-US', {maximumFractionDigits:0}) : '—';
     document.getElementById('circ-supply').textContent   = supplyF > 0 ? fmtK(supplyF) : '—';
     document.getElementById('supply-sub').textContent    = (() => {
-      if (supplyF <= 0) return 'CNOVA tokens';
+      if (supplyF <= 0) return t('buyPage.supply_sub_default', 'CNOVA tokens');
       const ceiling = CURVE_TIERS[currentTierIdx].ceiling;
       return ceiling === Infinity
         ? `${fmtK(supplyF)} CNOVA — Tier ${currentTierIdx+1} (no ceiling)`
@@ -566,7 +568,7 @@ async function refreshPurchaseLimits() {
   const currentPrice = floorPrice * currentMult; // USDC per CNOVA, current tier
   if (currentPrice <= 0 || !DIRECT_SALE_ADDR) {
     maxEl.textContent = '—';
-    subEl.textContent = 'Direct sale not live yet.';
+    subEl.textContent = t('buyPage.js.direct_sale_not_live', 'Direct sale not live yet.');
     return;
   }
 
@@ -592,18 +594,18 @@ async function refreshPurchaseLimits() {
   // caps are disabled -- guard against converting that to Number().
   const capF = capTokens === null ? null : Number(capTokens) / 1e18;
   if (capTokens === null || !isFinite(capF) || capF > 1e15) {
-    maxEl.textContent = 'No limit';
+    maxEl.textContent = t('buyPage.js.no_limit', 'No limit');
     subEl.textContent = usingWalletCap
-      ? 'No per-tx or per-wallet cap currently active.'
-      : 'No per-tx cap active — connect wallet to check your personal cap.';
+      ? t('buyPage.js.no_cap_active_wallet', 'No per-tx or per-wallet cap currently active.')
+      : t('buyPage.js.no_cap_connect', 'No per-tx cap active — connect wallet to check your personal cap.');
     return;
   }
 
   const maxUSD = capF * currentPrice;
   maxEl.textContent = '$' + maxUSD.toLocaleString('en-US', { maximumFractionDigits: 0 });
   subEl.textContent = usingWalletCap
-    ? 'Your remaining allowance at current price — re-checked on submit.'
-    : 'Per-tx cap at current price — connect wallet to see your personal cap.';
+    ? t('buyPage.js.your_allowance_note', 'Your remaining allowance at current price — re-checked on submit.')
+    : t('buyPage.js.per_tx_cap_note', 'Per-tx cap at current price — connect wallet to see your personal cap.');
 }
 
 // ── Tier grid ─────────────────────────────────────────────────────────────────
@@ -644,8 +646,9 @@ function renderTiers(supplyF) {
   const next = CURVE_TIERS[currentTierIdx + 1];
   if (next && supplyF > 0) {
     const remaining = CURVE_TIERS[currentTierIdx].ceiling - supplyF;
-    document.getElementById('next-tier-hint').textContent =
-      ` Next tier (${next.mult}×) in ${remaining.toLocaleString('en-US', {maximumFractionDigits:0})} CNOVA.`;
+    document.getElementById('next-tier-hint').textContent = ' ' + t('buyPage.js.next_tier_in', 'Next tier ({mult}×) in {amt} CNOVA.')
+      .replace('{mult}', next.mult)
+      .replace('{amt}', remaining.toLocaleString('en-US', {maximumFractionDigits:0}));
   }
 }
 
@@ -689,7 +692,7 @@ function onAmountChange() {
   document.getElementById('cnova-token-label').style.display = 'inline';
   document.getElementById('cnova-out').textContent         = fmtC(cnovaOut);
   document.getElementById('rate-hint').textContent         =
-    `Rate: 1 CNOVA = ${fmtD(tierPrice)}  (floor ${fmtD(floorPrice)} + ${((currentMult-1)*100).toFixed(0)}% premium)`;
+    `${t('buyPage.js.rate_label','Rate: 1 CNOVA =')} ${fmtD(tierPrice)}  (floor ${fmtD(floorPrice)} + ${((currentMult-1)*100).toFixed(0)}% ${t('buyPage.js.floor_premium_suffix','premium')})`;
 
   document.getElementById('breakdown').style.display = 'block';
   document.getElementById('bd-treasury').textContent = fmtD(floorVal);
@@ -716,22 +719,22 @@ function renderActionArea() {
   csNote.style.display = 'none';
 
   if (!signer) {
-    area.innerHTML = `<button class="btn-primary" onclick="connectWallet()">Connect Wallet to Buy</button>`;
+    area.innerHTML = `<button class="btn-primary" onclick="connectWallet()">${t('buyPage.btn_connect_to_buy','Connect Wallet to Buy')}</button>`;
     return;
   }
   if (amount <= 0) {
-    area.innerHTML = `<button class="btn-primary" disabled>Enter USDC Amount</button>`;
+    area.innerHTML = `<button class="btn-primary" disabled>${t('buyPage.btn_enter_amount','Enter USDC Amount')}</button>`;
     return;
   }
   if (amount > usdcBalance) {
-    area.innerHTML = `<button class="btn-primary" disabled>Insufficient USDC Balance</button>`;
+    area.innerHTML = `<button class="btn-primary" disabled>${t('buyPage.btn_insufficient','Insufficient USDC Balance')}</button>`;
     return;
   }
   if (approvalNeeded) {
-    area.innerHTML = `<button class="btn-approve" onclick="approveUSDC()">Approve USDC</button>`;
+    area.innerHTML = `<button class="btn-approve" onclick="approveUSDC()">${t('buyPage.btn_approve','Approve USDC')}</button>`;
     return;
   }
-  area.innerHTML = `<button class="btn-primary" onclick="executeBuy()">Buy CNOVA</button>`;
+  area.innerHTML = `<button class="btn-primary" onclick="executeBuy()">${t('buyPage.btn_buy','Buy CNOVA')}</button>`;
 }
 
 // ── Approve ───────────────────────────────────────────────────────────────────
@@ -739,17 +742,17 @@ async function approveUSDC() {
   const amount = parseFloat(document.getElementById('usdc-input').value);
   if (!signer || !amount) return;
   try {
-    setStatus('Approving USDC… please confirm in wallet.', 'info');
+    setStatus(t('buyPage.js.approving', 'Approving USDC… please confirm in wallet.'), 'info');
     const usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, signer);
     const rawAmt = ethers.parseUnits(amount.toString(), 6);
     const tx   = await usdc.approve(DIRECT_SALE_ADDR, rawAmt);
-    setStatus('Waiting for confirmation…', 'info');
+    setStatus(t('buyPage.js.waiting_confirmation', 'Waiting for confirmation…'), 'info');
     await tx.wait();
     approvalNeeded = false;
-    setStatus('✅ Approved! Now click Buy CNOVA.', 'success');
+    setStatus(t('buyPage.js.approved_now_buy', '✅ Approved! Now click Buy CNOVA.'), 'success');
     renderActionArea();
   } catch(e) {
-    setStatus('Approval failed: ' + (e.reason || e.message || e), 'error');
+    setStatus(t('buyPage.js.approval_failed', 'Approval failed:') + ' ' + (e.reason || e.message || e), 'error');
   }
 }
 
@@ -764,36 +767,31 @@ function friendlyDirectSaleError(e) {
     .filter(Boolean).join(' | ').toLowerCase();
 
   if (raw.includes('exceeds per-tx cap')) {
-    return '⚠️ Purchase limited: CNOVA total supply is still very small during this early ' +
-           'bootstrap phase, so the per-transaction whale-protection cap (a % of supply) is ' +
-           'very tight right now. This loosens automatically as more members join and supply ' +
-           'grows — try a smaller amount, or check back later.';
+    return t('buyPage.js.err_per_tx_cap', '⚠️ Purchase limited: CNOVA total supply is still very small during this early bootstrap phase, so the per-transaction whale-protection cap (a % of supply) is very tight right now. This loosens automatically as more members join and supply grows — try a smaller amount, or check back later.');
   }
   if (raw.includes('exceeds per-wallet cap')) {
-    return '⚠️ Purchase limited: holding this much CNOVA would put your wallet over the ' +
-           'per-wallet whale-protection cap relative to today’s small supply. This loosens ' +
-           'automatically as more members join — try a smaller amount for now.';
+    return t('buyPage.js.err_per_wallet_cap', '⚠️ Purchase limited: holding this much CNOVA would put your wallet over the per-wallet whale-protection cap relative to today\'s small supply. This loosens automatically as more members join — try a smaller amount for now.');
   }
   if (raw.includes('minimum $1 usdc')) {
-    return '⚠️ Minimum purchase is $1 USDC.';
+    return t('buyPage.js.err_min_purchase', '⚠️ Minimum purchase is $1 USDC.');
   }
   if (raw.includes('zero cnova out')) {
-    return '⚠️ That amount is too small to mint any CNOVA at the current price — try a larger amount.';
+    return t('buyPage.js.err_zero_out', '⚠️ That amount is too small to mint any CNOVA at the current price — try a larger amount.');
   }
   if (raw.includes('pausable: paused') || raw.includes('enforcedpause')) {
-    return '⚠️ Direct purchases are temporarily paused. Please check back shortly.';
+    return t('buyPage.js.err_paused', '⚠️ Direct purchases are temporarily paused. Please check back shortly.');
   }
   if (raw.includes('insufficient allowance') || raw.includes('exceeds allowance')) {
-    return '⚠️ USDC approval needed — click Approve USDC, then try again.';
+    return t('buyPage.js.err_allowance', '⚠️ USDC approval needed — click Approve USDC, then try again.');
   }
   if (raw.includes('transfer amount exceeds balance') || raw.includes('insufficient balance')) {
-    return '⚠️ Insufficient USDC balance in your wallet.';
+    return t('buyPage.js.err_insufficient_balance', '⚠️ Insufficient USDC balance in your wallet.');
   }
   if (raw.includes('user rejected') || raw.includes('action_rejected')) {
-    return 'Transaction cancelled.';
+    return t('buyPage.js.err_cancelled', 'Transaction cancelled.');
   }
   // Fallback — still avoid dumping the full raw error object onto the page.
-  return '⚠️ Purchase failed: ' + (e?.reason || e?.shortMessage || 'unexpected error — see browser console for details.');
+  return t('buyPage.js.err_fallback', '⚠️ Purchase failed:') + ' ' + (e?.reason || e?.shortMessage || 'unexpected error — see browser console for details.');
 }
 
 async function executeBuy() {
@@ -810,11 +808,11 @@ async function executeBuy() {
     return;
   }
   try {
-    setStatus('Sending purchase… please confirm in wallet.', 'info');
+    setStatus(t('buyPage.js.sending_purchase', 'Sending purchase… please confirm in wallet.'), 'info');
     const tx = await ds.buyCNOVA(raw, { gasLimit: 300_000 });
-    setStatus(`TX submitted: ${tx.hash.slice(0,18)}…`, 'info');
+    setStatus(`${t('buyPage.js.tx_submitted','TX submitted:')} ${tx.hash.slice(0,18)}…`, 'info');
     await tx.wait();
-    setStatus(`✅ Success! CNOVA sent to your wallet. TX: ${tx.hash.slice(0,18)}…`, 'success');
+    setStatus(`${t('buyPage.js.purchase_success','✅ Success! CNOVA sent to your wallet. TX:')} ${tx.hash.slice(0,18)}…`, 'success');
     document.getElementById('usdc-input').value = '';
     onAmountChange();
     await refreshWalletState();
@@ -829,7 +827,7 @@ async function executeBuy() {
 async function loadActivity() {
   const list = document.getElementById('activity-list');
   if (!DIRECT_SALE_ADDR) {
-    list.innerHTML = '<div class="activity-empty">Activity feed available once sale contract is live.</div>';
+    list.innerHTML = '<div class="activity-empty">' + t('buyPage.js.activity_pending', 'Activity feed available once sale contract is live.') + '</div>';
     return;
   }
   try {
@@ -843,7 +841,7 @@ async function loadActivity() {
     const recent = [...events].reverse().slice(0, 10);
 
     if (recent.length === 0) {
-      list.innerHTML = '<div class="activity-empty">No purchases yet — be the first buyer.</div>';
+      list.innerHTML = `<div class="activity-empty">${t('buyPage.recent_empty', 'No purchases yet — be the first buyer.')}</div>`;
       return;
     }
 
@@ -861,7 +859,7 @@ async function loadActivity() {
         </div>`;
     }).join('');
   } catch(e) {
-    list.innerHTML = '<div class="activity-empty">Activity unavailable.</div>';
+    list.innerHTML = '<div class="activity-empty">' + t('buyPage.js.activity_unavailable', 'Activity unavailable.') + '</div>';
   }
 }
 
@@ -873,18 +871,24 @@ function setStatus(msg, type) {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-loadPriceData();
-loadActivity();
-setInterval(loadPriceData, 30_000);  // refresh every 30s
+// Wrapped in DOMContentLoaded: i18n.js loads with `defer`, which only guarantees
+// it has run by DOMContentLoaded -- calling t() any earlier (e.g. synchronously
+// at the bottom of this inline script) would throw "t is not defined" the very
+// first time a wallet was already connected or on the very first 30s price load.
+window.addEventListener('DOMContentLoaded', () => {
+  loadPriceData();
+  loadActivity();
+  setInterval(loadPriceData, 30_000);  // refresh every 30s
 
-// Pre-wire wallet if already connected
-if (window.ethereum) {
-  window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-    if (accounts.length) connectWallet();
-  });
-  window.ethereum.on('accountsChanged', () => connectWallet());
-  window.ethereum.on('chainChanged', () => location.reload());
-}
+  // Pre-wire wallet if already connected
+  if (window.ethereum) {
+    window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+      if (accounts.length) connectWallet();
+    });
+    window.ethereum.on('accountsChanged', () => connectWallet());
+    window.ethereum.on('chainChanged', () => location.reload());
+  }
+});
 </script>
 </body>
 </html>

@@ -6,6 +6,7 @@
   <title>Governance — CryptoNova</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+  <script src="/i18n.js" defer></script>
   <style>
     :root {
       --bg:        #0a0e1a;
@@ -193,11 +194,12 @@
     <span class="logo-badge">DAO</span>
   </a>
   <div class="header-right">
-    <a href="index.html" class="nav-link">Dashboard</a>
-    <a href="buy.html" class="nav-link">Buy CNOVA</a>
-    <a href="governance.html" class="nav-link active">Governance</a>
+    <div id="lang-switcher"></div>
+    <a href="index.html" class="nav-link" data-i18n="common.dashboard">Dashboard</a>
+    <a href="buy.html" class="nav-link" data-i18n="common.buy_cnova">Buy CNOVA</a>
+    <a href="governance.html" class="nav-link active" data-i18n="common.governance">Governance</a>
     <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
-    <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
+    <button id="btn-connect" onclick="connectWallet()" data-i18n="common.connect_wallet">Connect Wallet</button>
   </div>
 </header>
 
@@ -205,37 +207,37 @@
 
   <!-- Hero -->
   <div class="hero">
-    <div class="hero-badge">⚖️ On-Chain DAO</div>
-    <h1>CryptoNova <span>Governance</span></h1>
-    <p>CNOVA holders vote on protocol parameters. Every vote is on-chain, transparent, and binding.</p>
+    <div class="hero-badge" data-i18n="govPage.hero_badge">⚖️ On-Chain DAO</div>
+    <h1><span data-i18n="govPage.hero_title_pre">CryptoNova</span> <span data-i18n="govPage.hero_title_post">Governance</span></h1>
+    <p data-i18n="govPage.hero_subtitle">CNOVA holders vote on protocol parameters. Every vote is on-chain, transparent, and binding.</p>
   </div>
 
   <!-- Voting Power -->
   <div class="card">
     <div class="card-title">
-      <div class="card-title-left"><span class="dot"></span> Your Voting Power</div>
-      <span id="power-refresh" style="font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;" onclick="refreshVotingPower()">↻ Refresh</span>
+      <div class="card-title-left"><span class="dot"></span> <span data-i18n="govPage.voting_power_title">Your Voting Power</span></div>
+      <span id="power-refresh" style="font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;" onclick="refreshVotingPower()" data-i18n="govPage.refresh_btn">↻ Refresh</span>
     </div>
     <div class="power-grid">
       <div class="power-stat">
-        <div class="power-label">CNOVA Balance</div>
+        <div class="power-label" data-i18n="govPage.cnova_balance_label">CNOVA Balance</div>
         <div class="power-value purple" id="cnova-balance">—</div>
-        <div class="power-sub">= your votes on any proposal</div>
+        <div class="power-sub" data-i18n="govPage.cnova_balance_sub">= your votes on any proposal</div>
       </div>
       <div class="power-stat">
-        <div class="power-label">Total CNOVA Supply</div>
+        <div class="power-label" data-i18n="govPage.total_supply_label">Total CNOVA Supply</div>
         <div class="power-value" id="total-supply">—</div>
-        <div class="power-sub" id="power-share">Connect wallet to see share</div>
+        <div class="power-sub" id="power-share" data-i18n="govPage.total_supply_sub_default">Connect wallet to see share</div>
       </div>
       <div class="power-stat">
-        <div class="power-label">Quorum Required</div>
+        <div class="power-label" data-i18n="govPage.quorum_label">Quorum Required</div>
         <div class="power-value green" id="quorum-req">—</div>
         <div class="power-sub" id="quorum-bps-label">2% of supply</div>
       </div>
       <div class="power-stat">
-        <div class="power-label">Open Proposals</div>
+        <div class="power-label" data-i18n="govPage.open_proposals_label">Open Proposals</div>
         <div class="power-value" id="active-count">—</div>
-        <div class="power-sub">Voting period: 72h + 48h timelock</div>
+        <div class="power-sub" data-i18n="govPage.open_proposals_sub">Voting period: 72h + 48h timelock</div>
       </div>
     </div>
   </div>
@@ -243,14 +245,14 @@
   <!-- Proposals -->
   <div class="card">
     <div class="card-title">
-      <div class="card-title-left"><span class="dot dot-green"></span> Proposals</div>
+      <div class="card-title-left"><span class="dot dot-green"></span> <span data-i18n="govPage.proposals_title">Proposals</span></div>
     </div>
     <div class="tab-strip">
-      <button class="tab-btn active" onclick="switchTab('active',this)">Active <span class="tab-count" id="cnt-active">0</span></button>
-      <button class="tab-btn" onclick="switchTab('timelocked',this)">Timelocked <span class="tab-count" id="cnt-timelocked">0</span></button>
-      <button class="tab-btn" onclick="switchTab('history',this)">History <span class="tab-count" id="cnt-history">0</span></button>
+      <button class="tab-btn active" onclick="switchTab('active',this)"><span data-i18n="govPage.tab_active">Active</span> <span class="tab-count" id="cnt-active">0</span></button>
+      <button class="tab-btn" onclick="switchTab('timelocked',this)"><span data-i18n="govPage.tab_timelocked">Timelocked</span> <span class="tab-count" id="cnt-timelocked">0</span></button>
+      <button class="tab-btn" onclick="switchTab('history',this)"><span data-i18n="govPage.tab_history">History</span> <span class="tab-count" id="cnt-history">0</span></button>
     </div>
-    <div id="proposals-loading" class="loading-row"><div class="spinner"></div> Loading proposals…</div>
+    <div id="proposals-loading" class="loading-row"><div class="spinner"></div> <span data-i18n="govPage.loading_proposals">Loading proposals…</span></div>
     <div id="tab-active"     style="display:none;"></div>
     <div id="tab-timelocked" style="display:none;"></div>
     <div id="tab-history"    style="display:none;"></div>
@@ -258,12 +260,12 @@
 
   <!-- Create Proposal -->
   <div class="card">
-    <div class="card-title"><div class="card-title-left"><span class="dot"></span> Create Proposal</div></div>
+    <div class="card-title"><div class="card-title-left"><span class="dot"></span> <span data-i18n="govPage.create_title">Create Proposal</span></div></div>
 
     <div class="form-row">
-      <label class="form-label">Parameter to Change</label>
+      <label class="form-label" data-i18n="govPage.param_label">Parameter to Change</label>
       <select class="form-select" id="param-select" onchange="onParamChange()">
-        <option value="">— Select a parameter —</option>
+        <option value="" data-i18n="govPage.param_placeholder">— Select a parameter —</option>
         <optgroup label="TierRouter">
           <option value="1">Auto-Upgrade Cycle Threshold</option>
           <option value="2">Re-entry Min Cycles</option>
@@ -331,33 +333,33 @@
     </div>
 
     <div class="form-row" id="matrix-instance-row" style="display:none;">
-      <label class="form-label">Tier Instance <span style="font-weight:400;color:var(--text3);">(this fee is set per matrix, not protocol-wide)</span></label>
+      <label class="form-label"><span data-i18n="govPage.tier_instance_label">Tier Instance</span> <span style="font-weight:400;color:var(--text3);" data-i18n="govPage.tier_instance_note">(this fee is set per matrix, not protocol-wide)</span></label>
       <select class="form-input" id="matrix-instance-select" onchange="onMatrixInstanceChange()">
         <!-- populated by onParamChange() -->
       </select>
-      <div class="form-hint">Each tier's MatA/MatB pair stores its own value — pick which instance to view and target.</div>
+      <div class="form-hint" data-i18n="govPage.tier_instance_hint">Each tier's MatA/MatB pair stores its own value — pick which instance to view and target.</div>
     </div>
 
     <div class="form-row" id="current-value-row" style="display:none;">
-      <label class="form-label">Current Value</label>
+      <label class="form-label" data-i18n="govPage.current_value_label">Current Value</label>
       <div id="current-value-display" style="font-size:14px;font-weight:700;color:var(--green);font-family:monospace;padding:8px 0;">Loading…</div>
     </div>
 
     <div class="form-row" id="allowed-row" style="display:none;">
-      <label class="form-label">Allowed Values <span style="font-weight:400;color:var(--text3);">(select one)</span></label>
+      <label class="form-label"><span data-i18n="govPage.allowed_values_label">Allowed Values</span> <span style="font-weight:400;color:var(--text3);" data-i18n="govPage.allowed_values_note">(select one)</span></label>
       <div class="allowed-vals" id="allowed-vals"></div>
       <input type="hidden" id="selected-value" />
       <div class="form-hint" id="param-hint"></div>
     </div>
 
     <div class="form-row" id="target-row" style="display:none;">
-      <label class="form-label">Target Contract</label>
+      <label class="form-label" data-i18n="govPage.target_label">Target Contract</label>
       <input class="form-input" id="target-input" readonly style="color:var(--text3);font-size:12px;font-family:monospace;" />
-      <div class="form-hint">Auto-filled based on parameter selected.</div>
+      <div class="form-hint" data-i18n="govPage.target_hint">Auto-filled based on parameter selected.</div>
     </div>
 
     <div class="form-row" id="array-row" style="display:none;">
-      <label class="form-label">Array Values</label>
+      <label class="form-label" data-i18n="govPage.array_values_label">Array Values</label>
       <div class="form-hint" id="array-hint" style="margin-bottom:8px;"></div>
       <div style="display:flex;gap:10px;font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">
         <span style="flex:1;" id="array-col1-label">Threshold</span>
@@ -365,49 +367,49 @@
         <span style="width:28px;"></span>
       </div>
       <div id="array-rows"></div>
-      <button type="button" class="btn-action" style="margin-top:6px;" onclick="addArrayRow()">+ Add Row</button>
+      <button type="button" class="btn-action" style="margin-top:6px;" onclick="addArrayRow()" data-i18n="govPage.add_row_btn">+ Add Row</button>
       <div class="form-hint" id="array-error" style="color:var(--red);margin-top:6px;"></div>
     </div>
 
     <div class="form-row">
-      <label class="form-label">Description / Rationale</label>
-      <textarea class="form-textarea" id="prop-description" placeholder="Explain why this change improves the protocol…"></textarea>
-      <div class="form-hint">Stored on-chain. Be clear — voters need context.</div>
+      <label class="form-label" data-i18n="govPage.description_label">Description / Rationale</label>
+      <textarea class="form-textarea" id="prop-description" placeholder="Explain why this change improves the protocol…" data-i18n-placeholder="govPage.description_placeholder"></textarea>
+      <div class="form-hint" data-i18n="govPage.description_hint">Stored on-chain. Be clear — voters need context.</div>
     </div>
 
     <div id="propose-gate" style="font-size:13px;color:var(--text3);margin-bottom:10px;"></div>
-    <button class="btn-propose" id="btn-propose" disabled onclick="createProposal()">Submit Proposal</button>
+    <button class="btn-propose" id="btn-propose" disabled onclick="createProposal()" data-i18n="govPage.submit_btn">Submit Proposal</button>
     <div id="prop-status"></div>
   </div>
 
   <!-- How it works -->
   <div class="card">
-    <div class="card-title"><div class="card-title-left"><span class="dot"></span> How Governance Works</div></div>
+    <div class="card-title"><div class="card-title-left"><span class="dot"></span> <span data-i18n="govPage.how_title">How Governance Works</span></div></div>
     <div class="how-grid">
       <div class="how-step">
         <div class="how-num">1</div>
-        <h4>Hold CNOVA</h4>
-        <p>Your vote weight equals your CNOVA balance at the time you vote. No staking, no lockup.</p>
+        <h4 data-i18n="govPage.how1_h">Hold CNOVA</h4>
+        <p data-i18n="govPage.how1_p">Your vote weight equals your CNOVA balance at the time you vote. No staking, no lockup.</p>
       </div>
       <div class="how-step">
         <div class="how-num">2</div>
-        <h4>Propose</h4>
-        <p>Any holder of at least 0.01% of supply can submit a param-change proposal. Only allowlisted values accepted.</p>
+        <h4 data-i18n="govPage.how2_h">Propose</h4>
+        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of supply can submit a param-change proposal. Only allowlisted values accepted.</p>
       </div>
       <div class="how-step">
         <div class="how-num">3</div>
-        <h4>Vote — 72 Hours</h4>
-        <p>For or Against. Quorum = 2% of supply. Simple majority (>50% of votes cast) to pass.</p>
+        <h4 data-i18n="govPage.how3_h">Vote — 72 Hours</h4>
+        <p data-i18n="govPage.how3_p">For or Against. Quorum = 2% of supply. Simple majority (&gt;50% of votes cast) to pass.</p>
       </div>
       <div class="how-step">
         <div class="how-num">4</div>
-        <h4>Timelock — 48 Hours</h4>
-        <p>Passed proposals enter a 48-hour timelock before anyone can execute. Community can review and respond.</p>
+        <h4 data-i18n="govPage.how4_h">Timelock — 48 Hours</h4>
+        <p data-i18n="govPage.how4_p">Passed proposals enter a 48-hour timelock before anyone can execute. Community can review and respond.</p>
       </div>
       <div class="how-step">
         <div class="how-num">5</div>
-        <h4>Execute</h4>
-        <p>After timelock, anyone can call execute. The parameter changes on-chain immediately. Expires if uncalled in 72h.</p>
+        <h4 data-i18n="govPage.how5_h">Execute</h4>
+        <p data-i18n="govPage.how5_p">After timelock, anyone can call execute. The parameter changes on-chain immediately. Expires if uncalled in 72h.</p>
       </div>
     </div>
   </div>
@@ -538,7 +540,12 @@ function fmtValue(paramId, v) {
   return VALUE_LABELS[paramId] ? VALUE_LABELS[paramId](v) : String(v);
 }
 
-const STATE_LABELS = ['Active','Passed','Defeated','Timelocked','Executed','Expired','Cancelled'];
+const STATE_LABEL_KEYS = ['state_active','state_passed','state_defeated','state_timelocked','state_executed','state_expired','state_cancelled'];
+function stateLabel(stateN) {
+  const key = STATE_LABEL_KEYS[stateN];
+  const fallback = ['Active','Passed','Defeated','Timelocked','Executed','Expired','Cancelled'][stateN] || '?';
+  return key ? t('govPage.js.' + key, fallback) : '?';
+}
 const STATE_PILLS  = ['pill-active','pill-passed','pill-defeated','pill-timelocked','pill-executed','pill-expired','pill-cancelled'];
 
 // ── ABIs ─────────────────────────────────────────────────────────────────────
@@ -652,13 +659,13 @@ if (localStorage.getItem('theme') === 'light') document.body.classList.add('ligh
 
 // ── Wallet ─────────────────────────────────────────────────────────────────────
 async function connectWallet() {
-  if (!window.ethereum) { alert('No wallet found. Install MetaMask.'); return; }
+  if (!window.ethereum) { alert(t('govPage.js.no_wallet_found', 'No wallet found. Install MetaMask.')); return; }
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send('eth_requestAccounts', []);
     const net = await provider.getNetwork();
     if (Number(net.chainId) !== CHAIN_ID) {
-      alert(`Wrong network. Switch to Base Sepolia (${CHAIN_ID}).`); return;
+      alert(t('govPage.js.wrong_network', 'Wrong network. Switch to Base Sepolia ({n}).').replace('{n}', CHAIN_ID)); return;
     }
     signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
@@ -668,7 +675,7 @@ async function connectWallet() {
     await refreshVotingPower();
     renderProposals(); // re-render to add vote buttons + voted state
     updateProposeGate();
-  } catch(e) { alert('Connection failed: ' + e.message); }
+  } catch(e) { alert(t('govPage.js.connection_failed', 'Connection failed:') + ' ' + e.message); }
 }
 
 // ── Voting power ─────────────────────────────────────────────────────────────
@@ -684,7 +691,7 @@ async function refreshVotingPower() {
     const fmtC = n => (Number(n) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 });
     document.getElementById('total-supply').textContent   = fmtC(totalSupply);
     document.getElementById('quorum-req').textContent     = fmtC(quorumAmt);
-    document.getElementById('quorum-bps-label').textContent = `${Number(quorumBps)/100}% of supply`;
+    document.getElementById('quorum-bps-label').textContent = `${Number(quorumBps)/100}${t('govPage.js.of_supply_suffix', '% of supply')}`;
 
     if (userAddr) {
       cnovaBalance = await cnova.balanceOf(userAddr);
@@ -692,7 +699,7 @@ async function refreshVotingPower() {
       const sharePct = totalSupply > 0n
         ? (Number(cnovaBalance) / Number(totalSupply) * 100).toFixed(4)
         : '0.0000';
-      document.getElementById('power-share').textContent = `${sharePct}% of supply`;
+      document.getElementById('power-share').textContent = `${sharePct}${t('govPage.js.of_supply_suffix', '% of supply')}`;
     } else {
       document.getElementById('cnova-balance').textContent = '—';
     }
@@ -743,9 +750,9 @@ function renderProposals() {
   document.getElementById('cnt-timelocked').textContent = timelocked.length;
   document.getElementById('cnt-history').textContent    = history.length;
 
-  renderTab('tab-active',     active,     'No active proposals right now.');
-  renderTab('tab-timelocked', timelocked, 'No proposals in timelock.');
-  renderTab('tab-history',    history,    'No historical proposals yet.');
+  renderTab('tab-active',     active,     t('govPage.empty_active', 'No active proposals right now.'));
+  renderTab('tab-timelocked', timelocked, t('govPage.empty_timelocked', 'No proposals in timelock.'));
+  renderTab('tab-history',    history,    t('govPage.empty_history', 'No historical proposals yet.'));
 
   switchTabContent(currentTab);
 }
@@ -783,11 +790,11 @@ function renderProposal(p) {
   if (isActive && endTime > now) {
     const rem = endTime - now;
     const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60);
-    countdown = `<span class="countdown${rem < 3600 ? ' urgent' : ''}">${h}h ${m}m left</span>`;
+    countdown = `<span class="countdown${rem < 3600 ? ' urgent' : ''}">${h}h ${m}m ${t('govPage.js.hours_left_suffix','left')}</span>`;
   } else if (isTL && tlEnd > now) {
     const rem = tlEnd - now;
     const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60);
-    countdown = `<span class="countdown">${h}h ${m}m until executable</span>`;
+    countdown = `<span class="countdown">${h}h ${m}m ${t('govPage.js.hours_until_executable','until executable')}</span>`;
   }
 
   // Footer buttons
@@ -799,17 +806,17 @@ function renderProposal(p) {
 
   if (canVote) {
     footer = `
-      <button class="btn-vote-for"     onclick="vote(${p.id}, true)">✓ Vote For</button>
-      <button class="btn-vote-against" onclick="vote(${p.id}, false)">✗ Vote Against</button>
+      <button class="btn-vote-for"     onclick="vote(${p.id}, true)">${t('govPage.js.vote_for','✓ Vote For')}</button>
+      <button class="btn-vote-against" onclick="vote(${p.id}, false)">${t('govPage.js.vote_against','✗ Vote Against')}</button>
       ${countdown}`;
   } else if (voted) {
-    footer = `<span class="voted-badge">✅ You voted</span>${countdown}`;
+    footer = `<span class="voted-badge">${t('govPage.js.you_voted','✅ You voted')}</span>${countdown}`;
   } else if (canFinalize) {
-    footer = `<button class="btn-action" onclick="finalize(${p.id})">Finalize Vote</button>${countdown}`;
+    footer = `<button class="btn-action" onclick="finalize(${p.id})">${t('govPage.js.finalize_vote','Finalize Vote')}</button>${countdown}`;
   } else if (canExecute) {
-    footer = `<button class="btn-action" onclick="executeProposal(${p.id})">Execute Now</button>${countdown}`;
+    footer = `<button class="btn-action" onclick="executeProposal(${p.id})">${t('govPage.js.execute_now','Execute Now')}</button>${countdown}`;
   } else if (isActive || isTL) {
-    footer = `<span style="font-size:12px;color:var(--text3);">Connect wallet to participate</span>${countdown}`;
+    footer = `<span style="font-size:12px;color:var(--text3);">${t('govPage.js.connect_to_participate','Connect wallet to participate')}</span>${countdown}`;
   }
 
   return `
@@ -819,25 +826,25 @@ function renderProposal(p) {
         <div class="proposal-id">Proposal #${p.id}</div>
         <div class="proposal-title">${escHtml(p.description || meta.label)}</div>
         <div class="proposal-meta">
-          Proposer: <span>${String(p.proposer).slice(0,6)}…${String(p.proposer).slice(-4)}</span>
+          ${t('govPage.js.proposer_label','Proposer:')} <span>${String(p.proposer).slice(0,6)}…${String(p.proposer).slice(-4)}</span>
         </div>
         <span class="proposal-param">${meta.label} → ${meta.isArray ? '(array-valued — see contract for full thresholds/values)' : fmtValue(paramId, Number(p.newValue))}</span>
       </div>
-      <span class="pill ${STATE_PILLS[stateN] || 'pill-expired'}">${STATE_LABELS[stateN] || '?'}</span>
+      <span class="pill ${STATE_PILLS[stateN] || 'pill-expired'}">${stateLabel(stateN)}</span>
     </div>
     <div class="vote-bars">
       <div class="vote-row">
-        <span class="vote-label for">For</span>
+        <span class="vote-label for">${t('govPage.js.for_label','For')}</span>
         <div class="bar-track"><div class="bar-fill bar-for" style="width:${forPct.toFixed(1)}%"></div></div>
         <span class="vote-pct">${forPct.toFixed(0)}%</span>
       </div>
       <div class="vote-row">
-        <span class="vote-label against">Against</span>
+        <span class="vote-label against">${t('govPage.js.against_label','Against')}</span>
         <div class="bar-track"><div class="bar-fill bar-against" style="width:${agsPct.toFixed(1)}%"></div></div>
         <span class="vote-pct">${agsPct.toFixed(0)}%</span>
       </div>
       <div class="quorum-row">
-        Quorum: ${total.toFixed(2)} / ${quorumNeeded.toFixed(2)} CNOVA (${quorumPct.toFixed(0)}%)
+        ${t('govPage.js.quorum_label','Quorum:')} ${total.toFixed(2)} / ${quorumNeeded.toFixed(2)} CNOVA (${quorumPct.toFixed(0)}%)
         <div class="quorum-bar-track"><div class="quorum-bar-fill" style="width:${quorumPct.toFixed(1)}%"></div></div>
       </div>
     </div>
@@ -860,45 +867,45 @@ function switchTabContent(tab) {
 
 // ── Voting actions ────────────────────────────────────────────────────────────
 async function vote(proposalId, support) {
-  if (!signer) { alert('Connect wallet first.'); return; }
+  if (!signer) { alert(t('govPage.js.connect_to_propose', 'Connect wallet to submit a proposal.')); return; }
   try {
-    setPropStatus(`Sending ${support ? 'For' : 'Against'} vote…`, 'info');
+    setPropStatus(t('govPage.js.sending_vote', 'Sending {dir} vote…').replace('{dir}', support ? t('govPage.js.for_label','For') : t('govPage.js.against_label','Against')), 'info');
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     const tx  = await gov.castVote(BigInt(proposalId), support, { gasLimit: 200_000 });
-    setPropStatus('Waiting for confirmation…', 'info');
+    setPropStatus(t('govPage.js.waiting_confirmation', 'Waiting for confirmation…'), 'info');
     await tx.wait();
-    setPropStatus(`✅ Vote cast! TX: ${tx.hash.slice(0,18)}…`, 'success');
+    setPropStatus(`${t('govPage.js.vote_cast','✅ Vote cast! TX:')} ${tx.hash.slice(0,18)}…`, 'success');
     await loadProposals();
   } catch(e) {
-    setPropStatus('Vote failed: ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.vote_failed', 'Vote failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
   }
 }
 
 async function finalize(proposalId) {
   if (!signer) return;
   try {
-    setPropStatus('Finalizing vote…', 'info');
+    setPropStatus(t('govPage.js.finalizing', 'Finalizing vote…'), 'info');
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     const tx  = await gov.finalizeVote(BigInt(proposalId), { gasLimit: 150_000 });
     await tx.wait();
-    setPropStatus('✅ Vote finalized!', 'success');
+    setPropStatus(t('govPage.js.vote_finalized', '✅ Vote finalized!'), 'success');
     await loadProposals();
   } catch(e) {
-    setPropStatus('Finalize failed: ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.finalize_failed', 'Finalize failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
   }
 }
 
 async function executeProposal(proposalId) {
   if (!signer) return;
   try {
-    setPropStatus('Executing proposal…', 'info');
+    setPropStatus(t('govPage.js.executing', 'Executing proposal…'), 'info');
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     const tx  = await gov.execute(BigInt(proposalId), { gasLimit: 300_000 });
     await tx.wait();
-    setPropStatus('✅ Proposal executed! Parameter updated on-chain.', 'success');
+    setPropStatus(t('govPage.js.proposal_executed', '✅ Proposal executed! Parameter updated on-chain.'), 'success');
     await loadProposals();
   } catch(e) {
-    setPropStatus('Execute failed: ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.execute_failed', 'Execute failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
   }
 }
 
@@ -967,7 +974,7 @@ async function onParamChange() {
 
   // Fetch allowed values from contract
   const avDiv = document.getElementById('allowed-vals');
-  avDiv.innerHTML = '<span style="color:var(--text3);font-size:12px;">Loading…</span>';
+  avDiv.innerHTML = `<span style="color:var(--text3);font-size:12px;">${t('govPage.js.loading_allowed_values','Loading…')}</span>`;
   try {
     const gov  = new ethers.Contract(GOV_ADDR, GOV_ABI, getRo());
     const vals = await gov.getAllowedValues(paramId);
@@ -975,7 +982,7 @@ async function onParamChange() {
       `<div class="av-chip" onclick="selectValue(this, ${v})">${fmtValue(paramId, Number(v))}</div>`
     ).join('');
   } catch {
-    avDiv.innerHTML = '<span style="color:var(--red);font-size:12px;">Could not load allowed values.</span>';
+    avDiv.innerHTML = `<span style="color:var(--red);font-size:12px;">${t('govPage.js.could_not_load_allowed','Could not load allowed values.')}</span>`;
   }
   updateProposeGate();
 }
@@ -990,19 +997,19 @@ async function onMatrixInstanceChange() {
   const tierIdx = parseInt(tierIdxStr);
   const cvDiv   = document.getElementById('current-value-display');
   document.getElementById('current-value-row').style.display = 'block';
-  cvDiv.textContent = 'Loading…';
+  cvDiv.textContent = t('govPage.js.loading', 'Loading…');
   try {
     const tr = new ethers.Contract(TIER_ROUTER, READ_ABI, getRo());
     const matrixAddr = side === 'A' ? await tr.tierMatrixAAddr(tierIdx) : await tr.tierMatrixBAddr(tierIdx);
     document.getElementById('target-input').value = matrixAddr;
     if (!matrixAddr || matrixAddr === ethers.ZeroAddress) {
-      cvDiv.textContent = 'Tier not deployed yet.';
+      cvDiv.textContent = t('govPage.js.tier_not_deployed', 'Tier not deployed yet.');
       return;
     }
     await loadCurrentValue(paramId, matrixAddr, getter);
   } catch (e) {
     console.warn('onMatrixInstanceChange:', e);
-    cvDiv.textContent = 'Could not load — check console.';
+    cvDiv.textContent = t('govPage.js.could_not_load', 'Could not load — check console.');
   }
 }
 
@@ -1010,7 +1017,7 @@ async function onMatrixInstanceChange() {
 async function loadCurrentValue(paramId, targetAddr, getterOverride) {
   const cvDiv = document.getElementById('current-value-display');
   document.getElementById('current-value-row').style.display = 'block';
-  cvDiv.textContent = 'Loading…';
+  cvDiv.textContent = t('govPage.js.loading', 'Loading…');
   const getter = getterOverride || PARAM_GETTER[paramId];
   if (!getter) { cvDiv.textContent = '—'; return; }
   try {
@@ -1019,7 +1026,7 @@ async function loadCurrentValue(paramId, targetAddr, getterOverride) {
     cvDiv.textContent = fmtValue(paramId, typeof v === 'boolean' ? (v ? 1 : 0) : Number(v));
   } catch (e) {
     console.warn('loadCurrentValue:', paramId, getter, e);
-    cvDiv.textContent = 'Could not load — check console.';
+    cvDiv.textContent = t('govPage.js.could_not_load', 'Could not load — check console.');
   }
 }
 
@@ -1121,21 +1128,21 @@ function updateProposeGate() {
   const meta    = PARAM_META[paramId];
 
   if (!userAddr) {
-    gate.textContent = 'Connect wallet to submit a proposal.';
+    gate.textContent = t('govPage.js.connect_to_propose', 'Connect wallet to submit a proposal.');
     btn.disabled = true; return;
   }
   if (totalSupply === 0n) {
-    gate.textContent = 'Loading supply data…';
+    gate.textContent = t('govPage.js.loading_supply', 'Loading supply data…');
     btn.disabled = true; return;
   }
   const minTokens = totalSupply / 10_000n;
   if (cnovaBalance < minTokens) {
     const minF = (Number(minTokens) / 1e18).toFixed(4);
-    gate.textContent = `You need at least ${minF} CNOVA (0.01% of supply) to propose.`;
+    gate.textContent = t('govPage.js.need_min_tokens', 'You need at least {n} CNOVA (0.01% of supply) to propose.').replace('{n}', minF);
     btn.disabled = true; return;
   }
   if (!paramId) {
-    gate.textContent = 'Select a parameter to continue.';
+    gate.textContent = t('govPage.js.select_param', 'Select a parameter to continue.');
     btn.disabled = true; return;
   }
   if (meta && meta.isArray) {
@@ -1144,14 +1151,14 @@ function updateProposeGate() {
       gate.textContent = err;
       btn.disabled = true; return;
     }
-    gate.textContent = '✓ Ready to submit.';
+    gate.textContent = t('govPage.js.ready_to_submit', '✓ Ready to submit.');
     btn.disabled = false; return;
   }
   if (selectedParamValue === null) {
-    gate.textContent = 'Select an allowed value above.';
+    gate.textContent = t('govPage.js.select_allowed_value', 'Select an allowed value above.');
     btn.disabled = true; return;
   }
-  gate.textContent = '✓ Ready to submit.';
+  gate.textContent = t('govPage.js.ready_to_submit', '✓ Ready to submit.');
   btn.disabled = false;
 }
 
@@ -1161,12 +1168,12 @@ async function createProposal() {
   const meta        = PARAM_META[paramId];
   const target      = document.getElementById('target-input').value;
   const description = document.getElementById('prop-description').value.trim();
-  if (!description) { setPropStatus('Please add a description.', 'error'); return; }
+  if (!description) { setPropStatus(t('govPage.js.please_add_description', 'Please add a description.'), 'error'); return; }
   if (!meta) return;
   if (!meta.isArray && selectedParamValue === null) return;
 
   try {
-    setPropStatus('Submitting proposal… please confirm in wallet.', 'info');
+    setPropStatus(t('govPage.js.submitting_proposal', 'Submitting proposal… please confirm in wallet.'), 'info');
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     let tx;
     if (meta.isArray) {
@@ -1180,9 +1187,9 @@ async function createProposal() {
     } else {
       tx = await gov.propose(paramId, target, selectedParamValue, description, { gasLimit: 400_000 });
     }
-    setPropStatus('Waiting for confirmation…', 'info');
+    setPropStatus(t('govPage.js.waiting_confirmation', 'Waiting for confirmation…'), 'info');
     await tx.wait();
-    setPropStatus('✅ Proposal submitted! Voting opens now.', 'success');
+    setPropStatus(t('govPage.js.proposal_submitted', '✅ Proposal submitted! Voting opens now.'), 'success');
     document.getElementById('param-select').value = '';
     document.getElementById('prop-description').value = '';
     document.getElementById('allowed-row').style.display = 'none';
@@ -1192,7 +1199,7 @@ async function createProposal() {
     arrayRows = [];
     await loadProposals();
   } catch(e) {
-    setPropStatus('Failed: ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.submit_failed', 'Failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
   }
 }
 
@@ -1207,14 +1214,19 @@ function escHtml(str) {
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
-loadProposals();
-setInterval(loadProposals, 60_000);
+// Wrapped in DOMContentLoaded: i18n.js loads with `defer`, only guaranteed to
+// have run by DOMContentLoaded. Calling t() any earlier would throw "t is not
+// defined" on the very first load.
+window.addEventListener('DOMContentLoaded', () => {
+  loadProposals();
+  setInterval(loadProposals, 60_000);
 
-if (window.ethereum) {
-  window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
-  window.ethereum.on('accountsChanged', () => connectWallet());
-  window.ethereum.on('chainChanged',    () => location.reload());
-}
+  if (window.ethereum) {
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
+    window.ethereum.on('accountsChanged', () => connectWallet());
+    window.ethereum.on('chainChanged',    () => location.reload());
+  }
+});
 </script>
 </body>
 </html>

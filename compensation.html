@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compensation Plan — CryptoNova</title>
+  <title data-i18n="compPage.browser_title">Compensation Plan — CryptoNova</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <script src="/i18n.js" defer></script>
   <style>
     :root{--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2236;--border:#1f2d47;--green:#00e5a0;--green2:#00b37d;--green-dim:rgba(0,229,160,0.12);--blue:#3b82f6;--yellow:#f59e0b;--purple:#a855f7;--red:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b}
     *{box-sizing:border-box;margin:0;padding:0}
@@ -37,6 +38,7 @@
     .badge-passive{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
     .badge-cycle{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
     .badge-token{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+    .badge-monthly{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3)}
 
     /* Section headings */
     h2{font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin:52px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
@@ -119,8 +121,9 @@
     <div class="logo-text">Crypto<span>Nova</span></div>
   </a>
   <div class="header-right">
-    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">&#9728;&#65039; Light</button>
-    <a href="index.html" class="back-btn">&#8592; Back to App</a>
+    <div id="lang-switcher"></div>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">&#9728;&#65039; <span data-i18n="common.light">Light</span></button>
+    <a href="index.html" class="back-btn">&#8592; <span data-i18n="common.back_to_app">Back to App</span></a>
   </div>
 </header>
 
@@ -128,14 +131,16 @@
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  document.getElementById('theme-btn').textContent = isLight ? '🌙 Dark' : '☀️ Light';
+  const word = window.t ? (isLight ? window.t('common.dark','Dark') : window.t('common.light','Light')) : (isLight ? 'Dark' : 'Light');
+  document.getElementById('theme-btn').textContent = (isLight ? '🌙 ' : '☀️ ') + word;
 }
 (function() {
   if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light');
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('theme-btn');
-      if (btn) btn.textContent = '🌙 Dark';
+      const word = window.t ? window.t('common.dark','Dark') : 'Dark';
+      if (btn) btn.textContent = '🌙 ' + word;
     });
   }
 })();
@@ -143,314 +148,346 @@ function toggleTheme() {
 
 <main>
 
-  <div class="page-title">Compensation <span>Plan</span></div>
-  <div class="page-subtitle">Every way CryptoNova pays you — from your first referral to a full matrix cycle at the apex tier. All logic lives on-chain. No admin. No gatekeeping.</div>
+  <div class="page-title"><span data-i18n="compPage.page_title_pre">Compensation</span> <span data-i18n="compPage.page_title_span">Plan</span></div>
+  <div class="page-subtitle" data-i18n="compPage.page_subtitle">Every way CryptoNova pays you — from your first referral to a full matrix cycle at the apex tier. All logic lives on-chain. No admin. No gatekeeping.</div>
 
-  <!-- ── 5 Streams Overview ── -->
+  <!-- ── 6 Streams Overview ── -->
   <div class="streams-grid">
 
     <div class="stream-card">
-      <span class="stream-badge badge-instant">Instant</span>
+      <span class="stream-badge badge-instant" data-i18n="compPage.badge_instant">Instant</span>
       <div class="stream-icon">🤝</div>
-      <div class="stream-name">Direct Referral Bonus</div>
-      <div class="stream-tagline">10% of every entry fee paid straight to your wallet the moment someone you referred joins.</div>
+      <div class="stream-name" data-i18n="compPage.card1_name">Direct Referral Bonus</div>
+      <div class="stream-tagline" data-i18n="compPage.card1_tagline">10% of every entry fee paid straight to your wallet the moment someone you referred joins.</div>
     </div>
 
     <div class="stream-card">
-      <span class="stream-badge badge-passive">Passive</span>
+      <span class="stream-badge badge-passive" data-i18n="compPage.badge_passive">Passive</span>
       <div class="stream-icon">⛓️</div>
-      <div class="stream-name">Chain Pay</div>
-      <div class="stream-tagline">17% of every entry flows up 6 BFS levels. The deeper your downline grows, the more you earn automatically.</div>
+      <div class="stream-name" data-i18n="compPage.card2_name">Chain Pay</div>
+      <div class="stream-tagline" data-i18n="compPage.card2_tagline">17% of every entry flows up 6 BFS levels. The deeper your downline grows, the more you earn automatically.</div>
     </div>
 
     <div class="stream-card">
-      <span class="stream-badge badge-cycle">Cycle</span>
+      <span class="stream-badge badge-cycle" data-i18n="compPage.badge_cycle">Cycle</span>
       <div class="stream-icon">🌀</div>
-      <div class="stream-name">Matrix Cycle Payout</div>
-      <div class="stream-tagline">45% of entries accumulate in the equalization pool. When all 127 seats fill, the root member receives the full pool and auto re-enters.</div>
+      <div class="stream-name" data-i18n="compPage.card3_name">Matrix Cycle Payout</div>
+      <div class="stream-tagline" data-i18n="compPage.card3_tagline">45% of entries accumulate in the equalization pool. When all 127 seats fill, the root member receives the full pool and auto re-enters.</div>
     </div>
 
     <div class="stream-card">
-      <span class="stream-badge badge-token">Token</span>
+      <span class="stream-badge badge-token" data-i18n="compPage.badge_token">Token</span>
       <div class="stream-icon">🪙</div>
-      <div class="stream-name">CNOVA Token Mining</div>
-      <div class="stream-tagline">CNOVA tokens are minted to your wallet on every entry. Early epochs pay the highest rewards before halving kicks in.</div>
+      <div class="stream-name" data-i18n="compPage.card4_name">CNOVA Token Mining</div>
+      <div class="stream-tagline" data-i18n="compPage.card4_tagline">CNOVA tokens are minted to your wallet on every entry. Early epochs pay the highest rewards before halving kicks in.</div>
     </div>
 
     <div class="stream-card">
-      <span class="stream-badge badge-token">Token</span>
+      <span class="stream-badge badge-token" data-i18n="compPage.badge_token">Token</span>
       <div class="stream-icon">📈</div>
-      <div class="stream-name">CNOVA Floor Appreciation</div>
-      <div class="stream-tagline">10% of all fees flow into the CNOVA Treasury. As more members join, the floor price only moves up — never down.</div>
+      <div class="stream-name" data-i18n="compPage.card5_name">CNOVA Floor Appreciation</div>
+      <div class="stream-tagline" data-i18n="compPage.card5_tagline">10–19% of every entry fee flows into the CNOVA Treasury (rises at higher tiers). As more members join, the floor price only moves up — never down.</div>
+    </div>
+
+    <div class="stream-card">
+      <span class="stream-badge badge-monthly" data-i18n="compPage.badge_monthly">Monthly</span>
+      <div class="stream-icon">🏛️</div>
+      <div class="stream-name" data-i18n="compPage.card6_name">Community Wallet Bonus</div>
+      <div class="stream-tagline" data-i18n="compPage.card6_tagline">Exclusive to the first 1,000 wallets ever to join. A dedicated pool, funded by a slice of every entry fee network-wide, pays out monthly — for life.</div>
     </div>
 
   </div>
 
   <!-- ── Stream 1: Direct Referral ── -->
-  <h2>🤝 Stream 1 &mdash; Direct Referral Bonus</h2>
+  <h2 data-i18n="compPage.s1_h">🤝 Stream 1 &mdash; Direct Referral Bonus</h2>
   <div class="section-card">
-    <h3><span style="color:var(--green)">10%</span> &nbsp;paid instantly on every entry</h3>
-    <p>When someone joins using your referral link — or upgrades to a higher tier — your wallet receives <strong>10% of their entry fee instantly</strong>, on-chain, with no approval required. This relationship is locked permanently; every future upgrade they make keeps earning you the L1 bonus.</p>
+    <h3><span style="color:var(--green)" data-i18n="compPage.s1_h3_pct">10–20%</span> <span data-i18n="compPage.s1_h3">&nbsp;paid instantly on every entry</span></h3>
+    <p data-i18n="compPage.s1_p1">When someone joins using your referral link — or upgrades to a higher tier — your wallet receives a percentage of their entry fee <strong>instantly</strong>, on-chain, with no approval required. The rate is 10% at Tiers 1–3 and rises to 20% at Tier 4 and above. This relationship is locked permanently; every future upgrade they make keeps earning you the L1 bonus.</p>
     <div class="nums-row">
-      <div><div class="big-num">$1.00</div><div class="num-label">per T1 join ($10)</div></div>
-      <div><div class="big-num">$2.50</div><div class="num-label">per T2 join ($25)</div></div>
-      <div><div class="big-num">$5.00</div><div class="num-label">per T3 join ($50)</div></div>
-      <div><div class="big-num yellow">$100</div><div class="num-label">per T7 join ($1,000)</div></div>
-      <div><div class="big-num yellow">$1,000</div><div class="num-label">per T10 join ($10,000)</div></div>
+      <div><div class="big-num">$1.00</div><div class="num-label" data-i18n="compPage.s1_n1_label">per T1 join ($10, 10%)</div></div>
+      <div><div class="big-num">$2.50</div><div class="num-label" data-i18n="compPage.s1_n2_label">per T2 join ($25, 10%)</div></div>
+      <div><div class="big-num">$5.00</div><div class="num-label" data-i18n="compPage.s1_n3_label">per T3 join ($50, 10%)</div></div>
+      <div><div class="big-num yellow">$200</div><div class="num-label" data-i18n="compPage.s1_n4_label">per T7 join ($1,000, 20%)</div></div>
+      <div><div class="big-num yellow">$2,000</div><div class="num-label" data-i18n="compPage.s1_n5_label">per T10 join ($10,000, 20%)</div></div>
     </div>
-    <p>Refer 10 people at T1: <strong style="color:var(--green)">$10 instantly</strong>. If those 10 auto-upgrade through T2–T4, you earn the L1 bonus each time, from the same 10 people, again and again.</p>
+    <p><span data-i18n="compPage.s1_p2_pre">Refer 10 people at T1:</span> <strong style="color:var(--green)" data-i18n="compPage.s1_p2_b">$10 instantly</strong><span data-i18n="compPage.s1_p2_post">. If those 10 auto-upgrade through T2–T4, you earn the L1 bonus each time, from the same 10 people, again and again — at the higher 20% rate once they reach T4.</span></p>
   </div>
 
   <!-- ── Stream 2: Chain Pay ── -->
-  <h2>⛓️ Stream 2 &mdash; Chain Pay (6-Level Depth)</h2>
+  <h2 data-i18n="compPage.s2_h">⛓️ Stream 2 &mdash; Chain Pay (6-Level Depth)</h2>
   <div class="section-card">
-    <h3><span style="color:var(--green)">17%</span> &nbsp;split across 6 upline BFS positions</h3>
-    <p>Every single registration in the network — regardless of who referred them — sends 17% of the entry fee upward through 6 BFS levels. If someone joins anywhere below you in the matrix, you earn automatically based on how many BFS levels separate you. This is the <em>passive</em> engine of CryptoNova.</p>
-    <p>At T1 ($10 entry), the <strong>$1.70 chain pay</strong> distributes as:</p>
+    <h3><span style="color:var(--green)" data-i18n="compPage.s2_h3_pct">17–20%</span> <span data-i18n="compPage.s2_h3">&nbsp;split across 6 upline BFS positions</span></h3>
+    <p data-i18n="compPage.s2_p1">Every single registration in the network — regardless of who referred them — sends 17–20% of the entry fee upward through 6 BFS levels (the rate depends on tier). If someone joins anywhere below you in the matrix, you earn automatically based on how many BFS levels separate you. This is the <em>passive</em> engine of CryptoNova.</p>
+    <p><span data-i18n="compPage.s2_p2_pre">At T1 ($10 entry), the</span> <strong data-i18n="compPage.s2_p2_b">$1.70 chain pay</strong> <span data-i18n="compPage.s2_p2_post">distributes as:</span></p>
     <div class="chain-levels">
-      <div class="chain-level"><div class="cl-label">L1 (direct upline)</div><div class="cl-val">$0.85</div><div class="cl-pct">50% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L2</div><div class="cl-val">$0.34</div><div class="cl-pct">20% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L3</div><div class="cl-val">$0.26</div><div class="cl-pct">15% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L4</div><div class="cl-val">$0.13</div><div class="cl-pct">7.5% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L5</div><div class="cl-val">$0.06</div><div class="cl-pct">3.75% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L6</div><div class="cl-val">$0.06</div><div class="cl-pct">3.75% of pool</div></div>
+      <div class="chain-level"><div class="cl-label" data-i18n="compPage.s2_l1_label">L1 (direct upline)</div><div class="cl-val">$0.85</div><div class="cl-pct" data-i18n="compPage.s2_l1_pct">50% of pool</div></div>
+      <div class="chain-level"><div class="cl-label">L2</div><div class="cl-val">$0.34</div><div class="cl-pct" data-i18n="compPage.s2_l2_pct">20% of pool</div></div>
+      <div class="chain-level"><div class="cl-label">L3</div><div class="cl-val">$0.26</div><div class="cl-pct" data-i18n="compPage.s2_l3_pct">15% of pool</div></div>
+      <div class="chain-level"><div class="cl-label">L4</div><div class="cl-val">$0.13</div><div class="cl-pct" data-i18n="compPage.s2_l4_pct">7.5% of pool</div></div>
+      <div class="chain-level"><div class="cl-label">L5</div><div class="cl-val">$0.06</div><div class="cl-pct" data-i18n="compPage.s2_l5_pct">3.75% of pool</div></div>
+      <div class="chain-level"><div class="cl-label">L6</div><div class="cl-val">$0.06</div><div class="cl-pct" data-i18n="compPage.s2_l6_pct">3.75% of pool</div></div>
     </div>
-    <p>These payments are <strong>continuous</strong> — they fire every time a new member enters anywhere below you, not just at cycle completion. A deep downline generates chain pay from hundreds of entries passively.</p>
-    <p style="font-size:13px;color:var(--text3)">At T5 ($250), the equivalent chain pay pool is $42.50 — so L1 earns $21.25 from each single entry below them at that tier.</p>
+    <p data-i18n="compPage.s2_p3">These payments are <strong>continuous</strong> — they fire every time a new member enters anywhere below you, not just at cycle completion. A deep downline generates chain pay from hundreds of entries passively.</p>
+    <p style="font-size:13px;color:var(--text3)" data-i18n="compPage.s2_p4">At T5 ($250, 20% chain pay), the equivalent chain pay pool is $50.00 — so L1 earns $25.00 from each single entry below them at that tier.</p>
   </div>
 
   <!-- ── Stream 3: Matrix Cycle Payout ── -->
-  <h2>🌀 Stream 3 &mdash; Matrix Cycle Payout</h2>
+  <h2 data-i18n="compPage.s3_h">🌀 Stream 3 &mdash; Matrix Cycle Payout</h2>
   <div class="section-card">
-    <h3><span style="color:var(--yellow)">45%</span> &nbsp;accumulates in the equalization pool — paid on cycle</h3>
-    <p>Every CryptoNova matrix holds <strong>127 seats</strong> (a 7-level BFS tree). As each new member fills a seat, 45% of their entry fee flows into that matrix's equalization pool. When all 127 seats are filled, the member at position #1 (root) receives the full pool and is automatically re-entered into the next active matrix.</p>
+    <h3><span style="color:var(--yellow)" data-i18n="compPage.s3_h3_pct">22.5–44%</span> <span data-i18n="compPage.s3_h3">&nbsp;accumulates in the equalization pool — paid on cycle</span></h3>
+    <p data-i18n="compPage.s3_p1">Every CryptoNova matrix holds <strong>127 seats</strong> (a 7-level BFS tree). As each new member fills a seat, a share of their entry fee flows into that matrix's equalization pool — 44% at Tiers 1–3, stepping down to 26% at T4–T5, 24.5% at T6–T7, and 22.5% at T8–T10 (higher tiers shift more of the fee into referral and chain pay instead). When all 127 seats are filled, the member at position #1 (root) receives the full pool and is automatically re-entered into the next active matrix.</p>
     <div class="nums-row">
-      <div><div class="big-num">$572</div><div class="num-label">T1 cycle payout <span style="font-size:10px;display:block;color:var(--text3)">127 × $4.50</span></div></div>
-      <div><div class="big-num">$1,429</div><div class="num-label">T2 cycle payout <span style="font-size:10px;display:block;color:var(--text3)">127 × $11.25</span></div></div>
-      <div><div class="big-num yellow">$57,150</div><div class="num-label">T7 cycle payout <span style="font-size:10px;display:block;color:var(--text3)">127 × $450</span></div></div>
-      <div><div class="big-num yellow">$571,500</div><div class="num-label">T10 cycle payout <span style="font-size:10px;display:block;color:var(--text3)">127 × $4,500</span></div></div>
+      <div><div class="big-num">$559</div><div class="num-label"><span data-i18n="compPage.s3_n1_label">T1 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n1_sub">127 × $4.40 (44%)</span></div></div>
+      <div><div class="big-num">$1,397</div><div class="num-label"><span data-i18n="compPage.s3_n2_label">T2 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n2_sub">127 × $11.00 (44%)</span></div></div>
+      <div><div class="big-num yellow">$31,115</div><div class="num-label"><span data-i18n="compPage.s3_n3_label">T7 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n3_sub">127 × $245 (24.5%)</span></div></div>
+      <div><div class="big-num yellow">$285,750</div><div class="num-label"><span data-i18n="compPage.s3_n4_label">T10 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n4_sub">127 × $2,250 (22.5%)</span></div></div>
     </div>
-    <p>You don't need to be the root to benefit. Being earlier in the queue means more entries land below you, generating chain pay throughout the fill. Faster-filling matrices = more frequent earnings for everyone in the queue.</p>
-    <p><strong>Auto re-entry:</strong> the protocol automatically re-enters the cycling member into the next active matrix. A portion of the cycle payout funds your re-entry fee — no manual action required.</p>
+    <p data-i18n="compPage.s3_p2">You don't need to be the root to benefit. Being earlier in the queue means more entries land below you, generating chain pay throughout the fill. Faster-filling matrices = more frequent earnings for everyone in the queue.</p>
+    <p><strong data-i18n="compPage.s3_p3_b">Auto re-entry:</strong> <span data-i18n="compPage.s3_p3">the protocol automatically re-enters the cycling member into the next active matrix. A portion of the cycle payout funds your re-entry fee — no manual action required.</span></p>
   </div>
 
   <!-- ── Stream 4: CNOVA Mining ── -->
-  <h2>🪙 Stream 4 &mdash; CNOVA Token Mining</h2>
+  <h2 data-i18n="compPage.s4_h">🪙 Stream 4 &mdash; CNOVA Token Mining</h2>
   <div class="section-card">
-    <h3>Minted to your wallet on every entry — <span style="color:var(--purple)">halving epochs</span></h3>
-    <p>CryptoNova mints CNOVA tokens to your wallet automatically each time a new entry is registered (at any tier). The amount follows a halving schedule — similar to Bitcoin. Joining early captures the highest per-entry reward before each halving kicks in.</p>
-    <p><strong>T1 Genesis epoch starting reward: 50 CNOVA per $10 entry.</strong> From epoch 2, rewards halve cleanly every two epochs (40 → 20 → 10 → 5 → 2.5) before plateauing at 2.5 CNOVA. There are 9 epochs total — the last is the Final Frontier, formula-driven by the live floor price.</p>
+    <h3><span data-i18n="compPage.s4_h3_pre">Minted to your wallet on every entry —</span> <span style="color:var(--purple)" data-i18n="compPage.s4_h3_span">halving epochs</span></h3>
+    <p data-i18n="compPage.s4_p1">CryptoNova mints CNOVA tokens to your wallet automatically each time a new entry is registered (at any tier). The amount follows a halving schedule — similar to Bitcoin. Joining early captures the highest per-entry reward before each halving kicks in.</p>
+    <p><strong data-i18n="compPage.s4_p2_b">T1 Genesis epoch starting reward: 50 CNOVA per $10 entry.</strong> <span data-i18n="compPage.s4_p2">From epoch 2, rewards halve cleanly every two epochs (40 → 20 → 10 → 5 → 2.5) before plateauing at 2.5 CNOVA. There are 9 epochs total — the last is the Final Frontier, formula-driven by the live floor price.</span></p>
     <div class="epoch-grid">
-      <div class="epoch-card"><div class="ep-name">Nebula Genesis</div><div class="ep-reward">50 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Mercury Rise</div><div class="ep-reward">40 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Lunar Cluster</div><div class="ep-reward">20 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Aurora Zenith</div><div class="ep-reward dim">10 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Solaris Echo</div><div class="ep-reward dim">5 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Cosmic Core</div><div class="ep-reward dim">2.5 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Galaxy Grid</div><div class="ep-reward dim">2.5 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Supernova Spark</div><div class="ep-reward dim">2.5 CNOVA</div></div>
-      <div class="epoch-card"><div class="ep-name">Final Frontier</div><div class="ep-reward dim" style="font-size:13px">≤ 2.5 CNOVA<span style="display:block;font-size:10px;color:var(--text3);font-weight:400;margin-top:2px">floor-price formula</span></div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep1_name">Nebula Genesis</div><div class="ep-reward">50 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep2_name">Mercury Rise</div><div class="ep-reward">40 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep3_name">Lunar Cluster</div><div class="ep-reward">20 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep4_name">Aurora Zenith</div><div class="ep-reward dim">10 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep5_name">Solaris Echo</div><div class="ep-reward dim">5 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep6_name">Cosmic Core</div><div class="ep-reward dim">2.5 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep7_name">Galaxy Grid</div><div class="ep-reward dim">2.5 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep8_name">Supernova Spark</div><div class="ep-reward dim">2.5 CNOVA</div></div>
+      <div class="epoch-card"><div class="ep-name" data-i18n="compPage.ep9_name">Final Frontier</div><div class="ep-reward dim" style="font-size:13px">≤ 2.5 CNOVA<span style="display:block;font-size:10px;color:var(--text3);font-weight:400;margin-top:2px" data-i18n="compPage.ep9_hint">floor-price formula</span></div></div>
     </div>
-    <p style="margin-top:14px">Higher tiers mint more CNOVA per entry due to tier multipliers — a T10 entry mints <strong>640×</strong> the base epoch reward compared to T1. CNOVA total supply is capped at <strong>21,000,000 tokens</strong>.</p>
+    <p style="margin-top:14px"><span data-i18n="compPage.s4_p3_pre">Higher tiers mint more CNOVA per entry due to tier multipliers — a T10 entry mints</span> <strong data-i18n="compPage.s4_p3_b">640×</strong> <span data-i18n="compPage.s4_p3_mid">the base epoch reward compared to T1. CNOVA total supply is capped at</span> <strong data-i18n="compPage.s4_p3_b2">21,000,000 tokens</strong><span data-i18n="compPage.s4_p3_post">.</span></p>
   </div>
 
   <!-- ── Stream 5: CNOVA Floor Appreciation ── -->
-  <h2>📈 Stream 5 &mdash; CNOVA Floor Price Appreciation</h2>
+  <h2 data-i18n="compPage.s5_h">📈 Stream 5 &mdash; CNOVA Floor Price Appreciation</h2>
   <div class="section-card">
-    <h3><span style="color:var(--green)">10%</span> &nbsp;of all entry fees back the CNOVA floor price</h3>
-    <p>10% of every entry fee flows into the on-chain CNOVA Treasury. The floor price is calculated automatically: <code style="background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--green)">floor = Treasury USDC ÷ CNOVA total supply</code>.</p>
-    <p>The floor price can only rise as more members join — more USDC flowing into Treasury relative to new CNOVA minted means the backing per token increases. CNOVA holders can redeem for USDC at the floor price at any time, directly from the Dashboard, with no approval or lock-up.</p>
+    <h3><span style="color:var(--green)" data-i18n="compPage.s5_h3_pct">10%</span> <span data-i18n="compPage.s5_h3">&nbsp;of all entry fees back the CNOVA floor price</span></h3>
+    <p><span data-i18n="compPage.s5_p1_pre">10% of every entry fee flows into the on-chain CNOVA Treasury. The floor price is calculated automatically:</span> <code style="background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--green)">floor = Treasury USDC ÷ CNOVA total supply</code>.</p>
+    <p data-i18n="compPage.s5_p2">The floor price can only rise as more members join — more USDC flowing into Treasury relative to new CNOVA minted means the backing per token increases. CNOVA holders can redeem for USDC at the floor price at any time, directly from the Dashboard, with no approval or lock-up.</p>
     <div class="nums-row">
-      <div><div class="big-num">$0.02</div><div class="num-label">Starting floor price<span style="font-size:10px;display:block;color:var(--text3)">at Genesis ($1.00 ÷ 50 CNOVA)</span></div></div>
-      <div><div class="big-num blue">Always rising</div><div class="num-label">as network grows<span style="font-size:10px;display:block;color:var(--text3)">floor never decreases</span></div></div>
+      <div><div class="big-num">$0.02</div><div class="num-label"><span data-i18n="compPage.s5_n1_label">Starting floor price</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n1_sub">at Genesis ($1.00 ÷ 50 CNOVA)</span></div></div>
+      <div><div class="big-num blue" data-i18n="compPage.s5_n2_val">Always rising</div><div class="num-label"><span data-i18n="compPage.s5_n2_label">as network grows</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n2_sub">floor never decreases</span></div></div>
     </div>
-    <p>CNOVA accrued during Genesis epoch at $0.02 floor could be worth significantly more at later epochs as the floor appreciates. There is no market-price ceiling — CNOVA can trade above floor on open markets.</p>
+    <p data-i18n="compPage.s5_p3">CNOVA accrued during Genesis epoch at $0.02 floor could be worth significantly more at later epochs as the floor appreciates. There is no market-price ceiling — CNOVA can trade above floor on open markets.</p>
+  </div>
+
+  <!-- ── Stream 6: Community Wallet ── -->
+  <h2 data-i18n="compPage.s6_h">🏛️ Stream 6 &mdash; Community Wallet (First 1,000 Members)</h2>
+  <div class="section-card">
+    <h3 data-i18n="compPage.s6_h3">Exclusive lifetime bonus for the first 1,000 wallets — paid monthly, for as long as you hold your spot</h3>
+    <p data-i18n="compPage.s6_p1">The 1% "Community Wallet" line in the entry-fee split below isn't just a protocol reserve sitting idle — <strong>every entry, from every member, at every tier, forever</strong> feeds this pool. What makes it special is who gets paid from it: only the first <strong>1,000 wallets</strong> ever to register with CryptoNova are eligible to receive distributions, split into two permanent cohorts by join order.</p>
+    <div class="nums-row">
+      <div><div class="big-num" data-i18n="compPage.s6_n1_val">#1–500</div><div class="num-label"><span data-i18n="compPage.s6_n1_label">Genesis cohort</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n1_sub">60% of each distribution</span></div></div>
+      <div><div class="big-num blue" data-i18n="compPage.s6_n2_val">#501–1,000</div><div class="num-label"><span data-i18n="compPage.s6_n2_label">Pioneer cohort</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n2_sub">40% of each distribution</span></div></div>
+    </div>
+    <p data-i18n="compPage.s6_p2">Enrollment is automatic and permanent the moment you register — there's no separate sign-up, and it's capped at <strong>one slot per wallet address for life</strong>. Once the 1,000th member joins, the cohort is closed forever; no one can buy or earn their way into it after the fact.</p>
+    <p><strong data-i18n="compPage.s6_p3_b">How distributions work:</strong> <span data-i18n="compPage.s6_p3">every 30 days, anyone can trigger a distribution. Half of the pool's current balance pays out — 60% split evenly across all enrolled Genesis members, 40% split evenly across all enrolled Pioneer members. The other half rolls over, compounding the pool for next month. The pool is also topped up by orphan fees — entry fees that had no valid upline to pay and would otherwise be stuck.</span></p>
+    <div class="nums-row">
+      <div><div class="big-num">~$3.00</div><div class="num-label"><span data-i18n="compPage.s6_n3_label">per Genesis member / month</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n3_sub">example: $5,000 pool</span></div></div>
+      <div><div class="big-num">~$2.00</div><div class="num-label"><span data-i18n="compPage.s6_n4_label">per Pioneer member / month</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n4_sub">example: $5,000 pool</span></div></div>
+      <div><div class="big-num blue">~$6.00 / ~$4.00</div><div class="num-label"><span data-i18n="compPage.s6_n5_label">per member / month</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n5_sub">example: $10,000 pool</span></div></div>
+    </div>
+    <p data-i18n="compPage.s6_p4">Claim your share anytime from the Dashboard — unclaimed distributions expire after 30 days and roll back into the pool for the next round, so nothing is ever lost from the system, even if a member forgets to claim. Because the cohort is permanently capped, being one of the first 1,000 isn't just about earning chain pay sooner — it's a seat at a pool that never reopens, funded by every member who joins after you, for as long as the protocol runs.</p>
   </div>
 
   <!-- ── 10-Tier Earnings Table ── -->
-  <h2>🏆 10-Tier Earnings at a Glance</h2>
+  <h2 data-i18n="compPage.table_h">🏆 10-Tier Earnings at a Glance</h2>
   <div class="tier-table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Tier</th>
-          <th>Name</th>
-          <th>Entry Fee</th>
-          <th>Direct Ref (10%)</th>
-          <th>Chain Pay L1 (per entry)</th>
-          <th>Cycle Pool Payout</th>
-          <th>Access</th>
+          <th data-i18n="compPage.th_tier">Tier</th>
+          <th data-i18n="compPage.th_name">Name</th>
+          <th data-i18n="compPage.th_entry">Entry Fee</th>
+          <th data-i18n="compPage.th_directref">Direct Ref (10%)</th>
+          <th data-i18n="compPage.th_chainpay">Chain Pay L1 (per entry)</th>
+          <th data-i18n="compPage.th_cyclepool">Cycle Pool Payout</th>
+          <th data-i18n="compPage.th_access">Access</th>
         </tr>
       </thead>
       <tbody>
         <tr class="highlight-row">
           <td class="t-tier t-open">T1</td>
-          <td class="t-name">Nova Seed</td>
+          <td class="t-name" data-i18n="compPage.tier1_name">Nova Seed</td>
           <td>$10</td>
           <td style="color:var(--green)">$1.00</td>
           <td>$0.85</td>
-          <td style="color:var(--green)">~$572</td>
-          <td><span style="color:var(--green);font-size:12px;font-weight:700">Open</span></td>
+          <td style="color:var(--green)">~$559</td>
+          <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
         </tr>
         <tr>
           <td class="t-tier t-open">T2</td>
-          <td class="t-name">Nova Rise</td>
+          <td class="t-name" data-i18n="compPage.tier2_name">Nova Rise</td>
           <td>$25</td>
           <td style="color:var(--green)">$2.50</td>
           <td>$2.13</td>
-          <td style="color:var(--green)">~$1,429</td>
-          <td><span style="color:var(--green);font-size:12px;font-weight:700">Open</span></td>
+          <td style="color:var(--green)">~$1,397</td>
+          <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T3</td>
-          <td class="t-name">Nova Star</td>
+          <td class="t-name" data-i18n="compPage.tier3_name">Nova Star</td>
           <td>$50</td>
           <td>$5.00</td>
           <td>$4.25</td>
-          <td>~$2,858</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td>~$2,794</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T4</td>
-          <td class="t-name">Nova Core</td>
+          <td class="t-name" data-i18n="compPage.tier4_name">Nova Core</td>
           <td>$100</td>
+          <td>$20.00</td>
           <td>$10.00</td>
-          <td>$8.50</td>
-          <td>~$5,715</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td>~$3,302</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T5</td>
-          <td class="t-name">Nova Prime</td>
+          <td class="t-name" data-i18n="compPage.tier5_name">Nova Prime</td>
           <td>$250</td>
+          <td>$50.00</td>
           <td>$25.00</td>
-          <td>$21.25</td>
-          <td>~$14,288</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td>~$8,255</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T6</td>
-          <td class="t-name">Nova Apex</td>
+          <td class="t-name" data-i18n="compPage.tier6_name">Nova Apex</td>
           <td>$500</td>
-          <td>$50.00</td>
-          <td>$42.50</td>
-          <td>~$28,575</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td>$100.00</td>
+          <td>$43.75</td>
+          <td>~$15,558</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T7</td>
-          <td class="t-name">Nova Pinnacle</td>
+          <td class="t-name" data-i18n="compPage.tier7_name">Nova Pinnacle</td>
           <td>$1,000</td>
-          <td>$100.00</td>
-          <td>$85.00</td>
-          <td>~$57,150</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td>$200.00</td>
+          <td>$87.50</td>
+          <td>~$31,115</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-super">T8</td>
-          <td class="t-name" style="color:var(--purple)">SuperNova Titan</td>
+          <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier8_name">SuperNova Titan</td>
           <td>$2,500</td>
-          <td style="color:var(--purple)">$250.00</td>
-          <td>$212.50</td>
-          <td style="color:var(--purple)">~$142,875</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td style="color:var(--purple)">$500.00</td>
+          <td>$218.75</td>
+          <td style="color:var(--purple)">~$71,438</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-super">T9</td>
-          <td class="t-name" style="color:var(--purple)">SuperNova Legend</td>
+          <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier9_name">SuperNova Legend</td>
           <td>$5,000</td>
-          <td style="color:var(--purple)">$500.00</td>
-          <td>$425.00</td>
-          <td style="color:var(--purple)">~$285,750</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td style="color:var(--purple)">$1,000.00</td>
+          <td>$437.50</td>
+          <td style="color:var(--purple)">~$142,875</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-super">T10</td>
-          <td class="t-name" style="color:var(--purple)">SuperNova Apex</td>
+          <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier10_name">SuperNova Apex</td>
           <td>$10,000</td>
-          <td style="color:var(--purple)">$1,000.00</td>
-          <td>$850.00</td>
-          <td style="color:var(--purple)">~$571,500</td>
-          <td><span style="color:var(--yellow);font-size:11px">Velocity Gated</span></td>
+          <td style="color:var(--purple)">$2,000.00</td>
+          <td>$875.00</td>
+          <td style="color:var(--purple)">~$285,750</td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
       </tbody>
     </table>
   </div>
   <div style="font-size:12px;color:var(--text3);margin-bottom:36px;padding:0 4px">
-    Cycle payout = 127 seats × entry fee × 45%. Chain pay L1 = entry fee × 17% × 50%. Velocity gates open when previous tier MatB reaches 80% fill. <strong style="color:var(--red)">Cycle payouts require the matrix to fill — not guaranteed.</strong>
+    <span data-i18n="compPage.table_footnote">Cycle payout = 127 seats × entry fee × pool share (44% at T1–T3, 26% at T4–T5, 24.5% at T6–T7, 22.5% at T8–T10). Chain pay L1 = entry fee × chain share (17% at T1–T3, 20% at T4–T5, 17.5% at T6–T10) × 50%. Direct referral = entry fee × 10% (T1–T3) or 20% (T4–T10). Velocity gates open when previous tier MatB reaches 80% fill.</span> <strong style="color:var(--red)" data-i18n="compPage.table_footnote_b">Cycle payouts require the matrix to fill — not guaranteed.</strong>
   </div>
 
   <!-- ── Entry Fee Split ── -->
-  <h2>💰 Where Does the $10 Entry Fee Go?</h2>
+  <h2 data-i18n="compPage.split_h">💰 Where Does the $10 Entry Fee Go?</h2>
   <div class="section-card">
-    <p>Every T1 entry fee is distributed automatically and instantly by the smart contract — no human intervention, no admin wallet:</p>
+    <p data-i18n="compPage.split_intro">Every T1 entry fee is distributed automatically and instantly by the smart contract — no human intervention, no admin wallet:</p>
     <div class="split-table">
       <div class="split-row">
-        <div class="split-label">🤝 L1 Direct Referral</div>
+        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:10%;background:var(--green)"></div></div>
         <div class="split-pct">10%</div>
         <div class="split-amt">$1.00</div>
       </div>
       <div class="split-row">
-        <div class="split-label">⛓️ Chain Pay (6 upline levels)</div>
+        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Chain Pay (6 upline levels)</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:17%;background:var(--blue)"></div></div>
         <div class="split-pct">17%</div>
         <div class="split-amt">$1.70</div>
       </div>
       <div class="split-row">
-        <div class="split-label">🌀 Equalization Pool</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:45%;background:var(--yellow)"></div></div>
-        <div class="split-pct">45%</div>
-        <div class="split-amt">$4.50</div>
+        <div class="split-label" data-i18n="compPage.split_pool">🌀 Equalization Pool</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:44%;background:var(--yellow)"></div></div>
+        <div class="split-pct">44%</div>
+        <div class="split-amt">$4.40</div>
       </div>
       <div class="split-row">
-        <div class="split-label">🏦 CNOVA Treasury (floor backing)</div>
+        <div class="split-label" data-i18n="compPage.split_treasury">🏦 CNOVA Treasury (floor backing)</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:10%;background:var(--green2)"></div></div>
         <div class="split-pct">10%</div>
         <div class="split-amt">$1.00</div>
       </div>
       <div class="split-row">
-        <div class="split-label">🌊 Stability Rescue Fund</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:13%;background:#38bdf8"></div></div>
-        <div class="split-pct">13%</div>
-        <div class="split-amt">$1.30</div>
+        <div class="split-label" data-i18n="compPage.split_sf">🌊 Stability Rescue Fund</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:12%;background:#38bdf8"></div></div>
+        <div class="split-pct">12%</div>
+        <div class="split-amt">$1.20</div>
       </div>
       <div class="split-row">
-        <div class="split-label">⚙️ Dev</div>
+        <div class="split-label" data-i18n="compPage.split_dev">⚙️ Dev</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:2%;background:var(--text3)"></div></div>
+        <div class="split-pct">2%</div>
+        <div class="split-amt">$0.20</div>
+      </div>
+      <div class="split-row">
+        <div class="split-label" data-i18n="compPage.split_ops">⚙️ Ops</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--text3)"></div></div>
         <div class="split-pct">1%</div>
         <div class="split-amt">$0.10</div>
       </div>
       <div class="split-row">
-        <div class="split-label">⚙️ Ops</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--text3)"></div></div>
-        <div class="split-pct">1%</div>
-        <div class="split-amt">$0.10</div>
-      </div>
-      <div class="split-row">
-        <div class="split-label">🏛️ Community Wallet</div>
+        <div class="split-label" data-i18n="compPage.split_cw">🏛️ Community Wallet</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--purple)"></div></div>
         <div class="split-pct">1%</div>
         <div class="split-amt">$0.10</div>
       </div>
       <div class="split-row">
-        <div class="split-label">🔥 CNOVA Buyback Reserve</div>
+        <div class="split-label" data-i18n="compPage.split_bbr">🔥 CNOVA Buyback Reserve</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--red)"></div></div>
         <div class="split-pct">1%</div>
         <div class="split-amt">$0.10</div>
       </div>
+      <div class="split-row">
+        <div class="split-label" data-i18n="compPage.split_lq">💧 Liquidity Reserve</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:2%;background:var(--blue)"></div></div>
+        <div class="split-pct">2%</div>
+        <div class="split-amt">$0.20</div>
+      </div>
     </div>
-    <p style="margin-top:14px;font-size:13px;color:var(--text3)">72% of every entry goes directly to participants (referral + chain pay + cycle pool). The remaining 28% builds the protocol — CNOVA floor backing, reserves, and operations. <strong style="color:var(--text)">100% on-chain. Immutable.</strong></p>
+    <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">71% of every entry goes directly to participants (referral + chain pay + cycle pool). The remaining 29% builds the protocol — CNOVA floor backing, reserves, liquidity, and operations.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Immutable.</strong> <span data-i18n="compPage.split_footer_post">(Splits shown are for Tiers 1–3; higher tiers shift more weight toward referral, chain pay, and treasury — see the table above and the Stream sections for exact per-tier figures.)</span></p>
   </div>
 
   <!-- ── Disclaimer ── -->
   <div class="risk-box">
-    <strong>⚠️ Important — Read Before Participating</strong><br>
-    CryptoNova Matrix is a high-risk DeFi protocol. Earnings depend entirely on continued network growth — if growth slows, matrix cycles slow and chain pay volume decreases. The cycle payouts shown above assume a fully-filled matrix, which is not guaranteed. CNOVA tokens are not a stablecoin and have no guaranteed market value above the floor price. Only participate with funds you can afford to lose entirely. This is not financial advice.
+    <strong data-i18n="compPage.risk_title">⚠️ Important — Read Before Participating</strong><br>
+    <span data-i18n="compPage.risk_body">CryptoNova Matrix is a high-risk DeFi protocol. Earnings depend entirely on continued network growth — if growth slows, matrix cycles slow and chain pay volume decreases. The cycle payouts shown above assume a fully-filled matrix, which is not guaranteed. CNOVA tokens are not a stablecoin and have no guaranteed market value above the floor price. Only participate with funds you can afford to lose entirely. This is not financial advice.</span>
   </div>
 
   <div style="margin-top:32px;text-align:center">
-    <a href="index.html" style="display:inline-block;background:var(--green);color:#000;font-weight:700;font-size:15px;padding:12px 36px;border-radius:8px;text-decoration:none;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+    <a href="index.html" style="display:inline-block;background:var(--green);color:#000;font-weight:700;font-size:15px;padding:12px 36px;border-radius:8px;text-decoration:none;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" data-i18n="compPage.join_btn">
       Join CryptoNova &rarr;
     </a>
   </div>
@@ -458,19 +495,19 @@ function toggleTheme() {
 </main>
 
 <footer>
-  <a href="index.html">&#8592; Back to CryptoNova App</a>
+  <a href="index.html">&#8592; <span data-i18n="footer2.back">Back to CryptoNova App</span></a>
   &nbsp;&middot;&nbsp;
-  <a href="faq.html">FAQ &amp; Glossary</a>
+  <a href="faq.html" data-i18n="footer2.faq">FAQ &amp; Glossary</a>
   &nbsp;&middot;&nbsp;
-  <a href="terms.html">Terms &amp; Risk Disclaimer</a>
+  <a href="terms.html" data-i18n="footer2.terms">Terms &amp; Risk Disclaimer</a>
   &nbsp;&middot;&nbsp;
-  <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener">Announcements</a>
+  <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener" data-i18n="footer2.announcements">Announcements</a>
   &nbsp;&middot;&nbsp;
-  <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener">Community Chat</a>
+  <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener" data-i18n="footer2.community_chat">Community Chat</a>
   &nbsp;&middot;&nbsp;
-  <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener">Support &amp; Q&amp;A</a>
+  <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" data-i18n="footer2.support_qa">Support &amp; Q&amp;A</a>
   &nbsp;&middot;&nbsp;
-  &copy; 2026 CryptoNova Matrix
+  <span data-i18n="footer2.copyright">&copy; 2026 CryptoNova Matrix</span>
 </footer>
 
 </body>
