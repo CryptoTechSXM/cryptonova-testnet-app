@@ -269,7 +269,8 @@
         <optgroup label="TierRouter">
           <option value="1" data-i18n="govPage.params.p1_option">Auto-Upgrade Cycle Threshold</option>
           <option value="2" data-i18n="govPage.params.p2_option">Re-entry Min Cycles</option>
-          <option value="3" data-i18n="govPage.params.p3_option">Escrow Floor Multiplier</option>
+          <!-- V8.21: param 3 (Escrow Floor Multiplier) retired -- propose() now
+               permanently reverts on it, so it's removed from the picker entirely. -->
         </optgroup>
         <optgroup label="MatrixKeeper">
           <option value="4" data-i18n="govPage.params.p4_option">Velocity Window (seconds)</option>
@@ -280,7 +281,9 @@
         </optgroup>
         <optgroup label="Matrix Fees">
           <option value="9" data-i18n="govPage.params.p9_option">Withdrawal Fee (BPS)</option>
-          <option value="10" data-i18n="govPage.params.p10_option">Early Exit Penalty (BPS)</option>
+          <!-- V8.21: param 10 (Early Exit Penalty BPS) retired -- propose() now
+               permanently reverts on it, so it's removed from the picker entirely.
+               See V8Governance.sol's PARAM_EARLY_EXIT_PENALTY_BPS retirement note. -->
         </optgroup>
         <optgroup label="Governance Self">
           <option value="11" data-i18n="govPage.params.p11_option">Voting Period (seconds)</option>
@@ -298,7 +301,7 @@
           <option value="20" data-i18n="govPage.params.p20_option">Rescue Ratio (BPS)</option>
         </optgroup>
         <optgroup label="StabilityFund">
-          <option value="21" data-i18n="govPage.params.p21_option">SF Target (USDC)</option>
+          <option value="21" data-i18n="govPage.params.p21_option">SF Target Manual Fallback (USDC)</option>
           <option value="22" data-i18n="govPage.params.p22_option">SF Community Carve-Out (BPS)</option>
           <option value="23" data-i18n="govPage.params.p23_option">SF Stability Floor (USDC)</option>
         </optgroup>
@@ -333,11 +336,11 @@
     </div>
 
     <div class="form-row" id="matrix-instance-row" style="display:none;">
-      <label class="form-label"><span data-i18n="govPage.tier_instance_label">Tier Instance</span> <span style="font-weight:400;color:var(--text3);" data-i18n="govPage.tier_instance_note">(this fee is set per matrix, not protocol-wide)</span></label>
+      <label class="form-label"><span data-i18n="govPage.tier_instance_label">Tier</span> <span style="font-weight:400;color:var(--text3);" data-i18n="govPage.tier_instance_note">(this fee is set per tier, not protocol-wide)</span></label>
       <select class="form-input" id="matrix-instance-select" onchange="onMatrixInstanceChange()">
         <!-- populated by onParamChange() -->
       </select>
-      <div class="form-hint" data-i18n="govPage.tier_instance_hint">Each tier's MatA/MatB pair stores its own value — pick which instance to view and target.</div>
+      <div class="form-hint" data-i18n="govPage.tier_instance_hint">Each tier's PairManager broadcasts the fee to every MatA/MatB pair it has ever added — pick which tier to target.</div>
     </div>
 
     <div class="form-row" id="current-value-row" style="display:none;">
@@ -449,9 +452,14 @@ const _NET_STATIC = ethers.Network.from(CHAIN_ID);
 // load) means translations apply correctly instead of always falling back
 // to English.
 const PARAM_TARGETS = {
-  1: TIER_ROUTER, 2: TIER_ROUTER, 3: TIER_ROUTER,
+  1: TIER_ROUTER, 2: TIER_ROUTER,
+  // V8.21: param 3 (Escrow Floor Multiplier) retired -- no target, not proposable.
   4: MK_ADDR, 5: MK_ADDR, 6: MK_ADDR, 7: MK_ADDR, 8: MK_ADDR,
-  9: TIER_ROUTER, 10: TIER_ROUTER,
+  // V8.21: param 9 (Withdrawal Fee BPS) now resolves to a per-tier
+  // PairManagerV8 address via the tier picker (see PM_TIER_GETTER below),
+  // not a fixed contract -- this placeholder is overwritten at render time.
+  // Param 10 (Early Exit Penalty BPS) retired entirely -- no target, not proposable.
+  9: TIER_ROUTER,
   11: GOV_ADDR, 12: GOV_ADDR, 13: GOV_ADDR,
   14: MK_ADDR,
   15: TIER_ROUTER, 16: TIER_ROUTER, 17: TIER_ROUTER, 18: TIER_ROUTER,
@@ -470,14 +478,21 @@ const PARAM_ARRAY_KIND = { 14: 'ladder', 36: 'boostTable' };
 const PARAM_FALLBACK = {
   1:  { label:'Auto-Upgrade Cycle Threshold', hint:'Cycles W1 must complete before auto-upgrade triggers.' },
   2:  { label:'Re-entry Min Cycles', hint:'Minimum cycles a wallet must complete before re-entering.' },
-  3:  { label:'Escrow Floor Multiplier', hint:'BPS multiplier on floor for escrow-funded cross (e.g. 120 = 1.2×).' },
+  // V8.21: param 3 (Escrow Floor Multiplier) retired entirely -- TierRouter's
+  // setter was deleted (it gated a guard that could never fire), and propose()
+  // now permanently rejects this id. No fallback entry, so it can't render.
   4:  { label:'Velocity Window (s)', hint:'Time window for velocity checks (seconds). 3600 = 1 hour.' },
   5:  { label:'Velocity Threshold', hint:'Minimum fills required within the velocity window to keep gate open.' },
   6:  { label:'Deflation Threshold', hint:'Parked wallet % above which deflation mode activates.' },
   7:  { label:'Idle Slot Timeout (s)', hint:'Seconds before an idle slot is eligible for reclamation.' },
   8:  { label:'Max Items Per Upkeep', hint:'Max work items processed per keeper call.' },
-  9:  { label:'Withdrawal Fee BPS', hint:'Fee on withdrawals in BPS (150 = 1.5%).' },
-  10: { label:'Early Exit Penalty BPS', hint:'Penalty on early matrix exit in BPS (2000 = 20%).' },
+  9:  { label:'Withdrawal Fee BPS', hint:'Fee on withdrawals in BPS (150 = 1.5%). V8.21: targets a tier’s PairManagerV8, which broadcasts the new fee to every MatA/MatB pair that tier has ever added (not just one matrix instance).' },
+  // V8.21: param 10 (Early Exit Penalty BPS) retired entirely -- the
+  // field/setter/getter were removed from FigureEightMatrixV8.sol because
+  // they were stored/DAO-votable but never consumed by any withdraw/cycle
+  // logic. No fallback entry, so it can't render. See V8Governance.sol's
+  // retirement note for the real (hardcoded) early-exit penalty mechanism,
+  // which lives in CNOVATreasury.redeemAtFloor().
   11: { label:'Voting Period (s)', hint:'Duration of the voting window in seconds.' },
   12: { label:'Timelock Period (s)', hint:'Delay between proposal passing and execution in seconds.' },
   13: { label:'Quorum BPS', hint:'Minimum % of CNOVA supply that must vote (200 = 2%).' },
@@ -492,9 +507,9 @@ const PARAM_FALLBACK = {
   18: { label:'Inactivity Guard Enabled', hint:'Master on/off switch for the inactivity guard (1 = enabled, 0 = disabled).' },
   19: { label:'Parked Grace Period', hint:'Seconds a parked member must wait before becoming eligible for rescue or eviction.' },
   20: { label:'Rescue Ratio BPS', hint:'Withdrawal ratio (BPS of total earned) above which a parked member is evicted instead of rescued.' },
-  21: { label:'SF Target', hint:'StabilityFund health target in USDC. 100% of withdrawal fees route to the Buyback Reserve once balance reaches this.' },
+  21: { label:'SF Target (Manual Fallback)', hint:'StabilityFund health target in USDC, used as a fallback. 100% of withdrawal fees route to the Buyback Reserve once balance reaches this. As of V8.21, the LIVE target usually auto-scales with the highest tier the system has organically opened (current tier entry fee x a per-tier multiplier) — this DAO-voted value only takes effect if that auto-scaling is switched off or not yet wired.' },
   22: { label:'SF Community Carve-Out BPS', hint:'Share of SF inflow routed to CommunityWallet (BPS). 0 pauses routing without unsetting CommunityWallet.' },
-  23: { label:'SF Stability Floor', hint:'Minimum SF balance reserved before any payouts. Capped at SF Target — can never exceed it.' },
+  23: { label:'SF Stability Floor', hint:'Minimum SF balance reserved before any payouts. Capped at the current effective SF Target (auto-scaled or manual fallback) — can never exceed it.' },
   24: { label:'Buyback Trigger Threshold', hint:'USDC balance in the Buyback Reserve required to trigger a CNOVA buyback.' },
   25: { label:'Buyback Max Slippage BPS', hint:'Maximum slippage allowed (BPS) on a buyback swap before it reverts.' },
   26: { label:'Direct Sale Max Tx BPS', hint:'Per-transaction whale cap on CNOVADirectSale, as a % of CNOVA total supply. 0 disables the cap.' },
@@ -547,7 +562,7 @@ const VALUE_LABELS = {
   11: v => `${v}s (${(v/3600).toFixed(0)}h)`,
   12: v => `${v}s (${(v/3600).toFixed(0)}h)`,
   9:  v => `${v} BPS (${(v/100).toFixed(2)}%)`,
-  10: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
+  // V8.21: param 10 (Early Exit Penalty BPS) retired -- no formatter needed.
   13: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
   // V8.20 second wave
   15: v => `${v} members`,
@@ -615,13 +630,14 @@ const READ_ABI = [
   // TierRouter
   'function autoUpgradeCycleThreshold() external view returns (uint256)',
   'function reentryMinCycles() external view returns (uint256)',
-  'function escrowFloorMultiplier() external view returns (uint256)',
+  // V8.21: escrowFloorMultiplier() removed -- TierRouter no longer has this function.
   'function whaleGateThreshold() external view returns (uint256)',
   'function inactivityDaysThreshold() external view returns (uint256)',
   'function inactivityCyclesThreshold() external view returns (uint256)',
   'function inactivityGuardEnabled() external view returns (bool)',
-  'function tierMatrixAAddr(uint256) external view returns (address)',
-  'function tierMatrixBAddr(uint256) external view returns (address)',
+  // V8.21: tierMatrixAAddr/tierMatrixBAddr removed -- param 9 no longer
+  // resolves to a single matrix instance (see tierPairManagers below).
+  'function tierPairManagers(uint256) external view returns (address)',
   // MatrixKeeper
   'function velocityWindow() external view returns (uint256)',
   'function velocityThreshold() external view returns (uint256)',
@@ -652,16 +668,20 @@ const READ_ABI = [
   'function genesisBps() external view returns (uint256)',
   'function distributeRatioBps() external view returns (uint256)',
   'function distributeInterval() external view returns (uint256)',
-  // Matrix instance (params 9/10 -- per-tier, not protocol-wide; see PARAM_META)
+  // Matrix instance (param 9 -- per-tier, not protocol-wide; see PARAM_META).
+  // withdrawalFeeBps() reads a specific MatA/MatB pair's live value;
+  // lastWithdrawalFeeBps() reads the PairManagerV8's last-broadcast value
+  // (0 = never broadcast, every pair still on its constructor default).
   'function withdrawalFeeBps() external view returns (uint256)',
-  'function earlyExitPenaltyBps() external view returns (uint256)',
+  'function lastWithdrawalFeeBps() external view returns (uint256)',
 ];
 
 // paramId -> getter function name on PARAM_META[paramId].target (READ_ABI above).
-// Params 9 and 10 are intentionally absent -- they resolve via the matrix
-// instance picker (see matrix-instance-row) instead of a fixed target.
+// Param 9 is intentionally absent -- it resolves via the tier picker (see
+// matrix-instance-row / PM_TIER_GETTER) instead of a fixed target.
 const PARAM_GETTER = {
-  1: 'autoUpgradeCycleThreshold', 2: 'reentryMinCycles', 3: 'escrowFloorMultiplier',
+  1: 'autoUpgradeCycleThreshold', 2: 'reentryMinCycles',
+  // V8.21: param 3 retired -- no getter (the on-chain function was deleted).
   4: 'velocityWindow', 5: 'velocityThreshold', 6: 'deflationThreshold',
   7: 'idleSlotTimeout', 8: 'maxItemsPerUpkeep',
   11: 'votingPeriod', 12: 'timelockPeriod', 13: 'quorumBps',
@@ -675,8 +695,13 @@ const PARAM_GETTER = {
   34: 'vestDuration', 35: 'maxPenaltyBps',
   37: 'genesisBps', 38: 'distributeRatioBps', 39: 'distributeInterval',
 };
-// paramId -> getter name for the matrix-instance-resolved params (9, 10)
-const MATRIX_INSTANCE_GETTER = { 9: 'withdrawalFeeBps', 10: 'earlyExitPenaltyBps' };
+// paramId -> getter name for the per-tier-PairManagerV8-resolved params (9 only,
+// since V8.21 retired param 10). Read via lastWithdrawalFeeBps() on the
+// PairManagerV8, NOT withdrawalFeeBps() on a single matrix -- the PM's
+// last-broadcast value is what setWithdrawalFeeBps() actually changes, and
+// is representative of every pair in the tier (they're all kept in sync by
+// the broadcast, with 0 meaning "never broadcast, pairs sit on default").
+const PM_TIER_GETTER = { 9: 'lastWithdrawalFeeBps' };
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let provider, signer, userAddr;
@@ -751,7 +776,6 @@ async function loadProposals() {
   const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, ro);
 
   await refreshVotingPower();
-
   let count = 0n;
   try { count = await gov.proposalCount(); } catch(e) { console.warn(e); }
   document.getElementById('active-count').textContent = '—';
@@ -991,17 +1015,15 @@ async function onParamChange() {
   document.getElementById('param-hint').textContent     = meta.hint;
   document.getElementById('allowed-row').style.display  = 'block';
 
-  if (MATRIX_INSTANCE_GETTER[paramId]) {
-    // Params 9/10 are stored per-matrix-instance, not on TierRouter itself --
-    // show a tier/side picker and resolve target + current value from that.
+  if (PM_TIER_GETTER[paramId]) {
+    // V8.21: param 9 targets a per-tier PairManagerV8 (broadcasts to every
+    // pair in that tier), not a single matrix instance -- show a tier-only
+    // picker and resolve target + current value from that.
     document.getElementById('matrix-instance-row').style.display = 'block';
     const sel = document.getElementById('matrix-instance-select');
-    if (sel.options.length === 0) {
+    if (sel.options.length === 0 || sel.options[0].value.includes('|')) {
       const opts = [];
-      for (let t = 1; t <= 10; t++) {
-        opts.push(`<option value="${t-1}|A">T${t} MatA</option>`);
-        opts.push(`<option value="${t-1}|B">T${t} MatB</option>`);
-      }
+      for (let t = 1; t <= 10; t++) opts.push(`<option value="${t-1}">T${t}</option>`);
       sel.innerHTML = opts.join('');
     }
     await onMatrixInstanceChange();
@@ -1026,26 +1048,27 @@ async function onParamChange() {
   updateProposeGate();
 }
 
-// Resolves the picked tier/side to a real matrix address via TierRouter,
-// updates the (now-correct) target field, and loads that instance's value.
+// Resolves the picked tier to its PairManagerV8 address via TierRouter,
+// updates the (now-correct) target field, and loads that PM's last-broadcast
+// value. V8.21: param 9 broadcasts to every pair in the tier via this single
+// PairManagerV8 -- there is no per-side (MatA/MatB) distinction anymore.
 async function onMatrixInstanceChange() {
   const paramId = parseInt(document.getElementById('param-select').value);
-  const getter  = MATRIX_INSTANCE_GETTER[paramId];
+  const getter  = PM_TIER_GETTER[paramId];
   if (!getter) return;
-  const [tierIdxStr, side] = document.getElementById('matrix-instance-select').value.split('|');
-  const tierIdx = parseInt(tierIdxStr);
+  const tierIdx = parseInt(document.getElementById('matrix-instance-select').value);
   const cvDiv   = document.getElementById('current-value-display');
   document.getElementById('current-value-row').style.display = 'block';
   cvDiv.textContent = t('govPage.js.loading', 'Loading…');
   try {
     const tr = new ethers.Contract(TIER_ROUTER, READ_ABI, getRo());
-    const matrixAddr = side === 'A' ? await tr.tierMatrixAAddr(tierIdx) : await tr.tierMatrixBAddr(tierIdx);
-    document.getElementById('target-input').value = matrixAddr;
-    if (!matrixAddr || matrixAddr === ethers.ZeroAddress) {
+    const pmAddr = await tr.tierPairManagers(tierIdx);
+    document.getElementById('target-input').value = pmAddr;
+    if (!pmAddr || pmAddr === ethers.ZeroAddress) {
       cvDiv.textContent = t('govPage.js.tier_not_deployed', 'Tier not deployed yet.');
       return;
     }
-    await loadCurrentValue(paramId, matrixAddr, getter);
+    await loadCurrentValue(paramId, pmAddr, getter);
   } catch (e) {
     console.warn('onMatrixInstanceChange:', e);
     cvDiv.textContent = t('govPage.js.could_not_load', 'Could not load — check console.');
@@ -1062,6 +1085,14 @@ async function loadCurrentValue(paramId, targetAddr, getterOverride) {
   try {
     const c = new ethers.Contract(targetAddr, READ_ABI, getRo());
     const v = await c[getter]();
+    // V8.21: PairManagerV8.lastWithdrawalFeeBps() == 0 is a sentinel meaning
+    // "never broadcast" -- every pair in the tier is still sitting on its own
+    // constructor default, not literally a 0 BPS fee. Show that distinction
+    // instead of the misleading "0 BPS (0.00%)".
+    if (getter === 'lastWithdrawalFeeBps' && Number(v) === 0) {
+      cvDiv.textContent = t('govPage.js.fee_never_broadcast', 'Not yet broadcast — each pair uses its own constructor default.');
+      return;
+    }
     cvDiv.textContent = fmtValue(paramId, typeof v === 'boolean' ? (v ? 1 : 0) : Number(v));
   } catch (e) {
     console.warn('loadCurrentValue:', paramId, getter, e);
