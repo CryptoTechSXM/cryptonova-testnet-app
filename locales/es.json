@@ -639,7 +639,37 @@
       "p38_option": "Ratio de Distribución (BPS)",
       "p39_label": "Intervalo de Distribución Comunitario",
       "p39_hint": "Segundos entre las distribuciones del pool comunitario, y la ventana de expiración de reclamo para cada una.",
-      "p39_option": "Intervalo de Distribución (segundos)"
+      "p39_option": "Intervalo de Distribución (segundos)",
+      "p40_label": "Multiplicador Objetivo SF — T1",
+      "p40_hint": "Multiplicador aplicado a la tarifa de entrada de T1 para calcular el objetivo auto-escalado de StabilityFund cuando T1 es el nivel más alto abierto. Por defecto 10x.",
+      "p40_option": "Multiplicador Objetivo SF — T1",
+      "p41_label": "Multiplicador Objetivo SF — T2",
+      "p41_hint": "Multiplicador aplicado a la tarifa de entrada de T2 para calcular el objetivo auto-escalado de StabilityFund cuando T2 es el nivel más alto abierto. Por defecto 20x.",
+      "p41_option": "Multiplicador Objetivo SF — T2",
+      "p42_label": "Multiplicador Objetivo SF — T3",
+      "p42_hint": "Multiplicador aplicado a la tarifa de entrada de T3 para calcular el objetivo auto-escalado de StabilityFund cuando T3 es el nivel más alto abierto. Por defecto 30x.",
+      "p42_option": "Multiplicador Objetivo SF — T3",
+      "p43_label": "Multiplicador Objetivo SF — T4",
+      "p43_hint": "Multiplicador aplicado a la tarifa de entrada de T4 para calcular el objetivo auto-escalado de StabilityFund cuando T4 es el nivel más alto abierto. Por defecto 40x.",
+      "p43_option": "Multiplicador Objetivo SF — T4",
+      "p44_label": "Multiplicador Objetivo SF — T5",
+      "p44_hint": "Multiplicador aplicado a la tarifa de entrada de T5 para calcular el objetivo auto-escalado de StabilityFund cuando T5 es el nivel más alto abierto. Por defecto 50x.",
+      "p44_option": "Multiplicador Objetivo SF — T5",
+      "p45_label": "Multiplicador Objetivo SF — T6",
+      "p45_hint": "Multiplicador aplicado a la tarifa de entrada de T6 para calcular el objetivo auto-escalado de StabilityFund cuando T6 es el nivel más alto abierto. Por defecto 60x.",
+      "p45_option": "Multiplicador Objetivo SF — T6",
+      "p46_label": "Multiplicador Objetivo SF — T7",
+      "p46_hint": "Multiplicador aplicado a la tarifa de entrada de T7 para calcular el objetivo auto-escalado de StabilityFund cuando T7 es el nivel más alto abierto. Por defecto 70x.",
+      "p46_option": "Multiplicador Objetivo SF — T7",
+      "p47_label": "Multiplicador Objetivo SF — T8",
+      "p47_hint": "Multiplicador aplicado a la tarifa de entrada de T8 para calcular el objetivo auto-escalado de StabilityFund cuando T8 es el nivel más alto abierto. Por defecto 80x.",
+      "p47_option": "Multiplicador Objetivo SF — T8",
+      "p48_label": "Multiplicador Objetivo SF — T9",
+      "p48_hint": "Multiplicador aplicado a la tarifa de entrada de T9 para calcular el objetivo auto-escalado de StabilityFund cuando T9 es el nivel más alto abierto. Por defecto 90x.",
+      "p48_option": "Multiplicador Objetivo SF — T9",
+      "p49_label": "Multiplicador Objetivo SF — T10",
+      "p49_hint": "Multiplicador aplicado a la tarifa de entrada de T10 para calcular el objetivo auto-escalado de StabilityFund cuando T10 es el nivel más alto abierto. Por defecto 100x.",
+      "p49_option": "Multiplicador Objetivo SF — T10"
     },
     "js": {
       "state_active": "Activa",
@@ -1057,4 +1087,4 @@
     "cta_community": "💬 Chat Comunitario",
     "cta_support": "🤖 Soporte y P&amp;R"
   }
-}                                 
+}

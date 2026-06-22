@@ -639,7 +639,37 @@
       "p38_option": "Verteilungsverhältnis (BPS)",
       "p39_label": "Community-Verteilungsintervall",
       "p39_hint": "Sekunden zwischen den Ausschüttungen des Community-Pools und dem Anspruchsablauffenster für jede einzelne.",
-      "p39_option": "Verteilungsintervall (Sekunden)"
+      "p39_option": "Verteilungsintervall (Sekunden)",
+      "p40_label": "SF-Zielmultiplikator — T1",
+      "p40_hint": "Multiplikator, der auf die Eintrittsgebühr von T1 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T1 die höchste offene Stufe ist. Standard 10x.",
+      "p40_option": "SF-Zielmultiplikator — T1",
+      "p41_label": "SF-Zielmultiplikator — T2",
+      "p41_hint": "Multiplikator, der auf die Eintrittsgebühr von T2 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T2 die höchste offene Stufe ist. Standard 20x.",
+      "p41_option": "SF-Zielmultiplikator — T2",
+      "p42_label": "SF-Zielmultiplikator — T3",
+      "p42_hint": "Multiplikator, der auf die Eintrittsgebühr von T3 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T3 die höchste offene Stufe ist. Standard 30x.",
+      "p42_option": "SF-Zielmultiplikator — T3",
+      "p43_label": "SF-Zielmultiplikator — T4",
+      "p43_hint": "Multiplikator, der auf die Eintrittsgebühr von T4 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T4 die höchste offene Stufe ist. Standard 40x.",
+      "p43_option": "SF-Zielmultiplikator — T4",
+      "p44_label": "SF-Zielmultiplikator — T5",
+      "p44_hint": "Multiplikator, der auf die Eintrittsgebühr von T5 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T5 die höchste offene Stufe ist. Standard 50x.",
+      "p44_option": "SF-Zielmultiplikator — T5",
+      "p45_label": "SF-Zielmultiplikator — T6",
+      "p45_hint": "Multiplikator, der auf die Eintrittsgebühr von T6 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T6 die höchste offene Stufe ist. Standard 60x.",
+      "p45_option": "SF-Zielmultiplikator — T6",
+      "p46_label": "SF-Zielmultiplikator — T7",
+      "p46_hint": "Multiplikator, der auf die Eintrittsgebühr von T7 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T7 die höchste offene Stufe ist. Standard 70x.",
+      "p46_option": "SF-Zielmultiplikator — T7",
+      "p47_label": "SF-Zielmultiplikator — T8",
+      "p47_hint": "Multiplikator, der auf die Eintrittsgebühr von T8 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T8 die höchste offene Stufe ist. Standard 80x.",
+      "p47_option": "SF-Zielmultiplikator — T8",
+      "p48_label": "SF-Zielmultiplikator — T9",
+      "p48_hint": "Multiplikator, der auf die Eintrittsgebühr von T9 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T9 die höchste offene Stufe ist. Standard 90x.",
+      "p48_option": "SF-Zielmultiplikator — T9",
+      "p49_label": "SF-Zielmultiplikator — T10",
+      "p49_hint": "Multiplikator, der auf die Eintrittsgebühr von T10 angewendet wird, um das automatisch skalierte Ziel des StabilityFund zu berechnen, wenn T10 die höchste offene Stufe ist. Standard 100x.",
+      "p49_option": "SF-Zielmultiplikator — T10"
     },
     "js": {
       "state_active": "Aktiv",
@@ -1057,4 +1087,4 @@
     "cta_community": "💬 Community-Chat",
     "cta_support": "🤖 Support & P&amp;R"
   }
-}                     
+}

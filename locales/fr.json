@@ -639,7 +639,37 @@
       "p38_option": "Ratio de Distribution (BPS)",
       "p39_label": "Intervalle de Distribution Communautaire",
       "p39_hint": "Secondes entre les distributions du pool communautaire, et la fenêtre d'expiration de réclamation pour chacune.",
-      "p39_option": "Intervalle de Distribution (secondes)"
+      "p39_option": "Intervalle de Distribution (secondes)",
+      "p40_label": "Multiplicateur Cible SF — T1",
+      "p40_hint": "Multiplicateur appliqué aux frais d'entrée de T1 pour calculer la cible auto-ajustée du StabilityFund lorsque T1 est le palier le plus élevé ouvert. Par défaut 10x.",
+      "p40_option": "Multiplicateur Cible SF — T1",
+      "p41_label": "Multiplicateur Cible SF — T2",
+      "p41_hint": "Multiplicateur appliqué aux frais d'entrée de T2 pour calculer la cible auto-ajustée du StabilityFund lorsque T2 est le palier le plus élevé ouvert. Par défaut 20x.",
+      "p41_option": "Multiplicateur Cible SF — T2",
+      "p42_label": "Multiplicateur Cible SF — T3",
+      "p42_hint": "Multiplicateur appliqué aux frais d'entrée de T3 pour calculer la cible auto-ajustée du StabilityFund lorsque T3 est le palier le plus élevé ouvert. Par défaut 30x.",
+      "p42_option": "Multiplicateur Cible SF — T3",
+      "p43_label": "Multiplicateur Cible SF — T4",
+      "p43_hint": "Multiplicateur appliqué aux frais d'entrée de T4 pour calculer la cible auto-ajustée du StabilityFund lorsque T4 est le palier le plus élevé ouvert. Par défaut 40x.",
+      "p43_option": "Multiplicateur Cible SF — T4",
+      "p44_label": "Multiplicateur Cible SF — T5",
+      "p44_hint": "Multiplicateur appliqué aux frais d'entrée de T5 pour calculer la cible auto-ajustée du StabilityFund lorsque T5 est le palier le plus élevé ouvert. Par défaut 50x.",
+      "p44_option": "Multiplicateur Cible SF — T5",
+      "p45_label": "Multiplicateur Cible SF — T6",
+      "p45_hint": "Multiplicateur appliqué aux frais d'entrée de T6 pour calculer la cible auto-ajustée du StabilityFund lorsque T6 est le palier le plus élevé ouvert. Par défaut 60x.",
+      "p45_option": "Multiplicateur Cible SF — T6",
+      "p46_label": "Multiplicateur Cible SF — T7",
+      "p46_hint": "Multiplicateur appliqué aux frais d'entrée de T7 pour calculer la cible auto-ajustée du StabilityFund lorsque T7 est le palier le plus élevé ouvert. Par défaut 70x.",
+      "p46_option": "Multiplicateur Cible SF — T7",
+      "p47_label": "Multiplicateur Cible SF — T8",
+      "p47_hint": "Multiplicateur appliqué aux frais d'entrée de T8 pour calculer la cible auto-ajustée du StabilityFund lorsque T8 est le palier le plus élevé ouvert. Par défaut 80x.",
+      "p47_option": "Multiplicateur Cible SF — T8",
+      "p48_label": "Multiplicateur Cible SF — T9",
+      "p48_hint": "Multiplicateur appliqué aux frais d'entrée de T9 pour calculer la cible auto-ajustée du StabilityFund lorsque T9 est le palier le plus élevé ouvert. Par défaut 90x.",
+      "p48_option": "Multiplicateur Cible SF — T9",
+      "p49_label": "Multiplicateur Cible SF — T10",
+      "p49_hint": "Multiplicateur appliqué aux frais d'entrée de T10 pour calculer la cible auto-ajustée du StabilityFund lorsque T10 est le palier le plus élevé ouvert. Par défaut 100x.",
+      "p49_option": "Multiplicateur Cible SF — T10"
     },
     "js": {
       "state_active": "Active",
@@ -1057,4 +1087,4 @@
     "cta_community": "💬 Chat Communautaire",
     "cta_support": "🤖 Support et Q&amp;R"
   }
-}                        
+}

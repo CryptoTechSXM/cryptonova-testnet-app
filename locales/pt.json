@@ -639,7 +639,37 @@
       "p38_option": "Índice de Distribuição (BPS)",
       "p39_label": "Intervalo de Distribuição Comunitária",
       "p39_hint": "Segundos entre as distribuições do pool comunitário, e a janela de expiração de reivindicação para cada uma.",
-      "p39_option": "Intervalo de Distribuição (segundos)"
+      "p39_option": "Intervalo de Distribuição (segundos)",
+      "p40_label": "Multiplicador Meta SF — T1",
+      "p40_hint": "Multiplicador aplicado à taxa de entrada do T1 para calcular a meta auto-escalada do StabilityFund quando T1 é o nível mais alto aberto. Padrão 10x.",
+      "p40_option": "Multiplicador Meta SF — T1",
+      "p41_label": "Multiplicador Meta SF — T2",
+      "p41_hint": "Multiplicador aplicado à taxa de entrada do T2 para calcular a meta auto-escalada do StabilityFund quando T2 é o nível mais alto aberto. Padrão 20x.",
+      "p41_option": "Multiplicador Meta SF — T2",
+      "p42_label": "Multiplicador Meta SF — T3",
+      "p42_hint": "Multiplicador aplicado à taxa de entrada do T3 para calcular a meta auto-escalada do StabilityFund quando T3 é o nível mais alto aberto. Padrão 30x.",
+      "p42_option": "Multiplicador Meta SF — T3",
+      "p43_label": "Multiplicador Meta SF — T4",
+      "p43_hint": "Multiplicador aplicado à taxa de entrada do T4 para calcular a meta auto-escalada do StabilityFund quando T4 é o nível mais alto aberto. Padrão 40x.",
+      "p43_option": "Multiplicador Meta SF — T4",
+      "p44_label": "Multiplicador Meta SF — T5",
+      "p44_hint": "Multiplicador aplicado à taxa de entrada do T5 para calcular a meta auto-escalada do StabilityFund quando T5 é o nível mais alto aberto. Padrão 50x.",
+      "p44_option": "Multiplicador Meta SF — T5",
+      "p45_label": "Multiplicador Meta SF — T6",
+      "p45_hint": "Multiplicador aplicado à taxa de entrada do T6 para calcular a meta auto-escalada do StabilityFund quando T6 é o nível mais alto aberto. Padrão 60x.",
+      "p45_option": "Multiplicador Meta SF — T6",
+      "p46_label": "Multiplicador Meta SF — T7",
+      "p46_hint": "Multiplicador aplicado à taxa de entrada do T7 para calcular a meta auto-escalada do StabilityFund quando T7 é o nível mais alto aberto. Padrão 70x.",
+      "p46_option": "Multiplicador Meta SF — T7",
+      "p47_label": "Multiplicador Meta SF — T8",
+      "p47_hint": "Multiplicador aplicado à taxa de entrada do T8 para calcular a meta auto-escalada do StabilityFund quando T8 é o nível mais alto aberto. Padrão 80x.",
+      "p47_option": "Multiplicador Meta SF — T8",
+      "p48_label": "Multiplicador Meta SF — T9",
+      "p48_hint": "Multiplicador aplicado à taxa de entrada do T9 para calcular a meta auto-escalada do StabilityFund quando T9 é o nível mais alto aberto. Padrão 90x.",
+      "p48_option": "Multiplicador Meta SF — T9",
+      "p49_label": "Multiplicador Meta SF — T10",
+      "p49_hint": "Multiplicador aplicado à taxa de entrada do T10 para calcular a meta auto-escalada do StabilityFund quando T10 é o nível mais alto aberto. Padrão 100x.",
+      "p49_option": "Multiplicador Meta SF — T10"
     },
     "js": {
       "state_active": "Ativa",
@@ -1057,4 +1087,4 @@
     "cta_community": "💬 Chat da Comunidade",
     "cta_support": "🤖 Suporte e P&amp;R"
   }
-}                         
+}

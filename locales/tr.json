@@ -639,7 +639,37 @@
       "p38_option": "Dağıtım Oranı (BPS)",
       "p39_label": "Topluluk Dağıtım Aralığı",
       "p39_hint": "Topluluk havuzu dağıtımları arasındaki saniyeler ve her biri için talep son kullanma penceresi.",
-      "p39_option": "Dağıtım Aralığı (saniye)"
+      "p39_option": "Dağıtım Aralığı (saniye)",
+      "p40_label": "SF Hedef Çarpanı — T1",
+      "p40_hint": "T1 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T1'in giriş ücretine uygulanan çarpan. Varsayılan 10x.",
+      "p40_option": "SF Hedef Çarpanı — T1",
+      "p41_label": "SF Hedef Çarpanı — T2",
+      "p41_hint": "T2 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T2'nin giriş ücretine uygulanan çarpan. Varsayılan 20x.",
+      "p41_option": "SF Hedef Çarpanı — T2",
+      "p42_label": "SF Hedef Çarpanı — T3",
+      "p42_hint": "T3 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T3'ün giriş ücretine uygulanan çarpan. Varsayılan 30x.",
+      "p42_option": "SF Hedef Çarpanı — T3",
+      "p43_label": "SF Hedef Çarpanı — T4",
+      "p43_hint": "T4 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T4'ün giriş ücretine uygulanan çarpan. Varsayılan 40x.",
+      "p43_option": "SF Hedef Çarpanı — T4",
+      "p44_label": "SF Hedef Çarpanı — T5",
+      "p44_hint": "T5 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T5'in giriş ücretine uygulanan çarpan. Varsayılan 50x.",
+      "p44_option": "SF Hedef Çarpanı — T5",
+      "p45_label": "SF Hedef Çarpanı — T6",
+      "p45_hint": "T6 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T6'nın giriş ücretine uygulanan çarpan. Varsayılan 60x.",
+      "p45_option": "SF Hedef Çarpanı — T6",
+      "p46_label": "SF Hedef Çarpanı — T7",
+      "p46_hint": "T7 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T7'nin giriş ücretine uygulanan çarpan. Varsayılan 70x.",
+      "p46_option": "SF Hedef Çarpanı — T7",
+      "p47_label": "SF Hedef Çarpanı — T8",
+      "p47_hint": "T8 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T8'in giriş ücretine uygulanan çarpan. Varsayılan 80x.",
+      "p47_option": "SF Hedef Çarpanı — T8",
+      "p48_label": "SF Hedef Çarpanı — T9",
+      "p48_hint": "T9 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T9'un giriş ücretine uygulanan çarpan. Varsayılan 90x.",
+      "p48_option": "SF Hedef Çarpanı — T9",
+      "p49_label": "SF Hedef Çarpanı — T10",
+      "p49_hint": "T10 en yüksek açık seviye olduğunda StabilityFund'un otomatik ölçeklenen hedefini hesaplamak için T10'un giriş ücretine uygulanan çarpan. Varsayılan 100x.",
+      "p49_option": "SF Hedef Çarpanı — T10"
     },
     "js": {
       "state_active": "Aktif",
@@ -1057,4 +1087,4 @@
     "cta_community": "💬 Topluluk Sohbeti",
     "cta_support": "🤖 Destek ve S&amp;C"
   }
-}                              
+}
