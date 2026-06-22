@@ -305,6 +305,21 @@
           <option value="22" data-i18n="govPage.params.p22_option">SF Community Carve-Out (BPS)</option>
           <option value="23" data-i18n="govPage.params.p23_option">SF Stability Floor (USDC)</option>
         </optgroup>
+        <optgroup label="StabilityFund — Per-Tier Target Multiplier">
+          <!-- V8.22: sfTargetMultiplier[tier] is independently DAO-governable
+               per tier -- one fixed param id per tier (no tier picker needed,
+               unlike param 9). -->
+          <option value="40" data-i18n="govPage.params.p40_option">SF Target Multiplier — T1</option>
+          <option value="41" data-i18n="govPage.params.p41_option">SF Target Multiplier — T2</option>
+          <option value="42" data-i18n="govPage.params.p42_option">SF Target Multiplier — T3</option>
+          <option value="43" data-i18n="govPage.params.p43_option">SF Target Multiplier — T4</option>
+          <option value="44" data-i18n="govPage.params.p44_option">SF Target Multiplier — T5</option>
+          <option value="45" data-i18n="govPage.params.p45_option">SF Target Multiplier — T6</option>
+          <option value="46" data-i18n="govPage.params.p46_option">SF Target Multiplier — T7</option>
+          <option value="47" data-i18n="govPage.params.p47_option">SF Target Multiplier — T8</option>
+          <option value="48" data-i18n="govPage.params.p48_option">SF Target Multiplier — T9</option>
+          <option value="49" data-i18n="govPage.params.p49_option">SF Target Multiplier — T10</option>
+        </optgroup>
         <optgroup label="Buyback Reserve">
           <option value="24" data-i18n="govPage.params.p24_option">Buyback Trigger Threshold (USDC)</option>
           <option value="25" data-i18n="govPage.params.p25_option">Buyback Max Slippage (BPS)</option>
@@ -470,8 +485,17 @@ const PARAM_TARGETS = {
   30: CNOVA_ADDR, 31: CNOVA_ADDR, 32: CNOVA_ADDR, 33: CNOVA_ADDR, 34: CNOVA_ADDR, 35: CNOVA_ADDR,
   36: CNOVA_ADDR,
   37: CW_ADDR, 38: CW_ADDR, 39: CW_ADDR,
+  // V8.22: each tier's sfTargetMultiplier is its own fixed param id -- all
+  // ten resolve to the same SF_ADDR target, just a different array index
+  // (see PARAM_TIER_INDEX below) read via the same sfTargetMultiplier(uint8) getter.
+  40: SF_ADDR, 41: SF_ADDR, 42: SF_ADDR, 43: SF_ADDR, 44: SF_ADDR,
+  45: SF_ADDR, 46: SF_ADDR, 47: SF_ADDR, 48: SF_ADDR, 49: SF_ADDR,
 };
 const PARAM_ARRAY_KIND = { 14: 'ladder', 36: 'boostTable' };
+// Fixed tier index per param id (0-based) -- used only to pass an argument
+// to the shared sfTargetMultiplier(uint8) getter; there is no UI tier picker
+// for these since each param id already IS a specific tier.
+const PARAM_TIER_INDEX = { 40: 0, 41: 1, 42: 2, 43: 3, 44: 4, 45: 5, 46: 6, 47: 7, 48: 8, 49: 9 };
 
 // English fallback text, used by t() whenever a translation key is missing
 // (including before i18n.js's fetch resolves).
@@ -530,6 +554,19 @@ const PARAM_FALLBACK = {
   37: { label:'Community Genesis Split BPS', hint:'Genesis members’ share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
   38: { label:'Community Distribute Ratio BPS', hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
   39: { label:'Community Distribute Interval', hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
+  // V8.22: sfTargetMultiplier[tier] -- independently DAO-governable per tier.
+  // Default schedule is roughly 10x per tier step (T1=10x ... T10=100x), but
+  // each can be voted to any value on the shared allowed-values menu.
+  40: { label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1’s entry fee to compute StabilityFund’s auto-scaled target when T1 is the highest open tier. Default 10x.' },
+  41: { label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2’s entry fee to compute StabilityFund’s auto-scaled target when T2 is the highest open tier. Default 20x.' },
+  42: { label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3’s entry fee to compute StabilityFund’s auto-scaled target when T3 is the highest open tier. Default 30x.' },
+  43: { label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4’s entry fee to compute StabilityFund’s auto-scaled target when T4 is the highest open tier. Default 40x.' },
+  44: { label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5’s entry fee to compute StabilityFund’s auto-scaled target when T5 is the highest open tier. Default 50x.' },
+  45: { label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6’s entry fee to compute StabilityFund’s auto-scaled target when T6 is the highest open tier. Default 60x.' },
+  46: { label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7’s entry fee to compute StabilityFund’s auto-scaled target when T7 is the highest open tier. Default 70x.' },
+  47: { label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8’s entry fee to compute StabilityFund’s auto-scaled target when T8 is the highest open tier. Default 80x.' },
+  48: { label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9’s entry fee to compute StabilityFund’s auto-scaled target when T9 is the highest open tier. Default 90x.' },
+  49: { label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10’s entry fee to compute StabilityFund’s auto-scaled target when T10 is the highest open tier. Default 100x.' },
 };
 
 function PARAM_META_GET(paramId) {
@@ -589,6 +626,9 @@ const VALUE_LABELS = {
   37: v => `${(v/100).toFixed(0)}% Genesis / ${((10000-v)/100).toFixed(0)}% Pioneer`,
   38: v => `${v} BPS (${(v/100).toFixed(0)}%)`,
   39: v => `${(v/86400).toFixed(0)} days`,
+  // V8.22: sfTargetMultiplier values are plain multiplier integers (10, 20, 30...), not BPS.
+  40: v => `${v}x`, 41: v => `${v}x`, 42: v => `${v}x`, 43: v => `${v}x`, 44: v => `${v}x`,
+  45: v => `${v}x`, 46: v => `${v}x`, 47: v => `${v}x`, 48: v => `${v}x`, 49: v => `${v}x`,
 };
 function fmtValue(paramId, v) {
   return VALUE_LABELS[paramId] ? VALUE_LABELS[paramId](v) : String(v);
@@ -674,6 +714,10 @@ const READ_ABI = [
   // (0 = never broadcast, every pair still on its constructor default).
   'function withdrawalFeeBps() external view returns (uint256)',
   'function lastWithdrawalFeeBps() external view returns (uint256)',
+  // V8.22: StabilityFund's public array getter -- takes a tier index arg.
+  // Params 40-49 all share this one getter name; PARAM_TIER_INDEX supplies
+  // the fixed index argument for whichever param id is selected.
+  'function sfTargetMultiplier(uint256) external view returns (uint256)',
 ];
 
 // paramId -> getter function name on PARAM_META[paramId].target (READ_ABI above).
@@ -694,6 +738,13 @@ const PARAM_GETTER = {
   30: 'rewardPct', 31: 'epochMintLimit', 32: 'epochMemberLimit', 33: 'epochTimeLimit',
   34: 'vestDuration', 35: 'maxPenaltyBps',
   37: 'genesisBps', 38: 'distributeRatioBps', 39: 'distributeInterval',
+  // V8.22: all ten share the same getter name -- PARAM_TIER_INDEX (below)
+  // supplies which array slot to read, passed as an arg via loadCurrentValue's
+  // getterArgs parameter, NOT resolved here.
+  40: 'sfTargetMultiplier', 41: 'sfTargetMultiplier', 42: 'sfTargetMultiplier',
+  43: 'sfTargetMultiplier', 44: 'sfTargetMultiplier', 45: 'sfTargetMultiplier',
+  46: 'sfTargetMultiplier', 47: 'sfTargetMultiplier', 48: 'sfTargetMultiplier',
+  49: 'sfTargetMultiplier',
 };
 // paramId -> getter name for the per-tier-PairManagerV8-resolved params (9 only,
 // since V8.21 retired param 10). Read via lastWithdrawalFeeBps() on the
@@ -1030,7 +1081,10 @@ async function onParamChange() {
   } else {
     document.getElementById('matrix-instance-row').style.display = 'none';
     document.getElementById('target-input').value = meta.target;
-    await loadCurrentValue(paramId, meta.target);
+    // V8.22: params 40-49 read sfTargetMultiplier(tierIndex) -- a fixed,
+    // param-id-baked index, not a UI-selected one (see PARAM_TIER_INDEX).
+    const fixedArgs = PARAM_TIER_INDEX[paramId] !== undefined ? [PARAM_TIER_INDEX[paramId]] : undefined;
+    await loadCurrentValue(paramId, meta.target, undefined, fixedArgs);
   }
 
   // Fetch allowed values from contract
@@ -1075,8 +1129,10 @@ async function onMatrixInstanceChange() {
   }
 }
 
-// Generic current-value loader used by every scalar param.
-async function loadCurrentValue(paramId, targetAddr, getterOverride) {
+// Generic current-value loader used by every scalar param. getterArgs (V8.22)
+// is an optional array of fixed arguments for getters that take one, e.g.
+// sfTargetMultiplier(uint256 tierIndex) for params 40-49.
+async function loadCurrentValue(paramId, targetAddr, getterOverride, getterArgs) {
   const cvDiv = document.getElementById('current-value-display');
   document.getElementById('current-value-row').style.display = 'block';
   cvDiv.textContent = t('govPage.js.loading', 'Loading…');
@@ -1084,7 +1140,7 @@ async function loadCurrentValue(paramId, targetAddr, getterOverride) {
   if (!getter) { cvDiv.textContent = '—'; return; }
   try {
     const c = new ethers.Contract(targetAddr, READ_ABI, getRo());
-    const v = await c[getter]();
+    const v = await c[getter](...(getterArgs || []));
     // V8.21: PairManagerV8.lastWithdrawalFeeBps() == 0 is a sentinel meaning
     // "never broadcast" -- every pair in the tier is still sitting on its own
     // constructor default, not literally a 0 BPS fee. Show that distinction
