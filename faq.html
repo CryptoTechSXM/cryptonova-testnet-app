@@ -110,25 +110,31 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="bfs queue matrix position breadth first search">
       <div class="acronym">BFS Matrix</div>
       <div class="full-name" data-i18n="faqPage.g1_full">Breadth-First Search Matrix</div>
-      <div class="definition" data-i18n="faqPage.g1_def">CryptoNova uses a 64-slot BFS (breadth-first) queue per tier. Members fill positions level-by-level. When all 64 slots are filled, the root member cycles out, receives their pool payout, and the matrix resets for the next cycle. Position determines chain pay depth.</div>
+      <div class="definition" data-i18n="faqPage.g1_def">CryptoNova uses a 127-seat BFS (breadth-first) queue per tier — a 7-level binary tree. Members fill positions level-by-level. When all 127 seats are filled, the root member cycles out, receives their pool payout, and the matrix resets for the next cycle. Position determines chain pay depth.</div>
     </div>
 
     <div class="glossary-card" data-terms="cnova token reward crypto nova">
       <div class="acronym">CNOVA</div>
       <div class="full-name" data-i18n="faqPage.g2_full">CryptoNova Token</div>
-      <div class="definition" data-i18n="faqPage.g2_def">The native reward token of the CryptoNova Matrix protocol. Minted and distributed to participants on each matrix entry. Has a rising floor price backed by the on-chain StabilityFund. Not a stablecoin &mdash; market value can rise above the floor based on demand.</div>
+      <div class="definition" data-i18n="faqPage.g2_def">The native reward token of the CryptoNova Matrix protocol. Minted and distributed to participants on each matrix entry. Has a rising floor price backed by the on-chain CNOVA Treasury. Not a stablecoin &mdash; market value can rise above the floor based on demand.</div>
     </div>
 
-    <div class="glossary-card" data-terms="stability fund floor price backing usdc reserve">
-      <div class="acronym">StabilityFund</div>
+    <div class="glossary-card" data-terms="cnova treasury floor price backing usdc reserve">
+      <div class="acronym">CNOVA Treasury</div>
       <div class="full-name" data-i18n="faqPage.g3_full">CNOVA Floor Price Reserve</div>
-      <div class="definition" data-i18n="faqPage.g3_def">15% of every T1 entry fee flows into the on-chain StabilityFund contract. The floor price = StabilityFund balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.</div>
+      <div class="definition" data-i18n="faqPage.g3_def">10% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.</div>
     </div>
 
-    <div class="glossary-card" data-terms="dao treasury reserve governance">
-      <div class="acronym">DAO Treasury</div>
-      <div class="full-name" data-i18n="faqPage.g4_full">Decentralized Autonomous Organization Reserve</div>
-      <div class="definition" data-i18n="faqPage.g4_def">2% of each entry fee flows into the DAO Treasury &mdash; a separate on-chain reserve for future governance decisions, grants, and protocol development. It is not used for CNOVA redemption and is not accessible to individual members.</div>
+    <div class="glossary-card" data-terms="stability rescue fund parked member rescue sf">
+      <div class="acronym">Stability Rescue Fund</div>
+      <div class="full-name" data-i18n="faqPage.g14_full">Member Rescue Reserve</div>
+      <div class="definition" data-i18n="faqPage.g14_def">12% of every entry fee flows into the Stability Rescue Fund. It finances partial rescue contributions for &ldquo;parked&rdquo; members &mdash; those who completed a matrix cycle but didn't have enough withdrawable balance to self-fund re-entry. This is separate from the CNOVA Treasury, which backs the token's floor price.</div>
+    </div>
+
+    <div class="glossary-card" data-terms="dev wallet protocol development engineering reserve">
+      <div class="acronym">Dev</div>
+      <div class="full-name" data-i18n="faqPage.g4_full">Development Reserve</div>
+      <div class="definition" data-i18n="faqPage.g4_def">2% of each entry fee flows to the Dev wallet &mdash; it funds ongoing smart contract development, audits, and protocol engineering. It is not used for CNOVA redemption and is not accessible to individual members.</div>
     </div>
 
     <div class="glossary-card" data-terms="usdc usd coin stablecoin circle">
@@ -146,7 +152,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="pair manager matrix a b rotation cycle overflow">
       <div class="acronym">MatA / MatB</div>
       <div class="full-name" data-i18n="faqPage.g7_full">Matrix A and Matrix B (Pair)</div>
-      <div class="definition" data-i18n="faqPage.g7_def">Each tier has two matrices (A and B). New members fill Matrix A first. When it completes (all 64 filled, root cycles), the system seamlessly switches to Matrix B so new joiners always have an active queue. The two matrices alternate, enabling continuous operation.</div>
+      <div class="definition" data-i18n="faqPage.g7_def">Each tier has two matrices (A and B). New members fill Matrix A first. When it completes (all 127 filled, root cycles), the system seamlessly switches to Matrix B so new joiners always have an active queue. The two matrices alternate, enabling continuous operation.</div>
     </div>
 
     <div class="glossary-card" data-terms="defi decentralized finance">
@@ -170,7 +176,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="epoch mining period halving cnova reward">
       <div class="acronym">Epoch</div>
       <div class="full-name" data-i18n="faqPage.g11_full">CNOVA Mining Period</div>
-      <div class="definition" data-i18n="faqPage.g11_def">An epoch is a CNOVA distribution period. Each epoch starts with a set reward per entry. After a threshold of entries, the epoch advances and the reward halves &mdash; similar to Bitcoin's halving. CryptoNova epoch names in order: Genesis, Pioneer, Expansion, Momentum, Apex, Legacy, Endgame, Infinity.</div>
+      <div class="definition" data-i18n="faqPage.g11_def">An epoch is a CNOVA distribution period. Each epoch starts with a set reward per entry. After a threshold of entries, the epoch advances and the reward decreases &mdash; similar to Bitcoin's halving. CryptoNova epoch names in order: Nebula Genesis, Mercury Rise, Lunar Cluster, Aurora Zenith, Solaris Echo, Cosmic Core, Galaxy Grid, Supernova Spark, Final Frontier.</div>
     </div>
 
     <div class="glossary-card" data-terms="original referrer referrer for life locked sponsor permanent">
@@ -182,7 +188,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="roi return on investment earnings">
       <div class="acronym">ROI</div>
       <div class="full-name" data-i18n="faqPage.g13_full">Return on Investment</div>
-      <div class="definition" data-i18n="faqPage.g13_def">The percentage of profit relative to the amount invested. In CryptoNova Matrix, ROI comes from chain pay (20% of entries flowing up 6 levels), referral bonuses ($2.00 per direct sign-up), equalization pool payouts ($3.30), and CNOVA token rewards. <strong>ROI is not guaranteed.</strong></div>
+      <div class="definition" data-i18n="faqPage.g13_def">The percentage of profit relative to the amount invested. In CryptoNova Matrix, ROI comes from chain pay (17% of entries flowing up 6 levels), referral bonuses ($1.00 per direct sign-up), equalization pool payouts ($4.40), and CNOVA token rewards. <strong>ROI is not guaranteed.</strong></div>
     </div>
 
   </div>
@@ -199,7 +205,7 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q1_a1">CryptoNova Matrix is a decentralized, autonomous smart contract protocol deployed on the Base blockchain. It runs a 10-tier BFS (breadth-first search) matrix compensation structure where participants pay an entry fee in USDC and receive payments from subsequent participants according to predefined on-chain rules.</p>
-        <p data-i18n="faqPage.q1_a2">CryptoNova uses a dual-matrix architecture (Matrix A + B per tier), a StabilityFund that backs the CNOVA token floor price, and a unified smart contract entry point that handles all tiers seamlessly. The protocol is fully autonomous &mdash; no admin can pause, modify, or redirect funds.</p>
+        <p data-i18n="faqPage.q1_a2">CryptoNova uses a dual-matrix architecture (Matrix A + B per tier), a CNOVA Treasury that backs the CNOVA token floor price, and a unified smart contract entry point that handles all tiers seamlessly. The protocol is fully autonomous &mdash; no admin can pause, modify, or redirect funds.</p>
       </div></div>
     </div>
 
@@ -230,18 +236,19 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q4_a1">Tier 1 (Nova Seed) entry fee is <strong>$10.00 USDC</strong>. Fees scale with each tier up to Tier 7 (SuperNova Spark). You also need a small amount of ETH for gas &mdash; typically under $0.10 on Base.</p>
+        <p data-i18n="faqPage.q4_a1">Tier 1 (Nova Seed) entry fee is <strong>$10.00 USDC</strong>. Fees scale with each tier up to Tier 10 (SuperNova Apex). You also need a small amount of ETH for gas &mdash; typically under $0.10 on Base.</p>
         <p data-i18n="faqPage.q4_a2">Your $10 T1 entry is split instantly by the smart contract:</p>
         <ul>
-          <li data-i18n="faqPage.q4_li1"><strong>$2.00 (20%)</strong> &mdash; L1 direct referral bonus to your sponsor</li>
-          <li data-i18n="faqPage.q4_li2"><strong>$2.00 (20%)</strong> &mdash; Chain pay distributed across 6 upline BFS levels</li>
-          <li data-i18n="faqPage.q4_li3"><strong>$3.30 (33%)</strong> &mdash; Equalization pool (funds matrix cycle payouts)</li>
-          <li data-i18n="faqPage.q4_li4"><strong>$1.50 (15%)</strong> &mdash; CNOVA Treasury (backs CNOVA floor price)</li>
-          <li data-i18n="faqPage.q4_li5"><strong>$0.50 (5%)</strong> &mdash; Stability Rescue Fund (CNOVA floor protection)</li>
-          <li data-i18n="faqPage.q4_li6"><strong>$0.30 (3%)</strong> &mdash; Dev</li>
-          <li data-i18n="faqPage.q4_li7"><strong>$0.20 (2%)</strong> &mdash; Ops</li>
+          <li data-i18n="faqPage.q4_li1"><strong>$1.00 (10%)</strong> &mdash; L1 direct referral bonus to your sponsor</li>
+          <li data-i18n="faqPage.q4_li2"><strong>$1.70 (17%)</strong> &mdash; Chain pay distributed across 6 upline BFS levels</li>
+          <li data-i18n="faqPage.q4_li3"><strong>$4.40 (44%)</strong> &mdash; Equalization pool (funds matrix cycle payouts)</li>
+          <li data-i18n="faqPage.q4_li4"><strong>$1.00 (10%)</strong> &mdash; CNOVA Treasury (backs CNOVA floor price)</li>
+          <li data-i18n="faqPage.q4_li5"><strong>$1.20 (12%)</strong> &mdash; Stability Rescue Fund (funds rescues for parked members)</li>
+          <li data-i18n="faqPage.q4_li6"><strong>$0.20 (2%)</strong> &mdash; Dev</li>
+          <li data-i18n="faqPage.q4_li7"><strong>$0.10 (1%)</strong> &mdash; Ops</li>
           <li data-i18n="faqPage.q4_li8"><strong>$0.10 (1%)</strong> &mdash; Community Wallet</li>
           <li data-i18n="faqPage.q4_li9"><strong>$0.10 (1%)</strong> &mdash; CNOVA Buyback Reserve</li>
+          <li data-i18n="faqPage.q4_li10"><strong>$0.20 (2%)</strong> &mdash; Liquidity Reserve</li>
         </ul>
       </div></div>
     </div>
@@ -262,14 +269,14 @@ function toggleTheme() {
   <h2 id="matrix-heading" data-i18n="faqPage.h_matrix">&#127760; How the Matrix Works</h2>
   <div class="faq-list" id="faq-matrix">
 
-    <div class="faq-item" data-terms="bfs matrix tree structure how works cryptonova 64 slots">
+    <div class="faq-item" data-terms="bfs matrix tree structure how works cryptonova 127 seats">
       <button class="faq-question" onclick="toggleFaq(this)">
         <span data-i18n="faqPage.q6">What is the CryptoNova BFS Matrix?</span>
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q6_a1">CryptoNova uses a 64-slot breadth-first search (BFS) matrix per tier. Members fill positions level-by-level: position 1 (root), then positions 2&ndash;3, then 4&ndash;7, and so on. When you join, you take the next available BFS slot.</p>
-        <p data-i18n="faqPage.q6_a2">When all 64 slots are filled, the root member completes their cycle: they receive a payout from the equalization pool and re-enter at the next available position in the active matrix. The matrix then resets for the next wave.</p>
+        <p data-i18n="faqPage.q6_a1">CryptoNova uses a 127-seat breadth-first search (BFS) matrix per tier &mdash; a 7-level binary tree. Members fill positions level-by-level: position 1 (root), then positions 2&ndash;3, then 4&ndash;7, then 8&ndash;15, and so on through level 7 (positions 64&ndash;127). When you join, you take the next available BFS slot.</p>
+        <p data-i18n="faqPage.q6_a2">When all 127 seats are filled, the root member completes their cycle: they receive a payout from the equalization pool and re-enter at the next available position in the active matrix. The matrix then resets for the next wave.</p>
       </div></div>
     </div>
 
@@ -284,13 +291,13 @@ function toggleTheme() {
       </div></div>
     </div>
 
-    <div class="faq-item" data-terms="cycle what is 64 slots complete trigger auto re-entry">
+    <div class="faq-item" data-terms="cycle what is 127 seats complete trigger auto re-entry">
       <button class="faq-question" onclick="toggleFaq(this)">
         <span data-i18n="faqPage.q8">What is a Cycle?</span>
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q8_a1">A cycle completes when <strong>all 64 positions in a matrix are filled</strong>. The member at position 1 (root) receives their equalization pool payout and is automatically re-entered into the active matrix at the next available slot. There is no manual action required.</p>
+        <p data-i18n="faqPage.q8_a1">A cycle completes when <strong>all 127 positions in a matrix are filled</strong>. The member at position 1 (root) receives their equalization pool payout and is automatically re-entered into the active matrix at the next available slot. There is no manual action required.</p>
         <p data-i18n="faqPage.q8_a2">Throughout the cycle, chain pay flows to upline positions as each new member joins &mdash; earnings are continuous, not a single event at cycle completion.</p>
       </div></div>
     </div>
@@ -302,7 +309,7 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q9_a1">An epoch is a CNOVA mining period. Each epoch starts with a set CNOVA reward per entry. After a threshold number of entries, the epoch advances and the reward per entry is halved &mdash; similar to Bitcoin's halving mechanism. Early participants receive the highest CNOVA rewards.</p>
-        <p data-i18n="faqPage.q9_a2">CryptoNova epoch names in order: <em>Genesis, Pioneer, Expansion, Momentum, Apex, Legacy, Endgame, Infinity</em>. The current epoch is displayed on the Home and Dashboard tabs.</p>
+        <p data-i18n="faqPage.q9_a2">CryptoNova epoch names in order: <em>Nebula Genesis, Mercury Rise, Lunar Cluster, Aurora Zenith, Solaris Echo, Cosmic Core, Galaxy Grid, Supernova Spark, Final Frontier</em>. The current epoch is displayed on the Home and Dashboard tabs.</p>
       </div></div>
     </div>
 
@@ -343,12 +350,12 @@ function toggleTheme() {
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q12_a1">Every $10 T1 entry generates income across four streams:</p>
         <ul>
-          <li data-i18n="faqPage.q12_li1"><strong>Direct referral bonus &mdash; $2.00 (20%)</strong> &mdash; paid instantly to your direct sponsor. You earn this every time someone you referred joins or auto-upgrades.</li>
-          <li data-i18n="faqPage.q12_li2"><strong>Chain pay &mdash; $2.00 total (20%)</strong> &mdash; distributed across 6 upline BFS positions as each new member fills a slot below you.</li>
-          <li data-i18n="faqPage.q12_li3"><strong>Equalization pool &mdash; $3.30 (33%)</strong> &mdash; accumulates and pays out to the root member when a full cycle (64 fills) completes, then restarts.</li>
+          <li data-i18n="faqPage.q12_li1"><strong>Direct referral bonus &mdash; $1.00 (10%)</strong> &mdash; paid instantly to your direct sponsor. You earn this every time someone you referred joins or auto-upgrades.</li>
+          <li data-i18n="faqPage.q12_li2"><strong>Chain pay &mdash; $1.70 total (17%)</strong> &mdash; distributed across 6 upline BFS positions as each new member fills a slot below you.</li>
+          <li data-i18n="faqPage.q12_li3"><strong>Equalization pool &mdash; $4.40 (44%)</strong> &mdash; accumulates and pays out to the root member when a full cycle (127 fills) completes, then restarts.</li>
           <li data-i18n="faqPage.q12_li4"><strong>CNOVA tokens</strong> &mdash; minted and sent to your wallet on every new entry. Amount decreases each epoch (halving model). Starting at 50 CNOVA per $10 entry in Genesis epoch.</li>
         </ul>
-        <p data-i18n="faqPage.q12_a2">The remaining split goes to protocol reserves (CNOVA Treasury, Stability Rescue Fund, Dev, Ops, Community Wallet, Buyback Reserve) — these are not directly withdrawable by individual members but back the protocol's long-term health.</p>
+        <p data-i18n="faqPage.q12_a2">The remaining split goes to protocol reserves and programs (CNOVA Treasury, Stability Rescue Fund, Dev, Ops, Liquidity Reserve, Buyback Reserve) — these back the protocol's long-term health and are not directly withdrawable by individual members. The exception is the Community Wallet: if you're one of the first 1,000 members to register, your share of that pool is claimable monthly from the Dashboard — see the Compensation Plan page for details.</p>
       </div></div>
     </div>
 
@@ -407,7 +414,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q17_a1">33% of each entry fee ($3.30 at T1) flows into the equalization pool for that matrix. When all 64 slots are filled, the pool balance is paid to the root member and used to automatically re-enter them into the next active matrix &mdash; no action required on your part.</p>
+        <p data-i18n="faqPage.q17_a1">44% of each entry fee ($4.40 at T1) flows into the equalization pool for that matrix. When all 127 seats are filled, the pool balance is paid to the root member and used to automatically re-enter them into the next active matrix &mdash; no action required on your part.</p>
         <p data-i18n="faqPage.q17_a2">If the pool accumulates before the matrix fills (from multiple cycles), the excess funds the root member's re-entry fee automatically. You can also top up your pool balance manually from the Dashboard if you want to accelerate re-entry.</p>
       </div></div>
     </div>
@@ -452,18 +459,18 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q20_a1">CNOVA is the native reward token of CryptoNova Matrix. It is minted and distributed to participants each time a new member joins. It is <strong>not a stablecoin</strong> and not a security &mdash; it is an in-protocol utility token with a rising floor price mechanism.</p>
-        <p data-i18n="faqPage.q20_a2">Starting CNOVA reward at Genesis epoch: <strong>50 CNOVA per $10 entry</strong>. This halves with each epoch advance. Total supply is capped at 100,000,000 CNOVA.</p>
+        <p data-i18n="faqPage.q20_a2">Starting CNOVA reward at Genesis epoch: <strong>50 CNOVA per $10 entry</strong>. Starting from epoch 2, rewards halve every two epochs (40 &rarr; 20 &rarr; 10 &rarr; 5 &rarr; 2.5) before plateauing at 2.5 CNOVA. Total supply is capped at 21,000,000 CNOVA.</p>
       </div></div>
     </div>
 
-    <div class="faq-item" data-terms="floor price stability fund backed guaranteed minimum usdc">
+    <div class="faq-item" data-terms="floor price cnova treasury backed guaranteed minimum usdc">
       <button class="faq-question" onclick="toggleFaq(this)">
         <span data-i18n="faqPage.q21">What is the floor price and how does it work?</span>
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q21_a1">15% of every T1 entry fee ($1.50 per $10) flows into the on-chain <strong>StabilityFund</strong> contract. The floor price is calculated automatically: <code>floor = StabilityFund.totalBalance() / CNOVA.totalSupply()</code>.</p>
-        <p data-i18n="faqPage.q21_a2">At launch with 50 CNOVA minted per $10 entry and $1.50 going to StabilityFund: $1.50 / 50 = <strong>$0.03 starting floor</strong>. The floor only rises as more members join and more USDC flows into StabilityFund.</p>
+        <p data-i18n="faqPage.q21_a1">10% of every entry fee ($1.00 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.totalBalance() / CNOVA.totalSupply()</code>.</p>
+        <p data-i18n="faqPage.q21_a2">At launch with 50 CNOVA minted per $10 entry and $1.00 going to the CNOVA Treasury: $1.00 / 50 = <strong>$0.02 starting floor</strong>. The floor only rises as more members join and more USDC flows into the Treasury.</p>
         <p data-i18n="faqPage.q21_a3">You can redeem CNOVA for USDC at the exact floor price at any time using the <strong>Redeem CNOVA</strong> section on the Dashboard &mdash; no admin approval, fully on-chain.</p>
       </div></div>
     </div>
@@ -476,7 +483,7 @@ function toggleTheme() {
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q22_a1">Go to the <strong>Dashboard tab</strong>, find the <strong>Redeem CNOVA</strong> section, enter the amount you want to redeem, and follow the two-step process:</p>
         <ol style="padding-left:18px;margin-top:8px;line-height:2">
-          <li data-i18n="faqPage.q22_li1"><strong>Step 1: Approve CNOVA</strong> &mdash; allows the StabilityFund contract to spend your tokens</li>
+          <li data-i18n="faqPage.q22_li1"><strong>Step 1: Approve CNOVA</strong> &mdash; allows the CNOVA Treasury contract to spend your tokens</li>
           <li data-i18n="faqPage.q22_li2"><strong>Step 2: Redeem for USDC</strong> &mdash; burns your CNOVA and sends USDC at the current floor price</li>
         </ol>
         <p data-i18n="faqPage.q22_a2">The USDC is sent directly to your wallet. The floor price shown is the live on-chain calculation at the moment of redemption.</p>
@@ -525,8 +532,8 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q26_a1"><strong>No.</strong> The core matrix logic, fee splits, and StabilityFund mechanics are immutable once deployed. No party can alter entry fee distributions, redirect USDC, or access participant funds in the matrix contracts.</p>
-        <p data-i18n="faqPage.q26_a2">The governance contract handles protocol-level settings and is subject to timelock delays and community approval. The team cannot unilaterally drain the StabilityFund or Treasury.</p>
+        <p data-i18n="faqPage.q26_a1"><strong>No.</strong> The core matrix logic, fee splits, and reserve-fund mechanics are immutable once deployed. No party can alter entry fee distributions, redirect USDC, or access participant funds in the matrix contracts.</p>
+        <p data-i18n="faqPage.q26_a2">The governance contract handles protocol-level settings and is subject to timelock delays and community approval. The team cannot unilaterally drain the Stability Rescue Fund or the CNOVA Treasury.</p>
       </div></div>
     </div>
 
