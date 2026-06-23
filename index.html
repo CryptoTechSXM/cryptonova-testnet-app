@@ -355,6 +355,7 @@
 
     /* ── Launch announcement banner ─────────────────────── */
     #launch-banner {
+      display: none !important; /* Hidden — re-enable when ready to announce mainnet */
       background: linear-gradient(90deg, rgba(0,255,136,.12) 0%, rgba(0,180,100,.08) 100%);
       border-bottom: 1px solid rgba(0,255,136,.25);
       padding: 10px 20px; display: flex; align-items: center;
@@ -549,7 +550,7 @@
   </div>
     <div class="logo-text">Crypto<span>Nova</span></div>
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
-    <span style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px">V8.21 PREVIEW</span>
+    <span style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px">V8.22 PREVIEW</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <div id="lang-switcher"></div>
@@ -2485,7 +2486,7 @@ async function loadHomeStats() {
       occA2, cyclesA2, occB2, poolB2,
       sysCycles, supply, epoch, sfBal, treasUsdc,
       occA3, cyclesA3, occB3, poolB3,
-      cwPoolBal, allTimeMinted, allTimeBurned, buybackBal
+      cwPoolBal, allTimeMinted, allTimeBurned, buybackBal, lqBal
     ] = await Promise.all([
       rpc(matA1.occupancy()).catch(()=>0n),
       rpc(matA1.rotationCount()).catch(()=>0n),
@@ -2509,6 +2510,7 @@ async function loadHomeStats() {
       rpc(cnova.totalMinted()).catch(()=>0n),
       rpc(cnova.totalBurned()).catch(()=>0n),
       rpc(usdc.balanceOf(ADDRS.buybackReserve || ethers.ZeroAddress)).catch(()=>0n),
+      rpc(usdc.balanceOf(ADDRS.liquidityReserve || ethers.ZeroAddress)).catch(()=>0n),
     ]);
 
     // Stat cards
@@ -2518,6 +2520,7 @@ async function loadHomeStats() {
     setText('stat-reserve',  fmt6(sfBal));
     setText('stat-cw-balance', fmt6(cwPoolBal));
     setText('stat-buyback',  fmt6(buybackBal));
+    setText('stat-lq-reserve', fmt6(lqBal));
     setText('stat-cycles',   sysCycles.toString());
 
     // T1A progress
