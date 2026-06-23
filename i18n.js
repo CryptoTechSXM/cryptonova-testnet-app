@@ -1,14 +1,14 @@
 /**
  * i18n.js — CryptoNova lightweight internationalisation loader
- * Supports: en, fr, es, pt, de, tr
+ * Supports: en, fr, es, pt, de, tr, zh, ko, vi, th
  * Usage: <script src="/i18n.js" defer></script>
  * Keys: data-i18n="section.key"  data-i18n-placeholder="section.key"
  */
 (function () {
   'use strict';
 
-  const SUPPORTED = ['en', 'fr', 'es', 'pt', 'de', 'tr'];
-  const FLAGS = { en: '🇬🇧 EN', fr: '🇫🇷 FR', es: '🇪🇸 ES', pt: '🇧🇷 PT', de: '🇩🇪 DE', tr: '🇹🇷 TR' };
+  const SUPPORTED = ['en', 'fr', 'es', 'pt', 'de', 'tr', 'zh', 'ko', 'vi', 'th'];
+  const FLAGS = { en: '🇬🇧 EN', fr: '🇫🇷 FR', es: '🇪🇸 ES', pt: '🇧🇷 PT', de: '🇩🇪 DE', tr: '🇹🇷 TR', zh: '🇨🇳 ZH', ko: '🇰🇷 KO', vi: '🇻🇳 VI', th: '🇹🇭 TH' };
   let _t = {};
 
   /* ── Language resolution ─────────────────────────────────── */
