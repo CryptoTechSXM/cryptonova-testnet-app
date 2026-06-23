@@ -406,7 +406,7 @@
   <div id="launch-gate">
     <h2>&#x1F9EA; CryptoNova &mdash; Testnet Early Access</h2>
     <p style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">
-      Community Preview &mdash; Tuesday, June 23 at 11:30 AM ET
+      Community Preview &mdash; Tuesday, June 23 at 12:00 PM ET
     </p>
     <p style="max-width:440px">
       You&rsquo;re getting first access to the CryptoNova Testnet on Base Sepolia.<br><br>
@@ -420,7 +420,7 @@
       <div class="cd-box"><span class="cd-num" id="cd-m">00</span><div class="cd-lbl">Minutes</div></div>
       <div class="cd-box"><span class="cd-num" id="cd-s">00</span><div class="cd-lbl">Seconds</div></div>
     </div>
-    <div class="launch-sub" id="cd-date-label">11:30 AM Eastern &bull; Tuesday, June 23 2026</div>
+    <div class="launch-sub" id="cd-date-label">12:00 PM Eastern &bull; Tuesday, June 23 2026</div>
 
     <!-- City timezone grid -->
     <div id="cd-cities-wrap" style="margin-top:14px;max-width:400px;width:100%;text-align:left">
@@ -1718,10 +1718,10 @@ const CHAIN_ID = 84532;
 
 // ── Countdown to 12 PM (noon) Eastern Friday June 12 ────────────────────────
 (function initCountdown() {
-  // 11:30 AM EDT = 15:30 UTC on June 23 2026 — Community testnet early access.
+  // 12:00 PM EDT = 16:00 UTC on June 23 2026 — Community testnet access on crypto-nova.app.
   // This is a FIXED UTC timestamp — same countdown for every viewer worldwide.
   // To reschedule: update this ISO string.
-  const LAUNCH_UTC = new Date('2026-06-23T15:30:00Z'); // 11:30 AM EDT = 15:30 UTC — Testnet early access opens
+  const LAUNCH_UTC = new Date('2026-06-23T16:00:00Z'); // noon EDT = 16:00 UTC — Testnet access opens
 
   // Major city local equivalents — shown below the countdown
   const CITY_ZONES = [
@@ -1795,7 +1795,7 @@ const LAUNCH_READY = !_PROD_HOSTS.includes(window.location.hostname);
 
 // Show the launch gate if on a gated host and the access time hasn't passed yet
 (function() {
-  const _launchTime = new Date('2026-06-23T15:30:00Z'); // 11:30 AM EDT — testnet community access
+  const _launchTime = new Date('2026-06-23T16:00:00Z'); // noon EDT — testnet community access on crypto-nova.app
   if (!LAUNCH_READY && new Date() < _launchTime) {
     document.getElementById('launch-gate').classList.add('visible');
   }
