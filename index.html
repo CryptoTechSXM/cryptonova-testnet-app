@@ -404,13 +404,13 @@
 
   <!-- ══ LAUNCH GATE ══════════════════════════════════════════════════ -->
   <div id="launch-gate">
-    <h2>&#x1F680; CryptoNova Matrix</h2>
+    <h2>&#x1F9EA; CryptoNova &mdash; Testnet Early Access</h2>
     <p style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">
-      Mainnet Launch &mdash; Friday, June 25 at 12 PM ET
+      Community Preview &mdash; Tuesday, June 23 at 11:30 AM ET
     </p>
     <p style="max-width:440px">
-      Register, earn, and redeem <strong style="color:var(--green)">CryptoNova Tokens</strong> across 10 live tiers.<br><br>
-      Test the full cycle &mdash; register, cycle out, withdraw, unlock your tokens.
+      You&rsquo;re getting first access to the CryptoNova Testnet on Base Sepolia.<br><br>
+      Register, earn <strong style="color:var(--green)">CryptoNova Tokens</strong>, cycle out, withdraw, and unlock &mdash; the full cycle, no real funds required.
       Your feedback shapes the mainnet launch.
     </p>
 
@@ -420,7 +420,7 @@
       <div class="cd-box"><span class="cd-num" id="cd-m">00</span><div class="cd-lbl">Minutes</div></div>
       <div class="cd-box"><span class="cd-num" id="cd-s">00</span><div class="cd-lbl">Seconds</div></div>
     </div>
-    <div class="launch-sub" id="cd-date-label">12:00 PM Eastern &bull; Friday, June 25 2026</div>
+    <div class="launch-sub" id="cd-date-label">11:30 AM Eastern &bull; Tuesday, June 23 2026</div>
 
     <!-- City timezone grid -->
     <div id="cd-cities-wrap" style="margin-top:14px;max-width:400px;width:100%;text-align:left">
@@ -1718,10 +1718,10 @@ const CHAIN_ID = 84532;
 
 // ── Countdown to 12 PM (noon) Eastern Friday June 12 ────────────────────────
 (function initCountdown() {
-  // 12:00 PM EDT (noon Eastern) = 16:00 UTC on June 12 2026.
+  // 11:30 AM EDT = 15:30 UTC on June 23 2026 — Community testnet early access.
   // This is a FIXED UTC timestamp — same countdown for every viewer worldwide.
   // To reschedule: update this ISO string.
-  const LAUNCH_UTC = new Date('2026-06-25T16:00:00Z'); // noon EDT = 16:00 UTC — Early Access opens
+  const LAUNCH_UTC = new Date('2026-06-23T15:30:00Z'); // 11:30 AM EDT = 15:30 UTC — Testnet early access opens
 
   // Major city local equivalents — shown below the countdown
   const CITY_ZONES = [
@@ -1789,13 +1789,13 @@ const CHAIN_ID = 84532;
 })();
 
 // ══ LAUNCH GATE ═══════════════════════════════════════════════════════════
-// Hostname-based: crypto-nova.app + www.crypto-nova.app = blocking gate; v8.* preview and localhost = gate off
-const _PROD_HOSTS = ['crypto-nova.app', 'www.crypto-nova.app'];
+// Hostname-based: crypto-nova.app + www = mainnet gate; early.crypto-nova.app = testnet early-access gate
+const _PROD_HOSTS = ['crypto-nova.app', 'www.crypto-nova.app', 'early.crypto-nova.app'];
 const LAUNCH_READY = !_PROD_HOSTS.includes(window.location.hostname);
 
-// Show the launch gate on production if launch date hasn't passed yet
+// Show the launch gate if on a gated host and the access time hasn't passed yet
 (function() {
-  const _launchTime = new Date('2020-01-01T00:00:00Z');
+  const _launchTime = new Date('2026-06-23T15:30:00Z'); // 11:30 AM EDT — testnet community access
   if (!LAUNCH_READY && new Date() < _launchTime) {
     document.getElementById('launch-gate').classList.add('visible');
   }
