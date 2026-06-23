@@ -249,7 +249,7 @@
         <div class="detail-section" data-i18n="statusPage.section_infrastructure">Infrastructure</div>
         <div class="detail-row">
           <span class="detail-key" data-i18n="statusPage.row_matrixkeeper_contract">MatrixKeeper contract</span>
-          <span class="detail-val"><span class="addr-short">0x2fBF…EF0</span></span>
+          <span class="detail-val"><span class="addr-short" id="kp-addr">—</span></span>
         </div>
         <div class="detail-row">
           <span class="detail-key" data-i18n="statusPage.row_automation_method">Automation method</span>
@@ -388,7 +388,7 @@
           <span class="detail-key" data-i18n="statusPage.row_cnova_total_supply">CNOVA total supply</span>
           <span class="detail-val blue" id="sf-cnova">—</span>
         </div>
-        <div class="info-note" data-i18n="statusPage.sf_info_note">The Stability Fund receives 5% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $200 can rescue 20+ members.</div>
+        <div class="info-note" data-i18n="statusPage.sf_info_note">The Stability Fund receives 5% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $100 can rescue 20+ members.</div>
       </div>
     </div>
 
@@ -408,6 +408,7 @@
     treasury:      '0x8CC3A6d5459495981C2d89C0F47223E294496f94',
     stabilityFund: '0xE465d93f38fc82bD7E3bf821B7F6AD71BE2b7745',
     buybackReserve:'0x88f02C1a77811536e08BfaFa9e97E23A65Ff7735',
+    liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
     tierRouter:    '0xcCaA21E54185a69B41a0aD9fb29ef2AcE3849e3D',
     matrixKeeper:  '0xEfA866A4546843Ad9E523507606c0Ed9718737a5',
     T1matA:        '0x2277818bF439AF9644924C5b57445dCA922C046D',
@@ -537,6 +538,7 @@
       setText('kp-work-needed', upkeepNeeded ? t('statusPage.js.yes', 'YES') : t('statusPage.js.no', 'No'));
       setClass('kp-work-needed', upkeepNeeded ? 'yellow' : 'green');
       setText('kp-work-type', upkeepNeeded ? workType : '—');
+      setText('kp-addr', ADDRS.matrixKeeper.slice(0,6) + '…' + ADDRS.matrixKeeper.slice(-4));
       setText('kp-last-rescue', lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—');
       setText('kp-rescue-count', rescueCount.toString());
 
@@ -747,10 +749,10 @@
 
       const sfNum = Number(BigInt(sfBal)) / 1e6;
 
-      // Health: >$500 = green, $100-500 = yellow, <$100 = red
-      const health = sfNum >= 500 ? 'green' : sfNum >= 100 ? 'yellow' : 'red';
-      const healthLabel = sfNum >= 500 ? t('statusPage.js.healthy','Healthy') : sfNum >= 100 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
-      const pct = Math.min(100, Math.round(sfNum / 10)); // 10% per $100
+      // Health: >=$100 = green (healthy), >=$50 = yellow (low), <$50 = red (critical)
+      const health = sfNum >= 100 ? 'green' : sfNum >= 50 ? 'yellow' : 'red';
+      const healthLabel = sfNum >= 100 ? t('statusPage.js.healthy','Healthy') : sfNum >= 50 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
+      const pct = Math.min(100, Math.round(sfNum)); // 100% at $100 target
 
       const pillInd = document.getElementById('pill-sf');
       pillInd.className = `pill-indicator ${health}`;
