@@ -984,6 +984,16 @@ function switchTabContent(tab) {
 }
 
 // ── Voting actions ────────────────────────────────────────────────────────────
+function govErrMsg(e) {
+  // CALL_EXCEPTION with custom errors often has reason=null, data=null — detect by code
+  if (e?.code === 'CALL_EXCEPTION') {
+    // Try to infer from known custom errors
+    if (e?.transaction?.data === '0x' || !e?.data) return 'Transaction reverted on-chain. You may have already voted, or the proposal is no longer active.';
+    return 'Transaction reverted — you may have already voted on this proposal.';
+  }
+  return e?.reason || e?.shortMessage || e?.message || String(e);
+}
+
 async function vote(proposalId, support) {
   if (!signer) { alert(t('govPage.js.connect_to_propose', 'Connect wallet to submit a proposal.')); return; }
   try {
@@ -995,7 +1005,7 @@ async function vote(proposalId, support) {
     setPropStatus(`${t('govPage.js.vote_cast','✅ Vote cast! TX:')} ${tx.hash.slice(0,18)}…`, 'success');
     await loadProposals();
   } catch(e) {
-    setPropStatus(t('govPage.js.vote_failed', 'Vote failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.vote_failed', 'Vote failed:') + ' ' + govErrMsg(e), 'error');
   }
 }
 
@@ -1009,7 +1019,7 @@ async function finalize(proposalId) {
     setPropStatus(t('govPage.js.vote_finalized', '✅ Vote finalized!'), 'success');
     await loadProposals();
   } catch(e) {
-    setPropStatus(t('govPage.js.finalize_failed', 'Finalize failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.finalize_failed', 'Finalize failed:') + ' ' + govErrMsg(e), 'error');
   }
 }
 
@@ -1023,7 +1033,7 @@ async function executeProposal(proposalId) {
     setPropStatus(t('govPage.js.proposal_executed', '✅ Proposal executed! Parameter updated on-chain.'), 'success');
     await loadProposals();
   } catch(e) {
-    setPropStatus(t('govPage.js.execute_failed', 'Execute failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
+    setPropStatus(t('govPage.js.execute_failed', 'Execute failed:') + ' ' + govErrMsg(e), 'error');
   }
 }
 
