@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liquidity Pool — CryptoNova</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+  <script src="/i18n.js" defer></script>
+  <style>
+    :root {
+      --bg:        #0a0e1a;
+      --bg2:       #111827;
+      --bg3:       #1a2236;
+      --border:    #1f2d47;
+      --green:     #00e5a0;
+      --green2:    #00b37d;
+      --green-dim: rgba(0,229,160,0.12);
+      --blue:      #3b82f6;
+      --blue-dim:  rgba(59,130,246,0.12);
+      --yellow:    #f59e0b;
+      --yellow-dim:rgba(245,158,11,0.12);
+      --purple:    #a855f7;
+      --purple-dim:rgba(168,85,247,0.12);
+      --red:       #ef4444;
+      --text:      #e2e8f0;
+      --text2:     #94a3b8;
+      --text3:     #64748b;
+    }
+    body.light {
+      --bg:#f1f5f9; --bg2:#ffffff; --bg3:#e2e8f0; --border:#cbd5e1;
+      --green:#00966a; --green2:#007a56; --green-dim:rgba(0,150,106,0.10);
+      --blue:#2563eb; --blue-dim:rgba(37,99,235,0.10);
+      --yellow:#d97706; --yellow-dim:rgba(217,119,6,0.10);
+      --purple:#7c3aed; --purple-dim:rgba(124,58,237,0.10);
+      --red:#dc2626; --text:#0f172a; --text2:#475569; --text3:#94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Header ── */
+    header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .logo img { width: 32px; height: 32px; }
+    .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo-text span { color: var(--green); }
+    .logo-badge { font-size: 10px; background: var(--green-dim); color: var(--green); border: 1px solid var(--green2); border-radius: 4px; padding: 2px 6px; margin-left: 8px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .nav-link { color: var(--text2); font-size: 14px; text-decoration: none; padding: 6px 12px; border-radius: 7px; transition: all .2s; }
+    .nav-link:hover { color: var(--text); background: var(--bg3); }
+    .nav-link.active { color: var(--green); }
+    #btn-connect { background: var(--green); color: #000; border: none; border-radius: 8px; padding: 8px 18px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .2s; white-space: nowrap; }
+    #btn-connect:hover { opacity: .85; }
+    #btn-connect.connected { background: var(--bg3); color: var(--green); border: 1px solid var(--green2); }
+    .theme-toggle { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text2); cursor: pointer; }
+    .theme-toggle:hover { color: var(--text); border-color: var(--green); }
+    #lang-switcher .lang-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; color: var(--text2); cursor: pointer; }
+
+    /* ── Layout ── */
+    main { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── Hero ── */
+    .hero { text-align: center; padding: 0 0 48px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; margin-bottom: 20px; letter-spacing: .4px; }
+    .testnet-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; margin-bottom: 14px; letter-spacing: .4px; }
+    .hero h1 { font-size: 40px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 14px; }
+    .hero h1 span { color: var(--purple); }
+    .hero p { font-size: 16px; color: var(--text2); max-width: 520px; margin: 0 auto; line-height: 1.65; }
+
+    /* ── Cards ── */
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 26px; margin-bottom: 20px; }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .card-title .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); flex-shrink: 0; }
+    .card-title .dot.green { background: var(--green); }
+
+    /* ── Stats grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+    .stat-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
+    .stat-value { font-size: 22px; font-weight: 700; color: var(--text); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.purple { color: var(--purple); }
+    .stat-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+    /* ── Pending reward banner ── */
+    .reward-banner { background: var(--green-dim); border: 1px solid var(--green2); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .reward-banner.hidden { display: none; }
+    .reward-banner-left { display: flex; align-items: center; gap: 12px; }
+    .reward-icon { font-size: 24px; }
+    .reward-label { font-size: 12px; color: var(--text2); margin-bottom: 2px; }
+    .reward-amount { font-size: 22px; font-weight: 800; color: var(--green); }
+    #btn-harvest-quick { background: var(--green); color: #000; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; transition: opacity .2s; }
+    #btn-harvest-quick:hover { opacity: .85; }
+    #btn-harvest-quick:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; background: var(--bg3); border-radius: 10px; padding: 4px; margin-bottom: 20px; }
+    .tab { flex: 1; text-align: center; padding: 9px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text2); border: none; background: transparent; transition: all .2s; }
+    .tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Input ── */
+    .input-group { margin-bottom: 16px; }
+    .input-label { font-size: 12px; color: var(--text3); margin-bottom: 7px; font-weight: 500; }
+    .input-wrap { position: relative; }
+    .input-wrap input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 70px 14px 16px; color: var(--text); font-size: 20px; font-weight: 700; outline: none; transition: border-color .2s; }
+    .input-wrap input:focus { border-color: var(--green2); }
+    .input-wrap input::placeholder { color: var(--text3); font-size: 16px; font-weight: 400; }
+    .input-token { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 700; color: var(--text2); }
+    .input-hint { font-size: 11px; color: var(--text3); margin-top: 6px; }
+    .input-hint.warn { color: var(--yellow); }
+
+    /* ── Quick amounts ── */
+    .quick-amounts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .quick-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; transition: all .2s; }
+    .quick-btn:hover { border-color: var(--green2); color: var(--green); }
+
+    /* ── Action buttons ── */
+    .btn-primary { width: 100%; background: var(--green); color: #000; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .2s; margin-top: 4px; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-primary.purple { background: var(--purple); color: #fff; }
+    .btn-primary.red { background: var(--red); color: #fff; }
+
+    /* ── Status msg ── */
+    .status-msg { margin-top: 14px; padding: 12px 16px; border-radius: 9px; font-size: 13px; display: none; }
+    .status-msg.show { display: block; }
+    .status-msg.ok { background: var(--green-dim); color: var(--green); border: 1px solid var(--green2); }
+    .status-msg.err { background: rgba(239,68,68,.12); color: var(--red); border: 1px solid var(--red); }
+    .status-msg.loading { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+
+    /* ── How it works ── */
+    .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .how-step { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .how-num { font-size: 28px; font-weight: 900; color: var(--purple); opacity: .5; margin-bottom: 10px; line-height: 1; }
+    .how-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .how-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+    /* ── Info row ── */
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-key { color: var(--text2); }
+    .info-val { font-weight: 600; color: var(--text); font-family: monospace; font-size: 12px; }
+    .info-val a { color: var(--blue); text-decoration: none; }
+    .info-val a:hover { text-decoration: underline; }
+
+    /* ── Connect prompt ── */
+    .connect-prompt { text-align: center; padding: 40px 20px; color: var(--text2); }
+    .connect-prompt p { margin-bottom: 16px; font-size: 15px; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 28px; }
+      .reward-banner { flex-direction: column; align-items: flex-start; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────── -->
+<header>
+  <a href="index.html" class="logo">
+    <img src="favicon.svg" alt="CryptoNova" />
+    <span class="logo-text">Crypto<span>Nova</span></span>
+    <span class="logo-badge">TESTNET</span>
+  </a>
+  <div class="header-right">
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="buy.html" class="nav-link">Buy CNOVA</a>
+    <a href="liquidity.html" class="nav-link active">Liquidity</a>
+    <a href="governance.html" class="nav-link">Governance</a>
+    <div id="lang-switcher"></div>
+    <button class="theme-toggle" id="btn-theme">☀️</button>
+    <button id="btn-connect">Connect Wallet</button>
+  </div>
+</header>
+
+<!-- ── Main ─────────────────────────────────────────────── -->
+<main>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="testnet-badge">🧪 Testnet Preview</div>
+    <div class="hero-badge">💧 Liquidity Pool</div>
+    <h1>Earn yield from<br><span>on-ramp partner fees</span></h1>
+    <p>Deposit USDC to earn a share of CryptoNova's Transak/Ramp partner fee revenue. The more on-ramp volume, the more you earn — automatically distributed every 15 minutes.</p>
+  </div>
+
+  <!-- Pending reward banner (shown when wallet connected + pending > 0) -->
+  <div class="reward-banner hidden" id="reward-banner">
+    <div class="reward-banner-left">
+      <div class="reward-icon">🌱</div>
+      <div>
+        <div class="reward-label">Pending reward ready to claim</div>
+        <div class="reward-amount" id="banner-pending">$0.00</div>
+      </div>
+    </div>
+    <button id="btn-harvest-quick">Harvest Now</button>
+  </div>
+
+  <!-- Pool stats -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Pool Stats</div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Total Staked</div>
+        <div class="stat-value purple" id="stat-total-staked">—</div>
+        <div class="stat-sub">USDC in pool</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Distributed</div>
+        <div class="stat-value green" id="stat-total-dist">—</div>
+        <div class="stat-sub">Partner fees paid out</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Your Stake</div>
+        <div class="stat-value" id="stat-my-stake">—</div>
+        <div class="stat-sub">Your USDC deposited</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Your Share</div>
+        <div class="stat-value green" id="stat-my-share">—</div>
+        <div class="stat-sub">% of pool rewards</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Pending Reward</div>
+        <div class="stat-value green" id="stat-pending">—</div>
+        <div class="stat-sub">Ready to harvest</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Distribution Cycle</div>
+        <div class="stat-value" style="font-size:15px">Every 15 min</div>
+        <div class="stat-sub">Auto via keeper</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions (connect prompt or tabs) -->
+  <div class="card" id="actions-card">
+    <div id="connect-prompt" class="connect-prompt">
+      <p>Connect your wallet to deposit USDC and start earning partner fee yield.</p>
+      <button class="btn-primary" style="max-width:240px;margin:0 auto;" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+
+    <div id="actions-panel" style="display:none">
+      <div class="card-title"><span class="dot green"></span> Manage Position</div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('deposit')">💰 Deposit</button>
+        <button class="tab" onclick="switchTab('withdraw')">📤 Withdraw</button>
+        <button class="tab" onclick="switchTab('harvest')">🌱 Harvest</button>
+      </div>
+
+      <!-- Deposit tab -->
+      <div class="tab-panel active" id="tab-deposit">
+        <div class="input-group">
+          <div class="input-label">Amount to deposit (multiples of $10 only)</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-deposit" placeholder="10" min="10" step="10" />
+            <span class="input-token">USDC</span>
+          </div>
+          <div class="input-hint" id="deposit-hint">Minimum $10 · Must be a multiple of $10</div>
+        </div>
+        <div class="quick-amounts">
+          <span class="quick-btn" onclick="setAmt('deposit',10)">$10</span>
+          <span class="quick-btn" onclick="setAmt('deposit',50)">$50</span>
+          <span class="quick-btn" onclick="setAmt('deposit',100)">$100</span>
+          <span class="quick-btn" onclick="setAmt('deposit',500)">$500</span>
+          <span class="quick-btn" onclick="setAmt('deposit',1000)">$1,000</span>
+        </div>
+        <div class="input-hint" style="margin-bottom:12px">Your USDC balance: <strong id="my-usdc-bal">—</strong></div>
+        <button class="btn-primary" id="btn-deposit" onclick="doDeposit()">Deposit USDC</button>
+        <div class="status-msg" id="msg-deposit"></div>
+      </div>
+
+      <!-- Withdraw tab -->
+      <div class="tab-panel" id="tab-withdraw">
+        <div class="input-group">
+          <div class="input-label">Amount to withdraw (multiples of $10 only)</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-withdraw" placeholder="10" min="10" step="10" />
+            <span class="input-token">USDC</span>
+          </div>
+          <div class="input-hint">Pending rewards are auto-harvested on withdrawal</div>
+        </div>
+        <div class="quick-amounts">
+          <span class="quick-btn" onclick="setAmt('withdraw',10)">$10</span>
+          <span class="quick-btn" onclick="setAmt('withdraw',50)">$50</span>
+          <span class="quick-btn" onclick="setAmt('withdraw',100)">$100</span>
+          <span class="quick-btn" id="withdraw-all-btn" onclick="setWithdrawAll()">All</span>
+        </div>
+        <div class="input-hint" style="margin-bottom:12px">Your stake: <strong id="my-stake-bal">—</strong></div>
+        <button class="btn-primary red" id="btn-withdraw" onclick="doWithdraw()">Withdraw USDC</button>
+        <div class="status-msg" id="msg-withdraw"></div>
+      </div>
+
+      <!-- Harvest tab -->
+      <div class="tab-panel" id="tab-harvest">
+        <div style="background:var(--bg3);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">Available to harvest</div>
+          <div style="font-size:40px;font-weight:900;color:var(--green)" id="harvest-amount">$0.00</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:6px;">USDC rewards from partner fee distributions</div>
+        </div>
+        <button class="btn-primary" id="btn-harvest" onclick="doHarvest()">Harvest Rewards</button>
+        <div class="status-msg" id="msg-harvest"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> How It Works</div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-title">Deposit USDC</div>
+        <div class="how-desc">Deposit any multiple of $10 (min $10). Your USDC stays in the smart contract — no lock-up, withdraw anytime.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-title">Fees flow in</div>
+        <div class="how-desc">When a new member uses Transak or Ramp to fund their wallet, a small partner fee is routed to the pool automatically every 15 minutes.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-title">Earn pro-rata</div>
+        <div class="how-desc">Your share of each fee distribution is proportional to your stake. $100 in a $1,000 pool = 10% of every distribution.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">04</div>
+        <div class="how-title">Harvest anytime</div>
+        <div class="how-desc">Rewards accumulate in real time. Click Harvest to claim your USDC earnings — or they auto-harvest when you deposit or withdraw.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contract info -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Contract Info</div>
+    <div class="info-row">
+      <span class="info-key">Pool Contract</span>
+      <span class="info-val"><a href="https://sepolia.basescan.org/address/0x387055f332C5558a2439D76FfFB4a5A3EbABc4EA" target="_blank">0x387055…c4EA ↗</a></span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Network</span>
+      <span class="info-val">Base Sepolia (Testnet)</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Reward Token</span>
+      <span class="info-val">USDC (test)</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Min Deposit</span>
+      <span class="info-val">$10 USDC · multiples of $10</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Lock Period</span>
+      <span class="info-val">None — withdraw anytime</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Distribution Frequency</span>
+      <span class="info-val">Every 15 min (automated keeper)</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Emergency Exit</span>
+      <span class="info-val">emergencyWithdraw() available on-chain</span>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const POOL_ADDR = '0x387055f332C5558a2439D76FfFB4a5A3EbABc4EA';
+const USDC_ADDR = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
+const UNIT = 1_000_000n; // USDC 6 decimals
+
+const POOL_ABI = [
+  'function deposit(uint256) external',
+  'function withdraw(uint256) external',
+  'function harvest() external',
+  'function pendingReward(address) view returns (uint256)',
+  'function staked(address) view returns (uint256)',
+  'function totalStaked() view returns (uint256)',
+  'function totalRewardDistributed() view returns (uint256)',
+  'function lpInfo(address) view returns (uint256,uint256,uint256)',
+];
+const ERC20_ABI = [
+  'function balanceOf(address) view returns (uint256)',
+  'function approve(address,uint256) returns (bool)',
+  'function allowance(address,address) view returns (uint256)',
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let provider, signer, userAddr, pool, usdc;
+let refreshTimer;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmtUSD(raw) {
+  return '$' + (Number(raw) / 1_000_000).toFixed(2);
+}
+function fmtPct(raw) {
+  // sharePercent is scaled x1,000,000 (100% = 1,000,000)
+  return (Number(raw) / 10_000).toFixed(2) + '%';
+}
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function showMsg(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'status-msg show ' + type;
+}
+function clearMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'status-msg';
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['deposit','withdraw','harvest'][i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── Quick amount buttons ──────────────────────────────────────────────────────
+function setAmt(tab, n) {
+  document.getElementById('inp-' + tab).value = n;
+}
+function setWithdrawAll() {
+  const el = document.getElementById('stat-my-stake');
+  const val = parseFloat((el.textContent || '').replace(/[^0-9.]/g, ''));
+  if (val) document.getElementById('inp-withdraw').value = Math.floor(val / 10) * 10;
+}
+
+// ── Wallet connection ─────────────────────────────────────────────────────────
+async function connectWallet() {
+  if (!window.ethereum) { alert('MetaMask not detected'); return; }
+  provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send('eth_requestAccounts', []);
+  signer  = await provider.getSigner();
+  userAddr = await signer.getAddress();
+
+  pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+  usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, signer);
+
+  const btn = document.getElementById('btn-connect');
+  btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
+  btn.classList.add('connected');
+
+  document.getElementById('connect-prompt').style.display = 'none';
+  document.getElementById('actions-panel').style.display = 'block';
+
+  await refreshAll();
+  refreshTimer = setInterval(refreshAll, 15000);
+}
+
+document.getElementById('btn-connect').addEventListener('click', connectWallet);
+
+// ── Refresh stats ─────────────────────────────────────────────────────────────
+async function refreshAll() {
+  try {
+    const [totalStaked, totalDist] = await Promise.all([
+      pool.totalStaked(),
+      pool.totalRewardDistributed(),
+    ]);
+    set('stat-total-staked', fmtUSD(totalStaked));
+    set('stat-total-dist',   fmtUSD(totalDist));
+
+    if (userAddr) {
+      const info = await pool.lpInfo(userAddr);
+      const myStaked  = info[0];
+      const myPending = info[1];
+      const myShare   = info[2];
+      const usdcBal   = await usdc.balanceOf(userAddr);
+
+      set('stat-my-stake', fmtUSD(myStaked));
+      set('stat-my-share', myStaked === 0n ? '0.00%' : fmtPct(myShare));
+      set('stat-pending',  fmtUSD(myPending));
+      set('my-usdc-bal',   fmtUSD(usdcBal));
+      set('my-stake-bal',  fmtUSD(myStaked));
+      set('harvest-amount', fmtUSD(myPending));
+      set('banner-pending', fmtUSD(myPending));
+
+      // Reward banner
+      const banner = document.getElementById('reward-banner');
+      banner.classList.toggle('hidden', myPending === 0n);
+
+      // Harvest button state
+      const btnH = document.getElementById('btn-harvest');
+      const btnHQ = document.getElementById('btn-harvest-quick');
+      if (btnH) btnH.disabled = myPending === 0n;
+      if (btnHQ) btnHQ.disabled = myPending === 0n;
+    }
+  } catch (e) {
+    console.warn('refresh error', e);
+  }
+}
+
+// ── Input validation ──────────────────────────────────────────────────────────
+function validateAmt(val, field) {
+  const hint = document.getElementById(field === 'deposit' ? 'deposit-hint' : null);
+  if (!val || val <= 0) return null;
+  if (val < 10) {
+    if (hint) { hint.textContent = '⚠ Minimum deposit is $10'; hint.className = 'input-hint warn'; }
+    return null;
+  }
+  if (val % 10 !== 0) {
+    if (hint) { hint.textContent = '⚠ Must be a multiple of $10 (e.g. $10, $20, $50, $100)'; hint.className = 'input-hint warn'; }
+    return null;
+  }
+  if (hint) { hint.textContent = '✓ Valid amount'; hint.className = 'input-hint'; }
+  return BigInt(val) * UNIT;
+}
+
+// ── Deposit ───────────────────────────────────────────────────────────────────
+async function doDeposit() {
+  const val = Number(document.getElementById('inp-deposit').value);
+  const amt = validateAmt(val, 'deposit');
+  if (!amt) return;
+
+  const btn = document.getElementById('btn-deposit');
+  btn.disabled = true;
+  clearMsg('msg-deposit');
+
+  try {
+    showMsg('msg-deposit', 'Checking USDC allowance…', 'loading');
+    const allowance = await usdc.allowance(userAddr, POOL_ADDR);
+    if (allowance < amt) {
+      showMsg('msg-deposit', 'Approving USDC — confirm in MetaMask…', 'loading');
+      const approveTx = await usdc.approve(POOL_ADDR, amt);
+      await approveTx.wait();
+    }
+
+    showMsg('msg-deposit', 'Depositing — confirm in MetaMask…', 'loading');
+    const tx = await pool.deposit(amt);
+    showMsg('msg-deposit', 'Transaction submitted — waiting for confirmation…', 'loading');
+    await tx.wait();
+
+    showMsg('msg-deposit', `✓ Deposited $${val} USDC successfully!`, 'ok');
+    document.getElementById('inp-deposit').value = '';
+    setTimeout(refreshAll, 4000);
+  } catch (e) {
+    const msg = e?.reason || e?.message || 'Transaction failed';
+    showMsg('msg-deposit', '✗ ' + msg.slice(0, 120), 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Withdraw ──────────────────────────────────────────────────────────────────
+async function doWithdraw() {
+  const val = Number(document.getElementById('inp-withdraw').value);
+  const amt = validateAmt(val, 'withdraw');
+  if (!amt) { showMsg('msg-withdraw', '⚠ Enter a valid multiple of $10', 'err'); return; }
+
+  const btn = document.getElementById('btn-withdraw');
+  btn.disabled = true;
+  clearMsg('msg-withdraw');
+
+  try {
+    showMsg('msg-withdraw', 'Withdrawing — confirm in MetaMask…', 'loading');
+    const tx = await pool.withdraw(amt);
+    showMsg('msg-withdraw', 'Transaction submitted — waiting…', 'loading');
+    await tx.wait();
+    showMsg('msg-withdraw', `✓ Withdrew $${val} USDC (+ any pending rewards) successfully!`, 'ok');
+    document.getElementById('inp-withdraw').value = '';
+    setTimeout(refreshAll, 4000);
+  } catch (e) {
+    const msg = e?.reason || e?.message || 'Transaction failed';
+    showMsg('msg-withdraw', '✗ ' + msg.slice(0, 120), 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Harvest ───────────────────────────────────────────────────────────────────
+async function doHarvest() {
+  await _harvest('btn-harvest', 'msg-harvest');
+}
+document.getElementById('btn-harvest-quick').addEventListener('click', async () => {
+  await _harvest('btn-harvest-quick', 'msg-harvest');
+});
+
+async function _harvest(btnId, msgId) {
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = true;
+  clearMsg(msgId);
+
+  try {
+    showMsg(msgId, 'Harvesting — confirm in MetaMask…', 'loading');
+    const tx = await pool.harvest();
+    showMsg(msgId, 'Transaction submitted — waiting…', 'loading');
+    await tx.wait();
+    showMsg(msgId, '✓ Rewards harvested successfully! USDC sent to your wallet.', 'ok');
+    setTimeout(refreshAll, 4000);
+  } catch (e) {
+    const msg = e?.reason || e?.message || 'Transaction failed';
+    showMsg(msgId, '✗ ' + (msg.includes('nothing to harvest') ? 'No rewards to harvest yet.' : msg.slice(0, 120)), 'err');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+const themeBtn = document.getElementById('btn-theme');
+const saved = localStorage.getItem('cnova_theme');
+if (saved === 'light') { document.body.classList.add('light'); themeBtn.textContent = '🌙'; }
+themeBtn.addEventListener('click', () => {
+  const isLight = document.body.classList.toggle('light');
+  themeBtn.textContent = isLight ? '🌙' : '☀️';
+  localStorage.setItem('cnova_theme', isLight ? 'light' : 'dark');
+});
+
+// ── Auto-connect if previously connected ──────────────────────────────────────
+window.addEventListener('load', async () => {
+  if (window.ethereum) {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length) connectWallet();
+  }
+  // Load public pool stats even without wallet
+  try {
+    const rp = new ethers.JsonRpcProvider('https://sepolia.base.org');
+    const poolR = new ethers.Contract(POOL_ADDR, POOL_ABI, rp);
+    const [ts, td] = await Promise.all([poolR.totalStaked(), poolR.totalRewardDistributed()]);
+    set('stat-total-staked', fmtUSD(ts));
+    set('stat-total-dist',   fmtUSD(td));
+  } catch (_) {}
+});
+</script>
+</body>
+</html>
