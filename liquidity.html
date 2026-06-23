@@ -633,6 +633,23 @@ function setWithdrawAll() {
   if (val) document.getElementById('inp-withdraw').value = Math.floor(val / 10) * 10;
 }
 
+// ── Read-only pool stats (no wallet required) ────────────────────────────────
+async function loadPublicStats() {
+  try {
+    const roProvider = new ethers.JsonRpcProvider('https://sepolia.base.org');
+    const roPool = new ethers.Contract(POOL_ADDR, POOL_ABI, roProvider);
+    const [totalStaked, totalDist] = await Promise.all([
+      roPool.totalStaked(),
+      roPool.totalRewardDistributed(),
+    ]);
+    set('stat-total-staked', fmtUSD(totalStaked));
+    set('stat-total-dist',   fmtUSD(totalDist));
+  } catch (e) {
+    console.warn('loadPublicStats error', e);
+  }
+}
+loadPublicStats();
+
 // ── Wallet connection ─────────────────────────────────────────────────────────
 async function connectWallet() {
   if (!window.ethereum) { alert('MetaMask not detected'); return; }
