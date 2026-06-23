@@ -714,12 +714,12 @@
       <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool</span><span><span class="split-amount">44%</span> <span class="split-pct">$4.40</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.chain_pay">⛓️ Chain Pay (6 upline levels)</span><span><span class="split-amount">17%</span> <span class="split-pct">$1.70</span></span></div>
       <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund <span style="font-size:10px;color:var(--text3)" data-i18n="split.stability_sub">(rescue reserve)</span></span><span><span class="split-amount">12%</span> <span class="split-pct">$1.20</span></span></div>
-      <div class="split-row"><span class="split-label">💧 Liquidity Reserve <span style="font-size:10px;color:var(--text3)">(CNOVA/USDC pool)</span></span><span><span class="split-amount">2%</span> <span class="split-pct">$0.20</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.referrer">🤝 L1 Direct Referrer</span><span><span class="split-amount">10%</span> <span class="split-pct">$1.00</span></span></div>
       <div class="split-row"><span class="split-label">🏦 CNOVA Treasury <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">10%</span> <span class="split-pct">$1.00</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.dev">⚙️ Dev</span><span><span class="split-amount">2%</span> <span class="split-pct">$0.20</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.ops">⚙️ Ops</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.community">🏛️ Community</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
+      <div class="split-row"><span class="split-label">💧 Liquidity Reserve <span style="font-size:10px;color:var(--text3)">(CNOVA/USDC pool)</span></span><span><span class="split-amount">2%</span> <span class="split-pct">$0.20</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.buyback">🔥 CNOVA Buyback Reserve</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
       <div style="margin-top:14px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green2);border-radius:8px;font-size:13px;color:var(--text2)">
         💡 <strong style="color:var(--green)" data-i18n="split.mechanic_label">CryptoNova Matrix mechanic:</strong> <span data-i18n="split.mechanic_body">Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.</span>
@@ -2656,7 +2656,7 @@ async function loadDaoWidget() {
   try {
     const GOV_MIN_ABI = [
       'function proposalCount() view returns (uint256)',
-      'function proposals(uint256) view returns (uint256 id,address proposer,uint8 paramId,uint256 newValue,address target,uint256 votesFor,uint256 votesAgainst,uint256 startTime,uint8 state,bool executed)',
+      'function proposals(uint256) view returns (uint256 id,address proposer,uint256 startTime,uint256 endTime,uint256 timelockEnd,uint8 state,uint8 paramId,address target,uint256 newValue,string description,uint256 votesFor,uint256 votesAgainst,uint256 quorumRequired)',
     ];
     const gov = new ethers.Contract(ADDRS.v8Governance, GOV_MIN_ABI, rp);
     const count = await gov.proposalCount().catch(() => 0n);
@@ -2671,14 +2671,15 @@ async function loadDaoWidget() {
     const toFetch = Math.min(total, 20);
     const ids = Array.from({ length: toFetch }, (_, i) => total - i);
     const props = await Promise.all(ids.map(id => gov.proposals(id).catch(() => null)));
-    // state: 0=Active, 1=Timelocked, 2=Executed, 3=Rejected, 4=Expired
+    // state: 0=Active, 1=Passed, 2=Defeated, 3=Timelocked, 4=Executed, 5=Expired, 6=Cancelled
     let active = 0, timelocked = 0;
     let latestLabel = '';
+    const STATE_NAMES = ['Active','Passed','Defeated','Timelocked','Executed','Expired','Cancelled'];
     for (const p of props) {
       if (!p) continue;
       if (p.state === 0n) active++;
-      if (p.state === 1n) timelocked++;
-      if (!latestLabel) latestLabel = `Latest: Proposal #${p.id} — ${['Active','Timelocked','Executed','Rejected','Expired'][Number(p.state)] || ''}`;
+      if (p.state === 3n) timelocked++;
+      if (!latestLabel) latestLabel = `Latest: Proposal #${p.id} — ${STATE_NAMES[Number(p.state)] || ''}`;
     }
     setText('dao-active-count', active.toString());
     setText('dao-timelocked-count', timelocked.toString());
