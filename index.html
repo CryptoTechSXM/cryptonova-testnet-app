@@ -200,10 +200,9 @@
       .logo-badge { display: none; }
       #btn-connect { padding: 7px 12px; font-size: 13px; }
 
-      /* ── Nav: horizontal scroll so all tabs stay reachable ── */
-      nav { padding: 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-      nav::-webkit-scrollbar { display: none; }
-      nav button { padding: 12px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+      /* ── Nav: wrap to 2 rows on mobile instead of horizontal scroll ── */
+      nav { padding: 4px 8px; flex-wrap: wrap; gap: 0; overflow-x: unset; }
+      nav button { padding: 10px 12px; font-size: 12px; flex: 1 1 auto; min-width: 80px; white-space: nowrap; }
 
       /* ── Layout ── */
       main { padding: 20px 16px; }

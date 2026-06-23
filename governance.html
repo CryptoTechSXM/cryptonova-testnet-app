@@ -179,6 +179,20 @@
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
     .tab-count { display: inline-block; background: var(--bg3); border-radius: 10px; padding: 1px 7px; font-size: 11px; margin-left: 5px; }
+
+    /* ── Mobile hamburger menu ──────────────────────────────── */
+    .hamburger { display: none; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 5px 10px; font-size: 20px; cursor: pointer; line-height: 1; flex-shrink: 0; }
+    .mobile-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg2); border-bottom: 1px solid var(--border); z-index: 300; flex-direction: column; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { display: block; padding: 14px 20px; color: var(--text2); text-decoration: none; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); transition: background .15s, color .15s; }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover, .mobile-menu a.active { color: var(--green); background: var(--bg3); }
+    @media (max-width: 640px) {
+      header { padding: 10px 16px; position: relative; }
+      .nav-link { display: none; }
+      .hamburger { display: block; }
+      #btn-connect { font-size: 12px; padding: 7px 10px; }
+    }
   </style>
 </head>
 <body>
@@ -201,6 +215,14 @@
     <a href="liquidity.html" class="nav-link">Liquidity</a>
     <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
     <button id="btn-connect" onclick="connectWallet()" data-i18n="common.connect_wallet">Connect Wallet</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html" data-i18n="common.dashboard">📊 Dashboard</a>
+    <a href="buy.html" data-i18n="common.buy_cnova">💰 Buy CNOVA</a>
+    <a href="governance.html" class="active" data-i18n="common.governance">⚖️ Governance</a>
+    <a href="liquidity.html">💧 Liquidity</a>
+    <a href="status.html">🛡️ Status</a>
   </div>
 </header>
 
@@ -769,6 +791,15 @@ let arrayRows = []; // [[col1,col2], ...] for the ladder/boost-table builder (pa
 let currentTab = 'active';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
+function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const m = document.getElementById('mobile-menu');
+  const h = document.getElementById('hamburger');
+  if (m && h && !m.contains(e.target) && !h.contains(e.target)) m.classList.remove('open');
+});
+
 function toggleTheme() {
   document.body.classList.toggle('light');
   localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
