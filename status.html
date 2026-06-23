@@ -210,7 +210,7 @@
         <div class="pill-sub" id="pill-matrix-sub" data-i18n="statusPage.pill_matrix_sub_default">MatA / MatB</div>
       </div>
     </div>
-    <div class="summary-pill" onclick="toggleCard('card-keeper')">
+    <div class="summary-pill" onclick="toggleCard('card-parked')">
       <div class="pill-indicator" id="pill-rescue"></div>
       <div>
         <div class="pill-label" data-i18n="statusPage.pill_rescue_label">Rescues</div>
@@ -244,15 +244,6 @@
         <div class="detail-row">
           <span class="detail-key" data-i18n="statusPage.row_work_type">Work type</span>
           <span class="detail-val" id="kp-work-type">—</span>
-        </div>
-        <div class="detail-section" data-i18n="statusPage.section_recent_activity">Recent Activity</div>
-        <div class="detail-row">
-          <span class="detail-key" data-i18n="statusPage.row_last_rescue">Last rescue</span>
-          <span class="detail-val" id="kp-last-rescue">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (last 50k blocks)</span>
-          <span class="detail-val blue" id="kp-rescue-count">—</span>
         </div>
         <div class="detail-section" data-i18n="statusPage.section_infrastructure">Infrastructure</div>
         <div class="detail-row">
@@ -296,6 +287,14 @@
         <div class="detail-row">
           <span class="detail-key" data-i18n="statusPage.row_avg_shortfall">Avg shortfall per member</span>
           <span class="detail-val" id="pk-shortfall">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (last 50k blocks)</span>
+          <span class="detail-val blue" id="kp-rescue-count">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key" data-i18n="statusPage.row_last_rescue">Last rescue</span>
+          <span class="detail-val green" id="kp-last-rescue">—</span>
         </div>
         <div class="detail-section" data-i18n="statusPage.section_parked_wallet_list">Parked Wallet List</div>
         <div id="parked-list-wrap">
@@ -577,8 +576,9 @@
   // ── Parked Members ────────────────────────────────────────
   async function loadParked(provider, blk) {
     try {
-      const matB = new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider);
-      const parkedCount = await matB.getParkedCount().catch(()=>0n);
+      // Keeper rescues from T1 MatA — read MatA parked count to match keeper reports
+      const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
+      const parkedCount = await matA.getParkedCount().catch(()=>0n);
       const count = Number(parkedCount);
 
       // Summary pill
@@ -609,10 +609,10 @@
       setText('pk-count', count > 0 ? count + ' ' + (count>1 ? t('statusPage.js.members_suffix','members') : t('statusPage.js.member_suffix','member')) : '0 — ' + t('statusPage.js.all_clear_suffix', 'all clear'));
       setClass('pk-count', count === 0 ? 'green' : count <= 5 ? 'yellow' : 'red');
 
-      // Scan MemberParked events to get wallet list
+      // Scan MemberParked events from T1 MatA (matches keeper rescue source)
       const fromBlock = Math.max(0, blk - 100000);
-      const parkFilter = matB.filters.MemberParked();
-      const parkLogs = await matB.queryFilter(parkFilter, fromBlock, blk).catch(()=>[]);
+      const parkFilter = matA.filters.MemberParked();
+      const parkLogs = await matA.queryFilter(parkFilter, fromBlock, blk).catch(()=>[]);
 
       // Deduplicate — keep latest per member, filter still-parked
       const seen = new Map();
@@ -629,11 +629,11 @@
         const addr = log.args[0];
         const shortfall = log.args[1] || 0n;
         let parked = false;
-        try { parked = await matB.isParked(addr); } catch(e) {}
+        try { parked = await matA.isParked(addr); } catch(e) {}
         if (parked) {
           let parkedTimestamp = null;
           try {
-            const ts = await matB.parkedAt(addr);
+            const ts = await matA.parkedAt(addr);
             parkedTimestamp = Number(ts);
           } catch(e) {}
           if (!parkedTimestamp) {

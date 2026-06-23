@@ -299,6 +299,8 @@
     "pill_sf_sub_default": "Rettungsreserve",
     "pill_matrix_label": "T1 Fortschritt",
     "pill_matrix_sub_default": "MatA / MatB",
+    "pill_rescue_label": "Rettungen",
+    "pill_rescue_sub_checking": "Wird geprüft…",
     "keeper_card_title": "Keeper-Status",
     "keeper_summary_default": "Prüft und führt ausstehende Matrix-Aufgaben aus",
     "section_current_check": "Aktuelle Prüfung",

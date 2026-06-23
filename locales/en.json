@@ -299,6 +299,8 @@
     "pill_sf_sub_default": "Rescue reserve",
     "pill_matrix_label": "T1 Fill Progress",
     "pill_matrix_sub_default": "MatA / MatB",
+    "pill_rescue_label": "Rescues",
+    "pill_rescue_sub_checking": "Checking…",
     "keeper_card_title": "Keeper Status",
     "keeper_summary_default": "Checks and runs pending matrix work",
     "section_current_check": "Current Check",

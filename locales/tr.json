@@ -299,6 +299,8 @@
     "pill_sf_sub_default": "Kurtarma rezervi",
     "pill_matrix_label": "T1 İlerlemesi",
     "pill_matrix_sub_default": "MatA / MatB",
+    "pill_rescue_label": "Kurtarmalar",
+    "pill_rescue_sub_checking": "Kontrol ediliyor…",
     "keeper_card_title": "Bekçi Durumu",
     "keeper_summary_default": "Bekleyen matris görevlerini kontrol eder ve yürütür",
     "section_current_check": "Mevcut Kontrol",

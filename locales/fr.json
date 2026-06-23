@@ -299,6 +299,8 @@
     "pill_sf_sub_default": "Réserve de secours",
     "pill_matrix_label": "Progression T1",
     "pill_matrix_sub_default": "MatA / MatB",
+    "pill_rescue_label": "Sauvetages",
+    "pill_rescue_sub_checking": "Vérification…",
     "keeper_card_title": "État du Gardien",
     "keeper_summary_default": "Vérifie et exécute les tâches matricielles en attente",
     "section_current_check": "Vérification Actuelle",
