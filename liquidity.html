@@ -149,6 +149,32 @@
     .connect-prompt { text-align: center; padding: 40px 20px; color: var(--text2); }
     .connect-prompt p { margin-bottom: 16px; font-size: 15px; }
 
+    /* ── AMM styles ── */
+    .section-divider { display: flex; align-items: center; gap: 12px; margin: 32px 0 16px; }
+    .section-divider h2 { font-size: 16px; font-weight: 700; white-space: nowrap; }
+    .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .price-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg3); border-radius: 10px; padding: 14px 18px; margin-bottom: 12px; }
+    .price-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+    .price-val { font-size: 20px; font-weight: 700; color: var(--green); font-family: monospace; }
+    .price-compare { font-size: 12px; color: var(--text2); }
+    .impact-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .impact-low  { background: rgba(0,229,160,0.15); color: var(--green); }
+    .impact-med  { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .impact-high { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .swap-direction { text-align: center; margin: 10px 0; }
+    .swap-direction button { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 16px; color: var(--text2); cursor: pointer; font-size: 18px; transition: all .2s; }
+    .swap-direction button:hover { color: var(--green); border-color: var(--green); }
+    .amm-tab-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .amm-tab { background: none; border: none; padding: 10px 20px; font-size: 14px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+    .amm-tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .lp-position { background: var(--green-dim); border: 1px solid var(--green2); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: none; }
+    .lp-position.visible { display: block; }
+    .lp-pos-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+    .lp-pos-key { color: var(--text2); }
+    .lp-pos-val { font-weight: 600; color: var(--green); }
+    .quote-box { background: var(--bg3); border-radius: 8px; padding: 10px 14px; margin: 8px 0 14px; font-size: 13px; color: var(--text2); min-height: 36px; }
+    .quote-box strong { color: var(--text); }
+
     @media (max-width: 600px) {
       .hero h1 { font-size: 28px; }
       .reward-banner { flex-direction: column; align-items: flex-start; }
@@ -232,6 +258,143 @@
         <div class="stat-label">Distribution Cycle</div>
         <div class="stat-value" style="font-size:15px">Every 15 min</div>
         <div class="stat-sub">Auto via keeper</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AMM: USDC/CNOVA Trading Pool ── -->
+  <div class="section-divider"><h2>⚡ USDC / CNOVA AMM Pool</h2></div>
+
+  <!-- AMM stats -->
+  <div class="card" id="amm-stats-card">
+    <div class="card-title"><span class="dot green"></span> AMM Pool State</div>
+
+    <div class="price-row">
+      <div>
+        <div class="price-label">AMM Spot Price</div>
+        <div class="price-val" id="amm-price">—</div>
+        <div class="price-compare" id="amm-vs-floor">vs bonding floor: —</div>
+      </div>
+      <div style="text-align:right">
+        <div class="price-label">Pool K constant</div>
+        <div style="font-size:14px;font-weight:600;font-family:monospace" id="amm-k">—</div>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+      <div class="stat-box">
+        <div class="stat-label">USDC Reserve</div>
+        <div class="stat-value blue" id="amm-usdc-reserve">—</div>
+        <div class="stat-sub">USDC in pool</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">CNOVA Reserve</div>
+        <div class="stat-value purple" id="amm-cnova-reserve">—</div>
+        <div class="stat-sub">CNOVA in pool</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">LP Supply</div>
+        <div class="stat-value" id="amm-lp-supply">—</div>
+        <div class="stat-sub">CNOVA-LP tokens</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AMM actions -->
+  <div class="card" id="amm-actions-card">
+    <div id="amm-connect-prompt" class="connect-prompt">
+      <p>Connect your wallet to swap USDC ↔ CNOVA or provide liquidity.</p>
+      <button class="btn-primary" style="max-width:240px;margin:0 auto;" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+
+    <div id="amm-panel" style="display:none">
+      <!-- User LP position -->
+      <div class="lp-position" id="lp-position-box">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">Your LP Position</div>
+        <div class="lp-pos-row"><span class="lp-pos-key">LP tokens</span><span class="lp-pos-val" id="my-lp-tokens">—</span></div>
+        <div class="lp-pos-row"><span class="lp-pos-key">Pool share</span><span class="lp-pos-val" id="my-lp-share">—</span></div>
+        <div class="lp-pos-row"><span class="lp-pos-key">USDC entitled</span><span class="lp-pos-val" id="my-lp-usdc">—</span></div>
+        <div class="lp-pos-row"><span class="lp-pos-key">CNOVA entitled</span><span class="lp-pos-val" id="my-lp-cnova">—</span></div>
+      </div>
+
+      <!-- AMM tabs -->
+      <div class="amm-tab-row">
+        <button class="amm-tab active" onclick="switchAmmTab('swap')">🔄 Swap</button>
+        <button class="amm-tab" onclick="switchAmmTab('add')">➕ Add LP</button>
+        <button class="amm-tab" onclick="switchAmmTab('remove')">➖ Remove LP</button>
+      </div>
+
+      <!-- Swap tab -->
+      <div class="amm-tab-panel" id="amm-tab-swap">
+        <div class="input-group">
+          <div class="input-label">You pay</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-swap-in" placeholder="0.00" min="0" oninput="updateSwapQuote()" />
+            <span class="input-token" id="swap-in-token">USDC</span>
+          </div>
+          <div class="input-hint">Balance: <strong id="swap-in-bal">—</strong></div>
+        </div>
+
+        <div class="swap-direction">
+          <button onclick="flipSwap()" title="Flip direction">⇅</button>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label">You receive (estimated)</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-swap-out" placeholder="0.00" readonly style="opacity:.7" />
+            <span class="input-token" id="swap-out-token">CNOVA</span>
+          </div>
+        </div>
+
+        <div class="quote-box" id="swap-quote-box">Enter an amount to see the quote.</div>
+
+        <button class="btn-primary" id="btn-swap" onclick="doSwap()">Swap</button>
+        <div class="status-msg" id="msg-swap"></div>
+      </div>
+
+      <!-- Add LP tab -->
+      <div class="amm-tab-panel" id="amm-tab-add" style="display:none">
+        <div class="input-group">
+          <div class="input-label">USDC to deposit</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-add-usdc" placeholder="0.00" oninput="updateAddQuote()" />
+            <span class="input-token">USDC</span>
+          </div>
+          <div class="input-hint">Balance: <strong id="add-usdc-bal">—</strong></div>
+        </div>
+        <div class="input-group" style="margin-top:12px">
+          <div class="input-label">CNOVA to deposit <span style="color:var(--text3);font-size:11px">(auto-calculated at pool ratio)</span></div>
+          <div class="input-wrap">
+            <input type="number" id="inp-add-cnova" placeholder="0.00" readonly style="opacity:.7" />
+            <span class="input-token">CNOVA</span>
+          </div>
+          <div class="input-hint">Balance: <strong id="add-cnova-bal">—</strong></div>
+        </div>
+        <div class="quote-box" id="add-quote-box">Enter a USDC amount. The required CNOVA will be calculated automatically at the current pool ratio.</div>
+        <button class="btn-primary" id="btn-add-lp" onclick="doAddLP()">Add Liquidity</button>
+        <div class="status-msg" id="msg-add-lp"></div>
+      </div>
+
+      <!-- Remove LP tab -->
+      <div class="amm-tab-panel" id="amm-tab-remove" style="display:none">
+        <div class="input-group">
+          <div class="input-label">LP tokens to burn</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-remove-lp" placeholder="0.00" oninput="updateRemoveQuote()" />
+            <span class="input-token">CNOVA-LP</span>
+          </div>
+          <div class="input-hint">Your LP balance: <strong id="remove-lp-bal">—</strong></div>
+        </div>
+        <div class="quick-amounts">
+          <span class="quick-btn" onclick="setRemovePct(25)">25%</span>
+          <span class="quick-btn" onclick="setRemovePct(50)">50%</span>
+          <span class="quick-btn" onclick="setRemovePct(75)">75%</span>
+          <span class="quick-btn" onclick="setRemovePct(100)">Max</span>
+        </div>
+        <div class="quote-box" id="remove-quote-box">Enter LP token amount to see your USDC + CNOVA return.</div>
+        <button class="btn-primary red" id="btn-remove-lp" onclick="doRemoveLP()">Remove Liquidity</button>
+        <div class="status-msg" id="msg-remove-lp"></div>
       </div>
     </div>
   </div>
@@ -456,6 +619,7 @@ async function connectWallet() {
   document.getElementById('connect-prompt').style.display = 'none';
   document.getElementById('actions-panel').style.display = 'block';
 
+  initAMM();
   await refreshAll();
   refreshTimer = setInterval(refreshAll, 15000);
 }
@@ -605,6 +769,340 @@ async function _harvest(btnId, msgId) {
   } finally {
     if (btn) btn.disabled = false;
   }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AMM — CryptoNovaLP (USDC/CNOVA constant-product pool)
+// ══════════════════════════════════════════════════════════════════════════════
+
+const LP_ADDR        = ''; // ← filled after deploy_lp.js; empty = pool not yet deployed
+const CNOVA_ADDR     = '0xCD56D03706f90956602ed0E8415f172F72c6De21';
+const DIRECT_SALE_ADDR = '0x8C7Fbe31B523316Ebf999475b93C5e49b0C750d6';
+const CNOVA_DECIMALS = 18;
+
+const LP_ABI = [
+  'function swapUSDCForCNOVA(uint256 usdcIn, uint256 minCnovaOut) returns (uint256)',
+  'function swapCNOVAForUSDC(uint256 cnovaIn, uint256 minUsdcOut) returns (uint256)',
+  'function addLiquidity(uint256 usdcAmount, uint256 cnovaAmount) returns (uint256 lpMinted)',
+  'function removeLiquidity(uint256 lpAmount) returns (uint256 usdcOut, uint256 cnovaOut)',
+  'function getReserves() view returns (uint256 reserveUSDC, uint256 reserveCNOVA)',
+  'function getCNOVAPrice() view returns (uint256)',
+  'function quoteUSDCForCNOVA(uint256 usdcIn) view returns (uint256 cnovaOut, uint256 priceImpactBps)',
+  'function quoteCNOVAForUSDC(uint256 cnovaIn) view returns (uint256 usdcOut, uint256 priceImpactBps)',
+  'function getOptimalCNOVAForUSDC(uint256 usdcAmount) view returns (uint256)',
+  'function getLPShare(address provider) view returns (uint256 shareBps)',
+  'function totalSupply() view returns (uint256)',
+  'function balanceOf(address) view returns (uint256)',
+];
+const CNOVA_ERC20_ABI = [
+  'function balanceOf(address) view returns (uint256)',
+  'function approve(address,uint256) returns (bool)',
+  'function allowance(address,address) view returns (uint256)',
+];
+const DIRECT_SALE_ABI = [
+  'function getFloorPrice() view returns (uint256)',
+];
+
+let lpContract, cnovaContract, directSale;
+let swapDirectionUSDCIn = true;  // true = USDC→CNOVA, false = CNOVA→USDC
+let myLpBalance = 0n;
+
+// ── AMM: initialise after wallet connect ────────────────────────────────────
+function initAMM() {
+  if (!LP_ADDR) {
+    document.getElementById('amm-stats-card').innerHTML =
+      '<div class="connect-prompt"><p>🔧 AMM pool not yet deployed.<br>Run <code>deploy_lp.js</code> then add LP_ADDR to this page.</p></div>';
+    document.getElementById('amm-actions-card').style.display = 'none';
+    return;
+  }
+  lpContract   = new ethers.Contract(LP_ADDR,          LP_ABI,          signer);
+  cnovaContract= new ethers.Contract(CNOVA_ADDR,       CNOVA_ERC20_ABI, signer);
+  directSale   = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, provider);
+
+  document.getElementById('amm-connect-prompt').style.display = 'none';
+  document.getElementById('amm-panel').style.display = 'block';
+  refreshAMM();
+}
+
+// ── AMM: stats refresh ───────────────────────────────────────────────────────
+async function refreshAMM() {
+  if (!LP_ADDR || !lpContract) return;
+  try {
+    const [rU, rC]  = await lpContract.getReserves();
+    const lpSupply  = await lpContract.totalSupply();
+    const humanPrice= rC > 0n ? (Number(rU) / 1e6) / (Number(rC) / 1e18) : 0;
+
+    set('amm-usdc-reserve',  '$' + (Number(rU) / 1e6).toFixed(2));
+    set('amm-cnova-reserve', (Number(rC) / 1e18).toFixed(2) + ' CNOVA');
+    set('amm-lp-supply',     (Number(lpSupply) / 1e18).toFixed(4));
+    set('amm-price',         '$' + humanPrice.toFixed(6));
+    set('amm-k',             'k = ' + (Number(rU) / 1e6 * Number(rC) / 1e18).toExponential(3));
+
+    // Compare with bonding curve floor
+    try {
+      const fp = await directSale.getFloorPrice();
+      const floor = Number(fp) / 1e6;
+      const premium = ((humanPrice / floor) - 1) * 100;
+      set('amm-vs-floor',
+        `vs bonding floor $${floor.toFixed(6)}: ${premium >= 0 ? '+' : ''}${premium.toFixed(2)}%`
+      );
+    } catch (_) { set('amm-vs-floor', ''); }
+
+    if (!userAddr) return;
+
+    // User LP position
+    myLpBalance = await lpContract.balanceOf(userAddr);
+    if (myLpBalance > 0n && lpSupply > 0n) {
+      const shareUSDC  = rU * myLpBalance / lpSupply;
+      const shareCNOVA = rC * myLpBalance / lpSupply;
+      const sharePct   = Number(myLpBalance * 10_000n / lpSupply) / 100;
+
+      set('my-lp-tokens', (Number(myLpBalance) / 1e18).toFixed(6) + ' CNOVA-LP');
+      set('my-lp-share',  sharePct.toFixed(2) + '%');
+      set('my-lp-usdc',   '$' + (Number(shareUSDC) / 1e6).toFixed(2));
+      set('my-lp-cnova',  (Number(shareCNOVA) / 1e18).toFixed(4) + ' CNOVA');
+      document.getElementById('lp-position-box').classList.add('visible');
+    } else {
+      document.getElementById('lp-position-box').classList.remove('visible');
+    }
+
+    // Balances
+    const cBal  = await cnovaContract.balanceOf(userAddr);
+    const uBal  = await usdc.balanceOf(userAddr);
+    set('swap-in-bal',   swapDirectionUSDCIn
+      ? '$' + (Number(uBal) / 1e6).toFixed(2) + ' USDC'
+      : (Number(cBal) / 1e18).toFixed(4) + ' CNOVA');
+    set('add-usdc-bal',  '$' + (Number(uBal) / 1e6).toFixed(2));
+    set('add-cnova-bal', (Number(cBal) / 1e18).toFixed(4) + ' CNOVA');
+    set('remove-lp-bal', (Number(myLpBalance) / 1e18).toFixed(6) + ' CNOVA-LP');
+
+  } catch (e) { console.warn('AMM refresh error', e); }
+}
+
+// ── AMM tab switching ─────────────────────────────────────────────────────────
+function switchAmmTab(name) {
+  document.querySelectorAll('.amm-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.amm-tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelector(`.amm-tab[onclick="switchAmmTab('${name}')"]`).classList.add('active');
+  document.getElementById('amm-tab-' + name).style.display = 'block';
+}
+
+// ── Swap direction flip ───────────────────────────────────────────────────────
+function flipSwap() {
+  swapDirectionUSDCIn = !swapDirectionUSDCIn;
+  set('swap-in-token',  swapDirectionUSDCIn ? 'USDC'  : 'CNOVA');
+  set('swap-out-token', swapDirectionUSDCIn ? 'CNOVA' : 'USDC');
+  document.getElementById('inp-swap-in').value = '';
+  document.getElementById('inp-swap-out').value = '';
+  set('swap-quote-box', 'Enter an amount to see the quote.');
+  refreshAMM();
+}
+
+// ── Swap quote updater ────────────────────────────────────────────────────────
+async function updateSwapQuote() {
+  if (!lpContract) return;
+  const val = parseFloat(document.getElementById('inp-swap-in').value);
+  if (!val || val <= 0) {
+    document.getElementById('inp-swap-out').value = '';
+    set('swap-quote-box', 'Enter an amount to see the quote.');
+    return;
+  }
+  try {
+    if (swapDirectionUSDCIn) {
+      const amt = BigInt(Math.round(val * 1e6));
+      const [out, impactBps] = await lpContract.quoteUSDCForCNOVA(amt);
+      document.getElementById('inp-swap-out').value = (Number(out) / 1e18).toFixed(4);
+      const cls = Number(impactBps) < 100 ? 'impact-low' : Number(impactBps) < 500 ? 'impact-med' : 'impact-high';
+      document.getElementById('swap-quote-box').innerHTML =
+        `You get <strong>${(Number(out)/1e18).toFixed(4)} CNOVA</strong> &nbsp;
+         <span class="impact-badge ${cls}">Impact: ${(Number(impactBps)/100).toFixed(2)}%</span>
+         &nbsp;· 0.30% fee included`;
+    } else {
+      const amt = BigInt(Math.round(val * 1e18));
+      const [out, impactBps] = await lpContract.quoteCNOVAForUSDC(amt);
+      document.getElementById('inp-swap-out').value = (Number(out) / 1e6).toFixed(2);
+      const cls = Number(impactBps) < 100 ? 'impact-low' : Number(impactBps) < 500 ? 'impact-med' : 'impact-high';
+      document.getElementById('swap-quote-box').innerHTML =
+        `You get <strong>$${(Number(out)/1e6).toFixed(2)} USDC</strong> &nbsp;
+         <span class="impact-badge ${cls}">Impact: ${(Number(impactBps)/100).toFixed(2)}%</span>
+         &nbsp;· 0.30% fee included`;
+    }
+  } catch (e) {
+    set('swap-quote-box', 'Quote failed: ' + (e?.message || '').slice(0, 80));
+  }
+}
+
+// ── Execute swap ─────────────────────────────────────────────────────────────
+async function doSwap() {
+  if (!lpContract) return;
+  const val = parseFloat(document.getElementById('inp-swap-in').value);
+  if (!val || val <= 0) { showMsg('msg-swap', '⚠ Enter a valid amount', 'err'); return; }
+
+  const btn = document.getElementById('btn-swap');
+  btn.disabled = true;
+  clearMsg('msg-swap');
+
+  try {
+    if (swapDirectionUSDCIn) {
+      const amt = BigInt(Math.round(val * 1e6));
+      const [minOut] = await lpContract.quoteUSDCForCNOVA(amt);
+      const slippage = minOut * 95n / 100n; // 5% tolerance
+
+      showMsg('msg-swap', 'Approving USDC…', 'loading');
+      const allowance = await usdc.allowance(userAddr, LP_ADDR);
+      if (allowance < amt) {
+        const tx = await usdc.approve(LP_ADDR, amt);
+        await tx.wait();
+      }
+
+      showMsg('msg-swap', 'Swapping — confirm in MetaMask…', 'loading');
+      const tx = await lpContract.swapUSDCForCNOVA(amt, slippage);
+      await tx.wait();
+      showMsg('msg-swap', `✓ Swapped $${val} USDC for ${(Number(minOut)/1e18).toFixed(4)} CNOVA!`, 'ok');
+
+    } else {
+      const amt = BigInt(Math.round(val * 1e18));
+      const [minOut] = await lpContract.quoteCNOVAForUSDC(amt);
+      const slippage = minOut * 95n / 100n;
+
+      showMsg('msg-swap', 'Approving CNOVA…', 'loading');
+      const allowance = await cnovaContract.allowance(userAddr, LP_ADDR);
+      if (allowance < amt) {
+        const tx = await cnovaContract.approve(LP_ADDR, amt);
+        await tx.wait();
+      }
+
+      showMsg('msg-swap', 'Swapping — confirm in MetaMask…', 'loading');
+      const tx = await lpContract.swapCNOVAForUSDC(amt, slippage);
+      await tx.wait();
+      showMsg('msg-swap', `✓ Swapped ${val} CNOVA for $${(Number(minOut)/1e6).toFixed(2)} USDC!`, 'ok');
+    }
+
+    document.getElementById('inp-swap-in').value = '';
+    document.getElementById('inp-swap-out').value = '';
+    setTimeout(refreshAMM, 3000);
+
+  } catch (e) {
+    showMsg('msg-swap', '✗ ' + (e?.reason || e?.message || 'Swap failed').slice(0, 120), 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Add LP: auto-calculate CNOVA from USDC input ──────────────────────────────
+async function updateAddQuote() {
+  if (!lpContract) return;
+  const val = parseFloat(document.getElementById('inp-add-usdc').value);
+  if (!val || val <= 0) {
+    document.getElementById('inp-add-cnova').value = '';
+    set('add-quote-box', 'Enter a USDC amount. The required CNOVA will be calculated automatically at the current pool ratio.');
+    return;
+  }
+  try {
+    const amt    = BigInt(Math.round(val * 1e6));
+    const needed = await lpContract.getOptimalCNOVAForUSDC(amt);
+    document.getElementById('inp-add-cnova').value = (Number(needed) / 1e18).toFixed(4);
+    set('add-quote-box',
+      `You deposit <strong>$${val} USDC</strong> + <strong>${(Number(needed)/1e18).toFixed(4)} CNOVA</strong>. ` +
+      `You receive LP tokens proportional to your pool share.`
+    );
+  } catch (e) {
+    set('add-quote-box', 'Failed to calculate ratio: ' + (e?.message || '').slice(0, 60));
+  }
+}
+
+async function doAddLP() {
+  if (!lpContract) return;
+  const uVal = parseFloat(document.getElementById('inp-add-usdc').value);
+  const cVal = parseFloat(document.getElementById('inp-add-cnova').value);
+  if (!uVal || !cVal) { showMsg('msg-add-lp', '⚠ Enter USDC amount first', 'err'); return; }
+
+  const uAmt = BigInt(Math.round(uVal * 1e6));
+  const cAmt = BigInt(Math.round(cVal * 1e18));
+  const btn  = document.getElementById('btn-add-lp');
+  btn.disabled = true;
+  clearMsg('msg-add-lp');
+
+  try {
+    showMsg('msg-add-lp', 'Approving USDC…', 'loading');
+    const uAllow = await usdc.allowance(userAddr, LP_ADDR);
+    if (uAllow < uAmt) { const tx = await usdc.approve(LP_ADDR, uAmt); await tx.wait(); }
+
+    showMsg('msg-add-lp', 'Approving CNOVA…', 'loading');
+    const cAllow = await cnovaContract.allowance(userAddr, LP_ADDR);
+    if (cAllow < cAmt) { const tx = await cnovaContract.approve(LP_ADDR, cAmt); await tx.wait(); }
+
+    showMsg('msg-add-lp', 'Adding liquidity — confirm in MetaMask…', 'loading');
+    const tx = await lpContract.addLiquidity(uAmt, cAmt);
+    await tx.wait();
+    showMsg('msg-add-lp', `✓ Liquidity added! $${uVal} USDC + ${cVal.toFixed(4)} CNOVA deposited.`, 'ok');
+
+    document.getElementById('inp-add-usdc').value = '';
+    document.getElementById('inp-add-cnova').value = '';
+    setTimeout(refreshAMM, 3000);
+
+  } catch (e) {
+    showMsg('msg-add-lp', '✗ ' + (e?.reason || e?.message || 'Failed').slice(0, 120), 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Remove LP ────────────────────────────────────────────────────────────────
+async function updateRemoveQuote() {
+  if (!lpContract) return;
+  const val = parseFloat(document.getElementById('inp-remove-lp').value);
+  if (!val || val <= 0) { set('remove-quote-box', 'Enter LP token amount to see your return.'); return; }
+  try {
+    const lpAmt    = BigInt(Math.round(val * 1e18));
+    const lpSupply = await lpContract.totalSupply();
+    const [rU, rC] = await lpContract.getReserves();
+    const uOut     = rU * lpAmt / lpSupply;
+    const cOut     = rC * lpAmt / lpSupply;
+    set('remove-quote-box',
+      `You receive <strong>$${(Number(uOut)/1e6).toFixed(2)} USDC</strong> + <strong>${(Number(cOut)/1e18).toFixed(4)} CNOVA</strong>`
+    );
+  } catch (e) {
+    set('remove-quote-box', 'Failed: ' + (e?.message || '').slice(0, 60));
+  }
+}
+
+function setRemovePct(pct) {
+  if (myLpBalance === 0n) return;
+  const amount = Number(myLpBalance * BigInt(pct) / 100n) / 1e18;
+  document.getElementById('inp-remove-lp').value = amount.toFixed(6);
+  updateRemoveQuote();
+}
+
+async function doRemoveLP() {
+  if (!lpContract) return;
+  const val = parseFloat(document.getElementById('inp-remove-lp').value);
+  if (!val || val <= 0) { showMsg('msg-remove-lp', '⚠ Enter LP amount', 'err'); return; }
+
+  const lpAmt = BigInt(Math.round(val * 1e18));
+  const btn   = document.getElementById('btn-remove-lp');
+  btn.disabled = true;
+  clearMsg('msg-remove-lp');
+
+  try {
+    showMsg('msg-remove-lp', 'Removing liquidity — confirm in MetaMask…', 'loading');
+    const tx = await lpContract.removeLiquidity(lpAmt);
+    await tx.wait();
+    showMsg('msg-remove-lp', `✓ Liquidity removed! USDC + CNOVA returned to your wallet.`, 'ok');
+    document.getElementById('inp-remove-lp').value = '';
+    setTimeout(refreshAMM, 3000);
+  } catch (e) {
+    showMsg('msg-remove-lp', '✗ ' + (e?.reason || e?.message || 'Failed').slice(0, 120), 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Hook initAMM into connectWallet flow (patch refreshAll)
+const _origRefreshAll = refreshAll;
+async function refreshAll() {
+  await _origRefreshAll();
+  await refreshAMM();
 }
 
 // ── Theme toggle ──────────────────────────────────────────────────────────────
