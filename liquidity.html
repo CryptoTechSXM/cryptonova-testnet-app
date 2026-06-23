@@ -446,6 +446,7 @@
             <span class="input-token">USDC</span>
           </div>
           <div class="input-hint" id="deposit-hint">Minimum $10 · Must be a multiple of $10</div>
+          <div class="input-hint" style="text-align:right;margin-top:2px">Balance: <strong id="my-usdc-bal">—</strong></div>
         </div>
         <div class="quick-amounts">
           <span class="quick-btn" onclick="setAmt('deposit',10)">$10</span>
@@ -454,7 +455,6 @@
           <span class="quick-btn" onclick="setAmt('deposit',500)">$500</span>
           <span class="quick-btn" onclick="setAmt('deposit',1000)">$1,000</span>
         </div>
-        <div class="input-hint" style="margin-bottom:12px">Your USDC balance: <strong id="my-usdc-bal">—</strong></div>
         <button class="btn-primary" id="btn-deposit" onclick="doDeposit()">Deposit USDC</button>
         <div class="status-msg" id="msg-deposit"></div>
       </div>
@@ -468,6 +468,7 @@
             <span class="input-token">USDC</span>
           </div>
           <div class="input-hint">Pending rewards are auto-harvested on withdrawal</div>
+          <div class="input-hint" style="text-align:right;margin-top:2px">Your stake: <strong id="my-stake-bal">—</strong></div>
         </div>
         <div class="quick-amounts">
           <span class="quick-btn" onclick="setAmt('withdraw',10)">$10</span>
@@ -475,7 +476,6 @@
           <span class="quick-btn" onclick="setAmt('withdraw',100)">$100</span>
           <span class="quick-btn" id="withdraw-all-btn" onclick="setWithdrawAll()">All</span>
         </div>
-        <div class="input-hint" style="margin-bottom:12px">Your stake: <strong id="my-stake-bal">—</strong></div>
         <button class="btn-primary red" id="btn-withdraw" onclick="doWithdraw()">Withdraw USDC</button>
         <div class="status-msg" id="msg-withdraw"></div>
       </div>
@@ -686,11 +686,13 @@ async function refreshAll() {
     set('stat-total-dist',   fmtUSD(totalDist));
 
     if (userAddr) {
-      const info = await pool.lpInfo(userAddr);
-      const myStaked  = info[0];
-      const myPending = info[1];
-      const myShare   = info[2];
-      const usdcBal   = await usdc.balanceOf(userAddr);
+      const [myStaked, myPending, usdcBal] = await Promise.all([
+        pool.staked(userAddr),
+        pool.pendingReward(userAddr),
+        usdc.balanceOf(userAddr),
+      ]);
+      // share % computed from already-fetched totalStaked above
+      const myShare = totalStaked > 0n ? myStaked * 1_000_000n / totalStaked : 0n;
 
       set('stat-my-stake', fmtUSD(myStaked));
       set('stat-my-share', myStaked === 0n ? '0.00%' : fmtPct(myShare));
