@@ -210,6 +210,14 @@
         <div class="pill-sub" id="pill-matrix-sub" data-i18n="statusPage.pill_matrix_sub_default">MatA / MatB</div>
       </div>
     </div>
+    <div class="summary-pill" onclick="toggleCard('card-keeper')">
+      <div class="pill-indicator" id="pill-rescue"></div>
+      <div>
+        <div class="pill-label" data-i18n="statusPage.pill_rescue_label">Rescues</div>
+        <div class="pill-value" id="pill-rescue-val">—</div>
+        <div class="pill-sub" id="pill-rescue-sub" data-i18n="statusPage.pill_rescue_sub_checking">Checking…</div>
+      </div>
+    </div>
   </div>
 
   <!-- Cards grid -->
@@ -539,8 +547,25 @@
       setClass('kp-work-needed', upkeepNeeded ? 'yellow' : 'green');
       setText('kp-work-type', upkeepNeeded ? workType : '—');
       setText('kp-addr', ADDRS.matrixKeeper.slice(0,6) + '…' + ADDRS.matrixKeeper.slice(-4));
-      setText('kp-last-rescue', lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—');
+      const lastRescueStr = lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—';
+      setText('kp-last-rescue', lastRescueStr);
       setText('kp-rescue-count', rescueCount.toString());
+
+      // Rescue summary pill
+      const pillRescueInd = document.getElementById('pill-rescue');
+      if (rescueCount > 0) {
+        pillRescueInd.className = 'pill-indicator green';
+        setText('pill-rescue-val', rescueCount + ' rescued');
+        setText('pill-rescue-sub', 'Last: ' + lastRescueStr);
+      } else {
+        pillRescueInd.className = 'pill-indicator';
+        setText('pill-rescue-val', '0 rescued');
+        setText('pill-rescue-sub', t('statusPage.js.no_rescues_yet', 'No rescues yet'));
+      }
+      // Update keeper card summary to show last rescue inline
+      if (lastRescueTime) {
+        setText('summary-keeper', rescueCount + ' rescue(s) · last ' + lastRescueStr);
+      }
 
     } catch(e) {
       console.error('Keeper load error:', e);
