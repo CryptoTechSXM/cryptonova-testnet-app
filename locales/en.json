@@ -722,7 +722,8 @@
       "please_add_description": "Please add a description.",
       "submitting_proposal": "Submitting proposal… please confirm in wallet.",
       "proposal_submitted": "✅ Proposal submitted! Voting opens now.",
-      "submit_failed": "Failed:"
+      "submit_failed": "Failed:",
+      "fee_never_broadcast": "Not yet broadcast — each pair uses its own constructor default."
     }
   },
   "termsPage": {
@@ -807,7 +808,6 @@
     "card5_tagline": "10–19% of every entry fee flows into the CNOVA Treasury (rises at higher tiers). As more members join, the floor price only moves up — never down.",
     "card6_name": "Community Wallet Bonus",
     "card6_tagline": "Exclusive to the first 1,000 wallets ever to join. A dedicated pool, funded by a slice of every entry fee network-wide, pays out monthly — for life.",
-
     "s1_h": "🤝 Stream 1 &mdash; Direct Referral Bonus",
     "s1_h3": "&nbsp;paid instantly on every entry",
     "s1_h3_pct": "10–20%",
@@ -820,7 +820,6 @@
     "s1_p2_pre": "Refer 10 people at T1:",
     "s1_p2_b": "$10 instantly",
     "s1_p2_post": ". If those 10 auto-upgrade through T2–T4, you earn the L1 bonus each time, from the same 10 people, again and again — at the higher 20% rate once they reach T4.",
-
     "s2_h": "⛓️ Stream 2 &mdash; Chain Pay (6-Level Depth)",
     "s2_h3_pct": "17–20%",
     "s2_h3": "&nbsp;split across 6 upline BFS positions",
@@ -837,7 +836,6 @@
     "s2_l6_pct": "3.75% of pool",
     "s2_p3": "These payments are <strong>continuous</strong> — they fire every time a new member enters anywhere below you, not just at cycle completion. A deep downline generates chain pay from hundreds of entries passively.",
     "s2_p4": "At T5 ($250, 20% chain pay), the equivalent chain pay pool is $50.00 — so L1 earns $25.00 from each single entry below them at that tier.",
-
     "s3_h": "🌀 Stream 3 &mdash; Matrix Cycle Payout",
     "s3_h3_pct": "22.5–44%",
     "s3_h3": "&nbsp;accumulates in the equalization pool — paid on cycle",
@@ -853,7 +851,6 @@
     "s3_p2": "You don't need to be the root to benefit. Being earlier in the queue means more entries land below you, generating chain pay throughout the fill. Faster-filling matrices = more frequent earnings for everyone in the queue.",
     "s3_p3_b": "Auto re-entry:",
     "s3_p3": "the protocol automatically re-enters the cycling member into the next active matrix. A portion of the cycle payout funds your re-entry fee — no manual action required.",
-
     "s4_h": "🪙 Stream 4 &mdash; CNOVA Token Mining",
     "s4_h3_pre": "Minted to your wallet on every entry —",
     "s4_h3_span": "halving epochs",
@@ -875,7 +872,6 @@
     "s4_p3_mid": "the base epoch reward compared to T1. CNOVA total supply is capped at",
     "s4_p3_b2": "21,000,000 tokens",
     "s4_p3_post": ".",
-
     "s5_h": "📈 Stream 5 &mdash; CNOVA Floor Price Appreciation",
     "s5_h3_pct": "10%",
     "s5_h3": "&nbsp;of all entry fees back the CNOVA floor price",
@@ -887,7 +883,6 @@
     "s5_n2_label": "as network grows",
     "s5_n2_sub": "floor never decreases",
     "s5_p3": "CNOVA accrued during Genesis epoch at $0.02 floor could be worth significantly more at later epochs as the floor appreciates. There is no market-price ceiling — CNOVA can trade above floor on open markets.",
-
     "s6_h": "🏛️ Stream 6 &mdash; Community Wallet (First 1,000 Members)",
     "s6_h3": "Exclusive lifetime bonus for the first 1,000 wallets — paid monthly, for as long as you hold your spot",
     "s6_p1": "The 1% \"Community Wallet\" line in the entry-fee split below isn't just a protocol reserve sitting idle — <strong>every entry, from every member, at every tier, forever</strong> feeds this pool. What makes it special is who gets paid from it: only the first <strong>1,000 wallets</strong> ever to register with CryptoNova are eligible to receive distributions, split into two permanent cohorts by join order.",
@@ -907,7 +902,6 @@
     "s6_n5_label": "per member / month",
     "s6_n5_sub": "example: $10,000 pool",
     "s6_p4": "Claim your share anytime from the Dashboard — unclaimed distributions expire after 30 days and roll back into the pool for the next round, so nothing is ever lost from the system, even if a member forgets to claim. Because the cohort is permanently capped, being one of the first 1,000 isn't just about earning chain pay sooner — it's a seat at a pool that never reopens, funded by every member who joins after you, for as long as the protocol runs.",
-
     "table_h": "🏆 10-Tier Earnings at a Glance",
     "th_tier": "Tier",
     "th_name": "Name",
@@ -930,7 +924,6 @@
     "tier10_name": "SuperNova Apex",
     "table_footnote": "Cycle payout = 127 seats × entry fee × pool share (44% at T1–T3, 26% at T4–T5, 24.5% at T6–T7, 22.5% at T8–T10). Chain pay L1 = entry fee × chain share (17% at T1–T3, 20% at T4–T5, 17.5% at T6–T10) × 50%. Direct referral = entry fee × 10% (T1–T3) or 20% (T4–T10). Velocity gates open when previous tier MatB reaches 80% fill.",
     "table_footnote_b": "Cycle payouts require the matrix to fill — not guaranteed.",
-
     "split_h": "💰 Where Does the $10 Entry Fee Go?",
     "split_intro": "Every T1 entry fee is distributed automatically and instantly by the smart contract — no human intervention, no admin wallet:",
     "split_l1": "🤝 L1 Direct Referral",
@@ -946,7 +939,6 @@
     "split_footer_pre": "71% of every entry goes directly to participants (referral + chain pay + cycle pool). The remaining 29% builds the protocol — CNOVA floor backing, reserves, liquidity, and operations.",
     "split_footer_b": "100% on-chain. Immutable.",
     "split_footer_post": "(Splits shown are for Tiers 1–3; higher tiers shift more weight toward referral, chain pay, and treasury — see the table above and the Stream sections for exact per-tier figures.)",
-
     "risk_title": "⚠️ Important — Read Before Participating",
     "risk_body": "CryptoNova Matrix is a high-risk DeFi protocol. Earnings depend entirely on continued network growth — if growth slows, matrix cycles slow and chain pay volume decreases. The cycle payouts shown above assume a fully-filled matrix, which is not guaranteed. CNOVA tokens are not a stablecoin and have no guaranteed market value above the floor price. Only participate with funds you can afford to lose entirely. This is not financial advice.",
     "join_btn": "Join CryptoNova &rarr;"
@@ -960,7 +952,6 @@
     "glossary_heading": "📖 Acronym Glossary",
     "glossary_empty": "No glossary terms match your search.",
     "faq_empty": "No FAQ results match your search.",
-
     "g1_full": "Breadth-First Search Matrix",
     "g1_def": "CryptoNova uses a 127-seat BFS (breadth-first) queue per tier — a 7-level binary tree. Members fill positions level-by-level. When all 127 seats are filled, the root member cycles out, receives their pool payout, and the matrix resets for the next cycle. Position determines chain pay depth.",
     "g2_full": "CryptoNova Token",
@@ -989,25 +980,20 @@
     "g12_def": "The wallet that referred you when you first registered. Permanently locked on-chain and never changes &mdash; not even on tier upgrade. Your referrer earns the L1 referral bonus on your registration and on any tier upgrades you make.",
     "g13_full": "Return on Investment",
     "g13_def": "The percentage of profit relative to the amount invested. In CryptoNova Matrix, ROI comes from chain pay (17% of entries flowing up 6 levels), referral bonuses ($1.00 per direct sign-up), equalization pool payouts ($4.40), and CNOVA token rewards. <strong>ROI is not guaranteed.</strong>",
-
     "h_started": "🚀 Getting Started",
     "h_matrix": "🌐 How the Matrix Works",
     "h_earnings": "💰 Earning &amp; Withdrawals",
     "h_reentry": "⚛️ Re-entry, Pause &amp; Activity",
     "h_cnova": "🪙 CNOVA Token",
     "h_tech": "⚙️ Technical &amp; Security",
-
     "q1": "What is CryptoNova Matrix?",
     "q1_a1": "CryptoNova Matrix is a decentralized, autonomous smart contract protocol deployed on the Base blockchain. It runs a 10-tier BFS (breadth-first search) matrix compensation structure where participants pay an entry fee in USDC and receive payments from subsequent participants according to predefined on-chain rules.",
     "q1_a2": "CryptoNova uses a dual-matrix architecture (Matrix A + B per tier), a CNOVA Treasury that backs the CNOVA token floor price, and a unified smart contract entry point that handles all tiers seamlessly. The protocol is fully autonomous &mdash; no admin can pause, modify, or redirect funds.",
-
     "q2": "How do I join?",
     "q2_a1": "Connect a Web3 wallet (MetaMask, Coinbase Wallet, etc.) on the Base network. Make sure you have USDC for the entry fee plus a small amount of ETH for gas (under $0.10).",
     "q2_a2": "Go to the <strong>Register tab</strong>, enter a referral address (or leave blank for auto-assignment), approve USDC spending in Step 1, then click <strong>Join CryptoNova Matrix</strong> in Step 2. The smart contract handles everything instantly.",
-
     "q3": "Do I need a referral to join?",
     "q3_a1": "A referral address is required by the smart contract, but you can leave the field blank and the system will auto-assign you to a founding member. Anyone who joins through your personal referral link is recorded as your direct downline on-chain, permanently.",
-
     "q4": "How much does it cost to join?",
     "q4_a1": "Tier 1 (Nova Seed) entry fee is <strong>$10.00 USDC</strong>. Fees scale with each tier up to Tier 10 (SuperNova Apex). You also need a small amount of ETH for gas &mdash; typically under $0.10 on Base.",
     "q4_a2": "Your $10 T1 entry is split instantly by the smart contract:",
@@ -1021,35 +1007,27 @@
     "q4_li8": "<strong>$0.10 (1%)</strong> &mdash; Community Wallet",
     "q4_li9": "<strong>$0.10 (1%)</strong> &mdash; CNOVA Buyback Reserve",
     "q4_li10": "<strong>$0.20 (2%)</strong> &mdash; Liquidity Reserve",
-
     "q5": "Which wallet should I use?",
     "q5_a1": "Any EVM-compatible wallet works &mdash; MetaMask, Coinbase Wallet, Trust Wallet, and Rabby are all supported. Make sure your wallet is connected to the <strong>Base</strong> network (chain ID 8453 for mainnet, 84532 for Sepolia testnet). Never share your seed phrase or private key with anyone.",
-
     "q6": "What is the CryptoNova BFS Matrix?",
     "q6_a1": "CryptoNova uses a 127-seat breadth-first search (BFS) matrix per tier &mdash; a 7-level binary tree. Members fill positions level-by-level: position 1 (root), then positions 2&ndash;3, then 4&ndash;7, then 8&ndash;15, and so on through level 7 (positions 64&ndash;127). When you join, you take the next available BFS slot.",
     "q6_a2": "When all 127 seats are filled, the root member completes their cycle: they receive a payout from the equalization pool and re-enter at the next available position in the active matrix. The matrix then resets for the next wave.",
-
     "q7": "What are Matrix A and Matrix B?",
     "q7_a1": "Each tier in CryptoNova has two matrices (A and B) that work as a pair. New members always go into the currently active matrix. When it fills and cycles, the system switches to the other matrix so there is always a ready queue.",
     "q7_a2": "The active matrix is shown on the Matrix tab. You can view your current position, which matrix you are in, and how many members are behind you.",
-
     "q8": "What is a Cycle?",
     "q8_a1": "A cycle completes when <strong>all 127 positions in a matrix are filled</strong>. The member at position 1 (root) receives their equalization pool payout and is automatically re-entered into the active matrix at the next available slot. There is no manual action required.",
     "q8_a2": "Throughout the cycle, chain pay flows to upline positions as each new member joins &mdash; earnings are continuous, not a single event at cycle completion.",
-
     "q9": "What is an Epoch?",
     "q9_a1": "An epoch is a CNOVA mining period. Each epoch starts with a set CNOVA reward per entry. After a threshold number of entries, the epoch advances and the reward per entry is halved &mdash; similar to Bitcoin's halving mechanism. Early participants receive the highest CNOVA rewards.",
     "q9_a2": "CryptoNova epoch names in order: <em>Nebula Genesis, Mercury Rise, Lunar Cluster, Aurora Zenith, Solaris Echo, Cosmic Core, Galaxy Grid, Supernova Spark, Final Frontier</em>. The current epoch is displayed on the Home and Dashboard tabs.",
-
     "q10": "What is an upline and downline?",
     "q10_a1": "<strong>Upline</strong> &mdash; members at shallower BFS positions than you in the matrix. They receive chain pay as new members (including you) fill positions below them.",
     "q10_a2": "<strong>Downline</strong> &mdash; members who joined after you and are placed at deeper positions. Each entry they or their downlines make generates chain pay that flows up to you based on BFS depth.",
     "q10_a3": "Your <strong>original referrer</strong> (the wallet that referred you) is a special permanent on-chain relationship separate from your BFS position &mdash; they earn L1 referral bonuses on everything you do.",
-
     "q11": "How do tier upgrades work?",
     "q11_a1": "CryptoNova includes an <strong>auto-upgrade system</strong>. When you complete a cycle at your current tier, a portion of your equalization pool payout is automatically used to register you at the next tier up &mdash; no manual action needed. Your original referrer is preserved across all tier upgrades.",
     "q11_a2": "Higher tiers have larger entry fees, larger chain pay amounts, and larger cycle payouts. You can also be upgraded manually from the Dashboard if you have sufficient earnings.",
-
     "q12": "How do I earn with CryptoNova Matrix?",
     "q12_a1": "Every $10 T1 entry generates income across four streams:",
     "q12_li1": "<strong>Direct referral bonus &mdash; $1.00 (10%)</strong> &mdash; paid instantly to your direct sponsor. You earn this every time someone you referred joins or auto-upgrades.",
@@ -1057,75 +1035,57 @@
     "q12_li3": "<strong>Equalization pool &mdash; $4.40 (44%)</strong> &mdash; accumulates and pays out to the root member when a full cycle (127 fills) completes, then restarts.",
     "q12_li4": "<strong>CNOVA tokens</strong> &mdash; minted and sent to your wallet on every new entry. Amount decreases each epoch (halving model). Starting at 50 CNOVA per $10 entry in Genesis epoch.",
     "q12_a2": "The remaining split goes to protocol reserves and programs (CNOVA Treasury, Stability Rescue Fund, Dev, Ops, Liquidity Reserve, Buyback Reserve) — these back the protocol's long-term health and are not directly withdrawable by individual members. The exception is the Community Wallet: if you're one of the first 1,000 members to register, your share of that pool is claimable monthly from the Dashboard — see the Compensation Plan page for details.",
-
     "q13": "How do I withdraw my earnings?",
     "q13_a1": "USDC earnings (chain pay, referral bonuses, cycle payouts) accumulate in your on-chain balance. Go to the <strong>Dashboard tab</strong> and click <strong>Withdraw to Wallet</strong>. The smart contract sends your full withdrawable balance directly to your connected wallet in one transaction.",
     "q13_a2": "CNOVA tokens are distributed directly to your wallet on every registration and do not require a separate withdrawal step. You can redeem CNOVA for USDC at the floor price using the <strong>Redeem CNOVA</strong> section on the Dashboard.",
-
     "q14": "Are earnings guaranteed?",
     "q14_a1": "<strong>No.</strong> Earnings depend on continued network participation. If growth slows, cycle completions slow down and chain pay volume decreases. Past results from any matrix structure do not guarantee future results.",
     "q14_a2": "This is a high-risk protocol. Only participate with funds you can afford to lose entirely.",
-
     "q15": "Can I get a refund?",
     "q15_a1": "<strong>No.</strong> All entry fees are processed directly by the smart contract and distributed instantly to upline wallets and protocol reserves. Blockchain transactions are irreversible. There are no refunds under any circumstances.",
-
     "q16": "What does \"referrer for life\" mean?",
     "q16_a1": "When you first register, the wallet that referred you is recorded permanently on-chain as your <strong>original referrer</strong> and locked forever &mdash; it never changes, even across tier upgrades.",
     "q16_a2": "Your referrer earns the <strong>$2.00 L1 referral bonus</strong> whenever you register at any tier. This rewards the person who brought you in for your lifetime participation.",
-
     "q17": "How does the equalization pool and re-entry work?",
     "q17_a1": "44% of each entry fee ($4.40 at T1) flows into the equalization pool for that matrix. When all 127 seats are filled, the pool balance is paid to the root member and used to automatically re-enter them into the next active matrix &mdash; no action required on your part.",
     "q17_a2": "If the pool accumulates before the matrix fills (from multiple cycles), the excess funds the root member's re-entry fee automatically. You can also top up your pool balance manually from the Dashboard if you want to accelerate re-entry.",
-
     "q18": "What happens if I'm inactive for 90 days?",
     "q18_a1": "If your account has had no on-chain activity for <strong>90 days</strong>, the smart contract flags your position as <strong>paused</strong>. While paused:",
     "q18_li1": "Chain pay to your position stops accumulating",
     "q18_li2": "Your pool will not auto-trigger even if it reaches the re-entry threshold",
     "q18_li3": "Your existing earnings balance is <strong>fully preserved</strong> &mdash; pausing never confiscates funds",
     "q18_a2": "This protects matrix health &mdash; abandoned wallets do not block active members from earning.",
-
     "q19": "How do I reactivate a paused account?",
     "q19_a1": "Reactivation costs a small re-entry fee. Connect your wallet, go to the Dashboard, and click <strong>Reactivate</strong>. The contract will place you back into the current active matrix at the next available BFS slot, reset your 90-day activity clock, and resume chain pay to your position.",
     "q19_a2": "All your previous USDC earnings and CNOVA are untouched &mdash; reactivation only re-enters you into the live matrix queue.",
-
     "q20": "What is the CNOVA token?",
     "q20_a1": "CNOVA is the native reward token of CryptoNova Matrix. It is minted and distributed to participants each time a new member joins. It is <strong>not a stablecoin</strong> and not a security &mdash; it is an in-protocol utility token with a rising floor price mechanism.",
     "q20_a2": "Starting CNOVA reward at Genesis epoch: <strong>50 CNOVA per $10 entry</strong>. Starting from epoch 2, rewards halve every two epochs (40 &rarr; 20 &rarr; 10 &rarr; 5 &rarr; 2.5) before plateauing at 2.5 CNOVA. Total supply is capped at 21,000,000 CNOVA.",
-
     "q21": "What is the floor price and how does it work?",
     "q21_a1": "10% of every entry fee ($1.00 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.totalBalance() / CNOVA.totalSupply()</code>.",
     "q21_a2": "At launch with 50 CNOVA minted per $10 entry and $1.00 going to the CNOVA Treasury: $1.00 / 50 = <strong>$0.02 starting floor</strong>. The floor only rises as more members join and more USDC flows into the Treasury.",
     "q21_a3": "You can redeem CNOVA for USDC at the exact floor price at any time using the <strong>Redeem CNOVA</strong> section on the Dashboard &mdash; no admin approval, fully on-chain.",
-
     "q22": "How do I redeem CNOVA for USDC?",
     "q22_a1": "Go to the <strong>Dashboard tab</strong>, find the <strong>Redeem CNOVA</strong> section, enter the amount you want to redeem, and follow the two-step process:",
     "q22_li1": "<strong>Step 1: Approve CNOVA</strong> &mdash; allows the CNOVA Treasury contract to spend your tokens",
     "q22_li2": "<strong>Step 2: Redeem for USDC</strong> &mdash; burns your CNOVA and sends USDC at the current floor price",
     "q22_a2": "The USDC is sent directly to your wallet. The floor price shown is the live on-chain calculation at the moment of redemption.",
-
     "q23": "How do I see CNOVA in my wallet?",
     "q23_a1": "In MetaMask (or any EVM wallet), go to <strong>Import Token</strong> and paste the CNOVA contract address shown in the app footer. Once imported, your CNOVA balance will appear. The app also has an <strong>Add CNOVA to Wallet</strong> button on the Dashboard that does this automatically via MetaMask's <code>wallet_watchAsset</code> API.",
-
     "q24": "Are the smart contracts audited?",
     "q24_a1": "The CryptoNova contracts have undergone extensive internal testing including a comprehensive unit test suite and large-scale stress tests on Base Sepolia testnet. Source code is verified and publicly readable on BaseScan. Despite all efforts, smart contracts may still contain undiscovered bugs &mdash; participation always carries smart contract risk.",
-
     "q25": "How can I verify the contracts on-chain?",
     "q25_a1_pre": "All CryptoNova contracts are deployed and verifiable on",
     "q25_a1_post": ". Search for the contract addresses shown in the app footer or Dashboard to read full source code and transaction history.",
-
     "q26": "Can the team shut down or modify the protocol?",
     "q26_a1": "<strong>No.</strong> The core matrix logic, fee splits, and reserve-fund mechanics are immutable once deployed. No party can alter entry fee distributions, redirect USDC, or access participant funds in the matrix contracts.",
     "q26_a2": "The governance contract handles protocol-level settings and is subject to timelock delays and community approval. The team cannot unilaterally drain the Stability Rescue Fund or the CNOVA Treasury.",
-
     "q27": "Which blockchain is CryptoNova Matrix on?",
     "q27_a1": "CryptoNova is deployed on <strong>Base Sepolia testnet</strong> for community testing. Base is an Ethereum L2 built by Coinbase, offering fast, low-cost transactions (typically under $0.01). Mainnet launch on Base mainnet follows the successful completion of the testnet phase.",
-
     "q28": "Is CryptoNova Matrix legal in my country?",
     "q28_a1": "Laws governing cryptocurrency, DeFi, and compensation structures vary significantly by jurisdiction and are subject to change. The platform does not perform KYC or geo-blocking. <strong>It is entirely your responsibility</strong> to determine whether participation is legal in your country or region before joining. Consult a local legal advisor if unsure.",
-
     "q29": "Do I need to pay taxes on my earnings?",
     "q29_a1": "Tax obligations vary by country. In many jurisdictions, cryptocurrency earnings &mdash; including stablecoin payouts and token rewards &mdash; are taxable events. The CryptoNova protocol does not withhold or report taxes on your behalf. Consult a qualified tax professional in your jurisdiction.",
-
     "cta_p": "Still have questions? Join the CryptoNova community on Telegram &mdash; we're happy to help.",
     "cta_announcements": "📣 Announcements",
     "cta_community": "💬 Community Chat",

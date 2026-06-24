@@ -722,7 +722,8 @@
       "please_add_description": "Por favor agrega una descripción.",
       "submitting_proposal": "Enviando propuesta… confirma en la billetera.",
       "proposal_submitted": "✅ ¡Propuesta enviada! La votación ya está abierta.",
-      "submit_failed": "Fallido:"
+      "submit_failed": "Fallido:",
+      "fee_never_broadcast": "Aún no difundido — cada par usa su propio valor predeterminado del constructor."
     }
   },
   "termsPage": {

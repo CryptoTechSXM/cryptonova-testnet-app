@@ -903,3 +903,24 @@ function setStatus(msg, type) {
 }
 
 // ── Init ───────────────────────────────────────────────
+// Wrapped in DOMContentLoaded: i18n.js loads with `defer`, only guaranteed to
+// have run by DOMContentLoaded -- calling t() any earlier (e.g. synchronously
+// at the bottom of this inline script) would throw "t is not defined" the very
+// first time a wallet was already connected or on the very first 30s price load.
+window.addEventListener('DOMContentLoaded', () => {
+  loadPriceData();
+  loadActivity();
+  setInterval(loadPriceData, 30_000);  // refresh every 30s
+
+  // Pre-wire wallet if already connected
+  if (window.ethereum) {
+    window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+      if (accounts.length) connectWallet();
+    });
+    window.ethereum.on('accountsChanged', () => connectWallet());
+    window.ethereum.on('chainChanged', () => location.reload());
+  }
+});
+</script>
+</body>
+</html>

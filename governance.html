@@ -1387,4 +1387,43 @@ async function createProposal() {
     } else {
       tx = await gov.propose(paramId, target, selectedParamValue, description, { gasLimit: 400_000 });
     }
-    setPropStatus(t('govPage.js.waiting_confirmation',
+    setPropStatus(t('govPage.js.waiting_confirmation', 'Waiting for confirmation…'), 'info');
+    await tx.wait();
+    setPropStatus(t('govPage.js.proposal_submitted', '✅ Proposal submitted! Voting opens now.'), 'success');
+    document.getElementById('param-select').value = '';
+    document.getElementById('prop-description').value = '';
+    document.getElementById('allowed-row').style.display = 'none';
+    document.getElementById('target-row').style.display  = 'none';
+    document.getElementById('array-row').style.display   = 'none';
+    selectedParamValue = null;
+    arrayRows = [];
+    await loadProposals();
+  } catch(e) {
+    setPropStatus(t('govPage.js.submit_failed', 'Failed:') + ' ' + (e.reason || e.shortMessage || e.message || e), 'error');
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────────────────
+function setPropStatus(msg, type) {
+  const el = document.getElementById('prop-status');
+  el.textContent = msg;
+  el.className   = type;
+}
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadProposals();
+  setInterval(loadProposals, 60_000);
+
+  if (window.ethereum) {
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
+    window.ethereum.on('accountsChanged', () => connectWallet());
+    window.ethereum.on('chainChanged',    () => location.reload());
+  }
+});
+</script>
+</body>
+</html>

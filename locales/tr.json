@@ -722,7 +722,8 @@
       "please_add_description": "Lütfen bir açıklama ekleyin.",
       "submitting_proposal": "Teklif gönderiliyor… lütfen cüzdanda onaylayın.",
       "proposal_submitted": "✅ Teklif gönderildi! Oylama şimdi açık.",
-      "submit_failed": "Başarısız:"
+      "submit_failed": "Başarısız:",
+      "fee_never_broadcast": "Henüz yayınlanmadı — her çift kendi kurucu varsayılanını kullanır."
     }
   },
   "termsPage": {

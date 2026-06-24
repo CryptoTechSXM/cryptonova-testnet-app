@@ -722,7 +722,8 @@
       "please_add_description": "Por favor adicione uma descrição.",
       "submitting_proposal": "Enviando proposta… confirme na carteira.",
       "proposal_submitted": "✅ Proposta enviada! A votação está aberta agora.",
-      "submit_failed": "Falhou:"
+      "submit_failed": "Falhou:",
+      "fee_never_broadcast": "Ainda não transmitido — cada par usa seu próprio padrão de construtor."
     }
   },
   "termsPage": {

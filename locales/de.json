@@ -722,7 +722,8 @@
       "please_add_description": "Bitte füge eine Beschreibung hinzu.",
       "submitting_proposal": "Vorschlag wird eingereicht… bitte im Wallet bestätigen.",
       "proposal_submitted": "✅ Vorschlag eingereicht! Abstimmung ist jetzt offen.",
-      "submit_failed": "Fehlgeschlagen:"
+      "submit_failed": "Fehlgeschlagen:",
+      "fee_never_broadcast": "Noch nicht übertragen — jedes Paar verwendet seinen eigenen Konstruktorstandard."
     }
   },
   "termsPage": {

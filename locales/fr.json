@@ -722,7 +722,8 @@
       "please_add_description": "Veuillez ajouter une description.",
       "submitting_proposal": "Soumission de la proposition… veuillez confirmer dans le portefeuille.",
       "proposal_submitted": "✅ Proposition soumise ! Le vote est maintenant ouvert.",
-      "submit_failed": "Échoué :"
+      "submit_failed": "Échoué :",
+      "fee_never_broadcast": "Pas encore diffusé — chaque paire utilise sa propre valeur par défaut de constructeur."
     }
   },
   "termsPage": {
