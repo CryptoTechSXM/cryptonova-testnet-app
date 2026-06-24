@@ -715,6 +715,8 @@ async function refreshAll() {
   } catch (e) {
     console.warn('refresh error', e);
   }
+  // Also refresh AMM stats on every cycle (lpContract set only after wallet connect)
+  if (typeof lpContract !== 'undefined' && lpContract) await refreshAMM();
 }
 
 // ── Input validation ──────────────────────────────────────────────────────────
@@ -1147,13 +1149,6 @@ async function doRemoveLP() {
   } finally {
     btn.disabled = false;
   }
-}
-
-// Hook initAMM into connectWallet flow (patch refreshAll)
-const _origRefreshAll = refreshAll;
-async function refreshAll() {
-  await _origRefreshAll();
-  await refreshAMM();
 }
 
 // ── Theme toggle ──────────────────────────────────────────────────────────────
