@@ -465,6 +465,7 @@
     'function ENTRY_FEE() external view returns (uint256)',
     'function totalJoined() external view returns (uint256)',
     'event MemberParked(address indexed member, uint256 shortfall)',
+    'event CoPayRescue(address indexed member, uint256 sfShare, uint256 memberWalletShare, uint256 withdrawableUsed)',
   ];
   const KEEPER_ABI = [
     'function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)',
@@ -549,14 +550,20 @@
         }
       } catch(e) {}
 
-      // Recent rescues
+      // Recent rescues — two sources:
+      //  1. ParkedRescued on MatrixKeeper (direct_keeper.js performUpkeep path)
+      //  2. CoPayRescue on T1 MatA     (bigfill_v8.js / push_parked.js direct path)
       const fromBlock = Math.max(0, blk - 50000);
       const rescueFilter = keeper.filters.ParkedRescued();
-      const rescueLogs = await keeper.queryFilter(rescueFilter, fromBlock, blk).catch(()=>[]);
-      const rescueCount = rescueLogs.length;
+      const keeperRescueLogs = await keeper.queryFilter(rescueFilter, fromBlock, blk).catch(()=>[]);
+      const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
+      const coPayFilter = matA.filters.CoPayRescue();
+      const coPayLogs = await matA.queryFilter(coPayFilter, fromBlock, blk).catch(()=>[]);
+      const allRescueLogs = [...keeperRescueLogs, ...coPayLogs].sort((a,b) => a.blockNumber - b.blockNumber);
+      const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
       if (rescueCount > 0) {
-        const lastLog = rescueLogs[rescueLogs.length - 1];
+        const lastLog = allRescueLogs[allRescueLogs.length - 1];
         const lastBlk = await provider.getBlock(lastLog.blockNumber);
         lastRescueTime = lastBlk?.timestamp;
       }
