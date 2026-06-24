@@ -684,6 +684,7 @@
       "vote_for": "✓ Votar A Favor",
       "vote_against": "✗ Votar En Contra",
       "you_voted": "✅ Ya votaste",
+      "already_voted": "✅ Ya has votado",
       "finalize_vote": "Finalizar Voto",
       "execute_now": "Ejecutar Ahora",
       "connect_to_participate": "Conecta la billetera para participar",

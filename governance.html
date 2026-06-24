@@ -960,7 +960,9 @@ function renderProposal(p) {
       <button class="btn-vote-against" onclick="vote(${p.id}, false)">${t('govPage.js.vote_against','✗ Vote Against')}</button>
       ${cancelBtn}${countdown}`;
   } else if (voted) {
-    footer = `<span class="voted-badge">${t('govPage.js.you_voted','✅ You voted')}</span>${cancelBtn}${countdown}`;
+    footer = `
+      <span class="voted-badge">${t('govPage.js.already_voted','✅ You have already voted')}</span>
+      ${cancelBtn}${countdown}`;
   } else if (canFinalize) {
     footer = `<button class="btn-action" onclick="finalize(${p.id})">${t('govPage.js.finalize_vote','Finalize Vote')}</button>${cancelBtn}${countdown}`;
   } else if (canExecute) {

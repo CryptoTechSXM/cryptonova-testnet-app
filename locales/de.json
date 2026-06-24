@@ -684,6 +684,7 @@
       "vote_for": "✓ Dafür Stimmen",
       "vote_against": "✗ Dagegen Stimmen",
       "you_voted": "✅ Du hast abgestimmt",
+      "already_voted": "✅ Du hast bereits abgestimmt",
       "finalize_vote": "Abstimmung Abschließen",
       "execute_now": "Jetzt Ausführen",
       "connect_to_participate": "Wallet verbinden, um teilzunehmen",

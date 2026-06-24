@@ -684,6 +684,7 @@
       "vote_for": "✓ Lehte Oy Ver",
       "vote_against": "✗ Aleyhte Oy Ver",
       "you_voted": "✅ Oy verdiniz",
+      "already_voted": "✅ Zaten oy kullandınız",
       "finalize_vote": "Oylamayı Sonlandır",
       "execute_now": "Şimdi Yürüt",
       "connect_to_participate": "Katılmak için cüzdanı bağla",

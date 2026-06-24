@@ -684,6 +684,7 @@
       "vote_for": "✓ Votar A Favor",
       "vote_against": "✗ Votar Contra",
       "you_voted": "✅ Você votou",
+      "already_voted": "✅ Você já votou",
       "finalize_vote": "Finalizar Voto",
       "execute_now": "Executar Agora",
       "connect_to_participate": "Conecte a carteira para participar",

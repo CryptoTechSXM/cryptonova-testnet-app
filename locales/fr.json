@@ -684,6 +684,7 @@
       "vote_for": "✓ Voter Pour",
       "vote_against": "✗ Voter Contre",
       "you_voted": "✅ Vous avez voté",
+      "already_voted": "✅ Vous avez déjà voté",
       "finalize_vote": "Finaliser le Vote",
       "execute_now": "Exécuter Maintenant",
       "connect_to_participate": "Connectez le portefeuille pour participer",

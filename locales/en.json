@@ -684,6 +684,7 @@
       "vote_for": "✓ Vote For",
       "vote_against": "✗ Vote Against",
       "you_voted": "✅ You voted",
+      "already_voted": "✅ You have already voted",
       "finalize_vote": "Finalize Vote",
       "execute_now": "Execute Now",
       "connect_to_participate": "Connect wallet to participate",
