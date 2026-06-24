@@ -284,6 +284,78 @@
     </div>
   </div>
 
+  <!-- Actions (connect prompt or tabs) -->
+  <div class="card" id="actions-card">
+    <div id="connect-prompt" class="connect-prompt">
+      <p>Connect your wallet to deposit USDC and start earning partner fee yield.</p>
+      <button class="btn-primary" style="max-width:240px;margin:0 auto;" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+
+    <div id="actions-panel" style="display:none">
+      <div class="card-title"><span class="dot green"></span> Manage Position</div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('deposit')">💰 Deposit</button>
+        <button class="tab" onclick="switchTab('withdraw')">📤 Withdraw</button>
+        <button class="tab" onclick="switchTab('harvest')">🌱 Harvest</button>
+      </div>
+
+      <!-- Deposit tab -->
+      <div class="tab-panel active" id="tab-deposit">
+        <div class="input-group">
+          <div class="input-label">Amount to deposit (multiples of $10 only)</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-deposit" placeholder="10" min="10" step="10" />
+            <span class="input-token">USDC</span>
+          </div>
+          <div class="input-hint" id="deposit-hint">Minimum $10 · Must be a multiple of $10</div>
+          <div class="input-hint" style="text-align:right;margin-top:2px">Balance: <strong id="my-usdc-bal">—</strong></div>
+        </div>
+        <div class="quick-amounts">
+          <span class="quick-btn" onclick="setAmt('deposit',10)">$10</span>
+          <span class="quick-btn" onclick="setAmt('deposit',50)">$50</span>
+          <span class="quick-btn" onclick="setAmt('deposit',100)">$100</span>
+          <span class="quick-btn" onclick="setAmt('deposit',500)">$500</span>
+          <span class="quick-btn" onclick="setAmt('deposit',1000)">$1,000</span>
+        </div>
+        <button class="btn-primary" id="btn-deposit" onclick="doDeposit()">Deposit USDC</button>
+        <div class="status-msg" id="msg-deposit"></div>
+      </div>
+
+      <!-- Withdraw tab -->
+      <div class="tab-panel" id="tab-withdraw">
+        <div class="input-group">
+          <div class="input-label">Amount to withdraw (multiples of $10 only)</div>
+          <div class="input-wrap">
+            <input type="number" id="inp-withdraw" placeholder="10" min="10" step="10" />
+            <span class="input-token">USDC</span>
+          </div>
+          <div class="input-hint">Pending rewards are auto-harvested on withdrawal</div>
+          <div class="input-hint" style="text-align:right;margin-top:2px">Your stake: <strong id="my-stake-bal">—</strong></div>
+        </div>
+        <div class="quick-amounts">
+          <span class="quick-btn" onclick="setAmt('withdraw',10)">$10</span>
+          <span class="quick-btn" onclick="setAmt('withdraw',50)">$50</span>
+          <span class="quick-btn" onclick="setAmt('withdraw',100)">$100</span>
+          <span class="quick-btn" id="withdraw-all-btn" onclick="setWithdrawAll()">All</span>
+        </div>
+        <button class="btn-primary red" id="btn-withdraw" onclick="doWithdraw()">Withdraw USDC</button>
+        <div class="status-msg" id="msg-withdraw"></div>
+      </div>
+
+      <!-- Harvest tab -->
+      <div class="tab-panel" id="tab-harvest">
+        <div style="background:var(--bg3);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">Available to harvest</div>
+          <div style="font-size:40px;font-weight:900;color:var(--green)" id="harvest-amount">$0.00</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:6px;">USDC rewards from partner fee distributions</div>
+        </div>
+        <button class="btn-primary" id="btn-harvest" onclick="doHarvest()">Harvest Rewards</button>
+        <div class="status-msg" id="msg-harvest"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── AMM: USDC/CNOVA Trading Pool ── -->
   <div class="section-divider"><h2>⚡ USDC / CNOVA AMM Pool</h2></div>
 
@@ -417,78 +489,6 @@
         <div class="quote-box" id="remove-quote-box">Enter LP token amount to see your USDC + CNOVA return.</div>
         <button class="btn-primary red" id="btn-remove-lp" onclick="doRemoveLP()">Remove Liquidity</button>
         <div class="status-msg" id="msg-remove-lp"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Actions (connect prompt or tabs) -->
-  <div class="card" id="actions-card">
-    <div id="connect-prompt" class="connect-prompt">
-      <p>Connect your wallet to deposit USDC and start earning partner fee yield.</p>
-      <button class="btn-primary" style="max-width:240px;margin:0 auto;" onclick="connectWallet()">Connect Wallet</button>
-    </div>
-
-    <div id="actions-panel" style="display:none">
-      <div class="card-title"><span class="dot green"></span> Manage Position</div>
-
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('deposit')">💰 Deposit</button>
-        <button class="tab" onclick="switchTab('withdraw')">📤 Withdraw</button>
-        <button class="tab" onclick="switchTab('harvest')">🌱 Harvest</button>
-      </div>
-
-      <!-- Deposit tab -->
-      <div class="tab-panel active" id="tab-deposit">
-        <div class="input-group">
-          <div class="input-label">Amount to deposit (multiples of $10 only)</div>
-          <div class="input-wrap">
-            <input type="number" id="inp-deposit" placeholder="10" min="10" step="10" />
-            <span class="input-token">USDC</span>
-          </div>
-          <div class="input-hint" id="deposit-hint">Minimum $10 · Must be a multiple of $10</div>
-          <div class="input-hint" style="text-align:right;margin-top:2px">Balance: <strong id="my-usdc-bal">—</strong></div>
-        </div>
-        <div class="quick-amounts">
-          <span class="quick-btn" onclick="setAmt('deposit',10)">$10</span>
-          <span class="quick-btn" onclick="setAmt('deposit',50)">$50</span>
-          <span class="quick-btn" onclick="setAmt('deposit',100)">$100</span>
-          <span class="quick-btn" onclick="setAmt('deposit',500)">$500</span>
-          <span class="quick-btn" onclick="setAmt('deposit',1000)">$1,000</span>
-        </div>
-        <button class="btn-primary" id="btn-deposit" onclick="doDeposit()">Deposit USDC</button>
-        <div class="status-msg" id="msg-deposit"></div>
-      </div>
-
-      <!-- Withdraw tab -->
-      <div class="tab-panel" id="tab-withdraw">
-        <div class="input-group">
-          <div class="input-label">Amount to withdraw (multiples of $10 only)</div>
-          <div class="input-wrap">
-            <input type="number" id="inp-withdraw" placeholder="10" min="10" step="10" />
-            <span class="input-token">USDC</span>
-          </div>
-          <div class="input-hint">Pending rewards are auto-harvested on withdrawal</div>
-          <div class="input-hint" style="text-align:right;margin-top:2px">Your stake: <strong id="my-stake-bal">—</strong></div>
-        </div>
-        <div class="quick-amounts">
-          <span class="quick-btn" onclick="setAmt('withdraw',10)">$10</span>
-          <span class="quick-btn" onclick="setAmt('withdraw',50)">$50</span>
-          <span class="quick-btn" onclick="setAmt('withdraw',100)">$100</span>
-          <span class="quick-btn" id="withdraw-all-btn" onclick="setWithdrawAll()">All</span>
-        </div>
-        <button class="btn-primary red" id="btn-withdraw" onclick="doWithdraw()">Withdraw USDC</button>
-        <div class="status-msg" id="msg-withdraw"></div>
-      </div>
-
-      <!-- Harvest tab -->
-      <div class="tab-panel" id="tab-harvest">
-        <div style="background:var(--bg3);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;">
-          <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">Available to harvest</div>
-          <div style="font-size:40px;font-weight:900;color:var(--green)" id="harvest-amount">$0.00</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:6px;">USDC rewards from partner fee distributions</div>
-        </div>
-        <button class="btn-primary" id="btn-harvest" onclick="doHarvest()">Harvest Rewards</button>
-        <div class="status-msg" id="msg-harvest"></div>
       </div>
     </div>
   </div>
