@@ -383,7 +383,7 @@
             <input type="number" id="inp-add-usdc" placeholder="0.00" oninput="updateAddQuote()" />
             <span class="input-token">USDC</span>
           </div>
-          <div class="input-hint">Balance: <strong id="add-usdc-bal">—</strong></div>
+          <div class="input-hint" style="text-align:right">Balance: <strong id="add-usdc-bal">—</strong></div>
         </div>
         <div class="input-group" style="margin-top:12px">
           <div class="input-label">CNOVA to deposit <span style="color:var(--text3);font-size:11px">(auto-calculated at pool ratio)</span></div>
@@ -391,7 +391,7 @@
             <input type="number" id="inp-add-cnova" placeholder="0.00" readonly style="opacity:.7" />
             <span class="input-token">CNOVA</span>
           </div>
-          <div class="input-hint">Balance: <strong id="add-cnova-bal">—</strong></div>
+          <div class="input-hint" style="text-align:right">Balance: <strong id="add-cnova-bal">—</strong></div>
         </div>
         <div class="quote-box" id="add-quote-box">Enter a USDC amount. The required CNOVA will be calculated automatically at the current pool ratio.</div>
         <button class="btn-primary" id="btn-add-lp" onclick="doAddLP()">Add Liquidity</button>
@@ -406,7 +406,7 @@
             <input type="number" id="inp-remove-lp" placeholder="0.00" oninput="updateRemoveQuote()" />
             <span class="input-token">CNOVA-LP</span>
           </div>
-          <div class="input-hint">Your LP balance: <strong id="remove-lp-bal">—</strong></div>
+          <div class="input-hint" style="text-align:right">Your LP balance: <strong id="remove-lp-bal">—</strong></div>
         </div>
         <div class="quick-amounts">
           <span class="quick-btn" onclick="setRemovePct(25)">25%</span>
@@ -1048,19 +1048,18 @@ async function updateAddQuote() {
   const val = parseFloat(document.getElementById('inp-add-usdc').value);
   if (!val || val <= 0) {
     document.getElementById('inp-add-cnova').value = '';
-    set('add-quote-box', 'Enter a USDC amount. The required CNOVA will be calculated automatically at the current pool ratio.');
+    document.getElementById('add-quote-box').innerHTML = 'Enter a USDC amount. The required CNOVA will be calculated automatically at the current pool ratio.';
     return;
   }
   try {
     const amt    = BigInt(Math.round(val * 1e6));
     const needed = await lpContract.getOptimalCNOVAForUSDC(amt);
     document.getElementById('inp-add-cnova').value = (Number(needed) / 1e18).toFixed(4);
-    set('add-quote-box',
+    document.getElementById('add-quote-box').innerHTML =
       `You deposit <strong>$${val} USDC</strong> + <strong>${(Number(needed)/1e18).toFixed(4)} CNOVA</strong>. ` +
-      `You receive LP tokens proportional to your pool share.`
-    );
+      `You receive LP tokens proportional to your pool share.`;
   } catch (e) {
-    set('add-quote-box', 'Failed to calculate ratio: ' + (e?.message || '').slice(0, 60));
+    document.getElementById('add-quote-box').innerHTML = 'Failed to calculate ratio: ' + (e?.message || '').slice(0, 60);
   }
 }
 
@@ -1105,18 +1104,17 @@ async function doAddLP() {
 async function updateRemoveQuote() {
   if (!lpContract) return;
   const val = parseFloat(document.getElementById('inp-remove-lp').value);
-  if (!val || val <= 0) { set('remove-quote-box', 'Enter LP token amount to see your return.'); return; }
+  if (!val || val <= 0) { document.getElementById('remove-quote-box').innerHTML = 'Enter LP token amount to see your return.'; return; }
   try {
     const lpAmt    = BigInt(Math.round(val * 1e18));
     const lpSupply = await lpContract.totalSupply();
     const [rU, rC] = await lpContract.getReserves();
     const uOut     = rU * lpAmt / lpSupply;
     const cOut     = rC * lpAmt / lpSupply;
-    set('remove-quote-box',
-      `You receive <strong>$${(Number(uOut)/1e6).toFixed(2)} USDC</strong> + <strong>${(Number(cOut)/1e18).toFixed(4)} CNOVA</strong>`
-    );
+    document.getElementById('remove-quote-box').innerHTML =
+      `You receive <strong>$${(Number(uOut)/1e6).toFixed(2)} USDC</strong> + <strong>${(Number(cOut)/1e18).toFixed(4)} CNOVA</strong>`;
   } catch (e) {
-    set('remove-quote-box', 'Failed: ' + (e?.message || '').slice(0, 60));
+    document.getElementById('remove-quote-box').innerHTML = 'Failed: ' + (e?.message || '').slice(0, 60);
   }
 }
 
