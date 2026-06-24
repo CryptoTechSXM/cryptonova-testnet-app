@@ -458,14 +458,19 @@
     'function occupancy() external view returns (uint256)',
     'function poolAccumulator() external view returns (uint256)',
     'function getParkedCount() external view returns (uint256)',
+    'function getParkedMember(uint256 idx) external view returns (address)',
     'function isParked(address) external view returns (bool)',
     'function parkedAt(address) external view returns (uint256)',
+    'function withdrawableOf(address) external view returns (uint256)',
+    'function ENTRY_FEE() external view returns (uint256)',
     'function totalJoined() external view returns (uint256)',
     'event MemberParked(address indexed member, uint256 shortfall)',
   ];
   const KEEPER_ABI = [
     'function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)',
+    'function parkedGracePeriod() external view returns (uint256)',
     'event ParkedRescued(address indexed matrix, address indexed member, uint8 tierIndex)',
+    'event WorkItemFailed(uint8 workType, uint8 tierIndex, address addr1, address addr2)',
   ];
   const SF_ABI    = ['function totalBalance() external view returns (uint256)'];
   const USDC_ABI  = ['function balanceOf(address) external view returns (uint256)'];
@@ -607,10 +612,23 @@
   // ── Parked Members ────────────────────────────────────────
   async function loadParked(provider, blk) {
     try {
-      // Keeper rescues from T1 MatA — read MatA parked count to match keeper reports
-      const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
-      const parkedCount = await matA.getParkedCount().catch(()=>0n);
-      const count = Number(parkedCount);
+      const matA   = new ethers.Contract(ADDRS.T1matA,       MATRIX_ABI, provider);
+      const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
+
+      const [parkedCount, gracePeriod] = await Promise.all([
+        matA.getParkedCount().catch(()=>0n),
+        keeper.parkedGracePeriod().catch(()=>0n),
+      ]);
+      const count      = Number(parkedCount);
+      const graceSecs  = Number(gracePeriod);
+      const nowSecs    = Math.floor(Date.now() / 1000);
+
+      // Grace period banner text
+      let graceLabel;
+      if (graceSecs === 0)         graceLabel = '⚡ Grace period: none — all parked members eligible immediately';
+      else if (graceSecs < 3600)   graceLabel = `⏳ Grace period: ${graceSecs}s — members wait ${graceSecs}s before rescue`;
+      else if (graceSecs < 86400)  graceLabel = `⏳ Grace period: ${Math.round(graceSecs/3600)}h — members wait before rescue`;
+      else                         graceLabel = `⏳ Grace period: ${Math.round(graceSecs/86400)}d — members wait before rescue`;
 
       // Summary pill
       const pillInd = document.getElementById('pill-parked');
@@ -640,43 +658,47 @@
       setText('pk-count', count > 0 ? count + ' ' + (count>1 ? t('statusPage.js.members_suffix','members') : t('statusPage.js.member_suffix','member')) : '0 — ' + t('statusPage.js.all_clear_suffix', 'all clear'));
       setClass('pk-count', count === 0 ? 'green' : count <= 5 ? 'yellow' : 'red');
 
-      // Scan MemberParked events from T1 MatA (matches keeper rescue source)
-      const fromBlock = Math.max(0, blk - 100000);
-      const parkFilter = matA.filters.MemberParked();
-      const parkLogs = await matA.queryFilter(parkFilter, fromBlock, blk).catch(()=>[]);
+      // ── Check for recent keeper failures (WorkItemFailed events) ──────────
+      const fromBlock = Math.max(0, blk - 5000); // ~2.5hr window
+      let keeperFailCount = 0;
+      try {
+        const failFilter = keeper.filters.WorkItemFailed();
+        const failLogs   = await keeper.queryFilter(failFilter, fromBlock, blk).catch(()=>[]);
+        keeperFailCount  = failLogs.length;
+      } catch {}
 
-      // Deduplicate — keep latest per member, filter still-parked
-      const seen = new Map();
-      for (const log of parkLogs) {
-        seen.set(log.args[0].toLowerCase(), log);
-      }
-
-      // Check which are still parked
-      const candidates = [...seen.values()];
+      // ── Build live parked list directly from on-chain queue ───────────────
       const stillParked = [];
       let totalShortfall = 0n;
 
-      for (const log of candidates) {
-        const addr = log.args[0];
-        const shortfall = log.args[1] || 0n;
-        let parked = false;
-        try { parked = await matA.isParked(addr); } catch(e) {}
-        if (parked) {
-          let parkedTimestamp = null;
-          try {
-            const ts = await matA.parkedAt(addr);
-            parkedTimestamp = Number(ts);
-          } catch(e) {}
-          if (!parkedTimestamp) {
-            try {
-              const blkData = await provider.getBlock(log.blockNumber);
-              parkedTimestamp = blkData?.timestamp;
-            } catch(e) {}
-          }
-          stillParked.push({ addr, shortfall: BigInt(shortfall), ts: parkedTimestamp });
-          totalShortfall += BigInt(shortfall);
-        }
+      // Fetch in parallel batches of 5
+      const batchSize = 5;
+      for (let i = 0; i < count; i += batchSize) {
+        const batch = [];
+        for (let j = i; j < Math.min(i + batchSize, count); j++) batch.push(j);
+        const addrs = await Promise.all(batch.map(idx => matA.getParkedMember(idx).catch(()=>null)));
+        const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
+          const [parkedTs, withdrawable] = await Promise.all([
+            matA.parkedAt(addr).catch(()=>0n),
+            matA.withdrawableOf(addr).catch(()=>0n),
+          ]);
+          return { addr, parkedTs: Number(parkedTs), withdrawable: BigInt(withdrawable) };
+        }));
+        stillParked.push(...details);
       }
+
+      // Compute shortfall vs entry fee (approximate — fee is same for all T1)
+      let entryFee = 10_000_000n;
+      try { entryFee = await matA.ENTRY_FEE(); } catch {}
+
+      for (const p of stillParked) {
+        const shortfall = entryFee > p.withdrawable ? entryFee - p.withdrawable : 0n;
+        p.shortfall = shortfall;
+        totalShortfall += shortfall;
+      }
+
+      // Sort: longest-waiting first
+      stillParked.sort((a, b) => a.parkedTs - b.parkedTs);
 
       // Avg shortfall
       const avgShortfall = stillParked.length > 0 ? totalShortfall / BigInt(stillParked.length) : 0n;
@@ -686,42 +708,84 @@
       try {
         const sfBal = await new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider).totalBalance();
         const sfNum = Number(BigInt(sfBal)) / 1e6;
-        // Rough estimate: SF covers ~50% shortfall per member, rest from member's withdrawable
-        const estimatedCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0; // ~$5 avg SF contribution
+        const estimatedCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0;
         setText('pk-capacity', `~${estimatedCap} ${t('statusPage.js.members_can_be_rescued', 'members can be rescued')}`);
       } catch(e) {
         setText('pk-capacity', '—');
       }
 
-      // Render table
+      // ── Render table ──────────────────────────────────────────────────────
       const wrap = document.getElementById('parked-list-wrap');
       if (stillParked.length === 0) {
-        wrap.innerHTML = `<div class="empty-state">${t('statusPage.js.no_parked_clear', '✅ No parked members — system is clear')}</div>`;
+        wrap.innerHTML = `<div class="empty-state">✅ No parked members — system is clear</div>`;
       } else {
-        const rows = stillParked.map(p => `
-          <tr>
-            <td>
-              <span class="addr-short">${shortAddr(p.addr)}</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('${p.addr}')" title="Copy address">⧉</button>
-            </td>
-            <td class="amount">${fmt6(p.shortfall)}</td>
-            <td class="time">${p.ts ? elapsed(p.ts) : '—'}</td>
-          </tr>
-        `).join('');
+        // Keeper status banner
+        let keeperBanner = '';
+        if (keeperFailCount > 0) {
+          keeperBanner = `<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:8px 10px;font-size:12px;color:#ef4444;margin-bottom:10px">
+            ⚠️ <strong>${keeperFailCount} keeper work item(s) failed</strong> in the last ~2.5hrs — rescue may be delayed. Check keeper.log for details.
+          </div>`;
+        } else if (count > 0) {
+          keeperBanner = `<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--green);margin-bottom:10px">
+            ✅ Keeper healthy — rescue runs every 2 min. ${graceLabel}
+          </div>`;
+        }
+
+        const rows = stillParked.map(p => {
+          const eligibleAt   = p.parkedTs + graceSecs;
+          const isEligible   = nowSecs >= eligibleAt;
+          const secsLeft     = eligibleAt - nowSecs;
+          let rescueStatus, rescueColor;
+          if (graceSecs === 0 || isEligible) {
+            rescueStatus = '⏳ In rescue queue';
+            rescueColor  = 'var(--yellow)';
+          } else if (secsLeft < 3600) {
+            rescueStatus = `⏰ ${Math.ceil(secsLeft/60)}m until eligible`;
+            rescueColor  = 'var(--text2)';
+          } else if (secsLeft < 86400) {
+            rescueStatus = `⏰ ${Math.ceil(secsLeft/3600)}h until eligible`;
+            rescueColor  = 'var(--text2)';
+          } else {
+            rescueStatus = `⏰ ${Math.ceil(secsLeft/86400)}d until eligible`;
+            rescueColor  = 'var(--text3)';
+          }
+          return `
+            <tr>
+              <td>
+                <span class="addr-short">${shortAddr(p.addr)}</span>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('${p.addr}')" title="Copy address">⧉</button>
+              </td>
+              <td class="amount">${fmt6(p.withdrawable)}</td>
+              <td class="amount" style="color:#f97316">${p.shortfall > 0n ? fmt6(p.shortfall) : '—'}</td>
+              <td class="time">${p.parkedTs ? elapsed(p.parkedTs) : '—'}</td>
+              <td style="font-size:11px;color:${rescueColor}">${rescueStatus}</td>
+            </tr>
+          `;
+        }).join('');
+
         wrap.innerHTML = `
+          ${keeperBanner}
           <table class="parked-table">
-            <thead><tr><th>${t('statusPage.js.th_wallet','Wallet')}</th><th>${t('statusPage.js.th_shortfall','Shortfall')}</th><th>${t('statusPage.js.th_parked','Parked')}</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Wallet</th>
+                <th>Has</th>
+                <th>Shortfall</th>
+                <th>Parked</th>
+                <th>Rescue Status</th>
+              </tr>
+            </thead>
             <tbody>${rows}</tbody>
           </table>
           <div style="font-size:11px;color:var(--text3);margin-top:8px">
-            ${stillParked.length} of ${count} ${t('statusPage.js.confirmed_parked_suffix','confirmed parked')} (${count - stillParked.length} ${t('statusPage.js.resolved_since_scan_suffix','resolved since last event scan')})
+            ${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue · ${graceLabel}
           </div>
         `;
       }
 
     } catch(e) {
       console.error('Parked load error:', e);
-      document.getElementById('parked-list-wrap').innerHTML = `<div class="loading-row">${t('statusPage.js.error_loading_parked', 'Error loading parked data')}</div>`;
+      document.getElementById('parked-list-wrap').innerHTML = `<div class="loading-row">Error loading parked data</div>`;
     }
   }
 
