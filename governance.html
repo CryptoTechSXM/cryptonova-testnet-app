@@ -806,6 +806,16 @@ function toggleTheme() {
 }
 if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
+// ── Refresh hasVoted for current userAddr ─────────────────────────────────────
+async function refreshHasVoted() {
+  if (!userAddr || !allProposals.length) return;
+  const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC }));
+  await Promise.all(allProposals.map(async p => {
+    try { p._voted = await gov.hasVoted(p.id, userAddr); }
+    catch { p._voted = false; }
+  }));
+}
+
 // ── Wallet ─────────────────────────────────────────────────────────────────────
 async function connectWallet() {
   if (!window.ethereum) { alert(t('govPage.js.no_wallet_found', 'No wallet found. Install MetaMask.')); return; }
@@ -822,6 +832,7 @@ async function connectWallet() {
     btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
     btn.classList.add('connected');
     await refreshVotingPower();
+    await refreshHasVoted(); // fetch on-chain voted state for connected address
     renderProposals(); // re-render to add vote buttons + voted state
     updateProposeGate();
   } catch(e) { alert(t('govPage.js.connection_failed', 'Connection failed:') + ' ' + e.message); }
