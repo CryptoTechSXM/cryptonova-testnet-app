@@ -340,7 +340,7 @@
 
     <!-- Coming soon note — hidden once contract is live -->
     <div class="coming-soon-note" id="coming-soon-note" style="display:none;" data-i18n="buyPage.coming_soon_note">
-      ⏳ Direct sale contract deploying with V8.19 — check back at launch
+      ⏳ Direct sale contract live — CNOVADirectSale deployed with V8.26
     </div>
   </div>
 
@@ -386,7 +386,7 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — swap addresses once V8.19 deploys
+// CONFIG — V8.26 (deployed 2026-06-25, loan system + flat 20x SF mult)
 // ─────────────────────────────────────────────────────────────────────────────
 const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 // Real ethers.Network object for staticNetwork — passing the literal boolean
@@ -395,7 +395,7 @@ const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 const _NET_STATIC      = ethers.Network.from(CHAIN_ID);
 const RPC_URL           = 'https://sepolia.base.org';
 
-// V8.24 live addresses — narrow catch + SF rescue ladder Preset 1 (2026-06-25)
+// V8.26 live addresses — loan system (rescueDebt) + flat 20x SF multiplier default
 const USDC_ADDR         = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
 const CNOVA_ADDR        = '0x97d0f2192102Fd51B8A408C3D41602CeFEA0C467';
 const TREASURY_ADDR     = '0x139EDEb203b9D1Ef0153993331FF2df9CDeaB581';
@@ -412,7 +412,7 @@ const CURVE_TIERS = [
   { label: 'Tier 4', mult: 2.00, ceiling: Infinity,     display: '20M+ CNOVA'   },
 ];
 
-// ── Dynamic SF/LQ split (targets — adjust once V8.19 sets them on-chain) ───
+// ── Dynamic SF/LQ split (targets — live as of V8.26) ───────────────────────
 const SF_TARGET_USD = 500;   // $500 SF target
 const LQ_TARGET_USD = 1000;  // $1000 LQ target (future: read from contract)
 

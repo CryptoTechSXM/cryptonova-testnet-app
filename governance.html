@@ -578,19 +578,19 @@ const PARAM_FALLBACK = {
   37: { label:'Community Genesis Split BPS', hint:'Genesis members’ share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
   38: { label:'Community Distribute Ratio BPS', hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
   39: { label:'Community Distribute Interval', hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
-  // V8.22: sfTargetMultiplier[tier] -- independently DAO-governable per tier.
-  // Default schedule is roughly 10x per tier step (T1=10x ... T10=100x), but
-  // each can be voted to any value on the shared allowed-values menu.
-  40: { label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1’s entry fee to compute StabilityFund’s auto-scaled target when T1 is the highest open tier. Default 10x.' },
-  41: { label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2’s entry fee to compute StabilityFund’s auto-scaled target when T2 is the highest open tier. Default 20x.' },
-  42: { label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3’s entry fee to compute StabilityFund’s auto-scaled target when T3 is the highest open tier. Default 30x.' },
-  43: { label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4’s entry fee to compute StabilityFund’s auto-scaled target when T4 is the highest open tier. Default 40x.' },
-  44: { label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5’s entry fee to compute StabilityFund’s auto-scaled target when T5 is the highest open tier. Default 50x.' },
-  45: { label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6’s entry fee to compute StabilityFund’s auto-scaled target when T6 is the highest open tier. Default 60x.' },
-  46: { label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7’s entry fee to compute StabilityFund’s auto-scaled target when T7 is the highest open tier. Default 70x.' },
-  47: { label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8’s entry fee to compute StabilityFund’s auto-scaled target when T8 is the highest open tier. Default 80x.' },
-  48: { label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9’s entry fee to compute StabilityFund’s auto-scaled target when T9 is the highest open tier. Default 90x.' },
-  49: { label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10’s entry fee to compute StabilityFund’s auto-scaled target when T10 is the highest open tier. Default 100x.' },
+  // V8.26: sfTargetMultiplier[tier] -- independently DAO-governable per tier.
+  // Default is flat 20x across all tiers (changed from staircase in V8.26).
+  // Each can be voted to any value via DAO proposal.
+  40: { label:’SF Target Multiplier — T1’, hint:’Multiplier applied to T1\’s entry fee to compute StabilityFund\’s auto-scaled target when T1 is the highest open tier. V8.26 default: 20x.’ },
+  41: { label:’SF Target Multiplier — T2’, hint:’Multiplier applied to T2\’s entry fee to compute StabilityFund\’s auto-scaled target when T2 is the highest open tier. V8.26 default: 20x.’ },
+  42: { label:’SF Target Multiplier — T3’, hint:’Multiplier applied to T3\’s entry fee to compute StabilityFund\’s auto-scaled target when T3 is the highest open tier. V8.26 default: 20x.’ },
+  43: { label:’SF Target Multiplier — T4’, hint:’Multiplier applied to T4\’s entry fee to compute StabilityFund\’s auto-scaled target when T4 is the highest open tier. V8.26 default: 20x.’ },
+  44: { label:’SF Target Multiplier — T5’, hint:’Multiplier applied to T5\’s entry fee to compute StabilityFund\’s auto-scaled target when T5 is the highest open tier. V8.26 default: 20x.’ },
+  45: { label:’SF Target Multiplier — T6’, hint:’Multiplier applied to T6\’s entry fee to compute StabilityFund\’s auto-scaled target when T6 is the highest open tier. V8.26 default: 20x.’ },
+  46: { label:’SF Target Multiplier — T7’, hint:’Multiplier applied to T7\’s entry fee to compute StabilityFund\’s auto-scaled target when T7 is the highest open tier. V8.26 default: 20x.’ },
+  47: { label:’SF Target Multiplier — T8’, hint:’Multiplier applied to T8\’s entry fee to compute StabilityFund\’s auto-scaled target when T8 is the highest open tier. V8.26 default: 20x.’ },
+  48: { label:’SF Target Multiplier — T9’, hint:’Multiplier applied to T9\’s entry fee to compute StabilityFund\’s auto-scaled target when T9 is the highest open tier. V8.26 default: 20x.’ },
+  49: { label:’SF Target Multiplier — T10’, hint:’Multiplier applied to T10\’s entry fee to compute StabilityFund\’s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.’ },
 };
 
 function PARAM_META_GET(paramId) {

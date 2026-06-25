@@ -269,7 +269,7 @@
         </div>
         <div class="detail-row">
           <span class="detail-key" data-i18n="statusPage.row_cre_migration">CRE migration</span>
-          <span class="detail-val yellow" data-i18n="statusPage.val_pending_approval">Pending approval</span>
+          <span class="detail-val" style="color:var(--text3)">Not active — direct keeper in use</span>
         </div>
         <div class="info-note" data-i18n="statusPage.keeper_info_note">The keeper runs <strong>checkUpkeep → performUpkeep</strong> on a schedule. When it detects pending work (parked rescues, force crosses, distributions), it submits a transaction automatically.</div>
       </div>
@@ -421,7 +421,7 @@
           <span class="detail-key" data-i18n="statusPage.row_cnova_total_supply">CNOVA total supply</span>
           <span class="detail-val blue" id="sf-cnova">—</span>
         </div>
-        <div class="info-note" data-i18n="statusPage.sf_info_note">The Stability Fund receives 5% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $100 can rescue 20+ members.</div>
+        <div class="info-note" data-i18n="statusPage.sf_info_note">The Stability Fund receives a share of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. The V8.26 default target is <strong>$200</strong> (20× the T1 entry fee). A healthy SF can rescue 20+ members.</div>
       </div>
     </div>
 
@@ -454,9 +454,9 @@
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
     tierRouter:    '0xF5dC3D6D48cdCd110ff7Dd4844cBd797a7021cB2',
     matrixKeeper:  '0x3de9c7bD20cC82238BC39c98D7A1aC15dd1280df',
-    T1matA:        '0xd5E3742bf458d5442027922DD63b00C98049f370',
-    T1matB:        '0xCb209d0Aa886404Fb2870E66FCBd853A52fb2eF3',
-    T2matA:        '0x239f3E53B2184ACb69d62c933F938eE95431a99D',
+    T1matA:        '0x6dd24D0268F9eD11BC9036d490AE4D58B9764e0b',
+    T1matB:        '0x6ddF0BF97CEd7D1585dE09ED1238A5d6Ed877Eb8',
+    T2matA:        '0xB62E0413e1BDAa80fAA569B45798aAb6FA4618d0',
   };
 
   const MATRIX_ABI = [
@@ -874,10 +874,12 @@
 
       const sfNum = Number(BigInt(sfBal)) / 1e6;
 
-      // Health: >=$100 = green (healthy), >=$50 = yellow (low), <$50 = red (critical)
-      const health = sfNum >= 100 ? 'green' : sfNum >= 50 ? 'yellow' : 'red';
-      const healthLabel = sfNum >= 100 ? t('statusPage.js.healthy','Healthy') : sfNum >= 50 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
-      const pct = Math.min(100, Math.round(sfNum)); // 100% at $100 target
+      // Health: V8.26 sfTarget = $200 (20x * $10 T1 fee).
+      // >=$200 = green (healthy), >=$100 = yellow (low), <$100 = red (critical)
+      const SF_TARGET = 200;
+      const health = sfNum >= SF_TARGET ? 'green' : sfNum >= 100 ? 'yellow' : 'red';
+      const healthLabel = sfNum >= SF_TARGET ? t('statusPage.js.healthy','Healthy') : sfNum >= 100 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
+      const pct = Math.min(100, Math.round(sfNum / SF_TARGET * 100)); // 100% at $200 target
 
       const pillInd = document.getElementById('pill-sf');
       pillInd.className = `pill-indicator ${health}`;
