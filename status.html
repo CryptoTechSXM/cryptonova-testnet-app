@@ -231,14 +231,6 @@
         <div class="pill-sub" id="pill-matrix-sub" data-i18n="statusPage.pill_matrix_sub_default">MatA / MatB</div>
       </div>
     </div>
-    <div class="summary-pill" onclick="toggleCard('card-parked')">
-      <div class="pill-indicator" id="pill-rescue"></div>
-      <div>
-        <div class="pill-label" data-i18n="statusPage.pill_rescue_label">Rescues</div>
-        <div class="pill-value" id="pill-rescue-val">—</div>
-        <div class="pill-sub" id="pill-rescue-sub" data-i18n="statusPage.pill_rescue_sub_checking">Checking…</div>
-      </div>
-    </div>
   </div>
 
   <!-- Cards grid -->
@@ -390,6 +382,19 @@
           <span class="detail-key" data-i18n="statusPage.row_rescue_capacity_est">Rescue capacity (est.)</span>
           <span class="detail-val" id="sf-rescue-cap">—</span>
         </div>
+        <div class="detail-section">Rescue Loans</div>
+        <div class="detail-row">
+          <span class="detail-key">Total loans issued</span>
+          <span class="detail-val" id="sf-loans-issued">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Total repaid (cycle-out)</span>
+          <span class="detail-val green" id="sf-loans-repaid">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Outstanding loans</span>
+          <span class="detail-val yellow" id="sf-loans-outstanding">—</span>
+        </div>
         <div class="detail-section" data-i18n="statusPage.section_health">Health</div>
         <div class="sf-health">
           <div style="flex:1">
@@ -473,7 +478,10 @@
     'event ParkedRescued(address indexed matrix, address indexed member, uint8 tierIndex)',
     'event WorkItemFailed(uint8 workType, uint8 tierIndex, address addr1, address addr2)',
   ];
-  const SF_ABI    = ['function totalBalance() external view returns (uint256)'];
+  const SF_ABI    = [
+    'function totalBalance() external view returns (uint256)',
+    'event DebtRepaymentReceived(address indexed matrix, uint256 amount)',
+  ];
   const USDC_ABI  = ['function balanceOf(address) external view returns (uint256)'];
   const CNOVA_ABI = ['function totalSupply() external view returns (uint256)'];
   const TR_ABI    = ['function totalSystemCycles() external view returns (uint256)', 'function globalJoinedCount() external view returns (uint256)'];
@@ -593,17 +601,7 @@
       setText('kp-last-rescue', lastRescueStr);
       setText('kp-rescue-count', rescueCount.toString());
 
-      // Rescue summary pill
-      const pillRescueInd = document.getElementById('pill-rescue');
-      if (rescueCount > 0) {
-        pillRescueInd.className = 'pill-indicator green';
-        setText('pill-rescue-val', rescueCount + ' rescued');
-        setText('pill-rescue-sub', 'Last: ' + lastRescueStr);
-      } else {
-        pillRescueInd.className = 'pill-indicator';
-        setText('pill-rescue-val', '0 rescued');
-        setText('pill-rescue-sub', t('statusPage.js.no_rescues_yet', 'No rescues yet'));
-      }
+      // Rescue pill card removed — counts live in the Parked Members dropdown above
       // Update keeper card summary to show last rescue inline
       if (lastRescueTime) {
         setText('summary-keeper', rescueCount + ' rescue(s) · last ' + lastRescueStr);
@@ -904,28 +902,26 @@
       setText('sf-cnova', fmt18(cnovaSup) + ' CNOVA');
       setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
 
-    } catch(e) {
-      console.error('SF load error:', e);
-    }
-  }
+      // ── Rescue loan tracking ──────────────────────────────────
+      try {
+        const blk = await provider.getBlockNumber();
+        const fromBlock = Math.max(0, blk - 200000); // ~4 days on Base
+        const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
 
-  // ── Theme ─────────────────────────────────────────────────
-  function toggleTheme() {
-    const isLight = document.body.classList.toggle('light');
-    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  }
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
-  }
+        // Loans issued: sum sfShare from CoPayRescue events on T1 MatA
+        const coPayLogs = await matA.queryFilter(matA.filters.CoPayRescue(), fromBlock, blk).catch(()=>[]);
+        let totalIssued = 0n;
+        for (const log of coPayLogs) {
+          try { totalIssued += BigInt(log.args.sfShare); } catch {}
+        }
 
-  // ── Boot ──────────────────────────────────────────────────
-  // Open keeper card by default (most relevant)
-  window.addEventListener('DOMContentLoaded', () => {
-    toggleCard('card-keeper');
-    loadAll();
-  });
-</script>
-</body>
-</html>
+        // Loans repaid: sum amount from DebtRepaymentReceived events on SF
+        const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), fromBlock, blk).catch(()=>[]);
+        let totalRepaid = 0n;
+        for (const log of repayLogs) {
+          try { totalRepaid += BigInt(log.args.amount); } catch {}
+        }
+
+        const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
+        setText('sf-loans-issued',      coPayLogs.length > 0 ? `${fmt6(totalIssued)} (${coPayLogs.length} rescue${coPayLogs.length!==1?'s':''})` : '$0.00');
+        setText('sf-loans-repaid',      repayLogs.length > 0 ? `${fmt
