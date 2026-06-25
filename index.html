@@ -1262,8 +1262,7 @@
         <div class="card">
           <div class="section-title" style="margin-bottom:12px"><div class="dot"></div> <span data-i18n="dash.member_info">Member Info</span> — <span id="dash-tier-name" style="color:var(--green);font-size:14px">—</span></div>
           <div class="info-row"><span class="info-key" data-i18n="dash.member_id">Member ID</span><span class="info-val" id="dash-id">—</span></div>
-          <div class="info-row"><span class="info-key" data-i18n="dash.active_matrix">Active Matrix</span><span class="info-val" id="dash-matrix">—</span></div>
-          <div class="info-row"><span class="info-key" data-i18n="dash.bfs_position">BFS Position</span><span class="info-val" id="dash-bfs">—</span></div>
+          <div id="dash-positions-list"><div class="info-row"><span class="info-key">Active Positions</span><span class="info-val" style="color:var(--text3)">—</span></div></div>
 
           <div class="info-row"><span class="info-key" data-i18n="dash.tier_cycles">Tier Cycles</span><span class="info-val" id="dash-cycles">—</span></div>
           <div id="dash-cycles-breakdown" style="font-size:12px;color:var(--text3);padding:4px 10px;background:var(--bg3);border-radius:6px;margin:-4px 0 6px 0;display:none"></div>
@@ -3191,7 +3190,8 @@ async function loadDashboardData() {
     ];
 
     let totalW = 0n, totalE = 0n, totalEscrow = 0n;
-    let activeMat = null, activeLabel = '', activeBFS = 0n, activeCycles = 0n, activeBFSUnknown = false;
+    let activePositions = []; // [{label, bfs, bfsUnknown}]
+    let activeCycles = 0n; // highest tier's cycles (for upgrade widget)
     let highestTier = 0;
     let memberId = 0, memberReferrer = ethers.ZeroAddress;
     let parkedInfo = null; // { label, addr, withdrawable, fee, shortfall }
@@ -3235,12 +3235,13 @@ async function loadDashboardData() {
         const tNum = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
         highestTier = Math.max(highestTier, tNum);
         if (member.isInMatrix) {
-          activeMat = member; activeLabel = m.label;
+          const pos = { label: m.label, bfs: 0n, bfsUnknown: false };
+          activePositions.push(pos);
+          if (tNum >= highestTier) activeCycles = BigInt(member.cyclesCompleted);
           followUps.push(
             retryRead(() => mc.matrixPos(userAddr)).then(({ value, ok }) => {
-              activeBFS = ok ? value : 0n;
-              activeBFSUnknown = !ok;
-              activeCycles = BigInt(member.cyclesCompleted);
+              pos.bfs = ok ? value : 0n;
+              pos.bfsUnknown = !ok;
             })
           );
         } else if (!parkedInfo) {
@@ -3327,10 +3328,21 @@ async function loadDashboardData() {
     loadUserBurnHistory(cnova, userAddr);
     setText('dash-tier',           highestTier > 0 ? `T${highestTier}` : 'T1');
     setText('dash-tier-name',      TIER_NAMES[highestTier] || '—');
-    setText('dash-matrix',         activeMat ? activeLabel : '—');
-    setText('dash-bfs',            activeBFSUnknown
-      ? unknownBadge('Could not read your matrix position after retries — likely a flaky RPC node. Refresh to try again.')
-      : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
+    // Render all active positions
+    (function() {
+      const posList = document.getElementById('dash-positions-list');
+      if (!posList) return;
+      if (activePositions.length === 0) {
+        posList.innerHTML = '<div class="info-row"><span class="info-key">Active Positions</span><span class="info-val" style="color:var(--text3)">—</span></div>';
+      } else {
+        posList.innerHTML = activePositions.map(p => {
+          const bfsStr = p.bfsUnknown
+            ? unknownBadge('Could not read matrix position — try refreshing.')
+            : (p.bfs > 0n ? '#' + p.bfs.toString() : '—');
+          return `<div class="info-row"><span class="info-key" style="color:var(--text2)">${p.label}</span><span class="info-val green">${bfsStr}</span></div>`;
+        }).join('');
+      }
+    })();
     setText('dash-cycles',         activeCycles.toString());
     setText('dash-id',             memberId > 0 ? '#' + memberId : '—');
     setText('dash-orig-referrer',  memberReferrer && memberReferrer !== ethers.ZeroAddress
