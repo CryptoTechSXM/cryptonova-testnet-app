@@ -924,4 +924,33 @@
 
         const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
         setText('sf-loans-issued',      coPayLogs.length > 0 ? `${fmt6(totalIssued)} (${coPayLogs.length} rescue${coPayLogs.length!==1?'s':''})` : '$0.00');
-        setText('sf-loans-repaid',      repayLogs.length > 0 ? `${fmt
+        setText('sf-loans-repaid',      repayLogs.length > 0 ? `${fmt6(totalRepaid)} (${repayLogs.length} repayment${repayLogs.length!==1?'s':''})` : '$0.00');
+        setText('sf-loans-outstanding', outstanding > 0n ? fmt6(outstanding) : '$0.00');
+        setClass('sf-loans-outstanding', outstanding > 0n ? 'yellow' : 'green');
+      } catch(e) { console.warn('Loan tracking error:', e); }
+
+    } catch(e) {
+      console.error('SF load error:', e);
+    }
+  }
+
+  // ── Theme ─────────────────────────────────────────────────
+  function toggleTheme() {
+    const isLight = document.body.classList.toggle('light');
+    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  }
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
+  }
+
+  // ── Boot ──────────────────────────────────────────────────
+  // Open keeper card by default (most relevant)
+  window.addEventListener('DOMContentLoaded', () => {
+    toggleCard('card-keeper');
+    loadAll();
+  });
+</script>
+</body>
+</html>
