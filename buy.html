@@ -395,13 +395,13 @@ const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 const _NET_STATIC      = ethers.Network.from(CHAIN_ID);
 const RPC_URL           = 'https://sepolia.base.org';
 
-// V8.22 live addresses (per-tier SF target multiplier DAO voting, 2026-06-22 -- same economics as V8.21/V8.20)
+// V8.24 live addresses — narrow catch + SF rescue ladder Preset 1 (2026-06-25)
 const USDC_ADDR         = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const CNOVA_ADDR        = '0x06E03Ba3456Fb4535316Ce714C700165F5123A92';
-const TREASURY_ADDR     = '0x3Ffa6d8fb3731cAe5E6DBa726089dD18B31bc8ab';
+const CNOVA_ADDR        = '0xDd25FE7D88e2656A77019198a990EbD291B339bA';
+const TREASURY_ADDR     = '0x34FB4C49b1204a7618767A7B8fd4c4f554396BEa';
 
-// CNOVADirectSale.sol redeployed with V8.22 (2026-06-22)
-const DIRECT_SALE_ADDR  = '0x43E5C9076C7D267bCAF4a0017ACd2269e5E6A550';
+// CNOVADirectSale.sol redeployed with V8.24 (2026-06-25)
+const DIRECT_SALE_ADDR  = '0xD76C24BCAe86Fb6c3cc6CE0F0740f199836d9505';
 
 // ── Bonding curve tiers ─────────────────────────────────────────────────────
 // [label, multiplier (x1000), supply ceiling (CNOVA, 18 dec as string)]
