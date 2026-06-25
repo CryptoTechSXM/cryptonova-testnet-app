@@ -2171,7 +2171,9 @@ async function connectWallet(silent=false) {
   if (!silent) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Connecting…'; }
   try {
     const walletName = detectWalletName();
-    provider = new ethers.BrowserProvider(window.ethereum);
+    // Pin to Base Sepolia (chainId 84532) so ethers v6 skips ENS resolution on write calls.
+    // Without this, signer.sendTransaction() tries getEnsAddress() on an "unknown" network and throws.
+    provider = new ethers.BrowserProvider(window.ethereum, ethers.Network.from(84532));
     // Silent reconnect uses eth_accounts (no popup); explicit connect uses eth_requestAccounts
     if (silent) {
       const accs = await window.ethereum.request({ method: 'eth_accounts' });
@@ -4627,6 +4629,7 @@ function friendlyError(e) {
   if (!e) return 'Unknown error';
   const msg = e.reason || e.data?.message || e.message || String(e);
   if (msg.includes('user rejected') || e.code === 4001) return 'Transaction cancelled.';
+  if (msg.includes('does not support ENS') || msg.includes('getEnsAddress')) return 'Network error — please disconnect and reconnect your wallet.';
   if (msg.includes('insufficient funds')) return 'Insufficient ETH for gas.';
   if (msg.includes('already registered') || msg.includes('AlreadyJoined') || msg.includes('already joined')) return 'This wallet is already registered — view your Dashboard.';
   if (msg.includes('USDC') && msg.includes('allowance')) return 'USDC not approved — complete Step 1 first.';
