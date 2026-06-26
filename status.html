@@ -921,36 +921,47 @@
       // ── Rescue loan tracking (V8.27 — RescueLoanIssued across all tiers) ─────
       try {
         const blk = await provider.getBlockNumber();
-        const fromBlock = Math.max(0, blk - 200000); // ~4 days on Base Sepolia
+        // Base Sepolia eth_getLogs hard-caps at ~2000 blocks per call.
+        // Query in 5 chunks of 2000 = 10,000 blocks = ~9 hrs coverage on Base Sepolia.
+        const CHUNK = 2000;
+        const fromBlock = Math.max(0, blk - CHUNK * 5);
 
-        // All matrix contracts for loan event scanning
-        const allMatrices = [
+        // Only query matrix contracts that are actually defined
+        const matrixKeys = [
           'T1matA','T1matB','T2matA','T2matB','T3matA','T3matB',
           'T4matA','T4matB','T5matA','T5matB','T6matA','T6matB',
           'T7matA','T7matB','T8matA','T8matB','T9matA','T9matB',
           'T10matA','T10matB',
-        ].map(k => new ethers.Contract(ADDRS[k], MATRIX_ABI, provider));
+        ].filter(k => ADDRS[k] && ADDRS[k] !== '0x0000000000000000000000000000000000000000');
+        const allMatrices = matrixKeys.map(k => new ethers.Contract(ADDRS[k], MATRIX_ABI, provider));
 
-        // Loans issued: sum totalLoan from RescueLoanIssued across all matrices
+        // Loans issued: query in CHUNK-sized blocks to avoid RPC limit
         let totalIssued = 0n;
         let loanCount = 0;
-        await Promise.all(allMatrices.map(async mat => {
-          const logs = await mat.queryFilter(mat.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
-          for (const log of logs) {
-            try { totalIssued += BigInt(log.args.totalLoan); loanCount++; } catch {}
-          }
-        }));
+        for (let from = fromBlock; from < blk; from += CHUNK) {
+          const to = Math.min(from + CHUNK - 1, blk);
+          await Promise.all(allMatrices.map(async mat => {
+            const logs = await mat.queryFilter(mat.filters.RescueLoanIssued(), from, to).catch(()=>[]);
+            for (const log of logs) {
+              try { totalIssued += BigInt(log.args[1] ?? log.args.totalLoan ?? log.args.loanAmount ?? 0n); loanCount++; } catch {}
+            }
+          }));
+        }
 
-        // Loans repaid: authoritative — sum DebtRepaymentReceived on SF (actual USDC received back)
-        const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), fromBlock, blk).catch(()=>[]);
+        // Loans repaid: DebtRepaymentReceived on SF
         let totalRepaid = 0n;
-        for (const log of repayLogs) {
-          try { totalRepaid += BigInt(log.args.amount); } catch {}
+        let repayCount = 0;
+        for (let from = fromBlock; from < blk; from += CHUNK) {
+          const to = Math.min(from + CHUNK - 1, blk);
+          const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), from, to).catch(()=>[]);
+          for (const log of repayLogs) {
+            try { totalRepaid += BigInt(log.args.amount ?? log.args[0] ?? 0n); repayCount++; } catch {}
+          }
         }
 
         const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
         setText('sf-loans-issued',      loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00');
-        setText('sf-loans-repaid',      repayLogs.length > 0 ? `${fmt6(totalRepaid)} (${repayLogs.length} repayment${repayLogs.length!==1?'s':''})` : '$0.00');
+        setText('sf-loans-repaid',      repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00');
         setText('sf-loans-outstanding', outstanding > 0n ? fmt6(outstanding) : '$0.00');
         setClass('sf-loans-outstanding', outstanding > 0n ? 'yellow' : 'green');
       } catch(e) { console.warn('Loan tracking error:', e); }
