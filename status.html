@@ -445,18 +445,35 @@
   const T1_FEE   = 10_000_000n; // $10 USDC
 
   const ADDRS = {
-    // V8.26 — deployed 2026-06-25 — loan system (rescueDebt), flat 20x SF multiplier default
+    // V8.27 — deployed 2026-06-26 — hybrid SF loan repayment (15% gradual + crossing buffer)
     usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-    cnova:         '0x97d0f2192102Fd51B8A408C3D41602CeFEA0C467',
-    treasury:      '0x139EDEb203b9D1Ef0153993331FF2df9CDeaB581',
-    stabilityFund: '0xef9D5aF4baa2cA1160aA2B3285aeD4F312C62aC7',
-    buybackReserve:'0x920787D959BBD1eE8cA2b16Bbf00Da7a2536C9EB',
+    cnova:         '0xb90dabe3f893bC93a243a9f19C44c763c0CB9762',
+    treasury:      '0xe68803A72b598BB52fb4323fe10e1e19B9243F34',
+    stabilityFund: '0xd170af139D17ed9aEfA1Ba4C81E3a87078C7b722',
+    buybackReserve:'0x55B174e7B8b951b88556716E9eD7eB8a4D58eCef',
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-    tierRouter:    '0xF5dC3D6D48cdCd110ff7Dd4844cBd797a7021cB2',
-    matrixKeeper:  '0x3de9c7bD20cC82238BC39c98D7A1aC15dd1280df',
-    T1matA:        '0x6dd24D0268F9eD11BC9036d490AE4D58B9764e0b',
-    T1matB:        '0x6ddF0BF97CEd7D1585dE09ED1238A5d6Ed877Eb8',
-    T2matA:        '0xB62E0413e1BDAa80fAA569B45798aAb6FA4618d0',
+    tierRouter:    '0xd2290Aa027e4570D354F9E6327372D095CBB2a34',
+    matrixKeeper:  '0x3f90161d548Add21e6134478070eA8b94805F9fe',
+    T1matA:  '0x456a8D2e2eda6Bf472709C86f058Da5Ac5095526',
+    T1matB:  '0x92F317B2fA1a1a3E8BF4539CE18fD0bf7B47428f',
+    T2matA:  '0xFdad4B8524fA7D5085749222A667C6f2518F65a1',
+    T2matB:  '0x2E97dBde6254a807077353bc197429De58ca09D5',
+    T3matA:  '0x9Af938D9466595e1d8B5364635CC15D3AE8FE7dD',
+    T3matB:  '0x16551877F098B54d765672EFd82f2D4668FAa6A9',
+    T4matA:  '0x08b1026de5C0013b7aF2dd208044C5B9554daa03',
+    T4matB:  '0xC8DB65B26400CEa1Ed0C4D54C1439d8aAb8F4Cb6',
+    T5matA:  '0xa71defFAb8a5CEDb530fce987A8543Ce4657C8b6',
+    T5matB:  '0xD80DAd37DF551733DF3D98B84407bBdA9b08784e',
+    T6matA:  '0xD1D96ff6149e22804EdBe47B83AF31BC92cC2d4c',
+    T6matB:  '0xCd658BB50a4ED4757Ba577fE7578A8399FABF29A',
+    T7matA:  '0x3Fd46a72C032FB6e5f9d8184deFd59c5091FD3f0',
+    T7matB:  '0xFc8ECc3a09D22FC102bd3917a95Ea2919f2E4B49',
+    T8matA:  '0xcdFB9DA134a7711a59a144Aa05EeD18aaCE3F62D',
+    T8matB:  '0x286BD1D8Bf186b3A965cd2c36528D2F2F15BBb55',
+    T9matA:  '0x56584fC7eC2368a47cEd6Eb887000C9f1E1f1b7d',
+    T9matB:  '0xE5b4e92a7d006bB7a47f6c1522F78dBC15132dD7',
+    T10matA: '0x1863d7Fae7D2B071e8b9Ce8d084954dEceC06C6E',
+    T10matB: '0x12b69F72B68ab33A0B6D654cF9578703E75E2Ec6',
   };
 
   const MATRIX_ABI = [
@@ -470,7 +487,9 @@
     'function ENTRY_FEE() external view returns (uint256)',
     'function totalJoined() external view returns (uint256)',
     'event MemberParked(address indexed member, uint256 shortfall)',
-    'event CoPayRescue(address indexed member, uint256 sfShare, uint256 memberWalletShare, uint256 withdrawableUsed)',
+    'event RescueLoanIssued(address indexed member, uint256 totalLoan, string source)',
+    'event RescueDebtRepaid(address indexed member, uint256 repaid, uint256 remaining)',
+    'function rescueDebtOf(address member) external view returns (uint256)',
   ];
   const KEEPER_ABI = [
     'function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)',
@@ -558,16 +577,11 @@
         }
       } catch(e) {}
 
-      // Recent rescues — two sources:
-      //  1. ParkedRescued on MatrixKeeper (direct_keeper.js performUpkeep path)
-      //  2. CoPayRescue on T1 MatA     (bigfill_v8.js / push_parked.js direct path)
+      // Recent rescues: ParkedRescued on MatrixKeeper (V8.27 unified path)
       const fromBlock = Math.max(0, blk - 50000);
       const rescueFilter = keeper.filters.ParkedRescued();
       const keeperRescueLogs = await keeper.queryFilter(rescueFilter, fromBlock, blk).catch(()=>[]);
-      const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
-      const coPayFilter = matA.filters.CoPayRescue();
-      const coPayLogs = await matA.queryFilter(coPayFilter, fromBlock, blk).catch(()=>[]);
-      const allRescueLogs = [...keeperRescueLogs, ...coPayLogs].sort((a,b) => a.blockNumber - b.blockNumber);
+      const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
       const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
       if (rescueCount > 0) {
@@ -904,20 +918,30 @@
       setText('sf-cnova', fmt18(cnovaSup) + ' CNOVA');
       setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
 
-      // ── Rescue loan tracking ──────────────────────────────────
+      // ── Rescue loan tracking (V8.27 — RescueLoanIssued across all tiers) ─────
       try {
         const blk = await provider.getBlockNumber();
-        const fromBlock = Math.max(0, blk - 200000); // ~4 days on Base
-        const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
+        const fromBlock = Math.max(0, blk - 200000); // ~4 days on Base Sepolia
 
-        // Loans issued: sum sfShare from CoPayRescue events on T1 MatA
-        const coPayLogs = await matA.queryFilter(matA.filters.CoPayRescue(), fromBlock, blk).catch(()=>[]);
+        // All matrix contracts for loan event scanning
+        const allMatrices = [
+          'T1matA','T1matB','T2matA','T2matB','T3matA','T3matB',
+          'T4matA','T4matB','T5matA','T5matB','T6matA','T6matB',
+          'T7matA','T7matB','T8matA','T8matB','T9matA','T9matB',
+          'T10matA','T10matB',
+        ].map(k => new ethers.Contract(ADDRS[k], MATRIX_ABI, provider));
+
+        // Loans issued: sum totalLoan from RescueLoanIssued across all matrices
         let totalIssued = 0n;
-        for (const log of coPayLogs) {
-          try { totalIssued += BigInt(log.args.sfShare); } catch {}
-        }
+        let loanCount = 0;
+        await Promise.all(allMatrices.map(async mat => {
+          const logs = await mat.queryFilter(mat.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
+          for (const log of logs) {
+            try { totalIssued += BigInt(log.args.totalLoan); loanCount++; } catch {}
+          }
+        }));
 
-        // Loans repaid: sum amount from DebtRepaymentReceived events on SF
+        // Loans repaid: authoritative — sum DebtRepaymentReceived on SF (actual USDC received back)
         const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), fromBlock, blk).catch(()=>[]);
         let totalRepaid = 0n;
         for (const log of repayLogs) {
@@ -925,7 +949,7 @@
         }
 
         const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
-        setText('sf-loans-issued',      coPayLogs.length > 0 ? `${fmt6(totalIssued)} (${coPayLogs.length} rescue${coPayLogs.length!==1?'s':''})` : '$0.00');
+        setText('sf-loans-issued',      loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00');
         setText('sf-loans-repaid',      repayLogs.length > 0 ? `${fmt6(totalRepaid)} (${repayLogs.length} repayment${repayLogs.length!==1?'s':''})` : '$0.00');
         setText('sf-loans-outstanding', outstanding > 0n ? fmt6(outstanding) : '$0.00');
         setClass('sf-loans-outstanding', outstanding > 0n ? 'yellow' : 'green');
