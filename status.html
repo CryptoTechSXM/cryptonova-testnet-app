@@ -440,7 +440,27 @@
   });
 
   // ── Config ────────────────────────────────────────────────
-  const RPC      = 'https://sepolia.base.org';
+  // RPC fallback list — tries each in order until one responds within 6s
+  const RPC_LIST = [
+    'https://sepolia.base.org',
+    'https://base-sepolia-rpc.publicnode.com',
+    'https://base-sepolia.blockpi.network/v1/rpc/public',
+  ];
+  async function _getProvider() {
+    for (const url of RPC_LIST) {
+      try {
+        const p = new ethers.JsonRpcProvider(url);
+        await Promise.race([
+          p.getBlockNumber(),
+          new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 6000))
+        ]);
+        return p;
+      } catch { /* try next */ }
+    }
+    // All failed — return primary anyway so callers get clean RPC errors
+    return new ethers.JsonRpcProvider(RPC_LIST[0]);
+  }
+  const RPC = RPC_LIST[0]; // kept for any direct references
   const MATRIX_SIZE = 127n;
   const T1_FEE   = 10_000_000n; // $10 USDC
 
@@ -540,7 +560,7 @@
     clearInterval(_timer);
     _countdown = 30;
     try {
-      const provider = new ethers.JsonRpcProvider(RPC);
+      const provider = await _getProvider();
       const [blk] = await Promise.all([provider.getBlockNumber()]);
 
       await Promise.all([
@@ -986,4 +1006,46 @@
 
         const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
         const issuedTxt      = loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00';
-        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.0
+        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00';
+        const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
+        const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
+        setText('sf-loans-issued',      issuedTxt);
+        setText('sf-loans-repaid',      repaidTxt);
+        setText('sf-loans-outstanding', outstandingTxt);
+        setClass('sf-loans-outstanding', outstandingCls);
+        _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
+      } catch(e) {
+        console.warn('Loan tracking error:', e);
+        if (_lastLoansState) {
+          setText('sf-loans-issued',      _lastLoansState.issuedTxt);
+          setText('sf-loans-repaid',      _lastLoansState.repaidTxt);
+          setText('sf-loans-outstanding', _lastLoansState.outstandingTxt);
+          setClass('sf-loans-outstanding', _lastLoansState.outstandingCls);
+        }
+      }
+
+    } catch(e) {
+      console.error('SF load error:', e);
+    }
+  }
+
+  // ── Theme ─────────────────────────────────────────────────
+  function toggleTheme() {
+    const isLight = document.body.classList.toggle('light');
+    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  }
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
+  }
+
+  // ── Boot ──────────────────────────────────────────────────
+  // Open keeper card by default (most relevant)
+  window.addEventListener('DOMContentLoaded', () => {
+    toggleCard('card-keeper');
+    loadAll();
+  });
+</script>
+</body>
+</html>
