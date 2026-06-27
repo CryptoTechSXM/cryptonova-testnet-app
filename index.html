@@ -59,10 +59,24 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
     /* ── Tabs ───────────────────────────────── */
-    nav { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; gap: 0; padding: 0 24px; position: sticky; top: 57px; z-index: 99; }
+    nav { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; gap: 0; padding: 0; justify-content: space-evenly; position: sticky; top: 57px; z-index: 99; }
     nav button { background: none; border: none; color: var(--text2); padding: 14px 20px; cursor: pointer; font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; transition: all .2s; }
     nav button:hover { color: var(--text); }
     nav button.active { color: var(--green); border-bottom-color: var(--green); }
+    .nav-trigger { display: none; }
+
+    /* ── TG hero buttons ── */
+    .tg-hero-links { display: flex; gap: 8px; justify-content: center; margin-top: 20px; flex-wrap: nowrap; }
+    .tg-hero-links a { flex: 1; max-width: 180px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.35); border-radius: 10px; padding: 9px 12px; color: var(--blue); font-weight: 600; font-size: 13px; text-decoration: none; transition: background .2s; min-width: 0; }
+    .tg-hero-links a:hover { background: rgba(59,130,246,.22); }
+    .tg-hero-links svg { flex-shrink: 0; }
+    .tg-hero-links .tg-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── Footer hover-expand ── */
+    .footer-link .fl-s { }
+    .footer-link .fl-l { display: none; }
+    .footer-link:hover .fl-s { display: none; }
+    .footer-link:hover .fl-l { display: inline; }
 
     /* ── Main ───────────────────────────────── */
     main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
@@ -245,6 +259,9 @@
       h1 { font-size: 26px; }
       .hero p { font-size: 15px; }
       .hero-actions { flex-direction: column; }
+      .tg-hero-links a { padding: 8px 6px !important; font-size: 11px !important; gap: 4px !important; }
+      footer { padding: 12px 10px; }
+      footer > div { gap: 8px; font-size: 11px; }
       .btn-primary { width: 100%; text-align: center; justify-content: center; }
 
       /* ── Cards ── */
@@ -520,18 +537,18 @@
         <button class="btn-primary" onclick="showTab('register')" data-i18n="idx.hero_join">Join Now — $10 USDC</button>
         <button class="btn-outline" onclick="showTab('dashboard')" data-i18n="idx.hero_dashboard">View Dashboard</button>
       </div>
-      <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
-        <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:9px 16px;color:var(--blue);font-weight:600;font-size:13px;transition:background .2s" onmouseover="this.style.background='rgba(59,130,246,.22)'" onmouseout="this.style.background='rgba(59,130,246,.12)'">
+      <div class="tg-hero-links">
+        <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
-          Announcements
+          <span class="tg-label">Announcements</span>
         </a>
-        <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:9px 16px;color:var(--blue);font-weight:600;font-size:13px;transition:background .2s" onmouseover="this.style.background='rgba(59,130,246,.22)'" onmouseout="this.style.background='rgba(59,130,246,.12)'">
+        <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
-          Community Chat
+          <span class="tg-label">Community Chat</span>
         </a>
-        <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:9px 16px;color:var(--blue);font-weight:600;font-size:13px;transition:background .2s" onmouseover="this.style.background='rgba(59,130,246,.22)'" onmouseout="this.style.background='rgba(59,130,246,.12)'">
+        <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
-          Support &amp; Q&amp;A
+          <span class="tg-label">Support &amp; Q&amp;A</span>
         </a>
       </div>
     </div>
@@ -1621,23 +1638,23 @@
 
 <!-- Footer -->
 <footer style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:13px;color:var(--text3);margin-top:40px">
-  <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap">
-    <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
-      Announcements
+  <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">
+    <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
+      <span class="fl-s">Announce</span><span class="fl-l">ments</span>
     </a>
     <span style="color:var(--border)">·</span>
-    <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Community Chat</a>
+    <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Chat</span><span class="fl-l">Community Chat</span></a>
     <span style="color:var(--border)">·</span>
-    <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Support &amp; Q&amp;A</a>
+    <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Support</span><span class="fl-l"> &amp; Q&amp;A</span></a>
     <span style="color:var(--border)">|</span>
-    <a href="terms.html" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Terms &amp; Risk Disclaimer</a>
+    <a href="terms.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Terms</span><span class="fl-l"> &amp; Risk Disclaimer</span></a>
     <span style="color:var(--border)">|</span>
-    <a href="faq.html" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">FAQ &amp; Glossary</a>
+    <a href="faq.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">FAQ</span><span class="fl-l"> &amp; Glossary</span></a>
     <span style="color:var(--border)">|</span>
-    <a href="compensation.html" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Compensation Plan</a>
+    <a href="compensation.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Plan</span><span class="fl-l">Compensation Plan</span></a>
     <span style="color:var(--border)">|</span>
-    <span>© 2026 CryptoNova. Smart contracts are immutable and open-source.</span>
+    <span><span class="fl-s">© 2026 CryptoNova</span><span class="fl-l"> · Smart contracts are immutable and open-source.</span></span>
   </div>
 </footer>
 
