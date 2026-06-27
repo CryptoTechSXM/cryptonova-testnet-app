@@ -463,17 +463,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const CHAIN_ID    = 84532;
 const RPC_URL     = 'https://sepolia.base.org';
-const GOV_ADDR    = '0xC79d38Cf0f661bAB436883aAdae396525714191f';
-const CNOVA_ADDR  = '0xb90dabe3f893bC93a243a9f19C44c763c0CB9762';
-const TIER_ROUTER = '0xd2290Aa027e4570D354F9E6327372D095CBB2a34';
-const MK_ADDR     = '0x3f90161d548Add21e6134478070eA8b94805F9fe';
-// V8.26 — deployed 2026-06-25 — second-wave governance targets (StabilityFund,
-// CNOVABuybackReserve, CNOVADirectSale, CommunityWallet -- CNOVAToken reuses
-// CNOVA_ADDR above). Adds PARAM_SF_MULT_T1..T10 (ids 40-49) on SF_ADDR.
-const SF_ADDR     = '0xd170af139D17ed9aEfA1Ba4C81E3a87078C7b722';
-const BBR_ADDR    = '0x55B174e7B8b951b88556716E9eD7eB8a4D58eCef';
-const DS_ADDR     = '0xE41233F15fcf424f7210b783Fe71a96Cd22A7E06';
-const CW_ADDR     = '0xAD9d6eCDD76473a989AA15673317dCDB4461086D';
+const GOV_ADDR    = '0xEF44f14E6257E36a7F0E306863eA7c87dEf3242C'; // V8.28
+const CNOVA_ADDR  = '0x5eFe45CC9A902c2d8Cae97Eec22BF10629e0FF47'; // V8.28
+const TIER_ROUTER = '0x4CAEf2333c4473f5ceFD05879D9578568B700475'; // V8.28
+const MK_ADDR     = '0x74e800B637a49635A5492ba2B6554FF21ba79C4d'; // V8.28
+// V8.28 — deployed 2026-06-26 — SF loan debt stored on MatB (fix: repayments now fire).
+const SF_ADDR     = '0x1Bcb0A0cfa161716Ad96B98d7eC6E8894E2773c0'; // V8.28
+const BBR_ADDR    = '0x11eF1E1Ed241F6e9864bA31f003e3F3f5c2f2D13'; // V8.28
+const DS_ADDR     = '0x7aB46E77c1da6C16cC625ef2B5a2e0354c4094Bc'; // V8.28
+const CW_ADDR     = '0x87E47De24c44A3BB23601D39195c81e24d3899dA'; // V8.28
 
 // Real ethers.Network object for staticNetwork -- passing the literal boolean
 // 'true' throws 'staticNetwork.matches is not a function' in ethers v6.7.1 and
