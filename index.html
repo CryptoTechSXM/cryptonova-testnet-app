@@ -386,32 +386,12 @@
     </style>
 </head>
 <body>
-<div id="time-gate" style="position:fixed;inset:0;background:#0a0a1a;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif;">
-  <div style="text-align:center;max-width:460px;padding:2rem;">
-    <div style="font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem;">CryptoNova</div>
     <div style="color:#a78bfa;font-size:1rem;letter-spacing:.12em;margin-bottom:2rem;text-transform:uppercase;">Community Launch</div>
     <div style="color:#94a3b8;font-size:.9rem;margin-bottom:.4rem;">Opens in</div>
     <div id="gate-cd" style="font-size:3.5rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin-bottom:1.25rem;">--:--:--</div>
     <div style="color:#475569;font-size:.85rem;">Saturday June 27 &nbsp;&middot;&nbsp; 12:00 PM EST</div>
   </div>
 </div>
-<script>
-(function(){
-  var unlock=new Date('2026-06-27T17:00:00Z').getTime();
-  function tick(){
-    var diff=unlock-Date.now();
-    if(diff<=0){var el=document.getElementById('time-gate');if(el)el.remove();return;}
-    var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
-    var cd=document.getElementById('gate-cd');
-    if(cd)cd.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  }
-  tick();setInterval(tick,1000);
-})();
-</script>
-
-
-
-
   <!-- ══ LAUNCH ANNOUNCEMENT BANNER ══════════════════════════════════════ -->
   <div id="launch-banner">
     <div class="bn-title">&#x1F680; CryptoNova &mdash; Mainnet Launch Friday June 25</div>
@@ -4740,4 +4720,102 @@ async function approveUSDCForUpgrade() {
 
     const MIN_ETH = ethers.parseEther('0.001');
     if (ethBal < MIN_ETH) {
-      _setS('⛽ You need a little Base Sepolia ETH for gas. Visit the faucet (top nav) to grab some
+      _setS('⛽ You need a little Base Sepolia ETH for gas. Visit the faucet (top nav) to grab some for free — it only takes a second!');
+      if (btnReg)  btnReg.disabled  = false;
+      if (btnDash) btnDash.disabled = false;
+      return;
+    }
+    if (usdcBal < fee) {
+      const needed = (Number(fee) / 1e6).toFixed(2);
+      const has    = (Number(usdcBal) / 1e6).toFixed(2);
+      _setS(`💳 You need $${needed} USDC for this upgrade but your wallet only has $${has}. Visit the faucet to top up!`);
+      if (btnReg)  btnReg.disabled  = false;
+      if (btnDash) btnDash.disabled = false;
+      return;
+    }
+
+    _setS('Approving USDC…');
+    const tx = await usdc.approve(ADDRS.tierRouter, fee);
+    _setS('Waiting for confirmation…');
+    await tx.wait();
+    _setS('✅ USDC approved. Now click Step 2 to upgrade.');
+    const btnManual = document.getElementById('btn-manual-upgrade');
+    const btnUp     = document.getElementById('btn-upgrade');
+    if (btnManual) { btnManual.disabled = false; btnManual.classList.remove('btn-ghost'); btnManual.classList.add('btn-green'); }
+    if (btnUp)     { btnUp.disabled     = false; btnUp.classList.remove('btn-ghost'); btnUp.classList.add('btn-green'); }
+  } catch(e) {
+    // Translate raw ethers errors into friendly messages
+    const msg = (e.message || '').toLowerCase();
+    let friendly;
+    if (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied')) {
+      friendly = '✋ Transaction cancelled — no worries, nothing was sent.';
+    } else if (msg.includes('insufficient funds') || (e.code === 'CALL_EXCEPTION' && !e.data)) {
+      friendly = '⛽ Looks like your wallet is short on Base Sepolia ETH for gas. Visit the faucet (top nav) to get a small amount for free!';
+    } else {
+      friendly = '❌ Something went wrong: ' + (e.reason || e.shortMessage || e.message || 'unknown error');
+    }
+    _setS(friendly);
+    if (btnReg)  btnReg.disabled  = false;
+    if (btnDash) btnDash.disabled = false;
+  }
+}
+
+// Shared upgrade execution — used by both register-page and dashboard upgrade cards
+async function _executeUpgrade(btnId, statusId, tierIdx) {
+  const btn    = document.getElementById(btnId);
+  const status = document.getElementById(statusId);
+  try {
+    if (btn) btn.disabled = true;
+    if (status) status.textContent = 'Submitting upgrade transaction…';
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: 3_000_000 });
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
+    toast('Tier upgraded successfully!', 'success');
+    setTimeout(() => loadDashboardData(), 2000);
+  } catch(e) {
+    const msg = (e.message || '').toLowerCase();
+    let friendly;
+    if (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied')) {
+      friendly = '✋ Transaction cancelled — no worries, nothing was sent.';
+    } else {
+      friendly = '❌ ' + (e.reason || e.shortMessage || e.message || 'unknown error');
+    }
+    if (status) status.textContent = friendly;
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Dashboard upgrade card — Step 2
+async function doManualUpgrade() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  await _executeUpgrade('btn-manual-upgrade', 'upgrade-status-dash', window._dashUpgradeTierIndex ?? 1);
+}
+
+// Register-page upgrade card — Step 2 (was calling undefined doUpgrade)
+async function doUpgrade() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  await _executeUpgrade('btn-upgrade', 'upgrade-status', window._upgradeCardTierIndex ?? 1);
+}
+
+function updateAddrsFromDeployed(d) {
+  if (!d) return;
+  if (d.usdc)          ADDRS.usdc          = d.usdc;
+  if (d.cnova)         ADDRS.cnova         = d.cnova;
+  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
+  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
+  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
+  const t = d.tiers || {};
+  for (let i = 1; i <= 10; i++) {
+    const tier = t[String(i)] || t[i];
+    if (tier) {
+      const key = 'T' + i;
+      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
+    }
+  }
+  console.log('[v8.8] ADDRS updated from deployed JSON');
+}
+</script>
+<script src="/i18n.js" defer></script>
+</body></html>
