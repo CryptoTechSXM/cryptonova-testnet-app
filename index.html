@@ -199,23 +199,38 @@
     .hamburger:hover { background: var(--bg3); }
 
     /* ── Responsive ──────────────────────────── */
+    /* ── Mobile name/badge helpers ── */
+    .nm-desktop { }
+    .nm-mobile  { display: none; font-weight: 700; color: var(--green); }
+    .vb-d { }
+    .vb-m { display: none; }
     @media (max-width: 640px) {
-      /* ── Header: 2-row layout ── */
-      header { padding: 10px 16px; flex-wrap: wrap; align-items: center; gap: 4px; }
-      .logo { flex: 1; }
-      .logo-text { font-size: 16px; }
+      /* ── Header: single-row layout ── */
+      header { padding: 8px 12px; flex-wrap: nowrap; align-items: center; gap: 6px; }
+      .logo { flex: none; gap: 4px; }
+      .logo-icon svg { width: 28px; height: 28px; }
+      .logo-text { font-size: 13px; }
+      .nm-desktop { display: none; }
+      .nm-mobile  { display: inline; }
       .logo-badge { display: none; }
-      .header-meta { order: 2; }
-      .header-wallet { order: 3; width: 100%; margin-top: 2px; }
-      #btn-connect { flex: 1; padding: 8px 12px; font-size: 13px; }
-      #btn-switch-network { flex: 1; }
-      .hamburger { display: block; }
+      .vb-d { display: none; }
+      .vb-m { display: inline; }
+      .vbadge { padding: 2px 4px !important; font-size: 9px !important; margin-left: 3px !important; }
+      .header-meta { order: unset; gap: 4px; flex: none; }
+      .tl { display: none; }
+      .theme-toggle { padding: 5px 7px; font-size: 14px; }
+      .header-wallet { order: unset; width: auto; margin-top: 0; flex: 1; justify-content: flex-end; gap: 6px; }
+      #btn-connect { padding: 7px 10px; font-size: 12px; flex: none; }
+      #btn-switch-network { padding: 5px 8px; font-size: 11px; flex: none; }
+      .hamburger { display: none !important; }
 
-      /* ── Nav: hidden by default, toggled by hamburger ── */
-      nav { display: none; flex-direction: column; position: sticky; top: 57px; z-index: 200; padding: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); overflow-x: unset; }
-      nav.nav-open { display: flex; }
-      nav button { width: 100%; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); border-radius: 0; white-space: normal; flex: none; min-width: unset; }
-      nav button:last-child { border-bottom: none; }
+      /* ── Nav trigger bar (hamburger lives here on mobile) ── */
+      nav { display: flex; flex-direction: column; position: sticky; top: 50px; z-index: 200; padding: 0; box-shadow: none; overflow-x: unset; }
+      .nav-trigger { display: flex !important; width: 100%; padding: 10px 20px; background: var(--bg2); border-bottom: 1px solid var(--border); color: var(--text2); font-size: 14px; font-weight: 500; align-items: center; justify-content: space-between; border-radius: 0; white-space: nowrap; flex: none; min-width: unset; }
+      nav button:not(.nav-trigger) { display: none; }
+      nav.nav-open .nav-trigger { color: var(--green); border-bottom-color: var(--green); }
+      nav.nav-open button:not(.nav-trigger) { display: flex; width: 100%; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); border-radius: 0; white-space: normal; flex: none; min-width: unset; }
+      nav.nav-open button:last-child { border-bottom: none; }
 
       /* ── Layout ── */
       main { padding: 20px 16px; }
@@ -442,22 +457,22 @@
       <circle cx="20" cy="20" r="5" fill="none" stroke="#00e5a0" stroke-width="1.5"/>
     </svg>
   </div>
-    <div class="logo-text">Crypto<span>Nova</span></div>
+    <div class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile">CNOVA</span></div>
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
-    <span style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px">V8.29 ADMIN</span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"><span class="vb-d">V8.29 ADMIN</span><span class="vb-m">V8.29</span></span>
   </div>
   <div class="header-meta">
     <div id="lang-switcher"></div>
-    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span><span class="tl"> Light</span></button>
   </div>
   <div class="header-wallet">
     <button id="btn-switch-network" onclick="switchToBaseSepolia()" style="display:none;background:var(--yellow);color:#000;border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:12px;cursor:pointer;transition:opacity .2s">⚠️ Wrong Network</button>
     <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
-    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
   </div>
 </header>
 
 <nav>
+  <button class="nav-trigger" onclick="toggleMobileNav()" aria-label="Toggle navigation">☰ Menu <span class="nav-arrow">▼</span></button>
   <button class="active" onclick="showTab('home')" data-i18n="idx.nav_home">🏠 Home</button>
   <button onclick="showTab('register')" data-i18n="idx.nav_register">✅ Register</button>
   <button onclick="showTab('dashboard')" data-i18n="idx.nav_dashboard">📊 Dashboard</button>
@@ -1223,7 +1238,7 @@
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
 
           <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
-            <strong>Co-Pay Rescue (Instant):</strong> The SF loans the gap and re-enters you immediately. Your withdrawable covers the rest. The SF share is recorded as a rescue debt — repaid from future earnings before you can withdraw.
+            <strong>Option 2 — Co-Pay Rescue (Instant):</strong> The SF loans the gap and re-enters you immediately. Your withdrawable covers the rest. The SF share is recorded as a rescue debt — repaid from future earnings before you can withdraw.
           </div>
           <div class="info-row" id="copay-you-pay-row" style="display:none">
             <span class="info-key">You Pay (wallet)</span>
@@ -1629,7 +1644,10 @@
 // ── Mobile nav toggle ────────────────────────────────────────────────
 function toggleMobileNav() {
   const nav = document.querySelector('nav');
-  if (nav) nav.classList.toggle('nav-open');
+  if (!nav) return;
+  nav.classList.toggle('nav-open');
+  const arrow = nav.querySelector('.nav-arrow');
+  if (arrow) arrow.textContent = nav.classList.contains('nav-open') ? ' ▲' : ' ▼';
 }
 // Close mobile nav when clicking outside
 document.addEventListener('click', function(e) {
@@ -1641,7 +1659,7 @@ document.addEventListener('click', function(e) {
 });
 // Close mobile nav when a tab is selected
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('nav button').forEach(function(btn) {
+  document.querySelectorAll('nav button:not(.nav-trigger)').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelector('nav').classList.remove('nav-open');
     });
@@ -1839,7 +1857,10 @@ let provider=null, signer=null, userAddr=null, readProvider=null, isConnecting=f
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+  const icon = document.getElementById('theme-icon');
+  const lbl  = btn ? btn.querySelector('.tl') : null;
+  if (icon) icon.textContent = isLight ? '🌙' : '☀️';
+  if (lbl)  lbl.textContent  = isLight ? ' Dark' : ' Light';
   try { localStorage.setItem('cnova_theme', isLight ? 'light' : 'dark'); } catch(_) {}
 }
 (function restoreTheme() {
@@ -1849,7 +1870,10 @@ function toggleTheme() {
       // Button may not exist yet at parse time — use DOMContentLoaded
       document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('theme-btn');
-        if (btn) btn.textContent = '🌙 Dark';
+        const icon2 = document.getElementById('theme-icon');
+        const lbl2  = btn ? btn.querySelector('.tl') : null;
+        if (icon2) icon2.textContent = '🌙';
+        if (lbl2)  lbl2.textContent  = ' Dark';
       });
     }
   } catch(_) {}
