@@ -204,6 +204,8 @@
     .nm-mobile  { display: none; font-weight: 700; color: var(--green); }
     .vb-d { }
     .vb-m { display: none; }
+    .wn-full  { }
+    .wn-short { display: none; }
     @media (max-width: 640px) {
       /* ── Header: single-row layout ── */
       header { padding: 8px 12px; flex-wrap: nowrap; align-items: center; gap: 6px; }
@@ -218,7 +220,8 @@
       .vbadge { padding: 2px 4px !important; font-size: 9px !important; margin-left: 3px !important; }
       .header-meta { order: unset; gap: 4px; flex: none; }
       .tl { display: none; }
-      .wn { display: none; }
+      .wn-full { display: none; }
+      .wn-short { display: inline; }
       .theme-toggle { padding: 5px 7px; font-size: 14px; }
       .header-wallet { order: unset; width: auto; margin-top: 0; flex: 1; justify-content: flex-end; gap: 6px; }
       #btn-connect { padding: 7px 10px; font-size: 12px; flex: none; }
@@ -2066,7 +2069,8 @@ async function connectWallet(silent=false) {
         error: `${walletName} connected — not yet in supported list`,
       });
     }
-    btn.innerHTML = '<span>' + short(userAddr) + '</span><span class="wn"> (' + walletName + ')</span>';
+    const _wShort = walletName === 'MetaMask' ? 'MM' : walletName === 'Rabby' ? 'RBY' : walletName.slice(0,3).toUpperCase();
+    btn.innerHTML = '<span>' + short(userAddr) + '</span><span class="wn-full"> (' + walletName + ')</span><span class="wn-short"> ' + _wShort + '</span>';
     btn.classList.add('connected');
     btn.disabled = false;
     localStorage.setItem('cnova_connected', '1'); // remember for auto-reconnect on refresh
