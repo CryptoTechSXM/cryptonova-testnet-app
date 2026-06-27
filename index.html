@@ -1221,11 +1221,7 @@
         <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
         <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
-          <div style="font-size:12px;color:var(--text3);line-height:1.6">
-            <strong>Option 1 — Request Admin Rescue (Free):</strong> The system will fund your re-entry. One per wallet — processed within minutes.
-          </div>
-          <button class="btn btn-green full-w" id="btn-request-rescue" onclick="requestRescue()">🚑 Request Rescue (Free)</button>
-          <div id="rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+
           <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
             <strong>Option 2 — Co-Pay Rescue (Instant):</strong> The SF loans the gap and re-enters you immediately. Your withdrawable covers the rest. The SF share is recorded as a rescue debt — repaid from future earnings before you can withdraw.
           </div>
@@ -3324,8 +3320,7 @@ async function loadDashboardData() {
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
         setText('rescue-fee',          fmt6(parkedInfo.fee));
         setText('rescue-shortfall',    fmt6(parkedInfo.shortfall));
-        const rBtn = document.getElementById('btn-request-rescue');
-        if (rBtn) rBtn.disabled = false;
+
         // Show co-pay option — calculate member wallet share
         const _sfShare     = parkedInfo.withdrawable / 2n;
         const _shortfall   = parkedInfo.fee > parkedInfo.withdrawable ? parkedInfo.fee - parkedInfo.withdrawable : 0n;
@@ -4655,35 +4650,6 @@ async function doUpgrade() {
   await _executeUpgrade('btn-upgrade', 'upgrade-status', window._upgradeCardTierIndex ?? 1);
 }
 
-
-// ── Admin Rescue (free — calls /api/rescue) ──────────────────────────────────
-async function requestRescue() {
-  const btn    = document.getElementById('btn-request-rescue');
-  const status = document.getElementById('rescue-status');
-  if (!userAddr) { if (status) status.textContent = 'Connect wallet first.'; return; }
-  if (btn) btn.disabled = true;
-  if (btn) btn.textContent = '🔄 Requesting…';
-  if (status) status.textContent = '';
-  try {
-    const res  = await fetch('/api/rescue', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ address: userAddr }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      if (status) { status.style.color = 'var(--green)'; status.textContent = '✅ ' + (data.message || 'You have been re-entered!'); }
-      if (btn) btn.textContent = '✅ Rescued!';
-      setTimeout(() => loadDashboardData(), 3000);
-    } else {
-      if (status) { status.style.color = 'var(--red)'; status.textContent = '❌ ' + (data.error || 'Rescue failed — try again or contact support.'); }
-      if (btn) { btn.disabled = false; btn.textContent = '🚑 Request Rescue (Free)'; }
-    }
-  } catch (e) {
-    if (status) { status.style.color = 'var(--red)'; status.textContent = '❌ Network error — try again.'; }
-    if (btn) { btn.disabled = false; btn.textContent = '🚑 Request Rescue (Free)'; }
-  }
-}
 
 // ── Co-Pay Rescue — Step 1: approve USDC to matrix (only if memberShare > 0) ──
 async function approveCoPayRescue() {
