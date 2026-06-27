@@ -392,12 +392,12 @@
     <div style="color:#a78bfa;font-size:1rem;letter-spacing:.12em;margin-bottom:2rem;text-transform:uppercase;">Community Launch</div>
     <div style="color:#94a3b8;font-size:.9rem;margin-bottom:.4rem;">Opens in</div>
     <div id="gate-cd" style="font-size:3.5rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin-bottom:1.25rem;">--:--:--</div>
-    <div style="color:#475569;font-size:.85rem;">Saturday June 27 &nbsp;&middot;&nbsp; 12:00 PM AST</div>
+    <div style="color:#475569;font-size:.85rem;">Saturday June 27 &nbsp;&middot;&nbsp; 12:00 PM EST</div>
   </div>
 </div>
 <script>
 (function(){
-  var unlock=new Date('2026-06-27T16:00:00Z').getTime();
+  var unlock=new Date('2026-06-27T17:00:00Z').getTime();
   function tick(){
     var diff=unlock-Date.now();
     if(diff<=0){var el=document.getElementById('time-gate');if(el)el.remove();return;}
@@ -408,6 +408,7 @@
   tick();setInterval(tick,1000);
 })();
 </script>
+
 
 
 
