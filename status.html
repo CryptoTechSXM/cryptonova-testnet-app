@@ -531,6 +531,10 @@
   // ── Main loader ───────────────────────────────────────────
   let _timer, _countdown = 30;
 
+  // ── Last-known-good caches (prevent flicker on poll error) ──
+  let _lastParkedHTML  = null;
+  let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
+
   async function loadAll() {
     setText('last-updated', t('statusPage.js.refreshing', 'Refreshing…'));
     clearInterval(_timer);
@@ -737,6 +741,7 @@
       const wrap = document.getElementById('parked-list-wrap');
       if (stillParked.length === 0) {
         wrap.innerHTML = `<div class="empty-state">✅ No parked members — system is clear</div>`;
+        _lastParkedHTML = wrap.innerHTML;
       } else {
         // Keeper status banner
         let keeperBanner = '';
@@ -800,11 +805,17 @@
             ${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue · ${graceLabel}
           </div>
         `;
+        _lastParkedHTML = wrap.innerHTML;
       }
 
     } catch(e) {
       console.error('Parked load error:', e);
-      document.getElementById('parked-list-wrap').innerHTML = `<div class="loading-row">Error loading parked data</div>`;
+      const wrap = document.getElementById('parked-list-wrap');
+      if (_lastParkedHTML !== null) {
+        wrap.innerHTML = _lastParkedHTML; // hold last good data — don't flash error
+      } else {
+        wrap.innerHTML = `<div class="loading-row">Error loading parked data</div>`;
+      }
     }
   }
 
@@ -960,11 +971,24 @@
         }
 
         const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
-        setText('sf-loans-issued',      loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00');
-        setText('sf-loans-repaid',      repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00');
-        setText('sf-loans-outstanding', outstanding > 0n ? fmt6(outstanding) : '$0.00');
-        setClass('sf-loans-outstanding', outstanding > 0n ? 'yellow' : 'green');
-      } catch(e) { console.warn('Loan tracking error:', e); }
+        const issuedTxt      = loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00';
+        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00';
+        const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
+        const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
+        setText('sf-loans-issued',      issuedTxt);
+        setText('sf-loans-repaid',      repaidTxt);
+        setText('sf-loans-outstanding', outstandingTxt);
+        setClass('sf-loans-outstanding', outstandingCls);
+        _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
+      } catch(e) {
+        console.warn('Loan tracking error:', e);
+        if (_lastLoansState) {
+          setText('sf-loans-issued',      _lastLoansState.issuedTxt);
+          setText('sf-loans-repaid',      _lastLoansState.repaidTxt);
+          setText('sf-loans-outstanding', _lastLoansState.outstandingTxt);
+          setClass('sf-loans-outstanding', _lastLoansState.outstandingCls);
+        }
+      }
 
     } catch(e) {
       console.error('SF load error:', e);
