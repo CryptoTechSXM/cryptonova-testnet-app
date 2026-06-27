@@ -550,7 +550,7 @@ const PARAM_FALLBACK = {
   6:  { label:'Deflation Threshold', hint:'Parked wallet % above which deflation mode activates.' },
   7:  { label:'Idle Slot Timeout (s)', hint:'Seconds before an idle slot is eligible for reclamation.' },
   8:  { label:'Max Items Per Upkeep', hint:'Max work items processed per keeper call.' },
-  9:  { label:'Withdrawal Fee BPS', hint:'Fee on withdrawals in BPS (150 = 1.5%). V8.21: targets a tier’s PairManagerV8, which broadcasts the new fee to every MatA/MatB pair that tier has ever added (not just one matrix instance).' },
+  9:  { label:'Withdrawal Fee BPS', hint:'Fee on withdrawals in BPS (150 = 1.5%). V8.21: targets a tier\'s PairManagerV8, which broadcasts the new fee to every MatA/MatB pair that tier has ever added (not just one matrix instance).' },
   // V8.21: param 10 (Early Exit Penalty BPS) retired entirely -- the
   // field/setter/getter were removed from FigureEightMatrixV8.sol because
   // they were stored/DAO-votable but never consumed by any withdraw/cycle
@@ -561,7 +561,7 @@ const PARAM_FALLBACK = {
   12: { label:'Timelock Period (s)', hint:'Delay between proposal passing and execution in seconds.' },
   13: { label:'Quorum BPS', hint:'Minimum % of CNOVA supply that must vote (200 = 2%).' },
   14: { label:'SF Rescue Ladder',
-        hint:'Maps each parked member’s withdrawal ratio to how much StabilityFund coverage they get on rescue. Lower withdrawal ratio (less already claimed) → higher SF coverage.',
+        hint:'Maps each parked member\'s withdrawal ratio to how much StabilityFund coverage they get on rescue. Lower withdrawal ratio (less already claimed) → higher SF coverage.',
         col1Label: 'Withdrawal % Threshold (desc)', col2Label: 'SF Coverage BPS (asc)',
         col1Hint: 'BPS of total earned already withdrawn. Row 1 is fixed at 10000/0 (full withdrawal = no rescue). Each row after must be strictly lower.',
         col2Hint: 'BPS of the remaining shortfall StabilityFund covers at this threshold. Must strictly increase, capped at 10000 (100%).' },
@@ -578,8 +578,8 @@ const PARAM_FALLBACK = {
   25: { label:'Buyback Max Slippage BPS', hint:'Maximum slippage allowed (BPS) on a buyback swap before it reverts.' },
   26: { label:'Direct Sale Max Tx BPS', hint:'Per-transaction whale cap on CNOVADirectSale, as a % of CNOVA total supply. 0 disables the cap.' },
   27: { label:'Direct Sale Max Wallet BPS', hint:'Per-wallet whale cap on CNOVADirectSale, as a % of resulting CNOVA total supply. 0 disables the cap.' },
-  28: { label:'Direct Sale SF Target', hint:'StabilityFund USDC target used to split each purchase’s premium between SF and the liquidity reserve.' },
-  29: { label:'Direct Sale LQ Target', hint:'Liquidity reserve USDC target used to split each purchase’s premium between SF and the liquidity reserve.' },
+  28: { label:'Direct Sale SF Target', hint:'StabilityFund USDC target used to split each purchase\'s premium between SF and the liquidity reserve.' },
+  29: { label:'Direct Sale LQ Target', hint:'Liquidity reserve USDC target used to split each purchase\'s premium between SF and the liquidity reserve.' },
   30: { label:'CNOVA Reward %', hint:'Final Frontier reward percentage paid out per epoch (range 10–75%).' },
   31: { label:'Epoch Mint Limit', hint:'CNOVA minted in an epoch that triggers the next halving epoch. Lower = faster halvings.' },
   32: { label:'Epoch Member Limit', hint:'Unique members joined in an epoch that triggers the next halving epoch.' },
@@ -591,22 +591,22 @@ const PARAM_FALLBACK = {
         col1Label: 'CNOVA Threshold (asc)', col2Label: 'Boost Rate BPS',
         col1Hint: 'CNOVA amount breakpoint. Each row after the first must be strictly higher than the previous.',
         col2Hint: 'Boost rate in BPS applied at or above this threshold. Max 10000 (100%).' },
-  37: { label:'Community Genesis Split BPS', hint:'Genesis members’ share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
+  37: { label:'Community Genesis Split BPS', hint:'Genesis members\' share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
   38: { label:'Community Distribute Ratio BPS', hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
   39: { label:'Community Distribute Interval', hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
   // V8.26: sfTargetMultiplier[tier] -- independently DAO-governable per tier.
   // Default is flat 20x across all tiers (changed from staircase in V8.26).
   // Each can be voted to any value via DAO proposal.
-  40: { label:’SF Target Multiplier — T1’, hint:’Multiplier applied to T1\’s entry fee to compute StabilityFund\’s auto-scaled target when T1 is the highest open tier. V8.26 default: 20x.’ },
-  41: { label:’SF Target Multiplier — T2’, hint:’Multiplier applied to T2\’s entry fee to compute StabilityFund\’s auto-scaled target when T2 is the highest open tier. V8.26 default: 20x.’ },
-  42: { label:’SF Target Multiplier — T3’, hint:’Multiplier applied to T3\’s entry fee to compute StabilityFund\’s auto-scaled target when T3 is the highest open tier. V8.26 default: 20x.’ },
-  43: { label:’SF Target Multiplier — T4’, hint:’Multiplier applied to T4\’s entry fee to compute StabilityFund\’s auto-scaled target when T4 is the highest open tier. V8.26 default: 20x.’ },
-  44: { label:’SF Target Multiplier — T5’, hint:’Multiplier applied to T5\’s entry fee to compute StabilityFund\’s auto-scaled target when T5 is the highest open tier. V8.26 default: 20x.’ },
-  45: { label:’SF Target Multiplier — T6’, hint:’Multiplier applied to T6\’s entry fee to compute StabilityFund\’s auto-scaled target when T6 is the highest open tier. V8.26 default: 20x.’ },
-  46: { label:’SF Target Multiplier — T7’, hint:’Multiplier applied to T7\’s entry fee to compute StabilityFund\’s auto-scaled target when T7 is the highest open tier. V8.26 default: 20x.’ },
-  47: { label:’SF Target Multiplier — T8’, hint:’Multiplier applied to T8\’s entry fee to compute StabilityFund\’s auto-scaled target when T8 is the highest open tier. V8.26 default: 20x.’ },
-  48: { label:’SF Target Multiplier — T9’, hint:’Multiplier applied to T9\’s entry fee to compute StabilityFund\’s auto-scaled target when T9 is the highest open tier. V8.26 default: 20x.’ },
-  49: { label:’SF Target Multiplier — T10’, hint:’Multiplier applied to T10\’s entry fee to compute StabilityFund\’s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.’ },
+  40: { label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1\'s entry fee to compute StabilityFund\'s auto-scaled target when T1 is the highest open tier. V8.26 default: 20x.' },
+  41: { label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2\'s entry fee to compute StabilityFund\'s auto-scaled target when T2 is the highest open tier. V8.26 default: 20x.' },
+  42: { label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3\'s entry fee to compute StabilityFund\'s auto-scaled target when T3 is the highest open tier. V8.26 default: 20x.' },
+  43: { label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4\'s entry fee to compute StabilityFund\'s auto-scaled target when T4 is the highest open tier. V8.26 default: 20x.' },
+  44: { label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5\'s entry fee to compute StabilityFund\'s auto-scaled target when T5 is the highest open tier. V8.26 default: 20x.' },
+  45: { label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6\'s entry fee to compute StabilityFund\'s auto-scaled target when T6 is the highest open tier. V8.26 default: 20x.' },
+  46: { label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7\'s entry fee to compute StabilityFund\'s auto-scaled target when T7 is the highest open tier. V8.26 default: 20x.' },
+  47: { label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8\'s entry fee to compute StabilityFund\'s auto-scaled target when T8 is the highest open tier. V8.26 default: 20x.' },
+  48: { label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9\'s entry fee to compute StabilityFund\'s auto-scaled target when T9 is the highest open tier. V8.26 default: 20x.' },
+  49: { label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.' },
 };
 
 function PARAM_META_GET(paramId) {
