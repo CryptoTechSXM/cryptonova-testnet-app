@@ -996,4 +996,56 @@
         // Loans repaid: DebtRepaymentReceived on SF
         let totalRepaid = 0n;
         let repayCount = 0;
-        for (let from 
+        for (let from = fromBlock; from < blk; from += CHUNK) {
+          const to = Math.min(from + CHUNK - 1, blk);
+          const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), from, to).catch(()=>[]);
+          for (const log of repayLogs) {
+            try { totalRepaid += BigInt(log.args.amount ?? log.args[0] ?? 0n); repayCount++; } catch {}
+          }
+        }
+
+        const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
+        const issuedTxt      = loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00';
+        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00';
+        const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
+        const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
+        setText('sf-loans-issued',      issuedTxt);
+        setText('sf-loans-repaid',      repaidTxt);
+        setText('sf-loans-outstanding', outstandingTxt);
+        setClass('sf-loans-outstanding', outstandingCls);
+        _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
+      } catch(e) {
+        console.warn('Loan tracking error:', e);
+        if (_lastLoansState) {
+          setText('sf-loans-issued',      _lastLoansState.issuedTxt);
+          setText('sf-loans-repaid',      _lastLoansState.repaidTxt);
+          setText('sf-loans-outstanding', _lastLoansState.outstandingTxt);
+          setClass('sf-loans-outstanding', _lastLoansState.outstandingCls);
+        }
+      }
+
+    } catch(e) {
+      console.error('SF load error:', e);
+    }
+  }
+
+  // ── Theme ─────────────────────────────────────────────────
+  function toggleTheme() {
+    const isLight = document.body.classList.toggle('light');
+    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  }
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
+  }
+
+  // ── Boot ──────────────────────────────────────────────────
+  // Open keeper card by default (most relevant)
+  window.addEventListener('DOMContentLoaded', () => {
+    toggleCard('card-keeper');
+    loadAll();
+  });
+</script>
+</body>
+</html>

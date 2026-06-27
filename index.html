@@ -386,6 +386,29 @@
     </style>
 </head>
 <body>
+<div id="time-gate" style="position:fixed;inset:0;background:#0a0a1a;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif;">
+  <div style="text-align:center;max-width:460px;padding:2rem;">
+    <div style="font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem;">CryptoNova</div>
+    <div style="color:#a78bfa;font-size:1rem;letter-spacing:.12em;margin-bottom:2rem;text-transform:uppercase;">Community Launch</div>
+    <div style="color:#94a3b8;font-size:.9rem;margin-bottom:.4rem;">Opens in</div>
+    <div id="gate-cd" style="font-size:3.5rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin-bottom:1.25rem;">--:--:--</div>
+    <div style="color:#475569;font-size:.85rem;">Saturday June 27 &nbsp;&middot;&nbsp; 12:00 PM AST</div>
+  </div>
+</div>
+<script>
+(function(){
+  var unlock=new Date('2026-06-27T16:00:00Z').getTime();
+  function tick(){
+    var diff=unlock-Date.now();
+    if(diff<=0){var el=document.getElementById('time-gate');if(el)el.remove();return;}
+    var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    var cd=document.getElementById('gate-cd');
+    if(cd)cd.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  tick();setInterval(tick,1000);
+})();
+</script>
+
 
 
   <!-- ══ LAUNCH ANNOUNCEMENT BANNER ══════════════════════════════════════ -->
