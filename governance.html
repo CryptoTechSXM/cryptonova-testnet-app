@@ -865,26 +865,41 @@ async function refreshVotingPower() {
 }
 
 // ── Load proposals ────────────────────────────────────────────────────────────
+const _withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
+]);
+
 async function loadProposals() {
+  try { await _loadProposalsInner(); }
+  catch(e) { console.warn('loadProposals fatal:', e); }
+  finally { document.getElementById('proposals-loading').style.display = 'none'; }
+}
+
+async function _loadProposalsInner() {
   ro = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
   const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, ro);
 
-  await refreshVotingPower();
+  await _withTimeout(refreshVotingPower(), 8000).catch(() => {});
   let count = 0n;
-  try { count = await gov.proposalCount(); } catch(e) { console.warn(e); }
+  try { count = await _withTimeout(gov.proposalCount(), 8000); } catch(e) { console.warn('proposalCount:', e.message); }
   document.getElementById('active-count').textContent = '—';
 
   allProposals = [];
   const fetches = [];
   for (let i = 1n; i <= count; i++) {
-    fetches.push(gov.proposals(i).then(p => allProposals.push(p)).catch(() => {}));
+    fetches.push(
+      _withTimeout(gov.proposals(i), 8000)
+        .then(p => allProposals.push(p))
+        .catch(() => {})
+    );
   }
   await Promise.all(fetches);
 
   // If wallet connected, fetch hasVoted for each
   if (userAddr) {
     await Promise.all(allProposals.map(async p => {
-      try { p._voted = await gov.hasVoted(p.id, userAddr); }
+      try { p._voted = await _withTimeout(gov.hasVoted(p.id, userAddr), 5000); }
       catch { p._voted = false; }
     }));
   }
