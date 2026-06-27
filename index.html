@@ -385,17 +385,7 @@
     }
     </style>
 </head>
-<body>
-    <div style="color:#a78bfa;font-size:1rem;letter-spacing:.12em;margin-bottom:2rem;text-transform:uppercase;">Community Launch</div>
-    <div style="color:#94a3b8;font-size:.9rem;margin-bottom:.4rem;">Opens in</div>
-    <div id="gate-cd" style="font-size:3.5rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin-bottom:1.25rem;">--:--:--</div>
-    <div style="color:#475569;font-size:.85rem;">Saturday June 27 &nbsp;&middot;&nbsp; 12:00 PM EST</div>
-  </div>
-</div>
-  <!-- ══ LAUNCH ANNOUNCEMENT BANNER ══════════════════════════════════════ -->
-  <div id="launch-banner">
-    <div class="bn-title">&#x1F680; CryptoNova &mdash; Mainnet Launch Friday June 25</div>
-    <div class="bn-cd">
+<body><div class="bn-cd">
       <span id="bn-h">00</span>h
       <span id="bn-m">00</span>m
       <span id="bn-s">00</span>s
@@ -404,108 +394,6 @@
     <div class="bn-date">Friday June 25 &bull; 12:00 PM Eastern</div>
     <div class="bn-live" id="bn-live">&#x1F7E2; We&rsquo;re Live &mdash; Register Now!</div>
   </div>
-
-  <!-- ══ LAUNCH GATE ══════════════════════════════════════════════════ -->
-  <div id="launch-gate">
-    <h2>&#x1F9EA; CryptoNova &mdash; Testnet Early Access</h2>
-    <p style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">
-      Community Preview &mdash; Tuesday, June 23 at 11:30 AM ET
-    </p>
-    <p style="max-width:440px">
-      You&rsquo;re getting first access to the CryptoNova Testnet on Base Sepolia.<br><br>
-      Register, earn <strong style="color:var(--green)">CryptoNova Tokens</strong>, cycle out, withdraw, and unlock &mdash; the full cycle, no real funds required.
-      Your feedback shapes the mainnet launch.
-    </p>
-
-    <!-- Countdown -->
-    <div class="cd-wrap">
-      <div class="cd-box"><span class="cd-num" id="cd-h">00</span><div class="cd-lbl">Hours</div></div>
-      <div class="cd-box"><span class="cd-num" id="cd-m">00</span><div class="cd-lbl">Minutes</div></div>
-      <div class="cd-box"><span class="cd-num" id="cd-s">00</span><div class="cd-lbl">Seconds</div></div>
-    </div>
-    <div class="launch-sub" id="cd-date-label">11:30 AM Eastern &bull; Tuesday, June 23 2026</div>
-
-    <!-- City timezone grid -->
-    <div id="cd-cities-wrap" style="margin-top:14px;max-width:400px;width:100%;text-align:left">
-      <h4 style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center">Your local launch time</h4>
-      <div id="cd-cities"></div>
-    </div>
-
-    <div style="margin-top:20px">
-      <button id="btn-add-usdc" onclick="addMockUSDC()" style="background:rgba(0,122,255,.15);border:1px solid rgba(0,122,255,.4);color:#4da6ff;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">
-        + Add Testnet USDC to MetaMask
-      </button>
-      <div style="font-size:11px;color:var(--text3);margin-top:8px;opacity:0.7">Base Sepolia mock USDC — needed for testnet registration</div>
-
-      <!-- Fallback panel — shown when wallet_watchAsset is unavailable or fails (mobile) -->
-      <div id="usdc-fallback" style="display:none;margin-top:14px;background:rgba(0,122,255,.07);border:1px solid rgba(0,122,255,.25);border-radius:10px;padding:13px 15px;text-align:left;max-width:380px;margin-left:auto;margin-right:auto">
-        <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
-          📋 <strong style="color:var(--text)">Add manually in MetaMask:</strong><br>
-          Tap <strong style="color:#4da6ff">Import tokens</strong> and paste this address:
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.35);border-radius:7px;padding:9px 11px">
-          <code id="usdc-addr-txt" style="font-size:11px;color:#4da6ff;word-break:break-all;flex:1;line-height:1.5">0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
-          <button onclick="copyUSDCAddr(this)" style="background:rgba(0,122,255,.25);border:1px solid rgba(0,122,255,.45);color:#4da6ff;padding:6px 11px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0">Copy</button>
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-top:8px">Symbol: USDC &nbsp;·&nbsp; Decimals: 6 &nbsp;·&nbsp; Network: Base Sepolia</div>
-      </div>
-    </div>
-  </div>
-  <script>
-  async function addMockUSDC() {
-    const USDC_ADDR = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-    const btn      = document.getElementById('btn-add-usdc');
-    const fallback = document.getElementById('usdc-fallback');
-
-    // No injected provider (regular mobile browser, not MetaMask in-app) — show manual fallback
-    if (!window.ethereum) {
-      if (fallback) fallback.style.display = 'block';
-      return;
-    }
-
-    try {
-      const added = await window.ethereum.request({
-        method: 'wallet_watchAsset',
-        params: { type: 'ERC20', options: { address: USDC_ADDR, symbol: 'USDC', decimals: 6 } }
-      });
-      if (added) {
-        // User confirmed — show success on the button
-        if (btn) {
-          btn.textContent = '✅ USDC Added!';
-          btn.style.background    = 'rgba(16,185,129,.18)';
-          btn.style.borderColor   = 'rgba(16,185,129,.4)';
-          btn.style.color         = '#34d399';
-          btn.disabled            = true;
-        }
-      } else {
-        // User dismissed the MetaMask prompt — show manual fallback
-        if (fallback) fallback.style.display = 'block';
-      }
-    } catch(e) {
-      console.error('wallet_watchAsset:', e);
-      // wallet_watchAsset unsupported or errored — show manual fallback
-      if (fallback) fallback.style.display = 'block';
-    }
-  }
-
-  function copyUSDCAddr(btn) {
-    const addr = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-    const orig = btn.textContent;
-    const done = () => { btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 2200); };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(addr).then(done).catch(() => fallbackCopy(addr, done));
-    } else {
-      fallbackCopy(addr, done);
-    }
-  }
-  function fallbackCopy(text, cb) {
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-    document.body.appendChild(ta); ta.focus(); ta.select();
-    try { document.execCommand('copy'); cb(); } catch(_) {}
-    document.body.removeChild(ta);
-  }
-  </script>
 
 
 <div id="file-protocol-banner" style="background:rgba(239,68,68,.1);border-bottom:1px solid rgba(239,68,68,.3);padding:10px 24px;text-align:center;font-size:13px;color:#ef4444;display:none">
@@ -628,8 +516,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0xb90dabe3f893bC93a243a9f19C44c763c0CB9762" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0xb90dabe3f893bC93a243a9f19C44c763c0CB9762" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0xb90dabe3f893bC93a243a9f19C44c763c0CB9762</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x8fD0e142c6348bf6e7a6700C9080d9684956c775" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x8fD0e142c6348bf6e7a6700C9080d9684956c775" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x8fD0e142c6348bf6e7a6700C9080d9684956c775</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing.</div>
         </div>
       </div>
