@@ -465,35 +465,35 @@
   const T1_FEE   = 10_000_000n; // $10 USDC
 
   const ADDRS = {
-    // V8.28 — deployed 2026-06-26 — SF loan debt stored on MatB (fix: repayments now fire correctly)
+    // V8.29 — deployed 2026-06-26 — SF loan debt stored on MatB (fix: repayments now fire correctly)
     usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-    cnova:         '0x5eFe45CC9A902c2d8Cae97Eec22BF10629e0FF47',
-    treasury:      '0xE81E8606427d62A32C1809052aD579c2b8D0D44e',
-    stabilityFund: '0x1Bcb0A0cfa161716Ad96B98d7eC6E8894E2773c0',
-    buybackReserve:'0x11eF1E1Ed241F6e9864bA31f003e3F3f5c2f2D13',
+    cnova:         '0x8fD0e142c6348bf6e7a6700C9080d9684956c775',
+    treasury:      '0xEdd733e0ace91067BacF2821518a2069cEF793C8',
+    stabilityFund: '0x77243188415c6ec7E899303766E4425fa814b6Aa',
+    buybackReserve:'0xabf042695DfF915A85c5dDcE1575FF06Aac96ec4',
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-    tierRouter:    '0x4CAEf2333c4473f5ceFD05879D9578568B700475',
-    matrixKeeper:  '0x74e800B637a49635A5492ba2B6554FF21ba79C4d',
-    T1matA:  '0xFc4C04a2a572D4233240500eFFb83cdCe67542aE',
-    T1matB:  '0x3c42aDFfF73cE5ce96467D964712df48313139f3',
-    T2matA:  '0xB8ae94A1988bDF1A6a4bEefd82aE824fD926462a',
-    T2matB:  '0x76FaF66a98349baB084d626FFEe3F29A295D1ef2',
-    T3matA:  '0x1D651da57fFaa6A97D3715B8b871b3D2896B09Ff',
-    T3matB:  '0x5dDFf7f49869b41A53C25e6d785Cb7b92274c5D2',
-    T4matA:  '0x7d02b5399004ef4455CC9CE19F596cA1906C57FC',
-    T4matB:  '0xb351B1f4c17D7a0843A251a8f34e25bdF0616550',
-    T5matA:  '0xdab2EEAfe3a6A26b0548728b9Cf2aDf4751eB222',
-    T5matB:  '0xBfC252C2d932B209Ce9763a4561808e1C12Aa269',
-    T6matA:  '0x582f6a5E60C9d4BC71aC8B4688bDBc7277619534',
-    T6matB:  '0xb9DE92A12a9468D3173b427f80e46f13e9a11a92',
-    T7matA:  '0xDcfD5A513ceAD92685A2367A36E2c36eb70C7888',
-    T7matB:  '0x49E2785996f6EA3aa760C440627671cb1CF1ef06',
-    T8matA:  '0x2fDC614Dc9a17B99B9ef7F500f6dDE3B87F715B5',
-    T8matB:  '0x2e097ec043a5Ea06037372D7FbD4B6af20479BA7',
-    T9matA:  '0xB231528D4293d6664B1Fe038BD265782e599a941',
-    T9matB:  '0xb8F3da3c691220b0C81B67A750a7F03231EF25Ee',
-    T10matA: '0xC713bDa52a8966F4a5fCB7914ffe2AfB4ae4F559',
-    T10matB: '0x2897535fea613F795392117aF8871490E97E668D',
+    tierRouter:    '0x9973d814590476fca9D2EA41b9DcB46eB529b1a7',
+    matrixKeeper:  '0xFe7ADd5c62695F0E437835670Bc88223EaA51865',
+    T1matA:  '0x62D2b758c2bC4cd73DCe8bF895e189e6FD57dCA3',
+    T1matB:  '0x40E9aA52a25997146fC016404653c9491b2F069A',
+    T2matA:  '0x3a94fDe949b7a11bB0d667e83FE2216f1F0939d7',
+    T2matB:  '0xBf40b3571F2Bc1e4CA933029f0309Fa54c8F4F7D',
+    T3matA:  '0x81450d8E1aD906b7EEecc8f543c747776DDebaF7',
+    T3matB:  '0x6f444410CB3c344a8829edb5b76237FCabA50745',
+    T4matA:  '0x9C8DD155BE1442bDC54c5e3359667E3365370aF0',
+    T4matB:  '0x507836A98eEa9916e51a66680F3F7F11a3CD8d8C',
+    T5matA:  '0x624F3A6C90c4acEC4DeCaa3501442d66F7C13C5E',
+    T5matB:  '0x733d288365F14694b93F5c0543bfc4C0F4bbD650',
+    T6matA:  '0x8aB24a9e4D75e5357F5Cc50c4fb820888Ec0cCFC',
+    T6matB:  '0x0eC2DFBDF825B2c69Ac0a65B74FedC8F74916A02',
+    T7matA:  '0x776660A67739FdE8beC4C0818FcB5bab703A7570',
+    T7matB:  '0xbf2eEc22B3A1c7d4f72a56FAa93AFBDE1142012b',
+    T8matA:  '0xeEc2AAe909C53F0EcbD2Ed7b63EC26fA7ad7E95e',
+    T8matB:  '0x6b110a13069B25AB8ba2118437F6758EB5aDb668',
+    T9matA:  '0xc64d297bC23B6e466bc0D6eACF837092565a3155',
+    T9matB:  '0xf8FE156AcDa40F7F7Fc9cb94e2c5eF8F067715aF',
+    T10matA: '0x1B8E11AFe1422fa5200DBAF2876F1Ee92CC70dF6',
+    T10matB: '0x6F796f05868d239d78784ff21F40109145eBBE46',
   };
 
   const MATRIX_ABI = [
@@ -996,56 +996,4 @@
         // Loans repaid: DebtRepaymentReceived on SF
         let totalRepaid = 0n;
         let repayCount = 0;
-        for (let from = fromBlock; from < blk; from += CHUNK) {
-          const to = Math.min(from + CHUNK - 1, blk);
-          const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), from, to).catch(()=>[]);
-          for (const log of repayLogs) {
-            try { totalRepaid += BigInt(log.args.amount ?? log.args[0] ?? 0n); repayCount++; } catch {}
-          }
-        }
-
-        const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
-        const issuedTxt      = loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00';
-        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00';
-        const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
-        const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
-        setText('sf-loans-issued',      issuedTxt);
-        setText('sf-loans-repaid',      repaidTxt);
-        setText('sf-loans-outstanding', outstandingTxt);
-        setClass('sf-loans-outstanding', outstandingCls);
-        _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
-      } catch(e) {
-        console.warn('Loan tracking error:', e);
-        if (_lastLoansState) {
-          setText('sf-loans-issued',      _lastLoansState.issuedTxt);
-          setText('sf-loans-repaid',      _lastLoansState.repaidTxt);
-          setText('sf-loans-outstanding', _lastLoansState.outstandingTxt);
-          setClass('sf-loans-outstanding', _lastLoansState.outstandingCls);
-        }
-      }
-
-    } catch(e) {
-      console.error('SF load error:', e);
-    }
-  }
-
-  // ── Theme ─────────────────────────────────────────────────
-  function toggleTheme() {
-    const isLight = document.body.classList.toggle('light');
-    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  }
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
-  }
-
-  // ── Boot ──────────────────────────────────────────────────
-  // Open keeper card by default (most relevant)
-  window.addEventListener('DOMContentLoaded', () => {
-    toggleCard('card-keeper');
-    loadAll();
-  });
-</script>
-</body>
-</html>
+        for (let from 

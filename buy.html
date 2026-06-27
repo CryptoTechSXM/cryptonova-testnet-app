@@ -340,7 +340,7 @@
 
     <!-- Coming soon note — hidden once contract is live -->
     <div class="coming-soon-note" id="coming-soon-note" style="display:none;" data-i18n="buyPage.coming_soon_note">
-      ⏳ Direct sale contract live — CNOVADirectSale deployed with V8.28
+      ⏳ Direct sale contract live — CNOVADirectSale deployed with V8.29
     </div>
   </div>
 
@@ -386,7 +386,7 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — V8.28 (deployed 2026-06-26, SF loan debt stored on MatB — repayments now fire)
+// CONFIG — V8.29 (deployed 2026-06-27, fresh deploy for community bug-bash)
 // ─────────────────────────────────────────────────────────────────────────────
 const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 // Real ethers.Network object for staticNetwork — passing the literal boolean
@@ -395,13 +395,13 @@ const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 const _NET_STATIC      = ethers.Network.from(CHAIN_ID);
 const RPC_URL           = 'https://sepolia.base.org';
 
-// V8.28 live addresses
+// V8.29 live addresses
 const USDC_ADDR         = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const CNOVA_ADDR        = '0x5eFe45CC9A902c2d8Cae97Eec22BF10629e0FF47';
-const TREASURY_ADDR     = '0xE81E8606427d62A32C1809052aD579c2b8D0D44e';
+const CNOVA_ADDR        = '0x8fD0e142c6348bf6e7a6700C9080d9684956c775';
+const TREASURY_ADDR     = '0xEdd733e0ace91067BacF2821518a2069cEF793C8';
 
-// CNOVADirectSale V8.28
-const DIRECT_SALE_ADDR  = '0x7aB46E77c1da6C16cC625ef2B5a2e0354c4094Bc';
+// CNOVADirectSale V8.29
+const DIRECT_SALE_ADDR  = '0xC482254c3D6910e2CA64ED5D9CC8E114AA1Da192';
 
 // ── Bonding curve tiers ─────────────────────────────────────────────────────
 // [label, multiplier (x1000), supply ceiling (CNOVA, 18 dec as string)]
