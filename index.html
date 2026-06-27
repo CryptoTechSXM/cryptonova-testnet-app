@@ -4730,7 +4730,7 @@ async function doCoPayRescue() {
     const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 800_000 });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
-    if (status) { status.style.color = 'var(--green)'; status.textContent = '🎉 You've been re-entered! Refreshing your dashboard…'; }
+    if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
     toast('Co-Pay Rescue successful!', 'success');
     setTimeout(() => loadDashboardData(), 3000);
   } catch (e) {
