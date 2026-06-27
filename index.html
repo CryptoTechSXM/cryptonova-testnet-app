@@ -192,17 +192,30 @@
     .chain-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
     .chain-row:last-child { border-bottom: none; }
 
+    /* ── Mobile header layout helpers ────────── */
+    .header-meta   { display: flex; align-items: center; gap: 8px; }
+    .header-wallet { display: flex; align-items: center; gap: 8px; }
+    .hamburger     { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 5px 10px; font-size: 20px; line-height: 1; cursor: pointer; flex-shrink: 0; transition: background .15s; }
+    .hamburger:hover { background: var(--bg3); }
+
     /* ── Responsive ──────────────────────────── */
     @media (max-width: 640px) {
-      /* ── Header ── */
-      header { padding: 10px 16px; }
+      /* ── Header: 2-row layout ── */
+      header { padding: 10px 16px; flex-wrap: wrap; align-items: center; gap: 4px; }
+      .logo { flex: 1; }
       .logo-text { font-size: 16px; }
       .logo-badge { display: none; }
-      #btn-connect { padding: 7px 12px; font-size: 13px; }
+      .header-meta { order: 2; }
+      .header-wallet { order: 3; width: 100%; margin-top: 2px; }
+      #btn-connect { flex: 1; padding: 8px 12px; font-size: 13px; }
+      #btn-switch-network { flex: 1; }
+      .hamburger { display: block; }
 
-      /* ── Nav: wrap to 2 rows on mobile instead of horizontal scroll ── */
-      nav { padding: 4px 8px; flex-wrap: wrap; gap: 0; overflow-x: unset; }
-      nav button { padding: 10px 12px; font-size: 12px; flex: 1 1 auto; min-width: 80px; white-space: nowrap; }
+      /* ── Nav: hidden by default, toggled by hamburger ── */
+      nav { display: none; flex-direction: column; position: sticky; top: 57px; z-index: 200; padding: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); overflow-x: unset; }
+      nav.nav-open { display: flex; }
+      nav button { width: 100%; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); border-radius: 0; white-space: normal; flex: none; min-width: unset; }
+      nav button:last-child { border-bottom: none; }
 
       /* ── Layout ── */
       main { padding: 20px 16px; }
@@ -433,11 +446,14 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px">V8.29 ADMIN</span>
   </div>
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="header-meta">
     <div id="lang-switcher"></div>
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+  <div class="header-wallet">
     <button id="btn-switch-network" onclick="switchToBaseSepolia()" style="display:none;background:var(--yellow);color:#000;border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:12px;cursor:pointer;transition:opacity .2s">⚠️ Wrong Network</button>
     <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
   </div>
 </header>
 
@@ -1607,6 +1623,28 @@
 <div id="toast"></div>
 
 <script>
+// ── Mobile nav toggle ────────────────────────────────────────────────
+function toggleMobileNav() {
+  const nav = document.querySelector('nav');
+  if (nav) nav.classList.toggle('nav-open');
+}
+// Close mobile nav when clicking outside
+document.addEventListener('click', function(e) {
+  const nav = document.querySelector('nav');
+  const h   = document.getElementById('hamburger');
+  if (nav && h && !nav.contains(e.target) && !h.contains(e.target)) {
+    nav.classList.remove('nav-open');
+  }
+});
+// Close mobile nav when a tab is selected
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelector('nav').classList.remove('nav-open');
+    });
+  });
+});
+
 // ═══════════════════════════════════════════════════════════════════════
 // CONFIG — V8.1 Figure-8 Matrix (Base Sepolia)
 // ═══════════════════════════════════════════════════════════════════════
