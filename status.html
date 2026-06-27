@@ -636,13 +636,16 @@
   async function loadParked(provider, blk) {
     try {
       const matA   = new ethers.Contract(ADDRS.T1matA,       MATRIX_ABI, provider);
+      const matB   = new ethers.Contract(ADDRS.T1matB,       MATRIX_ABI, provider);
       const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
 
-      const [parkedCount, gracePeriod] = await Promise.all([
+      // Keeper checks both matA and matB for parked members (see MatrixKeeper.sol lines 386/393)
+      const [parkedCountA, parkedCountB, gracePeriod] = await Promise.all([
         matA.getParkedCount().catch(()=>0n),
+        matB.getParkedCount().catch(()=>0n),
         keeper.parkedGracePeriod().catch(()=>0n),
       ]);
-      const count      = Number(parkedCount);
+      const count      = Number(parkedCountA) + Number(parkedCountB);
       const graceSecs  = Number(gracePeriod);
       const nowSecs    = Math.floor(Date.now() / 1000);
 
@@ -691,23 +694,25 @@
       } catch {}
 
       // ── Build live parked list directly from on-chain queue ───────────────
+      // Keeper checks both matA and matB — fetch from both and merge.
       const stillParked = [];
       let totalShortfall = 0n;
 
-      // Fetch in parallel batches of 5
       const batchSize = 5;
-      for (let i = 0; i < count; i += batchSize) {
-        const batch = [];
-        for (let j = i; j < Math.min(i + batchSize, count); j++) batch.push(j);
-        const addrs = await Promise.all(batch.map(idx => matA.getParkedMember(idx).catch(()=>null)));
-        const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
-          const [parkedTs, withdrawable] = await Promise.all([
-            matA.parkedAt(addr).catch(()=>0n),
-            matA.withdrawableOf(addr).catch(()=>0n),
-          ]);
-          return { addr, parkedTs: Number(parkedTs), withdrawable: BigInt(withdrawable) };
-        }));
-        stillParked.push(...details);
+      for (const [mat, matCount] of [[matA, Number(parkedCountA)], [matB, Number(parkedCountB)]]) {
+        for (let i = 0; i < matCount; i += batchSize) {
+          const batch = [];
+          for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
+          const addrs = await Promise.all(batch.map(idx => mat.getParkedMember(idx).catch(()=>null)));
+          const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
+            const [parkedTs, withdrawable] = await Promise.all([
+              mat.parkedAt(addr).catch(()=>0n),
+              mat.withdrawableOf(addr).catch(()=>0n),
+            ]);
+            return { addr, parkedTs: Number(parkedTs), withdrawable: BigInt(withdrawable) };
+          }));
+          stillParked.push(...details);
+        }
       }
 
       // Compute shortfall vs entry fee (approximate — fee is same for all T1)
@@ -981,46 +986,4 @@
 
         const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
         const issuedTxt      = loanCount > 0 ? `${fmt6(totalIssued)} (${loanCount} loan${loanCount!==1?'s':''})` : '$0.00';
-        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.00';
-        const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
-        const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
-        setText('sf-loans-issued',      issuedTxt);
-        setText('sf-loans-repaid',      repaidTxt);
-        setText('sf-loans-outstanding', outstandingTxt);
-        setClass('sf-loans-outstanding', outstandingCls);
-        _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
-      } catch(e) {
-        console.warn('Loan tracking error:', e);
-        if (_lastLoansState) {
-          setText('sf-loans-issued',      _lastLoansState.issuedTxt);
-          setText('sf-loans-repaid',      _lastLoansState.repaidTxt);
-          setText('sf-loans-outstanding', _lastLoansState.outstandingTxt);
-          setClass('sf-loans-outstanding', _lastLoansState.outstandingCls);
-        }
-      }
-
-    } catch(e) {
-      console.error('SF load error:', e);
-    }
-  }
-
-  // ── Theme ─────────────────────────────────────────────────
-  function toggleTheme() {
-    const isLight = document.body.classList.toggle('light');
-    document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  }
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
-  }
-
-  // ── Boot ──────────────────────────────────────────────────
-  // Open keeper card by default (most relevant)
-  window.addEventListener('DOMContentLoaded', () => {
-    toggleCard('card-keeper');
-    loadAll();
-  });
-</script>
-</body>
-</html>
+        const repaidTxt      = repayCount > 0 ? `${fmt6(totalRepaid)} (${repayCount} repayment${repayCount!==1?'s':''})` : '$0.0
