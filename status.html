@@ -57,7 +57,12 @@
     @media(max-width:640px){
       header{padding:10px 16px;position:relative}
       .btn-home{display:none}
-      .hamburger{display:block}
+      .hamburger{display:none!important}
+      .nm-desktop{display:none}
+      .nm-mobile{display:inline}
+      .tl{display:none}
+      header{flex-wrap:nowrap;gap:6px;padding:8px 12px}
+      .logo-text{font-size:13px}
     }
 
     /* Main */
@@ -176,9 +181,9 @@
     <div id="lang-switcher"></div>
     <a href="index.html" class="btn-home">← <span data-i18n="common.dashboard">Dashboard</span></a>
     <button class="theme-toggle" onclick="toggleTheme()">☀ <span data-i18n="common.light">Light</span></button>
-    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
+    <button class="nav-trigger" style="width:100%;text-align:left;padding:10px 20px;background:var(--bg2);border:none;border-bottom:1px solid var(--border);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;display:none" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
     <a href="governance.html">⚖️ Governance</a>
