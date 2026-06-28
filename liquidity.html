@@ -1186,10 +1186,14 @@ themeBtn.addEventListener('click', () => {
 
 // ── Auto-connect if previously connected ──────────────────────────────────────
 window.addEventListener('load', async () => {
-  if (window.ethereum) {
+  // Retry after 800ms for MetaMask mobile injection lag
+  const _tryAutoConnect = async () => {
+    if (!window.ethereum) return;
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (accounts.length) connectWallet();
-  }
+  };
+  await _tryAutoConnect();
+  setTimeout(_tryAutoConnect, 800);
   // Load public pool stats even without wallet
   try {
     const rp = new ethers.JsonRpcProvider('https://sepolia.base.org');

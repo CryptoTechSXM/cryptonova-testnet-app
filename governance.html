@@ -1471,8 +1471,13 @@ window.addEventListener('DOMContentLoaded', () => {
   loadProposals();
   setInterval(loadProposals, 60_000);
 
-  if (window.ethereum) {
+  const _tryAutoConnect = () => {
+    if (!window.ethereum) return;
     window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
+  };
+  _tryAutoConnect();
+  setTimeout(_tryAutoConnect, 800);
+  if (window.ethereum) {
     window.ethereum.on('accountsChanged', () => connectWallet());
     window.ethereum.on('chainChanged',    () => location.reload());
   }
