@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const token = process.env.TELEGRAM_QA_BOT_TOKEN;
   if (!token) return res.status(500).json({ error: 'TELEGRAM_QA_BOT_TOKEN not set' });
 
-  const webhookUrl = 'https://v8.crypto-nova.app/api/telegram-qa';
+  const webhookUrl = 'https://crypto-nova.app/api/telegram-qa';
 
   // 1. Check current webhook
   const infoRes = await fetch(`https://api.telegram.org/bot${token}/getWebhookInfo`);
