@@ -676,12 +676,21 @@ async function loadPublicStats() {
 loadPublicStats();
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
-async function connectWallet() {
-  if (!window.ethereum) { alert('MetaMask not detected'); return; }
-  provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send('eth_requestAccounts', []);
-  signer  = await provider.getSigner();
-  userAddr = await signer.getAddress();
+async function connectWallet(silent = false) {
+  if (!window.ethereum) { if (!silent) alert('No wallet detected'); return; }
+  if (silent) {
+    // Silent auto-connect: bypass eth_requestAccounts for Rabby/MetaMask mobile
+    const accs = await window.ethereum.request({ method: 'eth_accounts' });
+    if (!accs.length) return;
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer   = new ethers.JsonRpcSigner(provider, accs[0]);
+    userAddr = accs[0];
+  } else {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    signer  = await provider.getSigner();
+    userAddr = await signer.getAddress();
+  }
 
   pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
   usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, signer);
@@ -1190,10 +1199,10 @@ window.addEventListener('load', async () => {
   const _tryAutoConnect = async () => {
     if (!window.ethereum) return;
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-    if (accounts.length) connectWallet();
+    if (accounts.length) connectWallet(true);
   };
   await _tryAutoConnect();
-  setTimeout(_tryAutoConnect, 800);
+  setTimeout(() => _tryAutoConnect(), 800);
   // Load public pool stats even without wallet
   try {
     const rp = new ethers.JsonRpcProvider('https://sepolia.base.org');

@@ -854,16 +854,22 @@ async function refreshHasVoted() {
 }
 
 // ── Wallet ─────────────────────────────────────────────────────────────────────
-async function connectWallet() {
-  if (!window.ethereum) { alert(t('govPage.js.no_wallet_found', 'No wallet found. Install MetaMask.')); return; }
+async function connectWallet(silent = false) {
+  if (!window.ethereum) { if (!silent) alert(t('govPage.js.no_wallet_found', 'No wallet found. Install MetaMask.')); return; }
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send('eth_requestAccounts', []);
-    const net = await provider.getNetwork();
-    if (Number(net.chainId) !== CHAIN_ID) {
-      alert(t('govPage.js.wrong_network', 'Wrong network. Switch to Base Sepolia ({n}).').replace('{n}', CHAIN_ID)); return;
+    if (silent) {
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) return;
+      signer = new ethers.JsonRpcSigner(provider, accs[0]);
+    } else {
+      await provider.send('eth_requestAccounts', []);
+      const net = await provider.getNetwork();
+      if (Number(net.chainId) !== CHAIN_ID) {
+        alert(t('govPage.js.wrong_network', 'Wrong network. Switch to Base Sepolia ({n}).').replace('{n}', CHAIN_ID)); return;
+      }
+      signer = await provider.getSigner();
     }
-    signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
     const btn = document.getElementById('btn-connect');
     btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
@@ -1473,7 +1479,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const _tryAutoConnect = () => {
     if (!window.ethereum) return;
-    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(true); });
   };
   _tryAutoConnect();
   setTimeout(_tryAutoConnect, 800);
