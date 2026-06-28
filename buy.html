@@ -496,13 +496,23 @@ async function connectWallet(silent = false) {
       // Silent auto-connect: skip eth_requestAccounts (Rabby/MetaMask mobile safe)
       const accs = await window.ethereum.request({ method: 'eth_accounts' });
       if (!accs.length) return;
+      const silentNet = await provider.getNetwork();
+      if (Number(silentNet.chainId) !== CHAIN_ID) return; // wrong network — let user click Connect
       signer = new ethers.JsonRpcSigner(provider, accs[0]);
     } else {
       await provider.send('eth_requestAccounts', []);
       const net = await provider.getNetwork();
       if (Number(net.chainId) !== CHAIN_ID) {
-        setStatus(t('buyPage.js.wrong_network', 'Wrong network. Please switch to Base Sepolia (chainId {n}).').replace('{n}', CHAIN_ID), 'error');
-        return;
+        try {
+          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
+        } catch(switchErr) {
+          if (switchErr.code === 4902 || switchErr.code === -32603) {
+            try {
+              await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            } catch { setStatus('Please add Base Sepolia manually.', 'error'); return; }
+          } else { setStatus('Please switch to Base Sepolia manually.', 'error'); return; }
+        }
+        provider = new ethers.BrowserProvider(window.ethereum); // refresh after switch
       }
       signer = await provider.getSigner();
     }

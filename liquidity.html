@@ -592,6 +592,7 @@ document.addEventListener('click', function(e) {
 });
 
 // ── Config ──────────────────────────────────────────────────────────────────
+const CHAIN_ID  = 84532; // Base Sepolia
 const POOL_ADDR = '0x387055f332C5558a2439D76FfFB4a5A3EbABc4EA';
 const USDC_ADDR = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
 const UNIT = 1_000_000n; // USDC 6 decimals
@@ -683,11 +684,26 @@ async function connectWallet(silent = false) {
     const accs = await window.ethereum.request({ method: 'eth_accounts' });
     if (!accs.length) return;
     provider = new ethers.BrowserProvider(window.ethereum);
+    const silentNet = await provider.getNetwork();
+    if (Number(silentNet.chainId) !== CHAIN_ID) return;
     signer   = new ethers.JsonRpcSigner(provider, accs[0]);
     userAddr = accs[0];
   } else {
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send('eth_requestAccounts', []);
+    const net = await provider.getNetwork();
+    if (Number(net.chainId) !== CHAIN_ID) {
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
+      } catch(switchErr) {
+        if (switchErr.code === 4902 || switchErr.code === -32603) {
+          try {
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+          } catch { alert('Please add Base Sepolia manually.'); return; }
+        } else { alert('Please switch to Base Sepolia manually.'); return; }
+      }
+      provider = new ethers.BrowserProvider(window.ethereum);
+    }
     signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
   }
