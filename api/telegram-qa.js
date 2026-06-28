@@ -11,6 +11,7 @@ const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
 const TIER_ROUTER       = '0x9973d814590476fca9D2EA41b9DcB46eB529b1a7'; // V8.29
 const CNOVA_TOKEN       = '0x8fD0e142c6348bf6e7a6700C9080d9684956c775'; // V8.29
+const CNOVA_TREASURY    = '0xEdd733e0ace91067BacF2821518a2069cEF793C8'; // V8.29 — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -110,10 +111,11 @@ TierRouter deducts next tier fee from your <b>withdrawable balance</b> inside th
 - NOT free - comes from earnings.
 - Example: T1 cycles out, $25 T2 fee deducted from withdrawable, registered at T2 automatically.
 - If withdrawable < next fee: <b>parked</b> for up to 10 days. Keeper then applies the ratio check:
-  - If you withdrew ≤70% of total earned: StabilityFund covers 25% of fee, your withdrawable covers 75% → rescued automatically.
-  - If you withdrew >70% of total earned: evicted. Slot cleared, must re-enter fresh. Withdrawable balance preserved.
-- Both 70% threshold and 25% SF contribution are DAO-governed.
-- Do NOT say upgrade is free. Do NOT say rescue is guaranteed.
+  - Rescue path: <b>coPayRescue only</b>. The StabilityFund provides a USDC loan covering the shortfall; the loan is repaid automatically from your future earnings.
+  - There is NO free rescue — SF funds are scarce and loans must be repaid from earnings.
+  - If rescue fails or is not triggered: evicted. Slot cleared, must re-enter fresh. Withdrawable balance preserved.
+- Rescue eligibility and SF contribution ratios are DAO-governed.
+- Do NOT say upgrade is free. Do NOT say rescue is free or guaranteed.
 
 ## Network Setup (Base Sepolia)
 Chain ID: <code>84532</code> | RPC: <code>https://sepolia.base.org</code> | Explorer: <code>https://sepolia.basescan.org</code>
@@ -137,7 +139,8 @@ The referral system is fully live in the smart contracts.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
 ## Contracts (Base Sepolia)
-TierRouter: <code>0xC729627996E968b5065399843FfFfCF5bfB5148b</code>
+TierRouter: <code>0x9973d814590476fca9D2EA41b9DcB46eB529b1a7</code>
+CNOVA Token: <code>0x8fD0e142c6348bf6e7a6700C9080d9684956c775</code>
 USDC: <code>0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
 
 ## Links
@@ -333,8 +336,20 @@ async function fetchLiveStats() {
     if (json.error || !json.result || json.result === '0x') return null;
     return parseInt(json.result, 16);
   }
-  const count = await call(TIER_ROUTER, '0x2b47da6f') || await call(TIER_ROUTER, '0x753b5e99') || await call(TIER_ROUTER, '0x2d4d5ec3');
-  const memberDisplay = count && count > 0 ? `<b>${count.toLocaleString()}</b> members registered` : 'member count unavailable';
+  // getSystemEntryCount(uint256 fromTimestamp) — pass 0 for all-time count
+  // selector: keccak256("getSystemEntryCount(uint256)") = 0xd23ca4fa
+  const countCallData = '0xd23ca4fa' + '0'.repeat(64); // selector + uint256(0)
+  const countRaw = await (async () => {
+    const r = await fetch(RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: TIER_ROUTER, data: countCallData }, 'latest'] }),
+    });
+    const json = await r.json();
+    if (json.error || !json.result || json.result === '0x') return null;
+    return parseInt(json.result, 16);
+  })();
+  const memberDisplay = countRaw && countRaw > 0 ? `<b>${countRaw.toLocaleString()}</b> members registered` : 'member count unavailable';
   return `<b>CryptoNova Testnet - Live Stats</b>\n\nMembers: ${memberDisplay}\nNetwork: Base Sepolia\nContract: <code>${TIER_ROUTER}</code>\n\n<a href="https://crypto-nova.app">Open Dashboard for full stats</a>`;
 }
 
@@ -455,7 +470,7 @@ export default async function handler(req, res) {
             `<code>/faucet 0x…</code> — get testnet USDC + ETH\n` +
             `<code>/price</code> — current CNOVA floor price\n` +
             `<code>/tier</code> — tier entry fees and earnings\n\n` +
-            `🚀 <b>Mainnet launches June 19</b> — <a href="https://crypto-nova.app">crypto-nova.app</a>`,
+            `🚀 <b>Mainnet coming soon</b> — <a href="https://crypto-nova.app">crypto-nova.app</a>`,
         });
       }
     }
@@ -558,8 +573,9 @@ export default async function handler(req, res) {
           const j = await r.json();
           return (j.error || !j.result || j.result==='0x') ? null : BigInt(j.result);
         };
-        // floorPrice() — single uint256 in 6-decimal USDC
-        const raw = await eth(CNOVA_TOKEN, '0xd555254e');
+        // floorPrice() on CNOVATreasury — returns uint256 in 6-decimal USDC
+        // selector: keccak256("floorPrice()") = 0x9363c812
+        const raw = await eth(CNOVA_TREASURY, '0x9363c812');
         if (raw !== null) {
           const price = (Number(raw) / 1e6).toFixed(6);
           await sendReply(BOT_TOKEN, chatId,
@@ -628,26 +644,4 @@ export default async function handler(req, res) {
   }
 
   const detectedAddr = extractAddress(question);
-  if (detectedAddr && faucetKeywordsPresent(question)) {
-    if (!checkRateLimit(userId)) { await sendReply(BOT_TOKEN, chatId, `Too many messages. Please wait a moment.`, msgId); return ok(); }
-    await handleFaucetRequest(BOT_TOKEN, chatId, msgId, detectedAddr);
-    return ok();
-  }
-
-  if (!checkRateLimit(userId)) {
-    await sendReply(BOT_TOKEN, chatId, `Too many messages. Please wait a moment before asking again.`, msgId);
-    return ok();
-  }
-
-  await sendTyping(BOT_TOKEN, chatId);
-  try {
-    const answer = await askClaude(ANTHROPIC, question);
-    if (answer) await sendReply(BOT_TOKEN, chatId, answer, msgId);
-    else throw new Error('Empty response');
-  } catch (e) {
-    console.error('[telegram-qa] Claude error:', e.message);
-    await sendReply(BOT_TOKEN, chatId, `Having trouble right now. Try again in a moment.\n<a href="https://crypto-nova.app/faq">FAQ</a> | Tag @admin for urgent help.`, msgId);
-  }
-
-  return ok();
-}
+  if (de
