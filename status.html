@@ -591,6 +591,9 @@
 
   // ── Keeper ────────────────────────────────────────────────
   async function loadKeeper(provider, blk) {
+    // Reset card state so stale warning/has-issue classes don't persist across polls
+    const cardKeeper = document.getElementById('card-keeper');
+    if (cardKeeper) cardKeeper.className = 'status-card';
     try {
       const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
 
@@ -661,6 +664,9 @@
 
   // ── Parked Members ────────────────────────────────────────
   async function loadParked(provider, blk) {
+    // Reset card state so stale warning/has-issue classes don't persist across polls
+    const cardParked = document.getElementById('card-parked');
+    if (cardParked) cardParked.className = 'status-card';
     try {
       const matA   = new ethers.Contract(ADDRS.T1matA,       MATRIX_ABI, provider);
       const matB   = new ethers.Contract(ADDRS.T1matB,       MATRIX_ABI, provider);
@@ -925,6 +931,9 @@
 
   // ── Stability Fund ────────────────────────────────────────
   async function loadSF(provider) {
+    // Reset card state so stale warning/has-issue classes don't persist across polls
+    const cardSF = document.getElementById('card-sf');
+    if (cardSF) cardSF.className = 'status-card';
     try {
       const sf       = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
       const treasury = new ethers.Contract(ADDRS.treasury, USDC_ABI, provider);
@@ -1040,19 +1049,4 @@
   function toggleTheme() {
     const isLight = document.body.classList.toggle('light');
     document.querySelector('.theme-toggle').textContent = isLight ? ('🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark')) : ('☀ ' + (window.t ? window.t('common.light','Light') : 'Light'));
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  }
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-    document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
-  }
-
-  // ── Boot ──────────────────────────────────────────────────
-  // Open keeper card by default (most relevant)
-  window.addEventListener('DOMContentLoaded', () => {
-    toggleCard('card-keeper');
-    loadAll();
-  });
-</script>
-</body>
-</html>
+    localStorage.setItem('them
