@@ -2312,17 +2312,32 @@ async function loadCWData(userAddr, signer, rp) {
       }
     }
 
+    // Gate: 500 total system members AND day-of-month ≥ 25
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const totalMembers = Number(await tr.globalJoinedCount().catch(() => 0n));
+    const dayOfMonth   = new Date().getDate();
+    const has500Members = totalMembers >= 500;
+    const is25thOrLater = dayOfMonth >= 25;
+
     // Claim button state
     const claimBtn = document.getElementById('btn-cw-claim');
     if (claimBtn) {
-      if (claimUsd > 0) {
-        claimBtn.disabled     = false;
-        claimBtn.textContent  = `Claim $${claimUsd.toFixed(4)} USDC`;
-        claimBtn.className    = 'btn btn-green full-w';
+      if (claimUsd > 0 && has500Members && is25thOrLater) {
+        claimBtn.disabled    = false;
+        claimBtn.textContent = `Claim $${claimUsd.toFixed(4)} USDC`;
+        claimBtn.className   = 'btn btn-green full-w';
+      } else if (claimUsd > 0 && !has500Members) {
+        claimBtn.disabled    = true;
+        claimBtn.textContent = `Claim unlocks at 500 members (${totalMembers}/500)`;
+        claimBtn.className   = 'btn btn-ghost full-w';
+      } else if (claimUsd > 0 && !is25thOrLater) {
+        claimBtn.disabled    = true;
+        claimBtn.textContent = `Claim opens on the 25th of each month`;
+        claimBtn.className   = 'btn btn-ghost full-w';
       } else {
-        claimBtn.disabled     = true;
-        claimBtn.textContent  = 'Nothing to claim yet';
-        claimBtn.className    = 'btn btn-ghost full-w';
+        claimBtn.disabled    = true;
+        claimBtn.textContent = 'Nothing to claim yet';
+        claimBtn.className   = 'btn btn-ghost full-w';
       }
     }
 
@@ -4748,28 +4763,4 @@ async function doCoPayRescue() {
     const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
       ? '✋ Transaction cancelled — nothing was sent.'
       : '❌ ' + (e.reason || e.shortMessage || e.message || 'Co-pay rescue failed');
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
-    if (btn) btn.disabled = false;
-  }
-}
-
-function updateAddrsFromDeployed(d) {
-  if (!d) return;
-  if (d.usdc)          ADDRS.usdc          = d.usdc;
-  if (d.cnova)         ADDRS.cnova         = d.cnova;
-  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
-  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
-  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
-  const t = d.tiers || {};
-  for (let i = 1; i <= 10; i++) {
-    const tier = t[String(i)] || t[i];
-    if (tier) {
-      const key = 'T' + i;
-      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
-    }
-  }
-  console.log('[v8.8] ADDRS updated from deployed JSON');
-}
-</script>
-<script src="/i18n.js" defer></script>
-</body></html>
+    if (status) { status.style.
