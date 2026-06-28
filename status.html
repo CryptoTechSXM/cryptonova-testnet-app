@@ -49,7 +49,7 @@
 
     /* ── Mobile hamburger menu ──────────────────────────────── */
     .hamburger{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:5px 10px;font-size:20px;cursor:pointer;line-height:1;flex-shrink:0}
-    .nav-trigger{display:none}.mobile-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;flex-direction:column;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+    .nav-trigger{display:none}.vbadge{display:inline-flex;align-items:center;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700}.mobile-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;flex-direction:column;box-shadow:0 4px 16px rgba(0,0,0,.3)}
     .mobile-menu.open{display:flex}
     .mobile-menu a{display:block;padding:14px 20px;color:var(--text2);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--border);transition:background .15s,color .15s}
     .mobile-menu a:last-child{border-bottom:none}
@@ -62,7 +62,11 @@
       .nm-mobile{display:inline}
       header{flex-wrap:nowrap;gap:6px;padding:8px 12px}
       .logo-text{font-size:13px}
-      .nav-trigger{display:flex!important;align-items:center;gap:6px;white-space:nowrap}
+      header{flex-wrap:wrap}
+      .mobile-menu{display:block!important;width:100%;border-top:1px solid var(--border)}
+      .mobile-menu a{display:none}
+      .mobile-menu.open a{display:block}
+      .nav-trigger{display:flex!important;width:100%;justify-content:space-between;align-items:center;padding:8px 14px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer}
     }
 
     /* Main */
@@ -174,16 +178,17 @@
       </svg>
     </div>
     <div>
-      <div class="logo-text">Crypto<span>Nova</span><span class="logo-badge">TESTNET</span></div>
+      <div class="logo-text">Crypto<span>Nova</span></div>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="nm-desktop">Testnet</span><span class="nm-mobile">Test</span></span>
     </div>
   </a>
   <div class="header-right">
     <div id="lang-switcher"></div>
     <a href="index.html" class="btn-home">← <span data-i18n="common.dashboard">Dashboard</span></a>
     <button class="theme-toggle" onclick="toggleTheme()">☀ <span data-i18n="common.light">Light</span></button>
-    <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
+    <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
     <a href="governance.html">⚖️ Governance</a>

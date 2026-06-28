@@ -207,9 +207,12 @@
       .header-right { flex: 1; justify-content: flex-end; gap: 6px; }
       #btn-connect { font-size: 12px; padding: 7px 10px; flex: none; }
       .hamburger { display: none !important; }
-      /* nav trigger bar */
-      .mobile-menu { position: sticky; top: 50px; }
-      .nav-trigger { display: flex !important; align-items: center; gap: 6px; white-space: nowrap; }
+      /* nav trigger — second row below header */
+      header { flex-wrap: wrap; }
+      .mobile-menu { display: block !important; width: 100%; border-top: 1px solid var(--border); }
+      .mobile-menu a { display: none; }
+      .mobile-menu.open a { display: block; }
+      .nav-trigger { display: flex !important; width: 100%; justify-content: space-between; align-items: center; padding: 8px 14px; background: none; border: none; color: var(--text2); font-size: 14px; font-weight: 500; cursor: pointer; }
     }
   </style>
 </head>
@@ -220,19 +223,20 @@
   <a href="index.html" class="logo">
     <img src="favicon.svg" alt="CryptoNova" />
     <span class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile"><span style="color:var(--text)">C</span>NOVA</span></span>
-    <span class="logo-badge">TESTNET</span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="nm-desktop">Testnet</span><span class="nm-mobile">Test</span></span>
   </a>
   <div class="header-right">
     <a href="index.html" class="nav-link">Dashboard</a>
     <a href="buy.html" class="nav-link">Buy CNOVA</a>
-    <a href="liquidity.html" class="nav-link active">Liquidity</a>
     <a href="governance.html" class="nav-link">Governance</a>
+    <a href="liquidity.html" class="nav-link active">Liquidity</a>
+    <a href="status.html" class="nav-link">Status</a>
     <div id="lang-switcher"></div>
     <button class="theme-toggle" id="btn-theme">☀️</button>
     <button id="btn-connect">Connect Wallet</button>
-    <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
+    <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
     <a href="liquidity.html" class="active">💧 Liquidity</a>
