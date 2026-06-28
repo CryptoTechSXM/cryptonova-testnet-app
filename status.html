@@ -49,7 +49,7 @@
 
     /* ── Mobile hamburger menu ──────────────────────────────── */
     .hamburger{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:5px 10px;font-size:20px;cursor:pointer;line-height:1;flex-shrink:0}
-    .mobile-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;flex-direction:column;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+    .nav-trigger{display:none}.mobile-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;flex-direction:column;box-shadow:0 4px 16px rgba(0,0,0,.3)}
     .mobile-menu.open{display:flex}
     .mobile-menu a{display:block;padding:14px 20px;color:var(--text2);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--border);transition:background .15s,color .15s}
     .mobile-menu a:last-child{border-bottom:none}
@@ -62,17 +62,14 @@
       .nm-mobile{display:inline}
       header{flex-wrap:nowrap;gap:6px;padding:8px 12px}
       .logo-text{font-size:13px}
-      .nav-trigger { display: flex !important; }
-      .mobile-menu { display: flex !important; flex-direction: column; }
-      .mobile-menu a { display: none; }
-      .mobile-menu.open a { display: block; }
+      .nav-trigger{display:flex!important;align-items:center;gap:6px;white-space:nowrap}
     }
 
     /* Main */
     main{max-width:1100px;margin:0 auto;padding:32px 24px}
 
     /* Page title */
-    .page-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .page-title{margin-top:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
     .page-title h1{font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px}
     .page-title h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -184,9 +181,9 @@
     <div id="lang-switcher"></div>
     <a href="index.html" class="btn-home">← <span data-i18n="common.dashboard">Dashboard</span></a>
     <button class="theme-toggle" onclick="toggleTheme()">☀ <span data-i18n="common.light">Light</span></button>
+    <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
-    <button class="nav-trigger" style="width:100%;text-align:left;padding:10px 20px;background:var(--bg2);border:none;border-bottom:1px solid var(--border);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;display:none" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
     <a href="governance.html">⚖️ Governance</a>
