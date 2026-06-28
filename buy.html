@@ -488,34 +488,17 @@ function toggleTheme() {
 if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
 // ── Wallet ───────────────────────────────────────────────────────────────────
-async function connectWallet(silent = false) {
-  if (!window.ethereum) { if (!silent) setStatus(t('buyPage.js.no_wallet', 'No wallet detected. Please install MetaMask.'), 'error'); return; }
+async function connectWallet() {
+  if (!window.ethereum) { setStatus(t('buyPage.js.no_wallet', 'No wallet detected. Please install MetaMask.'), 'error'); return; }
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
-    if (silent) {
-      // Silent auto-connect: skip eth_requestAccounts (Rabby/MetaMask mobile safe)
-      const accs = await window.ethereum.request({ method: 'eth_accounts' });
-      if (!accs.length) return;
-      const silentNet = await provider.getNetwork();
-      if (Number(silentNet.chainId) !== CHAIN_ID) return; // wrong network — let user click Connect
-      signer = new ethers.JsonRpcSigner(provider, accs[0]);
-    } else {
-      await provider.send('eth_requestAccounts', []);
-      const net = await provider.getNetwork();
-      if (Number(net.chainId) !== CHAIN_ID) {
-        try {
-          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
-        } catch(switchErr) {
-          if (switchErr.code === 4902 || switchErr.code === -32603) {
-            try {
-              await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
-            } catch { setStatus('Please add Base Sepolia manually.', 'error'); return; }
-          } else { setStatus('Please switch to Base Sepolia manually.', 'error'); return; }
-        }
-        provider = new ethers.BrowserProvider(window.ethereum); // refresh after switch
-      }
-      signer = await provider.getSigner();
+    await provider.send('eth_requestAccounts', []);
+    const net = await provider.getNetwork();
+    if (Number(net.chainId) !== CHAIN_ID) {
+      setStatus(t('buyPage.js.wrong_network', 'Wrong network. Please switch to Base Sepolia (chainId {n}).').replace('{n}', CHAIN_ID), 'error');
+      return;
     }
+    signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
     const btn = document.getElementById('btn-connect');
     btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
@@ -903,7 +886,7 @@ async function loadActivity() {
   try {
     const ro  = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
     const ds  = new ethers.Contract(DIRECT_SALE_ADDR, [
-      'event CNOVAPurchased(address indexed buyer, uint256 usdcPaid, uint256 cnovaOut, uint256 tier)'
+      'event CNOVAPurchased(address indexed buyer, uint256 usdcIn, uint256 cnovaOut, uint256 toTreasury, uint256 toSF, uint256 toLQ)'
     ], ro);
     const filter = ds.filters.CNOVAPurchased();
     const latest = await ro.getBlockNumber();
@@ -916,16 +899,14 @@ async function loadActivity() {
     }
 
     list.innerHTML = recent.map(e => {
-      const buyer   = e.args[0];
-      const usdc    = (Number(e.args[1]) / 1e6).toFixed(2);
-      const cnova   = (Number(e.args[2]) / 1e18).toFixed(4);
-      const tierNum = Number(e.args[3]) + 1;
+      const buyer = e.args[0];
+      const usdc  = (Number(e.args[1]) / 1e6).toFixed(2);
+      const cnova = (Number(e.args[2]) / 1e18).toFixed(4);
       return `
         <div class="activity-row">
           <span class="activity-addr">${buyer.slice(0,6)}…${buyer.slice(-4)}</span>
           <span class="activity-cnova">+${cnova} CNOVA</span>
           <span class="activity-usdc">$${usdc}</span>
-          <span class="pill pill-green" style="font-size:10px;">T${tierNum}</span>
         </div>`;
     }).join('');
   } catch(e) {
@@ -953,7 +934,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Pre-wire wallet — retry after 800ms for MetaMask mobile injection lag
   const _tryAutoConnect = () => {
     if (!window.ethereum) return;
-    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(true); });
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
   };
   _tryAutoConnect();
   setTimeout(_tryAutoConnect, 800);
