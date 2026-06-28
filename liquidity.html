@@ -209,6 +209,9 @@
       /* nav trigger bar */
       .mobile-menu { position: sticky; top: 50px; }
       .nav-trigger { display: flex !important; }
+      .mobile-menu { display: flex !important; flex-direction: column; }
+      .mobile-menu a { display: none; }
+      .mobile-menu.open a { display: block; }
     }
   </style>
 </head>
@@ -582,8 +585,7 @@ function toggleMobileMenu() {
 }
 document.addEventListener('click', function(e) {
   const m = document.getElementById('mobile-menu');
-  const h = document.getElementById('hamburger');
-  if (m && h && !m.contains(e.target) && !h.contains(e.target)) m.classList.remove('open');
+  if (m && !m.contains(e.target)) m.classList.remove('open');
 });
 
 // ── Config ──────────────────────────────────────────────────────────────────

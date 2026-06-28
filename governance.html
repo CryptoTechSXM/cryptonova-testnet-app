@@ -208,6 +208,9 @@
       /* nav trigger bar */
       .mobile-menu { position: sticky; top: 50px; }
       .nav-trigger { display: flex !important; }
+      .mobile-menu { display: flex !important; flex-direction: column; }
+      .mobile-menu a { display: none; }
+      .mobile-menu.open a { display: block; }
     }
   </style>
 </head>
@@ -222,6 +225,7 @@
     </svg>
     <span class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile">CNOVA</span></span>
     <span class="logo-badge">DAO</span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px">Testnet</span>
   </a>
   <div class="header-right">
     <div id="lang-switcher"></div>
@@ -828,8 +832,7 @@ function toggleMobileMenu() {
 }
 document.addEventListener('click', function(e) {
   const m = document.getElementById('mobile-menu');
-  const h = document.getElementById('hamburger');
-  if (m && h && !m.contains(e.target) && !h.contains(e.target)) m.classList.remove('open');
+  if (m && !m.contains(e.target)) m.classList.remove('open');
 });
 
 function toggleTheme() {

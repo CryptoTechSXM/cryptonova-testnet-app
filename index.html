@@ -219,7 +219,6 @@
     .vb-d { }
     .vb-m { display: none; }
     .wn-full  { }
-    .wn-short { display: none; }
     @media (max-width: 640px) {
       /* ── Header: single-row layout ── */
       header { padding: 8px 12px; flex-wrap: nowrap; align-items: center; gap: 6px; }
@@ -234,7 +233,6 @@
       .vbadge { padding: 2px 4px !important; font-size: 9px !important; margin-left: 3px !important; }
       .header-meta { order: unset; gap: 4px; flex: none; }
       .wn-full { display: none; }
-      .wn-short { display: inline; }
       .tl { display: none; }
       .theme-toggle { padding: 5px 7px; font-size: 14px; }
       .header-wallet { order: unset; width: auto; margin-top: 0; flex: 1; justify-content: flex-end; gap: 6px; }
@@ -470,7 +468,7 @@
 </div>
 
 <header>
-  <div class="logo">
+  <a class="logo" href="index.html" onclick="if(typeof showTab==='function'){showTab('home');return false;}" style="text-decoration:none;cursor:pointer">
     <div class="logo-icon">
     <svg width="38" height="38" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="20" cy="20" r="19" stroke="#00e5a0" stroke-width="1.5"/>
@@ -481,7 +479,7 @@
     <div class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile">CNOVA</span></div>
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"><span class="vb-d">V8.29 ADMIN</span><span class="vb-m">V8.29</span></span>
-  </div>
+  </a>
   <div class="header-meta">
     <div id="lang-switcher"></div>
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span><span class="tl"> Light</span></button>
@@ -1641,20 +1639,20 @@
   <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">
     <a href="https://t.me/+0tmvkrDs20Q1M2My" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
-      <span class="fl-s">Announce</span><span class="fl-l">ments</span>
+      <span class="fl-s">Announce</span><span class="fl-l">Announcements</span>
     </a>
     <span style="color:var(--border)">·</span>
-    <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Chat</span><span class="fl-l">Community Chat</span></a>
+    <a href="https://t.me/+qyx0ubijx9JmYmVi" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg><span class="fl-s">Chat</span><span class="fl-l">Community Chat</span></a>
     <span style="color:var(--border)">·</span>
-    <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Support</span><span class="fl-l"> &amp; Q&amp;A</span></a>
+    <a href="https://t.me/+eBituWwdrtk5MmNi" target="_blank" rel="noopener" class="footer-link" style="color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg><span class="fl-s">Support</span><span class="fl-l">Support &amp; Q&amp;A</span></a>
     <span style="color:var(--border)">|</span>
-    <a href="terms.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Terms</span><span class="fl-l"> &amp; Risk Disclaimer</span></a>
+    <a href="terms.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Terms</span><span class="fl-l">Terms &amp; Risk Disclaimer</span></a>
     <span style="color:var(--border)">|</span>
-    <a href="faq.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">FAQ</span><span class="fl-l"> &amp; Glossary</span></a>
+    <a href="faq.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">FAQ</span><span class="fl-l">FAQ &amp; Glossary</span></a>
     <span style="color:var(--border)">|</span>
-    <a href="compensation.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Plan</span><span class="fl-l">Compensation Plan</span></a>
+    <a href="compensation.html" class="footer-link" style="color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'"><span class="fl-s">Comp Plan</span><span class="fl-l">Compensation Plan</span></a>
     <span style="color:var(--border)">|</span>
-    <span><span class="fl-s">© 2026 CryptoNova</span><span class="fl-l"> · Smart contracts are immutable and open-source.</span></span>
+    <span>© 2026 CryptoNova</span>
   </div>
 </footer>
 
@@ -2087,7 +2085,7 @@ async function connectWallet(silent=false) {
       });
     }
     const _wShort = walletName === 'MetaMask' ? 'MM' : walletName === 'Rabby' ? 'RBY' : walletName.slice(0,3).toUpperCase();
-    btn.innerHTML = '<span>' + short(userAddr) + '</span><span class="wn-full"> (' + walletName + ')</span><span class="wn-short"> ' + _wShort + '</span>';
+    btn.innerHTML = '<span>' + short(userAddr) + '</span><span class="wn-full"> (' + walletName + ')</span>';
     btn.classList.add('connected');
     btn.disabled = false;
     localStorage.setItem('cnova_connected', '1'); // remember for auto-reconnect on refresh
@@ -4487,7 +4485,7 @@ function showTab(name) {
   const panel = document.getElementById('tab-' + name);
   if (panel) panel.classList.add('active');
   const idx = ['home','register','dashboard','matrix','tiers','roadmap'].indexOf(name);
-  const navBtns = document.querySelectorAll('nav button');
+  const navBtns = document.querySelectorAll('nav button:not(.nav-trigger)');
   if (navBtns[idx]) navBtns[idx].classList.add('active');
   if (name === 'register') { if (userAddr) loadRegisterTab(); }
   if (name === 'dashboard') { loadDashboardData(); loadRedeemData(); }
