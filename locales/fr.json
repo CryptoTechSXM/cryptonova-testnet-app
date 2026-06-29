@@ -332,7 +332,7 @@
     "row_t1_matb_pool": "Pool T1 MatB",
     "section_totals": "Totaux",
     "row_total_cycles": "Total des cycles du système",
-    "row_total_registered": "Total inscrits T1",
+    "row_total_registered": "Total membres inscrits",
     "row_t2_mata_occupancy": "Occupation T2 MatA",
     "matrix_info_note": "<strong>MatA se remplit d'abord</strong> (127 membres), puis bascule de force vers MatB. Quand MatB atteint 127, le pool se distribue et les membres recyclent vers MatA. Le gardien pilote le basculement.",
     "sf_card_title": "Fonds de Stabilité",

@@ -330,7 +330,7 @@
     "row_t1_matb_pool": "T1 MatB 奖池",
     "section_totals": "总计",
     "row_total_cycles": "系统总循环次数",
-    "row_total_registered": "T1 总注册人数",
+    "row_total_registered": "总加入会员数",
     "row_t2_mata_occupancy": "T2 MatA 占用率",
     "matrix_info_note": "<strong>MatA 先填满</strong>（127 位会员），然后强制跨越至 MatB。MatB 填满至 127 时，奖池分配，会员循环回 MatA。Keeper 驱动跨越。",
     "sf_card_title": "Stability Fund",

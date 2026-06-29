@@ -330,7 +330,7 @@
     "row_t1_matb_pool": "T1 MatB 풀",
     "section_totals": "합계",
     "row_total_cycles": "총 시스템 사이클",
-    "row_total_registered": "총 T1 등록자",
+    "row_total_registered": "총 가입 회원 수",
     "row_t2_mata_occupancy": "T2 MatA 점유율",
     "matrix_info_note": "<strong>MatA가 먼저 채워집니다</strong> (127 멤버), 그 후 MatB로 강제 이동됩니다. MatB가 127로 채워지면 풀이 배분되고 멤버들이 MatA로 다시 돌아옵니다. Keeper가 이동을 처리합니다.",
     "sf_card_title": "Stability Fund",

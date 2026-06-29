@@ -330,7 +330,7 @@
     "row_t1_matb_pool": "Pool T1 MatB",
     "section_totals": "Tổng Cộng",
     "row_total_cycles": "Tổng chu kỳ hệ thống",
-    "row_total_registered": "Tổng đăng ký T1",
+    "row_total_registered": "Tổng thành viên đã tham gia",
     "row_t2_mata_occupancy": "Số lượng T2 MatA",
     "matrix_info_note": "<strong>MatA lấp đầy trước</strong> (127 thành viên), sau đó force-cross sang MatB. Khi MatB đạt 127, pool phân phối và thành viên quay lại MatA. Keeper điều khiển quá trình cross.",
     "sf_card_title": "Stability Fund",

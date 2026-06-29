@@ -379,7 +379,7 @@
           <span class="detail-val blue" id="mx-cycles">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key" data-i18n="statusPage.row_total_registered">Total T1 registered</span>
+          <span class="detail-key" data-i18n="statusPage.row_total_registered">Total members joined</span>
           <span class="detail-val" id="mx-total">—</span>
         </div>
         <div class="detail-row">
@@ -809,39 +809,36 @@
         setText('pk-capacity', '—');
       }
 
-      // ── Reconcile: if actual queue is empty, override count-based badge ─────
-      // getParkedCount() can be stale (non-decremental in some contract versions),
-      // returning a non-zero value even when all members have been rescued.
-      // Always trust the live queue (stillParked) over the raw counter.
-      const displayCount = stillParked.length;
-      if (displayCount === 0 && count > 0) {
-        // Queue is actually empty — correct the pill/badge that was set from stale count
-        const pillInd2 = document.getElementById('pill-parked');
-        if (pillInd2) pillInd2.className = 'pill-indicator green';
-        setText('pill-parked-val', '0 ' + t('statusPage.js.parked_word', 'parked'));
-        setText('pill-parked-sub', t('statusPage.js.all_members_active', 'All members active'));
-        if (cardParked) cardParked.className = 'status-card'; // clear any warning/has-issue
-        const badge2 = document.getElementById('badge-parked');
-        if (badge2) badge2.className = 'card-badge badge-green';
-        setText('badge-parked', t('statusPage.js.badge_clear', 'CLEAR'));
-        setText('summary-parked', t('statusPage.js.all_members_active', 'All members active'));
-        setText('pk-count', '0 — ' + t('statusPage.js.all_clear_suffix', 'all clear'));
-        setClass('pk-count', 'green');
-      }
-
       // ── Render table ──────────────────────────────────────────────────────
+      // NOTE: reconcile-override block removed (V8.20+). The contract correctly
+      // uses pop/swap so getParkedCount() is authoritative. If stillParked is
+      // empty but count > 0, it means RPC batch calls failed — preserve the
+      // count-based badge and show a fetch-error notice instead of faking CLEAR.
       const wrap = document.getElementById('parked-list-wrap');
       if (stillParked.length === 0) {
-        // If we have a previously seen list, keep it visible with a clear banner
-        // so the table doesn't flicker away between polls.
-        if (_lastParkedHTML !== null) {
-          wrap.innerHTML =
-            `<div style="background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.25);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--green);margin-bottom:10px">
-              ✅ Queue is currently clear — showing last known members below
-            </div>` + _lastParkedHTML;
+        if (count > 0) {
+          // RPC batch failure: contract reports parked members but getParkedMember()
+          // calls timed out or were rate-limited. Keep the count-based badge (red/
+          // yellow) and show a soft warning — do NOT override badge to CLEAR.
+          if (_lastParkedHTML !== null) {
+            wrap.innerHTML =
+              `<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--yellow);margin-bottom:10px">
+                ⚠️ ${count} member${count !== 1 ? 's' : ''} parked — member list temporarily unavailable (retrying next poll)
+              </div>` + _lastParkedHTML;
+          } else {
+            wrap.innerHTML = `<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--yellow)">⚠️ ${count} member${count !== 1 ? 's' : ''} parked — member details could not be loaded. Retrying…</div>`;
+          }
         } else {
-          wrap.innerHTML = `<div class="empty-state">✅ No parked members — system is clear</div>`;
-          _lastParkedHTML = wrap.innerHTML;
+          // Genuine clear: getParkedCount() returned 0
+          if (_lastParkedHTML !== null) {
+            wrap.innerHTML =
+              `<div style="background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.25);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--green);margin-bottom:10px">
+                ✅ Queue is currently clear — showing last known members below
+              </div>` + _lastParkedHTML;
+          } else {
+            wrap.innerHTML = `<div class="empty-state">✅ No parked members — system is clear</div>`;
+            _lastParkedHTML = wrap.innerHTML;
+          }
         }
       } else {
         // Keeper status banner

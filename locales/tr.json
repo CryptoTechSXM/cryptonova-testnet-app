@@ -332,7 +332,7 @@
     "row_t1_matb_pool": "T1 MatB Havuzu",
     "section_totals": "Toplamlar",
     "row_total_cycles": "Sistem toplam döngüsü",
-    "row_total_registered": "T1 toplam kayıtlı",
+    "row_total_registered": "Toplam üye kayıtlı",
     "row_t2_mata_occupancy": "T2 MatA doluluğu",
     "matrix_info_note": "<strong>MatA önce dolar</strong> (127 üye), ardından zorunlu olarak MatB'ye geçer. MatB 127'ye ulaştığında havuz dağıtılır ve üyeler MatA'ya geri döner. Bekçi geçişi yönetir.",
     "sf_card_title": "Stabilite Fonu",

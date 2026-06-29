@@ -332,7 +332,7 @@
     "row_t1_matb_pool": "Pool T1 MatB",
     "section_totals": "Totais",
     "row_total_cycles": "Total de ciclos do sistema",
-    "row_total_registered": "Total inscritos T1",
+    "row_total_registered": "Total de membros registados",
     "row_t2_mata_occupancy": "Ocupação T2 MatA",
     "matrix_info_note": "<strong>MatA preenche primeiro</strong> (127 membros), depois cruza forçosamente para MatB. Quando MatB atinge 127, o pool se distribui e os membros reciclam para MatA. O guardião conduz o cruzamento.",
     "sf_card_title": "Fundo de Estabilidade",

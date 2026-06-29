@@ -332,7 +332,7 @@
     "row_t1_matb_pool": "T1 MatB pool",
     "section_totals": "Totals",
     "row_total_cycles": "Total system cycles",
-    "row_total_registered": "Total T1 registered",
+    "row_total_registered": "Total members joined",
     "row_t2_mata_occupancy": "T2 MatA occupancy",
     "matrix_info_note": "<strong>MatA fills first</strong> (127 members), then force-crosses to MatB. When MatB fills to 127, the pool distributes and members cycle back to MatA. The keeper drives the crossing.",
     "sf_card_title": "Stability Fund",

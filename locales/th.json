@@ -330,7 +330,7 @@
     "row_t1_matb_pool": "พูล T1 MatB",
     "section_totals": "ยอดรวม",
     "row_total_cycles": "รอบระบบรวม",
-    "row_total_registered": "ลงทะเบียน T1 รวม",
+    "row_total_registered": "สมาชิกทั้งหมดที่เข้าร่วม",
     "row_t2_mata_occupancy": "การครอบครอง T2 MatA",
     "matrix_info_note": "<strong>MatA เติมก่อน</strong> (127 สมาชิก) จากนั้น force-cross ไป MatB เมื่อ MatB เติมถึง 127 พูลจะแจกจ่ายและสมาชิกวนกลับไป MatA Keeper ขับเคลื่อนการข้าม",
     "sf_card_title": "Stability Fund",
