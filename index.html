@@ -237,16 +237,18 @@
       .tl { display: none; }
       .theme-toggle { padding: 5px 7px; font-size: 14px; }
       .header-wallet { order: unset; width: auto; margin-top: 0; flex: 1; justify-content: flex-end; gap: 6px; }
-      #btn-connect { padding: 7px 10px; font-size: 12px; flex: none; }
+      #btn-connect { padding: 7px 10px; font-size: 12px; flex: none; display: none !important; }
       #btn-switch-network { padding: 5px 8px; font-size: 11px; flex: none; }
       .hamburger { display: none !important; }
 
       /* ── Nav trigger bar (hamburger lives here on mobile) ── */
-      nav { display: flex; flex-direction: column; position: sticky; top: 50px; z-index: 200; padding: 0; box-shadow: none; overflow-x: unset; }
-      .nav-trigger { display: flex !important; width: 100%; padding: 10px 20px; background: var(--bg2); border-bottom: 1px solid var(--border); color: var(--text2); font-size: 14px; font-weight: 500; align-items: center; justify-content: space-between; border-radius: 0; white-space: nowrap; flex: none; min-width: unset; }
-      nav button:not(.nav-trigger) { display: none; }
+      nav { display: flex; flex-direction: row; flex-wrap: wrap; position: sticky; top: 50px; z-index: 200; padding: 0; box-shadow: none; overflow-x: unset; align-items: center; }
+      .nav-trigger { display: flex !important; flex: 1; padding: 10px 20px; background: var(--bg2); border-bottom: 1px solid var(--border); color: var(--text2); font-size: 14px; font-weight: 500; align-items: center; justify-content: space-between; border-radius: 0; white-space: nowrap; min-width: unset; }
+      .btn-connect-mob { display: flex !important; align-items: center; font-size: 12px; padding: 5px 10px; font-weight: 700; background: var(--bg3); color: var(--green); border: 1px solid var(--green2); border-radius: 8px; cursor: pointer; white-space: nowrap; margin: 0 8px; flex-shrink: 0; }
+      .btn-connect-mob.connected { background: var(--bg3); color: var(--green); }
+      nav button:not(.nav-trigger):not(.btn-connect-mob) { display: none; }
       nav.nav-open .nav-trigger { color: var(--green); border-bottom-color: var(--green); }
-      nav.nav-open button:not(.nav-trigger) { display: flex; width: 100%; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); border-radius: 0; white-space: normal; flex: none; min-width: unset; }
+      nav.nav-open button:not(.nav-trigger):not(.btn-connect-mob) { display: flex; width: 100%; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); border-radius: 0; white-space: normal; flex: none; min-width: unset; }
       nav.nav-open button:last-child { border-bottom: none; }
 
       /* ── Layout ── */
@@ -493,6 +495,7 @@
 
 <nav>
   <button class="nav-trigger" onclick="toggleMobileNav()" aria-label="Toggle navigation">☰ Menu <span class="nav-arrow">▼</span></button>
+  <button id="btn-connect-m" class="btn-connect-mob" onclick="connectWallet()">Connect Wallet</button>
   <button class="active" onclick="showTab('home')" data-i18n="idx.nav_home">🏠 Home</button>
   <button onclick="showTab('register')" data-i18n="idx.nav_register">✅ Register</button>
   <button onclick="showTab('dashboard')" data-i18n="idx.nav_dashboard">📊 Dashboard</button>
@@ -2028,6 +2031,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('cnova_connected'); // clear so refresh doesn't try to reconnect
         const b = document.getElementById('btn-connect');
         b.textContent = 'Connect Wallet'; b.classList.remove('connected');
+      const _bm3 = document.getElementById('btn-connect-m'); if (_bm3) { _bm3.textContent = 'Connect Wallet'; _bm3.className = 'btn-connect-mob'; }
       } else if (accounts[0].toLowerCase() !== (userAddr||'').toLowerCase()) {
         setTimeout(() => connectWallet(true).catch(()=>{}), 300);
       }
@@ -2089,12 +2093,15 @@ async function connectWallet(silent=false) {
     btn.innerHTML = '<span>' + short(userAddr) + '</span><span class="wn-full"> (' + walletName + ')</span>';
     btn.classList.add('connected');
     btn.disabled = false;
+    const _bm = document.getElementById('btn-connect-m');
+    if (_bm) { _bm.innerHTML = btn.innerHTML; _bm.className = 'btn-connect-mob connected'; }
     localStorage.setItem('cnova_connected', '1'); // remember for auto-reconnect on refresh
     if (!silent) toast(`Connected: ${short(userAddr)}`, 'success');
     loadUserData();
   } catch(e) {
     if (!silent) toast('Connection cancelled.', 'error');
     btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected');
+    const _bm2 = document.getElementById('btn-connect-m'); if (_bm2) { _bm2.textContent = 'Connect Wallet'; _bm2.className = 'btn-connect-mob'; }
     if (!silent && e.code !== 4001) { // 4001 = user rejected — not an error
       reportEvent('WALLET_ERROR', {
         wallet: detectWalletName(), action: 'connect',
