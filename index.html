@@ -43,6 +43,7 @@
     .lang-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; color: var(--text); cursor: pointer; transition: border-color .2s; outline: none; }
     .lang-select:hover, .lang-select:focus { border-color: var(--green); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { overflow-x: hidden; }
     body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
 
     /* ── Layout ─────────────────────────────── */
@@ -1683,7 +1684,7 @@ document.addEventListener('click', function(e) {
 });
 // Close mobile nav when a tab is selected
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('nav button:not(.nav-trigger)').forEach(function(btn) {
+  document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelector('nav').classList.remove('nav-open');
     });
@@ -4501,11 +4502,11 @@ async function doRedeemAtFloor() {
 // ═══════════════════════════════════════════════════════════════════════
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)').forEach(b => b.classList.remove('active'));
   const panel = document.getElementById('tab-' + name);
   if (panel) panel.classList.add('active');
   const idx = ['home','register','dashboard','matrix','tiers','roadmap'].indexOf(name);
-  const navBtns = document.querySelectorAll('nav button:not(.nav-trigger)');
+  const navBtns = document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)');
   if (navBtns[idx]) navBtns[idx].classList.add('active');
   if (name === 'register') { if (userAddr) loadRegisterTab(); }
   if (name === 'dashboard') { loadDashboardData(); loadRedeemData(); }
