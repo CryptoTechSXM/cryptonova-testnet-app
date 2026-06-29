@@ -632,7 +632,8 @@
             const coder = ethers.AbiCoder.defaultAbiCoder();
             const WI_TYPE = 'tuple(uint8 workType, uint8 tierIndex, address addr1, address addr2)[]';
             const [items] = coder.decode([WI_TYPE], perfData);
-            const TYPE_NAMES = ['None','ForceCross','RescueParked','Distribute','VelocityGate','Reclaim','EvictParked','CommunityDist'];
+            // Matches MatrixKeeper.sol constants (0=VELOCITY,1=GHOST,2=RECLAIM,3=CHAIN_LINK,4=PARKED_RESCUE,5=VELOCITY_GATE,6=EVICT_PARKED,7=DISTRIBUTE_CW)
+            const TYPE_NAMES = ['Velocity','Ghost','Reclaim','ChainLink','RescueParked','VelocityGate','EvictParked','CommunityDist'];
             const counts = {};
             for (const item of items) {
               const n = TYPE_NAMES[Number(item.workType)] || `Type ${Number(item.workType)}`;
