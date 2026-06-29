@@ -235,8 +235,8 @@
     <div id="lang-switcher"></div>
     <a href="index.html" class="nav-link" data-i18n="common.dashboard">Dashboard</a>
     <a href="buy.html" class="nav-link active" data-i18n="common.buy_cnova">Buy CNOVA</a>
-    <a href="governance.html" class="nav-link" data-i18n="common.governance">Governance</a>
-    <a href="liquidity.html" class="nav-link">Liquidity</a>
+    <a href="governance.html" class="nav-link" data-i18n="common.governance">DAO</a>
+    <a href="liquidity.html" class="nav-link">Earn</a>
     <a href="status.html" class="nav-link">Status</a>
     <button class="theme-toggle" onclick="toggleTheme()"><span id="theme-icon">☀️</span><span class="tl"></span></button>
     <button id="btn-connect" onclick="connectWallet()" data-i18n="common.connect_wallet">Connect Wallet</button>
@@ -245,8 +245,8 @@
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html" class="active">💰 Buy CNOVA</a>
-    <a href="governance.html">⚖️ Governance</a>
-    <a href="liquidity.html">💧 Liquidity</a>
+    <a href="governance.html">⚖️ DAO</a>
+    <a href="liquidity.html">💧 Earn</a>
     <a href="status.html">🛡️ Status</a>
   </div>
 </header>
@@ -489,6 +489,15 @@ function toggleTheme() {
 if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
 // ── Wallet ───────────────────────────────────────────────────────────────────
+function detectWalletType() {
+  const e = window.ethereum;
+  if (!e) return '';
+  if (e.isRabby)           return 'Rabby';
+  if (e.isCoinbaseWallet)  return 'Coinbase';
+  if (e.isMetaMask)        return 'MetaMask';
+  if (e.isTrust)           return 'Trust';
+  return 'Wallet';
+}
 async function connectWallet() {
   if (!window.ethereum) { setStatus(t('buyPage.js.no_wallet', 'No wallet detected. Please install MetaMask.'), 'error'); return; }
   try {
@@ -502,7 +511,8 @@ async function connectWallet() {
     signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
     const btn = document.getElementById('btn-connect');
-    btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
+    const wt = detectWalletType();
+    btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     btn.classList.add('connected');
     await refreshWalletState();
     await refreshPurchaseLimits();

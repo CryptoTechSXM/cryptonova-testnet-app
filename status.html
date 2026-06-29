@@ -43,6 +43,9 @@
     .header-right{display:flex;align-items:center;gap:12px}
     .btn-home{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;text-decoration:none;transition:all .2s}
     .btn-home:hover{color:var(--green);border-color:var(--green2)}
+    .nav-link { color: var(--text2); font-size: 14px; text-decoration: none; padding: 6px 12px; border-radius: 7px; transition: all .2s; }
+    .nav-link:hover { color: var(--text); background: var(--bg3); }
+    .nav-link.active { color: var(--green); font-weight: 600; }
     .theme-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--text2);cursor:pointer;transition:all .2s}
     .theme-toggle:hover{color:var(--text);border-color:var(--green)}
     .lang-select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--text);cursor:pointer;transition:border-color .2s;outline:none}
@@ -184,15 +187,19 @@
   </a>
   <div class="header-right">
     <div id="lang-switcher"></div>
-    <a href="index.html" class="btn-home">← <span data-i18n="common.dashboard">Dashboard</span></a>
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="buy.html" class="nav-link">Buy CNOVA</a>
+    <a href="governance.html" class="nav-link">DAO</a>
+    <a href="liquidity.html" class="nav-link">Earn</a>
+    <a href="status.html" class="nav-link active">Status</a>
     <button class="theme-toggle" onclick="toggleTheme()">☀ <span data-i18n="common.light">Light</span></button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
-    <a href="governance.html">⚖️ Governance</a>
-    <a href="liquidity.html">💧 Liquidity</a>
+    <a href="governance.html">⚖️ DAO</a>
+    <a href="liquidity.html">💧 Earn</a>
     <a href="status.html" class="active">🛡️ Status</a>
   </div>
 </header>

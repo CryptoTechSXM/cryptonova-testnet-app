@@ -228,12 +228,12 @@
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="nm-desktop">Testnet</span><span class="nm-mobile">TN</span></span>
   </a>
   <div class="header-right">
+    <div id="lang-switcher"></div>
     <a href="index.html" class="nav-link">Dashboard</a>
     <a href="buy.html" class="nav-link">Buy CNOVA</a>
-    <a href="governance.html" class="nav-link">Governance</a>
-    <a href="liquidity.html" class="nav-link active">Liquidity</a>
+    <a href="governance.html" class="nav-link">DAO</a>
+    <a href="liquidity.html" class="nav-link active">Earn</a>
     <a href="status.html" class="nav-link">Status</a>
-    <div id="lang-switcher"></div>
     <button class="theme-toggle" id="btn-theme">☀️</button>
     <button id="btn-connect">Connect Wallet</button>
   </div>
@@ -241,8 +241,8 @@
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
-    <a href="liquidity.html" class="active">💧 Liquidity</a>
-    <a href="governance.html">⚖️ Governance</a>
+    <a href="governance.html">⚖️ DAO</a>
+    <a href="liquidity.html" class="active">💧 Earn</a>
     <a href="status.html">🛡️ Status</a>
   </div>
 </header>
@@ -678,6 +678,15 @@ async function loadPublicStats() {
 loadPublicStats();
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
+function detectWalletType() {
+  const e = window.ethereum;
+  if (!e) return '';
+  if (e.isRabby)           return 'Rabby';
+  if (e.isCoinbaseWallet)  return 'Coinbase';
+  if (e.isMetaMask)        return 'MetaMask';
+  if (e.isTrust)           return 'Trust';
+  return 'Wallet';
+}
 async function connectWallet(silent = false) {
   if (!window.ethereum) { if (!silent) alert('No wallet detected'); return; }
   if (silent) {
@@ -713,7 +722,8 @@ async function connectWallet(silent = false) {
   usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, signer);
 
   const btn = document.getElementById('btn-connect');
-  btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
+  const wt = detectWalletType();
+  btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
   btn.classList.add('connected');
 
   document.getElementById('connect-prompt').style.display = 'none';
