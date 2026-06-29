@@ -1074,7 +1074,7 @@
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('burned',this)" title="Click for redemption history">
-          <div class="stat-label" data-i18n="dash.cnova_burned">🔥 CNOVA Burned</div>
+          <div class="stat-label" data-i18n="dash.cnova_burned">🔥 Total CNOVA Burnt</div>
           <div class="stat-value" id="dash-cnova-burned" style="color:var(--red)">—</div>
           <div class="stat-sub" data-i18n="dash.redeemed_lifetime">Redeemed lifetime</div>
           <div class="detail-hint">Details ↗</div>
@@ -3563,40 +3563,19 @@ async function loadDashboardData() {
 }
 
 /**
- * Query on-chain Transfer(user → address(0)) events to sum all CNOVA the
- * user has ever burned via Redeem → USDC.  Runs independently so it
- * doesn't slow the main dashboard load.
+ * Load total system CNOVA burned via direct totalBurned() contract call.
+ * Replaces the previous event-scan approach which was unreliable on public
+ * testnet RPCs (50k-block queryFilter often times out or gets rejected).
  */
 async function loadUserBurnHistory(cnova, user) {
   try {
     setText('dash-cnova-burned', '…');
-    const provider   = cnova.runner?.provider ?? cnova.provider;
-    const latest     = await provider.getBlockNumber();
-    // V8.12 deployed June 14 2026 — all burns are recent.
-    // Scan last 50k blocks (~7h on Base Sepolia). Public RPCs reject block 0→latest.
-    // On mainnet an archive RPC removes this restriction entirely.
-    const fromBlock  = Math.max(0, latest - 50_000);
-    const burnFilter = cnova.filters.Transfer(user, ethers.ZeroAddress);
-
-    // Try one call first; if RPC rejects the range, chunk into 2 000-block windows
-    let events;
-    try {
-      events = await cnova.queryFilter(burnFilter, fromBlock, 'latest');
-    } catch {
-      events = [];
-      const CHUNK = 2_000;
-      for (let f = fromBlock; f <= latest; f += CHUNK) {
-        const chunk = await cnova.queryFilter(burnFilter, f, Math.min(f + CHUNK - 1, latest));
-        events = events.concat(chunk);
-      }
-    }
-
-    const totalBurned = events.reduce((acc, e) => acc + BigInt(e.args.value), 0n);
-    setText('dash-cnova-burned', Number(ethers.formatEther(totalBurned)).toLocaleString(
+    const burned = await cnova.totalBurned();
+    setText('dash-cnova-burned', Number(ethers.formatEther(burned)).toLocaleString(
       undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }
     ));
   } catch(e) {
-    console.warn('loadUserBurnHistory:', e.message);
+    console.warn('loadBurnHistory:', e.message);
     setText('dash-cnova-burned', '—');
   }
 }
