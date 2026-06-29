@@ -241,8 +241,8 @@
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
-    <a href="governance.html">⚖️ DAO</a>
-    <a href="liquidity.html" class="active">💧 Earn</a>
+    <a href="governance.html">⚖️ Governance</a>
+    <a href="liquidity.html" class="active">💧 Liquidity</a>
     <a href="status.html">🛡️ Status</a>
   </div>
 </header>
@@ -722,7 +722,7 @@ async function connectWallet(silent = false) {
   usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, signer);
 
   const btn = document.getElementById('btn-connect');
-  const wt = detectWalletType();
+  const wt = window.innerWidth > 768 ? detectWalletType() : '';
   btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
   btn.classList.add('connected');
 

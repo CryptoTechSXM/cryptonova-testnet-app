@@ -245,8 +245,8 @@
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html" class="active">💰 Buy CNOVA</a>
-    <a href="governance.html">⚖️ DAO</a>
-    <a href="liquidity.html">💧 Earn</a>
+    <a href="governance.html">⚖️ Governance</a>
+    <a href="liquidity.html">💧 Liquidity</a>
     <a href="status.html">🛡️ Status</a>
   </div>
 </header>
@@ -511,7 +511,7 @@ async function connectWallet() {
     signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
     const btn = document.getElementById('btn-connect');
-    const wt = detectWalletType();
+    const wt = window.innerWidth > 768 ? detectWalletType() : '';
     btn.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     btn.classList.add('connected');
     await refreshWalletState();
