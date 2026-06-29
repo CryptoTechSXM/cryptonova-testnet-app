@@ -43,7 +43,7 @@
     .lang-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; color: var(--text); cursor: pointer; transition: border-color .2s; outline: none; }
     .lang-select:hover, .lang-select:focus { border-color: var(--green); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
 
     /* ── Layout ─────────────────────────────── */
     header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
@@ -250,6 +250,7 @@
       nav.nav-open .nav-trigger { color: var(--green); border-bottom-color: var(--green); }
       nav.nav-open button:not(.nav-trigger):not(.btn-connect-mob) { display: flex; width: 100%; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); border-radius: 0; white-space: normal; flex: none; min-width: unset; }
       nav.nav-open button:last-child { border-bottom: none; }
+      nav.nav-open button.active { background: var(--bg3) !important; color: var(--green) !important; }
 
       /* ── Layout ── */
       main { padding: 20px 16px; }
@@ -2094,7 +2095,7 @@ async function connectWallet(silent=false) {
     btn.classList.add('connected');
     btn.disabled = false;
     const _bm = document.getElementById('btn-connect-m');
-    if (_bm) { _bm.innerHTML = btn.innerHTML; _bm.className = 'btn-connect-mob connected'; }
+    if (_bm) { _bm.textContent = short(userAddr) + (walletName ? ' (' + walletName + ')' : ''); _bm.className = 'btn-connect-mob connected'; }
     localStorage.setItem('cnova_connected', '1'); // remember for auto-reconnect on refresh
     if (!silent) toast(`Connected: ${short(userAddr)}`, 'success');
     loadUserData();

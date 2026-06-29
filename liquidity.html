@@ -36,7 +36,7 @@
       --red:#dc2626; --text:#0f172a; --text2:#475569; --text3:#94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
 
     /* ── Header ── */
     header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
@@ -432,7 +432,7 @@
       </div>
     </div>
 
-    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:12px;margin-top:4px;max-width:100%">
       <div class="stat-box">
         <div class="stat-label">USDC Reserve</div>
         <div class="stat-value blue" id="amm-usdc-reserve">—</div>
