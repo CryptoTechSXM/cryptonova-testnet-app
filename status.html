@@ -777,6 +777,26 @@
         setText('pk-capacity', '—');
       }
 
+      // ── Reconcile: if actual queue is empty, override count-based badge ─────
+      // getParkedCount() can be stale (non-decremental in some contract versions),
+      // returning a non-zero value even when all members have been rescued.
+      // Always trust the live queue (stillParked) over the raw counter.
+      const displayCount = stillParked.length;
+      if (displayCount === 0 && count > 0) {
+        // Queue is actually empty — correct the pill/badge that was set from stale count
+        const pillInd2 = document.getElementById('pill-parked');
+        if (pillInd2) pillInd2.className = 'pill-indicator green';
+        setText('pill-parked-val', '0 ' + t('statusPage.js.parked_word', 'parked'));
+        setText('pill-parked-sub', t('statusPage.js.all_members_active', 'All members active'));
+        if (cardParked) cardParked.className = 'status-card'; // clear any warning/has-issue
+        const badge2 = document.getElementById('badge-parked');
+        if (badge2) badge2.className = 'card-badge badge-green';
+        setText('badge-parked', t('statusPage.js.badge_clear', 'CLEAR'));
+        setText('summary-parked', t('statusPage.js.all_members_active', 'All members active'));
+        setText('pk-count', '0 — ' + t('statusPage.js.all_clear_suffix', 'all clear'));
+        setClass('pk-count', 'green');
+      }
+
       // ── Render table ──────────────────────────────────────────────────────
       const wrap = document.getElementById('parked-list-wrap');
       if (stillParked.length === 0) {
