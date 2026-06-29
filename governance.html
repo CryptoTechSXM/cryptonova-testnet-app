@@ -899,7 +899,7 @@ async function connectWallet(silent = false) {
       signer = await provider.getSigner();
     }
     userAddr = await signer.getAddress();
-    const wt = window.innerWidth > 768 ? detectWalletType() : '';
+    const wt = detectWalletType();
     const _wl = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     ['btn-connect','btn-connect-m'].forEach(id => { const b = document.getElementById(id); if (b) { b.textContent = _wl; b.classList.add('connected'); } });
     await refreshVotingPower();

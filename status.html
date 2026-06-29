@@ -43,6 +43,10 @@
     .header-right{display:flex;align-items:center;gap:12px}
     .btn-home{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;text-decoration:none;transition:all .2s}
     .btn-home:hover{color:var(--green);border-color:var(--green2)}
+    #btn-connect{background:var(--green);color:#000;border:none;border-radius:8px;padding:8px 18px;font-weight:700;font-size:14px;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+    #btn-connect:hover{opacity:.85}
+    #btn-connect.connected{background:var(--bg3);color:var(--green);border:1px solid var(--green2)}
+    .btn-connect-mob{display:none}
     .nav-link { color: var(--text2); font-size: 14px; text-decoration: none; padding: 6px 12px; border-radius: 7px; transition: all .2s; }
     .nav-link:hover { color: var(--text); background: var(--bg3); }
     .nav-link.active { color: var(--green); font-weight: 600; }
@@ -70,10 +74,14 @@
       .logo-text{font-size:13px}
       header{flex-wrap:wrap}
       main{padding:clamp(40px,6vh,72px) 16px 60px}
-      .mobile-menu{display:block!important;width:100%;border-top:1px solid var(--border)}
+      #btn-connect{display:none!important}
+      .mobile-menu{display:flex!important;flex-direction:row!important;width:100%;border-top:1px solid var(--border);align-items:center}
       .mobile-menu a{display:none}
-      .mobile-menu.open a{display:block}
-      .nav-trigger{display:flex!important;width:100%;justify-content:space-between;align-items:center;padding:8px 14px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer}
+      .mobile-menu.open{flex-wrap:wrap}
+      .mobile-menu.open a{display:block;width:100%}
+      .btn-connect-mob{display:flex!important;align-items:center;font-size:12px;padding:5px 10px;font-weight:700;background:var(--bg3);color:var(--green);border:1px solid var(--green2);border-radius:8px;cursor:pointer;white-space:nowrap;margin:4px 8px 4px 0;flex-shrink:0}
+      .btn-connect-mob.connected{background:var(--bg3);color:var(--green)}
+      .nav-trigger{display:flex!important;flex:1;justify-content:space-between;align-items:center;padding:8px 14px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer}
     }
 
     /* Main */
@@ -193,10 +201,12 @@
     <a href="governance.html" class="nav-link">Governance</a>
     <a href="liquidity.html" class="nav-link">Liquidity</a>
     <a href="status.html" class="nav-link active">Status</a>
+    <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
     <button class="theme-toggle" onclick="toggleTheme()">☀ <span data-i18n="common.light">Light</span></button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
+    <button id="btn-connect-m" class="btn-connect-mob" onclick="connectWallet()">Connect Wallet</button>
     <a href="index.html">📊 Dashboard</a>
     <a href="buy.html">💰 Buy CNOVA</a>
     <a href="governance.html">⚖️ Governance</a>
@@ -1098,11 +1108,42 @@
     document.querySelector('.theme-toggle').textContent = '🌙 ' + (window.t ? window.t('common.dark','Dark') : 'Dark');
   }
 
+  // ── Wallet connect (display only — status page uses read-only RPC) ──────────
+  function detectWalletType() {
+    const e = window.ethereum;
+    if (!e) return '';
+    if (e.isRabby)          return 'Rabby';
+    if (e.isCoinbaseWallet) return 'Coinbase';
+    if (e.isMetaMask)       return 'MetaMask';
+    if (e.isTrust)          return 'Trust';
+    return 'Wallet';
+  }
+  async function connectWallet() {
+    if (!window.ethereum) return;
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) return;
+      const addr = accs[0];
+      const wt = detectWalletType();
+      const label = addr.slice(0,6) + '…' + addr.slice(-4) + (wt ? ' (' + wt + ')' : '');
+      ['btn-connect','btn-connect-m'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) { b.textContent = label; b.classList.add('connected'); }
+      });
+    } catch(e) {}
+  }
+
   // ── Boot ──────────────────────────────────────────────────
   // Open keeper card by default (most relevant)
   window.addEventListener('DOMContentLoaded', () => {
     toggleCard('card-keeper');
     loadAll();
+    // Auto-connect if wallet already approved
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
+      window.ethereum.on('accountsChanged', () => connectWallet());
+    }
   });
 </script>
 </body>

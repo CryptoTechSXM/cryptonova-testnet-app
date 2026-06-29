@@ -728,7 +728,7 @@ async function connectWallet(silent = false) {
   pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
   usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, signer);
 
-  const wt2 = window.innerWidth > 768 ? detectWalletType() : '';
+  const wt2 = detectWalletType();
   const _wl = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt2 ? ' (' + wt2 + ')' : '');
   ['btn-connect','btn-connect-m'].forEach(id => { const b = document.getElementById(id); if (b) { b.textContent = _wl; b.classList.add('connected'); } });
 
