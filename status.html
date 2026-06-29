@@ -612,12 +612,23 @@
       try {
         const [needed, perfData] = await keeper.checkUpkeep('0x');
         upkeepNeeded = needed;
-        if (needed && perfData && perfData.length >= 66) {
-          // performData encodes work type as first byte after selector
-          // (kept as English contract-state identifiers — not user-facing prose)
-          const wt = parseInt(perfData.slice(2, 4), 16);
-          const types = ['None','ForceCross','RescueParked','Distribute','VelocityGate','Reclaim','EvictParked','CommunityDist'];
-          workType = types[wt] || `Type ${wt}`;
+        if (needed && perfData && perfData.length > 10) {
+          // performData is ABI-encoded as tuple(uint8,uint8,address,address)[]
+          // The old first-byte approach always read 0x00 (ABI offset prefix) → "None"
+          try {
+            const coder = ethers.AbiCoder.defaultAbiCoder();
+            const WI_TYPE = 'tuple(uint8 workType, uint8 tierIndex, address addr1, address addr2)[]';
+            const [items] = coder.decode([WI_TYPE], perfData);
+            const TYPE_NAMES = ['None','ForceCross','RescueParked','Distribute','VelocityGate','Reclaim','EvictParked','CommunityDist'];
+            const counts = {};
+            for (const item of items) {
+              const n = TYPE_NAMES[Number(item.workType)] || `Type ${Number(item.workType)}`;
+              counts[n] = (counts[n] || 0) + 1;
+            }
+            workType = Object.entries(counts).map(([k,v]) => v > 1 ? `${k} ×${v}` : k).join(', ') || 'None';
+          } catch(_) {
+            workType = 'Pending';
+          }
         }
       } catch(e) {}
 
