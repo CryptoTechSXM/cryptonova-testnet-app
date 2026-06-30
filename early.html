@@ -52,9 +52,9 @@
 
   <!-- EARLY SITE: coupon entry block (hidden by default, JS shows it) -->
   <div id="gate-coupon-block" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:360px;">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,26px);font-weight:700;margin:0 0 10px;">Early Access</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,26px);font-weight:700;margin:0 0 10px;">Leader &amp; Tester Preview</h1>
     <p style="color:#94a3b8;font-size:14px;max-width:320px;line-height:1.6;margin:0 0 24px;">
-      Enter your early access code to join the V8.30 community bug-bash.
+      This is a closed preview for selected leaders and trusted testers.<br>Enter your access code to continue.
     </p>
     <input id="gate-coupon-input" type="text" placeholder="Enter code" autocomplete="off"
       style="width:100%;padding:14px 18px;border-radius:10px;border:1px solid rgba(0,229,160,0.3);background:rgba(0,229,160,0.06);color:#e2e8f0;font-size:16px;text-align:center;letter-spacing:2px;text-transform:uppercase;outline:none;margin-bottom:12px;" />
@@ -63,12 +63,13 @@
       Enter
     </button>
     <div id="gate-coupon-err" style="color:#f87171;font-size:13px;min-height:18px;"></div>
+    <a href="https://crypto-nova.app" style="margin-top:18px;color:#64748b;font-size:12px;text-decoration:none;opacity:0.7;">Community testing → crypto-nova.app</a>
   </div>
 
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    V8.30 Testnet — Community Bug-Bash
+    <span id="gate-pill-label">V8.30 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -86,11 +87,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.30 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.30 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
