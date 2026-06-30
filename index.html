@@ -1459,6 +1459,44 @@
         </div>
       </div>
 
+      <!-- Coupon Manager -->
+      <div class="card" id="coupon-manager-card">
+        <div class="section-title" style="margin-bottom:14px"><div class="dot" style="background:#a855f7"></div> &#127921; Gift a Coupon</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+          Sponsor a new member's $10 entry fee. You deposit $10 USDC upfront — they register for free using your code. Valid for 30 days; reclaim if unused.
+        </div>
+        <div style="margin-bottom:22px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)">Issue a New Coupon</div>
+          <input type="text" id="issue-coupon-code" placeholder="e.g. WELCOME10 (letters &amp; numbers only)"
+            style="width:100%;font-size:14px;padding:12px 14px;margin-bottom:6px;text-transform:uppercase;box-sizing:border-box"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" />
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px">The new member types this code in the Register tab coupon field.</div>
+          <div class="info-row" style="margin-bottom:14px">
+            <span class="info-key">Cost to You</span>
+            <span class="info-val" id="coupon-issue-cost" style="color:#a855f7;font-weight:700">$10.00 USDC</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn btn-ghost full-w" id="btn-coupon-approve" onclick="approveCouponUSDC()" style="border-color:#a855f7;color:#a855f7">
+              Step 1: Approve $10 USDC &#128274;
+            </button>
+            <button class="btn btn-ghost full-w" id="btn-coupon-issue" onclick="doIssueCoupon()" disabled>
+              Step 2: Issue Coupon &#127921;
+            </button>
+          </div>
+          <div id="coupon-issue-status" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)">
+            My Issued Coupons
+            <span style="color:var(--text3);font-weight:400;font-size:12px">(last ~30 days)</span>
+            <button onclick="loadMyCoupons()" style="margin-left:8px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--green)">&#8635; Refresh</button>
+          </div>
+          <div id="my-coupons-list">
+            <div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">Connect your wallet to see your coupons.</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Chain pay breakdown -->
       <div class="card">
         <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth</div>
@@ -1937,6 +1975,11 @@ const COUPON_REGISTRY_ABI = [
   'function isValid(bytes32 codeHash) external view returns (bool)',
   'function couponAmount() external view returns (uint256)',
   'function redeemCoupon(bytes32 codeHash, address member) external returns (uint256)',
+  'function issueCoupon(bytes32 codeHash) external',
+  'function reclaimCoupon(bytes32 codeHash) external',
+  'function coupons(bytes32) external view returns (address issuer, uint256 amount, uint256 expiry, bool used)',
+  'event CouponIssued(bytes32 indexed codeHash, address indexed issuer, uint256 amount, uint256 expiry)',
+  'event CouponReclaimed(bytes32 indexed codeHash, address indexed issuer, uint256 amount)',
 ];
 
 const MATRIX_ABI = [
@@ -3307,6 +3350,119 @@ async function doRegister() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// COUPON MANAGER
+// ═══════════════════════════════════════════════════════════════════════
+async function loadMyCoupons() {
+  const el = document.getElementById('my-coupons-list');
+  if (!el || !userAddr) return;
+  el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px"><span class="spinner"></span> Loading...</div>';
+  try {
+    const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const reg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
+    const filter = reg.filters.CouponIssued(null, userAddr);
+    const events = await reg.queryFilter(filter, -200000);
+    if (events.length === 0) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">No coupons issued yet. Use the form above to gift an entry to a new member!</div>';
+      return;
+    }
+    const now = Math.floor(Date.now() / 1000);
+    let rows = '';
+    for (const ev of events.slice().reverse()) {
+      const codeHash  = ev.args[0];
+      const amount    = ev.args[2];
+      const expiry    = Number(ev.args[3]);
+      const couponD   = await reg.coupons(codeHash);
+      const amt       = (Number(amount) / 1e6).toFixed(2);
+      const expDate   = new Date(expiry * 1000).toLocaleDateString();
+      const daysLeft  = Math.ceil((expiry - now) / 86400);
+      let badge = '', actions = '';
+      if (couponD.used) {
+        badge = '<span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid var(--green2);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">&#10003; REDEEMED</span>';
+      } else if (now > expiry) {
+        badge = '<span style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">EXPIRED</span>';
+        actions = '<button onclick="doReclaimCoupon('' + codeHash + '')" style="margin-top:8px;background:none;border:1px solid var(--yellow);border-radius:6px;padding:4px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600">Reclaim $' + amt + ' USDC</button>';
+      } else {
+        badge = '<span style="background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.4);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">ACTIVE (' + daysLeft + 'd left)</span>';
+      }
+      rows += '<div style="padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
+        + '<div style="font-size:12px;font-family:monospace;color:var(--text2)">' + codeHash.slice(0,14) + '...</div>'
+        + badge + '</div>'
+        + '<div style="font-size:12px;color:var(--text3);margin-top:6px">$' + amt + ' USDC &middot; Expires ' + expDate + '</div>'
+        + actions + '</div>';
+    }
+    el.innerHTML = rows;
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:13px;color:#f87171;padding:8px">' + friendlyError(e) + '</div>';
+  }
+}
+
+async function approveCouponUSDC() {
+  if (!signer) { toast('Connect wallet first', 'error'); return; }
+  const code = (document.getElementById('issue-coupon-code')?.value || '').trim();
+  if (!code) { toast('Enter a coupon code first', 'error'); return; }
+  const btn = document.getElementById('btn-coupon-approve');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Approving...';
+  try {
+    const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const reg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
+    const amt = await reg.couponAmount();
+    const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+    const tx = await usdcW.approve(ADDRS.couponRegistry, amt);
+    setStatus('coupon-issue-status', '⏳ Approving USDC...', 'info');
+    await tx.wait();
+    setStatus('coupon-issue-status', '✅ Approved! Now click Step 2.', 'ok');
+    btn.textContent = '✓ Approved'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
+    const bi = document.getElementById('btn-coupon-issue');
+    if (bi) { bi.disabled = false; bi.className = 'btn btn-green full-w'; }
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Step 1: Approve $10 USDC 🔒';
+    setStatus('coupon-issue-status', '❌ ' + friendlyError(e), 'err');
+  }
+}
+
+async function doIssueCoupon() {
+  if (!signer) { toast('Connect wallet first', 'error'); return; }
+  const code = (document.getElementById('issue-coupon-code')?.value || '').trim().toUpperCase();
+  if (code.length < 3) { toast('Code must be at least 3 characters', 'error'); return; }
+  const btn = document.getElementById('btn-coupon-issue');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Issuing...';
+  try {
+    const codeHash = ethers.keccak256(ethers.toUtf8Bytes(code));
+    const regW = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, signer);
+    const tx = await regW.issueCoupon(codeHash);
+    setStatus('coupon-issue-status', '⏳ Confirming on-chain...', 'info');
+    await tx.wait();
+    setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! Share this code with the new member.', 'ok');
+    btn.textContent = '✅ Issued!';
+    toast('Coupon "' + code + '" issued!', 'success');
+    const ci = document.getElementById('issue-coupon-code');
+    if (ci) ci.value = '';
+    const ba = document.getElementById('btn-coupon-approve');
+    if (ba) { ba.disabled = false; ba.textContent = 'Step 1: Approve $10 USDC 🔒'; ba.style.borderColor = '#a855f7'; ba.style.color = '#a855f7'; }
+    btn.disabled = true; btn.className = 'btn btn-ghost full-w';
+    setTimeout(() => loadMyCoupons(), 3000);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Step 2: Issue Coupon 🎟️';
+    setStatus('coupon-issue-status', '❌ ' + friendlyError(e), 'err');
+  }
+}
+
+async function doReclaimCoupon(codeHash) {
+  if (!signer) { toast('Connect wallet first', 'error'); return; }
+  try {
+    const regW = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, signer);
+    const tx = await regW.reclaimCoupon(codeHash);
+    toast('⏳ Reclaiming USDC...', 'info');
+    await tx.wait();
+    toast('✅ USDC reclaimed!', 'success');
+    setTimeout(() => loadMyCoupons(), 2000);
+  } catch(e) {
+    toast(friendlyError(e), 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
 async function loadDashboardData() {
@@ -3846,6 +4002,7 @@ async function loadDashboardData() {
 
     // Community Wallet — load founder status + claimable
     await loadCWData(userAddr, signer, rp).catch(e => console.error('CW load error:', e.message));
+    loadMyCoupons().catch(e => console.error('coupons load error:', e.message));
 
   } catch(e) { console.error('loadDashboardData:', e.message); }
   finally { window._dashLoadInFlight = false; }
