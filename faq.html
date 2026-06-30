@@ -154,6 +154,16 @@
       0%,100%{opacity:1} 50%{opacity:.3}
     }
   </style>
+  <script>
+    // Admin domain is always open — gate bypasses itself on admin.cryptonova.ai
+    (function(){
+      var h = window.location.hostname;
+      if (h === 'admin.cryptonova.ai' || h === 'admin.crypto-nova.app' || h.startsWith('admin.')) {
+        var g = document.getElementById('maintenance-gate');
+        if (g) g.remove();
+      }
+    })();
+  </script>
 </div>
 <!-- ── END MAINTENANCE GATE ──────────────────────────────────────────────────── -->
 
