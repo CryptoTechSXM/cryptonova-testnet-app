@@ -4898,4 +4898,36 @@ async function doCoPayRescue() {
     const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 800_000 });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
-    if (status) { s
+    if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
+    toast('Co-Pay Rescue successful!', 'success');
+    setTimeout(() => loadDashboardData(), 3000);
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
+      ? '✋ Transaction cancelled — nothing was sent.'
+      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Co-pay rescue failed');
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (btn) btn.disabled = false;
+  }
+}
+
+function updateAddrsFromDeployed(d) {
+  if (!d) return;
+  if (d.usdc)          ADDRS.usdc          = d.usdc;
+  if (d.cnova)         ADDRS.cnova         = d.cnova;
+  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
+  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
+  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
+  const t = d.tiers || {};
+  for (let i = 1; i <= 10; i++) {
+    const tier = t[String(i)] || t[i];
+    if (tier) {
+      const key = 'T' + i;
+      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
+    }
+  }
+  console.log('[v8.8] ADDRS updated from deployed JSON');
+}
+</script>
+<script src="/i18n.js" defer></script>
+</body></html>
