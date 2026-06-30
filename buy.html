@@ -480,7 +480,7 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — V8.29 (deployed 2026-06-27, fresh deploy for community bug-bash)
+// CONFIG — V8.30 (deployed 2026-06-29 — selfRescue, isInMatrix fix, CouponRegistry)
 // ─────────────────────────────────────────────────────────────────────────────
 const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 // Real ethers.Network object for staticNetwork — passing the literal boolean
@@ -489,13 +489,13 @@ const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 const _NET_STATIC      = ethers.Network.from(CHAIN_ID);
 const RPC_URL           = 'https://sepolia.base.org';
 
-// V8.29 live addresses
+// V8.30 live addresses
 const USDC_ADDR         = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const CNOVA_ADDR        = '0x8fD0e142c6348bf6e7a6700C9080d9684956c775';
-const TREASURY_ADDR     = '0xEdd733e0ace91067BacF2821518a2069cEF793C8';
+const CNOVA_ADDR        = '0x7E572cC8dB7794f8992cf6bff40b1e77FA55A29a';
+const TREASURY_ADDR     = '0xD615A0065Ddf4ce5ccF50eb5Aa7DbB5dCE712518';
 
-// CNOVADirectSale V8.29
-const DIRECT_SALE_ADDR  = '0xC482254c3D6910e2CA64ED5D9CC8E114AA1Da192';
+// CNOVADirectSale V8.30
+const DIRECT_SALE_ADDR  = '0x39455dC6D642294BcFA7f8E2ea1ac334CcD51D9B';
 
 // ── Bonding curve tiers ─────────────────────────────────────────────────────
 // [label, multiplier (x1000), supply ceiling (CNOVA, 18 dec as string)]
