@@ -2187,8 +2187,7 @@ async function connectWallet(silent=false) {
     } else {
       await provider.send('eth_requestAccounts', []);
     }
-    const network = await provider.getNetwork();
-    const chainId = Number(network.chainId);
+    const chainId = parseInt(window.ethereum.chainId || '0', 16); // sync check avoids ethers pinned-network mismatch throw
     if (chainId !== CHAIN_ID) {
       // Auto-attempt network switch before showing banner
       try {
@@ -2238,7 +2237,7 @@ async function connectWallet(silent=false) {
     loadUserData();
     setTimeout(() => { if (signer) loadDashboardData(); }, 800); // mobile: ensure dashboard refreshes after connect
   } catch(e) {
-    if (!silent) toast('Connect error: ' + (e.message || e.code || String(e)), 'error');
+    if (!silent) toast('Connection cancelled.', 'error');
     btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected');
     const _bm2 = document.getElementById('btn-connect-m'); if (_bm2) { _bm2.textContent = 'Connect Wallet'; _bm2.className = 'btn-connect-mob'; }
     if (!silent && e.code !== 4001) { // 4001 = user rejected — not an error
