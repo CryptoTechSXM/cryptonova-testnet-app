@@ -3142,22 +3142,22 @@ async function validateCouponCode() {
       couponReg.couponAmount(),
     ]);
     if (!valid) {
-      if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">❌ Invalid or expired coupon code.</span>';
+      if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; Invalid or expired coupon code.</span>';
       _resetApproveBtn(); return;
     }
     const couponUsdc = Number(couponAmt) / 1e6;
     const youPay     = Math.max(0, Number(T1_FEE) / 1e6 - couponUsdc);
     window._activeCoupon = { code, codeHash, couponAmt, youPay };
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✅ Valid coupon — saves $' + couponUsdc.toFixed(2) + '!</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">&#10003; Valid coupon — saves $' + couponUsdc.toFixed(2) + '!</span>';
     const discountEl = document.getElementById('coupon-discount-amount');
     const youPayEl   = document.getElementById('coupon-you-pay-amount');
     if (discountEl) discountEl.textContent = '-$' + couponUsdc.toFixed(2);
-    if (youPayEl)   youPayEl.textContent   = youPay === 0 ? 'FREE! 🎉' : '$' + youPay.toFixed(2) + ' USDC';
+    if (youPayEl)   youPayEl.textContent   = youPay === 0 ? 'FREE! &#127881;' : '$' + youPay.toFixed(2) + ' USDC';
     if (discountRow) discountRow.style.display = '';
     if (youPayRow)   youPayRow.style.display   = '';
     _updateApproveForCoupon();
   } catch(e) {
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">❌ ' + friendlyError(e) + '</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; ' + friendlyError(e) + '</span>';
     _resetApproveBtn();
   }
 }
@@ -3175,11 +3175,11 @@ function _updateApproveForCoupon() {
   const btnReg = document.getElementById('btn-register');
   if (!btn || !c) return;
   if (c.youPay === 0) {
-    btn.textContent = '✓ No Payment Needed — Coupon Covers $10 🎟️';
+    btn.textContent = '✓ No Payment Needed — Coupon Covers $10 &#127921;';
     btn.disabled = true; btn.className = 'btn btn-ghost full-w';
     btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
     const approvedEl = document.getElementById('reg-approved');
-    if (approvedEl) approvedEl.textContent = '✅ Coupon covers full $10';
+    if (approvedEl) approvedEl.textContent = 'Coupon covers full $10';
     if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; }
   } else {
     btn.textContent = 'Step 1: Approve $' + c.youPay.toFixed(2) + ' USDC 🔒';
@@ -3196,7 +3196,7 @@ async function approveUSDC() {
   try {
     const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
     const c     = window._activeCoupon;
-    // Coupon path: reduced amount approved to MatA (MatA pulls directly in registerWithCoupon)
+    // Coupon path: approve reduced amount to MatA (MatA pulls directly in registerWithCoupon)
     // Normal path: full $10 approved to PairManager
     const approveAmt    = c ? BigInt(Math.round(c.youPay * 1e6)) : T1_FEE;
     const approveTarget = c ? ADDRS.T1.matA : ADDRS.T1.pm;
@@ -3284,9 +3284,7 @@ async function doRegister() {
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
     if (!c) {
-      // Auto-enable default options (auto-reentry on; auto-upgrade is on by contract default)
-      // NOTE: setMemberOptions requires TierRouter.globalJoined — coupon path bypasses TR,
-      // so we skip this for coupon registrations (member can adjust from Dashboard later).
+      // Auto-enable default options — skip for coupon path (TR.globalJoined not set yet)
       try {
         const tr2 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
         const optsTx = await tr2.setMemberOptions(false, true, false, { gasLimit: 120_000 });
@@ -3342,7 +3340,7 @@ async function loadDashboardData() {
         if (!mData.hasEverJoined) {
           hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
         }
-        // Member is in MatA via coupon — proceed with dashboard (TR features limited until V8.31)
+        // Member is in MatA via coupon path — proceed with dashboard
       } catch(_) {
         hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
       }
@@ -5166,4 +5164,21 @@ async function doCoPayRescue() {
 
 function updateAddrsFromDeployed(d) {
   if (!d) return;
-  if (d.usdc)          ADDRS.usdc
+  if (d.usdc)          ADDRS.usdc          = d.usdc;
+  if (d.cnova)         ADDRS.cnova         = d.cnova;
+  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
+  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
+  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
+  const t = d.tiers || {};
+  for (let i = 1; i <= 10; i++) {
+    const tier = t[String(i)] || t[i];
+    if (tier) {
+      const key = 'T' + i;
+      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
+    }
+  }
+  console.log('[v8.8] ADDRS updated from deployed JSON');
+}
+</script>
+<script src="/i18n.js" defer></script>
+</body></html>
