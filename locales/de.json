@@ -138,7 +138,9 @@
     "reward_per_entry": "CNOVA-Belohnung / Beitritt",
     "stability_fund": "Stabilitäts-Rettungsfonds",
     "community_wallet": "Community-Wallet",
-    "buyback_reserve": "Rückkaufreserve"
+    "buyback_reserve": "Rückkaufreserve",
+    "cnova_burnt": "🔥 Gesamte CNOVA Verbrannt",
+    "burnt_sub": "insgesamt eingelöst & verbrannt"
   },
   "split": {
     "title": "Gebührenaufteilung — pro $10 bei T1",

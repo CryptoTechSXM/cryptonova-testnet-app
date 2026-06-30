@@ -138,7 +138,9 @@
     "reward_per_entry": "Phần Thưởng CNOVA / Lượt Tham Gia",
     "stability_fund": "Stability Rescue Fund",
     "community_wallet": "Ví Cộng Đồng",
-    "buyback_reserve": "Buyback Reserve"
+    "buyback_reserve": "Buyback Reserve",
+    "cnova_burnt": "🔥 Tổng CNOVA Đã Đốt",
+    "burnt_sub": "đã mua lại & đốt tất cả các thời điểm"
   },
   "split": {
     "title": "Phân Chia Phí Tham Gia — mỗi $10 tại T1",

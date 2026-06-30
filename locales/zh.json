@@ -138,7 +138,9 @@
     "reward_per_entry": "CNOVA 奖励 / 次入场",
     "stability_fund": "Stability Rescue Fund",
     "community_wallet": "社区钱包",
-    "buyback_reserve": "Buyback Reserve"
+    "buyback_reserve": "Buyback Reserve",
+    "cnova_burnt": "🔥 CNOVA 总销毁量",
+    "burnt_sub": "所有时间的兑换与销毁"
   },
   "split": {
     "title": "入场费分配 — T1 每 $10",

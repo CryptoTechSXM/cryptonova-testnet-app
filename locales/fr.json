@@ -138,7 +138,9 @@
     "reward_per_entry": "Récompense CNOVA / Entrée",
     "stability_fund": "Fonds de Secours Stabilité",
     "community_wallet": "Portefeuille Communautaire",
-    "buyback_reserve": "Réserve de Rachat"
+    "buyback_reserve": "Réserve de Rachat",
+    "cnova_burnt": "🔥 Total CNOVA Brûlé",
+    "burnt_sub": "racheté & brûlé depuis toujours"
   },
   "split": {
     "title": "Répartition des Frais — par 10 $ au T1",

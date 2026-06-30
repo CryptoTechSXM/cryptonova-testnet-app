@@ -138,7 +138,9 @@
     "reward_per_entry": "Giriş Başına CNOVA Ödülü",
     "stability_fund": "İstikrar Kurtarma Fonu",
     "community_wallet": "Topluluk Cüzdanı",
-    "buyback_reserve": "Geri Alım Rezervi"
+    "buyback_reserve": "Geri Alım Rezervi",
+    "cnova_burnt": "🔥 Toplam CNOVA Yakıldı",
+    "burnt_sub": "tüm zamanların itfa & yakım miktarı"
   },
   "split": {
     "title": "Giriş Ücreti Dağılımı — T1'de $10 başına",

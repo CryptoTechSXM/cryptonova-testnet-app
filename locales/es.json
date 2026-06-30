@@ -138,7 +138,9 @@
     "reward_per_entry": "Recompensa CNOVA / Entrada",
     "stability_fund": "Fondo de Rescate de Estabilidad",
     "community_wallet": "Cartera Comunitaria",
-    "buyback_reserve": "Reserva de Recompra"
+    "buyback_reserve": "Reserva de Recompra",
+    "cnova_burnt": "🔥 Total CNOVA Quemado",
+    "burnt_sub": "canjeado y quemado desde el inicio"
   },
   "split": {
     "title": "Distribución de Tarifas — por $10 en T1",
