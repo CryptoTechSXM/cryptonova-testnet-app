@@ -3194,6 +3194,7 @@ async function loadDashboardData() {
   if (window._dashLoadInFlight) return;   // prevent concurrent double-loads
   window._dashLoadInFlight = true;
   if (!userAddr) {
+    window._dashLoadInFlight = false; // reset guard before early return
     showEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
   }
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
