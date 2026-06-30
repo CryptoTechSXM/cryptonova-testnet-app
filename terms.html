@@ -79,79 +79,57 @@
   </style>
 </head>
 <body>
-<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.30 is live ───────── -->
-<div id="maintenance-gate" style="
-  position:fixed;inset:0;z-index:99999;
-  background:#0a0e1a;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;text-align:center;font-family:system-ui,sans-serif;">
-
-  <!-- logo -->
+<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.30 is live ───────────── -->
+<div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
   <div style="font-size:clamp(28px,6vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:32px;">
     <span style="color:#e2e8f0;">Crypto</span><span style="color:#00e5a0;">Nova</span>
   </div>
-
-  <!-- pulsing ring -->
   <div style="position:relative;width:80px;height:80px;margin-bottom:32px;">
-    <div style="
-      position:absolute;inset:0;border-radius:50%;
-      border:2px solid rgba(0,229,160,0.15);
-      animation:ping 2s cubic-bezier(0,0,.2,1) infinite;"></div>
-    <div style="
-      position:absolute;inset:10px;border-radius:50%;
-      background:rgba(0,229,160,0.08);
-      border:1px solid rgba(0,229,160,0.3);
-      display:flex;align-items:center;justify-content:center;">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-      </svg>
+    <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(0,229,160,0.15);animation:ping 2s cubic-bezier(0,0,.2,1) infinite;"></div>
+    <div style="position:absolute;inset:10px;border-radius:50%;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.3);display:flex;align-items:center;justify-content:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
     </div>
   </div>
-
-  <!-- headline -->
-  <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">
-    Testnet V8.29 has been retired
-  </h1>
-
-  <!-- sub-message -->
-  <p style="color:#94a3b8;font-size:clamp(14px,2vw,17px);max-width:480px;line-height:1.6;margin:0 0 32px;">
-    We are baking <strong style="color:#00e5a0;">V8.30</strong> — a major upgrade with
-    self-rescue, on-chain coupons, and improved stability.
-    It will be landing <strong style="color:#e2e8f0;">very soon.</strong>
+  <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.30 Testnet — Opening Soon</h1>
+  <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
+    V8.30 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
   </p>
-
-  <!-- status pill -->
-  <div style="
-    display:inline-flex;align-items:center;gap:8px;
-    background:rgba(0,229,160,0.08);
-    border:1px solid rgba(0,229,160,0.25);
-    border-radius:99px;padding:8px 20px;
-    color:#00e5a0;font-size:14px;font-weight:500;">
-    <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;
-      animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    Upgrade in progress — please check back soon
+  <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
+  <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
+    <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
+    V8.30 Testnet — Community Bug-Bash
   </div>
-
-  <style>
-    @keyframes ping {
-      75%,100%{transform:scale(1.6);opacity:0}
-    }
-    @keyframes pulse {
-      0%,100%{opacity:1} 50%{opacity:.3}
-    }
-  </style>
+  <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
   <script>
-    // Admin domain is always open — gate bypasses itself on admin.cryptonova.ai
     (function(){
       var h = window.location.hostname;
       if (h === 'admin.cryptonova.ai' || h === 'admin.crypto-nova.app' || h.startsWith('admin.')) {
         var g = document.getElementById('maintenance-gate');
         if (g) g.remove();
+        return;
       }
+      var EARLY_MS = 1782785700000;
+      var MAIN_MS  = 1782786600000;
+      var openMs = (h.indexOf('early.') !== -1) ? EARLY_MS : MAIN_MS;
+      function tick() {
+        var diff = openMs - Date.now();
+        if (diff <= 0) {
+          var gate = document.getElementById('maintenance-gate');
+          if (gate) gate.remove();
+          return;
+        }
+        var s = Math.floor(diff / 1000);
+        var m = Math.floor(s / 60);
+        s = s % 60;
+        var el = document.getElementById('gate-countdown');
+        if (el) el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        setTimeout(tick, 500);
+      }
+      tick();
     })();
   </script>
 </div>
-<!-- ── END MAINTENANCE GATE ──────────────────────────────────────────────────── -->
+<!-- ── END MAINTENANCE GATE ──────────────────────────────────────────── -->
 
 
 <header>
