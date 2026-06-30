@@ -594,7 +594,7 @@
   </div>
     <div class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile"><span style="color:var(--text)">C</span>NOVA</span></div>
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"><span class="vb-d">V8.29 ADMIN</span><span class="vb-m">V8.29</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"><span class="vb-d">V8.30 ADMIN</span><span class="vb-m">V8.30</span></span>
   </a>
   <div class="header-meta">
     <div id="lang-switcher"></div>
@@ -2121,6 +2121,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     // ethers FallbackProvider constructor may vary — fall back to single provider
     readProvider = _mkRpc(RPC_URL);
   }
+  // Auto-navigate to tab if arriving from sub-page link
+  if (window.location.hash === '#dashboard') { setTimeout(function(){ if(typeof showTab==='function') showTab('dashboard'); }, 200); }
   loadHomeStats();
   setTimeout(loadDaoWidget, 1200);   // DAO widget — lightweight, stagger after loadHomeStats
   setTimeout(loadTiersStats, 1500);  // stagger after loadHomeStats to avoid RPC rate-limiting
@@ -3614,8 +3616,8 @@ async function loadDashboardData() {
           setText('dash-withdraw-amount', fmt6(free));
           const badge = document.getElementById('dash-reserved-badge');
           const lbl   = document.getElementById('dash-ready-label');
-          if (badge) { badge.textContent = `⚙ $${fmt6(reserved)} reserved`; badge.style.display = 'block'; }
-          if (lbl)   lbl.textContent = `$${fmt6(free)} free to claim`;
+          if (badge) { badge.textContent = `⚙ ${fmt6(reserved)} reserved`; badge.style.display = 'block'; }
+          if (lbl)   lbl.textContent = `${fmt6(free)} free to claim`;
 
           // Reserve notice banner in withdraw panel
           const notice = document.getElementById('withdraw-reserve-notice');
@@ -3623,7 +3625,7 @@ async function loadDashboardData() {
           const totEl  = document.getElementById('reserve-total-text');
           if (notice) notice.style.display = 'block';
           if (detEl)  detEl.innerHTML = details.map(d => `• ${d}`).join('<br>');
-          if (totEl)  totEl.textContent = `Total reserved: $${fmt6(reserved)} — held for your automation settings`;
+          if (totEl)  totEl.textContent = `Total reserved: ${fmt6(reserved)} — held for your automation settings`;
 
           // Re-render fee breakdown against the free amount
           try {
