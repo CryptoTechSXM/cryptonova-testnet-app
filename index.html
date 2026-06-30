@@ -3393,7 +3393,13 @@ async function loadMyCoupons() {
     }
     el.innerHTML = rows;
   } catch(e) {
-    el.innerHTML = '<div style="font-size:13px;color:#f87171;padding:8px">' + friendlyError(e) + '</div>';
+    const _errMsg = friendlyError(e);
+    if (_errMsg.includes('rate limit') || _errMsg.includes('Rate limit')) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">⏱️ Rate limited — retrying in 5s...</div>';
+      setTimeout(() => loadMyCoupons(), 5000);
+    } else {
+      el.innerHTML = '<div style="font-size:13px;color:#f87171;padding:8px">' + _errMsg + '</div>';
+    }
   }
 }
 
@@ -4002,7 +4008,7 @@ async function loadDashboardData() {
 
     // Community Wallet — load founder status + claimable
     await loadCWData(userAddr, signer, rp).catch(e => console.error('CW load error:', e.message));
-    loadMyCoupons().catch(e => console.error('coupons load error:', e.message));
+    setTimeout(() => loadMyCoupons().catch(e => console.error('coupons load error:', e.message)), 4000);
 
   } catch(e) { console.error('loadDashboardData:', e.message); }
   finally { window._dashLoadInFlight = false; }
