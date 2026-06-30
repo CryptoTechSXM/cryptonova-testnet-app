@@ -236,7 +236,6 @@
       .vbadge { padding: 2px 4px !important; font-size: 9px !important; margin-left: 3px !important; }
       .header-meta { order: unset; gap: 4px; flex: none; }
       .wn-full { display: none; }
-      .tl { display: none; }
       .theme-toggle { padding: 5px 7px; font-size: 14px; }
       .header-wallet { order: unset; width: auto; margin-top: 0; flex: 1; justify-content: flex-end; gap: 6px; }
       #btn-connect { padding: 7px 10px; font-size: 12px; flex: none; display: none !important; }
@@ -594,7 +593,7 @@
   </div>
     <div class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile"><span style="color:var(--text)">C</span>NOVA</span></div>
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TN</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TNet</span></span>
     <span id="domain-badge" style="display:none"></span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.30</span><span class="vb-m">V8.30</span></span>
   </a>
@@ -2237,6 +2236,7 @@ async function connectWallet(silent=false) {
     localStorage.setItem('cnova_connected', '1'); // remember for auto-reconnect on refresh
     if (!silent) toast(`Connected: ${short(userAddr)}`, 'success');
     loadUserData();
+    setTimeout(() => { if (signer) loadDashboardData(); }, 400); // mobile: ensure dashboard refreshes after connect
   } catch(e) {
     if (!silent) toast('Connection cancelled.', 'error');
     btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected');
