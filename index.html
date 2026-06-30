@@ -4921,7 +4921,7 @@ async function doSelfRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const SELF_RESCUE_ABI = ['function selfRescue() external'];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
-    const tx     = await matrix.selfRescue({ gasLimit: 800_000 });
+    const tx     = await matrix.selfRescue({ gasLimit: 5_000_000 }); // matrix may need to cycle 127 slots
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You're back in! Refreshing your dashboard…"; }
@@ -4978,7 +4978,7 @@ async function doCoPayRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const COPAY_ABI = ['function coPayRescue(address member) external'];
     const matrix    = new ethers.Contract(matrixAddr, COPAY_ABI, signer);
-    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 800_000 });
+    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 5_000_000 }); // matrix may need to cycle 127 slots
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
