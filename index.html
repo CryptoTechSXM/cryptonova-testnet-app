@@ -2236,7 +2236,7 @@ async function connectWallet(silent=false) {
     localStorage.setItem('cnova_connected', '1'); // remember for auto-reconnect on refresh
     if (!silent) toast(`Connected: ${short(userAddr)}`, 'success');
     loadUserData();
-    setTimeout(() => { if (signer) loadDashboardData(); }, 400); // mobile: ensure dashboard refreshes after connect
+    setTimeout(() => { if (signer) loadDashboardData(); }, 800); // mobile: ensure dashboard refreshes after connect
   } catch(e) {
     if (!silent) toast('Connection cancelled.', 'error');
     btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected');
@@ -4646,7 +4646,14 @@ function showTab(name) {
   const navBtns = document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)');
   if (navBtns[idx]) navBtns[idx].classList.add('active');
   if (name === 'register') { if (userAddr) loadRegisterTab(); }
-  if (name === 'dashboard') { loadDashboardData(); loadRedeemData(); }
+  if (name === 'dashboard') {
+    loadDashboardData(); loadRedeemData();
+    // Mobile: auto-reconnect may still be in progress — poll until signer arrives
+    if (!signer) {
+      const _dr = setInterval(() => { if (signer) { clearInterval(_dr); loadDashboardData(); } }, 300);
+      setTimeout(() => clearInterval(_dr), 6000);
+    }
+  }
   if (name === 'matrix') { loadQueueView(); setActiveMatrixBtn('btn-load-tree'); }
   if (name === 'home') { loadHomeStats(); loadDaoWidget(); }
   if (name === 'tiers') loadTiersStats();
