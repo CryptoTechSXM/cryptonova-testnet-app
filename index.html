@@ -4711,14 +4711,71 @@ function setStatus(id, msg, type) {
 
 function friendlyError(e) {
   if (!e) return 'Unknown error';
-  const msg = e.reason || e.data?.message || e.message || String(e);
-  if (msg.includes('user rejected') || e.code === 4001) return 'Transaction cancelled.';
-  if (msg.includes('does not support ENS') || msg.includes('getEnsAddress')) return 'Network error — please disconnect and reconnect your wallet.';
-  if (msg.includes('insufficient funds')) return 'Insufficient ETH for gas.';
-  if (msg.includes('already registered') || msg.includes('AlreadyJoined') || msg.includes('already joined')) return 'This wallet is already registered — view your Dashboard.';
-  if (msg.includes('USDC') && msg.includes('allowance')) return 'USDC not approved — complete Step 1 first.';
-  if (msg.includes('execution reverted')) return 'Transaction reverted: ' + (msg.split('execution reverted:')[1]||'').trim().slice(0,80);
-  return msg.slice(0, 120);
+  // Ethers v6 error shapes
+  const code    = e.code || '';
+  const raw     = e.message || String(e);
+  const msg     = e.reason || e.shortMessage || e.data?.message || raw;
+  const msgLow  = (msg + raw).toLowerCase();
+
+  // ── User cancelled ──────────────────────────────────────────────────────
+  if (code === 'ACTION_REJECTED' || e.code === 4001 ||
+      msgLow.includes('user rejected') || msgLow.includes('user denied') ||
+      msgLow.includes('user cancelled'))
+    return '✋ You cancelled — nothing was sent.';
+
+  // ── RPC / network rate limit ────────────────────────────────────────────
+  if (msgLow.includes('rate limit') || msgLow.includes('over rate limit') ||
+      msgLow.includes('-32016') || msgLow.includes('coalesce'))
+    return '⏱️ RPC rate limit — wait a few seconds and try again.';
+
+  // ── Network / RPC connectivity ──────────────────────────────────────────
+  if (msgLow.includes('could not detect network') || msgLow.includes('network changed') ||
+      msgLow.includes('does not support ens') || msgLow.includes('getensaddress') ||
+      msgLow.includes('failed to fetch') || msgLow.includes('network error'))
+    return '🌐 Network error — disconnect and reconnect your wallet.';
+
+  // ── Gas issues ──────────────────────────────────────────────────────────
+  if (msgLow.includes('insufficient funds for gas') || msgLow.includes('insufficient funds'))
+    return '⛽ Not enough ETH to cover gas fees.';
+  if (msgLow.includes('out of gas') || msgLow.includes('gas required exceeds'))
+    return '⛽ Transaction ran out of gas — please try again.';
+  if (msgLow.includes('underpriced') || msgLow.includes('replacement fee too low'))
+    return '⛽ Gas price too low — try again in a moment.';
+
+  // ── Nonce / pending tx ──────────────────────────────────────────────────
+  if (msgLow.includes('nonce too low') || msgLow.includes('nonce has already been used'))
+    return '🔄 Nonce conflict — refresh the page and try again.';
+  if (msgLow.includes('already known') || msgLow.includes('replacement transaction underpriced'))
+    return '⏳ Transaction already pending — wait for it to confirm.';
+
+  // ── Contract revert reasons ─────────────────────────────────────────────
+  if (msgLow.includes('already registered') || msgLow.includes('alreadyjoined') ||
+      msgLow.includes('already joined'))
+    return '✅ This wallet is already registered — view your Dashboard.';
+  if (msgLow.includes('not a member'))
+    return '❌ Wallet not recognised as a member.';
+  if (msgLow.includes('still in matrix'))
+    return '❌ You are still active in the matrix — no rescue needed.';
+  if (msgLow.includes('not parked'))
+    return '❌ You are not in the rescue queue.';
+  if (msgLow.includes('sf: below floor') || msgLow.includes('sf: not authorized'))
+    return '❌ Stability Fund error — please try Self Rescue instead.';
+  if (msgLow.includes('allowance') && msgLow.includes('usdc'))
+    return '❌ USDC not approved — complete Step 1 first.';
+  if (msgLow.includes('transfer amount exceeds balance'))
+    return '❌ Insufficient USDC balance.';
+
+  // ── Generic on-chain revert ─────────────────────────────────────────────
+  if (code === 'CALL_EXCEPTION' || msgLow.includes('execution reverted') ||
+      msgLow.includes('call_exception')) {
+    // Try to extract the revert string
+    const match = msg.match(/reverted[^:]*:\s*(.+)/i) || raw.match(/reverted[^:]*:\s*(.+)/i);
+    if (match) return '❌ ' + match[1].trim().slice(0, 100);
+    return '❌ Transaction reverted on-chain — try again or contact support.';
+  }
+
+  // ── Fallback ────────────────────────────────────────────────────────────
+  return '❌ ' + msg.slice(0, 120);
 }
 
 async function addCNOVAtoMetaMask() {
@@ -4902,10 +4959,7 @@ async function approveSelfRescue() {
     if (btn) btn.disabled = false;
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Approval cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Approval failed');
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
     if (btn) btn.disabled = false;
   }
 }
@@ -4929,10 +4983,7 @@ async function doSelfRescue() {
     setTimeout(() => loadDashboardData(), 3000);
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Transaction cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Self rescue failed');
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
     if (btn) btn.disabled = false;
   }
 }
@@ -4958,10 +5009,7 @@ async function approveCoPayRescue() {
     if (btn) btn.disabled = false;
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Approval cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Approval failed');
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
     if (btn) btn.disabled = false;
   }
 }
@@ -4986,10 +5034,7 @@ async function doCoPayRescue() {
     setTimeout(() => loadDashboardData(), 3000);
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Transaction cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Co-pay rescue failed');
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
     if (btn) btn.disabled = false;
   }
 }
