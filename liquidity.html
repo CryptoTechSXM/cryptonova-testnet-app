@@ -819,7 +819,7 @@ async function connectWallet(silent = false) {
   if (silent) {
     // Silent auto-connect: bypass eth_requestAccounts for Rabby/MetaMask mobile
     const accs = await window.ethereum.request({ method: 'eth_accounts' });
-    if (!accs.length) return;
+    if (!accs.length) { localStorage.removeItem('cnova_connected'); return; }
     provider = new ethers.BrowserProvider(window.ethereum);
     const silentNet = await provider.getNetwork();
     if (Number(silentNet.chainId) !== CHAIN_ID) return;
@@ -851,6 +851,7 @@ async function connectWallet(silent = false) {
   const wt2 = detectWalletType();
   const _wl = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt2 ? ' (' + wt2 + ')' : '');
   ['btn-connect','btn-connect-m'].forEach(id => { const b = document.getElementById(id); if (b) { b.textContent = _wl; b.classList.add('connected'); } });
+  localStorage.setItem('cnova_connected', '1');
 
   document.getElementById('connect-prompt').style.display = 'none';
   document.getElementById('actions-panel').style.display = 'block';
@@ -1350,22 +1351,17 @@ themeBtn.addEventListener('click', () => {
 
 // ── Auto-connect if previously connected ──────────────────────────────────────
 window.addEventListener('load', async () => {
-  // Retry after 800ms for MetaMask mobile injection lag
+  // Retry after 800ms for MetaMask mobile injection lag — only if previously connected
   const _tryAutoConnect = async () => {
-    if (!window.ethereum) return;
+    if (!window.ethereum || !localStorage.getItem('cnova_connected')) return;
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (accounts.length) connectWallet(true);
+    else { localStorage.removeItem('cnova_connected'); }
   };
   await _tryAutoConnect();
   setTimeout(() => _tryAutoConnect(), 800);
-  // Load public pool stats even without wallet
-  try {
-    const rp = new ethers.JsonRpcProvider('https://sepolia.base.org');
-    const poolR = new ethers.Contract(POOL_ADDR, POOL_ABI, rp);
-    const [ts, td] = await Promise.all([poolR.totalStaked(), poolR.totalRewardDistributed()]);
-    set('stat-total-staked', fmtUSD(ts));
-    set('stat-total-dist',   fmtUSD(td));
-  } catch (_) {}
-});
-</script>
-</body>
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', accs => {
+      if (!accs.length) {
+        localStorage.removeItem('cnova_connected');
+        signer = null; 

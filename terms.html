@@ -394,19 +394,27 @@ function detectWalletType() {
   if (e.isTrust) return 'Trust';
   return 'Wallet';
 }
-async function connectWallet() {
+async function connectWallet(silent = false) {
   if (!window.ethereum) return;
   try {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const accs = await window.ethereum.request({ method: 'eth_accounts' });
-    if (!accs.length) return;
-    const addr = accs[0];
+    let addr;
+    if (silent) {
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) { localStorage.removeItem('cnova_connected'); return; }
+      addr = accs[0];
+    } else {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) return;
+      addr = accs[0];
+    }
     const wt = detectWalletType();
     const label = addr.slice(0,6) + '\u2026' + addr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     ['btn-connect','btn-connect-m'].forEach(id => {
       const b = document.getElementById(id);
       if (b) { b.textContent = label; b.classList.add('connected'); }
     });
+    localStorage.setItem('cnova_connected', '1');
   } catch(e) {}
 }
 function toggleMobileMenu() {
@@ -419,16 +427,4 @@ function toggleMobileMenu() {
 document.addEventListener('click', function(e) {
   const m = document.getElementById('mobile-menu');
   const h = document.querySelector('header');
-  if (m && h && !h.contains(e.target)) { m.classList.remove('open'); }
-});
-document.addEventListener('DOMContentLoaded', async function() {
-  if (window.ethereum) {
-    try {
-      const accs = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accs.length) connectWallet();
-    } catch(e) {}
-  }
-});
-</script>
-</body>
-</html>
+  if (m && h && !h.contains(e.target)) { m.class

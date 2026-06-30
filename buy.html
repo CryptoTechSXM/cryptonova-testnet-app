@@ -625,27 +625,48 @@ function detectWalletType() {
   if (e.isTrust)           return 'Trust';
   return 'Wallet';
 }
-async function connectWallet() {
-  if (!window.ethereum) { setStatus(t('buyPage.js.no_wallet', 'No wallet detected. Please install MetaMask.'), 'error'); return; }
+let _isConnecting = false;
+async function connectWallet(silent = false) {
+  if (_isConnecting) return;
+  if (!window.ethereum) { if (!silent) setStatus(t('buyPage.js.no_wallet', 'No wallet detected. Please install MetaMask.'), 'error'); return; }
+  _isConnecting = true;
   try {
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send('eth_requestAccounts', []);
+    provider = new ethers.BrowserProvider(window.ethereum, ethers.Network.from(CHAIN_ID));
+    if (silent) {
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) { localStorage.removeItem('cnova_connected'); _isConnecting = false; return; }
+    } else {
+      await provider.send('eth_requestAccounts', []);
+    }
     const net = await provider.getNetwork();
     if (Number(net.chainId) !== CHAIN_ID) {
-      setStatus(t('buyPage.js.wrong_network', 'Wrong network. Please switch to Base Sepolia (chainId {n}).').replace('{n}', CHAIN_ID), 'error');
-      return;
+      // Auto-switch to Base Sepolia
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
+        _isConnecting = false; return connectWallet(silent);
+      } catch(swErr) {
+        if (swErr.code === 4902 || swErr.code === -32603) {
+          try {
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            _isConnecting = false; return connectWallet(silent);
+          } catch {}
+        }
+      }
+      if (!silent) setStatus(t('buyPage.js.wrong_network', 'Wrong network. Please switch to Base Sepolia (chainId {n}).').replace('{n}', CHAIN_ID), 'error');
+      _isConnecting = false; return;
     }
     signer  = await provider.getSigner();
     userAddr = await signer.getAddress();
     const wt = detectWalletType();
     const _wl = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     ['btn-connect','btn-connect-m'].forEach(id => { const b = document.getElementById(id); if (b) { b.textContent = _wl; b.classList.add('connected'); } });
+    localStorage.setItem('cnova_connected', '1');
     await refreshWalletState();
     await refreshPurchaseLimits();
     renderActionArea();
   } catch(e) {
-    setStatus(t('buyPage.js.connection_failed', 'Connection failed:') + ' ' + (e.message || e), 'error');
-  }
+    if (!silent) setStatus(t('buyPage.js.connection_failed', 'Connection failed:') + ' ' + (e.message || e), 'error');
+  } finally { _isConnecting = false; }
 }
 
 async function refreshWalletState() {
@@ -1051,34 +1072,4 @@ async function loadActivity() {
   }
 }
 
-// ── Status helper ─────────────────────────────────────────────────────────────
-function setStatus(msg, type) {
-  const el = document.getElementById('tx-status');
-  el.textContent = msg;
-  el.className   = type;
-}
-
-// ── Init ───────────────────────────────────────────────
-// Wrapped in DOMContentLoaded: i18n.js loads with `defer`, only guaranteed to
-// have run by DOMContentLoaded -- calling t() any earlier (e.g. synchronously
-// at the bottom of this inline script) would throw "t is not defined" the very
-// first time a wallet was already connected or on the very first 30s price load.
-window.addEventListener('DOMContentLoaded', () => {
-  loadPriceData();
-  loadActivity();
-  setInterval(loadPriceData, 30_000);  // refresh every 30s
-
-  // Pre-wire wallet — retry after 800ms for MetaMask mobile injection lag
-  const _tryAutoConnect = () => {
-    if (!window.ethereum) return;
-    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(); });
-  };
-  _tryAutoConnect();
-  setTimeout(_tryAutoConnect, 800);
-  if (window.ethereum) {
-    window.ethereum.on('accountsChanged', () => connectWallet());
-    window.ethereum.on('chainChanged', () => location.reload());
-  }
-});
-</script>
-</body
+// ── Status helper ──────────────────────────────────────────────────────────�

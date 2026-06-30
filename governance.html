@@ -1022,11 +1022,12 @@ async function connectWallet(silent = false) {
     const wt = detectWalletType();
     const _wl = userAddr.slice(0,6) + '…' + userAddr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     ['btn-connect','btn-connect-m'].forEach(id => { const b = document.getElementById(id); if (b) { b.textContent = _wl; b.classList.add('connected'); } });
+    localStorage.setItem('cnova_connected', '1');
     await refreshVotingPower();
     await refreshHasVoted(); // fetch on-chain voted state for connected address
     renderProposals(); // re-render to add vote buttons + voted state
     updateProposeGate();
-  } catch(e) { alert(t('govPage.js.connection_failed', 'Connection failed:') + ' ' + e.message); }
+  } catch(e) { if (!silent) alert(t('govPage.js.connection_failed', 'Connection failed:') + ' ' + e.message); }
 }
 
 // ── Voting power ─────────────────────────────────────────────────────────────
@@ -1626,15 +1627,11 @@ window.addEventListener('DOMContentLoaded', () => {
   setInterval(loadProposals, 60_000);
 
   const _tryAutoConnect = () => {
-    if (!window.ethereum) return;
-    window.ethereum.request({ method: 'eth_accounts' }).then(a => { if (a.length) connectWallet(true); });
+    if (!window.ethereum || !localStorage.getItem('cnova_connected')) return;
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => {
+      if (a.length) connectWallet(true);
+      else { localStorage.removeItem('cnova_connected'); }
+    }).catch(() => {});
   };
   _tryAutoConnect();
-  setTimeout(_tryAutoConnect, 800);
-  if (window.ethereum) {
-    window.ethereum.on('accountsChanged', () => connectWallet());
-    window.ethereum.on('chainChanged',    () => location.reload());
-  }
-});
-</script>
-</body>
+  setTimeout(_tryAutoConnect,

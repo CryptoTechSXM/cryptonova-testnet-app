@@ -2191,7 +2191,27 @@ async function connectWallet(silent=false) {
     const network = await provider.getNetwork();
     const chainId = Number(network.chainId);
     if (chainId !== CHAIN_ID) {
+      // Auto-attempt network switch before showing banner
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
+        // Switch accepted — reset flag and retry
+        isConnecting = false;
+        if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
+        return connectWallet(silent);
+      } catch(swErr) {
+        if (swErr.code === 4902 || swErr.code === -32603) {
+          // Chain not in wallet yet — try adding it
+          try {
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            isConnecting = false;
+            if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
+            return connectWallet(silent);
+          } catch(addErr) { /* user rejected add — fall through to banner */ }
+        }
+        // User rejected switch or unknown error — show banner below
+      }
       showNetworkBanner();
+      if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
       reportEvent('WRONG_NETWORK', {
         wallet: walletName, action: 'connect',
         network: String(chainId),
@@ -4878,36 +4898,4 @@ async function doCoPayRescue() {
     const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 800_000 });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
-    if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
-    toast('Co-Pay Rescue successful!', 'success');
-    setTimeout(() => loadDashboardData(), 3000);
-  } catch (e) {
-    const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Transaction cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Co-pay rescue failed');
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
-    if (btn) btn.disabled = false;
-  }
-}
-
-function updateAddrsFromDeployed(d) {
-  if (!d) return;
-  if (d.usdc)          ADDRS.usdc          = d.usdc;
-  if (d.cnova)         ADDRS.cnova         = d.cnova;
-  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
-  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
-  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
-  const t = d.tiers || {};
-  for (let i = 1; i <= 10; i++) {
-    const tier = t[String(i)] || t[i];
-    if (tier) {
-      const key = 'T' + i;
-      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
-    }
-  }
-  console.log('[v8.8] ADDRS updated from deployed JSON');
-}
-</script>
-<script src="/i18n.js" defer></script>
-</body></html>
+    if (status) { s
