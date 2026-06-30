@@ -1024,10 +1024,24 @@
             </div>
           </div>
 
+          <!-- Coupon code input -->
+          <div class="form-group" style="margin-top:14px">
+            <label style="color:var(--text2);font-weight:600;font-size:14px">&#127921; Coupon Code <span style="color:var(--text3);font-weight:400;font-size:12px">(optional)</span></label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="input-coupon" placeholder="Enter your coupon code"
+                style="flex:1;font-size:14px;padding:12px 14px"
+                onblur="validateCouponCode()" />
+              <button onclick="validateCouponCode()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0 16px;font-size:13px;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0">Check</button>
+            </div>
+            <div id="coupon-status" style="font-size:13px;margin-top:6px;min-height:18px"></div>
+          </div>
+
           <div style="margin-bottom:20px">
             <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)" data-i18n="reg.your_balances">Your balances</div>
             <div class="info-row"><span class="info-key" data-i18n="reg.usdc_bal">USDC Balance</span><span class="info-val" id="reg-usdc-bal">—</span></div>
             <div class="info-row"><span class="info-key" data-i18n="reg.usdc_approved">USDC Approved</span><span class="info-val" id="reg-approved">—</span></div>
+            <div id="coupon-discount-row" class="info-row" style="display:none"><span class="info-key">&#127921; Coupon Discount</span><span class="info-val" id="coupon-discount-amount" style="color:var(--green);font-weight:700">—</span></div>
+            <div id="coupon-you-pay-row" class="info-row" style="display:none"><span class="info-key">&#128179; You Pay</span><span class="info-val" id="coupon-you-pay-amount" style="font-weight:700">—</span></div>
             <div id="usdc-low-warn" style="display:none;margin-top:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--yellow)">
               <span data-i18n="reg.usdc_low">⚠️ You need test USDC to register on this testnet.</span>
               <button id="btn-faucet" onclick="claimTestUsdc()" style="display:block;width:100%;margin-top:10px;background:rgba(245,158,11,.2);border:1px solid var(--yellow);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:var(--yellow);cursor:pointer" data-i18n="reg.faucet_btn">
@@ -1919,6 +1933,12 @@ const TIER_ROUTER_ABI = [
   'function globalJoinedCount() external view returns (uint256)',
 ];
 
+const COUPON_REGISTRY_ABI = [
+  'function isValid(bytes32 codeHash) external view returns (bool)',
+  'function couponAmount() external view returns (uint256)',
+  'function redeemCoupon(bytes32 codeHash, address member) external returns (uint256)',
+];
+
 const MATRIX_ABI = [
   'function getMember(address) external view returns (tuple(uint256 id, address referrer, uint256 joinedAt, uint256 withdrawable, uint256 totalEarned, uint256 totalWithdrawn, uint256 cyclesCompleted, bool isInMatrix, bool hasEverJoined))',
   'function occupancy() external view returns (uint256)',
@@ -1936,6 +1956,7 @@ const MATRIX_ABI = [
   'function withdrawTo(address recipient) external',
   'function withdrawPartialTo(address recipient, uint256 amount) external',
   'function withdrawalFeeBps() external view returns (uint256)',
+  'function registerWithCoupon(address referrer, bytes32 couponCodeHash) external',
   'function parkedAt(address) external view returns (uint256)',
   'function isParked(address) external view returns (bool)',
   'function getParkedCount() external view returns (uint256)',
@@ -3098,22 +3119,101 @@ async function loadRegisterTab() {
   } catch(e) { console.error('loadRegisterTab:', e.message); }
 }
 
+// window._activeCoupon = { code, codeHash, couponAmt, youPay } when valid
+window._activeCoupon = null;
+
+async function validateCouponCode() {
+  const input    = document.getElementById('input-coupon');
+  const statusEl = document.getElementById('coupon-status');
+  const code     = input ? input.value.trim() : '';
+  window._activeCoupon = null;
+  const discountRow = document.getElementById('coupon-discount-row');
+  const youPayRow   = document.getElementById('coupon-you-pay-row');
+  if (discountRow) discountRow.style.display = 'none';
+  if (youPayRow)   youPayRow.style.display   = 'none';
+  if (!code) { if (statusEl) statusEl.textContent = ''; _resetApproveBtn(); return; }
+  if (statusEl) statusEl.innerHTML = '<span class="spinner"></span> Checking coupon…';
+  try {
+    const rp        = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const couponReg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
+    const codeHash  = ethers.keccak256(ethers.toUtf8Bytes(code));
+    const [valid, couponAmt] = await Promise.all([
+      couponReg.isValid(codeHash),
+      couponReg.couponAmount(),
+    ]);
+    if (!valid) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">❌ Invalid or expired coupon code.</span>';
+      _resetApproveBtn(); return;
+    }
+    const couponUsdc = Number(couponAmt) / 1e6;
+    const youPay     = Math.max(0, Number(T1_FEE) / 1e6 - couponUsdc);
+    window._activeCoupon = { code, codeHash, couponAmt, youPay };
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✅ Valid coupon — saves $' + couponUsdc.toFixed(2) + '!</span>';
+    const discountEl = document.getElementById('coupon-discount-amount');
+    const youPayEl   = document.getElementById('coupon-you-pay-amount');
+    if (discountEl) discountEl.textContent = '-$' + couponUsdc.toFixed(2);
+    if (youPayEl)   youPayEl.textContent   = youPay === 0 ? 'FREE! 🎉' : '$' + youPay.toFixed(2) + ' USDC';
+    if (discountRow) discountRow.style.display = '';
+    if (youPayRow)   youPayRow.style.display   = '';
+    _updateApproveForCoupon();
+  } catch(e) {
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">❌ ' + friendlyError(e) + '</span>';
+    _resetApproveBtn();
+  }
+}
+
+function _resetApproveBtn() {
+  const btn = document.getElementById('btn-approve');
+  if (!btn) return;
+  btn.textContent = 'Step 1: Approve $10 USDC 🔒';
+  btn.style.borderColor = ''; btn.style.color = '';
+}
+
+function _updateApproveForCoupon() {
+  const c = window._activeCoupon;
+  const btn = document.getElementById('btn-approve');
+  const btnReg = document.getElementById('btn-register');
+  if (!btn || !c) return;
+  if (c.youPay === 0) {
+    btn.textContent = '✓ No Payment Needed — Coupon Covers $10 🎟️';
+    btn.disabled = true; btn.className = 'btn btn-ghost full-w';
+    btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
+    const approvedEl = document.getElementById('reg-approved');
+    if (approvedEl) approvedEl.textContent = '✅ Coupon covers full $10';
+    if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; }
+  } else {
+    btn.textContent = 'Step 1: Approve $' + c.youPay.toFixed(2) + ' USDC 🔒';
+    btn.style.borderColor = ''; btn.style.color = '';
+    btn.disabled = false; btn.className = 'btn btn-green full-w';
+    if (btnReg) { btnReg.disabled = true; btnReg.className = 'btn btn-ghost full-w'; }
+  }
+}
+
 async function approveUSDC() {
   if (!signer) { toast('Connect wallet first', 'error'); return; }
   const btn = document.getElementById('btn-approve');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Approving…';
   try {
     const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    const tx = await usdcW.approve(ADDRS.T1.pm, T1_FEE);
-    setStatus('reg-status', '⏳ Approving USDC to PairManager…', 'info');
+    const c     = window._activeCoupon;
+    // Coupon path: reduced amount approved to MatA (MatA pulls directly in registerWithCoupon)
+    // Normal path: full $10 approved to PairManager
+    const approveAmt    = c ? BigInt(Math.round(c.youPay * 1e6)) : T1_FEE;
+    const approveTarget = c ? ADDRS.T1.matA : ADDRS.T1.pm;
+    const approveLabel  = c ? '$' + c.youPay.toFixed(2) : '$10';
+    const tx = await usdcW.approve(approveTarget, approveAmt);
+    setStatus('reg-status', '⏳ Approving ' + approveLabel + ' USDC…', 'info');
     await tx.wait();
     setStatus('reg-status', '✅ Approved! Now click Step 2.', 'ok');
-    btn.textContent = '✓ Approved';
+    btn.textContent = '✓ Approved ' + approveLabel;
     const btnReg = document.getElementById('btn-register');
     if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; }
-    document.getElementById('reg-approved').textContent = '✅ $10 Approved';
+    const approvedEl = document.getElementById('reg-approved');
+    if (approvedEl) approvedEl.textContent = '✅ ' + approveLabel + ' Approved';
   } catch(e) {
-    btn.disabled = false; btn.textContent = 'Step 1: Approve $10 USDC 🔒';
+    btn.disabled = false;
+    const c2 = window._activeCoupon;
+    btn.textContent = c2 ? 'Step 1: Approve $' + c2.youPay.toFixed(2) + ' USDC 🔒' : 'Step 1: Approve $10 USDC 🔒';
     setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
     if (e.code !== 4001) reportEvent('TX_FAILED', {
       action: 'approve-usdc', error: e.message || String(e),
@@ -3169,17 +3269,32 @@ async function doRegister() {
     const refInput = document.getElementById('input-referrer');
     const referrer = refInput && ethers.isAddress(refInput.value.trim())
       ? refInput.value.trim() : ethers.ZeroAddress;
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.register(referrer);
+
+    const c = window._activeCoupon;
+    let tx;
+    if (c) {
+      // Coupon path: call registerWithCoupon() directly on MatA
+      const matA = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, signer);
+      tx = await matA.registerWithCoupon(referrer, c.codeHash);
+    } else {
+      // Normal path: call register() on TierRouter
+      const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      tx = await tr.register(referrer);
+    }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
-    // Auto-enable default options (auto-reentry on; auto-upgrade is on by contract default)
-    try {
-      const optsTx = await tr.setMemberOptions(false, true, false, { gasLimit: 120_000 });
-      await optsTx.wait();
-      window._memberOptions = { disableUpgrade: false, enableReentry: true, enableDouble: false };
-      try { localStorage.setItem('cnova_opts_' + await signer.getAddress(), JSON.stringify(window._memberOptions)); } catch(_) {}
-    } catch(_) {} // non-critical — member can adjust from Dashboard
+    if (!c) {
+      // Auto-enable default options (auto-reentry on; auto-upgrade is on by contract default)
+      // NOTE: setMemberOptions requires TierRouter.globalJoined — coupon path bypasses TR,
+      // so we skip this for coupon registrations (member can adjust from Dashboard later).
+      try {
+        const tr2 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+        const optsTx = await tr2.setMemberOptions(false, true, false, { gasLimit: 120_000 });
+        await optsTx.wait();
+        window._memberOptions = { disableUpgrade: false, enableReentry: true, enableDouble: false };
+        try { localStorage.setItem('cnova_opts_' + await signer.getAddress(), JSON.stringify(window._memberOptions)); } catch(_) {}
+      } catch(_) {} // non-critical — member can adjust from Dashboard
+    }
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
@@ -3220,7 +3335,17 @@ async function loadDashboardData() {
     const joined = joinedRead.value;
 
     if (!joined) {
-      hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
+      // Coupon-registered members bypass TierRouter globalJoined — check MatA directly
+      try {
+        const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
+        const mData = await matA1.getMember(userAddr);
+        if (!mData.hasEverJoined) {
+          hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
+        }
+        // Member is in MatA via coupon — proceed with dashboard (TR features limited until V8.31)
+      } catch(_) {
+        hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
+      }
     }
 
     hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); showEl('dash-content');
@@ -5041,21 +5166,4 @@ async function doCoPayRescue() {
 
 function updateAddrsFromDeployed(d) {
   if (!d) return;
-  if (d.usdc)          ADDRS.usdc          = d.usdc;
-  if (d.cnova)         ADDRS.cnova         = d.cnova;
-  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
-  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
-  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
-  const t = d.tiers || {};
-  for (let i = 1; i <= 10; i++) {
-    const tier = t[String(i)] || t[i];
-    if (tier) {
-      const key = 'T' + i;
-      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
-    }
-  }
-  console.log('[v8.8] ADDRS updated from deployed JSON');
-}
-</script>
-<script src="/i18n.js" defer></script>
-</body></html>
+  if (d.usdc)          ADDRS.usdc
