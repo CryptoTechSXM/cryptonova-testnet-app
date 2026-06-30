@@ -594,8 +594,11 @@
   </div>
     <div class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile"><span style="color:var(--text)">C</span>NOVA</span></div>
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"><span class="vb-d">V8.30 ADMIN</span><span class="vb-m">V8.30</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TN</span></span>
+    <span id="domain-badge" style="display:none"></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.30</span><span class="vb-m">V8.30</span></span>
   </a>
+  <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="T&L Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
     <div id="lang-switcher"></div>
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span><span class="tl"> Light</span></button>
