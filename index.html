@@ -1375,6 +1375,13 @@
         <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
 
+          <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <strong>Option 1 — Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
+          </div>
+          <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0</span> USDC</button>
+          <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
+          <div id="self-rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+
           <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
             <strong>Option 2 — Co-Pay Rescue (Instant):</strong> The SF loans the gap and re-enters you immediately. Your withdrawable covers the rest. The SF share is recorded as a rescue debt — repaid from future earnings before you can withdraw.
           </div>
@@ -3531,6 +3538,19 @@ async function loadDashboardData() {
         const _sfShare     = parkedInfo.withdrawable / 2n;
         const _shortfall   = parkedInfo.fee > parkedInfo.withdrawable ? parkedInfo.fee - parkedInfo.withdrawable : 0n;
         const _memberShare = _shortfall > _sfShare ? _shortfall - _sfShare : 0n;
+        // Self rescue shortfall tracking
+        window._selfRescueShortfall = parkedInfo.shortfall;
+        const _selfApproveBtn = document.getElementById('btn-self-approve');
+        const _selfRescueBtn  = document.getElementById('btn-self-rescue');
+        const _selfShortfallEl = document.getElementById('self-shortfall-display');
+        if (_selfShortfallEl) _selfShortfallEl.textContent = '$' + fmt6(parkedInfo.shortfall);
+        if (parkedInfo.shortfall > 0n) {
+          if (_selfApproveBtn) _selfApproveBtn.style.display = '';
+          if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = '0.5';
+        } else {
+          if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
+          if (_selfRescueBtn)  { _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
+        }
         window._coPayMemberShare = _memberShare;
         const cpRow = document.getElementById('copay-you-pay-row');
         const cpApprove = document.getElementById('btn-copay-approve');
@@ -4861,6 +4881,62 @@ async function doUpgrade() {
 
 
 // ── Co-Pay Rescue — Step 1: approve USDC to matrix (only if memberShare > 0) ──
+async function approveSelfRescue() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const shortfall = window._selfRescueShortfall || 0n;
+  if (shortfall === 0n) { doSelfRescue(); return; }
+  const btn    = document.getElementById('btn-self-approve');
+  const status = document.getElementById('self-rescue-status');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'Approving USDC…';
+  try {
+    const matrixAddr = window._parkedMatrixAddr;
+    if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
+    const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+    const tx   = await usdc.approve(matrixAddr, shortfall);
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) { status.style.color = 'var(--green)'; status.textContent = '✅ USDC approved — now click Self Rescue.'; }
+    const rescueBtn = document.getElementById('btn-self-rescue');
+    if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.opacity = '1'; }
+    if (btn) btn.disabled = false;
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
+      ? '✋ Approval cancelled — nothing was sent.'
+      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Approval failed');
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function doSelfRescue() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const btn    = document.getElementById('btn-self-rescue');
+  const status = document.getElementById('self-rescue-status');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'Submitting self rescue…';
+  try {
+    const matrixAddr = window._parkedMatrixAddr;
+    if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
+    const SELF_RESCUE_ABI = ['function selfRescue() external'];
+    const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
+    const tx     = await matrix.selfRescue({ gasLimit: 800_000 });
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You're back in! Refreshing your dashboard…"; }
+    toast('Self Rescue successful! You\'re back in the matrix.', 'success');
+    setTimeout(() => loadDashboardData(), 3000);
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
+      ? '✋ Transaction cancelled — nothing was sent.'
+      : '❌ ' + (e.reason || e.shortMessage || e.message || 'Self rescue failed');
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendly; }
+    if (btn) btn.disabled = false;
+  }
+}
+
 async function approveCoPayRescue() {
   if (!signer) { toast('Connect your wallet first.', 'error'); return; }
   const memberShare = window._coPayMemberShare || 0n;
