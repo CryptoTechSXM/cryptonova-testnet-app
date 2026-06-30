@@ -837,13 +837,13 @@ async function connectWallet(silent = false) {
       if (!accs.length) return;
       addr = accs[0];
     }
+    localStorage.setItem('cnova_connected', '1');
     const wt = detectWalletType();
     const label = addr.slice(0,6) + '\u2026' + addr.slice(-4) + (wt ? ' (' + wt + ')' : '');
     ['btn-connect','btn-connect-m'].forEach(id => {
       const b = document.getElementById(id);
       if (b) { b.textContent = label; b.classList.add('connected'); }
     });
-    localStorage.setItem('cnova_connected', '1');
   } catch(e) {}
 }
 function toggleMobileMenu() {
@@ -856,4 +856,28 @@ function toggleMobileMenu() {
 document.addEventListener('click', function(e) {
   const m = document.getElementById('mobile-menu');
   const h = document.querySelector('header');
-  if (m && h && !h.contains(e.target)) { m.class
+  if (m && h && !h.contains(e.target)) { m.classList.remove('open'); }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.ethereum && localStorage.getItem('cnova_connected')) {
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => {
+      if (a.length) connectWallet(true);
+      else localStorage.removeItem('cnova_connected');
+    }).catch(() => {});
+  }
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', accs => {
+      if (!accs.length) {
+        localStorage.removeItem('cnova_connected');
+        ['btn-connect','btn-connect-m'].forEach(id => {
+          const b = document.getElementById(id);
+          if (b) { b.textContent = 'Connect Wallet'; b.classList.remove('connected'); }
+        });
+      }
+    });
+    window.ethereum.on('chainChanged', () => location.reload());
+  }
+});
+</script>
+</body>
+</html>

@@ -997,7 +997,7 @@ async function connectWallet(silent = false) {
     provider = new ethers.BrowserProvider(window.ethereum);
     if (silent) {
       const accs = await window.ethereum.request({ method: 'eth_accounts' });
-      if (!accs.length) return;
+      if (!accs.length) { localStorage.removeItem('cnova_connected'); return; }
       const silentNet = await provider.getNetwork();
       if (Number(silentNet.chainId) !== CHAIN_ID) return;
       signer = new ethers.JsonRpcSigner(provider, accs[0]);
@@ -1630,8 +1630,23 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!window.ethereum || !localStorage.getItem('cnova_connected')) return;
     window.ethereum.request({ method: 'eth_accounts' }).then(a => {
       if (a.length) connectWallet(true);
-      else { localStorage.removeItem('cnova_connected'); }
+      else localStorage.removeItem('cnova_connected');
     }).catch(() => {});
   };
   _tryAutoConnect();
-  setTimeout(_tryAutoConnect,
+  setTimeout(_tryAutoConnect, 800);
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', accs => {
+      if (!accs.length) {
+        localStorage.removeItem('cnova_connected');
+        ['btn-connect','btn-connect-m'].forEach(id => {
+          const b = document.getElementById(id);
+          if (b) { b.textContent = 'Connect Wallet'; b.classList.remove('connected'); }
+        });
+      } else { connectWallet(true); }
+    });
+    window.ethereum.on('chainChanged', () => location.reload());
+  }
+});
+</script>
+</body>

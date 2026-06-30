@@ -1351,12 +1351,12 @@ themeBtn.addEventListener('click', () => {
 
 // ── Auto-connect if previously connected ──────────────────────────────────────
 window.addEventListener('load', async () => {
-  // Retry after 800ms for MetaMask mobile injection lag — only if previously connected
+  // Retry after 800ms for MetaMask mobile injection lag
   const _tryAutoConnect = async () => {
     if (!window.ethereum || !localStorage.getItem('cnova_connected')) return;
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (accounts.length) connectWallet(true);
-    else { localStorage.removeItem('cnova_connected'); }
+    else localStorage.removeItem('cnova_connected');
   };
   await _tryAutoConnect();
   setTimeout(() => _tryAutoConnect(), 800);
@@ -1364,4 +1364,23 @@ window.addEventListener('load', async () => {
     window.ethereum.on('accountsChanged', accs => {
       if (!accs.length) {
         localStorage.removeItem('cnova_connected');
-        signer = null; 
+        signer = null; userAddr = null; provider = null;
+        ['btn-connect','btn-connect-m'].forEach(id => {
+          const b = document.getElementById(id);
+          if (b) { b.textContent = 'Connect Wallet'; b.classList.remove('connected'); }
+        });
+      }
+    });
+    window.ethereum.on('chainChanged', () => location.reload());
+  }
+  // Load public pool stats even without wallet
+  try {
+    const rp = new ethers.JsonRpcProvider('https://sepolia.base.org');
+    const poolR = new ethers.Contract(POOL_ADDR, POOL_ABI, rp);
+    const [ts, td] = await Promise.all([poolR.totalStaked(), poolR.totalRewardDistributed()]);
+    set('stat-total-staked', fmtUSD(ts));
+    set('stat-total-dist',   fmtUSD(td));
+  } catch (_) {}
+});
+</script>
+</body>
