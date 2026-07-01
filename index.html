@@ -1425,8 +1425,11 @@
       <!-- Community Wallet -->
       <div class="card" style="margin-bottom:24px">
         <div class="section-title" style="margin-bottom:14px"><div class="dot" style="background:var(--purple)"></div> Community Wallet</div>
-        <div id="cw-not-founder" style="display:none;padding:14px;background:var(--bg3);border-radius:10px;font-size:13px;color:var(--text2)">
-          You are not a founding member. The first <strong id="cw-max-founders">1,000</strong> members earn Community Wallet payouts — the first 500 as <strong>Genesis Members</strong> (#1–500, 60% share) and the next 500 as <strong>Pioneer Members</strong> (#501–1,000, 40% share).
+        <div id="cw-not-founder" style="display:none;padding:14px;background:var(--bg3);border-radius:10px;font-size:13px;color:var(--text2);line-height:1.7">
+          <div style="margin-bottom:8px">🏛️ <strong style="color:#a855f7">Community Wallet — Spots Still Available</strong></div>
+          You're not yet enrolled as a founding member. The first <strong id="cw-max-founders">1,000</strong> members earn <strong>lifetime</strong> Community Wallet payouts from orphan fees — registration is still open!<br><br>
+          <strong>Genesis Members</strong> (#1–500) receive <strong>60%</strong> of each monthly distribution.<br>
+          <strong>Pioneer Members</strong> (#501–1,000) receive <strong>40%</strong> of each monthly distribution.
         </div>
         <div id="cw-founder-panel" style="display:none">
           <div class="grid-2" style="margin-bottom:16px">
@@ -2359,6 +2362,27 @@ function rpc(p) {
   ]);
 }
 
+// ─── localStorage cache helper (stale-while-revalidate) ──────────────────────
+// Stores RPC results so pages render instantly from cache, then refresh in bg.
+// Keys are namespaced by wallet address so different members don't bleed data.
+const _cache = {
+  get(key, ttlMs) {
+    try {
+      const raw = localStorage.getItem('cnova_' + key);
+      if (!raw) return null;
+      const {ts, data} = JSON.parse(raw);
+      if (Date.now() - ts > ttlMs) return null;
+      return data;
+    } catch { return null; }
+  },
+  set(key, data) {
+    try { localStorage.setItem('cnova_' + key, JSON.stringify({ts: Date.now(), data})); } catch {}
+  },
+  del(key) {
+    try { localStorage.removeItem('cnova_' + key); } catch {}
+  }
+};
+
 // ─── CNOVA Price Sparkline ────────────────────────────────────────────────────
 let _priceChart = null;
 function _renderPriceSparkline(history, currentPrice) {
@@ -2451,23 +2475,57 @@ function _renderPriceSparkline(history, currentPrice) {
 }
 
 // ─── Community Wallet ─────────────────────────────────────────────────────────
+// Renders cohort status instantly from localStorage cache, then refreshes from chain.
+// Cache TTL: 5 min for claimable balance; cohort membership is permanent once set.
 async function loadCWData(userAddr, signer, rp) {
   const cwAddr = ADDRS.communityWallet;
   if (!cwAddr || cwAddr === ethers.ZeroAddress) return;
 
+  const cacheKey   = 'cw_' + userAddr.toLowerCase();
+  const cached     = _cache.get(cacheKey, 5 * 60 * 1000); // 5-min TTL
   const loadingEl   = document.getElementById('cw-loading');
   const notFounder  = document.getElementById('cw-not-founder');
   const founderPanel = document.getElementById('cw-founder-panel');
 
+  // ── Render from cache immediately so the panel never flickers ──
+  if (cached && cached.cohortNum > 0) {
+    if (loadingEl)   loadingEl.style.display   = 'none';
+    if (notFounder)  notFounder.style.display  = 'none';
+    if (founderPanel) founderPanel.style.display = 'block';
+    const isGenesisC = cached.cohortNum === 1;
+    setText('cw-tranche',    isGenesisC ? '🌟 Genesis Member' : '🚀 Pioneer Member');
+    setText('cw-founder-id', cached.founderLabel || (isGenesisC ? 'Genesis cohort (#1–500)' : 'Pioneer cohort (#501–1,000)'));
+    setText('cw-claimable',  cached.claimUsd != null ? '$' + cached.claimUsd.toFixed(4) : '—');
+    setText('cw-pending',    cached.cwBal    != null ? fmt6(BigInt(cached.cwBal))        : '—');
+    setText('cw-tranche-a',  cached.genesisSlots  ?? '—');
+    setText('cw-tranche-b',  cached.pioneerSlots  ?? '—');
+    setText('cw-epoch',      cached.epochLabel     ?? '—');
+    // Don't return — still fetch fresh data below and update
+  } else if (cached && cached.cohortNum === 0) {
+    if (loadingEl)   loadingEl.style.display   = 'none';
+    if (notFounder)  notFounder.style.display  = 'block';
+    if (founderPanel) founderPanel.style.display = 'none';
+    // Still refresh in background
+  }
+
   try {
     const cw = new ethers.Contract(cwAddr, CW_ABI, rp);
     const [cohortVal, claimableVal, totalEnrolled, lastDist, interval] = await Promise.all([
-      cw.cohort(userAddr).catch(() => 0n),
+      cw.cohort(userAddr).catch(() => null),          // null = RPC fail; 0n = confirmed not enrolled
       cw.claimable(userAddr).catch(() => 0n),
       cw.totalEnrolled().catch(() => 0n),
       cw.lastDistributionTime().catch(() => 0n),
       cw.distributeInterval().catch(() => 2592000n),  // 30 days default
     ]);
+
+    // RPC failure on the cohort call — don't flash "not a founding member" incorrectly
+    if (cohortVal === null) {
+      if (loadingEl) {
+        loadingEl.style.display = 'block';
+        loadingEl.innerHTML = `<strong style="color:#a855f7">🏛️ Community Wallet</strong><br><span style="color:var(--text3)">⚠️ Could not reach the network. Your founding member status will appear once the connection is restored.</span>`;
+      }
+      return;
+    }
 
     if (loadingEl) loadingEl.style.display = 'none';
     const cohortNum = Number(cohortVal);
@@ -2558,9 +2616,31 @@ async function loadCWData(userAddr, signer, rp) {
       }
     }
 
+    // ── Save fresh data to cache ──────────────────────────────────────────────
+    const epochLabelFresh = (() => {
+      const lastDistN2 = Number(lastDist), intervalN2 = Number(interval);
+      if (lastDistN2 === 0) return 'Pending first distribution';
+      const nextMs2 = (lastDistN2 + intervalN2) * 1000, nowMs2 = Date.now();
+      if (nowMs2 >= nextMs2) return '🟢 Distribution ready to trigger';
+      const days2 = Math.ceil((nextMs2 - nowMs2) / 86400000);
+      const hours2 = Math.ceil((nextMs2 - nowMs2) / 3600000);
+      return days2 >= 2 ? `~${days2} days until next distribution` : `~${hours2} hour${hours2 !== 1 ? 's' : ''} until next distribution`;
+    })();
+    const enrolledFresh = Number(totalEnrolled);
+    _cache.set(cacheKey, {
+      cohortNum,
+      founderLabel: document.getElementById('cw-founder-id')?.textContent ?? null,
+      claimUsd,
+      cwBal:        cwBal.toString(),    // BigInt → string for JSON
+      genesisSlots: Math.min(enrolledFresh, 500) + ' / 500',
+      pioneerSlots: Math.max(0, enrolledFresh - 500) + ' / 500',
+      epochLabel:   epochLabelFresh,
+    });
+
   } catch(e) {
     console.error('loadCWData:', e.message);
-    if (loadingEl) loadingEl.innerHTML = '<span style="color:var(--text3)">Community wallet data unavailable — ' + e.message + '</span>';
+    // Only overwrite the loading panel if we have no cached data to show
+    if (!cached && loadingEl) loadingEl.innerHTML = '<span style="color:var(--text3)">Community wallet data unavailable — ' + e.message + '</span>';
   }
 }
 
@@ -2580,6 +2660,8 @@ async function doCWClaimAll() {
     const receipt = await tx.wait();
     if (statusEl) statusEl.innerHTML =
       `✅ Claimed! <a href="https://sepolia.basescan.org/tx/${receipt.hash}" target="_blank" style="color:var(--green)">View tx ↗</a>`;
+    // Clear CW cache so next load shows fresh claimable balance
+    _cache.del('cw_' + userAddr.toLowerCase());
     // Refresh the panel after 2 seconds
     setTimeout(() => loadCWData(userAddr, signer, readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true })), 2000);
   } catch(e) {
