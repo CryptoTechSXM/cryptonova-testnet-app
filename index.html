@@ -2234,6 +2234,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('input-referrer').value = params.get('ref');
     showTab('register');
   }
+  if (params.get('coupon')) {
+    const _ci = document.getElementById('input-coupon');
+    if (_ci) { _ci.value = params.get('coupon'); showTab('register'); setTimeout(() => validateCouponCode(), 600); }
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -3447,6 +3451,44 @@ function _loadStoredCoupons() {
   return JSON.parse(localStorage.getItem(_couponKey()) || '[]');
 }
 
+function _shareCoupon(code, issuerAddr) {
+  const base     = window.location.origin;
+  const shareUrl = base + '?coupon=' + encodeURIComponent(code) + '&ref=' + issuerAddr;
+  const shareMsg = '\uD83C\uDFDF\uFE0F Join CryptoNova with my exclusive invite! Use coupon code: ' + code + '\n' + shareUrl;
+  const existing = document.getElementById('cnova-share-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'cnova-share-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box';
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;width:100%;box-sizing:border-box';
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  const mkBtn = (label, clr, bg, bdr, fn) => {
+    const b = document.createElement('button');
+    b.style.cssText = 'width:100%;background:' + bg + ';border:1px solid ' + bdr + ';border-radius:10px;padding:12px 16px;font-size:14px;color:' + clr + ';cursor:pointer;font-weight:600;text-align:left;margin-bottom:8px';
+    b.textContent = label;
+    b.addEventListener('click', fn);
+    return b;
+  };
+  card.innerHTML = '<div style="font-size:16px;font-weight:700;color:var(--text1);margin-bottom:4px">\uD83C\uDFDF\uFE0F Share Coupon: ' + code + '</div>'
+    + '<div style="font-size:13px;color:var(--text3);margin-bottom:14px">Your referral link is embedded \u2014 when they open it, your address pre-fills as their referrer.</div>'
+    + '<div style="background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:16px">' + shareUrl + '</div>';
+  const btnWrap = document.createElement('div');
+  btnWrap.appendChild(mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', () => navigator.clipboard.writeText(shareUrl).then(() => toast('Link copied!', 'success'))));
+  btnWrap.appendChild(mkBtn('\uD835\uDD4F  Share on X / Twitter', '#1DA1F2', 'rgba(29,161,242,.1)', 'rgba(29,161,242,.35)', () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareMsg), '_blank')));
+  btnWrap.appendChild(mkBtn('\uD83D\uDCAC  Share on WhatsApp', '#25D366', 'rgba(37,211,102,.08)', 'rgba(37,211,102,.3)', () => window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg), '_blank')));
+  btnWrap.appendChild(mkBtn('\u2708\uFE0F  Share on Telegram', '#0088cc', 'rgba(0,136,204,.08)', 'rgba(0,136,204,.3)', () => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent('\uD83C\uDFDF\uFE0F Join CryptoNova! Coupon: ' + code), '_blank')));
+  const closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'width:100%;margin-top:4px;background:none;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13px;color:var(--text3);cursor:pointer';
+  closeBtn.textContent = 'Close';
+  closeBtn.addEventListener('click', close);
+  card.appendChild(btnWrap);
+  card.appendChild(closeBtn);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+}
+
 async function loadMyCoupons() {
   const el = document.getElementById('my-coupons-list');
   if (!el || !userAddr) return;
@@ -3476,6 +3518,7 @@ async function loadMyCoupons() {
         actions = '<button data-hash="' + codeHash + '" onclick="doReclaimCoupon(this.dataset.hash)" style="margin-top:8px;background:none;border:1px solid var(--yellow);border-radius:6px;padding:4px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600">Reclaim $' + amt + ' USDC</button>';
       } else {
         badge = '<span style="background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.4);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">ACTIVE (' + daysLeft + 'd left)</span>';
+        if (item.code) actions = '<button data-code="' + item.code + '" data-issuer="' + userAddr + '" onclick="_shareCoupon(this.dataset.code,this.dataset.issuer)" style="margin-top:8px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);border-radius:6px;padding:4px 12px;font-size:12px;color:#c084fc;cursor:pointer;font-weight:600">\uD83D\uDCE4 Share Coupon</button>';
       }
       const label = item.code
         ? '<div style="font-size:13px;font-weight:600;color:var(--text1);letter-spacing:.5px">' + item.code + '</div>'
@@ -3531,6 +3574,7 @@ async function doIssueCoupon() {
     setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! Share this code with the new member.', 'ok');
     btn.textContent = '✅ Issued!';
     toast('Coupon "' + code + '" issued!', 'success');
+    setTimeout(() => _shareCoupon(code, userAddr), 800);
     // Save to localStorage so loadMyCoupons can read it without event queries
     try {
       const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
