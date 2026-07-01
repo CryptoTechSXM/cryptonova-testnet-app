@@ -613,6 +613,22 @@ function toggleTheme() {
 }
 if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
+// ── localStorage cache helper (stale-while-revalidate) ───────────────────────
+const _cache = {
+  get(key, ttlMs) {
+    try {
+      const raw = localStorage.getItem('cnova_' + key);
+      if (!raw) return null;
+      const {ts, data} = JSON.parse(raw);
+      if (Date.now() - ts > ttlMs) return null;
+      return data;
+    } catch { return null; }
+  },
+  set(key, data) {
+    try { localStorage.setItem('cnova_' + key, JSON.stringify({ts: Date.now(), data})); } catch {}
+  }
+};
+
 // ── Wallet ───────────────────────────────────────────────────────────────────
 function detectWalletType() {
   const e = window.ethereum;
@@ -685,6 +701,23 @@ async function refreshWalletState() {
 
 // ── On-chain price data ───────────────────────────────────────────────────────
 async function loadPriceData() {
+  // ── Render from cache instantly (2-min TTL) ───────────────────────────────
+  const cp = _cache.get('buy_price', 2 * 60 * 1000);
+  if (cp) {
+    floorPrice      = cp.floorPrice;
+    currentTierIdx  = cp.currentTierIdx;
+    currentMult     = cp.currentMult;
+    totalSupplyRaw  = BigInt(cp.totalSupplyRaw);
+    const fmt  = n => n > 0 ? '$' + n.toPrecision(4) : '—';
+    const fmtK = n => n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : n.toFixed(0);
+    document.getElementById('floor-price').textContent   = floorPrice > 0 ? fmt(floorPrice) : '—';
+    document.getElementById('current-price').textContent = floorPrice > 0 ? fmt(floorPrice * currentMult) : '—';
+    document.getElementById('current-mult-label').textContent = `${currentMult}× floor (Tier ${currentTierIdx+1})`;
+    document.getElementById('treasury-bal').textContent  = cp.treasuryF > 0 ? '$' + cp.treasuryF.toLocaleString('en-US', {maximumFractionDigits:0}) : '—';
+    document.getElementById('circ-supply').textContent   = cp.supplyF > 0 ? fmtK(cp.supplyF) : '—';
+    renderTiers(cp.supplyF);
+    onAmountChange();
+  }
   try {
     const ro       = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
     const cnova    = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, ro);
@@ -745,6 +778,13 @@ async function loadPriceData() {
     renderTiers(supplyF);
     onAmountChange(); // refresh preview if amount was pre-filled
     await refreshPurchaseLimits();
+
+    // Save fresh data to cache
+    _cache.set('buy_price', {
+      floorPrice, currentTierIdx, currentMult,
+      totalSupplyRaw: totalSupplyRaw.toString(),
+      supplyF, treasuryF
+    });
 
   } catch(e) {
     console.error('loadPriceData:', e);
@@ -1038,6 +1078,11 @@ async function loadActivity() {
     list.innerHTML = '<div class="activity-empty">' + t('buyPage.js.activity_pending', 'Activity feed available once sale contract is live.') + '</div>';
     return;
   }
+
+  // Show cached HTML instantly (5-min TTL)
+  const ca = _cache.get('buy_activity', 5 * 60 * 1000);
+  if (ca) list.innerHTML = ca;
+
   try {
     const ro  = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
     const ds  = new ethers.Contract(DIRECT_SALE_ADDR, [
@@ -1050,6 +1095,7 @@ async function loadActivity() {
 
     if (recent.length === 0) {
       list.innerHTML = `<div class="activity-empty">${t('buyPage.recent_empty', 'No purchases yet — be the first buyer.')}</div>`;
+      _cache.set('buy_activity', list.innerHTML);
       return;
     }
 
@@ -1064,8 +1110,10 @@ async function loadActivity() {
           <span class="activity-usdc">$${usdc}</span>
         </div>`;
     }).join('');
+    _cache.set('buy_activity', list.innerHTML); // save fresh HTML to cache
   } catch(e) {
-    list.innerHTML = '<div class="activity-empty">' + t('buyPage.js.activity_unavailable', 'Activity unavailable.') + '</div>';
+    if (!ca) list.innerHTML = '<div class="activity-empty">' + t('buyPage.js.activity_unavailable', 'Activity unavailable.') + '</div>';
+    // If we have cached HTML, keep showing it silently on error
   }
 }
 

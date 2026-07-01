@@ -969,6 +969,22 @@ function toggleTheme() {
 }
 if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
+// ── localStorage cache helper (stale-while-revalidate) ───────────────────────
+const _cache = {
+  get(key, ttlMs) {
+    try {
+      const raw = localStorage.getItem('cnova_' + key);
+      if (!raw) return null;
+      const {ts, data} = JSON.parse(raw);
+      if (Date.now() - ts > ttlMs) return null;
+      return data;
+    } catch { return null; }
+  },
+  set(key, data) {
+    try { localStorage.setItem('cnova_' + key, JSON.stringify({ts: Date.now(), data})); } catch {}
+  }
+};
+
 // ── Refresh hasVoted for current userAddr ─────────────────────────────────────
 async function refreshHasVoted() {
   if (!userAddr || !allProposals.length) return;
@@ -1063,6 +1079,19 @@ const _withTimeout = (promise, ms) => Promise.race([
 ]);
 
 async function loadProposals() {
+  // Show cached proposal HTML instantly (2-min TTL) — no spinner needed on return visits
+  const cg = _cache.get('gov_proposals', 2 * 60 * 1000);
+  if (cg) {
+    document.getElementById('tab-active').innerHTML     = cg.activeHtml;
+    document.getElementById('tab-timelocked').innerHTML = cg.timelockedHtml;
+    document.getElementById('tab-history').innerHTML    = cg.historyHtml;
+    document.getElementById('active-count').textContent = cg.activeCount;
+    document.getElementById('cnt-active').textContent      = cg.cntActive;
+    document.getElementById('cnt-timelocked').textContent  = cg.cntTimelocked;
+    document.getElementById('cnt-history').textContent     = cg.cntHistory;
+    document.getElementById('proposals-loading').style.display = 'none';
+    switchTabContent(currentTab);
+  }
   try { await _loadProposalsInner(); }
   catch(e) { console.warn('loadProposals fatal:', e); }
   finally { document.getElementById('proposals-loading').style.display = 'none'; }
@@ -1103,6 +1132,17 @@ async function _loadProposalsInner() {
 
   renderProposals();
   updateProposeGate();
+
+  // Save rendered HTML to cache so next page load is instant
+  _cache.set('gov_proposals', {
+    activeHtml:     document.getElementById('tab-active').innerHTML,
+    timelockedHtml: document.getElementById('tab-timelocked').innerHTML,
+    historyHtml:    document.getElementById('tab-history').innerHTML,
+    activeCount:    allProposals.filter(p => p.state === 0n).length,
+    cntActive:      allProposals.filter(p => Number(p.state) === 0).length,
+    cntTimelocked:  allProposals.filter(p => Number(p.state) === 3).length,
+    cntHistory:     allProposals.filter(p => ![0,3].includes(Number(p.state))).length,
+  });
 }
 
 // ── Render proposals ──────────────────────────────────────────────────────────

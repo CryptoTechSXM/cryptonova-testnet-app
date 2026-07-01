@@ -785,8 +785,30 @@ function setWithdrawAll() {
   if (val) document.getElementById('inp-withdraw').value = Math.floor(val / 10) * 10;
 }
 
+// ── localStorage cache helper (stale-while-revalidate) ───────────────────────
+const _cache = {
+  get(key, ttlMs) {
+    try {
+      const raw = localStorage.getItem('cnova_' + key);
+      if (!raw) return null;
+      const {ts, data} = JSON.parse(raw);
+      if (Date.now() - ts > ttlMs) return null;
+      return data;
+    } catch { return null; }
+  },
+  set(key, data) {
+    try { localStorage.setItem('cnova_' + key, JSON.stringify({ts: Date.now(), data})); } catch {}
+  }
+};
+
 // ── Read-only pool stats (no wallet required) ────────────────────────────────
 async function loadPublicStats() {
+  // Show cached pool stats instantly (5-min TTL)
+  const cp = _cache.get('lq_public', 5 * 60 * 1000);
+  if (cp) {
+    set('stat-total-staked', cp.totalStaked);
+    set('stat-total-dist',   cp.totalDist);
+  }
   try {
     const roProvider = new ethers.JsonRpcProvider('https://sepolia.base.org');
     const roPool = new ethers.Contract(POOL_ADDR, POOL_ABI, roProvider);
@@ -794,8 +816,11 @@ async function loadPublicStats() {
       roPool.totalStaked(),
       roPool.totalRewardDistributed(),
     ]);
-    set('stat-total-staked', fmtUSD(totalStaked));
-    set('stat-total-dist',   fmtUSD(totalDist));
+    const tsStr = fmtUSD(totalStaked);
+    const tdStr = fmtUSD(totalDist);
+    set('stat-total-staked', tsStr);
+    set('stat-total-dist',   tdStr);
+    _cache.set('lq_public', { totalStaked: tsStr, totalDist: tdStr });
   } catch (e) {
     console.warn('loadPublicStats error', e);
   }
@@ -865,6 +890,19 @@ if (_bm) _bm.addEventListener('click', connectWallet);
 
 // ── Refresh stats ─────────────────────────────────────────────────────────────
 async function refreshAll() {
+  // Show cached wallet stats instantly (2-min TTL) while fetching fresh
+  if (userAddr) {
+    const cu = _cache.get('lq_user_' + userAddr.toLowerCase(), 2 * 60 * 1000);
+    if (cu) {
+      set('stat-my-stake',  cu.myStake);
+      set('stat-my-share',  cu.myShare);
+      set('stat-pending',   cu.pending);
+      set('my-usdc-bal',    cu.usdcBal);
+      set('my-stake-bal',   cu.myStake);
+      set('harvest-amount', cu.pending);
+      set('banner-pending', cu.pending);
+    }
+  }
   try {
     const [totalStaked, totalDist] = await Promise.all([
       pool.totalStaked(),
@@ -881,14 +919,18 @@ async function refreshAll() {
       ]);
       // share % computed from already-fetched totalStaked above
       const myShare = totalStaked > 0n ? myStaked * 1_000_000n / totalStaked : 0n;
+      const myStakeStr  = fmtUSD(myStaked);
+      const myShareStr  = myStaked === 0n ? '0.00%' : fmtPct(myShare);
+      const myPendStr   = fmtUSD(myPending);
+      const usdcBalStr  = fmtUSD(usdcBal);
 
-      set('stat-my-stake', fmtUSD(myStaked));
-      set('stat-my-share', myStaked === 0n ? '0.00%' : fmtPct(myShare));
-      set('stat-pending',  fmtUSD(myPending));
-      set('my-usdc-bal',   fmtUSD(usdcBal));
-      set('my-stake-bal',  fmtUSD(myStaked));
-      set('harvest-amount', fmtUSD(myPending));
-      set('banner-pending', fmtUSD(myPending));
+      set('stat-my-stake',  myStakeStr);
+      set('stat-my-share',  myShareStr);
+      set('stat-pending',   myPendStr);
+      set('my-usdc-bal',    usdcBalStr);
+      set('my-stake-bal',   myStakeStr);
+      set('harvest-amount', myPendStr);
+      set('banner-pending', myPendStr);
 
       // Reward banner
       const banner = document.getElementById('reward-banner');
@@ -899,6 +941,12 @@ async function refreshAll() {
       const btnHQ = document.getElementById('btn-harvest-quick');
       if (btnH) btnH.disabled = myPending === 0n;
       if (btnHQ) btnHQ.disabled = myPending === 0n;
+
+      // Save to cache
+      _cache.set('lq_user_' + userAddr.toLowerCase(), {
+        myStake: myStakeStr, myShare: myShareStr,
+        pending: myPendStr, usdcBal: usdcBalStr
+      });
     }
   } catch (e) {
     console.warn('refresh error', e);
