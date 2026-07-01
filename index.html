@@ -3786,48 +3786,15 @@ async function loadDashboardData() {
     setText('dash-orig-referrer',  memberReferrer && memberReferrer !== ethers.ZeroAddress
       ? memberReferrer.slice(0,6)+'…'+memberReferrer.slice(-4) : 'Direct');
 
-    // Direct referrals count — scan memberReferrer mapping (event logs too stale on public RPC).
-    // Every read here is retried before giving up, and if any read still fails after
-    // retries we flag the count as incomplete instead of silently undercounting —
-    // a flaky RPC node should never look identical to "this member really has 0 referrals".
+    // Direct referrals count — events-first, scan fallback, localStorage cache.
+    // Shows cached count immediately so the field is never blank on load.
     (async () => {
-      let incomplete = false;
-      try {
-        const trD = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-        const mats = [ADDRS.T1.matA, ADDRS.T1.matB,
-          ...(ADDRS.T2?.matA?[ADDRS.T2.matA,ADDRS.T2.matB]:[]),
-          ...(ADDRS.T3?.matA?[ADDRS.T3.matA,ADDRS.T3.matB]:[]),
-          ...(ADDRS.T4?.matA?[ADDRS.T4.matA,ADDRS.T4.matB]:[]),
-          ...(ADDRS.T5?.matA?[ADDRS.T5.matA,ADDRS.T5.matB]:[]),
-        ];
-        const seen = new Set();
-        for (const m of mats) {
-          const mc = new ethers.Contract(m, MATRIX_ABI, rp);
-          const occRes = await retryRead(() => mc.occupancy());
-          if (!occRes.ok) { incomplete = true; continue; }
-          const occ = Number(occRes.value);
-          if (!occ) continue;
-          const posResults = await Promise.all(
-            Array.from({length:occ}, (_,i) => retryRead(() => mc.posToMember(i+1)))
-          );
-          for (const r of posResults) {
-            if (!r.ok) { incomplete = true; continue; }
-            if (r.value && r.value !== ethers.ZeroAddress) seen.add(r.value.toLowerCase());
-          }
-        }
-        const uniq = [...seen];
-        const refResults = await Promise.all(uniq.map(a => retryRead(() => trD.memberReferrer(a))));
-        let count = 0;
-        for (const r of refResults) {
-          if (!r.ok) { incomplete = true; continue; }
-          if (r.value.toLowerCase() === userAddr.toLowerCase()) count++;
-        }
-        setText('dash-directs', incomplete
-          ? `${count} ` + unknownBadge('Some reads failed after retries — this count may be missing referrals. Refresh to try again.')
-          : count.toString());
-      } catch(_) {
-        setText('dash-directs', unknownBadge('Could not load referral data — RPC error. Refresh to try again.'));
-      }
+      const cached = _cache.get('directs_' + userAddr.toLowerCase(), 30 * 60 * 1000);
+      if (cached) setText('dash-directs', cached.count.toString()); // instant from cache
+      const result = await _getDirectReferrals(userAddr, rp);
+      setText('dash-directs', result.incomplete
+        ? `${result.count} ` + unknownBadge('Some reads failed — count may be incomplete. Refresh to retry.')
+        : result.count.toString());
     })();
 
     // Withdraw button
@@ -4812,65 +4779,141 @@ async function loadMyTree() {
   }
 }
 
+// ─── Shared direct-referrals lookup ──────────────────────────────────────────
+// Strategy: events first (1 RPC call), matrix-scan fallback, localStorage cache.
+// Returns { addrs, count, incomplete, fromCache }
+async function _getDirectReferrals(addr, rp) {
+  const cacheKey = 'directs_' + addr.toLowerCase();
+  const CACHE_TTL = 5 * 60 * 1000; // 5 min
+
+  // ── Try event log approach (fast — 1 call) ────────────────────────────────
+  try {
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const events = await Promise.race([
+      tr.queryFilter(tr.filters.MemberRegistered()),          // all blocks
+      new Promise((_,r) => setTimeout(() => r(new Error('evt_timeout')), 12000))
+    ]);
+    const addrs = events
+      .filter(e => e.args?.referrer?.toLowerCase() === addr.toLowerCase())
+      .map(e => e.args.member);
+    const result = { addrs, count: addrs.length, incomplete: false, fromCache: false };
+    _cache.set(cacheKey, result);
+    return result;
+  } catch(evtErr) {
+    console.warn('directs events failed, trying scan:', evtErr.message);
+  }
+
+  // ── Fallback: matrix scan (T1 only for testnet — higher tiers rarely used) ─
+  try {
+    const trD   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const mats  = [ADDRS.T1?.matA, ADDRS.T1?.matB,
+      ...(ADDRS.T2?.matA ? [ADDRS.T2.matA, ADDRS.T2.matB] : []),
+      ...(ADDRS.T3?.matA ? [ADDRS.T3.matA, ADDRS.T3.matB] : []),
+    ].filter(Boolean);
+    const seen  = new Set();
+    let incomplete = false;
+    for (const matAddr of mats) {
+      const mc     = new ethers.Contract(matAddr, MATRIX_ABI, rp);
+      const occRes = await retryRead(() => mc.occupancy());
+      if (!occRes.ok) { incomplete = true; continue; }
+      const occ = Number(occRes.value);
+      if (!occ) continue;
+      const posRes = await Promise.all(
+        Array.from({length: occ}, (_,i) => retryRead(() => mc.posToMember(i + 1)))
+      );
+      for (const r of posRes) {
+        if (!r.ok) { incomplete = true; continue; }
+        if (r.value && r.value !== ethers.ZeroAddress) seen.add(r.value.toLowerCase());
+      }
+    }
+    const uniq    = [...seen];
+    const refRes  = await Promise.all(uniq.map(a => retryRead(() => trD.memberReferrer(a))));
+    const addrs   = [];
+    for (let i = 0; i < uniq.length; i++) {
+      const r = refRes[i];
+      if (!r.ok) { incomplete = true; continue; }
+      if (r.value.toLowerCase() === addr.toLowerCase()) addrs.push(uniq[i]);
+    }
+    const result = { addrs, count: addrs.length, incomplete, fromCache: false };
+    if (!incomplete) _cache.set(cacheKey, result);
+    return result;
+  } catch(scanErr) {
+    console.warn('directs scan failed:', scanErr.message);
+    const stale = _cache.get(cacheKey, 30 * 60 * 1000); // allow stale up to 30 min on failure
+    if (stale) return { ...stale, fromCache: true };
+    return { addrs: [], count: 0, incomplete: true, fromCache: false };
+  }
+}
+
+// Render helper — used by both the panel and any future callers
+function _renderDirectRows(rowsEl, addrs) {
+  rowsEl.innerHTML = addrs.map(a =>
+    `<div class="info-row">
+      <span class="info-key" style="font-family:monospace;font-size:12px">${a.slice(0,6)}…${a.slice(-4)}</span>
+      <span class="info-val"><a href="https://sepolia.basescan.org/address/${a}" target="_blank" style="color:var(--green);font-size:12px">View ↗</a></span>
+    </div>`
+  ).join('');
+}
+
 async function loadMyDirects() {
   if (!userAddr) { toast('Connect wallet first','error'); return; }
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-  document.getElementById('my-directs-card').style.display='block';
-  document.getElementById('my-directs-loading').style.display='block';
-  document.getElementById('my-directs-empty').style.display='none';
-  document.getElementById('my-directs-list').style.display='none';
-  document.getElementById('matrix-pos-banner').style.display='none';
-  const loadingEl = document.getElementById('matrix-loading');
-  const treeEl    = document.getElementById('matrix-tree');
-  if (loadingEl) loadingEl.style.display='none';
-  if (treeEl) treeEl.style.display='none';
-  try {
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    // Scan memberReferrer mapping — event-log approach fails on public RPCs (block range too old)
-    const allMats = [
-      ADDRS.T1.matA, ADDRS.T1.matB,
-      ...(ADDRS.T2?.matA?[ADDRS.T2.matA,ADDRS.T2.matB]:[]),
-      ...(ADDRS.T3?.matA?[ADDRS.T3.matA,ADDRS.T3.matB]:[]),
-      ...(ADDRS.T4?.matA?[ADDRS.T4.matA,ADDRS.T4.matB]:[]),
-      ...(ADDRS.T5?.matA?[ADDRS.T5.matA,ADDRS.T5.matB]:[]),
-      ...(ADDRS.T6?.matA?[ADDRS.T6.matA,ADDRS.T6.matB]:[]),
-      ...(ADDRS.T7?.matA?[ADDRS.T7.matA,ADDRS.T7.matB]:[]),
-      ...(ADDRS.T8?.matA?[ADDRS.T8.matA,ADDRS.T8.matB]:[]),
-      ...(ADDRS.T9?.matA?[ADDRS.T9.matA,ADDRS.T9.matB]:[]),
-      ...(ADDRS.T10?.matA?[ADDRS.T10.matA,ADDRS.T10.matB]:[]),
-    ];
-    const seen = new Set();
-    for (const matAddr of allMats) {
-      const mc  = new ethers.Contract(matAddr, MATRIX_ABI, rp);
-      const occ = Number(await mc.occupancy().catch(()=>0n));
-      if (!occ) continue;
-      const addrs = await Promise.all(
-        Array.from({length:occ}, (_,i) => mc.posToMember(i+1).catch(()=>ethers.ZeroAddress))
-      );
-      for (const a of addrs) {
-        if (a && a !== ethers.ZeroAddress) seen.add(a);
-      }
-    }
-    const uniq = [...seen];
-    const refs = await Promise.all(uniq.map(a => tr.memberReferrer(a).catch(()=>ethers.ZeroAddress)));
-    const directAddrs = uniq.filter((_,i) => refs[i].toLowerCase() === userAddr.toLowerCase());
-    document.getElementById('my-directs-loading').style.display='none';
-    if (directAddrs.length === 0) {
-      document.getElementById('my-directs-empty').style.display='block';
-      return;
-    }
-    const rowsEl = document.getElementById('my-directs-rows');
-    rowsEl.innerHTML = directAddrs.map(addr =>
-      `<div class="info-row">
-        <span class="info-key" style="font-family:monospace;font-size:12px">${addr.slice(0,6)}…${addr.slice(-4)}</span>
-        <span class="info-val"><a href="https://sepolia.basescan.org/address/${addr}" target="_blank" style="color:var(--green);font-size:12px">View ↗</a></span>
-      </div>`
-    ).join('');
-    setText('matrix-my-node', directAddrs.length.toString());
+
+  const card      = document.getElementById('my-directs-card');
+  const loadingEl = document.getElementById('my-directs-loading');
+  const emptyEl   = document.getElementById('my-directs-empty');
+  const listEl    = document.getElementById('my-directs-list');
+  const rowsEl    = document.getElementById('my-directs-rows');
+
+  card.style.display = 'block';
+  document.getElementById('matrix-pos-banner').style.display = 'none';
+  const matLoad = document.getElementById('matrix-loading');
+  const treeEl  = document.getElementById('matrix-tree');
+  if (matLoad) matLoad.style.display = 'none';
+  if (treeEl)  treeEl.style.display  = 'none';
+
+  // ── Show cached result immediately so the panel is never blank ────────────
+  const cached = _cache.get('directs_' + userAddr.toLowerCase(), 30 * 60 * 1000);
+  if (cached && cached.addrs.length > 0) {
+    _renderDirectRows(rowsEl, cached.addrs);
+    setText('matrix-my-node', cached.count.toString());
     document.getElementById('matrix-my-node-label').textContent = 'My Directs';
-    document.getElementById('my-directs-list').style.display='block';
-  } catch(e) {
-    document.getElementById('my-directs-loading').textContent = 'Error loading directs: ' + e.message.slice(0,100);
+    listEl.style.display    = 'block';
+    emptyEl.style.display   = 'none';
+    loadingEl.innerHTML     = '<span class="spinner"></span> Refreshing…';
+    loadingEl.style.display = 'block';
+  } else {
+    loadingEl.innerHTML     = '<span class="spinner"></span> Loading your direct referrals…';
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    listEl.style.display    = 'none';
+  }
+
+  // ── Fetch fresh data (events-first, scan fallback) ────────────────────────
+  const result = await _getDirectReferrals(userAddr, rp);
+  loadingEl.style.display = 'none';
+
+  if (result.addrs.length === 0 && !result.incomplete) {
+    emptyEl.style.display = 'block';
+    listEl.style.display  = 'none';
+    return;
+  }
+
+  _renderDirectRows(rowsEl, result.addrs);
+  setText('matrix-my-node', result.count.toString() + (result.incomplete ? ' ⚠️' : ''));
+  document.getElementById('matrix-my-node-label').textContent = 'My Directs';
+  listEl.style.display = 'block';
+
+  if (result.fromCache) {
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:12px;color:var(--text3);margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px';
+    note.textContent = '⚠️ Showing last known data — network was unavailable. Click 👥 My Directs to retry.';
+    rowsEl.appendChild(note);
+  } else if (result.incomplete) {
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:12px;color:var(--text3);margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px';
+    note.textContent = '⚠️ Some reads failed — list may be incomplete. Click 👥 My Directs to retry.';
+    rowsEl.appendChild(note);
   }
 }
 
