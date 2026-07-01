@@ -1168,22 +1168,27 @@
       setText('sf-cnova', fmt18(cnovaSup) + ' CNOVA');
       setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
 
-      // ── Rescue loan tracking — incremental accumulator ─────────────────────
-      // Builds an all-time running total by only fetching NEW blocks each poll.
-      // Stored in localStorage so history is never lost across page reloads.
+      // ── Rescue loan tracking — incremental accumulator (rate-limit safe) ──────
+      // Scans MAX 3 chunks (6000 blocks ~1.5hrs) per poll to avoid rate limits.
+      // History builds up gradually across polls. localStorage preserves totals.
       try {
-        const LOAN_KEY   = 'cnova_loans_v8_30';
-        const CHUNK      = 2000;
+        const LOAN_KEY        = 'cnova_loans_v8_30';
+        const CHUNK           = 2000;
+        const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
 
-        // Load accumulated state from localStorage
-        let acc = { fromBlock: 0, totalIssued: '0', loanCount: 0, totalRepaid: '0', repayCount: 0 };
+        // Load accumulated state
+        let acc = { nextBlock: 0, totalIssued: '0', loanCount: 0, totalRepaid: '0', repayCount: 0, catching: true };
         try { const s = localStorage.getItem(LOAN_KEY); if (s) acc = JSON.parse(s); } catch(e) {}
 
         const currentBlk = await provider.getBlockNumber();
-        const scanFrom   = Math.max(acc.fromBlock, currentBlk - 100000); // max 100k block catchup
-        const scanTo     = currentBlk;
 
-        if (scanTo > scanFrom) {
+        // On very first load seed nextBlock to current-6000 so we get recent data fast
+        if (acc.nextBlock === 0) acc.nextBlock = Math.max(0, currentBlk - CHUNK * MAX_CHUNKS_POLL);
+
+        const scanFrom = acc.nextBlock;
+        const scanTo   = Math.min(scanFrom + CHUNK * MAX_CHUNKS_POLL - 1, currentBlk);
+
+        if (scanTo >= scanFrom) {
           let newIssued = 0n, newLoans = 0;
           let newRepaid = 0n, newRepays = 0;
 
@@ -1195,37 +1200,39 @@
           ].filter(k => ADDRS[k] && ADDRS[k] !== '0x0000000000000000000000000000000000000000');
           const allMatrices = matrixKeys.map(k => new ethers.Contract(ADDRS[k], MATRIX_ABI, provider));
 
-          // Fetch one CHUNK at a time to avoid RPC limit
-          for (let from = scanFrom; from < scanTo; from += CHUNK) {
+          for (let from = scanFrom; from <= scanTo; from += CHUNK) {
             const to = Math.min(from + CHUNK - 1, scanTo);
-            // Loans issued
             await Promise.all(allMatrices.map(async mat => {
               const logs = await mat.queryFilter(mat.filters.RescueLoanIssued(), from, to).catch(()=>[]);
               for (const log of logs) {
                 try { newIssued += BigInt(log.args[1] ?? log.args.totalLoan ?? log.args.loanAmount ?? 0n); newLoans++; } catch {}
               }
             }));
-            // Loans repaid
             const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), from, to).catch(()=>[]);
             for (const log of repayLogs) {
               try { newRepaid += BigInt(log.args.amount ?? log.args[0] ?? 0n); newRepays++; } catch {}
             }
           }
 
-          // Add new findings to running totals
           acc.totalIssued = (BigInt(acc.totalIssued) + newIssued).toString();
-          acc.loanCount   += newLoans;
+          acc.loanCount  += newLoans;
           acc.totalRepaid = (BigInt(acc.totalRepaid) + newRepaid).toString();
-          acc.repayCount  += newRepays;
-          acc.fromBlock    = scanTo + 1;
+          acc.repayCount += newRepays;
+          acc.nextBlock   = scanTo + 1;
+          acc.catching    = acc.nextBlock <= currentBlk;
           try { localStorage.setItem(LOAN_KEY, JSON.stringify(acc)); } catch(e) {}
         }
 
-        const totalIssued = BigInt(acc.totalIssued);
-        const totalRepaid = BigInt(acc.totalRepaid);
-        const outstanding = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
-        const issuedTxt      = acc.loanCount > 0 ? `${fmt6(totalIssued)} (${acc.loanCount} loan${acc.loanCount!==1?'s':''})` : '$0.00';
-        const repaidTxt      = acc.repayCount > 0 ? `${fmt6(totalRepaid)} (${acc.repayCount} repayment${acc.repayCount!==1?'s':''})` : '$0.00';
+        const totalIssued    = BigInt(acc.totalIssued);
+        const totalRepaid    = BigInt(acc.totalRepaid);
+        const outstanding    = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
+        const catchingUp     = acc.catching ? ' ⟳' : '';
+        const issuedTxt      = acc.loanCount > 0
+          ? `${fmt6(totalIssued)} (${acc.loanCount} loan${acc.loanCount!==1?'s':''})${catchingUp}`
+          : `$0.00${catchingUp}`;
+        const repaidTxt      = acc.repayCount > 0
+          ? `${fmt6(totalRepaid)} (${acc.repayCount} repayment${acc.repayCount!==1?'s':''})`
+          : '$0.00';
         const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
         const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
         setText('sf-loans-issued',      issuedTxt);
