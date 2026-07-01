@@ -3352,29 +3352,40 @@ async function doRegister() {
 // ═══════════════════════════════════════════════════════════════════════
 // COUPON MANAGER
 // ═══════════════════════════════════════════════════════════════════════
-async function loadMyCoupons(_retries) { _retries = (_retries || 0);
+// ── Coupon localStorage helpers ──────────────────────────────────────────────
+function _couponKey() { return 'cnova_coupons_' + (userAddr || '').toLowerCase(); }
+function _saveCoupon(code, codeHash, amount, expiry) {
+  const list = JSON.parse(localStorage.getItem(_couponKey()) || '[]');
+  if (!list.find(c => c.codeHash === codeHash)) {
+    list.unshift({ code, codeHash, amount: amount.toString(), expiry: Number(expiry) });
+    localStorage.setItem(_couponKey(), JSON.stringify(list));
+  }
+}
+function _loadStoredCoupons() {
+  return JSON.parse(localStorage.getItem(_couponKey()) || '[]');
+}
+
+async function loadMyCoupons() {
   const el = document.getElementById('my-coupons-list');
   if (!el || !userAddr) return;
+  const stored = _loadStoredCoupons();
+  if (stored.length === 0) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">No coupons issued yet. Use the form above to gift an entry to a new member!</div>';
+    return;
+  }
   el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px"><span class="spinner"></span> Loading...</div>';
   try {
     const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
     const reg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
-    const filter = reg.filters.CouponIssued(null, userAddr);
-    const events = await reg.queryFilter(filter, -30000);
-    if (events.length === 0) {
-      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">No coupons issued yet. Use the form above to gift an entry to a new member!</div>';
-      return;
-    }
     const now = Math.floor(Date.now() / 1000);
     let rows = '';
-    for (const ev of events.slice().reverse()) {
-      const codeHash  = ev.args[0];
-      const amount    = ev.args[2];
-      const expiry    = Number(ev.args[3]);
-      const couponD   = await reg.coupons(codeHash);
-      const amt       = (Number(amount) / 1e6).toFixed(2);
-      const expDate   = new Date(expiry * 1000).toLocaleDateString();
-      const daysLeft  = Math.ceil((expiry - now) / 86400);
+    for (const item of stored) {
+      const codeHash = item.codeHash;
+      const couponD  = await reg.coupons(codeHash);
+      const amt      = (Number(item.amount) / 1e6).toFixed(2);
+      const expiry   = item.expiry;
+      const expDate  = new Date(expiry * 1000).toLocaleDateString();
+      const daysLeft = Math.ceil((expiry - now) / 86400);
       let badge = '', actions = '';
       if (couponD.used) {
         badge = '<span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid var(--green2);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">&#10003; REDEEMED</span>';
@@ -3384,22 +3395,18 @@ async function loadMyCoupons(_retries) { _retries = (_retries || 0);
       } else {
         badge = '<span style="background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.4);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">ACTIVE (' + daysLeft + 'd left)</span>';
       }
+      const label = item.code
+        ? '<div style="font-size:13px;font-weight:600;color:var(--text1);letter-spacing:.5px">' + item.code + '</div>'
+        : '<div style="font-size:12px;font-family:monospace;color:var(--text2)">' + codeHash.slice(0,14) + '...</div>';
       rows += '<div style="padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
-        + '<div style="font-size:12px;font-family:monospace;color:var(--text2)">' + codeHash.slice(0,14) + '...</div>'
-        + badge + '</div>'
+        + label + badge + '</div>'
         + '<div style="font-size:12px;color:var(--text3);margin-top:6px">$' + amt + ' USDC &middot; Expires ' + expDate + '</div>'
         + actions + '</div>';
     }
-    el.innerHTML = rows;
+    el.innerHTML = rows || '<div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">No coupons issued yet.</div>';
   } catch(e) {
-    const _errMsg = friendlyError(e);
-    if ((_errMsg.includes('rate limit') || _errMsg.includes('Rate limit')) && _retries < 3) {
-      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">⏱️ Rate limited — retrying in 8s...</div>';
-      setTimeout(() => loadMyCoupons(_retries + 1), 8000);
-    } else {
-      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">Could not load — <span style="color:var(--green);cursor:pointer" onclick="loadMyCoupons()">tap to refresh</span></div>';
-    }
+    el.innerHTML = '<div style="font-size:13px;color:#f87171;padding:8px">' + friendlyError(e) + '</div>';
   }
 }
 
@@ -3442,6 +3449,14 @@ async function doIssueCoupon() {
     setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! Share this code with the new member.', 'ok');
     btn.textContent = '✅ Issued!';
     toast('Coupon "' + code + '" issued!', 'success');
+    // Save to localStorage so loadMyCoupons can read it without event queries
+    try {
+      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _reg2 = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, _rp2);
+      const _cAmt = await _reg2.couponAmount();
+      const _cD   = await _reg2.coupons(codeHash);
+      _saveCoupon(code, codeHash, _cAmt, _cD.expiry);
+    } catch(_) {}
     const ci = document.getElementById('issue-coupon-code');
     if (ci) ci.value = '';
     const ba = document.getElementById('btn-coupon-approve');
@@ -4008,7 +4023,7 @@ async function loadDashboardData() {
 
     // Community Wallet — load founder status + claimable
     await loadCWData(userAddr, signer, rp).catch(e => console.error('CW load error:', e.message));
-    setTimeout(() => loadMyCoupons().catch(e => console.error('coupons load error:', e.message)), 4000);
+    loadMyCoupons().catch(e => console.error('coupons load error:', e.message));
 
   } catch(e) { console.error('loadDashboardData:', e.message); }
   finally { window._dashLoadInFlight = false; }
