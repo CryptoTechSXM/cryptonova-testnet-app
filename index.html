@@ -3352,7 +3352,7 @@ async function doRegister() {
 // ═══════════════════════════════════════════════════════════════════════
 // COUPON MANAGER
 // ═══════════════════════════════════════════════════════════════════════
-async function loadMyCoupons() {
+async function loadMyCoupons(_retries) { _retries = (_retries || 0);
   const el = document.getElementById('my-coupons-list');
   if (!el || !userAddr) return;
   el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px"><span class="spinner"></span> Loading...</div>';
@@ -3360,7 +3360,7 @@ async function loadMyCoupons() {
     const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
     const reg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
     const filter = reg.filters.CouponIssued(null, userAddr);
-    const events = await reg.queryFilter(filter, -200000);
+    const events = await reg.queryFilter(filter, -30000);
     if (events.length === 0) {
       el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">No coupons issued yet. Use the form above to gift an entry to a new member!</div>';
       return;
@@ -3394,11 +3394,11 @@ async function loadMyCoupons() {
     el.innerHTML = rows;
   } catch(e) {
     const _errMsg = friendlyError(e);
-    if (_errMsg.includes('rate limit') || _errMsg.includes('Rate limit')) {
-      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">⏱️ Rate limited — retrying in 5s...</div>';
-      setTimeout(() => loadMyCoupons(), 5000);
+    if ((_errMsg.includes('rate limit') || _errMsg.includes('Rate limit')) && _retries < 3) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">⏱️ Rate limited — retrying in 8s...</div>';
+      setTimeout(() => loadMyCoupons(_retries + 1), 8000);
     } else {
-      el.innerHTML = '<div style="font-size:13px;color:#f87171;padding:8px">' + _errMsg + '</div>';
+      el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">Could not load — <span style="color:var(--green);cursor:pointer" onclick="loadMyCoupons()">tap to refresh</span></div>';
     }
   }
 }
