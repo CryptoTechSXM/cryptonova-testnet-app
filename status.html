@@ -1182,8 +1182,9 @@
 
         const currentBlk = await provider.getBlockNumber();
 
-        // On very first load seed nextBlock to current-6000 so we get recent data fast
-        if (acc.nextBlock === 0) acc.nextBlock = Math.max(0, currentBlk - CHUNK * MAX_CHUNKS_POLL);
+        // On first load seed from ~140k blocks ago (~3.5 days = V8.30 deploy window).
+        // Scans 3 chunks (6k blocks) forward per poll — full history in ~24 polls (~12 min).
+        if (acc.nextBlock === 0) acc.nextBlock = Math.max(0, currentBlk - 140000);
 
         const scanFrom = acc.nextBlock;
         const scanTo   = Math.min(scanFrom + CHUNK * MAX_CHUNKS_POLL - 1, currentBlk);
