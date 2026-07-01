@@ -9,7 +9,7 @@
  *                          on the cryptonova-testnet-app repo
  */
 
-const https = require('https');
+import https from 'https';
 
 const GH_OWNER  = 'CryptoTechSXM';
 const GH_REPO   = 'cryptonova-testnet-app';
@@ -98,7 +98,7 @@ function insertEntry(current, entry) {
 }
 
 // ── Vercel handler ────────────────────────────────────────────────────────────
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
