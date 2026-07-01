@@ -702,6 +702,16 @@
   // ── Last-known-good caches (prevent flicker on poll error) ──
   let _lastParkedHTML  = null;
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
+  let _lastRescueCount = null; // { count, lastTime }
+  // Restore cached display state immediately (survives page reload)
+  try {
+    const _cl = localStorage.getItem('cnova_st_loans');
+    if (_cl) _lastLoansState = JSON.parse(_cl);
+    const _cp = localStorage.getItem('cnova_st_parked');
+    if (_cp) { _lastParkedHTML = _cp; const w = document.getElementById('parked-list-wrap'); if (w) w.innerHTML = _cp; }
+    const _cr = localStorage.getItem('cnova_st_rescue');
+    if (_cr) _lastRescueCount = JSON.parse(_cr);
+  } catch(e) {}
 
   async function loadAll() {
     setText('last-updated', t('statusPage.js.refreshing', 'Refreshing…'));
@@ -801,6 +811,8 @@
       const lastRescueStr = lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—';
       setText('kp-last-rescue', lastRescueStr);
       setText('kp-rescue-count', rescueCount.toString());
+      _lastRescueCount = { count: rescueCount, lastTime: lastRescueTime };
+      try { localStorage.setItem('cnova_st_rescue', JSON.stringify(_lastRescueCount)); } catch(e) {}
 
       // Rescue pill card removed — counts live in the Parked Members dropdown above
       // Update keeper card summary to show last rescue inline
@@ -911,8 +923,11 @@
         totalShortfall += shortfall;
       }
 
-      // Sort: longest-waiting first
+      // Sort: longest-waiting first (these are next to be rescued)
       stillParked.sort((a, b) => a.parkedTs - b.parkedTs);
+      const RESCUE_DISPLAY_LIMIT = 10;
+      const displayParked = stillParked.slice(0, RESCUE_DISPLAY_LIMIT);
+      const hiddenCount   = stillParked.length - displayParked.length;
 
       // Avg shortfall
       const avgShortfall = stillParked.length > 0 ? totalShortfall / BigInt(stillParked.length) : 0n;
@@ -957,6 +972,7 @@
           } else {
             wrap.innerHTML = `<div class="empty-state">✅ No parked members — system is clear</div>`;
             _lastParkedHTML = wrap.innerHTML;
+        try { localStorage.setItem('cnova_st_parked', _lastParkedHTML); } catch(e) {}
           }
         }
       } else {
@@ -972,7 +988,7 @@
           </div>`;
         }
 
-        const rows = stillParked.map(p => {
+        const rows = displayParked.map(p => {
           const eligibleAt   = p.parkedTs + graceSecs;
           const isEligible   = nowSecs >= eligibleAt;
           const secsLeft     = eligibleAt - nowSecs;
@@ -1019,7 +1035,10 @@
             <tbody>${rows}</tbody>
           </table>
           <div style="font-size:11px;color:var(--text3);margin-top:8px">
-            ${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue · ${graceLabel}
+            ${hiddenCount > 0
+              ? `Showing next ${displayParked.length} of ${stillParked.length} in queue (sorted by wait time) · ${graceLabel}`
+              : `${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue · ${graceLabel}`
+            }
           </div>
         `;
         _lastParkedHTML = wrap.innerHTML;
@@ -1200,6 +1219,7 @@
         setText('sf-loans-outstanding', outstandingTxt);
         setClass('sf-loans-outstanding', outstandingCls);
         _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
+        try { localStorage.setItem('cnova_st_loans', JSON.stringify(_lastLoansState)); } catch(e) {}
       } catch(e) {
         console.warn('Loan tracking error:', e);
         if (_lastLoansState) {
@@ -1265,4 +1285,4 @@
   });
 </script>
 </body>
-</html> 
+</html>
