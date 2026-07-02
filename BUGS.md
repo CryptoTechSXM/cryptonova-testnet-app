@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — Auto entry and auto upgràde set up from registration of acco…
+- **Reporter:** Dee1
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xa56cfcde5d539f95c22d723c0ffca5fadf6b47f4
+- **Frequency:** Consistent
+- **What happened:** Auto entry and auto upgràde set up from registration of account. T1 Matrrix was not reentered  at the end of  T1 Matrix B cycle even though money was available. Only T2 matrix showing. It does not give option to restart T1
+- **What was expected:** Tier 1 to be re entered
+- **Notes:** Same in my other accounts
+- **Submitted:** Thu, 02 Jul 2026 19:22:10 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — I have all auto reentry's disabled. I tried to withdraw the …
 - **Reporter:** KolawoleOla
 - **Page:** Dashboard (index.html)
