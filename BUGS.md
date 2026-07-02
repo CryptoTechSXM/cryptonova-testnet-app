@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard — diagnostic test — token fix verification
+- **Reporter:** Claude-diagnostic
+- **Page:** Dashboard
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xtest
+- **Frequency:** Consistent
+- **What happened:** diagnostic test — token fix verification
+- **What was expected:** diagnostic test — should succeed now
+- **Notes:** automated verification after GITHUB_TOKEN fix
+- **Submitted:** Thu, 02 Jul 2026 18:32:52 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — test
 - **Reporter:** test
 - **Page:** Dashboard (index.html)
