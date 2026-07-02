@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — My Member ID# is 444, whereas only 442 members have totally …
+- **Reporter:** Kolawole Ola
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xafa21bb205fc3294d7bc129897889b40ba8b155e
+- **Frequency:** Consistent
+- **What happened:** My Member ID# is 444, whereas only 442 members have totally registered as stated on the Home page.
+- **What was expected:** My member ID should have not exceeded 442.
+- **Submitted:** Thu, 02 Jul 2026 19:26:08 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — Firstly, when I registered with a coupon, on the Registratio…
 - **Reporter:** Kolawole Ola
 - **Page:** Dashboard (index.html)
