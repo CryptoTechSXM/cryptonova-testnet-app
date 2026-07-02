@@ -3998,7 +3998,7 @@ async function loadDashboardData() {
       if (limboInfo) {
         setText('limbo-matrix-label', limboInfo.label);
         setText('limbo-tier', 'T' + limboInfo.tierIdx);
-        setText('limbo-fee', '$' + fmt6(limboInfo.fee));
+        setText('limbo-fee', fmt6(limboInfo.fee));
         limboSec.style.display = '';
         window._limboInfo = limboInfo;
         // Reset button states
@@ -5463,8 +5463,13 @@ async function doUpgrade() {
 // ── Co-Pay Rescue — Step 1: approve USDC to matrix (only if memberShare > 0) ──
 async function approveLimboReEntry() {
   const info = window._limboInfo;
-  if (!info) return;
-  const signer = await getSigner();
+  if (!info) { setStatus('limbo-status', '❌ Session expired — refresh the page', 'err'); return; }
+  setStatus('limbo-status', '⏳ Connecting wallet…', 'info');
+  let signer;
+  try { signer = await getSigner(); } catch(e) {
+    setStatus('limbo-status', '❌ ' + (e.reason || e.message || 'Wallet not connected'), 'err');
+    return;
+  }
   const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
   setStatus('limbo-status', '⏳ Approving USDC…', 'info');
   try {
@@ -5472,17 +5477,23 @@ async function approveLimboReEntry() {
     await tx.wait();
     setStatus('limbo-status', '✅ Approved — click Re-Enter Matrix', 'ok');
   } catch(e) {
-    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'error');
+    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'err');
   }
 }
 
 async function doLimboReEntry() {
   const info = window._limboInfo;
-  if (!info) return;
-  const signer = await getSigner();
-  const matA = new ethers.Contract(info.addr, MATRIX_ABI, signer);
+  if (!info) { setStatus('limbo-status', '❌ Session expired — refresh the page', 'err'); return; }
   const btn = document.getElementById('btn-limbo-reenter');
   if (btn) btn.disabled = true;
+  setStatus('limbo-status', '⏳ Connecting wallet…', 'info');
+  let signer;
+  try { signer = await getSigner(); } catch(e) {
+    setStatus('limbo-status', '❌ ' + (e.reason || e.message || 'Wallet not connected'), 'err');
+    if (btn) btn.disabled = false;
+    return;
+  }
+  const matA = new ethers.Contract(info.addr, MATRIX_ABI, signer);
   setStatus('limbo-status', '⏳ Submitting re-entry…', 'info');
   try {
     const tx = await matA.register(info.referrer, { gasLimit: 500000 });
@@ -5491,7 +5502,7 @@ async function doLimboReEntry() {
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
     setTimeout(() => loadUserData(), 2000);
   } catch(e) {
-    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'error');
+    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'err');
     if (btn) btn.disabled = false;
   }
 }
