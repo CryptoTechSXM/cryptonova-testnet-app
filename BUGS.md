@@ -7,7 +7,16 @@
 
 ## Open Issues
 
-_No open issues yet._
+### [2026-07-02] Dashboard (index.html) — page is going to dashboard
+- **Reporter:** CT Testing Preview Report
+- **Page:** Dashboard (index.html)
+- **Wallet:** Rabby
+- **Frequency:** Consistent
+- **What happened:** page is going to dashboard
+- **What was expected:** Page is going to dashboard
+- **Notes:** can we change the label to home and make it go home instead
+- **Submitted:** Thu, 02 Jul 2026 12:23:46 GMT
+
 
 ---
 
