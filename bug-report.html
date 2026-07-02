@@ -291,14 +291,20 @@
   let sessionPw = sessionStorage.getItem('cnova_bug_pw') || '';
 
   (function init() {
-    if (sessionPw && window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-        if (accounts && accounts[0]) { walletAddress = accounts[0]; showForm(); }
-        else showWallet();
-      }).catch(() => showWallet());
-    } else {
-      showWallet();
-    }
+    if (!window.ethereum) { showWallet(); return; }
+    // eth_accounts: silent check — no popup, returns already-connected accounts only
+    window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+      if (accounts && accounts[0]) {
+        walletAddress = accounts[0];
+        if (sessionPw) {
+          showForm();           // wallet + password already done → jump to form
+        } else {
+          showPasswordScreen(); // wallet connected → skip step 1, go to password
+        }
+      } else {
+        showWallet();           // not connected → show connect wallet step
+      }
+    }).catch(() => showWallet());
   })();
 
   document.getElementById('pw-input').addEventListener('keydown', e => {
