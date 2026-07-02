@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — dashboard is not home
+- **Reporter:** CryptoTech Test bug report
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x84a4d33a4ef25e5de8dca960ab7af592351e4650
+- **Frequency:** Consistent
+- **What happened:** dashboard is not home
+- **What was expected:** dashboard is not home
+- **Notes:** dashboard is not home
+- **Submitted:** Thu, 02 Jul 2026 16:54:51 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — page is going to dashboard
 - **Reporter:** CT Testing Preview Report
 - **Page:** Dashboard (index.html)
