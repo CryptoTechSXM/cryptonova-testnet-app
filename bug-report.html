@@ -91,6 +91,13 @@
       cursor: pointer; font-size: 14px;
     }
     .another-btn:hover { background: #052e16; }
+    .success-home {
+      display:block; margin-top:10px; padding:10px;
+      border:1px solid #334155; border-radius:8px;
+      color:#94a3b8; font-size:14px; text-align:center;
+      text-decoration:none; transition:border-color .2s, color .2s;
+    }
+    .success-home:hover { border-color:#475569; color:#cbd5e1; }
   </style>
 </head>
 <body>
@@ -225,6 +232,7 @@
       <div class="icon">&#9989;</div>
       <p>Bug report submitted and logged. Thank you!</p>
       <button class="another-btn" onclick="resetForm()">Submit another</button>
+      <a href="/" class="success-home">&#8592; Back to Dashboard</a>
     </div>
   </div>
 
