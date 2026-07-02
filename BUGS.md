@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — testnet
+- **Reporter:** testnet
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x84a4d33a4ef25e5de8dca960ab7af592351e4650
+- **Frequency:** Consistent
+- **What happened:** testnet
+- **What was expected:** testnet
+- **Notes:** testnet
+- **Submitted:** Thu, 02 Jul 2026 18:35:28 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — Bug Report Testing
 - **Reporter:** Bug Report Testing
 - **Page:** Dashboard (index.html)
