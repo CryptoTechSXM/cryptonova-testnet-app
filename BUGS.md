@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — test
+- **Reporter:** test
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x84a4d33a4ef25e5de8dca960ab7af592351e4650
+- **Frequency:** Consistent
+- **What happened:** test
+- **What was expected:** test
+- **Notes:** test
+- **Submitted:** Thu, 02 Jul 2026 17:08:20 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — dashboard not home
 - **Reporter:** testing bug report
 - **Page:** Dashboard (index.html)
