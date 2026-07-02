@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — test
+- **Reporter:** yest
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x17152cb14dfe1a057e7ca875c9fab0f2a7c32844
+- **Frequency:** Consistent
+- **What happened:** test
+- **What was expected:** test
+- **Notes:** tesy
+- **Submitted:** Thu, 02 Jul 2026 18:38:43 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — Test
 - **Reporter:** Test
 - **Page:** Dashboard (index.html)
