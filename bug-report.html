@@ -142,9 +142,21 @@
     .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
     .step-dot.active { background: #22c55e; }
     .step-dot.done   { background: #166534; }
-    .back-link { text-align:center; margin-top:20px; }
-    .back-link a { color:#64748b; font-size:13px; text-decoration:none; }
-    .back-link a:hover { color:#94a3b8; }
+    .back-link { margin-top:12px; }
+    .back-link a {
+      display:block;
+      width:100%;
+      padding:12px;
+      border:1px solid #334155;
+      border-radius:8px;
+      color:#94a3b8;
+      font-size:14px;
+      text-align:center;
+      text-decoration:none;
+      transition:border-color .2s, color .2s;
+      box-sizing:border-box;
+    }
+    .back-link a:hover { border-color:#475569; color:#cbd5e1; }
   </style>
 </head>
 <body>
@@ -171,7 +183,7 @@
     <div class="back-link"><a href="/">← Back to Dashboard</a></div>
   </div>
 
-  <!-- ── Step 1: Password ── -->
+  <!-- ── Step 2: Password ── -->
   <div id="pw-screen">
     <div class="steps">
       <div class="step-dot done"></div>
@@ -193,9 +205,10 @@
     <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
     <button class="btn" id="pw-btn" onclick="checkPassword()">Continue</button>
     <div class="msg error" id="pw-error"></div>
+    <div class="back-link"><a href="/">← Back to Dashboard</a></div>
   </div>
 
-  <!-- ── Step 2: Bug report form ── -->
+  <!-- ── Step 3: Bug report form ── -->
   <div id="form-screen">
     <div class="steps">
       <div class="step-dot done"></div>
