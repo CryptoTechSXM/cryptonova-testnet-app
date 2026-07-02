@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — Test
+- **Reporter:** Test
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x662360fb7dd09fbb9178eaa959e097f5e5cb5308
+- **Frequency:** Consistent
+- **What happened:** Test
+- **What was expected:** Test
+- **Notes:** Test
+- **Submitted:** Thu, 02 Jul 2026 18:37:12 GMT
+
+
 ### [2026-07-02] Buy CNOVA (buy.html) — testnet
 - **Reporter:** testnet
 - **Page:** Buy CNOVA (buy.html)
