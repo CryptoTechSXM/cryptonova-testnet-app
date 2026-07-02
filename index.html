@@ -5489,7 +5489,8 @@ async function doLimboReEntry() {
   if (!signer) { toast('Connect your wallet first.', 'error'); return; }
   const btn = document.getElementById('btn-limbo-reenter');
   if (btn) btn.disabled = true;
-  const matA = new ethers.Contract(info.addr, MATRIX_ABI, signer);
+  const REENTRY_ABI = ['function register(address referrer) external'];
+  const matA = new ethers.Contract(info.addr, REENTRY_ABI, signer);
   setStatus('limbo-status', '⏳ Submitting re-entry…', 'info');
   try {
     const tx = await matA.register(info.referrer, { gasLimit: 500000 });
