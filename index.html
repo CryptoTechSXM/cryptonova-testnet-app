@@ -4741,6 +4741,7 @@ async function loadQueueView() {
     setText('matrix-bfs',   Number(mSize) + ' seats');
     const myBfs = userAddr ? await mc.matrixPos(userAddr).catch(()=>0n) : 0n;
     setText('matrix-my-node', myBfs > 0n ? '#'+myBfs.toString() : '—');
+    document.getElementById('matrix-my-node-label').textContent = 'My Position';
     if (loadingEl) loadingEl.style.display='none';
     if (treeEl) { treeEl.style.display='block'; treeEl.innerHTML = renderF8Tree(nodes, userAddr, occ, mSize); }
   } catch(e) {
@@ -4807,6 +4808,7 @@ async function loadMyTree() {
     setText('matrix-my-node', activeBFSUnknown
       ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
       : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
+    document.getElementById('matrix-my-node-label').textContent = 'My Position';
     const banner = document.getElementById('matrix-pos-banner');
     if (banner) {
       banner.style.display='block';
