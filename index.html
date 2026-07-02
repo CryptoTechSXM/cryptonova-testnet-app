@@ -1220,7 +1220,7 @@
       </div>
 
       <!-- ── SF Rescue Loan banner (shown only if member has outstanding debt) ── -->
-      <div id="rescue-debt-banner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:10px;border:1.5px solid var(--yellow);background:rgba(234,179,8,.08);display:flex;align-items:flex-start;gap:12px">
+      <div id="rescue-debt-banner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:10px;border:1.5px solid var(--yellow);background:rgba(234,179,8,.08);align-items:flex-start;gap:12px">
         <span style="font-size:22px;line-height:1">⚡</span>
         <div style="flex:1">
           <div style="font-weight:700;color:var(--yellow);font-size:14px;margin-bottom:4px">SF Rescue Loan Outstanding</div>
@@ -4741,7 +4741,6 @@ async function loadQueueView() {
     setText('matrix-bfs',   Number(mSize) + ' seats');
     const myBfs = userAddr ? await mc.matrixPos(userAddr).catch(()=>0n) : 0n;
     setText('matrix-my-node', myBfs > 0n ? '#'+myBfs.toString() : '—');
-    document.getElementById('matrix-my-node-label').textContent = 'My Position';
     if (loadingEl) loadingEl.style.display='none';
     if (treeEl) { treeEl.style.display='block'; treeEl.innerHTML = renderF8Tree(nodes, userAddr, occ, mSize); }
   } catch(e) {
@@ -4808,7 +4807,6 @@ async function loadMyTree() {
     setText('matrix-my-node', activeBFSUnknown
       ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
       : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
-    document.getElementById('matrix-my-node-label').textContent = 'My Position';
     const banner = document.getElementById('matrix-pos-banner');
     if (banner) {
       banner.style.display='block';
@@ -5530,4 +5528,4 @@ function updateAddrsFromDeployed(d) {
 }
 </script>
 <script src="/i18n.js" defer></script>
-</body></html>
+</body></html>             

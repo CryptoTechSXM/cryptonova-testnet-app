@@ -127,20 +127,41 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // 1. Fetch current BUGS.md
+    // 1. Fetch current BUGS.md (create fresh if file doesn't exist yet)
     const getRes = await ghRequest(
       'GET',
       `/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}`,
       null,
       TOKEN
     );
-    if (getRes.status !== 200) {
+
+    let sha     = null;
+    let current = '';
+
+    if (getRes.status === 200) {
+      sha     = getRes.body.sha;
+      current = Buffer.from(getRes.body.content, 'base64').toString('utf8');
+    } else if (getRes.status === 404) {
+      // File doesn't exist yet in this branch — bootstrap it
+      current = [
+        '# CryptoNova — Issue Tracker',
+        '',
+        '## Open Issues',
+        '',
+        '_No open issues yet._',
+        '',
+        '---',
+        '',
+        '## Resolved Issues',
+        '',
+        '| Date Reported | Date Fixed | Page | Summary | Commit |',
+        '|---|---|---|---|---|',
+        '',
+      ].join('\n');
+    } else {
       console.error('GitHub GET failed:', getRes.status, getRes.body);
       return res.status(502).json({ error: 'Could not read BUGS.md from GitHub' });
     }
-
-    const sha     = getRes.body.sha;
-    const current = Buffer.from(getRes.body.content, 'base64').toString('utf8');
 
     // 2. Build and insert entry
     const entry   = buildEntry({ reporter, page, wallet, frequency, happened, expected, notes });
@@ -153,22 +174,4 @@ export default async function handler(req, res) {
       'PUT',
       `/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
       {
-        message: `bug-report(${date}): ${shortPage} reported by ${reporter}`,
-        content: Buffer.from(updated).toString('base64'),
-        sha,
-        branch: GH_BRANCH
-      },
-      TOKEN
-    );
-
-    if (putRes.status !== 200 && putRes.status !== 201) {
-      console.error('GitHub PUT failed:', putRes.status, putRes.body);
-      return res.status(502).json({ error: 'Failed to save bug report to GitHub' });
-    }
-
-    console.log(`Bug report committed: ${date} — ${page} — ${reporter}`);
-    return res.status(200).json({ ok: true });
-  }
-
-  return res.status(400).json({ error: 'Unknown action' });
-};
+        message: `bug-report(${date}): ${shortPage} reported b
