@@ -1409,6 +1409,21 @@
         </div>
       </div>
 
+      <!-- Reclaimed / Re-entry Section -->
+      <div id="limbo-section" class="card" style="margin-bottom:24px;display:none;border:1px solid var(--yellow);background:rgba(234,179,8,0.06)">
+        <div class="section-title" style="margin-bottom:14px;color:var(--yellow)"><div class="dot" style="background:var(--yellow)"></div> ⚠️ Matrix Slot Cleared</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">
+          Your <strong id="limbo-matrix-label">—</strong> slot was cleared after a period of inactivity — this can happen when a matrix is filling slowly and the idle timer expires. Your tier status and all earnings are safe. Pay the re-entry fee to rejoin.
+        </div>
+        <div class="info-row"><span class="info-key">Tier</span><span class="info-val" id="limbo-tier">—</span></div>
+        <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="limbo-fee">—</span></div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <button class="btn full-w" id="btn-limbo-approve" onclick="approveLimboReEntry()" style="background:rgba(234,179,8,.12);border:1px solid var(--yellow);color:var(--yellow)">Step 1: Approve USDC</button>
+          <button class="btn full-w" id="btn-limbo-reenter" onclick="doLimboReEntry()" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#000;font-weight:700;border:none">🔄 Re-Enter Matrix</button>
+          <div id="limbo-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+        </div>
+      </div>
+
       <!-- TX History -->
       <div class="card" style="margin-bottom:24px">
         <div class="section-title" style="margin-bottom:14px"><div class="dot"></div> My Transaction History</div>
@@ -3677,6 +3692,7 @@ async function loadDashboardData() {
     let highestTier = 0;
     let memberId = 0, memberReferrer = ethers.ZeroAddress;
     let parkedInfo = null; // { label, addr, withdrawable, fee, shortfall }
+    let limboCandidates = []; // reclaimed-limbo: hasEverJoined + !isInMatrix + parkedAt==0
 
     // v8.19 fix (2026-06-20): highestTier below is normally derived by scanning all 20
     // matrix contracts and taking the max hasEverJoined tier — but on a flaky public RPC,
@@ -3738,12 +3754,29 @@ async function loadDashboardData() {
                 fee: BigInt(fee),
                 shortfall: BigInt(fee) > w ? BigInt(fee) - w : 0n,
               };
+            } else if (m.label.includes('Matrix A')) {
+              // No parkedAt either — this is a reclaimed-limbo member
+              const fee = await mc.ENTRY_FEE().catch(()=>0n);
+              limboCandidates.push({
+                label: m.label, addr: m.addr,
+                fee: BigInt(fee),
+                referrer: member.referrer !== ethers.ZeroAddress ? member.referrer : ethers.ZeroAddress,
+                tierIdx: parseInt(m.label.match(/^T(\d+)/)?.[1] || '1'),
+              });
             }
           })());
         }
       }
     }
     if (followUps.length) await Promise.allSettled(followUps); // allSettled — never throws
+
+    // Determine limboInfo: reclaimed-limbo only shown when member has no active position
+    // and is not in the rescue (parked) queue. Pick the highest-tier MatA candidate.
+    let limboInfo = null;
+    if (activePositions.length === 0 && !parkedInfo && limboCandidates.length > 0) {
+      const best = limboCandidates.filter(c => c.tierIdx === Math.max(...limboCandidates.map(x => x.tierIdx)))[0];
+      if (best) limboInfo = best;
+    }
 
     // CNOVA balance + floor price (treasuryUsdc / cnovaSupply)
     // v8.7: floor is backed by Treasury USDC (10% BPS), not SF
@@ -3956,6 +3989,26 @@ async function loadDashboardData() {
         }
       } else {
         rescueSection.style.display = 'none';
+      }
+    }
+
+    // ── Limbo / Reclaimed re-entry section ────────────────────────────────
+    const limboSec = document.getElementById('limbo-section');
+    if (limboSec) {
+      if (limboInfo) {
+        setText('limbo-matrix-label', limboInfo.label);
+        setText('limbo-tier', 'T' + limboInfo.tierIdx);
+        setText('limbo-fee', '$' + fmt6(limboInfo.fee));
+        limboSec.style.display = '';
+        window._limboInfo = limboInfo;
+        // Reset button states
+        const _lBtn = document.getElementById('btn-limbo-reenter');
+        if (_lBtn) { _lBtn.disabled = false; _lBtn.textContent = '🔄 Re-Enter Matrix'; }
+        const _lStatus = document.getElementById('limbo-status');
+        if (_lStatus) _lStatus.textContent = '';
+      } else {
+        limboSec.style.display = 'none';
+        window._limboInfo = null;
       }
     }
 
@@ -5408,6 +5461,41 @@ async function doUpgrade() {
 
 
 // ── Co-Pay Rescue — Step 1: approve USDC to matrix (only if memberShare > 0) ──
+async function approveLimboReEntry() {
+  const info = window._limboInfo;
+  if (!info) return;
+  const signer = await getSigner();
+  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+  setStatus('limbo-status', '⏳ Approving USDC…', 'info');
+  try {
+    const tx = await usdc.approve(info.addr, info.fee);
+    await tx.wait();
+    setStatus('limbo-status', '✅ Approved — click Re-Enter Matrix', 'ok');
+  } catch(e) {
+    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'error');
+  }
+}
+
+async function doLimboReEntry() {
+  const info = window._limboInfo;
+  if (!info) return;
+  const signer = await getSigner();
+  const matA = new ethers.Contract(info.addr, MATRIX_ABI, signer);
+  const btn = document.getElementById('btn-limbo-reenter');
+  if (btn) btn.disabled = true;
+  setStatus('limbo-status', '⏳ Submitting re-entry…', 'info');
+  try {
+    const tx = await matA.register(info.referrer, { gasLimit: 500000 });
+    setStatus('limbo-status', '⏳ Confirming…', 'info');
+    await tx.wait();
+    setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
+    setTimeout(() => loadUserData(), 2000);
+  } catch(e) {
+    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'error');
+    if (btn) btn.disabled = false;
+  }
+}
+
 async function approveSelfRescue() {
   if (!signer) { toast('Connect your wallet first.', 'error'); return; }
   const shortfall = window._selfRescueShortfall || 0n;
