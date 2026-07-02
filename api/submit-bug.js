@@ -50,7 +50,7 @@ function ghRequest(method, path, body, token) {
 }
 
 // ── Build the markdown entry ──────────────────────────────────────────────────
-function buildEntry({ reporter, page, wallet, frequency, happened, expected, notes }) {
+function buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, notes }) {
   const date = new Date().toISOString().slice(0, 10);
   const time = new Date().toUTCString();
   const title = happened.length > 60 ? happened.slice(0, 60) + '…' : happened;
@@ -59,7 +59,8 @@ function buildEntry({ reporter, page, wallet, frequency, happened, expected, not
     `### [${date}] ${page} — ${title}`,
     `- **Reporter:** ${reporter}`,
     `- **Page:** ${page}`,
-    `- **Wallet:** ${wallet}`,
+    `- **Wallet Type:** ${wallet}`,
+    `- **Wallet Address:** ${walletAddress || 'not provided'}`,
     `- **Frequency:** ${frequency}`,
     `- **What happened:** ${happened}`,
     `- **What was expected:** ${expected}`,
@@ -113,7 +114,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server misconfigured — contact admin' });
   }
 
-  const { action, password, reporter, page, wallet, frequency, happened, expected, notes } = req.body || {};
+  const { action, password, reporter, page, wallet, walletAddress, frequency, happened, expected, notes } = req.body || {};
 
   // ── Auth ──
   if (password !== PASS) return res.status(401).json({ error: 'Incorrect password' });
@@ -164,7 +165,7 @@ export default async function handler(req, res) {
     }
 
     // 2. Build and insert entry
-    const entry   = buildEntry({ reporter, page, wallet, frequency, happened, expected, notes });
+    const entry   = buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, notes });
     const updated = insertEntry(current, entry);
 
     // 3. Commit back

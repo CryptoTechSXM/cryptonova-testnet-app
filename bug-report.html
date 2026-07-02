@@ -66,6 +66,7 @@
       font-family: inherit;
     }
     input:focus, select:focus, textarea:focus { border-color: #22c55e; }
+    input[readonly] { color: #64748b; cursor: default; }
     textarea { min-height: 90px; resize: vertical; }
     select option { background: #1e293b; }
     .radio-group { display: flex; gap: 24px; margin-top: 6px; }
@@ -95,8 +96,8 @@
     .msg.error   { color: #f87171; }
     .msg.success { color: #22c55e; }
     .divider { border: none; border-top: 1px solid #1e3a5f; margin: 24px 0; }
-    #pw-screen, #form-screen { display: none; }
-    #pw-screen.active, #form-screen.active { display: block; }
+    #wallet-screen, #pw-screen, #form-screen { display: none; }
+    #wallet-screen.active, #pw-screen.active, #form-screen.active { display: block; }
     .lock { font-size: 44px; text-align: center; margin-bottom: 12px; }
     .success-card {
       text-align: center;
@@ -120,27 +121,94 @@
       font-size: 14px;
     }
     .another-btn:hover { background: #052e16; }
+    .wallet-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #052e16;
+      border: 1px solid #166534;
+      border-radius: 8px;
+      padding: 6px 14px;
+      margin-bottom: 4px;
+    }
+    .wallet-chip .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; flex-shrink:0; }
+    .wallet-chip span { color: #86efac; font-size: 13px; font-family: monospace; word-break:break-all; }
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+    .step-dot.active { background: #22c55e; }
+    .step-dot.done   { background: #166534; }
+    .back-link { text-align:center; margin-top:20px; }
+    .back-link a { color:#64748b; font-size:13px; text-decoration:none; }
+    .back-link a:hover { color:#94a3b8; }
   </style>
 </head>
 <body>
 <div class="card">
   <div class="logo">
     <div><span class="crypto">Crypto</span><span class="nova">Nova</span></div>
-    <p>Internal Bug Report Portal</p>
+    <p>Community Bug Report</p>
   </div>
 
-  <!-- ── Password screen ── -->
-  <div id="pw-screen" class="active">
+  <!-- ── Step 0: Connect Wallet ── -->
+  <div id="wallet-screen" class="active">
+    <div class="steps">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="lock">🔗</div>
+    <h2>Connect Your Wallet</h2>
+    <p style="text-align:center;color:#64748b;font-size:14px;line-height:1.6">
+      Connect your wallet to confirm you're a CryptoNova member before submitting a bug report.
+    </p>
+    <button class="btn" id="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+    <div class="msg error" id="wallet-error"></div>
+    <div class="back-link"><a href="/">← Back to Dashboard</a></div>
+  </div>
+
+  <!-- ── Step 1: Password ── -->
+  <div id="pw-screen">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div style="text-align:center">
+      <div class="wallet-chip" style="display:inline-flex">
+        <div class="dot"></div>
+        <span id="connected-addr">0x…</span>
+      </div>
+    </div>
     <div class="lock">🔐</div>
-    <h2>Team Access</h2>
+    <h2>Community Access</h2>
+    <p style="text-align:center;color:#64748b;font-size:13px">
+      Enter the community bug report password to continue.
+    </p>
     <label for="pw-input">Access Password</label>
-    <input type="password" id="pw-input" placeholder="Enter team password" autocomplete="current-password">
+    <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
     <button class="btn" id="pw-btn" onclick="checkPassword()">Continue</button>
     <div class="msg error" id="pw-error"></div>
   </div>
 
-  <!-- ── Bug report form ── -->
+  <!-- ── Step 2: Bug report form ── -->
   <div id="form-screen">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <div style="text-align:center">
+      <div class="wallet-chip" style="display:inline-flex">
+        <div class="dot"></div>
+        <span id="form-addr">0x…</span>
+      </div>
+    </div>
+
     <h2>Submit a Bug Report <span class="badge">TESTNET</span></h2>
 
     <label for="reporter">Your name / handle *</label>
@@ -163,8 +231,8 @@
       <option value="Other">Other</option>
     </select>
 
-    <label for="wallet">Wallet Type *</label>
-    <select id="wallet">
+    <label for="wallet-type">Wallet Type *</label>
+    <select id="wallet-type">
       <option value="">— Select wallet —</option>
       <option value="MetaMask">MetaMask</option>
       <option value="Rabby">Rabby</option>
@@ -172,6 +240,9 @@
       <option value="WalletConnect">WalletConnect</option>
       <option value="Other / Unknown">Other / Unknown</option>
     </select>
+
+    <label for="wallet-addr">Connected Wallet Address</label>
+    <input type="text" id="wallet-addr" readonly>
 
     <label>Frequency *</label>
     <div class="radio-group">
@@ -188,126 +259,68 @@
     <textarea id="expected" placeholder="What should have happened instead?"></textarea>
 
     <label for="notes">Additional notes (optional)</label>
-    <textarea id="notes" placeholder="Member wallet address, steps to reproduce, screenshot filename, error message seen..." style="min-height: 70px;"></textarea>
+    <textarea id="notes" placeholder="Steps to reproduce, screenshot filename, error message seen..." style="min-height: 70px;"></textarea>
 
     <button class="btn" id="submit-btn" onclick="submitBug()">Submit Bug Report</button>
     <div class="msg" id="form-msg"></div>
 
-    <!-- Success state -->
     <div class="success-card" id="success-card">
       <div class="icon">✅</div>
-      <p>Bug report submitted and logged to BUGS.md</p>
+      <p>Bug report submitted — thank you for helping improve CryptoNova!</p>
       <button class="another-btn" onclick="resetForm()">Submit another</button>
     </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
 <script>
-  // Restore session if already authenticated
+  let walletAddress = '';
   let sessionPw = sessionStorage.getItem('cnova_bug_pw') || '';
-  if (sessionPw) showForm();
+
+  (function init() {
+    if (sessionPw && window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+        if (accounts && accounts[0]) { walletAddress = accounts[0]; showForm(); }
+        else showWallet();
+      }).catch(() => showWallet());
+    } else {
+      showWallet();
+    }
+  })();
 
   document.getElementById('pw-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') checkPassword();
   });
 
-  async function checkPassword() {
-    const pw = document.getElementById('pw-input').value.trim();
-    if (!pw) return;
-    const btn = document.getElementById('pw-btn');
-    const errEl = document.getElementById('pw-error');
-    btn.disabled = true;
-    btn.textContent = 'Checking…';
+  function detectWalletType() {
+    if (!window.ethereum) return '';
+    if (window.ethereum.isRabby) return 'Rabby';
+    if (window.ethereum.isCoinbaseWallet) return 'Coinbase Wallet';
+    if (window.ethereum.isMetaMask) return 'MetaMask';
+    return 'Other / Unknown';
+  }
+
+  function shortAddr(addr) {
+    return addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : '0x…';
+  }
+
+  async function connectWallet() {
+    const btn = document.getElementById('connect-btn');
+    const errEl = document.getElementById('wallet-error');
     errEl.textContent = '';
-    try {
-      const r = await fetch('/api/submit-bug', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'verify', password: pw })
-      });
-      if (r.ok) {
-        sessionStorage.setItem('cnova_bug_pw', pw);
-        sessionPw = pw;
-        showForm();
-      } else {
-        errEl.textContent = 'Incorrect password — try again.';
-        btn.disabled = false;
-        btn.textContent = 'Continue';
-      }
-    } catch (e) {
-      errEl.textContent = 'Connection error. Please try again.';
-      btn.disabled = false;
-      btn.textContent = 'Continue';
+    if (!window.ethereum) {
+      errEl.textContent = 'No wallet detected — please install MetaMask or Rabby.';
+      return;
     }
-  }
-
-  function showForm() {
-    document.getElementById('pw-screen').classList.remove('active');
-    document.getElementById('form-screen').classList.add('active');
-  }
-
-  async function submitBug() {
-    const reporter = document.getElementById('reporter').value.trim();
-    const page     = document.getElementById('page').value;
-    const wallet   = document.getElementById('wallet').value;
-    const freqEl   = document.querySelector('input[name="freq"]:checked');
-    const happened = document.getElementById('happened').value.trim();
-    const expected = document.getElementById('expected').value.trim();
-    const notes    = document.getElementById('notes').value.trim();
-    const msgEl    = document.getElementById('form-msg');
-
-    msgEl.className = 'msg error';
-    if (!reporter)  { msgEl.textContent = 'Please enter your name.'; return; }
-    if (!page)      { msgEl.textContent = 'Please select a page.'; return; }
-    if (!wallet)    { msgEl.textContent = 'Please select a wallet type.'; return; }
-    if (!freqEl)    { msgEl.textContent = 'Please select Consistent or Intermittent.'; return; }
-    if (!happened)  { msgEl.textContent = 'Please describe what happened.'; return; }
-    if (!expected)  { msgEl.textContent = 'Please describe what was expected.'; return; }
-
-    const btn = document.getElementById('submit-btn');
     btn.disabled = true;
-    btn.textContent = 'Submitting…';
-    msgEl.textContent = '';
-
+    btn.textContent = 'Connecting…';
     try {
-      const r = await fetch('/api/submit-bug', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'submit', password: sessionPw,
-          reporter, page, wallet,
-          frequency: freqEl.value,
-          happened, expected, notes
-        })
-      });
-      if (r.ok) {
-        document.getElementById('submit-btn').style.display = 'none';
-        document.getElementById('success-card').classList.add('show');
-      } else {
-        const err = await r.json().catch(() => ({}));
-        msgEl.textContent = err.error || 'Submission failed — please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Submit Bug Report';
-      }
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (!accounts || !accounts[0]) throw new Error('No account returned');
+      walletAddress = accounts[0];
+      showPasswordScreen();
     } catch (e) {
-      msgEl.textContent = 'Network error — please try again.';
-      btn.disabled = false;
-      btn.textContent = 'Submit Bug Report';
-    }
-  }
-
-  function resetForm() {
-    ['reporter', 'page', 'wallet', 'happened', 'expected', 'notes'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    document.querySelectorAll('input[name="freq"]').forEach(r => r.checked = false);
-    document.getElementById('form-msg').textContent = '';
-    document.getElementById('submit-btn').style.display = '';
-    document.getElementById('submit-btn').disabled = false;
-    document.getElementById('submit-btn').textContent = 'Submit Bug Report';
-    document.getElementById('success-card').classList.remove('show');
-  }
-</script>
-</body>
-</html>
+      const msg = (e.message || '').toLowerCase();
+      errEl.textContent = (msg.includes('user rejected') || msg.includes('user denied'))
+        ? 'Connection cancelled — please try again.'
+        : 'Could not connect wa
