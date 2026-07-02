@@ -7,6 +7,20 @@
 
 ## Open Issues
 
+### [2026-07-02] Dashboard (index.html) — Firstly, when I registered with a coupon, on the Registratio…
+- **Reporter:** Kolawole Ola
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xafa21bb205fc3294d7bc129897889b40ba8b155e
+- **Frequency:** Consistent
+- **What happened:** Firstly, when I registered with a coupon, on the Registration tab, under "Your Balances", > You Pay > FREE &#127881; (That's the gibberish it displayed after "FREE".
+
+After registering, on the Dashboard tab, my MM wallet keeps failing each time I try to enable Auto-Reentry or double reentry. It says this transaction will fail and it never goes through.
+- **What was expected:** 1. only FREE should display after "You Pay"
+2. The wallets should link without an error when confirming any transaction.
+- **Submitted:** Thu, 02 Jul 2026 19:22:24 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — Auto entry and auto upgràde set up from registration of acco…
 - **Reporter:** Dee1
 - **Page:** Dashboard (index.html)
