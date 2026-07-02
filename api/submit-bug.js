@@ -86,10 +86,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
   const PASS  = process.env.BUG_REPORT_PASSWORD;
-  const TOKEN = process.env.GITHUB_TOKEN;
 
-  if (!PASS || !TOKEN) {
-    console.error('Missing BUG_REPORT_PASSWORD or GITHUB_TOKEN env var');
+  if (!PASS) {
+    console.error('Missing BUG_REPORT_PASSWORD env var');
     return res.status(500).json({ error: 'Server misconfigured — contact admin' });
   }
 
@@ -104,6 +103,11 @@ export default async function handler(req, res) {
 
   // ── Submit ──
   if (action === 'submit') {
+    const TOKEN = process.env.GITHUB_TOKEN;
+    if (!TOKEN) {
+      console.error('Missing GITHUB_TOKEN env var');
+      return res.status(500).json({ error: 'Server misconfigured — contact admin' });
+    }
     if (!reporter || !page || !wallet || !frequency || !happened || !expected) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
