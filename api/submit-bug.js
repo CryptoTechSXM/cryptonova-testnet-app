@@ -1,7 +1,7 @@
 /**
  * api/submit-bug.js
  * Receives bug reports from bug-report.html and commits them to BUGS.md
- * via the GitHub API.
+ * via the GitHub API. Uses built-in fetch (Node 18+) — no imports needed.
  *
  * Required Vercel env vars:
  *   BUG_REPORT_PASSWORD  — shared password for the bug report page
@@ -9,50 +9,35 @@
  *                          on the cryptonova-testnet-app repo
  */
 
-import https from 'https';
-
 const GH_OWNER  = 'CryptoTechSXM';
 const GH_REPO   = 'cryptonova-testnet-app';
 const GH_BRANCH = 'admin';
 const GH_FILE   = 'BUGS.md';
 
-// ── GitHub API helper ─────────────────────────────────────────────────────────
-function ghRequest(method, path, body, token) {
-  return new Promise((resolve, reject) => {
-    const data = body ? JSON.stringify(body) : null;
-    const opts = {
-      hostname: 'api.github.com',
-      path,
-      method,
-      headers: {
-        Authorization:           `Bearer ${token}`,
-        Accept:                  'application/vnd.github+json',
-        'User-Agent':            'CryptoNova-BugReport/1.0',
-        'X-GitHub-Api-Version':  '2022-11-28',
-        ...(data ? {
-          'Content-Type':   'application/json',
-          'Content-Length': Buffer.byteLength(data)
-        } : {})
-      }
-    };
-    const req = https.request(opts, res => {
-      let raw = '';
-      res.on('data', c => (raw += c));
-      res.on('end', () => {
-        try { resolve({ status: res.statusCode, body: raw ? JSON.parse(raw) : {} }); }
-        catch (e) { resolve({ status: res.statusCode, body: {} }); }
-      });
-    });
-    req.on('error', reject);
-    if (data) req.write(data);
-    req.end();
-  });
+// ── GitHub API helper (uses built-in fetch) ───────────────────────────────────
+async function ghRequest(method, path, body, token) {
+  const url  = `https://api.github.com${path}`;
+  const opts = {
+    method,
+    headers: {
+      Authorization:          `Bearer ${token}`,
+      Accept:                 'application/vnd.github+json',
+      'User-Agent':           'CryptoNova-BugReport/1.0',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(body ? { 'Content-Type': 'application/json' } : {})
+    },
+    ...(body ? { body: JSON.stringify(body) } : {})
+  };
+  const r    = await fetch(url, opts);
+  const text = await r.text();
+  try { return { status: r.status, body: text ? JSON.parse(text) : {} }; }
+  catch (e) { return { status: r.status, body: {} }; }
 }
 
 // ── Build the markdown entry ──────────────────────────────────────────────────
 function buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, notes }) {
-  const date = new Date().toISOString().slice(0, 10);
-  const time = new Date().toUTCString();
+  const date  = new Date().toISOString().slice(0, 10);
+  const time  = new Date().toUTCString();
   const title = happened.length > 60 ? happened.slice(0, 60) + '…' : happened;
 
   const lines = [
@@ -77,24 +62,18 @@ function insertEntry(current, entry) {
   const PLACEHOLDER = '\n\n_No open issues yet._';
 
   const markerIdx = current.indexOf(MARKER);
-  if (markerIdx === -1) {
-    // No section found — append at end
-    return current.trimEnd() + '\n\n' + entry;
-  }
+  if (markerIdx === -1) return current.trimEnd() + '\n\n' + entry;
 
   const afterMarker = markerIdx + MARKER.length;
   const checkSlice  = current.slice(afterMarker, afterMarker + PLACEHOLDER.length);
 
   if (checkSlice === PLACEHOLDER) {
-    // Replace placeholder with new entry
     return (
       current.slice(0, afterMarker) +
       '\n\n' + entry +
       current.slice(afterMarker + PLACEHOLDER.length)
     );
   }
-
-  // Already has entries — prepend after the header line
   return current.slice(0, afterMarker) + '\n\n' + entry + current.slice(afterMarker);
 }
 
@@ -114,7 +93,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server misconfigured — contact admin' });
   }
 
-  const { action, password, reporter, page, wallet, walletAddress, frequency, happened, expected, notes } = req.body || {};
+  const body = req.body || {};
+  const { action, password, reporter, page, wallet, walletAddress, frequency, happened, expected, notes } = body;
 
   // ── Auth ──
   if (password !== PASS) return res.status(401).json({ error: 'Incorrect password' });
@@ -128,7 +108,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // 1. Fetch current BUGS.md (create fresh if file doesn't exist yet)
     const getRes = await ghRequest(
       'GET',
       `/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}`,
@@ -143,7 +122,6 @@ export default async function handler(req, res) {
       sha     = getRes.body.sha;
       current = Buffer.from(getRes.body.content, 'base64').toString('utf8');
     } else if (getRes.status === 404) {
-      // File doesn't exist yet in this branch — bootstrap it
       current = [
         '# CryptoNova — Issue Tracker',
         '',
@@ -164,15 +142,30 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Could not read BUGS.md from GitHub' });
     }
 
-    // 2. Build and insert entry
     const entry   = buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, notes });
     const updated = insertEntry(current, entry);
 
-    // 3. Commit back
     const date      = new Date().toISOString().slice(0, 10);
     const shortPage = page.split(' ')[0];
     const putRes = await ghRequest(
       'PUT',
       `/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
       {
-        message: `bug-report(${date}): ${shortPage} reported b
+        message: `bug-report(${date}): ${shortPage} — new report`,
+        content: Buffer.from(updated).toString('base64'),
+        branch:  GH_BRANCH,
+        ...(sha ? { sha } : {})
+      },
+      TOKEN
+    );
+
+    if (putRes.status !== 200 && putRes.status !== 201) {
+      console.error('GitHub PUT failed:', putRes.status, putRes.body);
+      return res.status(502).json({ error: 'Could not save report — try again' });
+    }
+
+    return res.status(200).json({ ok: true });
+  }
+
+  return res.status(400).json({ error: 'Unknown action' });
+}
