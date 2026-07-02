@@ -5479,7 +5479,7 @@ async function approveLimboReEntry() {
     await tx.wait();
     setStatus('limbo-status', '✅ Approved — click Re-Enter Matrix', 'ok');
   } catch(e) {
-    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'err');
+    setStatus('limbo-status', '❌ ' + friendlyError(e), 'err');
   }
 }
 
@@ -5499,7 +5499,7 @@ async function doLimboReEntry() {
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
     setTimeout(() => loadUserData(), 2000);
   } catch(e) {
-    setStatus('limbo-status', '❌ ' + (e.reason || e.message), 'err');
+    setStatus('limbo-status', '❌ ' + friendlyError(e), 'err');
     if (btn) btn.disabled = false;
   }
 }
