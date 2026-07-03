@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoNova — Updating</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0f1e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: #fff;
+    padding: 2rem 1.5rem;
+  }
+
+  .gate {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+  }
+
+  /* Logo */
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2.5rem;
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #0d9e6e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.3px;
+  }
+  .logo-text .crypto { color: #fff; }
+  .logo-text .nova   { color: #0d9e6e; }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(13, 158, 110, 0.12);
+    border: 0.5px solid rgba(13, 158, 110, 0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: #0d9e6e;
+    letter-spacing: 0.3px;
+    margin-bottom: 2rem;
+  }
+  .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #0d9e6e;
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.25; }
+  }
+
+  /* Heading */
+  h1 {
+    font-size: 26px;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.35;
+    margin-bottom: 1rem;
+    letter-spacing: -0.3px;
+  }
+  .sub {
+    font-size: 15px;
+    color: #94a3b8;
+    line-height: 1.65;
+    margin-bottom: 2.5rem;
+    padding: 0 0.5rem;
+  }
+
+  /* Divider */
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(13, 158, 110, 0.35);
+    margin: 0 auto 2.5rem;
+  }
+
+  /* Countdown */
+  .countdown-wrap {
+    background: rgba(255,255,255,0.03);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .countdown-label {
+    font-size: 11px;
+    color: #475569;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .countdown-slots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+  }
+  .slot { text-align: center; }
+  .slot-num {
+    display: block;
+    font-size: 28px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 54px;
+  }
+  .slot-label {
+    font-size: 10px;
+    color: #475569;
+    letter-spacing: 0.6px;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+  .colon {
+    font-size: 24px;
+    color: #334155;
+    margin-bottom: 18px;
+    user-select: none;
+  }
+  .soon-text {
+    font-size: 20px;
+    font-weight: 500;
+    color: #64748b;
+    padding: 10px 0;
+  }
+
+  /* Status row */
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #334155;
+    flex-shrink: 0;
+  }
+
+  /* Footer */
+  footer {
+    font-size: 12px;
+    color: #475569;
+  }
+  footer a {
+    color: #0d9e6e;
+    text-decoration: none;
+  }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 400px) {
+    h1 { font-size: 22px; }
+    .slot-num { font-size: 22px; padding: 6px 10px; min-width: 44px; }
+  }
+</style>
+</head>
+<body>
+<div class="gate">
+
+  <div class="logo">
+    <div class="logo-mark">CN</div>
+    <div class="logo-text">
+      <span class="crypto">Crypto</span><span class="nova">Nova</span>
+    </div>
+  </div>
+
+  <div class="badge">
+    <span class="pulse"></span> Updating now
+  </div>
+
+  <h1>We're upgrading the system<br>with your feedback</h1>
+
+  <p class="sub">
+    Bug fixes from the community have been addressed and we're deploying
+    the update. We'll be back shortly with a fresh contract to start from.
+  </p>
+
+  <div class="divider"></div>
+
+  <div class="countdown-wrap">
+    <div class="countdown-label">Back online in</div>
+    <div class="countdown-slots" id="countdown-slots">
+      <div class="slot">
+        <span class="slot-num" id="cd-h">00</span>
+        <div class="slot-label">Hours</div>
+      </div>
+      <span class="colon">:</span>
+      <div class="slot">
+        <span class="slot-num" id="cd-m">00</span>
+        <div class="slot-label">Mins</div>
+      </div>
+      <span class="colon">:</span>
+      <div class="slot">
+        <span class="slot-num" id="cd-s">00</span>
+        <div class="slot-label">Secs</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-row">
+    <span>testnet</span>
+    <span class="dot"></span>
+    <span>Base Sepolia</span>
+    <span class="dot"></span>
+    <span>new contract deploying</span>
+  </div>
+
+  <footer>
+    Questions? Find us on <a href="https://t.me/CryptoNovaMatrix" target="_blank" rel="noopener">Telegram</a>
+  </footer>
+
+</div>
+
+<script>
+  // ── Countdown config ────────────────────────────────────────────────────────
+  // Set GATE_TARGET to the UTC datetime string when the site will be back.
+  // Example: '2026-07-05T18:00:00Z'
+  // Set to null to hide the countdown and show "Soon" instead.
+  var GATE_TARGET = '2026-07-03T23:30:00Z'; // 7:30 PM EDT — preview (early.crypto-nova.app)
+  // ────────────────────────────────────────────────────────────────────────────
+
+  var slotsEl = document.getElementById('countdown-slots');
+  var cdH = document.getElementById('cd-h');
+  var cdM = document.getElementById('cd-m');
+  var cdS = document.getElementById('cd-s');
+
+  function pad(n) { return String(Math.max(0, n)).padStart(2, '0'); }
+
+  if (!GATE_TARGET) {
+    slotsEl.innerHTML = '<span class="soon-text">Soon</span>';
+  } else {
+    var target = new Date(GATE_TARGET).getTime();
+    function tick() {
+      var diff = target - Date.now();
+      if (diff <= 0) {
+        slotsEl.innerHTML = '<span class="soon-text">Any moment now</span>';
+        return;
+      }
+      var h = Math.floor(diff / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      cdH.textContent = pad(h);
+      cdM.textContent = pad(m);
+      cdS.textContent = pad(s);
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+</script>
+</body>
+</html>

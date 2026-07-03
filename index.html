@@ -1893,7 +1893,7 @@ const RPC_FALLBACK = 'https://sepolia.base.org';
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
 const ADDRS = {
-  // V8.30 — deployed 2026-06-29 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
+  // V8.31 — deployed 2026-07-03 — 50/5/45 crossing reserve, Option B BPS, registerWithCoupon globalJoined fix, sfBal fallback fix
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
   cnova:         '0x8e81Ea3fE21DfFe30804cB46bE8543bD32CeC626',
   treasury:      '0x3980ed891B29d8745E6e116B8e010ac74701Da6f',
@@ -5605,4 +5605,92 @@ async function doSelfRescue() {
     const matrixAddr = window._parkedMatrixAddr;
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const SELF_RESCUE_ABI = ['function selfRescue() external'];
-    const matrix = new ethers.Contrac
+    const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
+    const tx     = await matrix.selfRescue({ gasLimit: 5_000_000 }); // matrix may need to cycle 127 slots
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You're back in! Refreshing your dashboard…"; }
+    toast('Self Rescue successful! You\'re back in the matrix.', 'success');
+    setTimeout(() => loadDashboardData(), 3000);
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function approveCoPayRescue() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const memberShare = window._coPayMemberShare || 0n;
+  if (memberShare === 0n) { doCoPayRescue(); return; }
+  const btn    = document.getElementById('btn-copay-approve');
+  const status = document.getElementById('copay-status');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'Approving USDC…';
+  try {
+    const matrixAddr = window._parkedMatrixAddr;
+    if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
+    const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+    const tx   = await usdc.approve(matrixAddr, memberShare);
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) { status.style.color = 'var(--green)'; status.textContent = '✅ USDC approved — now click Co-Pay Rescue.'; }
+    const rescueBtn = document.getElementById('btn-copay-rescue');
+    if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.opacity = '1'; }
+    if (btn) btn.disabled = false;
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── Co-Pay Rescue — Step 2 (or only step if memberShare == 0) ────────────────
+async function doCoPayRescue() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const btn    = document.getElementById('btn-copay-rescue');
+  const status = document.getElementById('copay-status');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'Submitting co-pay rescue…';
+  try {
+    const matrixAddr = window._parkedMatrixAddr;
+    if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
+    const COPAY_ABI = ['function coPayRescue(address member) external'];
+    const matrix    = new ethers.Contract(matrixAddr, COPAY_ABI, signer);
+    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 5_000_000 }); // matrix may need to cycle 127 slots
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
+    toast('Co-Pay Rescue successful!', 'success');
+    setTimeout(() => loadDashboardData(), 3000);
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
+    if (btn) btn.disabled = false;
+  }
+}
+
+function updateAddrsFromDeployed(d) {
+  if (!d) return;
+  if (d.usdc)          ADDRS.usdc          = d.usdc;
+  if (d.cnova)         ADDRS.cnova         = d.cnova;
+  if (d.stabilityFund) ADDRS.stabilityFund = d.stabilityFund;
+  if (d.tierRouter)    ADDRS.tierRouter    = d.tierRouter;
+  if (d.matrixKeeper)  ADDRS.matrixKeeper  = d.matrixKeeper;
+  const t = d.tiers || {};
+  for (let i = 1; i <= 10; i++) {
+    const tier = t[String(i)] || t[i];
+    if (tier) {
+      const key = 'T' + i;
+      ADDRS[key] = { pm: tier.pairManager || tier.pm || '', matA: tier.matA || '', matB: tier.matB || '' };
+    }
+  }
+  console.log('[v8.8] ADDRS updated from deployed JSON');
+}
+</script>
+<script src="/i18n.js" defer></script>
+    <!-- Bug Report Footer -->
+    <div style="text-align:center;padding:24px 0 24px;border-top:1px solid var(--border,#1e3a5f);margin-top:32px">
+      <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here</a>
+    </div>
+</body></html>
