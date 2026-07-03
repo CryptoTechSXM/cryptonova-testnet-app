@@ -7,6 +7,30 @@
 
 ## Open Issues
 
+### [2026-07-03] Dashboard (index.html) — This is the second time that I have entered T1A
+The dashboar…
+- **Reporter:** Dee1
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x299dcdddbe11ec3b4518cc5f47925fbb447bfd59
+- **Frequency:** Consistent
+- **What happened:** This is the second time that I have entered T1A
+The dashboard show that I am 147 in the matrix and therevhas been no payments on the account since then
+- **What was expected:** I should have been in the matrix between 1- 27 and received some payment for the cycle by now
+- **Submitted:** Fri, 03 Jul 2026 09:09:23 GMT
+
+
+### [2026-07-03] Dashboard (index.html) — This is the second time I have entered T1 A. The dashboard s…
+- **Reporter:** Dee1
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x063793b17f5bf7040ee2924d58067887f6fa5256
+- **Frequency:** Consistent
+- **What happened:** This is the second time I have entered T1 A. The dashboard say that I am 146 in the que, there has been no earnings on the account since then
+- **What was expected:** I should have been in the que between 1-127 and have receive some paymemta by now
+- **Submitted:** Fri, 03 Jul 2026 09:00:33 GMT
+
+
 ### [2026-07-02] Dashboard (index.html) — My Member ID# is 444, whereas only 442 members have totally …
 - **Reporter:** Kolawole Ola
 - **Page:** Dashboard (index.html)
