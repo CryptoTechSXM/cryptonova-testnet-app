@@ -3275,24 +3275,46 @@ async function validateCouponCode() {
   const youPayRow   = document.getElementById('coupon-you-pay-row');
   if (discountRow) discountRow.style.display = 'none';
   if (youPayRow)   youPayRow.style.display   = 'none';
-  if (!code) { if (statusEl) statusEl.textContent = ''; _resetApproveBtn(); return; }
+  // Unlock referrer field whenever coupon is cleared/invalid
+  const refInput = document.getElementById('input-referrer');
+  if (!code) {
+    if (statusEl) statusEl.textContent = '';
+    if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
+    _resetApproveBtn(); return;
+  }
   if (statusEl) statusEl.innerHTML = '<span class="spinner"></span> Checking coupon…';
   try {
     const rp        = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
     const couponReg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
     const codeHash  = ethers.keccak256(ethers.toUtf8Bytes(code));
-    const [valid, couponAmt] = await Promise.all([
+    const [valid, couponAmt, couponData] = await Promise.all([
       couponReg.isValid(codeHash),
       couponReg.couponAmount(),
+      couponReg.coupons(codeHash),   // returns (issuer, amount, expiry, used)
     ]);
     if (!valid) {
       if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; Invalid or expired coupon code.</span>';
+      if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
       _resetApproveBtn(); return;
     }
     const couponUsdc = Number(couponAmt) / 1e6;
     const youPay     = Math.max(0, Number(T1_FEE) / 1e6 - couponUsdc);
-    window._activeCoupon = { code, codeHash, couponAmt, youPay };
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">&#10003; Valid coupon — saves $' + couponUsdc.toFixed(2) + '!</span>';
+    // V8.31: lock referrer = coupon issuer so it cannot be changed
+    const issuer = couponData.issuer || couponData[0] || ethers.ZeroAddress;
+    window._activeCoupon = { code, codeHash, couponAmt, youPay, issuer };
+    if (refInput && issuer && issuer !== ethers.ZeroAddress) {
+      refInput.value    = issuer;
+      refInput.readOnly = true;
+      refInput.style.opacity = '0.7';
+      refInput.style.cursor  = 'not-allowed';
+      // Suppress the no-referrer warning — issuer is the sponsor
+      const sponsorWarn = document.getElementById('default-sponsor-warn');
+      if (sponsorWarn) sponsorWarn.style.display = 'none';
+    }
+    const issuerShort = (issuer && issuer !== ethers.ZeroAddress)
+      ? ' &nbsp;<span style="font-size:11px;color:var(--text3)">&#128274; Sponsor: ' + issuer.slice(0,6) + '…' + issuer.slice(-4) + '</span>'
+      : '';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">&#10003; Valid coupon — saves $' + couponUsdc.toFixed(2) + '!</span>' + issuerShort;
     const discountEl = document.getElementById('coupon-discount-amount');
     const youPayEl   = document.getElementById('coupon-you-pay-amount');
     if (discountEl) discountEl.textContent = '-$' + couponUsdc.toFixed(2);
@@ -3302,6 +3324,7 @@ async function validateCouponCode() {
     _updateApproveForCoupon();
   } catch(e) {
     if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; ' + friendlyError(e) + '</span>';
+    if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
     _resetApproveBtn();
   }
 }
@@ -3411,13 +3434,18 @@ async function doRegister() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Joining CryptoNova…';
   try {
     const refInput = document.getElementById('input-referrer');
-    const referrer = refInput && ethers.isAddress(refInput.value.trim())
-      ? refInput.value.trim() : ethers.ZeroAddress;
-
     const c = window._activeCoupon;
+    // V8.31: when a coupon is active, always use its issuer as referrer —
+    // the contract enforces this on-chain too, but belt-and-suspenders here.
+    const referrer = c && c.issuer && c.issuer !== ethers.ZeroAddress
+      ? c.issuer
+      : (refInput && ethers.isAddress(refInput.value.trim())
+          ? refInput.value.trim() : ethers.ZeroAddress);
+
     let tx;
     if (c) {
       // Coupon path: call registerWithCoupon() directly on MatA
+      // TODO V8.31 deploy: switch to tierRouter.registerWithCoupon() once V8.31 is live
       const matA = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, signer);
       tx = await matA.registerWithCoupon(referrer, c.codeHash);
     } else {
