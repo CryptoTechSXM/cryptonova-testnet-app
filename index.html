@@ -5241,11 +5241,15 @@ function setStatus(id, msg, type) {
 
 function friendlyError(e) {
   if (!e) return 'Unknown error';
-  // Ethers v6 error shapes
+  // Ethers v6 error shapes — gas estimation failures don't have code=CALL_EXCEPTION,
+  // so we harvest revert strings from several locations before falling through.
   const code    = e.code || '';
   const raw     = e.message || String(e);
-  const msg     = e.reason || e.shortMessage || e.data?.message || raw;
-  const msgLow  = (msg + raw).toLowerCase();
+  // Also check nested error shapes emitted by ethers v6 during gas estimation
+  const rawDeep = raw + (e.info?.error?.message || '') + (e.error?.message || '');
+  const msg     = e.reason || e.shortMessage || e.data?.message ||
+                  e.info?.error?.message || e.error?.message || raw;
+  const msgLow  = (msg + rawDeep).toLowerCase();
 
   // ── User cancelled ──────────────────────────────────────────────────────
   if (code === 'ACTION_REJECTED' || e.code === 4001 ||
@@ -5278,6 +5282,31 @@ function friendlyError(e) {
   if (msgLow.includes('already known') || msgLow.includes('replacement transaction underpriced'))
     return '⏳ Transaction already pending — wait for it to confirm.';
 
+  // ── Coupon Registry revert strings (CR:) ───────────────────────────────
+  if (msgLow.includes('cr: code already taken'))
+    return '❌ That coupon code is already taken — try a different code.';
+  if (msgLow.includes('cr: expired'))
+    return '❌ This coupon has expired.';
+  if (msgLow.includes('cr: already used'))
+    return '❌ This coupon has already been used.';
+  if (msgLow.includes('cr: coupon not found'))
+    return '❌ Coupon not found — double-check the code and try again.';
+  if (msgLow.includes('cr: not issuer'))
+    return '❌ Only the coupon issuer can perform this action.';
+  if (msgLow.includes('cr: not expired yet'))
+    return '❌ This coupon has not expired yet.';
+
+  // ── TierRouter revert strings (TR:) ────────────────────────────────────
+  if (msgLow.includes('tr: not registered') || msgLow.includes('tr: already joined'))
+    return '✅ This wallet is already registered — view your Dashboard.';
+
+  // ── Matrix revert strings (F8V8:) ──────────────────────────────────────
+  if (msgLow.includes('f8v8: must keep crossing reserve') ||
+      msgLow.includes('f8v8: balance fully reserved'))
+    return '❌ Your balance is reserved for your next matrix crossing — it cannot be withdrawn yet.';
+  if (msgLow.includes('f8v8: nothing to withdraw'))
+    return '❌ Nothing to withdraw — earnings from this matrix were used for your upgrade to the next tier.';
+
   // ── Contract revert reasons ─────────────────────────────────────────────
   if (msgLow.includes('already registered') || msgLow.includes('alreadyjoined') ||
       msgLow.includes('already joined'))
@@ -5292,19 +5321,27 @@ function friendlyError(e) {
     return '❌ Stability Fund error — please try Self Rescue instead.';
   if (msgLow.includes('allowance') && msgLow.includes('usdc'))
     return '❌ USDC not approved — complete Step 1 first.';
-  if (msgLow.includes('transfer amount exceeds balance'))
+  if (msgLow.includes('transfer amount exceeds balance') ||
+      msgLow.includes('erc20: transfer amount exceeds'))
     return '❌ Insufficient USDC balance.';
 
   // ── Generic on-chain revert ─────────────────────────────────────────────
   if (code === 'CALL_EXCEPTION' || msgLow.includes('execution reverted') ||
       msgLow.includes('call_exception')) {
-    // Try to extract the revert string
-    const match = msg.match(/reverted[^:]*:\s*(.+)/i) || raw.match(/reverted[^:]*:\s*(.+)/i);
+    // Search all error shapes for a readable revert string
+    const allText = [msg, raw, e.info?.error?.message, e.error?.message]
+      .filter(Boolean).join(' ');
+    // Named revert prefixes — surface the contract message directly
+    const prefixMatch = allText.match(/\b(CR|TR|F8V8|SF):\s*([^"'\n]{3,80})/i);
+    if (prefixMatch) return '❌ ' + prefixMatch[0].trim().slice(0, 100);
+    const match = allText.match(/reverted[^:]*:\s*(.+)/i);
     if (match) return '❌ ' + match[1].trim().slice(0, 100);
     return '❌ Transaction reverted on-chain — try again or contact support.';
   }
 
-  // ── Fallback ────────────────────────────────────────────────────────────
+  // ── Fallback — guard against raw tx hash leaking to the user ───────────
+  const isTxHash = /^"?0x[0-9a-f]{40,}"?/i.test(msg.trim()) || msg.includes('"from":');
+  if (isTxHash) return '❌ Transaction failed — please try again or contact support.';
   return '❌ ' + msg.slice(0, 120);
 }
 
