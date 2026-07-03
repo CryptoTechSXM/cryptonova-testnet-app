@@ -5331,7 +5331,7 @@ function friendlyError(e) {
   // ── Matrix revert strings (F8V8:) ──────────────────────────────────────
   if (msgLow.includes('f8v8: must keep crossing reserve') ||
       msgLow.includes('f8v8: balance fully reserved'))
-    return '⏳ Your balance is locked while you hold an active matrix position. The system reserves your entry fee ($20) to fund your next crossing. Once your current matrix cycle completes and pays out, you can withdraw freely. If you have Auto-Reentry disabled, you will not be re-entered and your full balance will be available after the cycle.';
+    return '⏳ Your balance is locked while you hold an active matrix position. The system reserves your entry fee ($10) to fund your next crossing. Once your current matrix cycle completes and pays out, you can withdraw freely. If you have Auto-Reentry disabled, you will not be re-entered and your full balance will be available after the cycle.';
   if (msgLow.includes('f8v8: nothing to withdraw'))
     return '❌ Nothing to withdraw — earnings from this matrix were used for your upgrade to the next tier.';
 
