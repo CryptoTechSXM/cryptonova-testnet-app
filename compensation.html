@@ -171,9 +171,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.30 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.31 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.30 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
+      V8.31 is live — crossing reserve, instant earn &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -197,7 +197,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.30 Testnet</span>
+    <span id="gate-pill-label">V8.31 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -215,13 +215,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.30 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.30 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -328,21 +328,21 @@ function toggleTheme() {
       <span class="stream-badge badge-instant" data-i18n="compPage.badge_instant">Instant</span>
       <div class="stream-icon">🤝</div>
       <div class="stream-name" data-i18n="compPage.card1_name">Direct Referral Bonus</div>
-      <div class="stream-tagline" data-i18n="compPage.card1_tagline">10% of every entry fee paid straight to your wallet the moment someone you referred joins.</div>
+      <div class="stream-tagline" data-i18n="compPage.card1_tagline">3.15% of every entry fee goes to your direct referrer instantly — and you receive 5% as an instant earn just for joining.</div>
     </div>
 
     <div class="stream-card">
       <span class="stream-badge badge-passive" data-i18n="compPage.badge_passive">Passive</span>
       <div class="stream-icon">⛓️</div>
       <div class="stream-name" data-i18n="compPage.card2_name">Chain Pay</div>
-      <div class="stream-tagline" data-i18n="compPage.card2_tagline">17% of every entry flows up 6 BFS levels. The deeper your downline grows, the more you earn automatically.</div>
+      <div class="stream-tagline" data-i18n="compPage.card2_tagline">16.65% of every entry flows equally up 6 BFS levels — L2–L6 earn identically, L1 gets a small premium. Fully passive.</div>
     </div>
 
     <div class="stream-card">
       <span class="stream-badge badge-cycle" data-i18n="compPage.badge_cycle">Cycle</span>
       <div class="stream-icon">🌀</div>
       <div class="stream-name" data-i18n="compPage.card3_name">Matrix Cycle Payout</div>
-      <div class="stream-tagline" data-i18n="compPage.card3_tagline">45% of entries accumulate in the equalization pool. When all 127 seats fill, the root member receives the full pool and auto re-enters.</div>
+      <div class="stream-tagline" data-i18n="compPage.card3_tagline">18% of every entry accumulates in the equalization pool — flat rate across all tiers. When 127 seats fill, the root member receives the full pool and auto re-enters.</div>
     </div>
 
     <div class="stream-card">
@@ -371,48 +371,48 @@ function toggleTheme() {
   <!-- ── Stream 1: Direct Referral ── -->
   <h2 data-i18n="compPage.s1_h">🤝 Stream 1 &mdash; Direct Referral Bonus</h2>
   <div class="section-card">
-    <h3><span style="color:var(--green)" data-i18n="compPage.s1_h3_pct">10–20%</span> <span data-i18n="compPage.s1_h3">&nbsp;paid instantly on every entry</span></h3>
-    <p data-i18n="compPage.s1_p1">When someone joins using your referral link — or upgrades to a higher tier — your wallet receives a percentage of their entry fee <strong>instantly</strong>, on-chain, with no approval required. The rate is 10% at Tiers 1–3 and rises to 20% at Tier 4 and above. This relationship is locked permanently; every future upgrade they make keeps earning you the L1 bonus.</p>
+    <h3><span style="color:var(--green)" data-i18n="compPage.s1_h3_pct">3.15%</span> <span data-i18n="compPage.s1_h3">&nbsp;of every entry (L1 slot) — instantly to your direct referrer</span></h3>
+    <p data-i18n="compPage.s1_p1">When someone joins using your referral link — or upgrades to a higher tier — you earn the L1 BPS slot: <strong>7% of the 45% payout base</strong> = 3.15% of their total entry fee, paid instantly on-chain. This flat rate applies at every tier. Your referral relationship is locked permanently on-chain — every future upgrade they make keeps earning you the L1 bonus.</p>
     <div class="nums-row">
-      <div><div class="big-num">$1.00</div><div class="num-label" data-i18n="compPage.s1_n1_label">per T1 join ($10, 10%)</div></div>
-      <div><div class="big-num">$2.50</div><div class="num-label" data-i18n="compPage.s1_n2_label">per T2 join ($25, 10%)</div></div>
-      <div><div class="big-num">$5.00</div><div class="num-label" data-i18n="compPage.s1_n3_label">per T3 join ($50, 10%)</div></div>
-      <div><div class="big-num yellow">$200</div><div class="num-label" data-i18n="compPage.s1_n4_label">per T7 join ($1,000, 20%)</div></div>
-      <div><div class="big-num yellow">$2,000</div><div class="num-label" data-i18n="compPage.s1_n5_label">per T10 join ($10,000, 20%)</div></div>
+      <div><div class="big-num">$0.32</div><div class="num-label" data-i18n="compPage.s1_n1_label">per T1 join ($10, 3.15%)</div></div>
+      <div><div class="big-num">$0.79</div><div class="num-label" data-i18n="compPage.s1_n2_label">per T2 join ($25, 3.15%)</div></div>
+      <div><div class="big-num">$1.58</div><div class="num-label" data-i18n="compPage.s1_n3_label">per T3 join ($50, 3.15%)</div></div>
+      <div><div class="big-num yellow">$31.50</div><div class="num-label" data-i18n="compPage.s1_n4_label">per T7 join ($1,000, 3.15%)</div></div>
+      <div><div class="big-num yellow">$315</div><div class="num-label" data-i18n="compPage.s1_n5_label">per T10 join ($10,000, 3.15%)</div></div>
     </div>
-    <p><span data-i18n="compPage.s1_p2_pre">Refer 10 people at T1:</span> <strong style="color:var(--green)" data-i18n="compPage.s1_p2_b">$10 instantly</strong><span data-i18n="compPage.s1_p2_post">. If those 10 auto-upgrade through T2–T4, you earn the L1 bonus each time, from the same 10 people, again and again — at the higher 20% rate once they reach T4.</span></p>
+    <p><span data-i18n="compPage.s1_p2_pre">Refer 10 people at T1:</span> <strong style="color:var(--green)" data-i18n="compPage.s1_p2_b">$3.15 instantly</strong><span data-i18n="compPage.s1_p2_post">. The L1 rate is flat across all tiers — as those 10 upgrade to T7 ($1,000), you earn $31.50 per upgrade, and $315 per upgrade at T10, all from the same permanent referral relationships locked on-chain.</span></p>
   </div>
 
   <!-- ── Stream 2: Chain Pay ── -->
   <h2 data-i18n="compPage.s2_h">⛓️ Stream 2 &mdash; Chain Pay (6-Level Depth)</h2>
   <div class="section-card">
-    <h3><span style="color:var(--green)" data-i18n="compPage.s2_h3_pct">17–20%</span> <span data-i18n="compPage.s2_h3">&nbsp;split across 6 upline BFS positions</span></h3>
-    <p data-i18n="compPage.s2_p1">Every single registration in the network — regardless of who referred them — sends 17–20% of the entry fee upward through 6 BFS levels (the rate depends on tier). If someone joins anywhere below you in the matrix, you earn automatically based on how many BFS levels separate you. This is the <em>passive</em> engine of CryptoNova.</p>
-    <p><span data-i18n="compPage.s2_p2_pre">At T1 ($10 entry), the</span> <strong data-i18n="compPage.s2_p2_b">$1.70 chain pay</strong> <span data-i18n="compPage.s2_p2_post">distributes as:</span></p>
+    <h3><span style="color:var(--green)" data-i18n="compPage.s2_h3_pct">16.65%</span> <span data-i18n="compPage.s2_h3">&nbsp;split across 6 upline BFS positions — L1 slight premium, L2–L6 equal</span></h3>
+    <p data-i18n="compPage.s2_p1">Every single registration in the network — regardless of who referred them — sends 16.65% of the entry fee upward through 6 BFS levels. L1 (your direct referrer) earns a slight premium; L2–L6 earn identically. If someone joins anywhere below you in the tree, you earn automatically based on your BFS position. This is the <em>passive</em> engine of CryptoNova.</p>
+    <p><span data-i18n="compPage.s2_p2_pre">At T1 ($10 entry), the</span> <strong data-i18n="compPage.s2_p2_b">$1.665 chain pay</strong> <span data-i18n="compPage.s2_p2_post">distributes as:</span></p>
     <div class="chain-levels">
-      <div class="chain-level"><div class="cl-label" data-i18n="compPage.s2_l1_label">L1 (direct upline)</div><div class="cl-val">$0.85</div><div class="cl-pct" data-i18n="compPage.s2_l1_pct">50% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L2</div><div class="cl-val">$0.34</div><div class="cl-pct" data-i18n="compPage.s2_l2_pct">20% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L3</div><div class="cl-val">$0.26</div><div class="cl-pct" data-i18n="compPage.s2_l3_pct">15% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L4</div><div class="cl-val">$0.13</div><div class="cl-pct" data-i18n="compPage.s2_l4_pct">7.5% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L5</div><div class="cl-val">$0.06</div><div class="cl-pct" data-i18n="compPage.s2_l5_pct">3.75% of pool</div></div>
-      <div class="chain-level"><div class="cl-label">L6</div><div class="cl-val">$0.06</div><div class="cl-pct" data-i18n="compPage.s2_l6_pct">3.75% of pool</div></div>
+      <div class="chain-level"><div class="cl-label" data-i18n="compPage.s2_l1_label">L1 (direct upline)</div><div class="cl-val">$0.315</div><div class="cl-pct" data-i18n="compPage.s2_l1_pct">7% of payout base</div></div>
+      <div class="chain-level"><div class="cl-label">L2</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l2_pct">6% of payout base</div></div>
+      <div class="chain-level"><div class="cl-label">L3</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l3_pct">6% of payout base</div></div>
+      <div class="chain-level"><div class="cl-label">L4</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l4_pct">6% of payout base</div></div>
+      <div class="chain-level"><div class="cl-label">L5</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l5_pct">6% of payout base</div></div>
+      <div class="chain-level"><div class="cl-label">L6</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l6_pct">6% of payout base</div></div>
     </div>
     <p data-i18n="compPage.s2_p3">These payments are <strong>continuous</strong> — they fire every time a new member enters anywhere below you, not just at cycle completion. A deep downline generates chain pay from hundreds of entries passively.</p>
-    <p style="font-size:13px;color:var(--text3)" data-i18n="compPage.s2_p4">At T5 ($250, 20% chain pay), the equivalent chain pay pool is $50.00 — so L1 earns $25.00 from each single entry below them at that tier.</p>
+    <p style="font-size:13px;color:var(--text3)" data-i18n="compPage.s2_p4">At T5 ($250 entry), total chain pay = $41.625 (16.65%): L1 earns $7.875, L2–L6 each earn $6.75. At T10 ($10,000), L1 earns $315 and L2–L6 each earn $270 per single entry.</p>
   </div>
 
   <!-- ── Stream 3: Matrix Cycle Payout ── -->
   <h2 data-i18n="compPage.s3_h">🌀 Stream 3 &mdash; Matrix Cycle Payout</h2>
   <div class="section-card">
-    <h3><span style="color:var(--yellow)" data-i18n="compPage.s3_h3_pct">22.5–44%</span> <span data-i18n="compPage.s3_h3">&nbsp;accumulates in the equalization pool — paid on cycle</span></h3>
-    <p data-i18n="compPage.s3_p1">Every CryptoNova matrix holds <strong>127 seats</strong> (a 7-level BFS tree). As each new member fills a seat, a share of their entry fee flows into that matrix's equalization pool — 44% at Tiers 1–3, stepping down to 26% at T4–T5, 24.5% at T6–T7, and 22.5% at T8–T10 (higher tiers shift more of the fee into referral and chain pay instead). When all 127 seats are filled, the member at position #1 (root) receives the full pool and is automatically re-entered into the next active matrix.</p>
+    <h3><span style="color:var(--yellow)" data-i18n="compPage.s3_h3_pct">18%</span> <span data-i18n="compPage.s3_h3">&nbsp;of every entry accumulates in the equalization pool — flat rate at all tiers</span></h3>
+    <p data-i18n="compPage.s3_p1">Every CryptoNova matrix holds <strong>127 seats</strong> (a 7-level BFS tree). As each new member fills a seat, 40% of the 45% payout base flows into that matrix's equalization pool — equal to <strong>18% of the full entry fee at every tier</strong>. When all 127 seats are filled, the member at position #1 (root) receives the full pool and is automatically re-entered into the next active matrix.</p>
     <div class="nums-row">
-      <div><div class="big-num">$559</div><div class="num-label"><span data-i18n="compPage.s3_n1_label">T1 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n1_sub">127 × $4.40 (44%)</span></div></div>
-      <div><div class="big-num">$1,397</div><div class="num-label"><span data-i18n="compPage.s3_n2_label">T2 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n2_sub">127 × $11.00 (44%)</span></div></div>
-      <div><div class="big-num yellow">$31,115</div><div class="num-label"><span data-i18n="compPage.s3_n3_label">T7 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n3_sub">127 × $245 (24.5%)</span></div></div>
-      <div><div class="big-num yellow">$285,750</div><div class="num-label"><span data-i18n="compPage.s3_n4_label">T10 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n4_sub">127 × $2,250 (22.5%)</span></div></div>
+      <div><div class="big-num">~$229</div><div class="num-label"><span data-i18n="compPage.s3_n1_label">T1 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n1_sub">127 × $1.80 (18%)</span></div></div>
+      <div><div class="big-num">~$572</div><div class="num-label"><span data-i18n="compPage.s3_n2_label">T2 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n2_sub">127 × $4.50 (18%)</span></div></div>
+      <div><div class="big-num yellow">~$22,860</div><div class="num-label"><span data-i18n="compPage.s3_n3_label">T7 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n3_sub">127 × $180 (18%)</span></div></div>
+      <div><div class="big-num yellow">~$228,600</div><div class="num-label"><span data-i18n="compPage.s3_n4_label">T10 cycle payout</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n4_sub">127 × $1,800 (18%)</span></div></div>
     </div>
-    <p data-i18n="compPage.s3_p2">You don't need to be the root to benefit. Being earlier in the queue means more entries land below you, generating chain pay throughout the fill. Faster-filling matrices = more frequent earnings for everyone in the queue.</p>
+    <p data-i18n="compPage.s3_p2">You don't need to be the root to benefit. Being earlier in the queue means more entries land below you, generating chain pay throughout the fill. Faster-filling matrices = more frequent earnings for everyone in the queue. The flat 18% pool rate makes cycle payouts predictable regardless of tier.</p>
     <p><strong data-i18n="compPage.s3_p3_b">Auto re-entry:</strong> <span data-i18n="compPage.s3_p3">the protocol automatically re-enters the cycling member into the next active matrix. A portion of the cycle payout funds your re-entry fee — no manual action required.</span></p>
   </div>
 
@@ -439,11 +439,11 @@ function toggleTheme() {
   <!-- ── Stream 5: CNOVA Floor Appreciation ── -->
   <h2 data-i18n="compPage.s5_h">📈 Stream 5 &mdash; CNOVA Floor Price Appreciation</h2>
   <div class="section-card">
-    <h3><span style="color:var(--green)" data-i18n="compPage.s5_h3_pct">10%</span> <span data-i18n="compPage.s5_h3">&nbsp;of all entry fees back the CNOVA floor price</span></h3>
-    <p><span data-i18n="compPage.s5_p1_pre">10% of every entry fee flows into the on-chain CNOVA Treasury. The floor price is calculated automatically:</span> <code style="background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--green)">floor = Treasury USDC ÷ CNOVA total supply</code>.</p>
+    <h3><span style="color:var(--green)" data-i18n="compPage.s5_h3_pct">4.5%</span> <span data-i18n="compPage.s5_h3">&nbsp;of every entry fee backs the CNOVA floor price</span></h3>
+    <p><span data-i18n="compPage.s5_p1_pre">4.5% of every entry fee flows into the on-chain CNOVA Treasury (= 10% of the 45% payout base). The floor price is calculated automatically:</span> <code style="background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--green)">floor = Treasury USDC ÷ CNOVA total supply</code>.</p>
     <p data-i18n="compPage.s5_p2">The floor price can only rise as more members join — more USDC flowing into Treasury relative to new CNOVA minted means the backing per token increases. CNOVA holders can redeem for USDC at the floor price at any time, directly from the Dashboard, with no approval or lock-up.</p>
     <div class="nums-row">
-      <div><div class="big-num">$0.02</div><div class="num-label"><span data-i18n="compPage.s5_n1_label">Starting floor price</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n1_sub">at Genesis ($1.00 ÷ 50 CNOVA)</span></div></div>
+      <div><div class="big-num">$0.009</div><div class="num-label"><span data-i18n="compPage.s5_n1_label">Starting floor price</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n1_sub">at Genesis ($0.45 treasury ÷ 50 CNOVA)</span></div></div>
       <div><div class="big-num blue" data-i18n="compPage.s5_n2_val">Always rising</div><div class="num-label"><span data-i18n="compPage.s5_n2_label">as network grows</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n2_sub">floor never decreases</span></div></div>
     </div>
     <p data-i18n="compPage.s5_p3">CNOVA accrued during Genesis epoch at $0.02 floor could be worth significantly more at later epochs as the floor appreciates. There is no market-price ceiling — CNOVA can trade above floor on open markets.</p>
@@ -477,9 +477,9 @@ function toggleTheme() {
           <th data-i18n="compPage.th_tier">Tier</th>
           <th data-i18n="compPage.th_name">Name</th>
           <th data-i18n="compPage.th_entry">Entry Fee</th>
-          <th data-i18n="compPage.th_directref">Direct Ref (10%)</th>
-          <th data-i18n="compPage.th_chainpay">Chain Pay L1 (per entry)</th>
-          <th data-i18n="compPage.th_cyclepool">Cycle Pool Payout</th>
+          <th data-i18n="compPage.th_directref">Direct Ref (3.15%)</th>
+          <th data-i18n="compPage.th_chainpay">Passive L2 Earn (per entry)</th>
+          <th data-i18n="compPage.th_cyclepool">Cycle Pool (18%)</th>
           <th data-i18n="compPage.th_access">Access</th>
         </tr>
       </thead>
@@ -488,166 +488,179 @@ function toggleTheme() {
           <td class="t-tier t-open">T1</td>
           <td class="t-name" data-i18n="compPage.tier1_name">Nova Seed</td>
           <td>$10</td>
-          <td style="color:var(--green)">$1.00</td>
-          <td>$0.85</td>
-          <td style="color:var(--green)">~$559</td>
+          <td style="color:var(--green)">$0.32</td>
+          <td>$0.27</td>
+          <td style="color:var(--green)">~$229</td>
           <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
         </tr>
         <tr>
           <td class="t-tier t-open">T2</td>
           <td class="t-name" data-i18n="compPage.tier2_name">Nova Rise</td>
           <td>$25</td>
-          <td style="color:var(--green)">$2.50</td>
-          <td>$2.13</td>
-          <td style="color:var(--green)">~$1,397</td>
+          <td style="color:var(--green)">$0.79</td>
+          <td>$0.68</td>
+          <td style="color:var(--green)">~$572</td>
           <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T3</td>
           <td class="t-name" data-i18n="compPage.tier3_name">Nova Star</td>
           <td>$50</td>
-          <td>$5.00</td>
-          <td>$4.25</td>
-          <td>~$2,794</td>
+          <td>$1.58</td>
+          <td>$1.35</td>
+          <td>~$1,143</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T4</td>
           <td class="t-name" data-i18n="compPage.tier4_name">Nova Core</td>
           <td>$100</td>
-          <td>$20.00</td>
-          <td>$10.00</td>
-          <td>~$3,302</td>
+          <td>$3.15</td>
+          <td>$2.70</td>
+          <td>~$2,286</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T5</td>
           <td class="t-name" data-i18n="compPage.tier5_name">Nova Prime</td>
           <td>$250</td>
-          <td>$50.00</td>
-          <td>$25.00</td>
-          <td>~$8,255</td>
+          <td>$7.88</td>
+          <td>$6.75</td>
+          <td>~$5,715</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T6</td>
           <td class="t-name" data-i18n="compPage.tier6_name">Nova Apex</td>
           <td>$500</td>
-          <td>$100.00</td>
-          <td>$43.75</td>
-          <td>~$15,558</td>
+          <td>$15.75</td>
+          <td>$13.50</td>
+          <td>~$11,430</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T7</td>
           <td class="t-name" data-i18n="compPage.tier7_name">Nova Pinnacle</td>
           <td>$1,000</td>
-          <td>$200.00</td>
-          <td>$87.50</td>
-          <td>~$31,115</td>
+          <td>$31.50</td>
+          <td>$27.00</td>
+          <td>~$22,860</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-super">T8</td>
           <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier8_name">SuperNova Titan</td>
           <td>$2,500</td>
-          <td style="color:var(--purple)">$500.00</td>
-          <td>$218.75</td>
-          <td style="color:var(--purple)">~$71,438</td>
+          <td style="color:var(--purple)">$78.75</td>
+          <td>$67.50</td>
+          <td style="color:var(--purple)">~$57,150</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-super">T9</td>
           <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier9_name">SuperNova Legend</td>
           <td>$5,000</td>
-          <td style="color:var(--purple)">$1,000.00</td>
-          <td>$437.50</td>
-          <td style="color:var(--purple)">~$142,875</td>
+          <td style="color:var(--purple)">$157.50</td>
+          <td>$135.00</td>
+          <td style="color:var(--purple)">~$114,300</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-super">T10</td>
           <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier10_name">SuperNova Apex</td>
           <td>$10,000</td>
-          <td style="color:var(--purple)">$2,000.00</td>
-          <td>$875.00</td>
-          <td style="color:var(--purple)">~$285,750</td>
+          <td style="color:var(--purple)">$315.00</td>
+          <td>$270.00</td>
+          <td style="color:var(--purple)">~$228,600</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
         </tr>
       </tbody>
     </table>
   </div>
   <div style="font-size:12px;color:var(--text3);margin-bottom:36px;padding:0 4px">
-    <span data-i18n="compPage.table_footnote">Cycle payout = 127 seats × entry fee × pool share (44% at T1–T3, 26% at T4–T5, 24.5% at T6–T7, 22.5% at T8–T10). Chain pay L1 = entry fee × chain share (17% at T1–T3, 20% at T4–T5, 17.5% at T6–T10) × 50%. Direct referral = entry fee × 10% (T1–T3) or 20% (T4–T10). Velocity gates open when previous tier MatB reaches 80% fill.</span> <strong style="color:var(--red)" data-i18n="compPage.table_footnote_b">Cycle payouts require the matrix to fill — not guaranteed.</strong>
+    <span data-i18n="compPage.table_footnote">Cycle payout = 127 × entry fee × 18% (= 40% pool BPS × 45% payout base — flat across all tiers). Direct Ref = entry fee × 3.15% (L1 slot: 7% × 45%). Passive L2 = entry fee × 2.7% (L2–L6 each: 6% × 45%). Additionally: 50% of each entry funds member's crossing reserve and 5% is credited instantly to the joining member. Velocity gates open when previous tier MatB reaches 80% fill.</span> <strong style="color:var(--red)" data-i18n="compPage.table_footnote_b">Cycle payouts require the matrix to fill — not guaranteed.</strong>
   </div>
 
   <!-- ── Entry Fee Split ── -->
   <h2 data-i18n="compPage.split_h">💰 Where Does the $10 Entry Fee Go?</h2>
   <div class="section-card">
-    <p data-i18n="compPage.split_intro">Every T1 entry fee is distributed automatically and instantly by the smart contract — no human intervention, no admin wallet:</p>
+    <p data-i18n="compPage.split_intro">Every T1 entry fee is split into three buckets by the smart contract — automatically, with no human intervention:</p>
+    <!-- V8.31 crossing reserve callout -->
+    <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--text2);line-height:1.7">
+      <strong style="color:#a855f7">🔐 How the 50/5/45 model works:</strong>
+      50% of your entry fee is held as your personal <em>crossing reserve</em> — when your 127-seat matrix fills, this covers your re-entry fee in full, so your first crossing costs nothing extra.
+      5% is credited directly to your withdrawable balance the moment you join (instant earn).
+      The remaining 45% runs through the BPS payout array below.
+    </div>
     <div class="split-table">
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:10%;background:var(--green)"></div></div>
-        <div class="split-pct">10%</div>
-        <div class="split-amt">$1.00</div>
+        <div class="split-label" data-i18n="compPage.split_reserve">🔐 Your Crossing Reserve (held for you)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:50%;background:#a855f7"></div></div>
+        <div class="split-pct">50%</div>
+        <div class="split-amt">$5.00</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Chain Pay (6 upline levels)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:17%;background:var(--blue)"></div></div>
-        <div class="split-pct">17%</div>
-        <div class="split-amt">$1.70</div>
+        <div class="split-label" data-i18n="compPage.split_instant">⚡ Your Instant Earn (to your balance)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:5%;background:var(--green)"></div></div>
+        <div class="split-pct">5%</div>
+        <div class="split-amt">$0.50</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_pool">🌀 Equalization Pool</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:44%;background:var(--yellow)"></div></div>
-        <div class="split-pct">44%</div>
-        <div class="split-amt">$4.40</div>
+        <div class="split-label" data-i18n="compPage.split_pool">🌀 Equalization Pool (45% base → 40%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:18%;background:var(--yellow)"></div></div>
+        <div class="split-pct">18%</div>
+        <div class="split-amt">$1.80</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_treasury">🏦 CNOVA Treasury (floor backing)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:10%;background:var(--green2)"></div></div>
-        <div class="split-pct">10%</div>
-        <div class="split-amt">$1.00</div>
+        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral (45% base → 7%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:3.15%;background:var(--green)"></div></div>
+        <div class="split-pct">3.15%</div>
+        <div class="split-amt">$0.32</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_sf">🌊 Stability Rescue Fund</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:12%;background:#38bdf8"></div></div>
-        <div class="split-pct">12%</div>
-        <div class="split-amt">$1.20</div>
+        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Chain Pay L2–L6 each (45% base → 6% each)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:2.7%;background:var(--blue)"></div></div>
+        <div class="split-pct">2.7% ea.</div>
+        <div class="split-amt">$0.27</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_dev">⚙️ Dev</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:2%;background:var(--text3)"></div></div>
-        <div class="split-pct">2%</div>
-        <div class="split-amt">$0.20</div>
+        <div class="split-label" data-i18n="compPage.split_treasury">🏦 CNOVA Treasury (45% base → 10%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:4.5%;background:var(--green2)"></div></div>
+        <div class="split-pct">4.5%</div>
+        <div class="split-amt">$0.45</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_ops">⚙️ Ops</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--text3)"></div></div>
-        <div class="split-pct">1%</div>
-        <div class="split-amt">$0.10</div>
+        <div class="split-label" data-i18n="compPage.split_sf">🌊 Stability Rescue Fund (45% base → 6%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:2.7%;background:#38bdf8"></div></div>
+        <div class="split-pct">2.7%</div>
+        <div class="split-amt">$0.27</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_cw">🏛️ Community Wallet</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--purple)"></div></div>
-        <div class="split-pct">1%</div>
-        <div class="split-amt">$0.10</div>
+        <div class="split-label" data-i18n="compPage.split_lq">💧 Liquidity Reserve (45% base → 2%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:0.9%;background:var(--blue)"></div></div>
+        <div class="split-pct">0.9%</div>
+        <div class="split-amt">$0.09</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_bbr">🔥 CNOVA Buyback Reserve</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--red)"></div></div>
-        <div class="split-pct">1%</div>
-        <div class="split-amt">$0.10</div>
+        <div class="split-label" data-i18n="compPage.split_dev">⚙️ Dev + Ops (45% base → 3%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:1.35%;background:var(--text3)"></div></div>
+        <div class="split-pct">1.35%</div>
+        <div class="split-amt">$0.135</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_lq">💧 Liquidity Reserve</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:2%;background:var(--blue)"></div></div>
-        <div class="split-pct">2%</div>
-        <div class="split-amt">$0.20</div>
+        <div class="split-label" data-i18n="compPage.split_cw">🏛️ Community Wallet (45% base → 1%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:0.45%;background:var(--purple)"></div></div>
+        <div class="split-pct">0.45%</div>
+        <div class="split-amt">$0.045</div>
+      </div>
+      <div class="split-row">
+        <div class="split-label" data-i18n="compPage.split_bbr">🔥 CNOVA Buyback Reserve (45% base → 1%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:0.45%;background:var(--red)"></div></div>
+        <div class="split-pct">0.45%</div>
+        <div class="split-amt">$0.045</div>
       </div>
     </div>
-    <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">71% of every entry goes directly to participants (referral + chain pay + cycle pool). The remaining 29% builds the protocol — CNOVA floor backing, reserves, liquidity, and operations.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Immutable.</strong> <span data-i18n="compPage.split_footer_post">(Splits shown are for Tiers 1–3; higher tiers shift more weight toward referral, chain pay, and treasury — see the table above and the Stream sections for exact per-tier figures.)</span></p>
+    <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">50% funds your crossing reserve (held for you). 5% is your instant earn. The remaining 45% goes to the pool (18%), chain pay (16.65%), treasury (4.5%), and protocol reserves. All rates are identical across all 10 tiers.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Immutable.</strong> <span data-i18n="compPage.split_footer_post">(Percentages shown are of the total entry fee. Pool and chain pay rates are flat at every tier — cycle payouts scale with the tier entry fee, not the pool percentage.)</span></p>
   </div>
 
   <!-- ── Disclaimer ── -->
