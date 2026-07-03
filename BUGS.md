@@ -99,4 +99,15 @@ After registering, on the Dashboard tab, my MM wallet keeps failing each time I 
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
-| | | | | |
+| 2026-07-02 | 2026-07-03 | All sub-pages | Nav link showed "📊 Dashboard" and went to index.html#dashboard; changed to "🏠 Home" → index.html across all 7 sub-pages | 0b9e3b8 |
+| 2026-07-02 | 2026-07-03 | index.html | "FREE 🎉" showing as HTML entity &#127881; — fixed textContent → innerHTML on coupon You Pay display | pending |
+| 2026-07-02 | 2026-07-03 | index.html | Withdrawal blocked error message too terse — expanded to explain crossing reserve and when funds unlock | pending |
+| 2026-07-02 | 2026-07-03 | index.html | Double Reentry / Auto Reentry tooltips unclear — member confused why T1 not re-entered after upgrade to T2; tooltips now explain the distinction | pending |
+
+## Notes on Open Issues
+
+- **KolawoleOla withdrawal ($21)** — Contract-level block (crossing reserve). Member must wait for current matrix cycle to complete. V8.31 Task #63 will fix for members with automation disabled.
+- **Dee1 auto-reentry failure** — Works as designed: auto-upgrade to T2 fired, T1 not re-entered (double reentry was not enabled). Not a bug.
+- **Kolawole auto-reentry TX fails** — Coupon members bypass TierRouter globalJoined. Requires V8.31 deploy to fix.
+- **Kolawole member ID 444 vs 442** — Known V8.30 coupon bypass side-effect. V8.31 fixes going forward; 2-member gap baked in on-chain.
+- **Dee1 #146/#147 no earnings** — Base Sepolia RPC outage (SERVER_ERROR confirmed 2026-07-03 13:35 UTC) prevented keeper from running force-crosses. Not a code bug. Monitor and retry once RPC recovers.

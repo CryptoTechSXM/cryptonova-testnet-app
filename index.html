@@ -1335,7 +1335,7 @@
           <div class="info-row"><span class="info-key" data-i18n="dash.referrer">Referrer</span><span class="info-val addr" id="dash-orig-referrer">—</span></div>
           <div class="info-row"><span class="info-key" data-i18n="dash.direct_referrals">Direct Referrals</span><span class="info-val" id="dash-directs">—</span></div>
           <div class="info-row" style="padding-top:10px;margin-top:6px;border-top:1px solid var(--border)">
-            <span class="info-key" title="When enabled, if your cycle surplus covers the entry fee, a second registration fires automatically on your next cycle-out.">Double Reentry ⓘ</span>
+            <span class="info-key" title="When enabled, at your next cycle-out you re-enter BOTH the new tier (or same tier) AND your previous tier simultaneously — so you hold two active positions at once. Requires enough balance to cover both entry fees.">Double Reentry ⓘ</span>
             <span class="info-val" style="display:flex;align-items:center;gap:8px">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
                 <input type="checkbox" id="chk-double-reentry" onchange="setDoubleReentryOption(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)">
@@ -1353,7 +1353,7 @@
             </span>
           </div>
           <div class="info-row" style="margin-top:4px">
-            <span class="info-key" title="When on, you re-enter the same tier automatically after completing enough cycles (when auto-upgrade does not fire).">Auto Reentry &#9432;</span>
+            <span class="info-key" title="When on, you re-enter the same tier automatically after a cycle completes — but only when Auto-Upgrade does not fire. If you upgrade, use Double Reentry to also hold your previous tier.">Auto Reentry &#9432;</span>
             <span class="info-val" style="display:flex;align-items:center;gap:8px">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
                 <input type="checkbox" id="chk-auto-reentry" onchange="setAutoReentryOption(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)">
@@ -3318,7 +3318,7 @@ async function validateCouponCode() {
     const discountEl = document.getElementById('coupon-discount-amount');
     const youPayEl   = document.getElementById('coupon-you-pay-amount');
     if (discountEl) discountEl.textContent = '-$' + couponUsdc.toFixed(2);
-    if (youPayEl)   youPayEl.textContent   = youPay === 0 ? 'FREE! &#127881;' : '$' + youPay.toFixed(2) + ' USDC';
+    if (youPayEl)   youPayEl.innerHTML     = youPay === 0 ? 'FREE! &#127881;' : '$' + youPay.toFixed(2) + ' USDC';
     if (discountRow) discountRow.style.display = '';
     if (youPayRow)   youPayRow.style.display   = '';
     _updateApproveForCoupon();
@@ -3342,7 +3342,7 @@ function _updateApproveForCoupon() {
   const btnReg = document.getElementById('btn-register');
   if (!btn || !c) return;
   if (c.youPay === 0) {
-    btn.textContent = '✓ No Payment Needed — Coupon Covers $10 &#127921;';
+    btn.innerHTML = '✓ No Payment Needed — Coupon Covers $10 &#127921;';
     btn.disabled = true; btn.className = 'btn btn-ghost full-w';
     btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
     const approvedEl = document.getElementById('reg-approved');
@@ -5331,7 +5331,7 @@ function friendlyError(e) {
   // ── Matrix revert strings (F8V8:) ──────────────────────────────────────
   if (msgLow.includes('f8v8: must keep crossing reserve') ||
       msgLow.includes('f8v8: balance fully reserved'))
-    return '❌ Your balance is reserved for your next matrix crossing — it cannot be withdrawn yet.';
+    return '⏳ Your balance is locked while you hold an active matrix position. The system reserves your entry fee ($20) to fund your next crossing. Once your current matrix cycle completes and pays out, you can withdraw freely. If you have Auto-Reentry disabled, you will not be re-entered and your full balance will be available after the cycle.';
   if (msgLow.includes('f8v8: nothing to withdraw'))
     return '❌ Nothing to withdraw — earnings from this matrix were used for your upgrade to the next tier.';
 
