@@ -8,170 +8,124 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0a0f1e;
-      color: #e0e8f0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      background: #0a0f1e; color: #e0e8f0;
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 20px;
     }
     .card {
-      background: #111827;
-      border: 1px solid #1e3a5f;
-      border-radius: 16px;
-      padding: 40px;
-      width: 100%;
-      max-width: 600px;
+      background: #111827; border: 1px solid #1e3a5f; border-radius: 16px;
+      padding: 40px; width: 100%; max-width: 600px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
     .logo { text-align: center; margin-bottom: 8px; }
     .logo .crypto { color: #fff; font-size: 26px; font-weight: 800; }
     .logo .nova   { color: #22c55e; font-size: 26px; font-weight: 800; }
-    .logo p { color: #64748b; font-size: 13px; margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
-    h2 { color: #fff; font-size: 18px; font-weight: 700; text-align: center; margin: 24px 0 20px; }
+    .logo p { color: #64748b; font-size: 13px; margin-top: 4px; letter-spacing: .05em; text-transform: uppercase; }
+    .steps { display: flex; justify-content: center; gap: 8px; margin: 16px 0 0; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+    .step-dot.active { background: #22c55e; }
+    .step-dot.done   { background: #166534; }
+    .wallet-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #1e293b; border: 1px solid #334155; border-radius: 20px;
+      padding: 4px 12px; font-size: 12px; color: #94a3b8; margin: 14px auto 0;
+    }
+    .wallet-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    .lock { font-size: 44px; text-align: center; margin: 20px 0 8px; }
+    h2 { color: #fff; font-size: 18px; font-weight: 700; text-align: center; margin: 16px 0 12px; }
     .badge {
-      display: inline-block;
-      background: #1e3a5f;
-      color: #38bdf8;
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      vertical-align: middle;
-      margin-left: 8px;
+      display: inline-block; background: #1e3a5f; color: #38bdf8;
+      border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600;
+      vertical-align: middle; margin-left: 8px;
     }
     label {
-      display: block;
-      color: #94a3b8;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 18px 0 6px;
+      display: block; color: #94a3b8; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .05em; margin: 18px 0 6px;
     }
-    input[type="text"],
-    input[type="password"],
-    select,
-    textarea {
-      width: 100%;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #e0e8f0;
-      padding: 10px 14px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-      font-family: inherit;
+    input[type="text"], input[type="password"], select, textarea {
+      width: 100%; background: #1e293b; border: 1px solid #334155;
+      border-radius: 8px; color: #e0e8f0; padding: 10px 14px; font-size: 14px;
+      outline: none; transition: border-color .2s; font-family: inherit;
     }
     input:focus, select:focus, textarea:focus { border-color: #22c55e; }
     input[readonly] { color: #64748b; cursor: default; }
     textarea { min-height: 90px; resize: vertical; }
     select option { background: #1e293b; }
-    .radio-group { display: flex; gap: 24px; margin-top: 6px; }
+    .radio-group { display: flex; gap: 24px; margin-top: 6px; flex-wrap: wrap; }
     .radio-group label {
       display: flex; align-items: center; gap: 8px;
       color: #e0e8f0; font-size: 14px; font-weight: 400;
-      text-transform: none; letter-spacing: normal;
-      margin: 0; cursor: pointer;
+      text-transform: none; letter-spacing: normal; margin: 0; cursor: pointer;
     }
     input[type="radio"] { accent-color: #22c55e; width: 16px; height: 16px; }
     .btn {
-      width: 100%;
-      margin-top: 28px;
-      padding: 14px;
-      background: #22c55e;
-      color: #000;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
+      width: 100%; margin-top: 20px; padding: 14px; background: #22c55e;
+      color: #000; border: none; border-radius: 10px; font-size: 15px;
+      font-weight: 700; cursor: pointer; transition: background .2s, opacity .2s;
     }
     .btn:hover:not(:disabled) { background: #16a34a; }
     .btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    .back-link { margin-top: 12px; }
+    .back-link a {
+      display: block; width: 100%; padding: 12px; border: 1px solid #334155;
+      border-radius: 8px; color: #94a3b8; font-size: 14px; text-align: center;
+      text-decoration: none; transition: border-color .2s, color .2s; box-sizing: border-box;
+    }
+    .back-link a:hover { border-color: #475569; color: #cbd5e1; }
     .msg { text-align: center; margin-top: 14px; font-size: 14px; min-height: 20px; }
     .msg.error   { color: #f87171; }
     .msg.success { color: #22c55e; }
     .divider { border: none; border-top: 1px solid #1e3a5f; margin: 24px 0; }
     #wallet-screen, #pw-screen, #form-screen { display: none; }
     #wallet-screen.active, #pw-screen.active, #form-screen.active { display: block; }
-    .lock { font-size: 44px; text-align: center; margin-bottom: 12px; }
     .success-card {
-      text-align: center;
-      padding: 20px;
-      background: #052e16;
-      border: 1px solid #166534;
-      border-radius: 12px;
-      display: none;
+      text-align: center; padding: 20px; background: #052e16;
+      border: 1px solid #166534; border-radius: 12px; margin-top: 20px; display: none;
     }
     .success-card.show { display: block; }
     .success-card .icon { font-size: 40px; margin-bottom: 12px; }
     .success-card p { color: #86efac; font-size: 15px; }
     .another-btn {
-      margin-top: 16px;
-      background: transparent;
-      border: 1px solid #22c55e;
-      color: #22c55e;
-      border-radius: 8px;
-      padding: 8px 20px;
-      cursor: pointer;
-      font-size: 14px;
+      margin-top: 16px; background: transparent; border: 1px solid #22c55e;
+      color: #22c55e; border-radius: 8px; padding: 8px 20px;
+      cursor: pointer; font-size: 14px;
     }
     .another-btn:hover { background: #052e16; }
-    .wallet-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #052e16;
-      border: 1px solid #166534;
-      border-radius: 8px;
-      padding: 6px 14px;
-      margin-bottom: 4px;
+    .success-home {
+      display:block; margin-top:10px; padding:10px;
+      border:1px solid #334155; border-radius:8px;
+      color:#94a3b8; font-size:14px; text-align:center;
+      text-decoration:none; transition:border-color .2s, color .2s;
     }
-    .wallet-chip .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; flex-shrink:0; }
-    .wallet-chip span { color: #86efac; font-size: 13px; font-family: monospace; word-break:break-all; }
-    .steps {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
-    .step-dot.active { background: #22c55e; }
-    .step-dot.done   { background: #166534; }
-    .back-link { text-align:center; margin-top:20px; }
-    .back-link a { color:#64748b; font-size:13px; text-decoration:none; }
-    .back-link a:hover { color:#94a3b8; }
+    .success-home:hover { border-color:#475569; color:#cbd5e1; }
   </style>
 </head>
 <body>
 <div class="card">
+
   <div class="logo">
     <div><span class="crypto">Crypto</span><span class="nova">Nova</span></div>
     <p>Community Bug Report</p>
   </div>
 
-  <!-- ── Step 0: Connect Wallet ── -->
+  <!-- Step 1: Connect Wallet -->
   <div id="wallet-screen" class="active">
     <div class="steps">
       <div class="step-dot active"></div>
       <div class="step-dot"></div>
       <div class="step-dot"></div>
     </div>
-    <div class="lock">🔗</div>
+    <div class="lock">&#128279;</div>
     <h2>Connect Your Wallet</h2>
     <p style="text-align:center;color:#64748b;font-size:14px;line-height:1.6">
-      Connect your wallet to confirm you're a CryptoNova member before submitting a bug report.
+      Connect your wallet to confirm you are a CryptoNova member before submitting a bug report.
     </p>
     <button class="btn" id="connect-btn" onclick="connectWallet()">Connect Wallet</button>
     <div class="msg error" id="wallet-error"></div>
-    <div class="back-link"><a href="/">← Back to Dashboard</a></div>
+    <div class="back-link"><a href="/">&#8592; Back to Dashboard</a></div>
   </div>
 
-  <!-- ── Step 1: Password ── -->
+  <!-- Step 2: Password -->
   <div id="pw-screen">
     <div class="steps">
       <div class="step-dot done"></div>
@@ -181,21 +135,31 @@
     <div style="text-align:center">
       <div class="wallet-chip" style="display:inline-flex">
         <div class="dot"></div>
-        <span id="connected-addr">0x…</span>
+        <span id="connected-addr">0x...</span>
       </div>
     </div>
-    <div class="lock">🔐</div>
+    <div class="lock">&#128272;</div>
     <h2>Community Access</h2>
     <p style="text-align:center;color:#64748b;font-size:13px">
       Enter the community bug report password to continue.
     </p>
     <label for="pw-input">Access Password</label>
-    <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
+    <div style="position:relative">
+      <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password" style="padding-right:46px;box-sizing:border-box;width:100%">
+      <button type="button" onclick="togglePwVisibility()" title="Show/hide password"
+        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;padding:0;line-height:0;display:flex;align-items:center">
+        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
     <button class="btn" id="pw-btn" onclick="checkPassword()">Continue</button>
     <div class="msg error" id="pw-error"></div>
+    <div class="back-link"><a href="/">&#8592; Back to Dashboard</a></div>
   </div>
 
-  <!-- ── Step 2: Bug report form ── -->
+  <!-- Step 3: Form -->
   <div id="form-screen">
     <div class="steps">
       <div class="step-dot done"></div>
@@ -205,18 +169,17 @@
     <div style="text-align:center">
       <div class="wallet-chip" style="display:inline-flex">
         <div class="dot"></div>
-        <span id="form-addr">0x…</span>
+        <span id="form-addr">0x...</span>
       </div>
     </div>
-
     <h2>Submit a Bug Report <span class="badge">TESTNET</span></h2>
 
     <label for="reporter">Your name / handle *</label>
     <input type="text" id="reporter" placeholder="e.g. Alex or @handle">
 
-    <label for="page">Page / Feature *</label>
-    <select id="page">
-      <option value="">— Select page —</option>
+    <label for="page-sel">Page / Feature *</label>
+    <select id="page-sel">
+      <option value="">-- Select page --</option>
       <option value="Dashboard (index.html)">Dashboard (Home)</option>
       <option value="Buy CNOVA (buy.html)">Buy CNOVA</option>
       <option value="Governance / DAO (governance.html)">Governance / DAO</option>
@@ -225,6 +188,7 @@
       <option value="Comp Plan (compensation.html)">Comp Plan</option>
       <option value="Terms (terms.html)">Terms</option>
       <option value="FAQ (faq.html)">FAQ</option>
+      <option value="Bug Report Page">Bug Report Page</option>
       <option value="Onboarding / Registration">Onboarding / Registration</option>
       <option value="Coupon System">Coupon System</option>
       <option value="Navigation / Menu">Navigation / Menu</option>
@@ -233,7 +197,7 @@
 
     <label for="wallet-type">Wallet Type *</label>
     <select id="wallet-type">
-      <option value="">— Select wallet —</option>
+      <option value="">-- Select wallet --</option>
       <option value="MetaMask">MetaMask</option>
       <option value="Rabby">Rabby</option>
       <option value="Coinbase Wallet">Coinbase Wallet</option>
@@ -241,8 +205,8 @@
       <option value="Other / Unknown">Other / Unknown</option>
     </select>
 
-    <label for="wallet-addr">Connected Wallet Address</label>
-    <input type="text" id="wallet-addr" readonly>
+    <label for="wallet-addr">Wallet Address</label>
+    <input type="text" id="wallet-addr" readonly placeholder="Auto-filled from connected wallet">
 
     <label>Frequency *</label>
     <div class="radio-group">
@@ -253,74 +217,213 @@
     <hr class="divider">
 
     <label for="happened">What happened? *</label>
-    <textarea id="happened" placeholder="Describe exactly what went wrong — be as specific as possible."></textarea>
+    <textarea id="happened" placeholder="Describe exactly what went wrong -- be as specific as possible."></textarea>
 
     <label for="expected">What was expected? *</label>
     <textarea id="expected" placeholder="What should have happened instead?"></textarea>
 
     <label for="notes">Additional notes (optional)</label>
-    <textarea id="notes" placeholder="Steps to reproduce, screenshot filename, error message seen..." style="min-height: 70px;"></textarea>
+    <textarea id="notes" placeholder="Steps to reproduce, screenshot filename, error message..." style="min-height:70px"></textarea>
 
     <button class="btn" id="submit-btn" onclick="submitBug()">Submit Bug Report</button>
     <div class="msg" id="form-msg"></div>
 
     <div class="success-card" id="success-card">
-      <div class="icon">✅</div>
-      <p>Bug report submitted — thank you for helping improve CryptoNova!</p>
+      <div class="icon">&#9989;</div>
+      <p>Bug report submitted and logged. Thank you!</p>
       <button class="another-btn" onclick="resetForm()">Submit another</button>
+      <a href="/" class="success-home">&#8592; Back to Dashboard</a>
     </div>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+</div>
 <script>
-  let walletAddress = '';
-  let sessionPw = sessionStorage.getItem('cnova_bug_pw') || '';
+  var walletAddress = '';
+  var sessionPw = sessionStorage.getItem('cnova_bug_pw') || '';
 
   (function init() {
-    if (sessionPw && window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-        if (accounts && accounts[0]) { walletAddress = accounts[0]; showForm(); }
-        else showWallet();
-      }).catch(() => showWallet());
-    } else {
-      showWallet();
-    }
+    if (!window.ethereum) { showWallet(); return; }
+    window.ethereum.request({ method: 'eth_accounts' }).then(function(accounts) {
+      if (accounts && accounts[0]) {
+        walletAddress = accounts[0];
+        if (sessionPw) { showForm(); } else { showPasswordScreen(); }
+      } else {
+        showWallet();
+      }
+    }).catch(function() { showWallet(); });
   })();
 
-  document.getElementById('pw-input').addEventListener('keydown', e => {
+  document.getElementById('pw-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') checkPassword();
   });
 
   function detectWalletType() {
     if (!window.ethereum) return '';
-    if (window.ethereum.isRabby) return 'Rabby';
+    if (window.ethereum.isRabby)          return 'Rabby';
     if (window.ethereum.isCoinbaseWallet) return 'Coinbase Wallet';
-    if (window.ethereum.isMetaMask) return 'MetaMask';
+    if (window.ethereum.isMetaMask)       return 'MetaMask';
     return 'Other / Unknown';
   }
 
   function shortAddr(addr) {
-    return addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : '0x…';
+    return addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '0x...';
+  }
+
+  function showWallet() {
+    document.getElementById('wallet-screen').classList.add('active');
+    document.getElementById('pw-screen').classList.remove('active');
+    document.getElementById('form-screen').classList.remove('active');
+    var btn = document.getElementById('connect-btn');
+    btn.disabled = false; btn.textContent = 'Connect Wallet';
+  }
+
+  function showPasswordScreen() {
+    document.getElementById('wallet-screen').classList.remove('active');
+    document.getElementById('pw-screen').classList.add('active');
+    document.getElementById('form-screen').classList.remove('active');
+    document.getElementById('connected-addr').textContent = shortAddr(walletAddress);
+    var btn = document.getElementById('pw-btn');
+    btn.disabled = false; btn.textContent = 'Continue';
+  }
+
+  function showForm() {
+    document.getElementById('wallet-screen').classList.remove('active');
+    document.getElementById('pw-screen').classList.remove('active');
+    document.getElementById('form-screen').classList.add('active');
+    document.getElementById('form-addr').textContent = shortAddr(walletAddress);
+    document.getElementById('wallet-addr').value = walletAddress || '';
+    var wType = detectWalletType();
+    if (wType) {
+      var sel = document.getElementById('wallet-type');
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === wType) { sel.selectedIndex = i; break; }
+      }
+    }
   }
 
   async function connectWallet() {
-    const btn = document.getElementById('connect-btn');
-    const errEl = document.getElementById('wallet-error');
+    var btn = document.getElementById('connect-btn');
+    var errEl = document.getElementById('wallet-error');
     errEl.textContent = '';
     if (!window.ethereum) {
-      errEl.textContent = 'No wallet detected — please install MetaMask or Rabby.';
+      errEl.textContent = 'No wallet detected -- please install MetaMask or Rabby.';
       return;
     }
-    btn.disabled = true;
-    btn.textContent = 'Connecting…';
+    btn.disabled = true; btn.textContent = 'Connecting...';
     try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       if (!accounts || !accounts[0]) throw new Error('No account returned');
       walletAddress = accounts[0];
       showPasswordScreen();
-    } catch (e) {
-      const msg = (e.message || '').toLowerCase();
+    } catch(e) {
+      var msg = (e.message || '').toLowerCase();
       errEl.textContent = (msg.includes('user rejected') || msg.includes('user denied'))
-        ? 'Connection cancelled — please try again.'
-        : 'Could not connect wa
+        ? 'Connection cancelled -- please try again.'
+        : 'Could not connect wallet. Please try again.';
+      btn.disabled = false; btn.textContent = 'Connect Wallet';
+    }
+  }
+
+  async function checkPassword() {
+    var pw = document.getElementById('pw-input').value.trim();
+    if (!pw) return;
+    var btn = document.getElementById('pw-btn');
+    var errEl = document.getElementById('pw-error');
+    btn.disabled = true; btn.textContent = 'Checking...';
+    errEl.textContent = '';
+    try {
+      var r = await fetch('/api/submit-bug', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', password: pw })
+      });
+      if (r.ok) {
+        sessionStorage.setItem('cnova_bug_pw', pw);
+        sessionPw = pw;
+        showForm();
+      } else {
+        errEl.textContent = 'Incorrect password -- try again.';
+        btn.disabled = false; btn.textContent = 'Continue';
+      }
+    } catch(e) {
+      errEl.textContent = 'Connection error. Please try again.';
+      btn.disabled = false; btn.textContent = 'Continue';
+    }
+  }
+
+  async function submitBug() {
+    var reporter   = document.getElementById('reporter').value.trim();
+    var page       = document.getElementById('page-sel').value;
+    var walletType = document.getElementById('wallet-type').value;
+    var freqEl     = document.querySelector('input[name="freq"]:checked');
+    var happened   = document.getElementById('happened').value.trim();
+    var expected   = document.getElementById('expected').value.trim();
+    var notes      = document.getElementById('notes').value.trim();
+    var msgEl      = document.getElementById('form-msg');
+
+    msgEl.className = 'msg error';
+    if (!reporter)   { msgEl.textContent = 'Please enter your name.'; return; }
+    if (!page)       { msgEl.textContent = 'Please select a page.'; return; }
+    if (!walletType) { msgEl.textContent = 'Please select a wallet type.'; return; }
+    if (!freqEl)     { msgEl.textContent = 'Please select Consistent or Intermittent.'; return; }
+    if (!happened)   { msgEl.textContent = 'Please describe what happened.'; return; }
+    if (!expected)   { msgEl.textContent = 'Please describe what was expected.'; return; }
+
+    var btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    msgEl.textContent = '';
+    try {
+      var r = await fetch('/api/submit-bug', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'submit', password: sessionPw,
+          reporter: reporter, page: page,
+          wallet: walletType, walletAddress: walletAddress,
+          frequency: freqEl.value,
+          happened: happened, expected: expected, notes: notes
+        })
+      });
+      if (r.ok) {
+        btn.style.display = 'none';
+        document.getElementById('success-card').classList.add('show');
+      } else {
+        var err = await r.json().catch(function(){ return {}; });
+        msgEl.textContent = err.error || 'Submission failed -- please try again.';
+        btn.disabled = false; btn.textContent = 'Submit Bug Report';
+      }
+    } catch(e) {
+      msgEl.textContent = 'Network error -- please try again.';
+      btn.disabled = false; btn.textContent = 'Submit Bug Report';
+    }
+  }
+
+  function resetForm() {
+    ['reporter','happened','expected','notes'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('page-sel').selectedIndex = 0;
+    document.getElementById('wallet-type').selectedIndex = 0;
+    document.querySelectorAll('input[name="freq"]').forEach(function(r){ r.checked = false; });
+    var msgEl = document.getElementById('form-msg');
+    msgEl.textContent = ''; msgEl.className = 'msg';
+    var btn = document.getElementById('submit-btn');
+    btn.style.display = ''; btn.disabled = false;
+    btn.textContent = 'Submit Bug Report';
+    document.getElementById('success-card').classList.remove('show');
+  }
+
+  function togglePwVisibility() {
+    var inp = document.getElementById('pw-input');
+    var icon = document.getElementById('eye-icon');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      inp.type = 'password';
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+</script>
+</body>
+</html>
