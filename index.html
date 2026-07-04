@@ -3467,10 +3467,9 @@ async function doRegister() {
 
     let tx;
     if (c) {
-      // Coupon path: call registerWithCoupon() directly on MatA
-      // TODO V8.31 deploy: switch to tierRouter.registerWithCoupon() once V8.31 is live
-      const matA = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, signer);
-      tx = await matA.registerWithCoupon(referrer, c.codeHash);
+      // Coupon path: V8.31 — call registerWithCoupon() on TierRouter so globalJoined is set
+      const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      tx = await tr.registerWithCoupon(referrer, c.codeHash);
     } else {
       // Normal path: call register() on TierRouter
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
@@ -3478,16 +3477,14 @@ async function doRegister() {
     }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
-    if (!c) {
-      // Auto-enable default options — skip for coupon path (TR.globalJoined not set yet)
-      try {
-        const tr2 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-        const optsTx = await tr2.setMemberOptions(false, true, false, { gasLimit: 120_000 });
-        await optsTx.wait();
-        window._memberOptions = { disableUpgrade: false, enableReentry: true, enableDouble: false };
-        try { localStorage.setItem('cnova_opts_' + await signer.getAddress(), JSON.stringify(window._memberOptions)); } catch(_) {}
-      } catch(_) {} // non-critical — member can adjust from Dashboard
-    }
+    // Auto-enable default options for all members — globalJoined is always set via TierRouter now
+    try {
+      const tr2 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      const optsTx = await tr2.setMemberOptions(false, true, false, { gasLimit: 120_000 });
+      await optsTx.wait();
+      window._memberOptions = { disableUpgrade: false, enableReentry: true, enableDouble: false };
+      try { localStorage.setItem('cnova_opts_' + await signer.getAddress(), JSON.stringify(window._memberOptions)); } catch(_) {}
+    } catch(_) {} // non-critical — member can adjust from Dashboard
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
