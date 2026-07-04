@@ -658,6 +658,7 @@
     'event RescueLoanIssued(address indexed member, uint256 totalLoan, string source)',
     'event RescueDebtRepaid(address indexed member, uint256 repaid, uint256 remaining)',
     'function rescueDebtOf(address member) external view returns (uint256)',
+    'function crossingReserveOf(address) external view returns (uint256)',  // V8.31
   ];
   const KEEPER_ABI = [
     'function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)',
@@ -903,11 +904,12 @@
           for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
           const addrs = await Promise.all(batch.map(idx => mat.getParkedMember(idx).catch(()=>null)));
           const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
-            const [parkedTs, withdrawable] = await Promise.all([
+            const [parkedTs, withdrawable, crossingReserve] = await Promise.all([
               mat.parkedAt(addr).catch(()=>0n),
               mat.withdrawableOf(addr).catch(()=>0n),
+              mat.crossingReserveOf(addr).catch(()=>0n),  // V8.31
             ]);
-            return { addr, parkedTs: Number(parkedTs), withdrawable: BigInt(withdrawable) };
+            return { addr, parkedTs: Number(parkedTs), withdrawable: BigInt(withdrawable), crossingReserve: BigInt(crossingReserve) };
           }));
           stillParked.push(...details);
         }
@@ -918,7 +920,10 @@
       try { entryFee = await matA.ENTRY_FEE(); } catch {}
 
       for (const p of stillParked) {
-        const shortfall = entryFee > p.withdrawable ? entryFee - p.withdrawable : 0n;
+        // V8.31: effectiveContrib = crossingReserve + withdrawable
+        // crossingReserve is consumed first toward the re-entry fee, so it reduces the SF shortfall.
+        const effectiveContrib = p.withdrawable + (p.crossingReserve || 0n);
+        const shortfall = entryFee > effectiveContrib ? entryFee - effectiveContrib : 0n;
         p.shortfall = shortfall;
         totalShortfall += shortfall;
       }
@@ -1013,6 +1018,7 @@
                 <button class="copy-btn" onclick="navigator.clipboard.writeText('${p.addr}')" title="Copy address">⧉</button>
               </td>
               <td class="amount">${fmt6(p.withdrawable)}</td>
+              <td class="amount" style="color:#10b981">${p.crossingReserve > 0n ? fmt6(p.crossingReserve) : '—'}</td>
               <td class="amount" style="color:#f97316">${p.shortfall > 0n ? fmt6(p.shortfall) : '—'}</td>
               <td class="time">${p.parkedTs ? elapsed(p.parkedTs) : '—'}</td>
               <td style="font-size:11px;color:${rescueColor}">${rescueStatus}</td>
@@ -1026,7 +1032,8 @@
             <thead>
               <tr>
                 <th>Wallet</th>
-                <th>Has</th>
+                <th>Withdrawable</th>
+                <th>Reserve</th>
                 <th>Shortfall</th>
                 <th>Parked</th>
                 <th>Rescue Status</th>
