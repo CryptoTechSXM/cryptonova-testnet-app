@@ -1488,7 +1488,7 @@
       <div class="card" id="coupon-manager-card">
         <div class="section-title" style="margin-bottom:14px"><div class="dot" style="background:#a855f7"></div> &#127921; Gift a Coupon</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
-          Sponsor a new member's $10 entry fee. You deposit $10 USDC upfront — they register for free using your code. Valid for 30 days; reclaim if unused.
+          Sponsor a new member's $10 entry fee. You deposit $10 USDC + ~$0.25 ETH upfront — they register for free using your code with gas already covered. Valid for 30 days; reclaim USDC if unused.
         </div>
         <div style="margin-bottom:22px">
           <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)">Issue a New Coupon</div>
@@ -1498,14 +1498,14 @@
           <div style="font-size:12px;color:var(--text3);margin-bottom:14px">The new member types this code in the Register tab coupon field.</div>
           <div class="info-row" style="margin-bottom:14px">
             <span class="info-key">Cost to You</span>
-            <span class="info-val" id="coupon-issue-cost" style="color:#a855f7;font-weight:700">$10.00 USDC</span>
+            <span class="info-val" id="coupon-issue-cost" style="color:#a855f7;font-weight:700">$10.00 USDC + ~$0.25 ETH gas gift</span>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <button class="btn btn-ghost full-w" id="btn-coupon-approve" onclick="approveCouponUSDC()" style="border-color:#a855f7;color:#a855f7">
               Step 1: Approve $10 USDC &#128274;
             </button>
             <button class="btn btn-ghost full-w" id="btn-coupon-issue" onclick="doIssueCoupon()" disabled>
-              Step 2: Issue Coupon &#127921;
+              Step 2: Issue Coupon + Fund Gas &#127921; ⛽
             </button>
           </div>
           <div id="coupon-issue-status" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
@@ -3635,9 +3635,33 @@ async function doIssueCoupon() {
     const tx = await regW.issueCoupon(codeHash);
     setStatus('coupon-issue-status', '⏳ Confirming on-chain...', 'info');
     await tx.wait();
-    setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! Share this code with the new member.', 'ok');
     btn.textContent = '✅ Issued!';
     toast('Coupon "' + code + '" issued!', 'success');
+    // ── Gas gift top-up: send a small ETH amount to the gas gift pool ──────────
+    // This funds the ~$0.25 ETH sent to the new member when they redeem.
+    // V8.32 will move this on-chain (payable issueCoupon) — until then we do
+    // a second wallet.sendTransaction() right after issuance confirms.
+    try {
+      setStatus('coupon-issue-status', '⛽ One more step — MetaMask will ask you to fund your invitee\'s gas (~$0.25 ETH)…', 'info');
+      const addrRes  = await fetch('/api/gas-gift-address').then(r => r.json());
+      const giftAddr = addrRes.address;
+      if (giftAddr && ethers.isAddress(giftAddr)) {
+        const GAS_GIFT_AMOUNT = ethers.parseEther('0.0001'); // ~$0.25–0.35
+        const gasGiftTx = await signer.sendTransaction({ to: giftAddr, value: GAS_GIFT_AMOUNT });
+        setStatus('coupon-issue-status', '⏳ Gas gift funding confirming…', 'info');
+        await gasGiftTx.wait(1);
+        setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live + gas gift funded! Share this code with your invite.', 'ok');
+      } else {
+        setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! (Gas gift pool not configured — ask admin.)', 'ok');
+      }
+    } catch(gasErr) {
+      // Non-critical — coupon is already live, just the gas top-up failed
+      if (gasErr.code === 4001) {
+        setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! Gas gift skipped (cancelled).', 'ok');
+      } else {
+        setStatus('coupon-issue-status', '✅ Coupon "' + code + '" is live! Gas gift failed: ' + friendlyError(gasErr), 'ok');
+      }
+    }
     setTimeout(() => _shareCoupon(code, userAddr), 800);
     // Save to localStorage so loadMyCoupons can read it without event queries
     try {
