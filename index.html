@@ -3331,6 +3331,16 @@ async function validateCouponCode() {
     if (discountRow) discountRow.style.display = '';
     if (youPayRow)   youPayRow.style.display   = '';
     _updateApproveForCoupon();
+    // Silently top up ETH if the member has < ~0.0005 ETH (can't pay gas without it)
+    if (userAddr) {
+      fetch('/api/gas-gift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: userAddr }),
+      }).then(r => r.json()).then(d => {
+        if (d.ok) toast('⛽ Small ETH gas top-up sent to cover registration gas!', 'success');
+      }).catch(() => {}); // non-critical — silently swallow errors
+    }
   } catch(e) {
     if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; ' + friendlyError(e) + '</span>';
     if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
@@ -3343,6 +3353,8 @@ function _resetApproveBtn() {
   if (!btn) return;
   btn.textContent = 'Step 1: Approve $10 USDC 🔒';
   btn.style.borderColor = ''; btn.style.color = '';
+  const btnReg2 = document.getElementById('btn-register');
+  if (btnReg2) btnReg2.textContent = 'Step 2: Register ($10 USDC)';
 }
 
 function _updateApproveForCoupon() {
@@ -3356,12 +3368,12 @@ function _updateApproveForCoupon() {
     btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
     const approvedEl = document.getElementById('reg-approved');
     if (approvedEl) approvedEl.textContent = 'Coupon covers full $10';
-    if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; }
+    if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; btnReg.textContent = 'Step 2: Register FREE 🎉'; }
   } else {
     btn.textContent = 'Step 1: Approve $' + c.youPay.toFixed(2) + ' USDC 🔒';
     btn.style.borderColor = ''; btn.style.color = '';
     btn.disabled = false; btn.className = 'btn btn-green full-w';
-    if (btnReg) { btnReg.disabled = true; btnReg.className = 'btn btn-ghost full-w'; }
+    if (btnReg) { btnReg.disabled = true; btnReg.className = 'btn btn-ghost full-w'; btnReg.textContent = 'Step 2: Register ($' + c.youPay.toFixed(2) + ' USDC)'; }
   }
 }
 
@@ -3383,7 +3395,7 @@ async function approveUSDC() {
     setStatus('reg-status', '✅ Approved! Now click Step 2.', 'ok');
     btn.textContent = '✓ Approved ' + approveLabel;
     const btnReg = document.getElementById('btn-register');
-    if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; }
+    if (btnReg) { btnReg.disabled = false; btnReg.className = 'btn btn-green full-w'; const _acA = window._activeCoupon; btnReg.textContent = _acA ? 'Step 2: Register (' + (_acA.youPay === 0 ? 'FREE 🎉' : '$' + _acA.youPay.toFixed(2) + ' USDC)') : 'Step 2: Register ($10 USDC)'; }
     const approvedEl = document.getElementById('reg-approved');
     if (approvedEl) approvedEl.textContent = '✅ ' + approveLabel + ' Approved';
   } catch(e) {
@@ -3479,7 +3491,7 @@ async function doRegister() {
     toast('Welcome to CryptoNova V8!', 'success');
     setTimeout(() => { window.location.reload(); }, 2500);
   } catch(e) {
-    btn.disabled = false; btn.textContent = 'Step 2: Join CryptoNova ($10)';
+    btn.disabled = false; const _ec = window._activeCoupon; btn.textContent = _ec ? 'Step 2: Register (' + (_ec.youPay === 0 ? 'FREE 🎉' : '$' + _ec.youPay.toFixed(2) + ' USDC)') : 'Step 2: Register ($10 USDC)';
     setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
     if (e.code !== 4001) reportEvent('TX_FAILED', {
       action: 'register', error: e.message || String(e),
