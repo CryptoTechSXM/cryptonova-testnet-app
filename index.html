@@ -1392,6 +1392,7 @@
         </div>
         <div class="info-row"><span class="info-key">Stuck In</span><span class="info-val" id="rescue-matrix">—</span></div>
         <div class="info-row"><span class="info-key">Your Withdrawable</span><span class="info-val green" id="rescue-withdrawable">—</span></div>
+        <div class="info-row" id="rescue-reserve-row" style="display:none"><span class="info-key">Crossing Reserve</span><span class="info-val green" id="rescue-reserve">—</span></div>
         <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
         <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
@@ -2029,6 +2030,7 @@ const MATRIX_ABI = [
   'function isParked(address) external view returns (bool)',
   'function getParkedCount() external view returns (uint256)',
   'function rescueDebtOf(address) external view returns (uint256)',
+  'function crossingReserveOf(address) external view returns (uint256)',  // V8.31
 ];
 
 const CNOVA_ABI = [
@@ -3822,11 +3824,16 @@ async function loadDashboardData() {
             if (BigInt(parkedAt) > 0n) {
               const fee = await mc.ENTRY_FEE().catch(()=>0n);
               const w   = BigInt(member.withdrawable);
+              // V8.31: crossing reserve is consumed first toward the entry fee.
+              // Shortfall = fee − (crossingReserve + withdrawable), not fee − withdrawable.
+              const res = await mc.crossingReserveOf(userAddr).catch(()=>0n);
+              const effectiveHave = w + BigInt(res);
               parkedInfo = {
                 label: m.label, addr: m.addr,
                 withdrawable: w,
+                crossingReserve: BigInt(res),
                 fee: BigInt(fee),
-                shortfall: BigInt(fee) > w ? BigInt(fee) - w : 0n,
+                shortfall: BigInt(fee) > effectiveHave ? BigInt(fee) - effectiveHave : 0n,
               };
             } else if (m.label.includes('Matrix A')) {
               // No parkedAt either — this is a reclaimed-limbo member.
@@ -4039,6 +4046,12 @@ async function loadDashboardData() {
         window._parkedFee           = parkedInfo.fee;
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
+        // V8.31: show crossing reserve row if non-zero (reduces shortfall)
+        const _rescueReserveRow = document.getElementById('rescue-reserve-row');
+        if (parkedInfo.crossingReserve > 0n && _rescueReserveRow) {
+          setText('rescue-reserve', fmt6(parkedInfo.crossingReserve));
+          _rescueReserveRow.style.display = '';
+        }
         setText('rescue-fee',          fmt6(parkedInfo.fee));
         setText('rescue-shortfall',    fmt6(parkedInfo.shortfall));
 
