@@ -51,9 +51,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: false, reason: 'already_gifted' });
   }
 
-  const faucetKey = process.env.FAUCET_PRIVATE_KEY;
+  // Prefer dedicated GAS_GIFT_PRIVATE_KEY (mainnet); fall back to FAUCET_PRIVATE_KEY (testnet)
+  const faucetKey = process.env.GAS_GIFT_PRIVATE_KEY || process.env.FAUCET_PRIVATE_KEY;
   if (!faucetKey) {
-    console.error('[gas-gift] FAUCET_PRIVATE_KEY not set');
+    console.error('[gas-gift] Neither GAS_GIFT_PRIVATE_KEY nor FAUCET_PRIVATE_KEY is set');
     return res.status(500).json({ error: 'Gas gift not configured' });
   }
 

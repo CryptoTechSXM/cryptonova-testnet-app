@@ -34,7 +34,8 @@ export default function handler(req, res) {
     return res.status(200).json({ address: process.env.GAS_GIFT_WALLET_ADDR });
   }
 
-  const faucetKey = process.env.FAUCET_PRIVATE_KEY;
+  // Prefer dedicated GAS_GIFT_PRIVATE_KEY (mainnet); fall back to FAUCET_PRIVATE_KEY (testnet)
+  const faucetKey = process.env.GAS_GIFT_PRIVATE_KEY || process.env.FAUCET_PRIVATE_KEY;
   if (!faucetKey) {
     return res.status(503).json({ error: 'Gas gift not configured' });
   }
