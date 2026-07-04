@@ -15,13 +15,22 @@ Read this file at the start of every session before touching any frontend code.
 
 ## Branch → Domain map
 
-| Branch | Domain | Rule |
-|--------|--------|------|
-| `admin` | admin.crypto-nova.app | All work goes here first |
-| `preview` | early.crypto-nova.app | Push only after admin verified |
-| `main` | crypto-nova.app / v8.crypto-nova.app | Push only after leader sign-off |
+| Branch | Domain | Who reviews | Rule |
+|--------|--------|-------------|------|
+| `admin` | admin.crypto-nova.app | Owner (personal assessment) | All work goes here first |
+| `preview` | early.crypto-nova.app | QA team (quality assessment) | Push ONLY after admin is verified |
+| `main` | crypto-nova.app / v8.crypto-nova.app | Community / world | Push ONLY after QA + leader sign-off |
 
-**Never push to `preview` or `main` without explicit approval from leaders/members.**
+## 3-stage deploy order — MANDATORY
+
+```
+Stage 1: git push origin admin
+Stage 2: git push origin admin:preview --force   ← STOP, wait for QA
+Stage 3: git push origin admin:main --force      ← STOP, wait for leader sign-off
+```
+
+**NEVER push to `main` before `preview`. NEVER skip stages.**  
+**NEVER push to `preview` or `main` without explicit approval.**
 
 ---
 
