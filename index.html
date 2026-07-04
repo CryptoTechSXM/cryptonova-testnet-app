@@ -439,7 +439,7 @@
 </head>
 <body>
 
-<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.30 is live ───────────── -->
+<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.31 is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -457,9 +457,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.30 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.31 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.30 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
+      V8.31 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -483,7 +483,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.30 Testnet</span>
+    <span id="gate-pill-label">V8.31 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -501,13 +501,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.30 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.30 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -595,7 +595,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.30</span><span class="vb-m">V8.30</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.31</span><span class="vb-m">V8.31</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -1194,6 +1194,11 @@
           <div class="stat-value" id="dash-total-earned">—</div>
           <div class="stat-sub" id="dash-total-earned-sub" data-i18n="dash.all_tiers_lifetime" title="Total USDC ever credited to your account. Includes current balance, amounts auto-deducted for tier upgrades, and past withdrawals.">All tiers lifetime</div>
           <div class="detail-hint">Details ↗</div>
+        </div>
+        <div class="card-sm" title="Total USDC you have successfully withdrawn to your wallet across all tiers.">
+          <div class="stat-label">Total Withdrawn</div>
+          <div class="stat-value" id="dash-total-withdrawn">—</div>
+          <div class="stat-sub">Paid out to wallet</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
           <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span></div>
@@ -3161,8 +3166,10 @@ async function loadRegisterTab() {
         const hiTier = hiTierRead.ok ? Number(hiTierRead.value) : 2; // unknown -> assume past T1, hide
         const t2matA     = new ethers.Contract(ADDRS.T2.matA, MATRIX_ABI, rp);
         const alreadyInT2 = await t2matA.isActiveInMatrix(userAddr).catch(() => false);
-        if (hiTier >= 2 || alreadyInT2) {
-          // Already past the T1->T2 step — hide; T2+ upgrades surface on the Dashboard tab.
+        const t2VGRead = await retryRead(() => tr.tierVelocityGreen(1));
+        const t2VGOpen = t2VGRead.ok ? t2VGRead.value : false;
+        if (hiTier >= 2 || alreadyInT2 || !t2VGOpen) {
+          // Hide if past T1, already in T2, or T2 velocity gate not yet open.
           upgradeCard.style.display = 'none';
           return;
         }
@@ -3470,7 +3477,7 @@ async function doRegister() {
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
-    setTimeout(() => { loadHomeStats(); loadUserData(); }, 2000);
+    setTimeout(() => { window.location.reload(); }, 2500);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Join CryptoNova ($10)';
     setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
@@ -3716,7 +3723,7 @@ async function loadDashboardData() {
       ...(ADDRS.T10.matA ? [{addr:ADDRS.T10.matA,label:'T10 Matrix A'},{addr:ADDRS.T10.matB,label:'T10 Matrix B'}] : []),
     ];
 
-    let totalW = 0n, totalE = 0n, totalEscrow = 0n;
+    let totalW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
     let activePositions = []; // [{label, bfs, bfsUnknown}]
     let activeCycles = 0n; // highest tier's cycles (for upgrade widget)
     let highestTier = 0;
@@ -3759,6 +3766,7 @@ async function loadDashboardData() {
       if (member && member.hasEverJoined) {
         totalW += BigInt(member.withdrawable);
         totalE += BigInt(member.totalEarned);
+        totalWD += BigInt(member.totalWithdrawn ?? 0n);
         if (!memberId) { memberId = Number(member.id); memberReferrer = member.referrer; }
         const tNum = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
         highestTier = Math.max(highestTier, tNum);
@@ -3861,6 +3869,7 @@ async function loadDashboardData() {
       if (dest) dest.textContent = userAddr.slice(0,6) + '…' + userAddr.slice(-4);
     }
     setText('dash-total-earned',   fmt6(totalE));
+    setText('dash-total-withdrawn', fmt6(totalWD));
     // Show deducted/claimed gap so accounting is transparent
     try {
       const deducted = totalE > totalW + totalEscrow ? totalE - totalW - totalEscrow : 0n;
