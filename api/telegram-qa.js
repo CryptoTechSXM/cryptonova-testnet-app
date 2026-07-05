@@ -336,19 +336,9 @@ async function fetchLiveStats() {
     if (json.error || !json.result || json.result === '0x') return null;
     return parseInt(json.result, 16);
   }
-  // getSystemEntryCount(uint256 fromTimestamp) — pass 0 for all-time count
-  // selector: keccak256("getSystemEntryCount(uint256)") = 0xd23ca4fa
-  const countCallData = '0xd23ca4fa' + '0'.repeat(64); // selector + uint256(0)
-  const countRaw = await (async () => {
-    const r = await fetch(RPC, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: TIER_ROUTER, data: countCallData }, 'latest'] }),
-    });
-    const json = await r.json();
-    if (json.error || !json.result || json.result === '0x') return null;
-    return parseInt(json.result, 16);
-  })();
+  // globalJoinedCount() — true running total (not capped like getSystemEntryCount)
+  // selector: keccak256("globalJoinedCount()") = 0xfbcfd600
+  const countRaw = await call(TIER_ROUTER, '0xfbcfd600');
   const memberDisplay = countRaw && countRaw > 0 ? `<b>${countRaw.toLocaleString()}</b> members registered` : 'member count unavailable';
   return `<b>CryptoNova Testnet - Live Stats</b>\n\nMembers: ${memberDisplay}\nNetwork: Base Sepolia\nContract: <code>${TIER_ROUTER}</code>\n\n<a href="https://crypto-nova.app">Open Dashboard for full stats</a>`;
 }
