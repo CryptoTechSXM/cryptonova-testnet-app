@@ -704,6 +704,7 @@
   let _lastParkedHTML  = null;
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
   let _lastRescueCount = null; // { count, lastTime }
+  let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
   // Restore cached display state immediately (survives page reload)
   try {
     const _cl = localStorage.getItem('cnova_st_loans');
@@ -712,6 +713,12 @@
     if (_cp) { _lastParkedHTML = _cp; const w = document.getElementById('parked-list-wrap'); if (w) w.innerHTML = _cp; }
     const _cr = localStorage.getItem('cnova_st_rescue');
     if (_cr) _lastRescueCount = JSON.parse(_cr);
+    const _cps = localStorage.getItem('cnova_st_parked_stats');
+    if (_cps) {
+      _lastParkedStats = JSON.parse(_cps);
+      if (_lastParkedStats.shortfall) setText('pk-shortfall', _lastParkedStats.shortfall);
+      if (_lastParkedStats.capacity)  setText('pk-capacity',  _lastParkedStats.capacity);
+    }
   } catch(e) {}
 
   async function loadAll() {
@@ -775,10 +782,11 @@
         }
       } catch(e) {}
 
-      // Recent rescues: ParkedRescued on MatrixKeeper (V8.27 unified path)
+      // Recent rescues: RescueLoanIssued from StabilityFund — works with manual_rescue.js
+      // (manual_rescue bypasses MatrixKeeper so ParkedRescued is never emitted on that path)
       const fromBlock = Math.max(0, blk - 50000);
-      const rescueFilter = keeper.filters.ParkedRescued();
-      const keeperRescueLogs = await keeper.queryFilter(rescueFilter, fromBlock, blk).catch(()=>[]);
+      const sfForRescue = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
+      const keeperRescueLogs = await sfForRescue.queryFilter(sfForRescue.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
       const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
       const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
@@ -936,17 +944,23 @@
 
       // Avg shortfall
       const avgShortfall = stillParked.length > 0 ? totalShortfall / BigInt(stillParked.length) : 0n;
-      setText('pk-shortfall', stillParked.length > 0 ? fmt6(avgShortfall) : '—');
+      const shortfallTxt = stillParked.length > 0 ? fmt6(avgShortfall) : '—';
+      setText('pk-shortfall', shortfallTxt);
 
       // SF rescue capacity
+      let capacityTxt = _lastParkedStats ? _lastParkedStats.capacity : '—';
       try {
         const sfBal = await new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider).totalBalance();
         const sfNum = Number(BigInt(sfBal)) / 1e6;
         const estimatedCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0;
-        setText('pk-capacity', `~${estimatedCap} ${t('statusPage.js.members_can_be_rescued', 'members can be rescued')}`);
+        capacityTxt = `~${estimatedCap} ${t('statusPage.js.members_can_be_rescued', 'members can be rescued')}`;
       } catch(e) {
-        setText('pk-capacity', '—');
+        // keep last-known value if RPC fails — no flicker to '—'
       }
+      setText('pk-capacity', capacityTxt);
+      // Save to cache — survives poll failures and page reload
+      _lastParkedStats = { shortfall: shortfallTxt, capacity: capacityTxt };
+      try { localStorage.setItem('cnova_st_parked_stats', JSON.stringify(_lastParkedStats)); } catch(e) {}
 
       // ── Render table ──────────────────────────────────────────────────────
       // NOTE: reconcile-override block removed (V8.20+). The contract correctly
