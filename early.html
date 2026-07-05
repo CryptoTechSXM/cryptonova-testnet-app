@@ -2,225 +2,232 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CryptoNova — Early Access</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoNova — Opening Soon</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#0a0a1a;color:#fff;font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
-  .wrap{text-align:center;max-width:520px;padding:2rem;width:100%}
-  .logo{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;display:flex;align-items:center;justify-content:center;gap:10px}
-  .logo svg{flex-shrink:0}
-  .phase{color:#a78bfa;font-size:1rem;margin-bottom:2rem;letter-spacing:.05em}
-  .box{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.35);border-radius:12px;padding:16px 20px;margin-bottom:2rem;text-align:left}
-  .box-label{font-size:.8rem;color:#a78bfa;font-weight:600;letter-spacing:.08em;margin-bottom:8px}
-  .box-body{font-size:.9rem;color:#cbd5e1;line-height:1.65}
-  .lbl{color:#94a3b8;font-size:.9rem;margin-bottom:.75rem}
-  .cd{font-size:3rem;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;letter-spacing:.05em;margin-bottom:1.5rem}
-  .sched{color:#475569;font-size:.82rem;line-height:1.8}
-  .open-panel{display:none;margin-top:1rem}
-  .open-title{font-size:1.4rem;font-weight:700;color:#22d3ee;margin-bottom:.5rem}
-  .open-sub{font-size:.9rem;color:#94a3b8;margin-bottom:1.2rem}
-  .btn{display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:700;font-size:1rem;border-radius:8px;text-decoration:none}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0f1e; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #fff; }
+
+  /* ── Gate overlay ── */
+  #gate {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #0a0f1e;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem 1.5rem; text-align: center;
+  }
+  .gate-inner { max-width: 480px; width: 100%; }
+
+  /* Logo */
+  .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2.5rem; }
+  .logo-mark { width: 48px; height: 48px; border-radius: 50%; background: #0d9e6e; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .logo-text { font-size: 22px; font-weight: 500; }
+  .logo-text .cr { color: #fff; }
+  .logo-text .nv { color: #0d9e6e; }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(13,158,110,0.12); border: 0.5px solid rgba(13,158,110,0.3); border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #0d9e6e; letter-spacing: 0.3px; margin-bottom: 2rem; }
+  .pulse { width: 6px; height: 6px; border-radius: 50%; background: #0d9e6e; display: inline-block; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+  /* Countdown panel */
+  #panel-countdown h1 { font-size: clamp(20px,4vw,26px); font-weight: 500; color: #fff; line-height: 1.35; margin-bottom: 0.75rem; }
+  #panel-countdown .sub { font-size: 15px; color: #94a3b8; line-height: 1.65; margin-bottom: 2rem; padding: 0 0.5rem; }
+  .cd-wrap { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+  .cd-label { font-size: 11px; color: #475569; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 0.9rem; }
+  .cd-slots { display: flex; gap: 10px; justify-content: center; align-items: center; }
+  .slot { text-align: center; }
+  .slot-num { display: block; font-size: 36px; font-weight: 500; color: #fff; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; min-width: 64px; }
+  .slot-lbl { font-size: 10px; color: #475569; letter-spacing: 0.6px; margin-top: 6px; text-transform: uppercase; }
+  .colon { font-size: 28px; color: #334155; margin-bottom: 18px; user-select: none; }
+  .status-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: #475569; flex-wrap: wrap; }
+  .dot { width: 3px; height: 3px; border-radius: 50%; background: #334155; flex-shrink: 0; }
+
+  /* Coupon panel */
+  #panel-coupon { display: none; }
+  #panel-coupon h1 { font-size: clamp(20px,4vw,24px); font-weight: 600; color: #fff; margin-bottom: 0.6rem; }
+  #panel-coupon .sub { font-size: 14px; color: #94a3b8; line-height: 1.65; margin-bottom: 1.75rem; }
+  .coupon-input { width: 100%; padding: 14px 18px; border-radius: 10px; border: 1px solid rgba(13,158,110,0.35); background: rgba(13,158,110,0.06); color: #e2e8f0; font-size: 17px; text-align: center; letter-spacing: 3px; text-transform: uppercase; outline: none; margin-bottom: 10px; }
+  .coupon-input:focus { border-color: rgba(13,158,110,0.7); }
+  .coupon-btn { width: 100%; padding: 14px; border-radius: 10px; background: #0d9e6e; color: #fff; font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 10px; transition: background 0.2s; }
+  .coupon-btn:hover:not(:disabled) { background: #0bb87e; }
+  .coupon-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .coupon-err { color: #f87171; font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+  .skip-link { color: #475569; font-size: 12px; text-decoration: none; display: inline-block; margin-top: 14px; transition: color 0.2s; }
+  .skip-link:hover { color: #64748b; }
+
+  /* Open panel */
+  #panel-open { display: none; }
+  #panel-open h1 { font-size: 28px; font-weight: 600; color: #0d9e6e; margin-bottom: 0.75rem; }
+  #panel-open .sub { font-size: 15px; color: #94a3b8; margin-bottom: 2rem; }
+  .enter-btn { display: inline-block; padding: 14px 36px; background: #0d9e6e; color: #fff; font-size: 16px; font-weight: 700; border-radius: 10px; text-decoration: none; }
+  .redirect-msg { font-size: 13px; color: #475569; margin-top: 1rem; }
+
+  @media (max-width: 400px) {
+    .slot-num { font-size: 28px; padding: 8px 10px; min-width: 52px; }
+  }
 </style>
 </head>
 <body>
-<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.30 is live ───────────── -->
-<div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
-  <!-- logo -->
-  <div style="font-size:clamp(28px,6vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:32px;">
-    <span style="color:#e2e8f0;">Crypto</span><span style="color:#00e5a0;">Nova</span>
-  </div>
+<div id="gate">
+  <div class="gate-inner">
 
-  <!-- pulsing ring -->
-  <div style="position:relative;width:80px;height:80px;margin-bottom:32px;">
-    <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(0,229,160,0.15);animation:ping 2s cubic-bezier(0,0,.2,1) infinite;"></div>
-    <div style="position:absolute;inset:10px;border-radius:50%;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.3);display:flex;align-items:center;justify-content:center;">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    <div class="logo">
+      <div class="logo-mark">CN</div>
+      <div class="logo-text"><span class="cr">Crypto</span><span class="nv">Nova</span></div>
     </div>
-  </div>
 
-  <!-- MAIN SITE: countdown block -->
-  <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.31 Testnet — Opening Soon</h1>
-    <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.31 is live — crossing reserve, instant earn &amp; improved stability.<br>Opening in:
-    </p>
-    <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
-  </div>
+    <div class="badge" id="gate-badge">
+      <span class="pulse"></span>
+      <span id="badge-txt">V8.31 Testnet</span>
+    </div>
 
-  <!-- EARLY SITE: coupon entry block (hidden by default, JS shows it) -->
-  <div id="gate-coupon-block" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:360px;">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,26px);font-weight:700;margin:0 0 10px;">Leader &amp; Tester Preview</h1>
-    <p style="color:#94a3b8;font-size:14px;max-width:320px;line-height:1.6;margin:0 0 24px;">
-      This is a closed preview for selected leaders and trusted testers.<br>Enter your access code to continue.
-    </p>
-    <input id="gate-coupon-input" type="text" placeholder="Enter code" autocomplete="off"
-      style="width:100%;padding:14px 18px;border-radius:10px;border:1px solid rgba(0,229,160,0.3);background:rgba(0,229,160,0.06);color:#e2e8f0;font-size:16px;text-align:center;letter-spacing:2px;text-transform:uppercase;outline:none;margin-bottom:12px;" />
-    <button id="gate-coupon-btn" onclick="window._gateSubmit()"
-      style="width:100%;padding:14px;border-radius:10px;background:#00e5a0;color:#0a0e1a;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px;">
-      Enter
-    </button>
-    <div id="gate-coupon-err" style="color:#f87171;font-size:13px;min-height:18px;"></div>
-    <a href="https://crypto-nova.app" style="margin-top:18px;color:#64748b;font-size:12px;text-decoration:none;opacity:0.7;">Community testing → crypto-nova.app</a>
-  </div>
+    <!-- Panel 1: Countdown -->
+    <div id="panel-countdown">
+      <h1 id="cd-heading">Opening Soon</h1>
+      <p class="sub" id="cd-sub">CryptoNova launches in:</p>
+      <div class="cd-wrap">
+        <div class="cd-label" id="cd-label">Time remaining</div>
+        <div class="cd-slots">
+          <div class="slot"><span class="slot-num" id="cd-h">00</span><div class="slot-lbl">Hours</div></div>
+          <span class="colon">:</span>
+          <div class="slot"><span class="slot-num" id="cd-m">00</span><div class="slot-lbl">Mins</div></div>
+          <span class="colon">:</span>
+          <div class="slot"><span class="slot-num" id="cd-s">00</span><div class="slot-lbl">Secs</div></div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span>testnet</span><span class="dot"></span>
+        <span>Base Sepolia</span><span class="dot"></span>
+        <span id="cd-mode-label">Early access</span>
+      </div>
+    </div>
 
-  <!-- status pill -->
-  <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
-    <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.31 Testnet</span>
-  </div>
+    <!-- Panel 2: Coupon gate (early mode — shown after countdown) -->
+    <div id="panel-coupon">
+      <h1>Leader &amp; Tester Preview</h1>
+      <p class="sub">This is a closed preview for selected leaders and trusted testers. Enter your access code to continue.</p>
+      <input id="coupon-input" class="coupon-input" type="text" placeholder="ENTER CODE" autocomplete="off" />
+      <button id="coupon-btn" class="coupon-btn" onclick="window._gateSubmit()">Enter</button>
+      <div id="coupon-err" class="coupon-err"></div>
+      <a href="https://crypto-nova.app" class="skip-link">Don't have a code? → Public site (crypto-nova.app)</a>
+    </div>
 
-  <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
-  <script>
-    (function(){
-      var h = window.location.hostname;
-      // Admin always open
-      if (h === 'admin.cryptonova.ai' || h === 'admin.crypto-nova.app' || h.startsWith('admin.')) {
-        document.getElementById('maintenance-gate').remove(); return;
-      }
-      var isEarly = h.indexOf('early.') !== -1;
-      if (isEarly) {
-        // Check if already admitted
-        try { if (localStorage.getItem('cnova_ea_access') === '1') { document.getElementById('maintenance-gate').remove(); return; } } catch(e){}
-        // Show coupon form
-        document.getElementById('gate-countdown-block').style.display = 'none';
-        document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
-        // Allow Enter key
-        var inp = document.getElementById('gate-coupon-input');
-        if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
-      } else {
-        // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
-        var MAIN_MS = 1782786600000;
-        function tick() {
-          var diff = MAIN_MS - Date.now();
-          if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
-          var s = Math.floor(diff/1000), m = Math.floor(s/60); s = s%60;
-          var el = document.getElementById('gate-countdown');
-          if (el) el.textContent = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-          setTimeout(tick, 500);
-        }
-        tick();
-      }
-    })();
+    <!-- Panel 3: Open (main mode — shown after countdown) -->
+    <div id="panel-open">
+      <h1>🟢 Now Open</h1>
+      <p class="sub">CryptoNova is live. Redirecting you now…</p>
+      <a href="/" class="enter-btn">Enter Now →</a>
+      <div class="redirect-msg" id="redirect-msg">Redirecting in 3 seconds…</div>
+    </div>
 
-    window._gateSubmit = async function() {
-      var inp = document.getElementById('gate-coupon-input');
-      var btn = document.getElementById('gate-coupon-btn');
-      var err = document.getElementById('gate-coupon-err');
-      if (!inp || !btn) return;
-      var code = inp.value.trim().toUpperCase();
-      if (!code) { err.textContent = 'Please enter a code.'; return; }
-      btn.disabled = true; btn.textContent = 'Checking…'; err.textContent = '';
-      try {
-        var res = await fetch('/api/verify-coupon', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code:code}) });
-        var data = await res.json();
-        if (data.ok) {
-          try { localStorage.setItem('cnova_ea_access','1'); } catch(e){}
-          document.getElementById('maintenance-gate').remove();
-        } else {
-          err.textContent = data.error || 'Invalid code. Try again.';
-          btn.disabled = false; btn.textContent = 'Enter';
-        }
-      } catch(e) {
-        err.textContent = 'Network error — please retry.';
-        btn.disabled = false; btn.textContent = 'Enter';
-      }
-    };
-  </script>
-</div>
-<!-- ── END MAINTENANCE GATE ──────────────────────────────────────────── -->
-
-<div id="time-gate" style="position:fixed;inset:0;background:#0a0a1a;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif;">
-  <div style="text-align:center;max-width:460px;padding:2rem;">
-    <div style="font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem;">CryptoNova</div>
-    <div style="color:#a78bfa;font-size:1rem;letter-spacing:.12em;margin-bottom:2rem;text-transform:uppercase;">Early Access</div>
-    <div style="color:#94a3b8;font-size:.9rem;margin-bottom:.4rem;">Opens in</div>
-    <div id="gate-cd" style="font-size:3.5rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin-bottom:1.25rem;">--:--:--</div>
-    <div style="color:#475569;font-size:.85rem;">Saturday June 27 &nbsp;&middot;&nbsp; 11:30 AM EST</div>
   </div>
 </div>
+
 <script>
-(function(){
-  var unlock=new Date('2026-06-27T16:30:00Z').getTime();
-  function tick(){
-    var diff=unlock-Date.now();
-    if(diff<=0){var el=document.getElementById('time-gate');if(el)el.remove();return;}
-    var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
-    var cd=document.getElementById('gate-cd');
-    if(cd)cd.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+(function () {
+  // ── CONFIG — update these two lines per test ──────────────────────────────
+  var GATE_TARGET = '2026-07-05T23:45:00Z'; // Test 1: 7:45 PM EDT
+  var GATE_MODE   = 'early';                 // 'early' = countdown then coupon | 'main' = countdown then open
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Admin always bypasses gate
+  var h = window.location.hostname;
+  if (h.startsWith('admin.')) { document.getElementById('gate').remove(); return; }
+
+  // Already admitted? (early mode) — skip gate
+  if (GATE_MODE === 'early') {
+    try { if (localStorage.getItem('cnova_ea_access') === '1') { document.getElementById('gate').remove(); return; } } catch(e) {}
   }
-  tick();setInterval(tick,1000);
-})();
-</script>
 
+  // Label updates
+  if (GATE_MODE === 'early') {
+    document.getElementById('badge-txt').textContent     = 'Early Access Preview';
+    document.getElementById('cd-heading').textContent    = 'Early Access Opening Soon';
+    document.getElementById('cd-sub').textContent        = 'Closed preview for leaders and testers:';
+    document.getElementById('cd-mode-label').textContent = 'coupon required';
+  } else {
+    document.getElementById('badge-txt').textContent     = 'V8.31 Testnet — Community Launch';
+    document.getElementById('cd-heading').textContent    = 'CryptoNova Opens Soon';
+    document.getElementById('cd-sub').textContent        = 'Open registration launches in:';
+    document.getElementById('cd-mode-label').textContent = 'open registration';
+  }
 
-<div class="wrap">
-  <div class="logo"><svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" stroke="#00e5a0" stroke-width="1.5"/><path d="M20 8 L20 32 M8 20 L32 20 M11.5 11.5 L28.5 28.5 M28.5 11.5 L11.5 28.5" stroke="#00e5a0" stroke-width="1.2" stroke-linecap="round"/><circle cx="20" cy="20" r="5" fill="none" stroke="#00e5a0" stroke-width="1.5"/></svg>CryptoNova</div>
-  <div class="phase" id="phase-lbl">EARLY ACCESS</div>
+  var target  = new Date(GATE_TARGET).getTime();
+  var cdH     = document.getElementById('cd-h');
+  var cdM     = document.getElementById('cd-m');
+  var cdS     = document.getElementById('cd-s');
+  var shown   = false;
 
-  <div class="box">
-    <div class="box-label">SYSTEM UPDATE</div>
-    <div class="box-body">We completed a fresh contract deployment to resolve issues caught during our last stress test. Clean contracts, better stability — everything is ready for launch.</div>
-  </div>
+  function pad(n) { return String(Math.max(0, n)).padStart(2, '0'); }
 
-  <div id="cd-panel">
-    <div class="lbl">Early access opens in</div>
-    <div class="cd" id="cd">--:--:--</div>
-    <div class="sched">
-      <span style="color:#a78bfa;font-weight:600;">3:30 PM EDT</span> — Early community access<br>
-      <span style="color:#22d3ee;font-weight:600;">4:00 PM EDT</span> — Full public launch &middot; June 15, 2026
-    </div>
-  </div>
+  function showCoupon() {
+    if (shown) return; shown = true;
+    document.getElementById('panel-countdown').style.display = 'none';
+    document.getElementById('panel-coupon').style.display    = 'block';
+    setTimeout(function(){ var el = document.getElementById('coupon-input'); if(el) el.focus(); }, 100);
+  }
 
-  <div class="open-panel" id="open-panel">
-    <div class="open-title">&#x1F7E2; Early Access is OPEN</div>
-    <div class="open-sub" id="redirect-lbl">Redirecting to the app in 5 seconds&hellip;</div>
-    <a class="btn" href="https://crypto-nova.app">Enter Now &rarr;</a>
-  </div>
-</div>
-
-<script>
-(function() {
-  var EARLY_AT    = new Date('2026-06-15T19:30:00Z').getTime();
-  var cd          = document.getElementById('cd');
-  var cdPanel     = document.getElementById('cd-panel');
-  var openPanel   = document.getElementById('open-panel');
-  var phaseLbl    = document.getElementById('phase-lbl');
-  var rdLbl       = document.getElementById('redirect-lbl');
-  var redirecting = false;
-
-  function startRedirect() {
-    if (redirecting) return;
-    redirecting = true;
-    phaseLbl.textContent    = 'EARLY ACCESS OPEN';
-    cdPanel.style.display   = 'none';
-    openPanel.style.display = 'block';
-    var secs = 5;
-    rdLbl.textContent = 'Redirecting to the app in ' + secs + ' seconds…';
-    var t = setInterval(function() {
+  function showOpen() {
+    if (shown) return; shown = true;
+    document.getElementById('panel-countdown').style.display = 'none';
+    document.getElementById('panel-open').style.display      = 'block';
+    var secs = 3;
+    var msg  = document.getElementById('redirect-msg');
+    var t    = setInterval(function() {
       secs--;
       if (secs <= 0) { clearInterval(t); window.location.href = '/'; }
-      else { rdLbl.textContent = 'Redirecting to the app in ' + secs + ' seconds…'; }
+      else { if (msg) msg.textContent = 'Redirecting in ' + secs + ' second' + (secs !== 1 ? 's' : '') + '…'; }
     }, 1000);
   }
 
   function tick() {
-    var now = Date.now();
-    if (now >= EARLY_AT) { startRedirect(); return; }
-    var diff = EARLY_AT - now;
+    var diff = target - Date.now();
+    if (diff <= 0) {
+      cdH.textContent = '00'; cdM.textContent = '00'; cdS.textContent = '00';
+      if (GATE_MODE === 'early') showCoupon(); else showOpen();
+      return;
+    }
     var h = Math.floor(diff / 3600000);
     var m = Math.floor((diff % 3600000) / 60000);
     var s = Math.floor((diff % 60000) / 1000);
-    cd.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    cdH.textContent = pad(h);
+    cdM.textContent = pad(m);
+    cdS.textContent = pad(s);
+    setTimeout(tick, 500);
   }
-
   tick();
-  setInterval(tick, 1000);
+
+  // Allow Enter key on coupon input
+  var inp = document.getElementById('coupon-input');
+  if (inp) inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') window._gateSubmit(); });
 })();
+
+window._gateSubmit = async function() {
+  var inp = document.getElementById('coupon-input');
+  var btn = document.getElementById('coupon-btn');
+  var err = document.getElementById('coupon-err');
+  if (!inp || !btn) return;
+  var code = inp.value.trim().toUpperCase();
+  if (!code) { err.textContent = 'Please enter a code.'; return; }
+  btn.disabled = true; btn.textContent = 'Checking…'; err.textContent = '';
+  try {
+    var res  = await fetch('/api/verify-coupon', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ code: code }) });
+    var data = await res.json();
+    if (data.ok) {
+      try { localStorage.setItem('cnova_ea_access', '1'); } catch(e) {}
+      document.getElementById('gate').remove();
+    } else {
+      err.textContent = data.error || 'Invalid code — try again.';
+      btn.disabled = false; btn.textContent = 'Enter';
+    }
+  } catch(e) {
+    err.textContent = 'Network error — please retry.';
+    btn.disabled = false; btn.textContent = 'Enter';
+  }
+};
 </script>
+
 </body>
 </html>
