@@ -450,7 +450,7 @@
           <span class="detail-val" id="pk-shortfall">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (last 50k blocks)</span>
+          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (last 100k blocks)</span>
           <span class="detail-val blue" id="kp-rescue-count">—</span>
         </div>
         <div class="detail-row">
@@ -785,7 +785,7 @@
       // Recent rescues: RescueLoanIssued is in MATRIX_ABI — emitted by MatrixLogicLib (library)
       // which runs in the context of FigureEightMatrixV8, so the event originates from matA/matB.
       // Works with manual_rescue.js (ParkedRescued on MatrixKeeper is never emitted on that path).
-      const fromBlock = Math.max(0, blk - 50000);
+      const fromBlock = Math.max(0, blk - 100000); // ~56h on Base Sepolia (2s/block)
       const matAForRescue = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
       const matBForRescue = new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider);
       const [logsA, logsB] = await Promise.all([
