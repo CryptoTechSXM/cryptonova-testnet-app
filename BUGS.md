@@ -7,17 +7,6 @@
 
 ## Open Issues
 
-### [2026-07-05] Bug Report Page — Admin pipeline test — verifying end-to-end bug report flow: …
-- **Reporter:** Claude (Admin Test)
-- **Page:** Bug Report Page
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xb41a3cfb7e3125aa42f938ed9a8c6807b459617c
-- **Frequency:** Consistent
-- **What happened:** Admin pipeline test — verifying end-to-end bug report flow: password gate → form submission → GitHub BUGS.md write.
-- **What was expected:** This report should appear in BUGS.md on the admin branch within seconds of submission, confirming the full pipeline (Vercel API → GitHub token → BUGS.md append) is working correctly before July 19 launch.
-- **Notes:** TEST SUBMISSION — safe to close/archive. Triggered by admin to verify system integrity pre-launch.
-- **Submitted:** Sun, 05 Jul 2026 19:37:11 GMT
-
 
 ### [2026-07-03] Dashboard (index.html) — This is the second time that I have entered T1A
 The dashboar…
