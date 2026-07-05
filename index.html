@@ -1995,6 +1995,7 @@ const TIER_ROUTER_ABI = [
   'function setMemberOptions(bool disableUpgrade, bool enableReentry, bool enableDouble) external',
   'function tierVelocityGreen(uint8 tierIdx) external view returns (bool)',
   'function globalJoinedCount() external view returns (uint256)',
+  'function registerWithCoupon(address referrer, bytes32 couponCodeHash) external', // V8.31
 ];
 
 const COUPON_REGISTRY_ABI = [
@@ -3308,11 +3309,14 @@ async function validateCouponCode() {
       if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
       _resetApproveBtn(); return;
     }
-    const couponUsdc = Number(couponAmt) / 1e6;
-    const youPay     = Math.max(0, Number(T1_FEE) / 1e6 - couponUsdc);
+    // V8.31: use per-coupon amount (couponData.amount) — falls back to global couponAmount()
+    // The global couponAmount() is the DEFAULT for new coupons; individual coupons may differ.
+    const perCouponAmt = couponData.amount ?? couponData[1] ?? couponAmt;
+    const couponUsdc   = Number(perCouponAmt) / 1e6;
+    const youPay       = Math.max(0, Number(T1_FEE) / 1e6 - couponUsdc);
     // V8.31: lock referrer = coupon issuer so it cannot be changed
     const issuer = couponData.issuer || couponData[0] || ethers.ZeroAddress;
-    window._activeCoupon = { code, codeHash, couponAmt, youPay, issuer };
+    window._activeCoupon = { code, codeHash, couponAmt: perCouponAmt, youPay, issuer };
     if (refInput && issuer && issuer !== ethers.ZeroAddress) {
       refInput.value    = issuer;
       refInput.readOnly = true;
@@ -3469,7 +3473,7 @@ async function doRegister() {
     if (c) {
       // Coupon path: V8.31 — call registerWithCoupon() on TierRouter so globalJoined is set
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      tx = await tr.registerWithCoupon(referrer, c.codeHash);
+      tx = await tr.registerWithCoupon(referrer, c.codeHash, { gasLimit: 600_000 });
     } else {
       // Normal path: call register() on TierRouter
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
@@ -3488,7 +3492,9 @@ async function doRegister() {
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
-    setTimeout(() => { window.location.reload(); }, 2500);
+    // V8.31: immediately flip UI to dashboard instead of waiting for full reload
+    try { await loadUserData(); showTab('dashboard'); } catch(_) {}
+    setTimeout(() => { window.location.reload(); }, 5000);
   } catch(e) {
     btn.disabled = false; const _ec = window._activeCoupon; btn.textContent = _ec ? 'Step 2: Register (' + (_ec.youPay === 0 ? 'FREE 🎉' : '$' + _ec.youPay.toFixed(2) + ' USDC)') : 'Step 2: Register ($10 USDC)';
     setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
@@ -3806,13 +3812,19 @@ async function loadDashboardData() {
         const tNum = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
         highestTier = Math.max(highestTier, tNum);
         if (member.isInMatrix) {
-          const pos = { label: m.label, bfs: 0n, bfsUnknown: false };
+          const pos = { label: m.label, bfs: 0n, bfsUnknown: false, crossingReserve: 0n };
           activePositions.push(pos);
           if (tNum >= highestTier) activeCycles = BigInt(member.cyclesCompleted);
           followUps.push(
             retryRead(() => mc.matrixPos(userAddr)).then(({ value, ok }) => {
               pos.bfs = ok ? value : 0n;
               pos.bfsUnknown = !ok;
+            })
+          );
+          // V8.31: fetch crossing reserve ($5 locked per active member toward next crossing)
+          followUps.push(
+            mc.crossingReserveOf(userAddr).catch(() => 0n).then(res => {
+              pos.crossingReserve = BigInt(res);
             })
           );
         } else if (!parkedInfo) {
@@ -3940,7 +3952,11 @@ async function loadDashboardData() {
           const bfsStr = p.bfsUnknown
             ? unknownBadge('Could not read matrix position — try refreshing.')
             : (p.bfs > 0n ? '#' + p.bfs.toString() : '—');
-          return `<div class="info-row"><span class="info-key" style="color:var(--text2)">${p.label}</span><span class="info-val green">${bfsStr}</span></div>`;
+          // V8.31: show crossing reserve sub-row — $5 locked per active position
+          const resRow = p.crossingReserve > 0n
+            ? `<div class="info-row" style="padding-top:2px;padding-bottom:6px"><span class="info-key" style="color:var(--text3);font-size:12px;padding-left:14px">↳ Crossing Reserve</span><span class="info-val" style="color:#a855f7;font-size:12px" title="Locked toward next matrix crossing — released as earnings when the matrix cycles">$${fmt6(p.crossingReserve)}</span></div>`
+            : '';
+          return `<div class="info-row"><span class="info-key" style="color:var(--text2)">${p.label}</span><span class="info-val green">${bfsStr}</span></div>${resRow}`;
         }).join('');
       }
     })();

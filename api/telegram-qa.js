@@ -9,9 +9,9 @@ import { ethers } from 'ethers';
 
 const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const TIER_ROUTER       = '0x43eBF15e6433318b184180A8455e380B7358F161'; // V8.30
-const CNOVA_TOKEN       = '0x7E572cC8dB7794f8992cf6bff40b1e77FA55A29a'; // V8.30
-const CNOVA_TREASURY    = '0xD615A0065Ddf4ce5ccF50eb5Aa7DbB5dCE712518'; // V8.30 — floorPrice() lives here
+const TIER_ROUTER       = '0x3A569619f0FB2A0ef48d7eDB1BFeA34AeF35512c'; // V8.31
+const CNOVA_TOKEN       = '0x8e81Ea3fE21DfFe30804cB46bE8543bD32CeC626'; // V8.31
+const CNOVA_TREASURY    = '0x3980ed891B29d8745E6e116B8e010ac74701Da6f'; // V8.31 — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -139,8 +139,8 @@ The referral system is fully live in the smart contracts.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
 ## Contracts (Base Sepolia)
-TierRouter: <code>0x43eBF15e6433318b184180A8455e380B7358F161</code>
-CNOVA Token: <code>0x7E572cC8dB7794f8992cf6bff40b1e77FA55A29a</code>
+TierRouter: <code>0x3A569619f0FB2A0ef48d7eDB1BFeA34AeF35512c</code>
+CNOVA Token: <code>0x8e81Ea3fE21DfFe30804cB46bE8543bD32CeC626</code>
 USDC: <code>0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
 
 ## Links
