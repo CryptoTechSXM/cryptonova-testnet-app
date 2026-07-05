@@ -782,11 +782,17 @@
         }
       } catch(e) {}
 
-      // Recent rescues: RescueLoanIssued from StabilityFund — works with manual_rescue.js
-      // (manual_rescue bypasses MatrixKeeper so ParkedRescued is never emitted on that path)
+      // Recent rescues: RescueLoanIssued is in MATRIX_ABI — emitted by MatrixLogicLib (library)
+      // which runs in the context of FigureEightMatrixV8, so the event originates from matA/matB.
+      // Works with manual_rescue.js (ParkedRescued on MatrixKeeper is never emitted on that path).
       const fromBlock = Math.max(0, blk - 50000);
-      const sfForRescue = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
-      const keeperRescueLogs = await sfForRescue.queryFilter(sfForRescue.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
+      const matAForRescue = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
+      const matBForRescue = new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider);
+      const [logsA, logsB] = await Promise.all([
+        matAForRescue.queryFilter(matAForRescue.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]),
+        matBForRescue.queryFilter(matBForRescue.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]),
+      ]);
+      const keeperRescueLogs = [...logsA, ...logsB];
       const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
       const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
