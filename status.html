@@ -1132,14 +1132,14 @@
     if (cardSF) cardSF.className = 'status-card';
     try {
       const sf       = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
-      const treasury = new ethers.Contract(ADDRS.treasury, USDC_ABI, provider);
-      const buyback  = new ethers.Contract(ADDRS.buybackReserve, USDC_ABI, provider);
+      const usdcCtr  = new ethers.Contract(ADDRS.usdc, USDC_ABI, provider);
       const cnova    = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, provider);
 
+      // Query USDC contract for each wallet's balance (treasury/buyback are plain wallets)
       const [sfBal, treaBal, bbBal, cnovaSup] = await Promise.all([
         sf.totalBalance().catch(()=>0n),
-        treasury.balanceOf(ADDRS.treasury).catch(()=>0n),
-        buyback.balanceOf(ADDRS.buybackReserve).catch(()=>0n),
+        usdcCtr.balanceOf(ADDRS.treasury).catch(()=>0n),
+        usdcCtr.balanceOf(ADDRS.buybackReserve).catch(()=>0n),
         cnova.totalSupply().catch(()=>0n),
       ]);
 
