@@ -944,7 +944,7 @@
 
       // Avg shortfall
       const avgShortfall = stillParked.length > 0 ? totalShortfall / BigInt(stillParked.length) : 0n;
-      const shortfallTxt = stillParked.length > 0 ? fmt6(avgShortfall) : '—';
+      const shortfallTxt = stillParked.length > 0 ? fmt6(avgShortfall) : (_lastParkedStats ? _lastParkedStats.shortfall : '—');
       setText('pk-shortfall', shortfallTxt);
 
       // SF rescue capacity
