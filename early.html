@@ -136,11 +136,6 @@
   var h = window.location.hostname;
   if (h.startsWith('admin.')) { document.getElementById('gate').remove(); return; }
 
-  // Already admitted? (early mode) — skip gate
-  if (GATE_MODE === 'early') {
-    try { if (localStorage.getItem('cnova_ea_access') === '1') { document.getElementById('gate').remove(); return; } } catch(e) {}
-  }
-
   // Label updates
   if (GATE_MODE === 'early') {
     document.getElementById('badge-txt').textContent     = 'Early Access Preview';
