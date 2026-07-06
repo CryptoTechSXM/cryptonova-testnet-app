@@ -578,7 +578,7 @@ function toggleTheme() {
     </table>
   </div>
   <div style="font-size:12px;color:var(--text3);margin-bottom:36px;padding:0 4px">
-    <span data-i18n="compPage.table_footnote">Cycle payout = 127 × entry fee × 18% (= 40% pool BPS × 45% payout base — flat across all tiers). Direct Ref = entry fee × 3.15% (L1 slot: 7% × 45%). Passive L2 = entry fee × 2.7% (L2–L6 each: 6% × 45%). Additionally: 50% of each entry funds member's crossing reserve and 5% is credited instantly to the joining member. Velocity gates open when previous tier MatB reaches 80% fill.</span> <strong style="color:var(--red)" data-i18n="compPage.table_footnote_b">Cycle payouts require the matrix to fill — not guaranteed.</strong>
+    <span data-i18n="compPage.table_footnote">Cycle payout = 127 × entry fee × 18% (= 37.9% pool BPS × 47.5% payout base — flat across all tiers). Direct Ref = entry fee × 5% (L1 slot: 10.5% × 47.5%). Passive L2 = entry fee × 2.7% (L2–L6 each: 5.7% × 47.5%). Additionally: 50% of each entry funds member's crossing reserve and 2.5% is credited instantly to the joining member. Velocity gates open when previous tier MatB reaches 80% fill.</span> <strong style="color:var(--red)" data-i18n="compPage.table_footnote_b">Cycle payouts require the matrix to fill — not guaranteed.</strong>
   </div>
 
   <!-- ── Entry Fee Split ── -->
@@ -587,10 +587,10 @@ function toggleTheme() {
     <p data-i18n="compPage.split_intro">Every T1 entry fee is split into three buckets by the smart contract — automatically, with no human intervention:</p>
     <!-- V8.31 crossing reserve callout -->
     <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--text2);line-height:1.7">
-      <strong style="color:#a855f7">🔐 How the 50/5/45 model works:</strong>
+      <strong style="color:#a855f7">🔐 How the 50/2.5/47.5 model works:</strong>
       50% of your entry fee is held as your personal <em>crossing reserve</em> — when your 127-seat matrix fills, this covers your re-entry fee in full, so your first crossing costs nothing extra.
-      5% is credited directly to your withdrawable balance the moment you join (instant earn).
-      The remaining 45% runs through the BPS payout array below.
+      2.5% is credited directly to your withdrawable balance the moment you join (instant earn).
+      The remaining 47.5% runs through the BPS payout array below.
     </div>
     <div class="split-table">
       <div class="split-row">
@@ -601,9 +601,9 @@ function toggleTheme() {
       </div>
       <div class="split-row">
         <div class="split-label" data-i18n="compPage.split_instant">⚡ Your Instant Earn (to your balance)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:5%;background:var(--green)"></div></div>
-        <div class="split-pct">5%</div>
-        <div class="split-amt">$0.50</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:2.5%;background:var(--green)"></div></div>
+        <div class="split-pct">2.5%</div>
+        <div class="split-amt">$0.25</div>
       </div>
       <div class="split-row">
         <div class="split-label" data-i18n="compPage.split_pool">🌀 Equalization Pool (45% base → 40%)</div>
@@ -612,55 +612,55 @@ function toggleTheme() {
         <div class="split-amt">$1.80</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral (45% base → 7%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:3.15%;background:var(--green)"></div></div>
-        <div class="split-pct">3.15%</div>
-        <div class="split-amt">$0.32</div>
+        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral (47.5% base → 10.5%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:5%;background:var(--green)"></div></div>
+        <div class="split-pct">5%</div>
+        <div class="split-amt">$0.50</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Chain Pay L2–L6 each (45% base → 6% each)</div>
+        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Chain Pay L2–L6 each (47.5% base → 5.7% each)</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:2.7%;background:var(--blue)"></div></div>
         <div class="split-pct">2.7% ea.</div>
         <div class="split-amt">$0.27</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_treasury">🏦 CNOVA Treasury (45% base → 10%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:4.5%;background:var(--green2)"></div></div>
-        <div class="split-pct">4.5%</div>
-        <div class="split-amt">$0.45</div>
+        <div class="split-label" data-i18n="compPage.split_treasury">🏦 CNOVA Treasury (47.5% base → 10.5%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:5%;background:var(--green2)"></div></div>
+        <div class="split-pct">5%</div>
+        <div class="split-amt">$0.50</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_sf">🌊 Stability Rescue Fund (45% base → 6%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:2.7%;background:#38bdf8"></div></div>
-        <div class="split-pct">2.7%</div>
-        <div class="split-amt">$0.27</div>
+        <div class="split-label" data-i18n="compPage.split_sf">🌊 Stability Rescue Fund (47.5% base → 6.3%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:3%;background:#38bdf8"></div></div>
+        <div class="split-pct">3%</div>
+        <div class="split-amt">$0.30</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_lq">💧 Liquidity Reserve (45% base → 2%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:0.9%;background:var(--blue)"></div></div>
-        <div class="split-pct">0.9%</div>
-        <div class="split-amt">$0.09</div>
+        <div class="split-label" data-i18n="compPage.split_lq">💧 Liquidity Reserve (47.5% base → 1.1%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:0.5%;background:var(--blue)"></div></div>
+        <div class="split-pct">0.5%</div>
+        <div class="split-amt">$0.05</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_dev">⚙️ Dev + Ops (45% base → 3%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:1.35%;background:var(--text3)"></div></div>
-        <div class="split-pct">1.35%</div>
-        <div class="split-amt">$0.135</div>
+        <div class="split-label" data-i18n="compPage.split_dev">⚙️ Dev + Ops (47.5% base → 3.2%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:1.5%;background:var(--text3)"></div></div>
+        <div class="split-pct">1.5%</div>
+        <div class="split-amt">$0.15</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_cw">🏛️ Community Wallet (45% base → 1%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:0.45%;background:var(--purple)"></div></div>
-        <div class="split-pct">0.45%</div>
-        <div class="split-amt">$0.045</div>
+        <div class="split-label" data-i18n="compPage.split_cw">🏛️ Community Wallet (47.5% base → 1.1%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:0.5%;background:var(--purple)"></div></div>
+        <div class="split-pct">0.5%</div>
+        <div class="split-amt">$0.05</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_bbr">🔥 CNOVA Buyback Reserve (45% base → 1%)</div>
-        <div class="split-bar-wrap"><div class="split-bar" style="width:0.45%;background:var(--red)"></div></div>
-        <div class="split-pct">0.45%</div>
-        <div class="split-amt">$0.045</div>
+        <div class="split-label" data-i18n="compPage.split_bbr">🔥 CNOVA Buyback Reserve (47.5% base → 1.1%)</div>
+        <div class="split-bar-wrap"><div class="split-bar" style="width:0.5%;background:var(--red)"></div></div>
+        <div class="split-pct">0.5%</div>
+        <div class="split-amt">$0.05</div>
       </div>
     </div>
-    <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">50% funds your crossing reserve (held for you). 5% is your instant earn. The remaining 45% goes to the pool (18%), chain pay (16.65%), treasury (4.5%), and protocol reserves. All rates are identical across all 10 tiers.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Immutable.</strong> <span data-i18n="compPage.split_footer_post">(Percentages shown are of the total entry fee. Pool and chain pay rates are flat at every tier — cycle payouts scale with the tier entry fee, not the pool percentage.)</span></p>
+    <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">50% funds your crossing reserve (held for you). 2.5% is your instant earn. The remaining 47.5% goes to the pool (18%), chain pay (18.5%), treasury (5%), and protocol reserves. All rates are identical across all 10 tiers.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Immutable.</strong> <span data-i18n="compPage.split_footer_post">(Percentages shown are of the total entry fee. Pool and chain pay rates are flat at every tier — cycle payouts scale with the tier entry fee, not the pool percentage.)</span></p>
   </div>
 
   <!-- ── Disclaimer ── -->
