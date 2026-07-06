@@ -496,15 +496,29 @@
       }
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
-        // Check if already admitted
-        try { if (localStorage.getItem('cnova_ea_access') === '1') { document.getElementById('maintenance-gate').remove(); return; } } catch(e){}
-        // Show coupon form
-        document.getElementById('gate-countdown-block').style.display = 'none';
-        document.getElementById('gate-coupon-block').style.display = 'flex';
+        // TEST TARGET: 2026-07-06T00:45:00Z — update EARLY_MS to real launch date before going live
+        var EARLY_MS = 1783298700000;
         var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
-        // Allow Enter key
-        var inp = document.getElementById('gate-coupon-input');
-        if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
+        // Override countdown block text for early domain
+        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
+        var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
+        var openEarlyCoupon = function() {
+          // localStorage only bypasses gate AFTER the countdown has expired
+          try { if (localStorage.getItem('cnova_ea_access') === '1') { document.getElementById('maintenance-gate').remove(); return; } } catch(e){}
+          document.getElementById('gate-countdown-block').style.display = 'none';
+          document.getElementById('gate-coupon-block').style.display = 'flex';
+          var inp2 = document.getElementById('gate-coupon-input');
+          if (inp2) { inp2.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); }); inp2.focus(); }
+        };
+        var earlyTick = function() {
+          var d = EARLY_MS - Date.now();
+          if (d <= 0) { openEarlyCoupon(); return; }
+          var s = Math.floor(d/1000), m = Math.floor(s/60); s = s%60;
+          var el = document.getElementById('gate-countdown');
+          if (el) el.textContent = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+          setTimeout(earlyTick, 500);
+        };
+        if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
         var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
