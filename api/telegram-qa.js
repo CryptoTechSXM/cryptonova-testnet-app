@@ -32,7 +32,7 @@ const SYSTEM_PROMPT = `You are the CryptoNova Support Bot. Answer questions from
 - Never make up numbers, addresses, or facts.
 
 ## What Is CryptoNova?
-Decentralized matrix platform on Base blockchain. Members pay USDC to join a binary matrix and earn USDC as it fills. Also features CNOVA utility token mined automatically through cycles. Currently on <b>Base Sepolia testnet</b>. Mainnet launch planned.
+Decentralized matrix platform on Base blockchain. Members pay USDC to join a binary matrix and earn USDC as it fills. Also features CNOVA utility token mined automatically through cycles. Currently on <b>Base Sepolia testnet</b>. <b>Mainnet launch: July 19, 2026</b> at cryptonova.ai.
 
 ## The Matrix System
 1. Each tier has a two-phase cycle totalling <b>254 seats</b> (two 127-seat binary trees back-to-back).
@@ -460,7 +460,7 @@ export default async function handler(req, res) {
             `<code>/faucet 0x…</code> — get testnet USDC + ETH\n` +
             `<code>/price</code> — current CNOVA floor price\n` +
             `<code>/tier</code> — tier entry fees and earnings\n\n` +
-            `🚀 <b>Mainnet coming soon</b> — <a href="https://crypto-nova.app">crypto-nova.app</a>`,
+            `🚀 <b>Mainnet launches July 19</b> — <a href="https://cryptonova.ai">cryptonova.ai</a>`,
         });
       }
     }
