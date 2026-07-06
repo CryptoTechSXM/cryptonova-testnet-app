@@ -1162,9 +1162,9 @@
           <div style="color:var(--green);font-weight:700;margin-bottom:6px" data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)</div>
           <div style="color:var(--text2);line-height:1.6">
             <span data-i18n="reg.earn_passive">Passive (0 referrals): <strong style="color:var(--text)">~$3.00</strong> chain pay per cycle (~30% ROI)</span><br>
-            <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">~$3.63</strong> per cycle (~36% ROI)</span><br>
-            <span data-i18n="reg.earn_power">Power (5 referrals): <strong style="color:var(--text)">~$4.58</strong> per cycle (~46% ROI)</span><br>
-            <span style="font-size:11px;color:var(--text3)" data-i18n="reg.earn_disclaimer">Plus $0.50 instant earn on join · ~$229 pool payout when your matrix fills. Chain pay: L1 3.15% · L2–L6 2.7% each (flat rates, all tiers).</span>
+            <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">~$4.00</strong> per cycle (~40% ROI)</span><br>
+            <span data-i18n="reg.earn_power">Power (5 referrals): <strong style="color:var(--text)">~$5.50</strong> per cycle (~55% ROI)</span><br>
+            <span style="font-size:11px;color:var(--text3)" data-i18n="reg.earn_disclaimer">Plus $0.25 instant earn on join · ~$229 pool payout when your matrix fills. Chain pay: L1 5% · L2–L6 2.7% each (flat rates, all tiers).</span>
           </div>
         </div>
       </div>
@@ -1415,22 +1415,13 @@
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
 
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <strong>Option 1 — Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
+            <strong>Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
           </div>
           <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0</span> USDC</button>
           <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
           <div id="self-rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
 
-          <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
-            <strong>Option 2 — Co-Pay Rescue (Instant):</strong> The SF loans the gap and re-enters you immediately. Your withdrawable covers the rest. The SF share is recorded as a rescue debt — repaid from future earnings before you can withdraw.
-          </div>
-          <div class="info-row" id="copay-you-pay-row" style="display:none">
-            <span class="info-key">You Pay (wallet)</span>
-            <span class="info-val" style="color:#f97316" id="copay-you-pay">—</span>
-          </div>
-          <button class="btn full-w" id="btn-copay-approve" onclick="approveCoPayRescue()" style="display:none;background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.4);color:#f97316">Step 1: Approve USDC</button>
-          <button class="btn full-w" id="btn-copay-rescue" onclick="doCoPayRescue()" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff;border:none">⚡ Co-Pay Rescue (SF Loan)</button>
-          <div id="copay-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+
         </div>
       </div>
 
@@ -1544,18 +1535,18 @@
       <div class="card">
         <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:16px">These amounts flow upward from each new member registration through your position.</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">16.65% of each entry fee flows across 6 levels — L1 direct referrer bonus + L2–L6 flat rate per upline level</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">18.5% of each entry fee flows across 6 levels — L1 direct referrer bonus + L2–L6 flat rate per upline level</div>
         <div id="chain-pay-table">
-          <div class="chain-row"><span style="color:var(--text2)">L1 — Direct Referrer <span style="font-size:11px;color:var(--text3)">(person who brought you in)</span></span><span><span style="font-weight:600;color:var(--green)">$0.315</span> <span style="font-size:11px;color:var(--text3)">3.15%</span></span></div>
+          <div class="chain-row"><span style="color:var(--text2)">L1 — Direct Referrer <span style="font-size:11px;color:var(--text3)">(person who brought you in)</span></span><span><span style="font-weight:600;color:var(--green)">$0.50</span> <span style="font-size:11px;color:var(--text3)">5%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L2 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L3 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L4 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L5 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L6 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
-          <div class="chain-row" style="border-top:1px solid var(--green2)"><span style="font-weight:700">Total chain pay per T1 entry</span><span style="font-weight:700;color:var(--green)">$1.665 <span style="font-size:11px;color:var(--text3);font-weight:400">(16.65% of $10)</span></span></div>
+          <div class="chain-row" style="border-top:1px solid var(--green2)"><span style="font-weight:700">Total chain pay per T1 entry</span><span style="font-weight:700;color:var(--green)">$1.85 <span style="font-size:11px;color:var(--text3);font-weight:400">(18.5% of $10)</span></span></div>
         </div>
         <div style="margin-top:10px;font-size:12px;color:var(--text3);padding:8px 12px;background:var(--bg3);border-radius:8px">
-          💡 You earn <strong style="color:var(--green)">$0.315</strong> for every direct referral (L1 — the highest single-level bonus), plus <strong style="color:var(--green)">$0.27</strong> per level from your L2–L6 upline positions.
+          💡 You earn <strong style="color:var(--green)">$0.50</strong> for every direct referral (L1 — the highest single-level bonus), plus <strong style="color:var(--green)">$0.27</strong> per level from your L2–L6 upline positions.
         </div>
       </div>
     </div>
