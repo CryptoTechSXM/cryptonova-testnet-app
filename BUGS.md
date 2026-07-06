@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-06] Coupon System — Suggestion: It would be good if after purchasing the coupon …
+- **Reporter:** Sherwyn
+- **Page:** Coupon System
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Suggestion: It would be good if after purchasing the coupon and when you click the copy button to copy the link, to have an acknowledgement that says the link was actually copied...
+- **What was expected:** To see acknowledgement of the copy..
+- **Submitted:** Mon, 06 Jul 2026 20:14:17 GMT
+
+
 ### [2026-07-06] Coupon System — When trying to use coupon code this is the error: ❌ ❌ "", "f…
 - **Reporter:** Sherwyn
 - **Page:** Coupon System
