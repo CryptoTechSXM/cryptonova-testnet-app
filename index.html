@@ -496,8 +496,8 @@
       }
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
-        // TEST TARGET: 2026-07-06T00:45:00Z — update EARLY_MS to real launch date before going live
-        var EARLY_MS = 1783298700000;
+        // Early gate opens July 19 2026 9:00 AM EDT = 2026-07-19T13:00:00Z
+        var EARLY_MS = 1784466000000;
         var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
@@ -522,7 +522,7 @@
       } else {
         // Main site countdown
         var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
-        var MAIN_MS = 1782786600000;
+        var MAIN_MS = 1784466000000; // July 19 2026 9:00 AM EDT = 2026-07-19T13:00:00Z
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
