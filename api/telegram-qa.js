@@ -164,17 +164,18 @@ I can answer questions about:
 2. Registration and entry fees
 3. CNOVA token and mining
 4. Tiers, upgrades and earnings
-5. Withdrawals and 1.5% fee
+5. Withdrawals and fee structure
 6. Community Pool eligibility
 7. Dashboard breakdown
 8. Troubleshooting
 
 <b>Commands:</b>
-/faucet 0xYourAddress — get $20 USDC + 0.002 ETH instantly
-/register — how to get started
+/status — platform status &amp; member count
+/stats — live on-chain stats (SF, CNOVA supply)
 /price — live CNOVA floor price
 /tier — entry fees and earnings per tier
-/stats — live testnet stats
+/register — how to get started
+/faucet 0xYourAddress — get $20 USDC + 0.002 ETH
 /help — this message
 
 <a href="https://crypto-nova.app">crypto-nova.app</a> | <a href="https://crypto-nova.app/faq">FAQ</a>`;
@@ -547,6 +548,36 @@ export default async function handler(req, res) {
 
     if (cmd === '/start' || cmd === '/help') { await sendReply(BOT_TOKEN, chatId, HELP_TEXT); return ok(); }
     if (cmd === '/register') { await sendReply(BOT_TOKEN, chatId, REGISTER_TEXT); return ok(); }
+    if (cmd === '/status') {
+      await sendTyping(BOT_TOKEN, chatId);
+      try {
+        const RPC = process.env.BASE_SEPOLIA_RPC || 'https://sepolia.base.org';
+        const ethCall = async (to, sel) => {
+          const r = await fetch(RPC, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'eth_call', params:[{to, data:sel},'latest'] }) });
+          const j = await r.json();
+          return (j.error || !j.result || j.result==='0x') ? null : BigInt(j.result);
+        };
+        // globalJoinedCount() selector: 0xfbcfd600
+        const countRaw = await ethCall(TIER_ROUTER, '0xfbcfd600');
+        const memberCount = countRaw !== null ? Number(countRaw) : null;
+        const countLine = memberCount !== null ? `👥 <b>Members:</b> ${memberCount}` : `👥 <b>Members:</b> —`;
+        await sendReply(BOT_TOKEN, chatId,
+          `<b>CryptoNova Status</b> 🟢\n\n` +
+          `🌐 <b>Network:</b> Base Sepolia (testnet)\n` +
+          countLine + `\n` +
+          `📊 <b>Matrix:</b> Operational — register, earn USDC, mine CNOVA\n` +
+          `💰 <b>Test Funds:</b> /faucet 0xYourAddress\n` +
+          `🚀 <b>Mainnet:</b> July 19, 2026 — <a href="https://cryptonova.ai">cryptonova.ai</a>\n\n` +
+          `For live chain stats use /stats`,
+          msgId);
+      } catch(e) {
+        await sendReply(BOT_TOKEN, chatId,
+          `<b>CryptoNova Status</b> 🟢\n\nPlatform is live on Base Sepolia.\nVisit <a href="https://crypto-nova.app">crypto-nova.app</a> for your dashboard.`,
+          msgId);
+      }
+      return ok();
+    }
     if (cmd === '/stats') {
       await sendTyping(BOT_TOKEN, chatId);
       try { await sendReply(BOT_TOKEN, chatId, await fetchLiveStats(), msgId); }
@@ -600,7 +631,8 @@ export default async function handler(req, res) {
         `<b>How earnings work:</b>\n` +
         `• 127-seat binary tree fills → you advance\n` +
         `• Full 254-seat cycle → auto-upgrade + CNOVA mined\n` +
-        `• Chain pay: 10%→4%→3%→1.5%→0.75%→0.75% up 6 levels\n\n` +
+        `• Chain pay: L1 5% direct bonus · L2–L6 2.7% each · 18.5% total\n` +
+        `• 2.5% instant earn on join · 50% crossing reserve (used to cycle out)\n\n` +
         `Register at T1 and get your referral link: <a href="https://crypto-nova.app">crypto-nova.app</a>`,
         msgId);
       return ok();
