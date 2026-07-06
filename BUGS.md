@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-06] Dashboard (index.html) — As the system already takes 50% from our $10 entry for cross…
+- **Reporter:** Kolawole Ola
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
+- **Frequency:** Consistent
+- **What happened:** As the system already takes 50% from our $10 entry for crossing, why does it reserve another $5 from our earnings as "Auto-Deducted (Upgrades)?
+- **What was expected:** I think there shouldn't be another deduction.
+- **Submitted:** Mon, 06 Jul 2026 20:19:43 GMT
+
+
 ### [2026-07-06] Coupon System — Suggestion: It would be good if after purchasing the coupon …
 - **Reporter:** Sherwyn
 - **Page:** Coupon System
