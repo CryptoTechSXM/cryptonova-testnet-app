@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-06] Coupon System — When trying to use coupon code this is the error: ❌ ❌ "", "f…
+- **Reporter:** Sherwyn
+- **Page:** Coupon System
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** When trying to use coupon code this is the error: ❌ ❌ "", "from": "0x50c8426E34C14859DcbF361f80E9b5D3412780E0", "to": "0x8c854e61E92999dE1741943C145b58Df7
+- **What was expected:** To be registered..
+- **Notes:** This seems to happen only when using the coupon codes... Didn't have this issue with other accounts as I used the referral link and wallet address... also happened in the previous version (V8.31)
+- **Submitted:** Mon, 06 Jul 2026 20:10:08 GMT
+
+
 *No open issues — ready for launch.*
 
 ---
