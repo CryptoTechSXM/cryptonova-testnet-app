@@ -1199,7 +1199,7 @@
       // Scans MAX 3 chunks (6000 blocks ~1.5hrs) per poll to avoid rate limits.
       // History builds up gradually across polls. localStorage preserves totals.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_31'; // bump suffix to reset on logic change
+        const LOAN_KEY        = 'cnova_loans_v8_32'; // bump suffix to reset on logic change
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
 
