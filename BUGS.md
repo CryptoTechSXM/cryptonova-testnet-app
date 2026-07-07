@@ -7,6 +7,40 @@
 
 ## Open Issues
 
+### [2026-07-06] Dashboard (index.html) — As the system already takes 50% from our $10 entry for cross…
+- **Reporter:** Kolawole Ola
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
+- **Frequency:** Consistent
+- **What happened:** As the system already takes 50% from our $10 entry for crossing, why does it reserve another $5 from our earnings as "Auto-Deducted (Upgrades)?
+- **What was expected:** I think there shouldn't be another deduction.
+- **Submitted:** Mon, 06 Jul 2026 20:19:43 GMT
+
+
+### [2026-07-06] Coupon System — Suggestion: It would be good if after purchasing the coupon …
+- **Reporter:** Sherwyn
+- **Page:** Coupon System
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Suggestion: It would be good if after purchasing the coupon and when you click the copy button to copy the link, to have an acknowledgement that says the link was actually copied...
+- **What was expected:** To see acknowledgement of the copy..
+- **Submitted:** Mon, 06 Jul 2026 20:14:17 GMT
+
+
+### [2026-07-06] Coupon System — When trying to use coupon code this is the error: ❌ ❌ "", "f…
+- **Reporter:** Sherwyn
+- **Page:** Coupon System
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** When trying to use coupon code this is the error: ❌ ❌ "", "from": "0x50c8426E34C14859DcbF361f80E9b5D3412780E0", "to": "0x8c854e61E92999dE1741943C145b58Df7
+- **What was expected:** To be registered..
+- **Notes:** This seems to happen only when using the coupon codes... Didn't have this issue with other accounts as I used the referral link and wallet address... also happened in the previous version (V8.31)
+- **Submitted:** Mon, 06 Jul 2026 20:10:08 GMT
+
+
 *No open issues — ready for launch.*
 
 ---
