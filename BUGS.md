@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-07] Dashboard (index.html) — i attempted a manual upgrade, I went thru the process of app…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
+- **Frequency:** Consistent
+- **What happened:** i attempted a manual upgrade, I went thru the process of approving the update on metamask, I got the message that it was confirmed. the message on the dapp was stuck on 'approving USDC'. It did  not highlight step 2. When I refreshed the page, it was still on step 1. I tried this several times.
+- **What was expected:** I should have got a message that USDC was approved and then step 2 should have been highlighted for me to click and complete the upgrade.
+- **Submitted:** Tue, 07 Jul 2026 22:36:40 GMT
+
+
 ### [2026-07-06] Dashboard (index.html) — As the system already takes 50% from our $10 entry for cross…
 - **Reporter:** Kolawole Ola
 - **Page:** Dashboard (index.html)
