@@ -3505,7 +3505,12 @@ async function doRegister() {
     setTimeout(() => { window.location.reload(); }, 5000);
   } catch(e) {
     btn.disabled = false; const _ec = window._activeCoupon; btn.textContent = _ec ? 'Step 2: Register (' + (_ec.youPay === 0 ? 'FREE 🎉' : '$' + _ec.youPay.toFixed(2) + ' USDC)') : 'Step 2: Register ($10 USDC)';
-    setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
+    const _fe = friendlyError(e);
+    // If a coupon was active and we got a generic on-chain revert, give a clear coupon message
+    const _em = (_ec && (e.code === 'CALL_EXCEPTION' || _fe.includes('Transaction reverted on-chain')))
+      ? 'Coupon not found or expired — please request a new one.'
+      : _fe.replace(/^\u274C\s*/, '');
+    setStatus('reg-status', '❌ ' + _em, 'err');
     if (e.code !== 4001) reportEvent('TX_FAILED', {
       action: 'register', error: e.message || String(e),
     });
@@ -3552,7 +3557,8 @@ function _shareCoupon(code, issuerAddr) {
     + '<div style="font-size:13px;color:var(--text3);margin-bottom:14px">Your referral link is embedded \u2014 when they open it, your address pre-fills as their referrer.</div>'
     + '<div style="background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:16px">' + shareUrl + '</div>';
   const btnWrap = document.createElement('div');
-  btnWrap.appendChild(mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', () => navigator.clipboard.writeText(shareUrl).then(() => toast('Link copied!', 'success'))));
+  const copyBtn = mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', () => navigator.clipboard.writeText(shareUrl).then(() => { toast('Link copied!', 'success'); copyBtn.textContent = '\u2713 Copied!'; setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000); }));
+  btnWrap.appendChild(copyBtn);
   btnWrap.appendChild(mkBtn('\uD835\uDD4F  Share on X / Twitter', '#1DA1F2', 'rgba(29,161,242,.1)', 'rgba(29,161,242,.35)', () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareMsg), '_blank')));
   btnWrap.appendChild(mkBtn('\uD83D\uDCAC  Share on WhatsApp', '#25D366', 'rgba(37,211,102,.08)', 'rgba(37,211,102,.3)', () => window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg), '_blank')));
   btnWrap.appendChild(mkBtn('\u2708\uFE0F  Share on Telegram', '#0088cc', 'rgba(0,136,204,.08)', 'rgba(0,136,204,.3)', () => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent('\uD83C\uDFDF\uFE0F Join CryptoNova! Coupon: ' + code), '_blank')));
@@ -3940,7 +3946,7 @@ async function loadDashboardData() {
             : (p.bfs > 0n ? '#' + p.bfs.toString() : '—');
           // V8.31: show crossing reserve sub-row — $5 locked per active position
           const resRow = p.crossingReserve > 0n
-            ? `<div class="info-row" style="padding-top:2px;padding-bottom:6px"><span class="info-key" style="color:var(--text3);font-size:12px;padding-left:14px">↳ Crossing Reserve</span><span class="info-val" style="color:#a855f7;font-size:12px" title="Locked toward next matrix crossing — released as earnings when the matrix cycles">$${fmt6(p.crossingReserve)}</span></div>`
+            ? `<div class="info-row" style="padding-top:2px;padding-bottom:6px"><span class="info-key" style="color:var(--text3);font-size:12px;padding-left:14px">↳ Crossing Reserve</span><span class="info-val" style="color:#a855f7;font-size:12px" title="Locked toward next matrix crossing — released as earnings when the matrix cycles">${fmt6(p.crossingReserve)}</span></div>`
             : '';
           return `<div class="info-row"><span class="info-key" style="color:var(--text2)">${p.label}</span><span class="info-val green">${bfsStr}</span></div>${resRow}`;
         }).join('');
@@ -4376,8 +4382,23 @@ async function _getAllMatrixMembers(userAddr, rp) {
 // ── Withdrawable breakdown ────────────────────────────────────────────
 async function renderWithdrawableDetail(el, rp) {
   const { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt } = await _getAllMatrixMembers(userAddr, rp);
-  const autoDeducted = totalEarned > (totalWithdrawn + totalWithdrawable)
+
+  // Fetch crossing reserve locked across all active tier matrices
+  const tierKeys = Object.keys(ADDRS).filter(k => /^T\d+$/.test(k));
+  let totalCrossingReserve = 0n;
+  await Promise.all(tierKeys.flatMap(tk => {
+    const tier = ADDRS[tk];
+    return [tier.matA, tier.matB].filter(a => a && a !== ethers.ZeroAddress).map(addr =>
+      new ethers.Contract(addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
+        totalCrossingReserve += BigInt(r);
+      })
+    );
+  }));
+
+  const autoDeducted    = totalEarned > (totalWithdrawn + totalWithdrawable)
     ? totalEarned - totalWithdrawn - totalWithdrawable : 0n;
+  const crossingLocked  = totalCrossingReserve;
+  const upgradeDeducted = autoDeducted > crossingLocked ? autoDeducted - crossingLocked : 0n;
 
   const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
   const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
@@ -4392,7 +4413,9 @@ async function renderWithdrawableDetail(el, rp) {
   el.innerHTML = `
     <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
     <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
-    <div class="detail-row"><span class="detail-key">${_t('modal.auto_deducted','Auto-Deducted (upgrades)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>
+    ${crossingLocked > 0n ? `<div class="detail-row"><span class="detail-key" style="color:#a855f7">${_t('modal.crossing_reserve','\u21B3 Crossing Reserve (locked)')}</span><span class="detail-val" style="color:#a855f7" title="Locked toward your next matrix crossing — released as earnings when the cycle completes">− ${fmt6(crossingLocked)}</span></div>` : ''}
+    ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key">${_t('modal.upgrade_fees','Upgrade Fees (auto-deducted)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
+    ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key">${_t('modal.auto_deducted','Auto-Deducted (upgrades)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
     ${totalWithdrawable > 0n ? `
     <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
