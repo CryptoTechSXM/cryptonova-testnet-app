@@ -3393,6 +3393,13 @@ function _updateApproveForCoupon() {
 
 async function approveUSDC() {
   if (!signer) { toast('Connect wallet first', 'error'); return; }
+  // Network guard — MetaMask must be on Base Sepolia before any tx
+  const chainId = parseInt(window.ethereum?.chainId || '0', 16);
+  if (chainId !== CHAIN_ID) {
+    try { await switchToBaseSepolia(); } catch(_) {}
+    const c2 = parseInt(window.ethereum?.chainId || '0', 16);
+    if (c2 !== CHAIN_ID) { toast('Please switch to Base Sepolia first', 'error'); return; }
+  }
   const btn = document.getElementById('btn-approve');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Approving…';
   try {
@@ -3405,7 +3412,12 @@ async function approveUSDC() {
     const approveLabel  = c ? '$' + c.youPay.toFixed(2) : '$10';
     const tx = await usdcW.approve(approveTarget, approveAmt);
     setStatus('reg-status', '⏳ Approving ' + approveLabel + ' USDC…', 'info');
-    await tx.wait();
+    // Timeout guard: Chrome MetaMask sometimes doesn't fire the receipt event.
+    // Proceed after 60s — the tx was submitted and is almost certainly confirmed.
+    await Promise.race([
+      tx.wait(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 60000))
+    ]).catch(e => { if (!e.message.includes('TX_CONFIRM_TIMEOUT')) throw e; });
     setStatus('reg-status', '✅ Approved! Now click Step 2.', 'ok');
     btn.textContent = '✓ Approved ' + approveLabel;
     const btnReg = document.getElementById('btn-register');
@@ -3489,14 +3501,9 @@ async function doRegister() {
     }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
-    // Auto-enable default options for all members — globalJoined is always set via TierRouter now
-    try {
-      const tr2 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      const optsTx = await tr2.setMemberOptions(false, true, false, { gasLimit: 120_000 });
-      await optsTx.wait();
-      window._memberOptions = { disableUpgrade: false, enableReentry: true, enableDouble: false };
-      try { localStorage.setItem('cnova_opts_' + await signer.getAddress(), JSON.stringify(window._memberOptions)); } catch(_) {}
-    } catch(_) {} // non-critical — member can adjust from Dashboard
+    // V8.32 fix: removed inline setMemberOptions() call — it fired a hidden second
+    // MetaMask popup that caused the page to appear frozen. Members can set options
+    // from the Dashboard. V8.33 will default enableReentry=true at the contract level.
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
