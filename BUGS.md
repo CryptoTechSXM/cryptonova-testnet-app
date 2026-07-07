@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-07] Dashboard (index.html) — Coupons purchase not finalizing. The approval keeps spinning…
+- **Reporter:** CT CharFun
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x706dbc8301ba8886e45e54f1698e322413223b0f
+- **Frequency:** Consistent
+- **What happened:** Coupons purchase not finalizing. The approval keeps spinning for ever!
+- **What was expected:** expected it to bring the approval confirmation from metamask then go to step two where payment is made,.
+- **Notes:** new account testing to see what bugs can be found
+- **Submitted:** Tue, 07 Jul 2026 23:11:11 GMT
+
+
 ### [2026-07-07] Dashboard (index.html) — i attempted a manual upgrade, I went thru the process of app…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
