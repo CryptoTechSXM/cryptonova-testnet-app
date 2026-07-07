@@ -3622,14 +3622,20 @@ async function approveCouponUSDC() {
   if (!signer) { toast('Connect wallet first', 'error'); return; }
   const code = (document.getElementById('issue-coupon-code')?.value || '').trim();
   if (!code) { toast('Enter a coupon code first', 'error'); return; }
+  // Network guard -- switch to Base Sepolia before any tx
+  const chainId = parseInt(window.ethereum?.chainId || '0', 16);
+  if (chainId !== CHAIN_ID) {
+    try { await switchToBaseSepolia(); } catch(_) {}
+    const c2 = parseInt(window.ethereum?.chainId || '0', 16);
+    if (c2 !== CHAIN_ID) { toast('Please switch to Base Sepolia first', 'error'); return; }
+  }
   const btn = document.getElementById('btn-coupon-approve');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Approving...';
   try {
-    const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-    const reg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
-    const amt = await reg.couponAmount();
+    // V8.32 fix: use T1_FEE directly -- coupon amount is always $10 (same as entry fee).
+    // Removed couponAmount() RPC call: if it fails/times out MetaMask never shows.
     const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    const tx = await usdcW.approve(ADDRS.couponRegistry, amt);
+    const tx = await usdcW.approve(ADDRS.couponRegistry, T1_FEE);
     setStatus('coupon-issue-status', '⏳ Approving USDC...', 'info');
     await tx.wait();
     setStatus('coupon-issue-status', '✅ Approved! Now click Step 2.', 'ok');
