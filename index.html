@@ -3604,14 +3604,8 @@ async function loadMyCoupons() {
       const daysLeft = Math.ceil((expiry - now) / 86400);
       let badge = '', actions = '';
       if (couponD.used) {
-        // Both redeemCoupon() and cancelCoupon() set used=true.
-        // Query CouponCancelled event to distinguish the two states.
-        let wasCancelled = false;
-        try {
-          const cancelEvents = await reg.queryFilter(reg.filters.CouponCancelled(codeHash));
-          wasCancelled = cancelEvents.length > 0;
-        } catch(_) {}
-        if (wasCancelled) {
+        // cancelCoupon() sets cancelled:true in localStorage; redeemCoupon() does not.
+        if (item.cancelled) {
           badge = '<span style="background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">✕ CANCELLED</span>';
         } else {
           badge = '<span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid var(--green2);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">&#10003; REDEEMED</span>';
@@ -3730,6 +3724,10 @@ async function doCancelCoupon(codeHash) {
     const tx = await regW.cancelCoupon(codeHash);
     toast('⏳ Cancelling coupon...', 'info');
     await tx.wait();
+    // Mark cancelled in localStorage so loadMyCoupons shows CANCELLED not REDEEMED
+    const _cl = JSON.parse(localStorage.getItem(_couponKey()) || '[]');
+    const _ci = _cl.findIndex(s => s.codeHash === codeHash);
+    if (_ci !== -1) { _cl[_ci].cancelled = true; localStorage.setItem(_couponKey(), JSON.stringify(_cl)); }
     toast('✅ Coupon cancelled — $10 USDC returned to your wallet!', 'success');
     setTimeout(() => loadMyCoupons(), 2000);
   } catch(e) {
@@ -4361,6 +4359,10 @@ async function doCancelCoupon(codeHash) {
     const tx = await regW.cancelCoupon(codeHash);
     toast('⏳ Cancelling coupon...', 'info');
     await tx.wait();
+    // Mark cancelled in localStorage so loadMyCoupons shows CANCELLED not REDEEMED
+    const _cl = JSON.parse(localStorage.getItem(_couponKey()) || '[]');
+    const _ci = _cl.findIndex(s => s.codeHash === codeHash);
+    if (_ci !== -1) { _cl[_ci].cancelled = true; localStorage.setItem(_couponKey(), JSON.stringify(_cl)); }
     toast('✅ Coupon cancelled — $10 USDC returned to your wallet!', 'success');
     setTimeout(() => loadMyCoupons(), 2000);
   } catch(e) {
