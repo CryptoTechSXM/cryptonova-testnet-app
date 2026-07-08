@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-08] Coupon System — Trying to use coupon to sign up and it's saying "coupon not …
+- **Reporter:** sherwyn
+- **Page:** Coupon System
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Trying to use coupon to sign up and it's saying "coupon not found or Expired...
+- **What was expected:** Easy registration...
+- **Submitted:** Wed, 08 Jul 2026 21:24:37 GMT
+
+
 *No open issues — ready for launch.* ✅
 
 ---
