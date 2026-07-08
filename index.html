@@ -3358,7 +3358,7 @@ async function validateCouponCode() {
       }).catch(() => {}); // non-critical — silently swallow errors
     }
   } catch(e) {
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; ' + friendlyError(e) + '</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">' + friendlyError(e) + '</span>';
     if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
     _resetApproveBtn();
   }
@@ -3430,7 +3430,7 @@ async function approveUSDC() {
     btn.disabled = false;
     const c2 = window._activeCoupon;
     btn.textContent = c2 ? 'Step 1: Approve $' + c2.youPay.toFixed(2) + ' USDC 🔒' : 'Step 1: Approve $10 USDC 🔒';
-    setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('reg-status', friendlyError(e), 'err');
     if (e.code !== 4001) reportEvent('TX_FAILED', {
       action: 'approve-usdc', error: e.message || String(e),
     });
@@ -3566,7 +3566,26 @@ function _shareCoupon(code, issuerAddr) {
     + '<div style="font-size:13px;color:var(--text3);margin-bottom:14px">Your referral link is embedded \u2014 when they open it, your address pre-fills as their referrer.</div>'
     + '<div style="background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:16px">' + shareUrl + '</div>';
   const btnWrap = document.createElement('div');
-  const copyBtn = mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', () => navigator.clipboard.writeText(shareUrl).then(() => { toast('Link copied!', 'success'); copyBtn.textContent = '\u2713 Copied!'; setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000); }));
+  const _doCopy = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast('Link copied!', 'success');
+      copyBtn.textContent = '\u2713 Copied!';
+      setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000);
+    }).catch(() => {
+      // Fallback for browsers where clipboard API is restricted
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast('Link copied!', 'success');
+        copyBtn.textContent = '\u2713 Copied!';
+        setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000);
+      } catch(_) { toast('Copy failed — please copy the link manually', 'error'); }
+    });
+  };
+  const copyBtn = mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', _doCopy);
   btnWrap.appendChild(copyBtn);
   btnWrap.appendChild(mkBtn('\uD835\uDD4F  Share on X / Twitter', '#1DA1F2', 'rgba(29,161,242,.1)', 'rgba(29,161,242,.35)', () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareMsg), '_blank')));
   btnWrap.appendChild(mkBtn('\uD83D\uDCAC  Share on WhatsApp', '#25D366', 'rgba(37,211,102,.08)', 'rgba(37,211,102,.3)', () => window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg), '_blank')));
@@ -3653,14 +3672,18 @@ async function approveCouponUSDC() {
     const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
     const tx = await usdcW.approve(ADDRS.couponRegistry, T1_FEE);
     setStatus('coupon-issue-status', '⏳ Approving USDC...', 'info');
-    await tx.wait();
+    // Timeout guard: RPC sometimes hangs on receipt events — proceed after 10s regardless
+    await Promise.race([
+      tx.wait(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 10000))
+    ]).catch(e => { if (!e.message.includes('TX_CONFIRM_TIMEOUT')) throw e; });
     setStatus('coupon-issue-status', '✅ Approved! Now click Step 2.', 'ok');
     btn.textContent = '✓ Approved'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
     const bi = document.getElementById('btn-coupon-issue');
     if (bi) { bi.disabled = false; bi.className = 'btn btn-green full-w'; }
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 1: Approve $10 USDC 🔒';
-    setStatus('coupon-issue-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('coupon-issue-status', friendlyError(e), 'err');
   }
 }
 
@@ -3698,7 +3721,7 @@ async function doIssueCoupon() {
     setTimeout(() => loadMyCoupons(), 3000);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Issue Coupon 🎟️ ⛽';
-    setStatus('coupon-issue-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('coupon-issue-status', friendlyError(e), 'err');
   }
 }
 
@@ -4474,8 +4497,8 @@ async function renderWithdrawableDetail(el, rp) {
     <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
     <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
     ${crossingLocked > 0n ? `<div class="detail-row"><span class="detail-key" style="color:#a855f7">${_t('modal.crossing_reserve','\u21B3 Crossing Reserve (locked)')}</span><span class="detail-val" style="color:#a855f7" title="Locked toward your next matrix crossing — released as earnings when the cycle completes">− ${fmt6(crossingLocked)}</span></div>` : ''}
-    ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key">${_t('modal.upgrade_fees','Upgrade Fees (auto-deducted)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
-    ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key">${_t('modal.auto_deducted','Auto-Deducted (upgrades)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
+    ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
+    ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
     ${totalWithdrawable > 0n ? `
     <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
@@ -4761,7 +4784,7 @@ async function doWithdrawPartial() {
     if (withdrawn) await new Promise(r => setTimeout(r, 3500));
     await loadDashboardData();
   } catch(e) {
-    setStatus('withdraw-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('withdraw-status', friendlyError(e), 'err');
   } finally {
     if (btnP) { btnP.disabled = false; btnP.textContent = 'Withdraw Amount'; }
     if (btnA) btnA.disabled = false;
@@ -4814,7 +4837,7 @@ async function doWithdraw() {
     if (withdrawn) await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
     await loadDashboardData();
   } catch(e) {
-    setStatus('withdraw-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('withdraw-status', friendlyError(e), 'err');
   } finally {
     btn.disabled = false; btn.textContent = 'Withdraw Earnings';
   }
@@ -5324,7 +5347,7 @@ async function approveCNOVAForRedeem() {
     if (redeemBtn) redeemBtn.disabled = false;
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 1: Approve CNOVA';
-    setStatus('redeem-status','❌ ' + friendlyError(e),'err');
+    setStatus('redeem-status',friendlyError(e),'err');
   }
 }
 
@@ -5350,7 +5373,7 @@ async function doRedeemAtFloor() {
     loadHomeStats(); // refresh CNOVA Minted + Total Supply in live stats
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Redeem for USDC';
-    setStatus('redeem-status','❌ ' + friendlyError(e),'err');
+    setStatus('redeem-status',friendlyError(e),'err');
   }
 }
 
@@ -5583,23 +5606,28 @@ async function approveUSDCForUpgrade() {
     if (btnDash) btnDash.disabled = true;
     _setS('Checking wallet…');
 
-    // Pre-flight: verify ETH and USDC before attempting approve
-    const provider = signer.provider;
-    const userAddr = await signer.getAddress();
-    const usdc     = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    const [ethBal, usdcBal] = await Promise.all([
-      provider.getBalance(userAddr),
-      usdc.balanceOf(userAddr),
-    ]);
+    // Pre-flight: try to verify ETH and USDC — but timeout after 5s so a slow
+    // RPC never blocks MetaMask from opening (Bug 2: Koach100 fix).
+    const provider   = signer.provider;
+    const userAddrU  = await signer.getAddress();
+    const usdc       = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+    let ethBal = null, usdcBal = null;
+    try {
+      const _results = await Promise.race([
+        Promise.all([provider.getBalance(userAddrU), usdc.balanceOf(userAddrU)]),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('PREFLIGHT_TIMEOUT')), 5000))
+      ]);
+      [ethBal, usdcBal] = _results;
+    } catch(_) { /* RPC slow — skip preflight, MetaMask handles balance errors */ }
 
     const MIN_ETH = ethers.parseEther('0.001');
-    if (ethBal < MIN_ETH) {
+    if (ethBal !== null && ethBal < MIN_ETH) {
       _setS('⛽ You need a little Base Sepolia ETH for gas. Visit the faucet (top nav) to grab some for free — it only takes a second!');
       if (btnReg)  btnReg.disabled  = false;
       if (btnDash) btnDash.disabled = false;
       return;
     }
-    if (usdcBal < fee) {
+    if (usdcBal !== null && usdcBal < fee) {
       const needed = (Number(fee) / 1e6).toFixed(2);
       const has    = (Number(usdcBal) / 1e6).toFixed(2);
       _setS(`💳 You need $${needed} USDC for this upgrade but your wallet only has $${has}. Visit the faucet to top up!`);
@@ -5611,7 +5639,11 @@ async function approveUSDCForUpgrade() {
     _setS('Approving USDC…');
     const tx = await usdc.approve(ADDRS.tierRouter, fee);
     _setS('Waiting for confirmation…');
-    await tx.wait();
+    // Timeout guard: RPC sometimes hangs on receipt events — proceed after 10s regardless
+    await Promise.race([
+      tx.wait(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 10000))
+    ]).catch(e => { if (!e.message.includes('TX_CONFIRM_TIMEOUT')) throw e; });
     _setS('✅ USDC approved. Now click Step 2 to upgrade.');
     const btnManual = document.getElementById('btn-manual-upgrade');
     const btnUp     = document.getElementById('btn-upgrade');
@@ -5686,7 +5718,7 @@ async function approveLimboReEntry() {
     await tx.wait();
     setStatus('limbo-status', '✅ Approved — click Re-Enter Matrix', 'ok');
   } catch(e) {
-    setStatus('limbo-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('limbo-status', friendlyError(e), 'err');
   }
 }
 
@@ -5706,7 +5738,7 @@ async function doLimboReEntry() {
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
     setTimeout(() => loadUserData(), 2000);
   } catch(e) {
-    setStatus('limbo-status', '❌ ' + friendlyError(e), 'err');
+    setStatus('limbo-status', friendlyError(e), 'err');
     if (btn) btn.disabled = false;
   }
 }
