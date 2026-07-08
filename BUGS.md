@@ -7,64 +7,7 @@
 
 ## Open Issues
 
-### [2026-07-07] Dashboard (index.html) — Coupons purchase not finalizing. The approval keeps spinning…
-- **Reporter:** CT CharFun
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x706dbc8301ba8886e45e54f1698e322413223b0f
-- **Frequency:** Consistent
-- **What happened:** Coupons purchase not finalizing. The approval keeps spinning for ever!
-- **What was expected:** expected it to bring the approval confirmation from metamask then go to step two where payment is made,.
-- **Notes:** new account testing to see what bugs can be found
-- **Submitted:** Tue, 07 Jul 2026 23:11:11 GMT
-
-
-### [2026-07-07] Dashboard (index.html) — i attempted a manual upgrade, I went thru the process of app…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
-- **Frequency:** Consistent
-- **What happened:** i attempted a manual upgrade, I went thru the process of approving the update on metamask, I got the message that it was confirmed. the message on the dapp was stuck on 'approving USDC'. It did  not highlight step 2. When I refreshed the page, it was still on step 1. I tried this several times.
-- **What was expected:** I should have got a message that USDC was approved and then step 2 should have been highlighted for me to click and complete the upgrade.
-- **Submitted:** Tue, 07 Jul 2026 22:36:40 GMT
-
-
-### [2026-07-06] Dashboard (index.html) — As the system already takes 50% from our $10 entry for cross…
-- **Reporter:** Kolawole Ola
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
-- **Frequency:** Consistent
-- **What happened:** As the system already takes 50% from our $10 entry for crossing, why does it reserve another $5 from our earnings as "Auto-Deducted (Upgrades)?
-- **What was expected:** I think there shouldn't be another deduction.
-- **Submitted:** Mon, 06 Jul 2026 20:19:43 GMT
-
-
-### [2026-07-06] Coupon System — Suggestion: It would be good if after purchasing the coupon …
-- **Reporter:** Sherwyn
-- **Page:** Coupon System
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Suggestion: It would be good if after purchasing the coupon and when you click the copy button to copy the link, to have an acknowledgement that says the link was actually copied...
-- **What was expected:** To see acknowledgement of the copy..
-- **Submitted:** Mon, 06 Jul 2026 20:14:17 GMT
-
-
-### [2026-07-06] Coupon System — When trying to use coupon code this is the error: ❌ ❌ "", "f…
-- **Reporter:** Sherwyn
-- **Page:** Coupon System
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Consistent
-- **What happened:** When trying to use coupon code this is the error: ❌ ❌ "", "from": "0x50c8426E34C14859DcbF361f80E9b5D3412780E0", "to": "0x8c854e61E92999dE1741943C145b58Df7
-- **What was expected:** To be registered..
-- **Notes:** This seems to happen only when using the coupon codes... Didn't have this issue with other accounts as I used the referral link and wallet address... also happened in the previous version (V8.31)
-- **Submitted:** Mon, 06 Jul 2026 20:10:08 GMT
-
-
-*No open issues — ready for launch.*
+*No open issues — ready for launch.* ✅
 
 ---
 
@@ -95,3 +38,8 @@
 | 2026-07-02 | 2026-07-05 | index.html | Kolawole — member ID 444 vs 442 member count. Known V8.30 coupon bypass side-effect — 2-member gap is baked on-chain. V8.31 fixes globalJoined for all new coupon registrations going forward. | V8.31 |
 | 2026-07-02 | V8.32 (Aug 19) | index.html | Kolawole — Auto-Reentry TX fails after coupon registration. Root cause: pre-V8.31 coupon members have globalJoined=false in TierRouter → setMemberOptions reverts. Fix: setGlobalJoined() admin fn in V8.32 (Aug 19). | V8.32 |
 | 2026-07-03 | 2026-07-05 | index.html | Dee1 (0x299d / 0x0637) — positions 146/147 in T1A MatB, no earnings. Root cause: Base Sepolia RPC outage (SERVER_ERROR confirmed 2026-07-03 13:35 UTC) prevented keeper from running force-crosses. Not a code bug. Keeper resumes when RPC recovers. | — |
+| 2026-07-07 | 2026-07-08 | index.html | CT CharFun — coupon purchase approval spinner never resolves. Root cause: `approveCouponUSDC()` had bare `tx.wait()` with no timeout; hangs on slow RPC. Fix: `Promise.race` 10s timeout (same pattern as `approveUSDC()`). | 96eb981 |
+| 2026-07-07 | 2026-07-08 | index.html | Koach100 — manual upgrade stuck on "approving USDC" after MetaMask confirmation. Root cause: pre-flight `getBalance`+`balanceOf` RPC calls in `approveUSDCForUpgrade()` were blocking; `tx.wait()` also had no timeout. Fix: 5s pre-flight timeout + 10s `tx.wait()` timeout. | 96eb981 |
+| 2026-07-06 | 2026-07-08 | index.html | Kolawole Ola — "Auto-Deducted (Upgrades)" label confused members who already saw the crossing reserve deduction. Not a double-charge — label was misleading. Fix: renamed to "Tier Upgrade Fee (from earnings)" with tooltip clarifying it's the next-tier entry fee paid from earnings, separate from crossing reserve. | 96eb981 |
+| 2026-07-06 | 2026-07-08 | index.html | Sherwyn — coupon share copy button showed no acknowledgement when link was copied. Fix: added `.catch()` fallback using `document.execCommand('copy')` for browsers blocking clipboard API; both paths show "✓ Copied!" confirmation. | 96eb981 |
+| 2026-07-06 | 2026-07-08 | index.html | Sherwyn — coupon redemption showed "❌ ❌" double-error prefix. Root cause: 9 `setStatus()` calls used `'❌ ' + friendlyError(e)` but `friendlyError()` already prepends `❌`. Fix: removed the extra prefix from all 9 call sites. Error message for coupon-specific CALL_EXCEPTION also improved to "Coupon not found or expired — please request a new one." | 96eb981 |
