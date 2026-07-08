@@ -3416,7 +3416,7 @@ async function approveUSDC() {
     // Proceed after 60s — the tx was submitted and is almost certainly confirmed.
     await Promise.race([
       tx.wait(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 60000))
+      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 10000))
     ]).catch(e => { if (!e.message.includes('TX_CONFIRM_TIMEOUT')) throw e; });
     setStatus('reg-status', '✅ Approved! Now click Step 2.', 'ok');
     btn.textContent = '✓ Approved ' + approveLabel;
