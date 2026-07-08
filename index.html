@@ -496,9 +496,9 @@
       }
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
-        // Gate: 2026-07-06 11:00 AM EDT (15:00 UTC) — today's V8.32 test gate
-        var EARLY_MS = 1783350000000;
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.32 Early Access — Opens 11AM EDT';
+        // Gate: 2026-07-08 9:00 AM EDT (13:00 UTC)
+        var EARLY_MS = 1783515600000;
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.33 Early Access — Opens 9AM EDT';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
@@ -522,8 +522,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.32 Testnet — Opens 12PM EDT';
-        var MAIN_MS = 1783353600000; // Gate: 2026-07-06 12:00 PM EDT (16:00 UTC) — today's V8.32 test gate
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.33 Testnet — Opens 12PM EDT';
+        var MAIN_MS = 1783526400000; // Gate: 2026-07-08 12:00 PM EDT (16:00 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
@@ -691,8 +691,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0xcDD1D1b9968E13748f1AA2f56A93B884Fe29A748" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0xcDD1D1b9968E13748f1AA2f56A93B884Fe29A748" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0xcDD1D1b9968E13748f1AA2f56A93B884Fe29A748</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x39b7e7A78C5760337130a650C67a59A4364164bf" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x39b7e7A78C5760337130a650C67a59A4364164bf" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x39b7e7A78C5760337130a650C67a59A4364164bf</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing.</div>
         </div>
       </div>
@@ -1909,69 +1909,69 @@ const RPC_FALLBACK = 'https://sepolia.base.org';
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
 const ADDRS = {
-  // V8.32 — deployed 2026-07-06 — 50/2.5/47.5 crossing reserve, payable issueCoupon, DAO param #50, freeReentry, parkedAt clear, setGlobalJoined
+  // V8.33 — deployed 2026-07-08 — slot overflow fix, softParkIdle, extended idle timeouts, cancelCoupon, lastActivityTime on earnings
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0xcDD1D1b9968E13748f1AA2f56A93B884Fe29A748',
-  treasury:      '0x87669Ab59f6DAB51F520413AeFeB2360909ecF24',
-  stabilityFund: '0xBf7d8DD5141B63148e9B507d10c5D8dfB9947bf9',
-  buybackReserve:'0x900748C73bdC0D1F874328E49F7e02AA92D01EE2',
-  tierRouter:    '0x8c854e61E92999dE1741943C145b58Df743422c7',
-  matrixKeeper:  '0xa581CeBecFd6a6F96D7CD6931Df2176d79159102',
-  v8Governance:  '0xf3f87843D29E0C605f48Ee037D8C8558920b2fB0',
-  communityWallet:'0xD87bC0260E62312A2FA56Af6550b0eA96fBb6551',
+  cnova:         '0x39b7e7A78C5760337130a650C67a59A4364164bf',
+  treasury:      '0x9e70132aea6336f5148aE7bDeEE1Ca5c74B98347',
+  stabilityFund: '0x08a62f046EB0299038421a2FcD4bc5479182A0d0',
+  buybackReserve:'0x114427F39Dda2944387b3771148785C9327BAEB0',
+  tierRouter:    '0x5c1d576Eb95D1EC78C87e5555C3C779aEb38dA6d',
+  matrixKeeper:  '0xb8A20B719f2649e212E36C4f7C151Ba0364F6E28',
+  v8Governance:  '0x3427086b507546D5bC7892F93b250361c1c2EeF5',
+  communityWallet:'0xe7aBF937D3D9c5C42e632acd0E35a3364d6d5021',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x4e16CFCA9cDA585F84F0015A848C85A976b4c9ca',
-  couponRegistry:'0x3367d5585BFcad1c6dAf8D04433321617167fe0D',
+  directSale:    '0xbc2A000CcfD2B367498a340e63763043088Bd59B',
+  couponRegistry:'0x542a9186cd22D70505b446697041a73feb874ba3',
   // V8.30 tier pairs — deployed 2026-06-29
   T1: {
-    pm:   '0xa24A22ADFEf3C530BeBA93d677EfE9d52c911a7a',
-    matA: '0xf22C99AcA9388Fc2cee8bD5B24D311e8D40b14A5',
-    matB: '0x623664De078F012E6D1F7B33DDaeA1b8d64A3D41',
+    pm:   '0x6EF8007A9ACB23Bd0D1A309Be9646aE52Fb777cF',
+    matA: '0xE1Ce0C46EB05ccf991BedECf79928B984399637b',
+    matB: '0x938122F84Fffa40343d51A8e54337349359d9EBF',
   },
   T2: {
-    pm:   '0x56292BAa165afC1ba2063672B320f009E769e1DD',
-    matA: '0x9eFFDa63d88856f59c98774099863F373B671A66',
-    matB: '0xf72106ddB79FD7a7F13a9cbA2Ae6DFAde5c151DD',
+    pm:   '0x076A2d4Ea94F132c47584e7A1D5D80024Fbf9b22',
+    matA: '0x6AcCa1b52baa8DC329663b02B86B8f71eDb946b3',
+    matB: '0xbC990FbD4AaA4E609828aa470638879d130B07A8',
   },
   T3: {
-    pm:   '0x23EdCfe406d542812042b2eb2ef745504c13e14a',
-    matA: '0x1cA5D335b27B7a2edb1918dA0B0F70f3F2e65B55',
-    matB: '0x99dbCd2DC939Cd3dFE0ae33D007fcd8e28B0f551',
+    pm:   '0xa8fb2564187c66242B690FA223F7411423EE221b',
+    matA: '0x02236AC2560202458B39573d7fdF5e274b3599Cd',
+    matB: '0x2B5E6c11b961fed4C94bf18a33662aEA861a7A38',
   },
   T4: {
-    pm:   '0xEe912b01B6c748bFdF7459145124C58761B94F75',
-    matA: '0x1C1d097b8286FBb1cbf5A34Fe254b8Af396B74c9',
-    matB: '0xD885c91a60575edBb2fD3C461072f259081ea105',
+    pm:   '0x1368e2E9f15Ecc0a379B3569C710A253d054207f',
+    matA: '0xf0F31DAA4412b2b227C099271EB792d327d7f79C',
+    matB: '0xA25E12773923a79d721Cc6E46681Dd36111Ff080',
   },
   T5: {
-    pm:   '0x05a61acc99eA09b2C7464CEDC648aF70dD27578A',
-    matA: '0x5858D5536C4dda99219D33A0175cBD074F2b09B0',
-    matB: '0xf561B8EDd6A6ECd567687d25E47d07262aD2A9BC',
+    pm:   '0xA6E850866A758a9920d3f7A2A55e3867C501D595',
+    matA: '0xE41a34A04EbF5451e0622DE772882e6db7250dF4',
+    matB: '0xe7315E72B5608e6137013a85efCfaD8782F8b503',
   },
   T6: {
-    pm:   '0xd04182D1015a48841C7edDb629b2EAC7CbE8B99b',
-    matA: '0x2892aF225E0A8a09BBdf95A4f211629046F66a62',
-    matB: '0x04Fc0AB854ff656d36c0444D70f7a6b10d4eFbAb',
+    pm:   '0xefDD5665581249f39D10A72802c202cAD6b006cC',
+    matA: '0x8b5C88a4A6242f6d5857B8a0a9e19e6f0441b14F',
+    matB: '0x564217aA1E98319bF9cDEd3fF3b3bb4b7fB4d444',
   },
   T7: {
-    pm:   '0x591B1fF2F5CAB9d2B0Ec930Fc9407C312946F008',
-    matA: '0xC03B970a0A6E25c43d37233e4e6E76EbAa796180',
-    matB: '0xe6d003034C5CB1e3ddCa620e6aF85bE9aF708416',
+    pm:   '0x692981e41eB6AFAc1593Dd779c6eCee43029cA33',
+    matA: '0xac9D43689203912934fa9e8dfDA408fcd3799Ebe',
+    matB: '0x6bA57800e8c41032b9Fc715D8828a8b8e3FdD600',
   },
   T8: {
-    pm:   '0xe25Ccc25e3E2923b01a382BEe752c51f7E62F288',
-    matA: '0xBb351D5Ae1265E9be08780a569D484fD7aa70055',
-    matB: '0xf774C84B8188a51E6B93eBCA4E864f542e8a0569',
+    pm:   '0x3663A4276545200bA230e448BFe0335721774A6B',
+    matA: '0xa6071aF364690BefCd855FB72693F68926aEC325',
+    matB: '0x55DCe9398376e55FC07efa60732c5164861A2ce2',
   },
   T9: {
-    pm:   '0xDF9A906D09EE38Ea2B52036d733974E2342a4966',
-    matA: '0x55FDb20dFc9cb282216C900f8A7ac7fEEad77a64',
-    matB: '0xd7add0fecD5430E77b3cd53C3565626521831063',
+    pm:   '0xF9947defe84123431dc14293d1aA6323F257dE3b',
+    matA: '0x9A7dB03eB7F3792ff458f94B4fD117d918AB317D',
+    matB: '0x1Dbe536fD0C6ABe9C135e9F71bF3ff82f9AFB3EB',
   },
   T10: {
-    pm:   '0xF501Ab511f520d1A1a6EA3a2362de70894D288E3',
-    matA: '0x7F94C53BE65466E976F70F38143da2Bdfa31eC71',
-    matB: '0x0aBE4B93D45b9604b4Cc338019A2cB0f6486126A',
+    pm:   '0xa714ce4B0b724Ae2A7c2D2243c50B95aeBcD8FF3',
+    matA: '0x2251b45FE9d014aA1708f850847440DCbf37dc92',
+    matB: '0x58E3F88d1d796dc7d2ed1F676c824839eb65e2bf',
   },
 };
 
@@ -5788,4 +5788,4 @@ function updateAddrsFromDeployed(d) {
     <div style="text-align:center;padding:24px 0 24px;border-top:1px solid var(--border,#1e3a5f);margin-top:32px">
       <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here</a>
     </div>
-</body></html>
+</body></html>                                                          

@@ -470,6 +470,7 @@
           <option value="5" data-i18n="govPage.params.p5_option">Velocity Threshold</option>
           <option value="6" data-i18n="govPage.params.p6_option">Deflation Threshold</option>
           <option value="7" data-i18n="govPage.params.p7_option">Idle Slot Timeout (seconds)</option>
+          <option value="51" data-i18n="govPage.params.p51_option">Extended Idle Timeout (seconds)</option>
           <option value="8" data-i18n="govPage.params.p8_option">Max Items Per Upkeep</option>
         </optgroup>
         <optgroup label="Matrix Fees">
@@ -652,15 +653,15 @@ async function _getBestRpc() {
   }
   return RPC_URL; // fallback to primary
 }
-const GOV_ADDR    = '0xf3f87843D29E0C605f48Ee037D8C8558920b2fB0'; // V8.31
-const CNOVA_ADDR  = '0xcDD1D1b9968E13748f1AA2f56A93B884Fe29A748'; // V8.31
-const TIER_ROUTER = '0x8c854e61E92999dE1741943C145b58Df743422c7'; // V8.31
-const MK_ADDR     = '0xa581CeBecFd6a6F96D7CD6931Df2176d79159102'; // V8.31
+const GOV_ADDR    = '0x3427086b507546D5bC7892F93b250361c1c2EeF5'; // V8.31
+const CNOVA_ADDR  = '0x39b7e7A78C5760337130a650C67a59A4364164bf'; // V8.31
+const TIER_ROUTER = '0x5c1d576Eb95D1EC78C87e5555C3C779aEb38dA6d'; // V8.31
+const MK_ADDR     = '0xb8A20B719f2649e212E36C4f7C151Ba0364F6E28'; // V8.31
 // V8.31 — deployed 2026-07-01 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
-const SF_ADDR     = '0xBf7d8DD5141B63148e9B507d10c5D8dfB9947bf9'; // V8.31
-const BBR_ADDR    = '0x900748C73bdC0D1F874328E49F7e02AA92D01EE2'; // V8.31
-const DS_ADDR     = '0x4e16CFCA9cDA585F84F0015A848C85A976b4c9ca'; // V8.31
-const CW_ADDR     = '0xD87bC0260E62312A2FA56Af6550b0eA96fBb6551'; // V8.31
+const SF_ADDR     = '0x08a62f046EB0299038421a2FcD4bc5479182A0d0'; // V8.31
+const BBR_ADDR    = '0x114427F39Dda2944387b3771148785C9327BAEB0'; // V8.31
+const DS_ADDR     = '0xbc2A000CcfD2B367498a340e63763043088Bd59B'; // V8.31
+const CW_ADDR     = '0xe7aBF937D3D9c5C42e632acd0E35a3364d6d5021'; // V8.31
 
 // Real ethers.Network object for staticNetwork -- passing the literal boolean
 // 'true' throws 'staticNetwork.matches is not a function' in ethers v6.7.1 and
@@ -681,6 +682,7 @@ const PARAM_TARGETS = {
   1: TIER_ROUTER, 2: TIER_ROUTER,
   // V8.21: param 3 (Escrow Floor Multiplier) retired -- no target, not proposable.
   4: MK_ADDR, 5: MK_ADDR, 6: MK_ADDR, 7: MK_ADDR, 8: MK_ADDR,
+  51: MK_ADDR,  // V8.33: extendedIdleTimeout
   // V8.21: param 9 (Withdrawal Fee BPS) now resolves to a per-tier
   // PairManagerV8 address via the tier picker (see PM_TIER_GETTER below),
   // not a fixed contract -- this placeholder is overwritten at render time.
@@ -780,6 +782,8 @@ const PARAM_FALLBACK = {
   49: { label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.' },
   // V8.32: SF rescue loan repayment percentage becomes DAO-votable.
   50: { label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 5000 = 50% (default). Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
+  // V8.33: extended idle timeout becomes DAO-votable.
+  51: { label:'Extended Idle Timeout (s)', hint:'Seconds a member has in extended idle mode before soft-park triggers. Default: 604800 (7 days). Lower = faster action; higher = more member-friendly grace period.' },
 };
 
 function PARAM_META_GET(paramId) {
@@ -844,6 +848,8 @@ const VALUE_LABELS = {
   45: v => `${v}x`, 46: v => `${v}x`, 47: v => `${v}x`, 48: v => `${v}x`, 49: v => `${v}x`,
   // V8.32: rescueRepayBps
   50: v => `${v} BPS (${(v/100).toFixed(0)}%)`,
+  // V8.33: extendedIdleTimeout
+  51: v => `${v}s (${(v/3600/24).toFixed(1)} days)`,
 };
 function fmtValue(paramId, v) {
   return VALUE_LABELS[paramId] ? VALUE_LABELS[paramId](v) : String(v);
@@ -936,6 +942,8 @@ const READ_ABI = [
   'function sfTargetMultiplier(uint256) external view returns (uint256)',
   // V8.32: param 50 -- DAO-votable rescue repayment rate.
   'function rescueRepayBps() external view returns (uint256)',
+  // V8.33: param 51 -- DAO-votable extended idle timeout.
+  'function extendedIdleTimeout() external view returns (uint256)',
 ];
 
 // paramId -> getter function name on PARAM_META[paramId].target (READ_ABI above).
@@ -965,6 +973,8 @@ const PARAM_GETTER = {
   49: 'sfTargetMultiplier',
   // V8.32: param 50
   50: 'rescueRepayBps',
+  // V8.33: param 51
+  51: 'extendedIdleTimeout',
 };
 // paramId -> getter name for the per-tier-PairManagerV8-resolved params (9 only,
 // since V8.21 retired param 10). Read via lastWithdrawalFeeBps() on the
