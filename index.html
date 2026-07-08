@@ -2012,9 +2012,11 @@ const COUPON_REGISTRY_ABI = [
   'function redeemCoupon(bytes32 codeHash, address member) external returns (uint256)',
   'function issueCoupon(bytes32 codeHash) external payable',
   'function reclaimCoupon(bytes32 codeHash) external',
+  'function cancelCoupon(bytes32 codeHash) external',
   'function coupons(bytes32) external view returns (address issuer, uint256 amount, uint256 expiry, bool used)',
   'event CouponIssued(bytes32 indexed codeHash, address indexed issuer, uint256 amount, uint256 expiry)',
   'event CouponReclaimed(bytes32 indexed codeHash, address indexed issuer, uint256 amount)',
+  'event CouponCancelled(bytes32 indexed codeHash, address indexed issuer, uint256 amount)',
 ];
 
 const MATRIX_ABI = [
@@ -3608,7 +3610,9 @@ async function loadMyCoupons() {
         actions = '<button data-hash="' + codeHash + '" onclick="doReclaimCoupon(this.dataset.hash)" style="margin-top:8px;background:none;border:1px solid var(--yellow);border-radius:6px;padding:4px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600">Reclaim $' + amt + ' USDC</button>';
       } else {
         badge = '<span style="background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.4);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">ACTIVE (' + daysLeft + 'd left)</span>';
-        if (item.code) actions = '<button data-code="' + item.code + '" data-issuer="' + userAddr + '" onclick="_shareCoupon(this.dataset.code,this.dataset.issuer)" style="margin-top:8px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);border-radius:6px;padding:4px 12px;font-size:12px;color:#c084fc;cursor:pointer;font-weight:600">\uD83D\uDCE4 Share Coupon</button>';
+        const shareBtn = item.code ? '<button data-code="' + item.code + '" data-issuer="' + userAddr + '" onclick="_shareCoupon(this.dataset.code,this.dataset.issuer)" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);border-radius:6px;padding:4px 12px;font-size:12px;color:#c084fc;cursor:pointer;font-weight:600">\uD83D\uDCE4 Share</button>' : '';
+        const cancelBtn = '<button data-hash="' + codeHash + '" onclick="doCancelCoupon(this.dataset.hash)" style="background:none;border:1px solid #f87171;border-radius:6px;padding:4px 12px;font-size:12px;color:#f87171;cursor:pointer;font-weight:600">✕ Cancel</button>';
+        actions = '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + shareBtn + cancelBtn + '</div>';
       }
       const label = item.code
         ? '<div style="font-size:13px;font-weight:600;color:var(--text1);letter-spacing:.5px">' + item.code + '</div>'
@@ -3701,6 +3705,21 @@ async function doReclaimCoupon(codeHash) {
     toast('⏳ Reclaiming USDC...', 'info');
     await tx.wait();
     toast('✅ USDC reclaimed!', 'success');
+    setTimeout(() => loadMyCoupons(), 2000);
+  } catch(e) {
+    toast(friendlyError(e), 'error');
+  }
+}
+
+async function doCancelCoupon(codeHash) {
+  if (!signer) { toast('Connect wallet first', 'error'); return; }
+  if (!confirm('Cancel this coupon and reclaim your $10 USDC?')) return;
+  try {
+    const regW = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, signer);
+    const tx = await regW.cancelCoupon(codeHash);
+    toast('⏳ Cancelling coupon...', 'info');
+    await tx.wait();
+    toast('✅ Coupon cancelled — $10 USDC returned to your wallet!', 'success');
     setTimeout(() => loadMyCoupons(), 2000);
   } catch(e) {
     toast(friendlyError(e), 'error');
@@ -4320,6 +4339,21 @@ async function loadUserBurnHistory(cnova, user) {
   } catch(e) {
     console.warn('loadUserBurnHistory:', e.message);
     setText('dash-cnova-burned', '—');
+  }
+}
+
+async function doCancelCoupon(codeHash) {
+  if (!signer) { toast('Connect wallet first', 'error'); return; }
+  if (!confirm('Cancel this coupon and reclaim your $10 USDC?')) return;
+  try {
+    const regW = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, signer);
+    const tx = await regW.cancelCoupon(codeHash);
+    toast('⏳ Cancelling coupon...', 'info');
+    await tx.wait();
+    toast('✅ Coupon cancelled — $10 USDC returned to your wallet!', 'success');
+    setTimeout(() => loadMyCoupons(), 2000);
+  } catch(e) {
+    toast(friendlyError(e), 'error');
   }
 }
 
