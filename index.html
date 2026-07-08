@@ -3604,7 +3604,18 @@ async function loadMyCoupons() {
       const daysLeft = Math.ceil((expiry - now) / 86400);
       let badge = '', actions = '';
       if (couponD.used) {
-        badge = '<span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid var(--green2);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">&#10003; REDEEMED</span>';
+        // Both redeemCoupon() and cancelCoupon() set used=true.
+        // Query CouponCancelled event to distinguish the two states.
+        let wasCancelled = false;
+        try {
+          const cancelEvents = await reg.queryFilter(reg.filters.CouponCancelled(codeHash));
+          wasCancelled = cancelEvents.length > 0;
+        } catch(_) {}
+        if (wasCancelled) {
+          badge = '<span style="background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">✕ CANCELLED</span>';
+        } else {
+          badge = '<span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid var(--green2);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">&#10003; REDEEMED</span>';
+        }
       } else if (now > expiry) {
         badge = '<span style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">EXPIRED</span>';
         actions = '<button data-hash="' + codeHash + '" onclick="doReclaimCoupon(this.dataset.hash)" style="margin-top:8px;background:none;border:1px solid var(--yellow);border-radius:6px;padding:4px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600">Reclaim $' + amt + ' USDC</button>';
