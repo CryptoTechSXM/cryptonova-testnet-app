@@ -693,7 +693,7 @@
         <div>
           <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x39b7e7A78C5760337130a650C67a59A4364164bf" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
           <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x39b7e7A78C5760337130a650C67a59A4364164bf" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x39b7e7A78C5760337130a650C67a59A4364164bf</a> · 18 decimals</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing.</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
         </div>
       </div>
       <button class="btn-metamask" onclick="addCNOVAtoMetaMask()">
@@ -1220,7 +1220,7 @@
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
           <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span></div>
           <div class="stat-value green" id="dash-cnova">—</div>
-          <div class="stat-sub" data-i18n="dash.mined_tokens">Mined tokens</div>
+          <div class="stat-sub" data-i18n="dash.mined_tokens">Mined · 180-day vest 🔒</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
@@ -2056,6 +2056,8 @@ const CNOVA_ABI = [
   'function transfer(address,uint256) external returns (bool)',
   'function vestDuration() external view returns (uint256)',
   'function maxPenaltyBps() external view returns (uint256)',
+  'function lockedBalanceOf(address) external view returns (uint256)',
+  'function unlockedBalanceOf(address) external view returns (uint256)',
   'event Transfer(address indexed from, address indexed to, uint256 value)',
 ];
 
@@ -4550,11 +4552,13 @@ async function renderCnovaDetail(el, rp) {
   const cnova  = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   const usdcC  = new ethers.Contract(ADDRS.usdc,  USDC_ABI,  rp);
 
-  const [cnovabal, supply, treasuryUsdc, epochNum] = await Promise.all([
+  const [cnovabal, supply, treasuryUsdc, epochNum, lockedBal, unlockedBal] = await Promise.all([
     cnova.balanceOf(userAddr).catch(() => 0n),
     cnova.totalSupply().catch(() => 0n),
     usdcC.balanceOf(ADDRS.treasury).catch(() => 0n),
     cnova.currentEpochNumber().catch(() => 1),
+    cnova.lockedBalanceOf(userAddr).catch(() => null),
+    cnova.unlockedBalanceOf(userAddr).catch(() => null),
   ]);
 
   const cnovaValRaw = supply > 0n ? (cnovabal * treasuryUsdc) / supply : 0n;
@@ -4562,6 +4566,18 @@ async function renderCnovaDetail(el, rp) {
     ? '$' + (Number(treasuryUsdc) / Number(supply) * 1e12).toFixed(6)
     : '$0.000000';
   const balFmt = Number(ethers.formatEther(cnovabal)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  // Vesting breakdown rows
+  const fmtCnova = v => Number(ethers.formatEther(v)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const vestRows = (lockedBal !== null && unlockedBal !== null) ? `
+    <div class="detail-row">
+      <span class="detail-key" style="color:var(--green)">✅ Transferable (unlocked)</span>
+      <span class="detail-val green">${fmtCnova(unlockedBal)} CNOVA</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-key" style="color:var(--yellow)">🔒 Vesting (locked 180 days)</span>
+      <span class="detail-val" style="color:var(--yellow)">${fmtCnova(lockedBal)} CNOVA</span>
+    </div>` : '';
 
   // Epoch reward schedule (8 epochs)
   const epochRewards = await Promise.all(
@@ -4580,11 +4596,13 @@ async function renderCnovaDetail(el, rp) {
   el.innerHTML = `
     <div class="detail-section">Your Balance</div>
     <div class="detail-row"><span class="detail-key">CNOVA Held</span><span class="detail-val green">${balFmt} CNOVA</span></div>
+    ${vestRows}
     <div class="detail-row"><span class="detail-key">Floor Price</span><span class="detail-val">${floorPerToken} / CNOVA</span></div>
     <div class="detail-row total"><span class="detail-key">USD Value at Floor</span><span class="detail-val green">${fmt6(cnovaValRaw)}</span></div>
     <div class="detail-section">Mining Schedule</div>
     ${epochRows || '<div class="detail-row"><span class="detail-key" style="color:var(--text3)">Epoch data unavailable</span></div>'}
-    <div class="detail-note">◈ CNOVA is minted each time you complete a matrix cycle. The reward decreases each epoch as total supply grows. Floor price = CNOVA Treasury USDC ÷ total supply — guaranteed minimum redemption value.</div>`;
+    <div class="detail-note">◈ CNOVA is minted each time you complete a matrix cycle. The reward decreases each epoch as total supply grows. Floor price = CNOVA Treasury USDC ÷ total supply — guaranteed minimum redemption value.</div>
+    <div class="detail-note" style="color:var(--yellow);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2)">🔒 Matrix-minted CNOVA vests over 180 days — it cannot be transferred or sold until the lock expires. CNOVA purchased via the Buy CNOVA page is immediately transferable.</div>`;
 }
 
 // ── CNOVA Burned breakdown ────────────────────────────────────────────
