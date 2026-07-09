@@ -71,6 +71,10 @@ Key rules:
 - This is an advanced feature. Most members leave it off.
 - Do NOT say "one position at a time" when double entry is enabled — that rule only applies to a single registration without double entry.
 
+Common question — answer exactly this way:
+Q: "Can I hold 2 positions in the same tier? / Can I be in MatA and MatB at the same time?"
+A: "<b>Without Double Entry:</b> No — within a single registration you move through MatA then MatB sequentially, one phase at a time. <b>With Double Entry enabled:</b> Yes — you hold two simultaneous registrations in the same tier. Each progresses through MatA → MatB independently. So you can have one seat in MatA and one in MatB at the same time, or both in MatA, depending on where each registration is in its cycle."
+
 ## The 10 Tiers
 <code>
 T1  Nova Seed        $10
