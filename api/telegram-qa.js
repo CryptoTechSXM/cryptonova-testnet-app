@@ -44,30 +44,32 @@ Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)
 
 Key nuances:
 - <b>MatA and MatB are the same tier</b> — MatA is phase 1, MatB is phase 2. The crossing between them is a mid-point, not an upgrade.
-- You hold <b>one position at a time</b> (MatA OR MatB). You cannot be in both simultaneously.
+- Within a single registration you hold one seat: MatA OR MatB. You advance from MatA to MatB at the crossing — not simultaneously.
 - Upgrade only happens after completing the full 254-seat cycle (both MatA + MatB). 127 seats (MatA full) is mid-point only.
 - Do not promise upgrade after exactly one fill or after MatA alone.
+- <b>Exception — Double Entry (see below):</b> a member with Double Entry enabled holds two simultaneous registrations, each progressing independently through MatA→MatB.
 
 ## Double Entry (opt-in feature)
-Double entry is an <b>opt-in toggle</b> per member (off by default). When enabled, the contract fires a <b>second registration</b> automatically on cycle-out, paid from your escrow/withdrawable surplus.
+Double entry is an <b>opt-in toggle</b> per member (off by default). When a member cycles out of a matrix, the contract fires a <b>second registerFor() call immediately</b> using the remaining escrow/withdrawable surplus. This second registration is placed <b>at the same moment</b> as the primary one — not in a future cycle.
 
-What "second registration" means depends on whether you also upgraded in that cycle:
+<b>Two seats simultaneously.</b> The member now has two active positions progressing through the matrix independently. Each seat moves through MatA → MatB on its own.
 
-<b>Scenario A — Upgrading (T1→T2):</b>
-Primary position: placed in <b>T2</b> (your upgrade).
-Second position: placed back in <b>T1</b> (your old tier).
-Result: you are active in <b>two different tiers at the same time</b>.
+What tier the second seat lands in:
 
-<b>Scenario B — Re-entering same tier (no upgrade yet):</b>
-Primary position: placed in <b>T1</b> (re-entry).
-Second position: also placed in <b>T1</b>.
-Result: you hold <b>two seats in the same tier simultaneously</b>.
+<b>Scenario A — Re-entering same tier (no upgrade yet):</b>
+Primary: placed in <b>T1</b>. Second: also placed in <b>T1</b>.
+Result: <b>two seats in T1 at the same time</b>. Each progresses independently.
+
+<b>Scenario B — Upgrading (T1→T2):</b>
+Primary: placed in <b>T2</b> (the upgrade). Second: placed back in <b>T1</b>.
+Result: <b>one seat in T2 + one seat in T1 simultaneously</b>.
 
 Key rules:
 - <b>Escrow surplus must cover the second entry fee</b> — if not, double entry is silently skipped.
 - Requires completing at least 2 cycles before it activates.
 - Toggle via the Dashboard (Member Options → Double Entry).
 - This is an advanced feature. Most members leave it off.
+- Do NOT say "one position at a time" when double entry is enabled — that rule only applies to a single registration without double entry.
 
 ## The 10 Tiers
 <code>
