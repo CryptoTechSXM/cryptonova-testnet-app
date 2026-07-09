@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-09] Dashboard (index.html) — The following message is being displayed across all my accou…
+- **Reporter:** Sherwyn
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
+- **Frequency:** Consistent
+- **What happened:** The following message is being displayed across all my accounts when trying to do self rescue... ❌ "", "from": "0x774481DAc8584CfAFb5B6b6fAD883787b343C573", "to": "0xE1Ce0C46EB05ccf991BedECf79928B984
+- **What was expected:** To move over to matrix B...
+- **Notes:** Across all accounts..
+- **Submitted:** Thu, 09 Jul 2026 13:32:30 GMT
+
+
 ### [2026-07-09] Dashboard (index.html) — I tried to upgrade manually. The Metamask approval was confi…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
