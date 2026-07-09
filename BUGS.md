@@ -19,6 +19,17 @@
 
 ## Open Issues
 
+### [2026-07-09] Coupon System — I just noticed/confirmed that the previous coupons, even in …
+- **Reporter:** Kolawole Ola
+- **Page:** Coupon System
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
+- **Frequency:** Consistent
+- **What happened:** I just noticed/confirmed that the previous coupons, even in the last 2 upgrades/versions are still showing and cannot be deleted. It says only the person that created it can delete them. I created them by myself, one each in the last 2 versions.
+- **What was expected:** The should have been scrapped off with the new versions upgrade.
+- **Submitted:** Thu, 09 Jul 2026 17:16:22 GMT
+
+
 ### [2026-07-09] Dashboard (index.html) — The following message is being displayed across all my accou…
 - **Reporter:** Sherwyn
 - **Page:** Dashboard (index.html)
