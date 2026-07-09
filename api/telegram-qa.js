@@ -9,9 +9,9 @@ import { ethers } from 'ethers';
 
 const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const TIER_ROUTER       = '0x5c1d576Eb95D1EC78C87e5555C3C779aEb38dA6d'; // V8.33
-const CNOVA_TOKEN       = '0x39b7e7A78C5760337130a650C67a59A4364164bf'; // V8.33
-const CNOVA_TREASURY    = '0x9e70132aea6336f5148aE7bDeEE1Ca5c74B98347'; // V8.33 — floorPrice() lives here
+const TIER_ROUTER       = '0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b'; // V8.34
+const CNOVA_TOKEN       = '0x39b7e7A78C5760337130a650C67a59A4364164bf'; // V8.34 (unchanged)
+const CNOVA_TREASURY    = '0x9e70132aea6336f5148aE7bDeEE1Ca5c74B98347'; // V8.34 (unchanged) — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -35,16 +35,18 @@ const SYSTEM_PROMPT = `You are the CryptoNova Support Bot. Answer questions from
 Decentralized matrix platform on Base blockchain. Members pay USDC to join a binary matrix and earn USDC as it fills. Also features CNOVA utility token mined automatically through cycles. Currently on <b>Base Sepolia testnet</b>. <b>Mainnet launch: July 19, 2026</b> at cryptonova.ai.
 
 ## The Matrix System
-1. Each tier has a two-phase cycle totalling <b>254 seats</b> (two 127-seat binary trees back-to-back).
-2. Register at a tier, take a seat, USDC flows up as members fill seats below you.
-3. Completing the first 127 seats is a mid-point crossing - <b>not</b> an upgrade.
-4. When all 254 seats fill, the root member auto-upgrades to the next tier and earns CNOVA.
-5. Cycle resets and begins again. Referral bonus pays when someone uses your referral link.
+Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)</b> — each holds 127 seats. Together they form one full cycle of 254 seats.
+
+1. You join a tier and are placed in <b>MatA</b> first. You hold <b>one seat</b> — either in MatA or MatB, never both at the same time.
+2. When MatA fills to 127, a <b>crossing</b> fires — members from MatA move into MatB. MatA then resets and starts filling again with new members.
+3. When MatB fills to 127, the full 254-seat cycle completes. Root members earn their payout and auto-upgrade to the next tier.
+4. Cycle repeats. You may pass through MatA → MatB <b>multiple times</b> before reaching root position and upgrading.
 
 Key nuances:
-- Upgrade only after the full 254-seat cycle. 127 is mid-point, not an upgrade.
-- You may cycle through 254 seats <b>multiple times</b> before reaching root. Position determines when you upgrade.
-- Do not promise upgrade after exactly one fill.
+- <b>MatA and MatB are the same tier</b> — MatA is phase 1, MatB is phase 2. The crossing between them is a mid-point, not an upgrade.
+- You hold <b>one position at a time</b> (MatA OR MatB). You cannot be in both simultaneously.
+- Upgrade only happens after completing the full 254-seat cycle (both MatA + MatB). 127 seats (MatA full) is mid-point only.
+- Do not promise upgrade after exactly one fill or after MatA alone.
 
 ## The 10 Tiers
 <code>
@@ -138,8 +140,9 @@ The referral system is fully live in the smart contracts.
 - On mainnet, members who use a referral link will show the referrer's wallet address. Members who register directly will always show "Direct" — permanently.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
-## Contracts (Base Sepolia)
-TierRouter: <code>0x5c1d576Eb95D1EC78C87e5555C3C779aEb38dA6d</code>
+## Contracts (Base Sepolia — V8.34)
+TierRouter: <code>0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b</code>
+MatrixKeeper: <code>0xcf6c943908ceF7585Cfb860002e2f56A818D22b9</code>
 CNOVA Token: <code>0x39b7e7A78C5760337130a650C67a59A4364164bf</code>
 USDC: <code>0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
 
