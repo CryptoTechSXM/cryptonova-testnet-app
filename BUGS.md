@@ -5,6 +5,18 @@
 
 ---
 
+## 🚨 CRITICAL (V8.34 Required)
+
+### [2026-07-09] T2 Matrix Occupancy Corruption — reentrancy in `enterFor()` [CRITICAL]
+- **Severity:** CRITICAL — blocks all T2 entries; must deploy V8.34 to fix
+- **Symptom:** Members trying to upgrade to T2 (manually or auto) get `reason=null, data=null` revert consuming ~2.8M gas
+- **Root cause:** Reentrancy bug in `FigureEightMatrixV8.enterFor()`. When `handleCycleOut` triggers `_executeAndDouble → PM.registerFor → enterFor` on T2MatA while T2MatA is already inside `_cycleOutRoot` (crossingInProgress=true), the `crossingInProgress` guard does NOT protect `enterFor`. The re-entrant call corrupts occupancy to 128 (over matrixSize=127), then every subsequent entry triggers a recursive EVM call-stack overflow revert.
+- **On-chain state (V8.33):** T2MatA=128/127 (CORRUPTED), T2MatB=128/127 (CORRUPTED). Cannot fix in-place. V8.34 fresh deploy resets all matrices.
+- **Fix (applied 2026-07-09):** `FigureEightMatrixV8.sol enterFor()` — added `require(!_state.crossingInProgress, "F8V8: reentrant enter blocked");` before `this._enterMatrix(...)`. Staged for V8.34 deploy.
+- **Verified example:** Member #10 (`0x7308daF433804e8F10Dd267C70332609bd491477`) — `manualUpgrade()` to T2 → gasUsed=2,825,302 revert with null reason/data (EVM stack overflow from recursive re-entry loop).
+
+---
+
 ## Open Issues
 
 ### [2026-07-09] Dashboard (index.html) — The following message is being displayed across all my accou…
@@ -50,7 +62,7 @@
 - **Frequency:** Consistent
 - **What happened:** i am not positioned in matrix
 - **What was expected:** to have a position in a matrix
-- **Notes:** You are not currently active in any matrix. Check back after registration.
+- **Notes:** May be related to T2 reentrancy corruption above — check if this wallet is trying to enter T2. Alternatively check if wallet is registered via diag_matrix_state.js. Pending V8.34 to resolve T2 state.
 - **Submitted:** Thu, 09 Jul 2026 00:52:12 GMT
 
 
@@ -62,10 +74,8 @@
 - **Frequency:** Consistent
 - **What happened:** Trying to use coupon to sign up and it's saying "coupon not found or Expired...
 - **What was expected:** Easy registration...
+- **Notes:** Check if coupon was already redeemed, expired, or cancelled. Error message was improved in 96eb981 but the coupon may genuinely be stale — ask sherwyn to request a new one.
 - **Submitted:** Wed, 08 Jul 2026 21:24:37 GMT
-
-
-*No open issues — ready for launch.* ✅
 
 ---
 

@@ -691,9 +691,9 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x73906fbD986C353AfCD44bBc39F236EC58E1b980" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x73906fbD986C353AfCD44bBc39F236EC58E1b980" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x73906fbD986C353AfCD44bBc39F236EC58E1b980</a> · 18 decimals</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x39b7e7A78C5760337130a650C67a59A4364164bf" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x39b7e7A78C5760337130a650C67a59A4364164bf" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x39b7e7A78C5760337130a650C67a59A4364164bf</a> · 18 decimals</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing.</div>
         </div>
       </div>
       <button class="btn-metamask" onclick="addCNOVAtoMetaMask()">
@@ -1220,7 +1220,7 @@
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
           <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span></div>
           <div class="stat-value green" id="dash-cnova">—</div>
-          <div class="stat-sub" data-i18n="dash.mined_tokens">Mined · 180-day vest 🔒</div>
+          <div class="stat-sub" data-i18n="dash.mined_tokens">Mined tokens</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
@@ -1904,74 +1904,74 @@ const CHAIN_ID = 84532;
 
 
 
-const RPC_URL      = 'https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy';
-const RPC_FALLBACK = 'https://base-sepolia.public.blastapi.io';
+const RPC_URL      = 'https://base-sepolia.public.blastapi.io';
+const RPC_FALLBACK = 'https://sepolia.base.org';
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
 const ADDRS = {
-  // V8.34 — deployed 2026-07-09 — reentrancy fix in enterFor(), RESCUE_REPAY_BPS=100%, referrer indexed, proposal fee 100 CNOVA
+  // V8.33 — deployed 2026-07-08 — slot overflow fix, softParkIdle, extended idle timeouts, cancelCoupon, lastActivityTime on earnings
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0x73906fbD986C353AfCD44bBc39F236EC58E1b980',
-  treasury:      '0xe0A3EBd83BFF1B0ab7AEbcc34D43d79F4675D14a',
-  stabilityFund: '0xb4Fd854167b4e349eCaB65CA1BBD73db417B7c58',
-  buybackReserve:'0x515c066e59Cc76b3F3409bf52B3412e0b1FBc9fB',
-  tierRouter:    '0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b',
-  matrixKeeper:  '0xcf6c943908ceF7585Cfb860002e2f56A818D22b9',
-  v8Governance:  '0x5D8775acC76e824949b25D4DcE64aeB181943FcA',
-  communityWallet:'0x391d28410EC65E46FbC7b19EA140d23de36FdE01',
+  cnova:         '0x39b7e7A78C5760337130a650C67a59A4364164bf',
+  treasury:      '0x9e70132aea6336f5148aE7bDeEE1Ca5c74B98347',
+  stabilityFund: '0x08a62f046EB0299038421a2FcD4bc5479182A0d0',
+  buybackReserve:'0x114427F39Dda2944387b3771148785C9327BAEB0',
+  tierRouter:    '0x5c1d576Eb95D1EC78C87e5555C3C779aEb38dA6d',
+  matrixKeeper:  '0xb8A20B719f2649e212E36C4f7C151Ba0364F6E28',
+  v8Governance:  '0x3427086b507546D5bC7892F93b250361c1c2EeF5',
+  communityWallet:'0xe7aBF937D3D9c5C42e632acd0E35a3364d6d5021',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x57F531847b53CB51Cb9166B44f15825f4DFa77cd',
-  couponRegistry:'0x3F321247AAE14227142A8142B51d1Ed1C8b08229',
+  directSale:    '0xbc2A000CcfD2B367498a340e63763043088Bd59B',
+  couponRegistry:'0x542a9186cd22D70505b446697041a73feb874ba3',
   // V8.30 tier pairs — deployed 2026-06-29
   T1: {
-    pm:   '0x7DDC0a01E315ad389bb7a6a500BBC3289c21c992',
-    matA: '0xa2B7309ed2e2891633CDB1d6F105C9B3044472e9',
-    matB: '0xdFD7F87ce48f9c21ef354B0DF3D326DB24209828',
+    pm:   '0x6EF8007A9ACB23Bd0D1A309Be9646aE52Fb777cF',
+    matA: '0xE1Ce0C46EB05ccf991BedECf79928B984399637b',
+    matB: '0x938122F84Fffa40343d51A8e54337349359d9EBF',
   },
   T2: {
-    pm:   '0xFB4e73c5fD1a7F9898c2CC7376515E17cE2165C8',
-    matA: '0x427B4b0a95D59C710fB74Eba357C912256Aa5245',
-    matB: '0x16f28697B9ce5f285c29dD2E94EFc2ef2F1D442A',
+    pm:   '0x076A2d4Ea94F132c47584e7A1D5D80024Fbf9b22',
+    matA: '0x6AcCa1b52baa8DC329663b02B86B8f71eDb946b3',
+    matB: '0xbC990FbD4AaA4E609828aa470638879d130B07A8',
   },
   T3: {
-    pm:   '0xF1Ea8dCd522bAe8B5e38a491b0b45e460F1148e6',
-    matA: '0x7B911c9Ada467B813f31AD297974431B726be83A',
-    matB: '0xEc5a7Ad348Ac68878999f7dd8781526166839c88',
+    pm:   '0xa8fb2564187c66242B690FA223F7411423EE221b',
+    matA: '0x02236AC2560202458B39573d7fdF5e274b3599Cd',
+    matB: '0x2B5E6c11b961fed4C94bf18a33662aEA861a7A38',
   },
   T4: {
-    pm:   '0xd302f38566e19a821bdb7b8c0E82EFA908A97eac',
-    matA: '0xE66d693228Bd05E6EA1c7503A74d02b470e57c58',
-    matB: '0xA44DAdA9f5a7124aEe9Fb4C719F84c5820e946B3',
+    pm:   '0x1368e2E9f15Ecc0a379B3569C710A253d054207f',
+    matA: '0xf0F31DAA4412b2b227C099271EB792d327d7f79C',
+    matB: '0xA25E12773923a79d721Cc6E46681Dd36111Ff080',
   },
   T5: {
-    pm:   '0xa547cd53cAfcc637Ba57811A9aBEe8c29d26D947',
-    matA: '0x97ABaeFE8925A3DB28A325BB557b6965817bEF81',
-    matB: '0x71d5da0E8cEecC61a2F72c32CFF37BB36b204dD4',
+    pm:   '0xA6E850866A758a9920d3f7A2A55e3867C501D595',
+    matA: '0xE41a34A04EbF5451e0622DE772882e6db7250dF4',
+    matB: '0xe7315E72B5608e6137013a85efCfaD8782F8b503',
   },
   T6: {
-    pm:   '0x36Df4ce08eA03bF39F95a7f375eB648877DA9Ed7',
-    matA: '0xFc49c529dfA737D2846C56dBC31b587746fC48CB',
-    matB: '0x39606A3012AD4ae97AD16D829c45b137b6E809BF',
+    pm:   '0xefDD5665581249f39D10A72802c202cAD6b006cC',
+    matA: '0x8b5C88a4A6242f6d5857B8a0a9e19e6f0441b14F',
+    matB: '0x564217aA1E98319bF9cDEd3fF3b3bb4b7fB4d444',
   },
   T7: {
-    pm:   '0x1B2A82d7B23d2fdD90708006C1009a54b0217329',
-    matA: '0x0e7d45234106c00aFCBEe292CCf4CC2711f4971e',
-    matB: '0x6445366B12FF85953DF31E8C3358752045eD2512',
+    pm:   '0x692981e41eB6AFAc1593Dd779c6eCee43029cA33',
+    matA: '0xac9D43689203912934fa9e8dfDA408fcd3799Ebe',
+    matB: '0x6bA57800e8c41032b9Fc715D8828a8b8e3FdD600',
   },
   T8: {
-    pm:   '0xC2e19BBf463195F55352695929D261BA77c7709A',
-    matA: '0x40A39f26FCCdaCfaEc884552EE2D93DaBA70Df7A',
-    matB: '0xBAeD6c32a4c0ab97Ff8E863139A482FEB9123280',
+    pm:   '0x3663A4276545200bA230e448BFe0335721774A6B',
+    matA: '0xa6071aF364690BefCd855FB72693F68926aEC325',
+    matB: '0x55DCe9398376e55FC07efa60732c5164861A2ce2',
   },
   T9: {
-    pm:   '0xB5B6568BB0D59AEe64223CaED357b98B2e851896',
-    matA: '0x8f594eb9012b5DE776823Ef86f782015F58c72d0',
-    matB: '0xC8B01746F94B7307fEB6D60B719A12449ac49006',
+    pm:   '0xF9947defe84123431dc14293d1aA6323F257dE3b',
+    matA: '0x9A7dB03eB7F3792ff458f94B4fD117d918AB317D',
+    matB: '0x1Dbe536fD0C6ABe9C135e9F71bF3ff82f9AFB3EB',
   },
   T10: {
-    pm:   '0xF5b6E9506426a60ca1D832F35AAfB81D616Eb540',
-    matA: '0xB131590EdED3A01E1B35AD2d49711C59fE4809F2',
-    matB: '0x52916eFA3f201abD441ac5c0a4d438AB0265f880',
+    pm:   '0xa714ce4B0b724Ae2A7c2D2243c50B95aeBcD8FF3',
+    matA: '0x2251b45FE9d014aA1708f850847440DCbf37dc92',
+    matB: '0x58E3F88d1d796dc7d2ed1F676c824839eb65e2bf',
   },
 };
 
@@ -2056,8 +2056,6 @@ const CNOVA_ABI = [
   'function transfer(address,uint256) external returns (bool)',
   'function vestDuration() external view returns (uint256)',
   'function maxPenaltyBps() external view returns (uint256)',
-  'function lockedBalanceOf(address) external view returns (uint256)',
-  'function unlockedBalanceOf(address) external view returns (uint256)',
   'event Transfer(address indexed from, address indexed to, uint256 value)',
 ];
 
@@ -2315,7 +2313,7 @@ async function connectWallet(silent=false) {
         if (swErr.code === 4902 || swErr.code === -32603) {
           // Chain not in wallet yet — try adding it
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy', 'https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
@@ -2383,7 +2381,7 @@ async function switchToBaseSepolia() {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
           nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},
-          rpcUrls:['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy','https://base-sepolia.public.blastapi.io','https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com'],
+          rpcUrls:['https://base-sepolia.public.blastapi.io','https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com'],
           blockExplorerUrls:['https://sepolia.basescan.org']
         }] });
         hideNetworkBanner(); if (!userAddr) await connectWallet();
@@ -3360,7 +3358,7 @@ async function validateCouponCode() {
       }).catch(() => {}); // non-critical — silently swallow errors
     }
   } catch(e) {
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">' + friendlyError(e) + '</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">&#10060; ' + friendlyError(e) + '</span>';
     if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
     _resetApproveBtn();
   }
@@ -3432,7 +3430,7 @@ async function approveUSDC() {
     btn.disabled = false;
     const c2 = window._activeCoupon;
     btn.textContent = c2 ? 'Step 1: Approve $' + c2.youPay.toFixed(2) + ' USDC 🔒' : 'Step 1: Approve $10 USDC 🔒';
-    setStatus('reg-status', friendlyError(e), 'err');
+    setStatus('reg-status', '❌ ' + friendlyError(e), 'err');
     if (e.code !== 4001) reportEvent('TX_FAILED', {
       action: 'approve-usdc', error: e.message || String(e),
     });
@@ -3568,26 +3566,7 @@ function _shareCoupon(code, issuerAddr) {
     + '<div style="font-size:13px;color:var(--text3);margin-bottom:14px">Your referral link is embedded \u2014 when they open it, your address pre-fills as their referrer.</div>'
     + '<div style="background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:16px">' + shareUrl + '</div>';
   const btnWrap = document.createElement('div');
-  const _doCopy = () => {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast('Link copied!', 'success');
-      copyBtn.textContent = '\u2713 Copied!';
-      setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000);
-    }).catch(() => {
-      // Fallback for browsers where clipboard API is restricted
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = shareUrl; ta.style.cssText = 'position:fixed;opacity:0';
-        document.body.appendChild(ta); ta.focus(); ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        toast('Link copied!', 'success');
-        copyBtn.textContent = '\u2713 Copied!';
-        setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000);
-      } catch(_) { toast('Copy failed — please copy the link manually', 'error'); }
-    });
-  };
-  const copyBtn = mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', _doCopy);
+  const copyBtn = mkBtn('\uD83D\uDCCB  Copy Link', 'var(--text1)', 'var(--bg3)', 'var(--border)', () => navigator.clipboard.writeText(shareUrl).then(() => { toast('Link copied!', 'success'); copyBtn.textContent = '\u2713 Copied!'; setTimeout(() => { copyBtn.textContent = '\uD83D\uDCCB  Copy Link'; }, 2000); }));
   btnWrap.appendChild(copyBtn);
   btnWrap.appendChild(mkBtn('\uD835\uDD4F  Share on X / Twitter', '#1DA1F2', 'rgba(29,161,242,.1)', 'rgba(29,161,242,.35)', () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareMsg), '_blank')));
   btnWrap.appendChild(mkBtn('\uD83D\uDCAC  Share on WhatsApp', '#25D366', 'rgba(37,211,102,.08)', 'rgba(37,211,102,.3)', () => window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg), '_blank')));
@@ -3674,18 +3653,14 @@ async function approveCouponUSDC() {
     const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
     const tx = await usdcW.approve(ADDRS.couponRegistry, T1_FEE);
     setStatus('coupon-issue-status', '⏳ Approving USDC...', 'info');
-    // Timeout guard: RPC sometimes hangs on receipt events — proceed after 10s regardless
-    await Promise.race([
-      tx.wait(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 10000))
-    ]).catch(e => { if (!e.message.includes('TX_CONFIRM_TIMEOUT')) throw e; });
+    await tx.wait();
     setStatus('coupon-issue-status', '✅ Approved! Now click Step 2.', 'ok');
     btn.textContent = '✓ Approved'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
     const bi = document.getElementById('btn-coupon-issue');
     if (bi) { bi.disabled = false; bi.className = 'btn btn-green full-w'; }
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 1: Approve $10 USDC 🔒';
-    setStatus('coupon-issue-status', friendlyError(e), 'err');
+    setStatus('coupon-issue-status', '❌ ' + friendlyError(e), 'err');
   }
 }
 
@@ -3723,7 +3698,7 @@ async function doIssueCoupon() {
     setTimeout(() => loadMyCoupons(), 3000);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Issue Coupon 🎟️ ⛽';
-    setStatus('coupon-issue-status', friendlyError(e), 'err');
+    setStatus('coupon-issue-status', '❌ ' + friendlyError(e), 'err');
   }
 }
 
@@ -4499,8 +4474,8 @@ async function renderWithdrawableDetail(el, rp) {
     <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
     <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
     ${crossingLocked > 0n ? `<div class="detail-row"><span class="detail-key" style="color:#a855f7">${_t('modal.crossing_reserve','\u21B3 Crossing Reserve (locked)')}</span><span class="detail-val" style="color:#a855f7" title="Locked toward your next matrix crossing — released as earnings when the cycle completes">− ${fmt6(crossingLocked)}</span></div>` : ''}
-    ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
-    ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
+    ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key">${_t('modal.upgrade_fees','Upgrade Fees (auto-deducted)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
+    ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key">${_t('modal.auto_deducted','Auto-Deducted (upgrades)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
     ${totalWithdrawable > 0n ? `
     <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
@@ -4552,13 +4527,11 @@ async function renderCnovaDetail(el, rp) {
   const cnova  = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   const usdcC  = new ethers.Contract(ADDRS.usdc,  USDC_ABI,  rp);
 
-  const [cnovabal, supply, treasuryUsdc, epochNum, lockedBal, unlockedBal] = await Promise.all([
+  const [cnovabal, supply, treasuryUsdc, epochNum] = await Promise.all([
     cnova.balanceOf(userAddr).catch(() => 0n),
     cnova.totalSupply().catch(() => 0n),
     usdcC.balanceOf(ADDRS.treasury).catch(() => 0n),
     cnova.currentEpochNumber().catch(() => 1),
-    cnova.lockedBalanceOf(userAddr).catch(() => null),
-    cnova.unlockedBalanceOf(userAddr).catch(() => null),
   ]);
 
   const cnovaValRaw = supply > 0n ? (cnovabal * treasuryUsdc) / supply : 0n;
@@ -4566,18 +4539,6 @@ async function renderCnovaDetail(el, rp) {
     ? '$' + (Number(treasuryUsdc) / Number(supply) * 1e12).toFixed(6)
     : '$0.000000';
   const balFmt = Number(ethers.formatEther(cnovabal)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-
-  // Vesting breakdown rows
-  const fmtCnova = v => Number(ethers.formatEther(v)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  const vestRows = (lockedBal !== null && unlockedBal !== null) ? `
-    <div class="detail-row">
-      <span class="detail-key" style="color:var(--green)">✅ Transferable (unlocked)</span>
-      <span class="detail-val green">${fmtCnova(unlockedBal)} CNOVA</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-key" style="color:var(--yellow)">🔒 Vesting (locked 180 days)</span>
-      <span class="detail-val" style="color:var(--yellow)">${fmtCnova(lockedBal)} CNOVA</span>
-    </div>` : '';
 
   // Epoch reward schedule (8 epochs)
   const epochRewards = await Promise.all(
@@ -4596,13 +4557,11 @@ async function renderCnovaDetail(el, rp) {
   el.innerHTML = `
     <div class="detail-section">Your Balance</div>
     <div class="detail-row"><span class="detail-key">CNOVA Held</span><span class="detail-val green">${balFmt} CNOVA</span></div>
-    ${vestRows}
     <div class="detail-row"><span class="detail-key">Floor Price</span><span class="detail-val">${floorPerToken} / CNOVA</span></div>
     <div class="detail-row total"><span class="detail-key">USD Value at Floor</span><span class="detail-val green">${fmt6(cnovaValRaw)}</span></div>
     <div class="detail-section">Mining Schedule</div>
     ${epochRows || '<div class="detail-row"><span class="detail-key" style="color:var(--text3)">Epoch data unavailable</span></div>'}
-    <div class="detail-note">◈ CNOVA is minted each time you complete a matrix cycle. The reward decreases each epoch as total supply grows. Floor price = CNOVA Treasury USDC ÷ total supply — guaranteed minimum redemption value.</div>
-    <div class="detail-note" style="color:var(--yellow);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2)">🔒 Matrix-minted CNOVA vests over 180 days — it cannot be transferred or sold until the lock expires. CNOVA purchased via the Buy CNOVA page is immediately transferable.</div>`;
+    <div class="detail-note">◈ CNOVA is minted each time you complete a matrix cycle. The reward decreases each epoch as total supply grows. Floor price = CNOVA Treasury USDC ÷ total supply — guaranteed minimum redemption value.</div>`;
 }
 
 // ── CNOVA Burned breakdown ────────────────────────────────────────────
@@ -4802,7 +4761,7 @@ async function doWithdrawPartial() {
     if (withdrawn) await new Promise(r => setTimeout(r, 3500));
     await loadDashboardData();
   } catch(e) {
-    setStatus('withdraw-status', friendlyError(e), 'err');
+    setStatus('withdraw-status', '❌ ' + friendlyError(e), 'err');
   } finally {
     if (btnP) { btnP.disabled = false; btnP.textContent = 'Withdraw Amount'; }
     if (btnA) btnA.disabled = false;
@@ -4855,7 +4814,7 @@ async function doWithdraw() {
     if (withdrawn) await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
     await loadDashboardData();
   } catch(e) {
-    setStatus('withdraw-status', friendlyError(e), 'err');
+    setStatus('withdraw-status', '❌ ' + friendlyError(e), 'err');
   } finally {
     btn.disabled = false; btn.textContent = 'Withdraw Earnings';
   }
@@ -5103,12 +5062,10 @@ async function _getDirectReferrals(addr, rp) {
 
   // ── Try event log approach (fast — 1 call) ────────────────────────────────
   try {
-    // Use Alchemy directly -- bypass FallbackProvider quorum issues with eth_getLogs
-    const logRp = new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, logRp);
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     const events = await Promise.race([
       tr.queryFilter(tr.filters.MemberRegistered()),          // all blocks
-      new Promise((_,r) => setTimeout(() => r(new Error('evt_timeout')), 30000))
+      new Promise((_,r) => setTimeout(() => r(new Error('evt_timeout')), 12000))
     ]);
     const addrs = events
       .filter(e => e.args?.referrer?.toLowerCase() === addr.toLowerCase())
@@ -5367,7 +5324,7 @@ async function approveCNOVAForRedeem() {
     if (redeemBtn) redeemBtn.disabled = false;
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 1: Approve CNOVA';
-    setStatus('redeem-status',friendlyError(e),'err');
+    setStatus('redeem-status','❌ ' + friendlyError(e),'err');
   }
 }
 
@@ -5393,7 +5350,7 @@ async function doRedeemAtFloor() {
     loadHomeStats(); // refresh CNOVA Minted + Total Supply in live stats
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Redeem for USDC';
-    setStatus('redeem-status',friendlyError(e),'err');
+    setStatus('redeem-status','❌ ' + friendlyError(e),'err');
   }
 }
 
@@ -5626,28 +5583,23 @@ async function approveUSDCForUpgrade() {
     if (btnDash) btnDash.disabled = true;
     _setS('Checking wallet…');
 
-    // Pre-flight: try to verify ETH and USDC — but timeout after 5s so a slow
-    // RPC never blocks MetaMask from opening (Bug 2: Koach100 fix).
-    const provider   = signer.provider;
-    const userAddrU  = await signer.getAddress();
-    const usdc       = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    let ethBal = null, usdcBal = null;
-    try {
-      const _results = await Promise.race([
-        Promise.all([provider.getBalance(userAddrU), usdc.balanceOf(userAddrU)]),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('PREFLIGHT_TIMEOUT')), 5000))
-      ]);
-      [ethBal, usdcBal] = _results;
-    } catch(_) { /* RPC slow — skip preflight, MetaMask handles balance errors */ }
+    // Pre-flight: verify ETH and USDC before attempting approve
+    const provider = signer.provider;
+    const userAddr = await signer.getAddress();
+    const usdc     = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+    const [ethBal, usdcBal] = await Promise.all([
+      provider.getBalance(userAddr),
+      usdc.balanceOf(userAddr),
+    ]);
 
     const MIN_ETH = ethers.parseEther('0.001');
-    if (ethBal !== null && ethBal < MIN_ETH) {
+    if (ethBal < MIN_ETH) {
       _setS('⛽ You need a little Base Sepolia ETH for gas. Visit the faucet (top nav) to grab some for free — it only takes a second!');
       if (btnReg)  btnReg.disabled  = false;
       if (btnDash) btnDash.disabled = false;
       return;
     }
-    if (usdcBal !== null && usdcBal < fee) {
+    if (usdcBal < fee) {
       const needed = (Number(fee) / 1e6).toFixed(2);
       const has    = (Number(usdcBal) / 1e6).toFixed(2);
       _setS(`💳 You need $${needed} USDC for this upgrade but your wallet only has $${has}. Visit the faucet to top up!`);
@@ -5659,11 +5611,7 @@ async function approveUSDCForUpgrade() {
     _setS('Approving USDC…');
     const tx = await usdc.approve(ADDRS.tierRouter, fee);
     _setS('Waiting for confirmation…');
-    // Timeout guard: RPC sometimes hangs on receipt events — proceed after 10s regardless
-    await Promise.race([
-      tx.wait(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('TX_CONFIRM_TIMEOUT')), 10000))
-    ]).catch(e => { if (!e.message.includes('TX_CONFIRM_TIMEOUT')) throw e; });
+    await tx.wait();
     _setS('✅ USDC approved. Now click Step 2 to upgrade.');
     const btnManual = document.getElementById('btn-manual-upgrade');
     const btnUp     = document.getElementById('btn-upgrade');
@@ -5738,7 +5686,7 @@ async function approveLimboReEntry() {
     await tx.wait();
     setStatus('limbo-status', '✅ Approved — click Re-Enter Matrix', 'ok');
   } catch(e) {
-    setStatus('limbo-status', friendlyError(e), 'err');
+    setStatus('limbo-status', '❌ ' + friendlyError(e), 'err');
   }
 }
 
@@ -5758,7 +5706,7 @@ async function doLimboReEntry() {
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
     setTimeout(() => loadUserData(), 2000);
   } catch(e) {
-    setStatus('limbo-status', friendlyError(e), 'err');
+    setStatus('limbo-status', '❌ ' + friendlyError(e), 'err');
     if (btn) btn.disabled = false;
   }
 }

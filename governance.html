@@ -422,8 +422,8 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:4px;">
       <div style="background:var(--bg3);border-radius:10px;padding:14px 16px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;">Rescue Loan Rate</div>
-        <div style="font-size:22px;font-weight:700;color:var(--yellow);font-family:monospace;">50%</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Parked members repay 50% of the SF rescue loan from their future earnings. Remainder is forgiven.</div>
+        <div style="font-size:22px;font-weight:700;color:var(--yellow);font-family:monospace;">100%</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Rescued members repay 100% of the SF loan. Repayments are deducted from future USDC earnings each cycle until the full balance is cleared — no portion is forgiven.</div>
         <div style="font-size:11px;color:var(--text3);margin-top:6px;border-top:1px solid var(--border);padding-top:6px;">✅ Now DAO-votable — Param #50</div>
       </div>
       <div style="background:var(--bg3);border-radius:10px;padding:14px 16px;">
@@ -591,6 +591,11 @@
     </div>
 
     <div id="propose-gate" style="font-size:13px;color:var(--text3);margin-bottom:10px;"></div>
+    <!-- V8.34: proposal fee notice -->
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);">
+      <span style="font-size:16px;">🔥</span>
+      <span><strong style="color:#a855f7">100 CNOVA will be permanently burned</strong> when you submit this proposal. Voting is always free. You will be asked to approve the burn first, then confirm the proposal — two wallet clicks total.</span>
+    </div>
     <button class="btn-propose" id="btn-propose" disabled onclick="createProposal()" data-i18n="govPage.submit_btn">Submit Proposal</button>
     <div id="prop-status"></div>
   </div>
@@ -607,7 +612,7 @@
       <div class="how-step">
         <div class="how-num">2</div>
         <h4 data-i18n="govPage.how2_h">Propose</h4>
-        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of supply can submit a param-change proposal. Only allowlisted values accepted.</p>
+        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of CNOVA supply can submit a param-change proposal. A <strong>100 CNOVA fee is permanently burned</strong> on submission to prevent spam. Only allowlisted values are accepted. Voting is always free.</p>
       </div>
       <div class="how-step">
         <div class="how-num">3</div>
@@ -653,15 +658,15 @@ async function _getBestRpc() {
   }
   return RPC_URL; // fallback to primary
 }
-const GOV_ADDR    = '0x3427086b507546D5bC7892F93b250361c1c2EeF5'; // V8.31
-const CNOVA_ADDR  = '0x39b7e7A78C5760337130a650C67a59A4364164bf'; // V8.31
-const TIER_ROUTER = '0x5c1d576Eb95D1EC78C87e5555C3C779aEb38dA6d'; // V8.31
-const MK_ADDR     = '0xb8A20B719f2649e212E36C4f7C151Ba0364F6E28'; // V8.31
+const GOV_ADDR    = '0x5D8775acC76e824949b25D4DcE64aeB181943FcA'; // V8.31
+const CNOVA_ADDR  = '0x73906fbD986C353AfCD44bBc39F236EC58E1b980'; // V8.31
+const TIER_ROUTER = '0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b'; // V8.31
+const MK_ADDR     = '0xcf6c943908ceF7585Cfb860002e2f56A818D22b9'; // V8.31
 // V8.31 — deployed 2026-07-01 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
-const SF_ADDR     = '0x08a62f046EB0299038421a2FcD4bc5479182A0d0'; // V8.31
-const BBR_ADDR    = '0x114427F39Dda2944387b3771148785C9327BAEB0'; // V8.31
-const DS_ADDR     = '0xbc2A000CcfD2B367498a340e63763043088Bd59B'; // V8.31
-const CW_ADDR     = '0xe7aBF937D3D9c5C42e632acd0E35a3364d6d5021'; // V8.31
+const SF_ADDR     = '0xb4Fd854167b4e349eCaB65CA1BBD73db417B7c58'; // V8.31
+const BBR_ADDR    = '0x515c066e59Cc76b3F3409bf52B3412e0b1FBc9fB'; // V8.31
+const DS_ADDR     = '0x57F531847b53CB51Cb9166B44f15825f4DFa77cd'; // V8.31
+const CW_ADDR     = '0x391d28410EC65E46FbC7b19EA140d23de36FdE01'; // V8.31
 
 // Real ethers.Network object for staticNetwork -- passing the literal boolean
 // 'true' throws 'staticNetwork.matches is not a function' in ethers v6.7.1 and
@@ -781,7 +786,7 @@ const PARAM_FALLBACK = {
   48: { label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9\'s entry fee to compute StabilityFund\'s auto-scaled target when T9 is the highest open tier. V8.26 default: 20x.' },
   49: { label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.' },
   // V8.32: SF rescue loan repayment percentage becomes DAO-votable.
-  50: { label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 5000 = 50% (default). Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
+  50: { label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 10000 = 100% (V8.34 default) \u2014 full loan is always repaid across as many cycles as needed. Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
   // V8.33: extended idle timeout becomes DAO-votable.
   51: { label:'Extended Idle Timeout (s)', hint:'Seconds a member has in extended idle mode before soft-park triggers. Default: 604800 (7 days). Lower = faster action; higher = more member-friendly grace period.' },
 };
@@ -870,6 +875,7 @@ const GOV_ABI = [
   'function hasVoted(uint256,address) external view returns (bool)',
   'function getAllowedValues(uint8) external view returns (uint256[])',
   'function quorumBps() external view returns (uint256)',
+  'function proposalFee() external view returns (uint256)', // V8.34: 100 CNOVA burned per proposal
   'function votingPeriod() external view returns (uint256)',
   'function timelockPeriod() external view returns (uint256)',
   'function propose(uint8,address,uint256,string) external returns (uint256)',
@@ -883,6 +889,8 @@ const GOV_ABI = [
 const ERC20_ABI = [
   'function balanceOf(address) external view returns (uint256)',
   'function totalSupply() external view returns (uint256)',
+  'function approve(address,uint256) external returns (bool)',      // V8.34: proposal fee approval
+  'function allowance(address,address) external view returns (uint256)', // V8.34
 ];
 
 // Superset of read-only getters across every governance target contract --
@@ -1660,7 +1668,21 @@ async function createProposal() {
   if (!meta.isArray && selectedParamValue === null) return;
 
   try {
-    setPropStatus(t('govPage.js.submitting_proposal', 'Submitting proposal… please confirm in wallet.'), 'info');
+    // V8.34: approve 100 CNOVA burn before proposing (two-step)
+    const govRo   = new ethers.Contract(GOV_ADDR, GOV_ABI, getRo());
+    const fee     = await govRo.proposalFee().catch(() => 100n * (10n ** 18n));
+    if (fee > 0n) {
+      const cnova      = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, signer);
+      const allowance  = await cnova.allowance(userAddr, GOV_ADDR).catch(() => 0n);
+      if (allowance < fee) {
+        setPropStatus('Step 1/2: Approve 100 CNOVA burn — confirm in MetaMask…', 'info');
+        const approveTx = await cnova.approve(GOV_ADDR, fee, { gasLimit: 80_000 });
+        await Promise.race([approveTx.wait(), new Promise((_,r) => setTimeout(() => r(new Error('approve_timeout')), 30000))]);
+      }
+      setPropStatus('Step 2/2: Submitting proposal — confirm in MetaMask…', 'info');
+    } else {
+      setPropStatus(t('govPage.js.submitting_proposal', 'Submitting proposal… please confirm in wallet.'), 'info');
+    }
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     let tx;
     if (meta.isArray) {
