@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-09] Dashboard (index.html) — I tried to upgrade manually. The Metamask approval was confi…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** I tried to upgrade manually. The Metamask approval was confirmed for step 1 and 2 then I got a message on the dapp saying the transaction execution was reverted with a string of coding language after it.
+- **What was expected:** I should have been upgraded to tier 2.
+- **Notes:** i took a photo but i couldn't share it here.
+- **Submitted:** Thu, 09 Jul 2026 12:32:42 GMT
+
+
 ### [2026-07-09] Other — Unable to Upgrade on main acct and this acct
 - **Reporter:** Maximum - 71
 - **Page:** Other
