@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-09] Dashboard (index.html) — i am not positioned in matrix
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x301afb29e6f4b68c97f20686ad23e7adc3955170
+- **Frequency:** Consistent
+- **What happened:** i am not positioned in matrix
+- **What was expected:** to have a position in a matrix
+- **Notes:** You are not currently active in any matrix. Check back after registration.
+- **Submitted:** Thu, 09 Jul 2026 00:52:12 GMT
+
+
 ### [2026-07-08] Coupon System — Trying to use coupon to sign up and it's saying "coupon not …
 - **Reporter:** sherwyn
 - **Page:** Coupon System
