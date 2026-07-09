@@ -290,6 +290,8 @@
     /* ── Loading spinner ──────────────────────── */
     .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse-border-orange { 0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0.4)} 50%{box-shadow:0 0 0 6px rgba(249,115,22,0)} }
+    @keyframes pulse-border-yellow  { 0%,100%{box-shadow:0 0 0 0 rgba(234,179,8,0.4)}  50%{box-shadow:0 0 0 6px rgba(234,179,8,0)}  }
     .loading-text { color: var(--text3); font-size: 14px; padding: 24px 0; text-align: center; }
 
     /* ── Addr display ────────────────────────── */
@@ -1243,6 +1245,44 @@
         </div>
       </div>
 
+      <!-- ── ACTION REQUIRED — shown only when work needs doing, placed prominently ── -->
+
+      <!-- Parked / Rescue Section -->
+      <div id="rescue-section" class="card" style="margin-bottom:20px;display:none;border:2px solid #f97316;background:rgba(249,115,22,0.08);animation:pulse-border-orange 2s ease-in-out infinite">
+        <div class="section-title" style="margin-bottom:14px;color:#f97316"><div class="dot" style="background:#f97316"></div> ⏳ Action Required — Re-Entry Queue</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px" id="rescue-desc">
+          You cycled out of your matrix but didn't have enough earnings to auto re-enter. You're in the rescue queue.
+        </div>
+        <div class="info-row"><span class="info-key">Stuck In</span><span class="info-val" id="rescue-matrix">—</span></div>
+        <div class="info-row"><span class="info-key">Your Withdrawable</span><span class="info-val green" id="rescue-withdrawable">—</span></div>
+        <div class="info-row" id="rescue-reserve-row" style="display:none"><span class="info-key">Crossing Reserve</span><span class="info-val green" id="rescue-reserve">—</span></div>
+        <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
+        <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <strong>Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
+          </div>
+          <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0</span> USDC</button>
+          <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
+          <div id="self-rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- Reclaimed / Re-entry Section -->
+      <div id="limbo-section" class="card" style="margin-bottom:20px;display:none;border:2px solid var(--yellow);background:rgba(234,179,8,0.08);animation:pulse-border-yellow 2s ease-in-out infinite">
+        <div class="section-title" style="margin-bottom:14px;color:var(--yellow)"><div class="dot" style="background:var(--yellow)"></div> ⚠️ Action Required — Matrix Slot Cleared</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">
+          Your <strong id="limbo-matrix-label">—</strong> slot was cleared after a period of inactivity — this can happen when a matrix is filling slowly and the idle timer expires. Your tier status and all earnings are safe. Pay the re-entry fee to rejoin.
+        </div>
+        <div class="info-row"><span class="info-key">Tier</span><span class="info-val" id="limbo-tier">—</span></div>
+        <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="limbo-fee">—</span></div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <button class="btn full-w" id="btn-limbo-approve" onclick="approveLimboReEntry()" style="background:rgba(234,179,8,.12);border:1px solid var(--yellow);color:var(--yellow)">Step 1: Approve USDC</button>
+          <button class="btn full-w" id="btn-limbo-reenter" onclick="doLimboReEntry()" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#000;font-weight:700;border:none">🔄 Re-Enter Matrix</button>
+          <div id="limbo-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+        </div>
+      </div>
+
       <!-- ── SF Rescue Loan banner (shown only if member has outstanding debt) ── -->
       <div id="rescue-debt-banner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:10px;border:1.5px solid var(--yellow);background:rgba(234,179,8,.08);align-items:flex-start;gap:12px">
         <span style="font-size:22px;line-height:1">⚡</span>
@@ -1398,45 +1438,6 @@
             </div>
             <div id="upgrade-status-dash" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
           </div>
-        </div>
-      </div>
-
-      <!-- Parked / Rescue Section -->
-      <div id="rescue-section" class="card" style="margin-bottom:24px;display:none;border:1px solid #f97316;background:rgba(249,115,22,0.06)">
-        <div class="section-title" style="margin-bottom:14px;color:#f97316"><div class="dot" style="background:#f97316"></div> ⏳ Re-Entry Queue</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:12px" id="rescue-desc">
-          You cycled out of your matrix but didn't have enough earnings to auto re-enter. You're in the rescue queue.
-        </div>
-        <div class="info-row"><span class="info-key">Stuck In</span><span class="info-val" id="rescue-matrix">—</span></div>
-        <div class="info-row"><span class="info-key">Your Withdrawable</span><span class="info-val green" id="rescue-withdrawable">—</span></div>
-        <div class="info-row" id="rescue-reserve-row" style="display:none"><span class="info-key">Crossing Reserve</span><span class="info-val green" id="rescue-reserve">—</span></div>
-        <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
-        <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
-        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
-
-          <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <strong>Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
-          </div>
-          <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0</span> USDC</button>
-          <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
-          <div id="self-rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
-
-
-        </div>
-      </div>
-
-      <!-- Reclaimed / Re-entry Section -->
-      <div id="limbo-section" class="card" style="margin-bottom:24px;display:none;border:1px solid var(--yellow);background:rgba(234,179,8,0.06)">
-        <div class="section-title" style="margin-bottom:14px;color:var(--yellow)"><div class="dot" style="background:var(--yellow)"></div> ⚠️ Matrix Slot Cleared</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">
-          Your <strong id="limbo-matrix-label">—</strong> slot was cleared after a period of inactivity — this can happen when a matrix is filling slowly and the idle timer expires. Your tier status and all earnings are safe. Pay the re-entry fee to rejoin.
-        </div>
-        <div class="info-row"><span class="info-key">Tier</span><span class="info-val" id="limbo-tier">—</span></div>
-        <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="limbo-fee">—</span></div>
-        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
-          <button class="btn full-w" id="btn-limbo-approve" onclick="approveLimboReEntry()" style="background:rgba(234,179,8,.12);border:1px solid var(--yellow);color:var(--yellow)">Step 1: Approve USDC</button>
-          <button class="btn full-w" id="btn-limbo-reenter" onclick="doLimboReEntry()" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#000;font-weight:700;border:none">🔄 Re-Enter Matrix</button>
-          <div id="limbo-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
         </div>
       </div>
 
