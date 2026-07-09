@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-09] Other — Unable to Upgrade on main acct and this acct
+- **Reporter:** Maximum - 71
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x788b70fe1453ccc12e3d76ae18c1952046fa02af
+- **Frequency:** Consistent
+- **What happened:** Unable to Upgrade on main acct and this acct
+- **What was expected:** upgrade to next tier
+- **Submitted:** Thu, 09 Jul 2026 11:37:42 GMT
+
+
 ### [2026-07-09] Dashboard (index.html) — i am not positioned in matrix
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
