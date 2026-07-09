@@ -48,6 +48,27 @@ Key nuances:
 - Upgrade only happens after completing the full 254-seat cycle (both MatA + MatB). 127 seats (MatA full) is mid-point only.
 - Do not promise upgrade after exactly one fill or after MatA alone.
 
+## Double Entry (opt-in feature)
+Double entry is an <b>opt-in toggle</b> per member (off by default). When enabled, the contract fires a <b>second registration</b> automatically on cycle-out, paid from your escrow/withdrawable surplus.
+
+What "second registration" means depends on whether you also upgraded in that cycle:
+
+<b>Scenario A — Upgrading (T1→T2):</b>
+Primary position: placed in <b>T2</b> (your upgrade).
+Second position: placed back in <b>T1</b> (your old tier).
+Result: you are active in <b>two different tiers at the same time</b>.
+
+<b>Scenario B — Re-entering same tier (no upgrade yet):</b>
+Primary position: placed in <b>T1</b> (re-entry).
+Second position: also placed in <b>T1</b>.
+Result: you hold <b>two seats in the same tier simultaneously</b>.
+
+Key rules:
+- <b>Escrow surplus must cover the second entry fee</b> — if not, double entry is silently skipped.
+- Requires completing at least 2 cycles before it activates.
+- Toggle via the Dashboard (Member Options → Double Entry).
+- This is an advanced feature. Most members leave it off.
+
 ## The 10 Tiers
 <code>
 T1  Nova Seed        $10
