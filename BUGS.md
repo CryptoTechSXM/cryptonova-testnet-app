@@ -5,87 +5,17 @@
 
 ---
 
-## 🚨 CRITICAL (V8.34 Required)
-
-### [2026-07-09] T2 Matrix Occupancy Corruption — reentrancy in `enterFor()` [CRITICAL]
-- **Severity:** CRITICAL — blocks all T2 entries; must deploy V8.34 to fix
-- **Symptom:** Members trying to upgrade to T2 (manually or auto) get `reason=null, data=null` revert consuming ~2.8M gas
-- **Root cause:** Reentrancy bug in `FigureEightMatrixV8.enterFor()`. When `handleCycleOut` triggers `_executeAndDouble → PM.registerFor → enterFor` on T2MatA while T2MatA is already inside `_cycleOutRoot` (crossingInProgress=true), the `crossingInProgress` guard does NOT protect `enterFor`. The re-entrant call corrupts occupancy to 128 (over matrixSize=127), then every subsequent entry triggers a recursive EVM call-stack overflow revert.
-- **On-chain state (V8.33):** T2MatA=128/127 (CORRUPTED), T2MatB=128/127 (CORRUPTED). Cannot fix in-place. V8.34 fresh deploy resets all matrices.
-- **Fix (applied 2026-07-09):** `FigureEightMatrixV8.sol enterFor()` — added `require(!_state.crossingInProgress, "F8V8: reentrant enter blocked");` before `this._enterMatrix(...)`. Staged for V8.34 deploy.
-- **Verified example:** Member #10 (`0x7308daF433804e8F10Dd267C70332609bd491477`) — `manualUpgrade()` to T2 → gasUsed=2,825,302 revert with null reason/data (EVM stack overflow from recursive re-entry loop).
-
----
-
 ## Open Issues
 
-### [2026-07-09] Coupon System — I just noticed/confirmed that the previous coupons, even in …
-- **Reporter:** Kolawole Ola
-- **Page:** Coupon System
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
-- **Frequency:** Consistent
-- **What happened:** I just noticed/confirmed that the previous coupons, even in the last 2 upgrades/versions are still showing and cannot be deleted. It says only the person that created it can delete them. I created them by myself, one each in the last 2 versions.
-- **What was expected:** The should have been scrapped off with the new versions upgrade.
-- **Submitted:** Thu, 09 Jul 2026 17:16:22 GMT
-
-
-### [2026-07-09] Dashboard (index.html) — The following message is being displayed across all my accou…
-- **Reporter:** Sherwyn
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
-- **Frequency:** Consistent
-- **What happened:** The following message is being displayed across all my accounts when trying to do self rescue... ❌ "", "from": "0x774481DAc8584CfAFb5B6b6fAD883787b343C573", "to": "0xE1Ce0C46EB05ccf991BedECf79928B984
-- **What was expected:** To move over to matrix B...
-- **Notes:** Across all accounts..
-- **Submitted:** Thu, 09 Jul 2026 13:32:30 GMT
-
-
-### [2026-07-09] Dashboard (index.html) — I tried to upgrade manually. The Metamask approval was confi…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
-- **Frequency:** Consistent
-- **What happened:** I tried to upgrade manually. The Metamask approval was confirmed for step 1 and 2 then I got a message on the dapp saying the transaction execution was reverted with a string of coding language after it.
-- **What was expected:** I should have been upgraded to tier 2.
-- **Notes:** i took a photo but i couldn't share it here.
-- **Submitted:** Thu, 09 Jul 2026 12:32:42 GMT
-
-
-### [2026-07-09] Other — Unable to Upgrade on main acct and this acct
-- **Reporter:** Maximum - 71
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x788b70fe1453ccc12e3d76ae18c1952046fa02af
-- **Frequency:** Consistent
-- **What happened:** Unable to Upgrade on main acct and this acct
-- **What was expected:** upgrade to next tier
-- **Submitted:** Thu, 09 Jul 2026 11:37:42 GMT
-
-
-### [2026-07-09] Dashboard (index.html) — i am not positioned in matrix
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x301afb29e6f4b68c97f20686ad23e7adc3955170
-- **Frequency:** Consistent
-- **What happened:** i am not positioned in matrix
-- **What was expected:** to have a position in a matrix
-- **Notes:** May be related to T2 reentrancy corruption above — check if this wallet is trying to enter T2. Alternatively check if wallet is registered via diag_matrix_state.js. Pending V8.34 to resolve T2 state.
-- **Submitted:** Thu, 09 Jul 2026 00:52:12 GMT
-
-
-### [2026-07-08] Coupon System — Trying to use coupon to sign up and it's saying "coupon not …
+### [2026-07-08] Coupon System — coupon "not found or Expired" for Sherwyn
 - **Reporter:** sherwyn
 - **Page:** Coupon System
 - **Wallet Type:** MetaMask
 - **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
 - **Frequency:** Consistent
-- **What happened:** Trying to use coupon to sign up and it's saying "coupon not found or Expired...
-- **What was expected:** Easy registration...
-- **Notes:** Check if coupon was already redeemed, expired, or cancelled. Error message was improved in 96eb981 but the coupon may genuinely be stale — ask sherwyn to request a new one.
+- **What happened:** Trying to use coupon to sign up and it's saying "coupon not found or Expired"
+- **What was expected:** Easy registration
+- **Notes:** Coupon was issued on V8.32 or V8.33 contract — now void after V8.34 fresh deploy. Action needed: Kolawole or any admin issues a fresh V8.34 coupon for Sherwyn's wallet 0x1e8e...b1f7.
 - **Submitted:** Wed, 08 Jul 2026 21:24:37 GMT
 
 ---
@@ -122,3 +52,9 @@
 | 2026-07-06 | 2026-07-08 | index.html | Kolawole Ola — "Auto-Deducted (Upgrades)" label confused members who already saw the crossing reserve deduction. Not a double-charge — label was misleading. Fix: renamed to "Tier Upgrade Fee (from earnings)" with tooltip clarifying it's the next-tier entry fee paid from earnings, separate from crossing reserve. | 96eb981 |
 | 2026-07-06 | 2026-07-08 | index.html | Sherwyn — coupon share copy button showed no acknowledgement when link was copied. Fix: added `.catch()` fallback using `document.execCommand('copy')` for browsers blocking clipboard API; both paths show "✓ Copied!" confirmation. | 96eb981 |
 | 2026-07-06 | 2026-07-08 | index.html | Sherwyn — coupon redemption showed "❌ ❌" double-error prefix. Root cause: 9 `setStatus()` calls used `'❌ ' + friendlyError(e)` but `friendlyError()` already prepends `❌`. Fix: removed the extra prefix from all 9 call sites. Error message for coupon-specific CALL_EXCEPTION also improved to "Coupon not found or expired — please request a new one." | 96eb981 |
+| 2026-07-09 | 2026-07-09 | Contract | T2 Matrix Occupancy Corruption — reentrancy in `enterFor()` corrupted T2MatA+MatB to 128/127. V8.34 deployed with `require(!_state.crossingInProgress)` guard in `enterFor()`. Fresh deploy resets matrices. Verified: T1+T2 both completed full 127→127 MatA+MatB lifecycle post-deploy. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x1ca3) — manual upgrade to T2 reverted. Root cause: V8.33 T2 reentrancy corruption. Resolved by V8.34 deploy — member can re-register and upgrade on fresh contract. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Maximum-71 (0x788b) — unable to upgrade on 2 accounts. Root cause: same T2 reentrancy corruption. Resolved by V8.34. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x301a) — "not positioned in matrix." Root cause: V8.34 is a fresh deploy; wallet needs to register on V8.34. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Sherwyn (0x7744) — self rescue failed with raw tx error. Root cause: reported at 13:32 UTC against V8.33 T2 corrupted state. V8.34 went live at 17:00 UTC. Member should re-register on V8.34 and retry self rescue on clean matrices. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Kolawole Ola (0x5704) — coupons from V8.32/V8.33 still showing and cancel fails ("only issuer" revert). Root cause: localStorage-stored coupons persist across deploys; `cancelCoupon()` on V8.34 returns issuer=0x0000 for old-contract hashes → revert. Fix: `loadMyCoupons()` now detects zero-address issuer and renders "PREV. VERSION" badge (greyed out, no action buttons) instead of ACTIVE. | f7156d5 |
