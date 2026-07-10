@@ -3502,7 +3502,7 @@ async function doRegister() {
     } else {
       // Normal path: call register() on TierRouter
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      tx = await tr.register(referrer);
+      tx = await tr.register(referrer, { gasLimit: 800_000 });
     }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
@@ -5707,7 +5707,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     if (btn) btn.disabled = true;
     if (status) status.textContent = 'Submitting upgrade transaction…';
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: 3_000_000 });
+    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: 5_000_000 });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
@@ -5765,7 +5765,7 @@ async function doLimboReEntry() {
   const matA = new ethers.Contract(info.addr, REENTRY_ABI, signer);
   setStatus('limbo-status', '⏳ Submitting re-entry…', 'info');
   try {
-    const tx = await matA.register(info.referrer, { gasLimit: 500000 });
+    const tx = await matA.register(info.referrer, { gasLimit: 800_000 });
     setStatus('limbo-status', '⏳ Confirming…', 'info');
     await tx.wait();
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
