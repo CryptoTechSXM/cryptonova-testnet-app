@@ -7,6 +7,29 @@
 
 ## Open Issues
 
+### [2026-07-11] Dashboard (index.html) — I checked my account this morning and got this message. I ha…
+- **Reporter:** Kolawole Ola
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x33b5a588fb40e1243abd794a882832861d49bc49
+- **Frequency:** Consistent
+- **What happened:** I checked my account this morning and got this message. I have re-entry and double re-entry enabled.
+
+Action Required — Matrix Slot Cleared
+Your T1 Matrix A slot was cleared after a period of inactivity — this can happen when a matrix is filling slowly and the idle timer expires. Your tier status and all earnings are safe. Pay the re-entry fee to rejoin.
+
+I also had enough funds for the automatic re-entry, it just did not engage:
+
+Withdrawable — Balance Breakdown
+✕
+Total Ever Earned - $15.72
+Previously Withdrawn − $0.00
+↳ Crossing Reserve (locked)− $10.00
+= Available to Claim - $8.43
+- **What was expected:** It should have automatically re-entered without me having to come out of pocket again.
+- **Submitted:** Sat, 11 Jul 2026 09:42:41 GMT
+
+
 ### [2026-07-08] Coupon System — coupon "not found or Expired" for Sherwyn
 - **Reporter:** sherwyn
 - **Page:** Coupon System
