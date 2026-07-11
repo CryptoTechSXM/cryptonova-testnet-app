@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-11] Governance / DAO (governance.html) — I attempted to withdraw 17.64 USDC. After the fee I should h…
+- **Reporter:** @Koach100
+- **Page:** Governance / DAO (governance.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
+- **Frequency:** Consistent
+- **What happened:** I attempted to withdraw 17.64 USDC. After the fee I should have received 17.38, but only 4.66 went into my wallet.
+- **What was expected:** 17.38USDC should have been transferred into my wallet.
+- **Submitted:** Sat, 11 Jul 2026 23:09:01 GMT
+
+
 ### [2026-07-11] Onboarding / Registration — i tried registering but the transaction keeps failing.
 - **Reporter:** @Koach100
 - **Page:** Onboarding / Registration
