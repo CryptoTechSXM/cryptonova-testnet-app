@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-11] Onboarding / Registration — i tried registering but the transaction keeps failing.
+- **Reporter:** @Koach100
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9ae38809a625eb41dfb53ae4d0c2cf733be48fc4
+- **Frequency:** Consistent
+- **What happened:** i tried registering but the transaction keeps failing.
+- **What was expected:** i expect to be registered successfully.
+- **Notes:** ❌ ⏱️ RPC rate limit — wait a few seconds and try again.
+- **Submitted:** Sat, 11 Jul 2026 15:28:53 GMT
+
+
 ### [2026-07-11] Dashboard (index.html) — I checked my account this morning and got this message. I ha…
 - **Reporter:** Kolawole Ola
 - **Page:** Dashboard (index.html)
