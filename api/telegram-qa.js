@@ -9,9 +9,9 @@ import { ethers } from 'ethers';
 
 const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const TIER_ROUTER       = '0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b'; // V8.34
-const CNOVA_TOKEN       = '0x39b7e7A78C5760337130a650C67a59A4364164bf'; // V8.34 (unchanged)
-const CNOVA_TREASURY    = '0x9e70132aea6336f5148aE7bDeEE1Ca5c74B98347'; // V8.34 (unchanged) — floorPrice() lives here
+const TIER_ROUTER       = '0x633e83D3669874431aB7453844cc14dA11849356'; // V8.35
+const CNOVA_TOKEN       = '0xB539886c16ebee0deb2Bd64BE11b610dEf2F02Ca'; // V8.35
+const CNOVA_TREASURY    = '0x35F1B5A669abE4D0793739f4dbff61d80f281807'; // V8.35 — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -160,17 +160,17 @@ Chain ID: <code>84532</code> | RPC: <code>https://sepolia.base.org</code> | Expl
 
 ## Referral System
 The referral system is fully live in the smart contracts.
-- When you register using someone's referral link, their <b>wallet address</b> is recorded on-chain permanently and they earn the L1 direct fee (20% of your entry fee) instantly.
+- When you register using someone's referral link, their <b>wallet address</b> is recorded on-chain permanently and they earn the L1 direct fee (5% of your entry fee) instantly.
 - The referrer field always shows a <b>wallet address</b> (e.g. 0x1a2b...3c4d). There are no usernames or Member IDs — it is wallet-address based.
 - <b>"Direct"</b> means the member registered without a referral link (no referrer address passed). This happens on testnet AND mainnet — it is not a testnet limitation.
 - On testnet, most members show "Direct" because they were added via automated stress-testing with no referrer, not because referrals aren't working.
 - On mainnet, members who use a referral link will show the referrer's wallet address. Members who register directly will always show "Direct" — permanently.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
-## Contracts (Base Sepolia — V8.34)
-TierRouter: <code>0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b</code>
-MatrixKeeper: <code>0xcf6c943908ceF7585Cfb860002e2f56A818D22b9</code>
-CNOVA Token: <code>0x39b7e7A78C5760337130a650C67a59A4364164bf</code>
+## Contracts (Base Sepolia — V8.35)
+TierRouter: <code>0x633e83D3669874431aB7453844cc14dA11849356</code>
+MatrixKeeper: <code>0xA3C648Cf79d4714857Cb56B3eFa203c8eFf144d7</code>
+CNOVA Token: <code>0xB539886c16ebee0deb2Bd64BE11b610dEf2F02Ca</code>
 USDC: <code>0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
 
 ## Links
