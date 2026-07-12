@@ -489,6 +489,12 @@
           <option value="16" data-i18n="govPage.params.p16_option">Inactivity Days Threshold</option>
           <option value="17" data-i18n="govPage.params.p17_option">Inactivity Cycles Threshold</option>
           <option value="18" data-i18n="govPage.params.p18_option">Inactivity Guard Enabled</option>
+          <option value="52" data-i18n="govPage.params.p52_option">Whale Gate Threshold — T5</option>
+          <option value="53" data-i18n="govPage.params.p53_option">Whale Gate Threshold — T6</option>
+          <option value="54" data-i18n="govPage.params.p54_option">Whale Gate Threshold — T7</option>
+          <option value="55" data-i18n="govPage.params.p55_option">Whale Gate Threshold — T8</option>
+          <option value="56" data-i18n="govPage.params.p56_option">Whale Gate Threshold — T9</option>
+          <option value="57" data-i18n="govPage.params.p57_option">Whale Gate Threshold — T10</option>
         </optgroup>
         <optgroup label="MatrixKeeper — Parked Rescue">
           <option value="19" data-i18n="govPage.params.p19_option">Parked Grace Period (seconds)</option>
@@ -696,6 +702,9 @@ const PARAM_TARGETS = {
   11: GOV_ADDR, 12: GOV_ADDR, 13: GOV_ADDR,
   14: MK_ADDR,
   15: TIER_ROUTER, 16: TIER_ROUTER, 17: TIER_ROUTER, 18: TIER_ROUTER,
+  // V8.35: per-tier whale gate thresholds (params 52-57)
+  52: TIER_ROUTER, 53: TIER_ROUTER, 54: TIER_ROUTER,
+  55: TIER_ROUTER, 56: TIER_ROUTER, 57: TIER_ROUTER,
   19: MK_ADDR, 20: MK_ADDR,
   21: SF_ADDR, 22: SF_ADDR, 23: SF_ADDR, 50: SF_ADDR,
   24: BBR_ADDR, 25: BBR_ADDR,
@@ -714,6 +723,8 @@ const PARAM_ARRAY_KIND = { 14: 'ladder', 36: 'boostTable' };
 // to the shared sfTargetMultiplier(uint8) getter; there is no UI tier picker
 // for these since each param id already IS a specific tier.
 const PARAM_TIER_INDEX = { 40: 0, 41: 1, 42: 2, 43: 3, 44: 4, 45: 5, 46: 6, 47: 7, 48: 8, 49: 9 };
+// V8.35: param id → 1-based tier number for tierGateThreshold(uint8) getter (params 52-57)
+const PARAM_GATE_TIER  = { 52: 5, 53: 6, 54: 7, 55: 8, 56: 9, 57: 10 };
 
 // English fallback text, used by t() whenever a translation key is missing
 // (including before i18n.js's fetch resolves).
@@ -789,6 +800,13 @@ const PARAM_FALLBACK = {
   50: { label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 10000 = 100% (V8.34 default) \u2014 full loan is always repaid across as many cycles as needed. Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
   // V8.33: extended idle timeout becomes DAO-votable.
   51: { label:'Extended Idle Timeout (s)', hint:'Seconds a member has in extended idle mode before soft-park triggers. Default: 604800 (7 days). Lower = faster action; higher = more member-friendly grace period.' },
+  // V8.35: per-tier whale gate pioneer thresholds
+  52: { label:'Whale Gate Threshold — T5', hint:'Number of T5 first-entry members needed to unlock T2-T5 direct purchases. T2/T3/T4 share this gate. Default: 25 pioneers.' },
+  53: { label:'Whale Gate Threshold — T6', hint:'Pioneers needed in T6 to unlock T6 direct purchases (independent gate). Default: 15.' },
+  54: { label:'Whale Gate Threshold — T7', hint:'Pioneers needed in T7 to unlock T7 direct purchases (independent gate). Default: 10.' },
+  55: { label:'Whale Gate Threshold — T8', hint:'Pioneers needed in T8 to unlock T8 direct purchases (independent gate). Default: 5.' },
+  56: { label:'Whale Gate Threshold — T9', hint:'Pioneers needed in T9 to unlock T9 direct purchases (independent gate). Default: 5.' },
+  57: { label:'Whale Gate Threshold — T10', hint:'Pioneers needed in T10 to unlock T10 direct purchases (independent gate). Default: 5.' },
 };
 
 function PARAM_META_GET(paramId) {
@@ -855,6 +873,13 @@ const VALUE_LABELS = {
   50: v => `${v} BPS (${(v/100).toFixed(0)}%)`,
   // V8.33: extendedIdleTimeout
   51: v => `${v}s (${(v/3600/24).toFixed(1)} days)`,
+  // V8.35: whale gate per-tier thresholds -- display as pioneer count
+  52: v => `${v} pioneer${v !== 1 ? 's' : ''}`,
+  53: v => `${v} pioneer${v !== 1 ? 's' : ''}`,
+  54: v => `${v} pioneer${v !== 1 ? 's' : ''}`,
+  55: v => `${v} pioneer${v !== 1 ? 's' : ''}`,
+  56: v => `${v} pioneer${v !== 1 ? 's' : ''}`,
+  57: v => `${v} pioneer${v !== 1 ? 's' : ''}`,
 };
 function fmtValue(paramId, v) {
   return VALUE_LABELS[paramId] ? VALUE_LABELS[paramId](v) : String(v);
@@ -952,6 +977,8 @@ const READ_ABI = [
   'function rescueRepayBps() external view returns (uint256)',
   // V8.33: param 51 -- DAO-votable extended idle timeout.
   'function extendedIdleTimeout() external view returns (uint256)',
+  // V8.35: params 52-57 -- per-tier whale gate thresholds; takes 1-based tier number.
+  'function tierGateThreshold(uint8) external view returns (uint256)',
 ];
 
 // paramId -> getter function name on PARAM_META[paramId].target (READ_ABI above).
@@ -983,6 +1010,10 @@ const PARAM_GETTER = {
   50: 'rescueRepayBps',
   // V8.33: param 51
   51: 'extendedIdleTimeout',
+  // V8.35: params 52-57 all share the same getter; PARAM_GATE_TIER supplies
+  // the tier argument (T5-T10) passed as a fixed arg to loadCurrentValue.
+  52: 'tierGateThreshold', 53: 'tierGateThreshold', 54: 'tierGateThreshold',
+  55: 'tierGateThreshold', 56: 'tierGateThreshold', 57: 'tierGateThreshold',
 };
 // paramId -> getter name for the per-tier-PairManagerV8-resolved params (9 only,
 // since V8.21 retired param 10). Read via lastWithdrawalFeeBps() on the
@@ -1452,7 +1483,11 @@ async function onParamChange() {
     document.getElementById('target-input').value = meta.target;
     // V8.22: params 40-49 read sfTargetMultiplier(tierIndex) -- a fixed,
     // param-id-baked index, not a UI-selected one (see PARAM_TIER_INDEX).
-    const fixedArgs = PARAM_TIER_INDEX[paramId] !== undefined ? [PARAM_TIER_INDEX[paramId]] : undefined;
+    const fixedArgs = PARAM_TIER_INDEX[paramId] !== undefined
+        ? [PARAM_TIER_INDEX[paramId]]
+        : PARAM_GATE_TIER[paramId] !== undefined
+        ? [PARAM_GATE_TIER[paramId]]
+        : undefined;
     await loadCurrentValue(paramId, meta.target, undefined, fixedArgs);
   }
 
