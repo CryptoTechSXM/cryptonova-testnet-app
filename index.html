@@ -437,6 +437,13 @@
       #launch-banner { gap: 10px; padding: 8px 14px; }
       #launch-banner .bn-date { display: none; }
     }
+
+    /* ── Novice Tooltips ──────────────────────────── */
+    .tip-badge{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(0,229,160,0.15);border:1px solid rgba(0,229,160,0.4);color:var(--green);font-size:9px;font-weight:700;cursor:help;margin-left:3px;vertical-align:middle;flex-shrink:0;position:relative;user-select:none}
+    .tip-badge:hover .tip-popup,.tip-badge:focus .tip-popup,.tip-badge.open .tip-popup{display:block}
+    .tip-popup{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);width:230px;background:var(--bg2);border:1px solid var(--green2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.5;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);pointer-events:none;font-weight:400}
+    .tip-popup::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--green2)}
+    @media(max-width:480px){.tip-popup{width:190px;left:0;transform:none}}
     </style>
 </head>
 <body>
@@ -795,13 +802,13 @@
     <!-- Entry split -->
     <div class="card">
       <div class="section-title"><div class="dot"></div> <span data-i18n="split.title">Entry Fee Split — per $10 at T1</span></div>
-      <div class="split-row" style="border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:4px"><span class="split-label">🔐 Crossing Reserve <span style="font-size:10px;color:var(--text3)">(funds your first re-entry)</span></span><span><span class="split-amount">50%</span> <span class="split-pct">$5.00</span></span></div>
-      <div class="split-row" style="margin-bottom:8px"><span class="split-label">⚡ Instant Earn <span style="font-size:10px;color:var(--text3)">(credited to withdrawable on join)</span></span><span><span class="split-amount">2.5%</span> <span class="split-pct">$0.25</span></span></div>
-      <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool</span><span><span class="split-amount">18%</span> <span class="split-pct">$1.80</span></span></div>
-      <div class="split-row"><span class="split-label">⛓️ Chain Pay L1 <span style="font-size:10px;color:var(--text3)">(direct referrer)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
-      <div class="split-row"><span class="split-label" data-i18n="split.chain_pay">⛓️ Chain Pay L2–L6 <span style="font-size:10px;color:var(--text3)">(per level, flat rate)</span></span><span><span class="split-amount">2.7% ea</span> <span class="split-pct">$0.27 ea</span></span></div>
-      <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund <span style="font-size:10px;color:var(--text3)" data-i18n="split.stability_sub">(rescue reserve)</span></span><span><span class="split-amount">3%</span> <span class="split-pct">$0.30</span></span></div>
-      <div class="split-row"><span class="split-label">🏦 CNOVA Treasury <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
+      <div class="split-row" style="border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:4px"><span class="split-label">🔐 Crossing Reserve<span class="tip-badge" tabindex="0">?<span class="tip-popup">50% of your $10 entry held by the smart contract. When your 127-seat matrix fills and cycles, this automatically covers your re-entry fee — so your first crossing is free.</span></span> <span style="font-size:10px;color:var(--text3)">(funds your first re-entry)</span></span><span><span class="split-amount">50%</span> <span class="split-pct">$5.00</span></span></div>
+      <div class="split-row" style="margin-bottom:8px"><span class="split-label">⚡ Instant Earn<span class="tip-badge" tabindex="0">?<span class="tip-popup">2.5% of your entry fee ($0.25 at T1) credited to your withdrawable balance the moment you register. Available to withdraw immediately — no waiting.</span></span> <span style="font-size:10px;color:var(--text3)">(credited to withdrawable on join)</span></span><span><span class="split-amount">2.5%</span> <span class="split-pct">$0.25</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool<span class="tip-badge" tabindex="0">?<span class="tip-popup">18% of each entry pools together. When all 127 seats fill (~$229 at T1), this distributes position-weighted to all 126 members. Later/deeper positions get a larger share to compensate for joining later.</span></span></span><span><span class="split-amount">18%</span> <span class="split-pct">$1.80</span></span></div>
+      <div class="split-row"><span class="split-label">⛓️ Chain Pay L1<span class="tip-badge" tabindex="0">?<span class="tip-popup">The L1 referral bonus — 5% of the entry fee goes directly to the person who referred the new joiner (the person whose referral link they used). This is YOUR bonus when you refer someone.</span></span> <span style="font-size:10px;color:var(--text3)">(direct referrer)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.chain_pay">⛓️ Chain Pay L2–L6<span class="tip-badge" tabindex="0">?<span class="tip-popup">2.7% per level goes to each of the 5 matrix position ancestors above the new member (levels L2-L6). These are automatically determined by the BFS tree structure — not by referral links. You earn from ANYONE below you in the matrix, not just your referrals.</span></span> <span style="font-size:10px;color:var(--text3)">(per level, flat rate)</span></span><span><span class="split-amount">2.7% ea</span> <span class="split-pct">$0.27 ea</span></span></div>
+      <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund<span class="tip-badge" tabindex="0">?<span class="tip-popup">3% of each entry builds the Stability Rescue Fund. This fund automatically steps in when a member's crossing reserve falls short — ensuring the matrix always cycles smoothly without manual intervention.</span></span> <span style="font-size:10px;color:var(--text3)" data-i18n="split.stability_sub">(rescue reserve)</span></span><span><span class="split-amount">3%</span> <span class="split-pct">$0.30</span></span></div>
+      <div class="split-row"><span class="split-label">🏦 CNOVA Treasury<span class="tip-badge" tabindex="0">?<span class="tip-popup">5% builds the on-chain CNOVA Treasury. The floor price formula: Treasury USDC ÷ total CNOVA supply. More members joining = more USDC in Treasury = higher floor. The floor only goes up, never down.</span></span> <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.dev">⚙️ Dev</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.ops">⚙️ Ops</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.community">🏛️ Community</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
@@ -1183,7 +1190,7 @@
         </ul>
 
         <div style="margin-top:20px;padding:14px;background:var(--bg3);border-radius:8px;font-size:13px">
-          <div style="color:var(--green);font-weight:700;margin-bottom:6px" data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)</div>
+          <div style="color:var(--green);font-weight:700;margin-bottom:6px" data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)<span class="tip-badge" tabindex="0">?<span class="tip-popup">A "cycle" = all 127 seats in your matrix filled by new members. Each seat filled sends chain pay upward. When all 127 fill, the pool pays out and the matrix resets.</span></span></div>
           <div style="color:var(--text2);line-height:1.6">
             <span data-i18n="reg.earn_passive">Passive (0 referrals): <strong style="color:var(--text)">~$3.00</strong> chain pay per cycle (~30% ROI)</span><br>
             <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">~$4.00</strong> per cycle (~40% ROI)</span><br>
@@ -1224,7 +1231,7 @@
       <!-- Earnings cards -->
       <div class="grid-4" style="margin-bottom:24px">
         <div class="card-sm clickable" style="border-color:var(--green2)" onclick="openDashDetail('withdrawable',this)" title="Click for breakdown">
-          <div class="stat-label" data-i18n="dash.withdrawable">Withdrawable</div>
+          <div class="stat-label" data-i18n="dash.withdrawable">Withdrawable<span class="tip-badge" tabindex="0">?<span class="tip-popup">USDC you can withdraw to your wallet right now. Includes: your 2.5% instant earn, L1 referral bonuses you've earned, and chain pay from members who joined below you in the matrix.</span></span></div>
           <div class="stat-value green" id="dash-withdrawable">—</div>
           <div id="dash-reserved-badge" style="display:none;color:var(--yellow);font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="stat-sub" id="dash-ready-label" data-i18n="dash.ready_to_claim">Ready to claim</div>
@@ -1242,7 +1249,7 @@
           <div class="stat-sub">Paid out to wallet</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
-          <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span></div>
+          <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance<span class="tip-badge" tabindex="0">?<span class="tip-popup">Protocol tokens minted automatically when you or anyone in your matrix registers. Genesis epoch: 50 CNOVA per T1 entry. Redeem at the floor price anytime — or hold for appreciation.</span></span></span></div>
           <div class="stat-value green" id="dash-cnova">—</div>
           <div class="stat-sub" data-i18n="dash.mined_tokens">Mined · 180-day vest 🔒</div>
           <div class="detail-hint">Details ↗</div>
@@ -1570,9 +1577,9 @@
 
       <!-- Chain pay breakdown -->
       <div class="card">
-        <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">These amounts flow upward from each new member registration through your position.</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">18.5% of each entry fee flows across 6 levels — L1 direct referrer bonus + L2–L6 flat rate per upline level</div>
+        <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth<span class="tip-badge" tabindex="0">?<span class="tip-popup">Every new member registration sends automatic USDC payments up the matrix tree. L1 = your referral sponsor (5%); L2–L6 = your 5 matrix position ancestors (2.7% each). You earn from ANYONE who joins below you — not just your direct referrals.</span></span></div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">These amounts flow upward automatically from <em>every</em> new member registration that lands below you in the matrix.</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">18.5% of each $10 entry flows upward: $0.50 to your direct referral sponsor (L1) + $0.27 to each of 5 matrix ancestors (L2–L6). <strong style="color:var(--text2)">You are an ancestor to everyone below your position.</strong></div>
         <div id="chain-pay-table">
           <div class="chain-row"><span style="color:var(--text2)">L1 — Direct Referrer <span style="font-size:11px;color:var(--text3)">(person who brought you in)</span></span><span><span style="font-weight:600;color:var(--green)">$0.50</span> <span style="font-size:11px;color:var(--text3)">5%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L2 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
@@ -1736,19 +1743,22 @@
       <div class="roadmap-phase">
         <div style="display:flex;flex-direction:column;align-items:flex-end;padding-right:20px;padding-top:4px">
           <div class="phase-label active">Phase 2</div>
-          <div style="font-size:10px;color:var(--yellow);text-align:right;margin-top:2px">⚡ Now</div>
+          <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px">⚡ Live Now</div>
         </div>
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">Soft launch to initial community — testnet testing with real members</div>
+            <div class="phase-subtitle">V8.35 live on testnet — leader preview open July 12, community open July 19</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
-              <li><span class="check-icon check-pending">⏳</span> Collect feedback and fix remaining UX issues</li>
+              <li><span class="check-icon check-done">✅</span> Dual-matrix cycle confirmed: T1 MatA → MatB → auto-upgrade to T2</li>
+              <li><span class="check-icon check-done">✅</span> V8.35 deployed: per-tier Whale Gate, MatrixPairFactory, bulkUpgrade()</li>
+              <li><span class="check-icon check-done">✅</span> 6-language i18n (EN/FR/ES/PT/DE/TR) + 4 more (KO/TH/VI/ZH)</li>
+              <li><span class="check-icon check-done">✅</span> Automated keeper live on VPS — 6 cron scripts, 24/7 rescue &amp; cycling</li>
+              <li><span class="check-icon check-done">✅</span> Coupon system live — leader referral codes for early access</li>
               <li><span class="check-icon check-pending">⏳</span> Record tutorial video / walkthrough for non-crypto members</li>
-              <li><span class="check-icon check-done">✅</span> Dual-matrix cycle confirmed: T1 MatA fills → MatB fills → wallet auto-upgraded to T2 ✅</li>
-              <li><span class="check-icon check-pending">⏳</span> Confirm referral link flow works end-to-end for all members</li>
+              <li><span class="check-icon check-pending">⏳</span> Confirm referral link flow end-to-end for all leader wallets</li>
             </ul>
           </div>
         </div>
@@ -1758,19 +1768,19 @@
       <div class="roadmap-phase">
         <div style="display:flex;flex-direction:column;align-items:flex-end;padding-right:20px;padding-top:4px">
           <div class="phase-label future">Phase 3</div>
-          <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:2px">Weeks 6–8</div>
+          <div style="font-size:10px;color:var(--yellow);text-align:right;margin-top:2px">July 19, 2026</div>
         </div>
         <div>
-          <div class="phase-card" style="margin-bottom:20px">
-            <div class="phase-title">🚀 Mainnet Launch</div>
-            <div class="phase-subtitle">Real USDC. Real earnings. Community-ready.</div>
+          <div class="phase-card" style="margin-bottom:20px;border-color:rgba(245,158,11,0.4)">
+            <div class="phase-title">🚀 Mainnet Launch <span style="font-size:13px;color:var(--yellow);font-weight:600">— July 19, 2026</span></div>
+            <div class="phase-subtitle">Real USDC. Real earnings. Open to the world — cryptonova.ai</div>
             <ul class="checklist">
-              <li><span class="check-icon check-future">◦</span> Deploy full smart contract suite to Base mainnet</li>
-              <li><span class="check-icon check-future">◦</span> Update dApp to point to mainnet contracts + real USDC address</li>
-              <li><span class="check-icon check-future">◦</span> Verify mainnet contracts on BaseScan</li>
-              <li><span class="check-icon check-future">◦</span> Final security review before public launch</li>
-              <li><span class="check-icon check-future">◦</span> Consider renouncing contract ownership (fully decentralised)</li>
-              <li><span class="check-icon check-future">◦</span> Public announcement — open registrations</li>
+              <li><span class="check-icon check-future">◦</span> Deploy V8.35 full contract suite to Base mainnet</li>
+              <li><span class="check-icon check-future">◦</span> Seed Wave 1 (W1 wallet) — first matrix seat on mainnet</li>
+              <li><span class="check-icon check-future">◦</span> Verify all contracts on BaseScan (removes wallet warnings)</li>
+              <li><span class="check-icon check-future">◦</span> Leader early access opens July 19, 9am EST — coupon codes</li>
+              <li><span class="check-icon check-future">◦</span> Community open access July 19, 12pm EST — auto gates open</li>
+              <li><span class="check-icon check-future">◦</span> VPS keeper migrated to mainnet — 24/7 automated cycling</li>
               <li><span class="check-icon check-future">◦</span> Members begin earning real USDC from day 1</li>
             </ul>
           </div>
@@ -6077,4 +6087,21 @@ function updateAddrsFromDeployed(d) {
     <div style="text-align:center;padding:24px 0 24px;border-top:1px solid var(--border,#1e3a5f);margin-top:32px">
       <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here</a>
     </div>
+
+<script>
+// Novice tooltip: tap on mobile toggles popup
+document.addEventListener('click', function(e){
+  var b = e.target.closest('.tip-badge');
+  if(!b) return;
+  var p = b.querySelector('.tip-popup');
+  if(!p) return;
+  var shown = p.style.display === 'block';
+  // Hide all popups first
+  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
+  if(!shown) { p.style.display='block'; e.stopPropagation(); }
+});
+document.addEventListener('click', function(){ 
+  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
+});
+</script>
 </body></html>

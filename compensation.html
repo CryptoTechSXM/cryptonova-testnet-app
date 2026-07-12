@@ -171,9 +171,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.31 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.35 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.31 is live — crossing reserve, instant earn &amp; improved stability.<br>Opening in:
+      V8.35 is live — whale gate redesign,, instant earn &amp; improved stability.<br>instant earn &amp; improved rescue. Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -197,7 +197,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.31 Testnet</span>
+    <span id="gate-pill-label">V8.35 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -215,13 +215,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.35 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.35 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -374,11 +374,11 @@ function toggleTheme() {
     <h3><span style="color:var(--green)" data-i18n="compPage.s1_h3_pct">3.15%</span> <span data-i18n="compPage.s1_h3">&nbsp;of every entry (L1 slot) — instantly to your direct referrer</span></h3>
     <p data-i18n="compPage.s1_p1">When someone joins using your referral link — or upgrades to a higher tier — you earn the L1 BPS slot: <strong>7% of the 45% payout base</strong> = 3.15% of their total entry fee, paid instantly on-chain. This flat rate applies at every tier. Your referral relationship is locked permanently on-chain — every future upgrade they make keeps earning you the L1 bonus.</p>
     <div class="nums-row">
-      <div><div class="big-num">$0.32</div><div class="num-label" data-i18n="compPage.s1_n1_label">per T1 join ($10, 3.15%)</div></div>
-      <div><div class="big-num">$0.79</div><div class="num-label" data-i18n="compPage.s1_n2_label">per T2 join ($25, 3.15%)</div></div>
-      <div><div class="big-num">$1.58</div><div class="num-label" data-i18n="compPage.s1_n3_label">per T3 join ($50, 3.15%)</div></div>
-      <div><div class="big-num yellow">$31.50</div><div class="num-label" data-i18n="compPage.s1_n4_label">per T7 join ($1,000, 3.15%)</div></div>
-      <div><div class="big-num yellow">$315</div><div class="num-label" data-i18n="compPage.s1_n5_label">per T10 join ($10,000, 3.15%)</div></div>
+      <div><div class="big-num">$0.50</div><div class="num-label" data-i18n="compPage.s1_n1_label">per T1 join ($10, 3.15%)</div></div>
+      <div><div class="big-num">$1.25</div><div class="num-label" data-i18n="compPage.s1_n2_label">per T2 join ($25, 3.15%)</div></div>
+      <div><div class="big-num">$2.50</div><div class="num-label" data-i18n="compPage.s1_n3_label">per T3 join ($50, 3.15%)</div></div>
+      <div><div class="big-num yellow">$50.00</div><div class="num-label" data-i18n="compPage.s1_n4_label">per T7 join ($1,000, 3.15%)</div></div>
+      <div><div class="big-num yellow">$500</div><div class="num-label" data-i18n="compPage.s1_n5_label">per T10 join ($10,000, 3.15%)</div></div>
     </div>
     <p><span data-i18n="compPage.s1_p2_pre">Refer 10 people at T1:</span> <strong style="color:var(--green)" data-i18n="compPage.s1_p2_b">$3.15 instantly</strong><span data-i18n="compPage.s1_p2_post">. The L1 rate is flat across all tiers — as those 10 upgrade to T7 ($1,000), you earn $31.50 per upgrade, and $315 per upgrade at T10, all from the same permanent referral relationships locked on-chain.</span></p>
   </div>
@@ -390,12 +390,11 @@ function toggleTheme() {
     <p data-i18n="compPage.s2_p1">Every single registration in the network — regardless of who referred them — sends 16.65% of the entry fee upward through 6 BFS levels. L1 (your direct referrer) earns a slight premium; L2–L6 earn identically. If someone joins anywhere below you in the tree, you earn automatically based on your BFS position. This is the <em>passive</em> engine of CryptoNova.</p>
     <p><span data-i18n="compPage.s2_p2_pre">At T1 ($10 entry), the</span> <strong data-i18n="compPage.s2_p2_b">$1.665 chain pay</strong> <span data-i18n="compPage.s2_p2_post">distributes as:</span></p>
     <div class="chain-levels">
-      <div class="chain-level"><div class="cl-label" data-i18n="compPage.s2_l1_label">L1 (direct upline)</div><div class="cl-val">$0.315</div><div class="cl-pct" data-i18n="compPage.s2_l1_pct">7% of payout base</div></div>
-      <div class="chain-level"><div class="cl-label">L2</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l2_pct">6% of payout base</div></div>
-      <div class="chain-level"><div class="cl-label">L3</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l3_pct">6% of payout base</div></div>
-      <div class="chain-level"><div class="cl-label">L4</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l4_pct">6% of payout base</div></div>
-      <div class="chain-level"><div class="cl-label">L5</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l5_pct">6% of payout base</div></div>
-      <div class="chain-level"><div class="cl-label">L6</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l6_pct">6% of payout base</div></div>
+      <div class="chain-level"><div class="cl-label" data-i18n="compPage.s2_l1_label">L2 (matrix level)</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l1_pct">2.7% (270 BPS)</div></div>
+      <div class="chain-level"><div class="cl-label">L3</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l2_pct">2.7% (270 BPS)</div></div>
+      <div class="chain-level"><div class="cl-label">L4</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l3_pct">2.7% (270 BPS)</div></div>
+      <div class="chain-level"><div class="cl-label">L5</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l4_pct">2.7% (270 BPS)</div></div>
+      <div class="chain-level"><div class="cl-label">L6</div><div class="cl-val">$0.27</div><div class="cl-pct" data-i18n="compPage.s2_l5_pct">2.7% (270 BPS)</div></div>
     </div>
     <p data-i18n="compPage.s2_p3">These payments are <strong>continuous</strong> — they fire every time a new member enters anywhere below you, not just at cycle completion. A deep downline generates chain pay from hundreds of entries passively.</p>
     <p style="font-size:13px;color:var(--text3)" data-i18n="compPage.s2_p4">At T5 ($250 entry), total chain pay = $41.625 (16.65%): L1 earns $7.875, L2–L6 each earn $6.75. At T10 ($10,000), L1 earns $315 and L2–L6 each earn $270 per single entry.</p>
@@ -443,7 +442,7 @@ function toggleTheme() {
     <p><span data-i18n="compPage.s5_p1_pre">4.5% of every entry fee flows into the on-chain CNOVA Treasury (= 10% of the 45% payout base). The floor price is calculated automatically:</span> <code style="background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--green)">floor = Treasury USDC ÷ CNOVA total supply</code>.</p>
     <p data-i18n="compPage.s5_p2">The floor price can only rise as more members join — more USDC flowing into Treasury relative to new CNOVA minted means the backing per token increases. CNOVA holders can redeem for USDC at the floor price at any time, directly from the Dashboard, with no approval or lock-up.</p>
     <div class="nums-row">
-      <div><div class="big-num">$0.009</div><div class="num-label"><span data-i18n="compPage.s5_n1_label">Starting floor price</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n1_sub">at Genesis ($0.45 treasury ÷ 50 CNOVA)</span></div></div>
+      <div><div class="big-num">$0.01</div><div class="num-label"><span data-i18n="compPage.s5_n1_label">Starting floor price</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n1_sub">at Genesis ($0.45 treasury ÷ 50 CNOVA)</span></div></div>
       <div><div class="big-num blue" data-i18n="compPage.s5_n2_val">Always rising</div><div class="num-label"><span data-i18n="compPage.s5_n2_label">as network grows</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s5_n2_sub">floor never decreases</span></div></div>
     </div>
     <p data-i18n="compPage.s5_p3">CNOVA accrued during Genesis epoch at $0.02 floor could be worth significantly more at later epochs as the floor appreciates. There is no market-price ceiling — CNOVA can trade above floor on open markets.</p>
@@ -488,7 +487,7 @@ function toggleTheme() {
           <td class="t-tier t-open">T1</td>
           <td class="t-name" data-i18n="compPage.tier1_name">Nova Seed</td>
           <td>$10</td>
-          <td style="color:var(--green)">$0.32</td>
+          <td style="color:var(--green)">$0.50</td>
           <td>$0.27</td>
           <td style="color:var(--green)">~$229</td>
           <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
@@ -497,7 +496,7 @@ function toggleTheme() {
           <td class="t-tier t-open">T2</td>
           <td class="t-name" data-i18n="compPage.tier2_name">Nova Rise</td>
           <td>$25</td>
-          <td style="color:var(--green)">$0.79</td>
+          <td style="color:var(--green)">$1.25</td>
           <td>$0.68</td>
           <td style="color:var(--green)">~$572</td>
           <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
@@ -506,7 +505,7 @@ function toggleTheme() {
           <td class="t-tier t-gated">T3</td>
           <td class="t-name" data-i18n="compPage.tier3_name">Nova Star</td>
           <td>$50</td>
-          <td>$1.58</td>
+          <td>$2.50</td>
           <td>$1.35</td>
           <td>~$1,143</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -515,7 +514,7 @@ function toggleTheme() {
           <td class="t-tier t-gated">T4</td>
           <td class="t-name" data-i18n="compPage.tier4_name">Nova Core</td>
           <td>$100</td>
-          <td>$3.15</td>
+          <td>$5.00</td>
           <td>$2.70</td>
           <td>~$2,286</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -524,7 +523,7 @@ function toggleTheme() {
           <td class="t-tier t-gated">T5</td>
           <td class="t-name" data-i18n="compPage.tier5_name">Nova Prime</td>
           <td>$250</td>
-          <td>$7.88</td>
+          <td>$12.50</td>
           <td>$6.75</td>
           <td>~$5,715</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -533,7 +532,7 @@ function toggleTheme() {
           <td class="t-tier t-gated">T6</td>
           <td class="t-name" data-i18n="compPage.tier6_name">Nova Apex</td>
           <td>$500</td>
-          <td>$15.75</td>
+          <td>$25.00</td>
           <td>$13.50</td>
           <td>~$11,430</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -542,7 +541,7 @@ function toggleTheme() {
           <td class="t-tier t-gated">T7</td>
           <td class="t-name" data-i18n="compPage.tier7_name">Nova Pinnacle</td>
           <td>$1,000</td>
-          <td>$31.50</td>
+          <td>$50.00</td>
           <td>$27.00</td>
           <td>~$22,860</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -551,7 +550,7 @@ function toggleTheme() {
           <td class="t-tier t-super">T8</td>
           <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier8_name">SuperNova Titan</td>
           <td>$2,500</td>
-          <td style="color:var(--purple)">$78.75</td>
+          <td style="color:var(--purple)">$125.00</td>
           <td>$67.50</td>
           <td style="color:var(--purple)">~$57,150</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -560,7 +559,7 @@ function toggleTheme() {
           <td class="t-tier t-super">T9</td>
           <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier9_name">SuperNova Legend</td>
           <td>$5,000</td>
-          <td style="color:var(--purple)">$157.50</td>
+          <td style="color:var(--purple)">$250.00</td>
           <td>$135.00</td>
           <td style="color:var(--purple)">~$114,300</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -569,7 +568,7 @@ function toggleTheme() {
           <td class="t-tier t-super">T10</td>
           <td class="t-name" style="color:var(--purple)" data-i18n="compPage.tier10_name">SuperNova Apex</td>
           <td>$10,000</td>
-          <td style="color:var(--purple)">$315.00</td>
+          <td style="color:var(--purple)">$500.00</td>
           <td>$270.00</td>
           <td style="color:var(--purple)">~$228,600</td>
           <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Velocity Gated</span></td>
@@ -612,13 +611,13 @@ function toggleTheme() {
         <div class="split-amt">$1.80</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral (47.5% base → 10.5%)</div>
+        <div class="split-label" data-i18n="compPage.split_l1">🤝 L1 Direct Referral Bonus (5% flat, l1Bps = 500)</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:5%;background:var(--green)"></div></div>
         <div class="split-pct">5%</div>
         <div class="split-amt">$0.50</div>
       </div>
       <div class="split-row">
-        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Chain Pay L2–L6 each (47.5% base → 5.7% each)</div>
+        <div class="split-label" data-i18n="compPage.split_chain">⛓️ Matrix Chain Pay L2–L6 each (2.7% per level, 270 BPS each)</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:2.7%;background:var(--blue)"></div></div>
         <div class="split-pct">2.7% ea.</div>
         <div class="split-amt">$0.27</div>

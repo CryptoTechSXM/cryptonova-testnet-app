@@ -240,10 +240,10 @@
     "upgrade_step1": "Bước 1: Phê Duyệt USDC 🔒",
     "upgrade_step2": "Bước 2: Nâng Cấp Cấp",
     "earn_title": "💡 Tiềm Năng Thu Nhập Cấp 1 (mỗi chu kỳ 127 ghế)",
-    "earn_passive": "Thụ động (0 giới thiệu): <strong style=\"color:var(--text)\">$3.06</strong> chain pay + equalization mỗi chu kỳ (~31% ROI)",
-    "earn_active": "Năng động (2 giới thiệu): <strong style=\"color:var(--text)\">$5.06</strong> mỗi chu kỳ (~51% ROI)",
-    "earn_power": "Mạnh mẽ (5 giới thiệu): <strong style=\"color:var(--text)\">$8.06</strong> mỗi chu kỳ (~81% ROI)",
-    "earn_disclaimer": "Dựa trên vị trí cấp trung. Chain pay BPS: L1 8.5% · L2 3.4% · L3 2.55% · L4 1.27% · L5-L6 0.64%. Pool=45% equalization mỗi lần cycle-out. Nâng cấp = phí lớn hơn = chain pay lớn hơn."
+    "earn_passive": "Thụ động (0 giới thiệu): <strong style=\"color:var(--text)\">$3.05</strong> chain pay + equalization mỗi chu kỳ (~31% ROI)",
+    "earn_active": "Năng động (2 giới thiệu): <strong style=\"color:var(--text)\">$4.05</strong> mỗi chu kỳ (~41% ROI)",
+    "earn_power": "Mạnh mẽ (5 giới thiệu): <strong style=\"color:var(--text)\">$5.55</strong> mỗi chu kỳ (~56% ROI)",
+    "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {
     "low": "Thấp",

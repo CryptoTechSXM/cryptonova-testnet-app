@@ -240,10 +240,10 @@
     "upgrade_step1": "1단계: USDC 승인 🔒",
     "upgrade_step2": "2단계: 티어 업그레이드",
     "earn_title": "💡 티어 1 수익 잠재력 (127석 사이클당)",
-    "earn_passive": "수동적 (0 추천): <strong style=\"color:var(--text)\">$3.06</strong> 체인 페이 + 균등화 사이클당 (~31% ROI)",
-    "earn_active": "활성 (2 추천): <strong style=\"color:var(--text)\">$5.06</strong> 사이클당 (~51% ROI)",
-    "earn_power": "파워 (5 추천): <strong style=\"color:var(--text)\">$8.06</strong> 사이클당 (~81% ROI)",
-    "earn_disclaimer": "중간 위치 기준. 체인 페이 BPS: L1 8.5% · L2 3.4% · L3 2.55% · L4 1.27% · L5-L6 0.64%. Pool=45% 각 사이클아웃 균등화. 티어 업그레이드 = 더 큰 수수료 = 더 큰 체인 페이."
+    "earn_passive": "수동적 (0 추천): <strong style=\"color:var(--text)\">$3.05</strong> 체인 페이 + 균등화 사이클당 (~31% ROI)",
+    "earn_active": "활성 (2 추천): <strong style=\"color:var(--text)\">$4.05</strong> 사이클당 (~41% ROI)",
+    "earn_power": "파워 (5 추천): <strong style=\"color:var(--text)\">$5.55</strong> 사이클당 (~56% ROI)",
+    "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {
     "low": "낮음",

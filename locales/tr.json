@@ -240,10 +240,10 @@
     "upgrade_step1": "Adım 1: USDC Onayla 🔒",
     "upgrade_step2": "Adım 2: Seviye Yükselt",
     "earn_title": "💡 T1 Kazanç Potansiyeli (127 koltuklu döngü başına)",
-    "earn_passive": "Pasif (0 referans): <strong style=\"color:var(--text)\">$3.06</strong> döngü başına zincir ödemesi + eşitleme (~%31 ROI)",
-    "earn_active": "Aktif (2 referans): <strong style=\"color:var(--text)\">$5.06</strong> döngü başına (~%51 ROI)",
-    "earn_power": "Güçlü (5 referans): <strong style=\"color:var(--text)\">$8.06</strong> döngü başına (~%81 ROI)",
-    "earn_disclaimer": "Orta seviye pozisyona göre. Zincir ödeme BPS: S1 %8.5 · S2 %3.4 · S3 %2.55 · S4 %1.27 · S5-S6 %0.64. Havuz=%45 her döngü sonunda eşitleme. Seviye yükseltin = daha yüksek ücretler = daha yüksek zincir ödemesi."
+    "earn_passive": "Pasif (0 referans): <strong style=\"color:var(--text)\">$3.05</strong> döngü başına zincir ödemesi + eşitleme (~%31 ROI)",
+    "earn_active": "Aktif (2 referans): <strong style=\"color:var(--text)\">$4.05</strong> döngü başına (~%41 ROI)",
+    "earn_power": "Güçlü (5 referans): <strong style=\"color:var(--text)\">$5.55</strong> döngü başına (~%56 ROI)",
+    "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {
     "low": "Düşük",
