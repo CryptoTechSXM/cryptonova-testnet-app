@@ -636,10 +636,25 @@
   <button onclick="showTab('tiers')" data-i18n="idx.nav_tiers">🏆 Tiers</button>
   <button onclick="showTab('roadmap')" data-i18n="idx.nav_roadmap">🗺️ Roadmap</button>
   <button onclick="window.location.href='status.html'" data-i18n="idx.nav_status">🛡️ Status</button>
-  <button onclick="window.location.href='buy.html'">💎 Buy CNOVA</button>
-  <button onclick="window.location.href='governance.html'">⚖️ Governance</button>
-  <button onclick="window.location.href='liquidity.html'">💧 Liquidity</button>
+  <button id="nav-btn-buy" onclick="window.location.href='buy.html'">💎 Buy CNOVA</button>
+  <button id="nav-btn-gov" onclick="window.location.href='governance.html'">⚖️ Governance</button>
+  <button id="nav-btn-liq" onclick="window.location.href='liquidity.html'">💧 Liquidity</button>
 </nav>
+<script>
+/* Feature gate — hide Buy/Governance/Liquidity nav on non-admin domains */
+(function(){
+  var h=location.hostname;
+  var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
+  if(!isAdmin){
+    ['nav-btn-buy','nav-btn-gov','nav-btn-liq'].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.style.display='none';
+    });
+    document.addEventListener('DOMContentLoaded',function(){
+      var el=document.getElementById('btn-view-proposals');if(el)el.parentElement.style.display='none';
+    });
+  }
+})();
+</script>
 
 <main>
 <!-- CNOVA token logo symbol — referenced inline throughout page -->
@@ -772,7 +787,7 @@
         </div>
         <div style="flex:2;min-width:200px;text-align:right">
           <div id="dao-latest-label" style="font-size:12px;color:var(--text3);margin-bottom:8px">—</div>
-          <button onclick="window.location.href='governance.html'" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:14px">View Proposals →</button>
+          <button id="btn-view-proposals" onclick="window.location.href='governance.html'" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:14px">View Proposals →</button>
         </div>
       </div>
     </div>
