@@ -466,9 +466,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.35 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.36 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.35 is live — MatrixPairFactory expansion, per-tier Whale Gate &amp; bulkUpgrade().<br>Opening in:
+      V8.36 is live — MINTER_ROLE factory fix, cross-pair referrer credit &amp; factory threshold fix.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -492,7 +492,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.35 Testnet</span>
+    <span id="gate-pill-label">V8.36 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -506,8 +506,8 @@
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
         // Gate: 2026-07-12 12:00 PM EDT (16:00 UTC)
-        var EARLY_MS = 1783872000000;
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.35 Early Access — Opens 12PM EDT';
+        var EARLY_MS = 1783984800000;
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.36 Early Access — Opens 7:20 PM EDT';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
@@ -531,8 +531,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.35 Testnet — Opens 3PM EDT';
-        var MAIN_MS = 1783882800000; // Gate: 2026-07-12 3:00 PM EDT (19:00 UTC)
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.36 Testnet — Opens 7:30 PM EDT';
+        var MAIN_MS  = 1783985400000; // Gate: 2026-07-13 7:30 PM EDT (23:30 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
@@ -620,7 +620,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.35</span><span class="vb-m">V8.35</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.36</span><span class="vb-m">V8.36</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -1748,12 +1748,12 @@
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">V8.35 live on testnet — leader preview open July 12, community open July 19</div>
+            <div class="phase-subtitle">V8.36 live on testnet — leader preview open July 13, community open July 19</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
               <li><span class="check-icon check-done">✅</span> Dual-matrix cycle confirmed: T1 MatA → MatB → auto-upgrade to T2</li>
-              <li><span class="check-icon check-done">✅</span> V8.35 deployed: per-tier Whale Gate, MatrixPairFactory, bulkUpgrade()</li>
+              <li><span class="check-icon check-done">✅</span> V8.36 deployed: MINTER_ROLE factory fix, cross-pair referrer credit, factory threshold fix</li>
               <li><span class="check-icon check-done">✅</span> 6-language i18n (EN/FR/ES/PT/DE/TR) + 4 more (KO/TH/VI/ZH)</li>
               <li><span class="check-icon check-done">✅</span> Automated keeper live on VPS — 6 cron scripts, 24/7 rescue &amp; cycling</li>
               <li><span class="check-icon check-done">✅</span> Coupon system live — leader referral codes for early access</li>
@@ -1775,7 +1775,7 @@
             <div class="phase-title">🚀 Mainnet Launch <span style="font-size:13px;color:var(--yellow);font-weight:600">— July 19, 2026</span></div>
             <div class="phase-subtitle">Real USDC. Real earnings. Open to the world — cryptonova.ai</div>
             <ul class="checklist">
-              <li><span class="check-icon check-future">◦</span> Deploy V8.35 full contract suite to Base mainnet</li>
+              <li><span class="check-icon check-future">◦</span> Deploy V8.36 full contract suite to Base mainnet</li>
               <li><span class="check-icon check-future">◦</span> Seed Wave 1 (W1 wallet) — first matrix seat on mainnet</li>
               <li><span class="check-icon check-future">◦</span> Verify all contracts on BaseScan (removes wallet warnings)</li>
               <li><span class="check-icon check-future">◦</span> Leader early access opens July 19, 9am EST — coupon codes</li>
