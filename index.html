@@ -2127,6 +2127,8 @@ const PM_ABI = [
   'function allPairsStatus() external view returns (address[] memory, address[] memory, uint256[] memory, uint256[] memory, uint256[] memory, bool[] memory)',
   'function activePairIndex() external view returns (uint256)',
   'function pairCount() external view returns (uint256)',
+  'function currentMatA() external view returns (address)',
+  'function currentMatB() external view returns (address)',
 ];
 
 const TREASURY_ABI = [
@@ -2773,8 +2775,14 @@ async function loadHomeStats() {
                     'stat-cycles','stat-epoch','stat-supply','stat-treasury-usdc','stat-floor-price','stat-reward','stat-buyback'];
 
   async function _fetchStats(provider) {
-    const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, provider);
-    const matB1 = new ethers.Contract(ADDRS.T1.matB, MATRIX_ABI, provider);
+    // Resolve active T1 pair addresses via PairManager (shows T1.2 when factory has fired)
+    const pm1 = new ethers.Contract(ADDRS.T1.pm, PM_ABI, provider);
+    const [activeMatA1addr, activeMatB1addr] = await Promise.all([
+      pm1.currentMatA().catch(() => ADDRS.T1.matA),
+      pm1.currentMatB().catch(() => ADDRS.T1.matB),
+    ]);
+    const matA1 = new ethers.Contract(activeMatA1addr, MATRIX_ABI, provider);
+    const matB1 = new ethers.Contract(activeMatB1addr, MATRIX_ABI, provider);
     const matA2 = new ethers.Contract(ADDRS.T2.matA, MATRIX_ABI, provider);
     const matB2 = new ethers.Contract(ADDRS.T2.matB, MATRIX_ABI, provider);
     const matA3 = new ethers.Contract(ADDRS.T3.matA, MATRIX_ABI, provider);
@@ -3210,7 +3218,9 @@ async function loadUserData() {
         refInput.value = urlRef;
       } else {
         try {
-          const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
+          const pm1 = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
+          const activeMatA = await pm1.currentMatA();
+          const matA1 = new ethers.Contract(activeMatA, MATRIX_ABI, rp);
           const root = await matA1.posToMember(1n);
           if (root && root !== ethers.ZeroAddress) {
             refInput.placeholder = 'Auto: ' + short(root) + ' (current root)';
@@ -3327,7 +3337,9 @@ async function loadRegisterTab() {
         }
         // Fetch cycles to determine locked / eligible state (hiTier already confirmed < 2 above)
         const cycles     = Number(await tr.tierCycles(userAddr, 0).catch(() => 0n));
-        const t1matB     = new ethers.Contract(ADDRS.T1.matB, MATRIX_ABI, rp);
+        const _pm1Reg    = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
+        const _activeMatBReg = await _pm1Reg.currentMatB().catch(() => ADDRS.T1.matB);
+        const t1matB     = new ethers.Contract(_activeMatBReg, MATRIX_ABI, rp);
         const inT1MatB   = await t1matB.isActiveInMatrix(userAddr).catch(() => false);
         const hint   = document.getElementById('upgrade-tier-hint');
         const btnApp = document.getElementById('btn-upgrade-approve');
@@ -3345,10 +3357,14 @@ async function loadRegisterTab() {
           if (btnApp) { btnApp.disabled = true; btnApp.textContent = 'Step 1: Approve USDC (locked until cycle complete)'; }
           if (btnUp)  { btnUp.disabled = true; }
         }
-        // Load referrer address from contract
+        // Load referrer address from contract — check active pair first, then T1.1 fallback
         try {
-          const matA1  = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
-          const member = await matA1.getMember(userAddr).catch(() => null);
+          const _pm1Ref   = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
+          const _actMatA  = await _pm1Ref.currentMatA().catch(() => ADDRS.T1.matA);
+          let member      = await new ethers.Contract(_actMatA, MATRIX_ABI, rp).getMember(userAddr).catch(() => null);
+          if (!member || member.referrer === ethers.ZeroAddress) {
+            member = await new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp).getMember(userAddr).catch(() => null);
+          }
           const rInp   = document.getElementById('upgrade-referrer');
           if (rInp) {
             if (member && member.referrer && member.referrer !== ethers.ZeroAddress) {
@@ -3900,6 +3916,38 @@ async function doCancelCoupon(codeHash) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// MULTI-PAIR MATRIX DISCOVERY
+// Discovers all deployed pair matrices across all tiers (T1.1, T1.2 …).
+// Used by loadDashboardData(), withdrawal functions, and helpers.
+// Falls back to static ADDRS if PM discovery fails.
+// ═══════════════════════════════════════════════════════════════════════
+async function _buildAllMatrixObjects(rp) {
+  const TK = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
+  const result = [];
+  for (let i = 0; i < TK.length; i++) {
+    const t = TK[i];
+    const tNum = i + 1;
+    if (!ADDRS[t]?.matA) continue;
+    let added = false;
+    if (ADDRS[t]?.pm) {
+      try {
+        const [matAs, matBs] = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp).allPairsStatus();
+        for (let pi = 0; pi < matAs.length; pi++) {
+          result.push({ addr: matAs[pi], label: `T${tNum} Matrix A` });
+          result.push({ addr: matBs[pi], label: `T${tNum} Matrix B` });
+        }
+        added = true;
+      } catch(e) {}
+    }
+    if (!added) {
+      result.push({ addr: ADDRS[t].matA, label: `T${tNum} Matrix A` });
+      result.push({ addr: ADDRS[t].matB, label: `T${tNum} Matrix B` });
+    }
+  }
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
 async function loadDashboardData() {
@@ -3925,41 +3973,32 @@ async function loadDashboardData() {
     }
     const joined = joinedRead.value;
 
+    // Discover all pair matrices dynamically (includes factory pairs like T1.2, T2.2 …)
+    // This must run before the coupon check so we can scan all T1 MatAs.
+    const matrices = await _buildAllMatrixObjects(rp);
+
     if (!joined) {
-      // Coupon-registered members bypass TierRouter globalJoined — check MatA directly
-      try {
-        const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
-        const mData = await matA1.getMember(userAddr);
-        if (!mData.hasEverJoined) {
-          hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
-        }
-        // Member is in MatA via coupon path — proceed with dashboard
-      } catch(_) {
+      // Coupon-registered members bypass TierRouter globalJoined.
+      // Check ANY T1 Matrix A (T1.1, T1.2 …) for hasEverJoined so T1.2 coupon
+      // members don't incorrectly see "not registered".
+      const t1MatAs = matrices.filter(m => m.label === 'T1 Matrix A');
+      let foundInT1 = false;
+      for (const m of t1MatAs) {
+        try {
+          const mData = await new ethers.Contract(m.addr, MATRIX_ABI, rp).getMember(userAddr);
+          if (mData.hasEverJoined) { foundInT1 = true; break; }
+        } catch(_) {}
+      }
+      if (!foundInT1) {
         hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
       }
+      // Member is in a T1 MatA via coupon path — proceed with dashboard
     }
 
     hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); showEl('dash-content');
 
     // Fetch T1 cycles from TierRouter (manual upgrade gate)
     const t1CyclesTR = await tr.tierCycles(userAddr, 0).catch(() => 0n);
-
-    // Query all 6 matrices (T1A, T1B, T2A, T2B, T3A, T3B)
-    const matrices = [
-      { addr: ADDRS.T1.matA, label: 'T1 Matrix A' },
-      { addr: ADDRS.T1.matB, label: 'T1 Matrix B' },
-      { addr: ADDRS.T2.matA, label: 'T2 Matrix A' },
-      { addr: ADDRS.T2.matB, label: 'T2 Matrix B' },
-      { addr: ADDRS.T3.matA, label: 'T3 Matrix A' },
-      { addr: ADDRS.T3.matB, label: 'T3 Matrix B' },
-      ...(ADDRS.T4.matA ? [{addr:ADDRS.T4.matA,label:'T4 Matrix A'},{addr:ADDRS.T4.matB,label:'T4 Matrix B'}] : []),
-      ...(ADDRS.T5.matA ? [{addr:ADDRS.T5.matA,label:'T5 Matrix A'},{addr:ADDRS.T5.matB,label:'T5 Matrix B'}] : []),
-      ...(ADDRS.T6.matA ? [{addr:ADDRS.T6.matA,label:'T6 Matrix A'},{addr:ADDRS.T6.matB,label:'T6 Matrix B'}] : []),
-      ...(ADDRS.T7.matA ? [{addr:ADDRS.T7.matA,label:'T7 Matrix A'},{addr:ADDRS.T7.matB,label:'T7 Matrix B'}] : []),
-      ...(ADDRS.T8.matA ? [{addr:ADDRS.T8.matA,label:'T8 Matrix A'},{addr:ADDRS.T8.matB,label:'T8 Matrix B'}] : []),
-      ...(ADDRS.T9.matA ? [{addr:ADDRS.T9.matA,label:'T9 Matrix A'},{addr:ADDRS.T9.matB,label:'T9 Matrix B'}] : []),
-      ...(ADDRS.T10.matA ? [{addr:ADDRS.T10.matA,label:'T10 Matrix A'},{addr:ADDRS.T10.matB,label:'T10 Matrix B'}] : []),
-    ];
 
     let totalW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
     let activePositions = []; // [{label, bfs, bfsUnknown}]
@@ -4201,7 +4240,12 @@ async function loadDashboardData() {
       // on a flaky public RPC it could silently fall back to false and hide this whole
       // section even for a genuinely-eligible member (curTierCycles=0 + a dropped read =
       // canUpgrade false). Retried like every other read in this function now.
-      const _curMatBAddrDash = ADDRS['T' + highestTier] ? ADDRS['T' + highestTier].matB : null;
+      // Resolve active MatB for highestTier via PairManager (handles factory-spawned pairs like T1.2)
+      const _tierKey = 'T' + highestTier;
+      const _pmDash  = ADDRS[_tierKey]?.pm ? new ethers.Contract(ADDRS[_tierKey].pm, PM_ABI, rp) : null;
+      const _curMatBAddrDash = _pmDash
+        ? await _pmDash.currentMatB().catch(() => ADDRS[_tierKey]?.matB || null)
+        : (ADDRS[_tierKey]?.matB || null);
       const _inCurMatBDashRead = _curMatBAddrDash
         ? await retryRead(() => new ethers.Contract(_curMatBAddrDash, MATRIX_ABI, rp).isActiveInMatrix(userAddr))
         : { ok: true, value: false };
@@ -4580,17 +4624,8 @@ async function openDashDetail(type, cardEl) {
 
 // ── Helpers ──────────────────────────────────────────────────────────
 async function _getAllMatrixMembers(userAddr, rp) {
-  const mats = [
-    ADDRS.T1.matA, ADDRS.T1.matB, ADDRS.T2.matA, ADDRS.T2.matB,
-    ADDRS.T3.matA, ADDRS.T3.matB,
-    ...(ADDRS.T4?.matA ? [ADDRS.T4.matA, ADDRS.T4.matB] : []),
-    ...(ADDRS.T5?.matA ? [ADDRS.T5.matA, ADDRS.T5.matB] : []),
-    ...(ADDRS.T6?.matA ? [ADDRS.T6.matA, ADDRS.T6.matB] : []),
-    ...(ADDRS.T7?.matA ? [ADDRS.T7.matA, ADDRS.T7.matB] : []),
-    ...(ADDRS.T8?.matA ? [ADDRS.T8.matA, ADDRS.T8.matB] : []),
-    ...(ADDRS.T9?.matA ? [ADDRS.T9.matA, ADDRS.T9.matB] : []),
-    ...(ADDRS.T10?.matA ? [ADDRS.T10.matA, ADDRS.T10.matB] : []),
-  ];
+  const matObjs = await _buildAllMatrixObjects(rp);
+  const mats = matObjs.map(m => m.addr);
   let totalEarned = 0n, totalWithdrawn = 0n, totalWithdrawable = 0n, joinedAt = 0n, memberId = 0;
   for (const addr of mats) {
     const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
@@ -4901,18 +4936,8 @@ async function doWithdrawPartial() {
   if (btnA) btnA.disabled = true;
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
-    const matrices = [
-      ADDRS.T1.matA, ADDRS.T1.matB,
-      ADDRS.T2.matA, ADDRS.T2.matB,
-      ADDRS.T3.matA, ADDRS.T3.matB,
-      ...(ADDRS.T4.matA ? [ADDRS.T4.matA, ADDRS.T4.matB] : []),
-      ...(ADDRS.T5.matA ? [ADDRS.T5.matA, ADDRS.T5.matB] : []),
-      ...(ADDRS.T6.matA ? [ADDRS.T6.matA, ADDRS.T6.matB] : []),
-      ...(ADDRS.T7.matA ? [ADDRS.T7.matA, ADDRS.T7.matB] : []),
-      ...(ADDRS.T8.matA ? [ADDRS.T8.matA, ADDRS.T8.matB] : []),
-      ...(ADDRS.T9.matA ? [ADDRS.T9.matA, ADDRS.T9.matB] : []),
-      ...(ADDRS.T10.matA ? [ADDRS.T10.matA, ADDRS.T10.matB] : []),
-    ];
+    const _matObjs = await _buildAllMatrixObjects(rp);
+    const matrices = _matObjs.map(m => m.addr);
     let remaining = amtMicro;
     let withdrawn = false;
     for (const addr of matrices) {
@@ -4969,18 +4994,8 @@ async function doWithdraw() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Withdrawing…';
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
-    const matrices = [
-      ADDRS.T1.matA, ADDRS.T1.matB,
-      ADDRS.T2.matA, ADDRS.T2.matB,
-      ADDRS.T3.matA, ADDRS.T3.matB,
-      ...(ADDRS.T4.matA ? [ADDRS.T4.matA, ADDRS.T4.matB] : []),
-      ...(ADDRS.T5.matA ? [ADDRS.T5.matA, ADDRS.T5.matB] : []),
-      ...(ADDRS.T6.matA ? [ADDRS.T6.matA, ADDRS.T6.matB] : []),
-      ...(ADDRS.T7.matA ? [ADDRS.T7.matA, ADDRS.T7.matB] : []),
-      ...(ADDRS.T8.matA ? [ADDRS.T8.matA, ADDRS.T8.matB] : []),
-      ...(ADDRS.T9.matA ? [ADDRS.T9.matA, ADDRS.T9.matB] : []),
-      ...(ADDRS.T10.matA ? [ADDRS.T10.matA, ADDRS.T10.matB] : []),
-    ];
+    const _matObjs = await _buildAllMatrixObjects(rp);
+    const matrices = _matObjs.map(m => m.addr);
     let withdrawn = false;
     for (const addr of matrices) {
       const mc = new ethers.Contract(addr, MATRIX_ABI, rp);

@@ -637,6 +637,7 @@
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
     tierRouter:    '0x0E15b1D7086699b03ABC85aa1dbC92A89d13422b',
     matrixKeeper:  '0x0F1520dD108b5fa7227Ba8f42B10EE9E07223202',
+    T1pm:    '0x5d1a6fbA359c95a90c55321396F696A5912Be10F',
     T1matA:  '0x8723dfEb5bD23283339767f4560d6819D2F46A2c',
     T1matB:  '0xb7dA867788A5f4E74D870b9755aEa26E2A0aAE2B',
     T2matA:  '0x01dC98760690Abb0a64C226C2DCa631cB122a1c7',
@@ -674,6 +675,11 @@
     'event RescueDebtRepaid(address indexed member, uint256 repaid, uint256 remaining)',
     'function rescueDebtOf(address member) external view returns (uint256)',
     'function crossingReserveOf(address) external view returns (uint256)',  // V8.31
+  ];
+  const PM_ABI = [
+    'function currentMatA() external view returns (address)',
+    'function currentMatB() external view returns (address)',
+    'function allPairsStatus() external view returns (address[] memory, address[] memory, uint256[] memory, uint256[] memory, uint256[] memory, bool[] memory)',
   ];
   const KEEPER_ABI = [
     'function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)',
@@ -801,13 +807,20 @@
       // which runs in the context of FigureEightMatrixV8, so the event originates from matA/matB.
       // Works with manual_rescue.js (ParkedRescued on MatrixKeeper is never emitted on that path).
       const fromBlock = Math.max(0, blk - 100000); // ~56h on Base Sepolia (2s/block)
-      const matAForRescue = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
-      const matBForRescue = new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider);
-      const [logsA, logsB] = await Promise.all([
-        matAForRescue.queryFilter(matAForRescue.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]),
-        matBForRescue.queryFilter(matBForRescue.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]),
-      ]);
-      const keeperRescueLogs = [...logsA, ...logsB];
+      // Query RescueLoanIssued across all T1 pairs (T1.1, T1.2, …) via PairManager
+      const pm1ForKeeper = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
+      let allT1PairAddrs = [ADDRS.T1matA, ADDRS.T1matB];
+      try {
+        const [matAs, matBs] = await pm1ForKeeper.allPairsStatus();
+        allT1PairAddrs = [...matAs, ...matBs];
+      } catch(_) {}
+      const rescueLogArrays = await Promise.all(
+        allT1PairAddrs.map(addr => {
+          const c = new ethers.Contract(addr, MATRIX_ABI, provider);
+          return c.queryFilter(c.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
+        })
+      );
+      const keeperRescueLogs = rescueLogArrays.flat();
       const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
       const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
@@ -863,17 +876,36 @@
     const cardParked = document.getElementById('card-parked');
     if (cardParked) cardParked.className = 'status-card';
     try {
-      const matA   = new ethers.Contract(ADDRS.T1matA,       MATRIX_ABI, provider);
-      const matB   = new ethers.Contract(ADDRS.T1matB,       MATRIX_ABI, provider);
       const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
 
-      // Keeper checks both matA and matB for parked members (see MatrixKeeper.sol lines 386/393)
-      const [parkedCountA, parkedCountB, gracePeriod] = await Promise.all([
-        matA.getParkedCount().catch(()=>0n),
-        matB.getParkedCount().catch(()=>0n),
+      // Discover all T1 pairs via PairManager (handles factory-spawned pairs like T1.2)
+      const pm1 = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
+      let allT1Pairs = [];
+      try {
+        const [matAs, matBs] = await pm1.allPairsStatus();
+        for (let pi = 0; pi < matAs.length; pi++) {
+          allT1Pairs.push(
+            new ethers.Contract(matAs[pi], MATRIX_ABI, provider),
+            new ethers.Contract(matBs[pi], MATRIX_ABI, provider),
+          );
+        }
+      } catch(_) {
+        allT1Pairs = [
+          new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider),
+          new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider),
+        ];
+      }
+      const matA = allT1Pairs[0];   // active pair's MatA (for ENTRY_FEE lookup)
+      const matB = allT1Pairs[1];   // active pair's MatB
+
+      // Keeper checks all parked members across all pairs
+      const [parkedCounts, gracePeriod] = await Promise.all([
+        Promise.all(allT1Pairs.map(m => m.getParkedCount().catch(()=>0n))),
         keeper.parkedGracePeriod().catch(()=>0n),
       ]);
-      const count      = Number(parkedCountA) + Number(parkedCountB);
+      const parkedCountA = parkedCounts[0] || 0n;
+      const parkedCountB = parkedCounts[1] || 0n;
+      const count      = parkedCounts.reduce((s, c) => s + Number(c || 0n), 0);
       const graceSecs  = Number(gracePeriod);
       const nowSecs    = Math.floor(Date.now() / 1000);
 
@@ -901,11 +933,21 @@
         document.getElementById('badge-parked').className = 'card-badge badge-yellow';
         setText('badge-parked', count + ' ' + t('statusPage.js.badge_waiting_suffix', 'WAITING'));
       } else {
-        pillInd.className = 'pill-indicator red';
+        // Show yellow (not red) when grace period is active — members are expected to be parked
+        const inGrace = graceSecs > 0;
+        pillInd.className = inGrace ? 'pill-indicator yellow' : 'pill-indicator red';
         setText('pill-parked-val', count + ' ' + t('statusPage.js.parked_word', 'parked'));
-        setText('pill-parked-sub', t('statusPage.js.needs_attention', 'Needs attention'));
-        document.getElementById('card-parked').classList.add('has-issue');
-        document.getElementById('badge-parked').className = 'card-badge badge-red';
+        const graceTxt = inGrace
+          ? (graceSecs >= 86400 ? `Within ${Math.round(graceSecs/3600)}h grace period` : `Within ${Math.round(graceSecs/3600)}h grace`)
+          : t('statusPage.js.needs_attention', 'Needs attention');
+        setText('pill-parked-sub', graceTxt);
+        if (inGrace) {
+          document.getElementById('card-parked').classList.add('warning');
+          document.getElementById('badge-parked').className = 'card-badge badge-yellow';
+        } else {
+          document.getElementById('card-parked').classList.add('has-issue');
+          document.getElementById('badge-parked').className = 'card-badge badge-red';
+        }
         setText('badge-parked', count + ' ' + t('statusPage.js.badge_waiting_suffix', 'WAITING'));
       }
 
@@ -922,12 +964,12 @@
       } catch {}
 
       // ── Build live parked list directly from on-chain queue ───────────────
-      // Keeper checks both matA and matB — fetch from both and merge.
+      // Keeper scans all pairs — fetch from all discovered T1 pairs and merge.
       const stillParked = [];
       let totalShortfall = 0n;
 
       const batchSize = 5;
-      for (const [mat, matCount] of [[matA, Number(parkedCountA)], [matB, Number(parkedCountB)]]) {
+      for (const [mat, matCount] of allT1Pairs.map((m, i) => [m, Number(parkedCounts[i] || 0n)])) {
         for (let i = 0; i < matCount; i += batchSize) {
           const batch = [];
           for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
@@ -1100,8 +1142,14 @@
   // ── Matrix Progress ───────────────────────────────────────
   async function loadMatrix(provider) {
     try {
-      const matA = new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider);
-      const matB = new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider);
+      // Resolve active T1 pair via PairManager — shows T1.2 when factory has fired
+      const pm1 = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
+      const [activeMatAAddr, activeMatBAddr] = await Promise.all([
+        pm1.currentMatA().catch(() => ADDRS.T1matA),
+        pm1.currentMatB().catch(() => ADDRS.T1matB),
+      ]);
+      const matA = new ethers.Contract(activeMatAAddr, MATRIX_ABI, provider);
+      const matB = new ethers.Contract(activeMatBAddr, MATRIX_ABI, provider);
       const t2matA = new ethers.Contract(ADDRS.T2matA, MATRIX_ABI, provider);
       const tr   = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
 
