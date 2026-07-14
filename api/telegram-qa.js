@@ -9,9 +9,9 @@ import { ethers } from 'ethers';
 
 const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const TIER_ROUTER       = '0x633e83D3669874431aB7453844cc14dA11849356'; // V8.35
-const CNOVA_TOKEN       = '0xB539886c16ebee0deb2Bd64BE11b610dEf2F02Ca'; // V8.35
-const CNOVA_TREASURY    = '0x35F1B5A669abE4D0793739f4dbff61d80f281807'; // V8.35 — floorPrice() lives here
+const TIER_ROUTER       = '0x0E15b1D7086699b03ABC85aa1dbC92A89d13422b'; // V8.36
+const CNOVA_TOKEN       = '0x0501eB61203dEDCB5601b678d49f5fA1e87Fa392'; // V8.36
+const CNOVA_TREASURY    = '0xeEBe071749377D8DF3CE34bEFc25E51ED112DfF8'; // V8.36 — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -90,11 +90,16 @@ T10 SuperNova Apex   $10,000
 </code>
 
 ## CNOVA Token
-- Mined automatically each cycle you complete.
-- Guaranteed floor price: Treasury USDC divided by total CNOVA supply.
-- 15% of every entry fee backs the Treasury permanently.
+- Minted automatically on every matrix event (register, cross, rotate).
+- Guaranteed floor price: Treasury USDC divided by total CNOVA minted.
+- 5% of every entry fee goes to the Treasury permanently (treasury BPS = 500).
+- Every tier contributes to the floor — T2–T7 push it up faster than T1; T8–T10 push it up fastest.
 - Redeem CNOVA for USDC at floor price from the Dashboard anytime.
-- Floor price only goes up.
+- Floor price only ever goes up — every activity adds more USDC per CNOVA than the current floor.
+
+## CNOVA Floor Price by Tier (Epoch 1, 5% treasury BPS)
+T1=$10 fee → $0.0100/CNOVA  |  T2–T7 → $0.0125/CNOVA  |  T8–T10 → $0.01563/CNOVA
+Tier multipliers: T1=1×, T2=2×, T3=4×, T4=8×, T5=20×, T6=40×, T7=80×, T8=160×, T9=320×, T10=640×
 
 ## CNOVA Epochs (from CNOVAToken.sol)
 <b>Global and platform-wide</b> - not per-member. <b>9 epochs total.</b>
