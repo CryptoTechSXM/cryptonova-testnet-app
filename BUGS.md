@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-15] Dashboard (index.html) — Shows V8.36
+- **Reporter:** Anthony L
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3af00d7309c89270889a1ac0fa2ce279b8a9fd91
+- **Frequency:** Consistent
+- **What happened:** Shows V8.36
+- **What was expected:** Should show V8.37
+- **Submitted:** Wed, 15 Jul 2026 14:22:14 GMT
+
+
 ### [2026-07-15] Dashboard (index.html) — It's still showing v8.36
 - **Reporter:** KolaOla
 - **Page:** Dashboard (index.html)
