@@ -861,10 +861,12 @@ document.addEventListener('click', function(e) {
   if (m && h && !h.contains(e.target)) { m.classList.remove('open'); }
 });
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.ethereum && localStorage.getItem('cnova_connected')) {
+  // Always try eth_accounts — Trust Wallet and similar wallets scope auth per-page,
+  // so eth_accounts may return [] even when connected. Don't gate on cnova_connected.
+  if (window.ethereum) {
     window.ethereum.request({ method: 'eth_accounts' }).then(a => {
       if (a.length) connectWallet(true);
-      else localStorage.removeItem('cnova_connected');
+      // empty = per-page scoping, not real disconnect — leave cnova_connected intact
     }).catch(() => {});
   }
   if (window.ethereum) {
@@ -877,7 +879,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-    window.ethereum.on('chainChanged', () => location.reload());
+    window.ethereum.on('chainChanged', (newChainId) => {
+      // Only reload if genuinely switching AWAY from Base Sepolia.
+      // Some wallets (Trust Wallet, TokenPocket) fire spurious chainChanged with
+      // the SAME chainId during connect — blindly reloading causes an infinite loop.
+      if (parseInt(newChainId, 16) !== CHAIN_ID) location.reload();
+      else if (typeof connectWallet === 'function') connectWallet(true).catch(() => {});
+    });
   }
 });
 </script>

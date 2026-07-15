@@ -2313,11 +2313,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     window.ethereum.on('accountsChanged', (accounts) => {
       if (accounts.length === 0) {
-        userAddr = null; signer = null; provider = null;
-        localStorage.removeItem('cnova_connected'); // clear so refresh doesn't try to reconnect
-        const b = document.getElementById('btn-connect');
-        b.textContent = 'Connect Wallet'; b.classList.remove('connected');
-      const _bm3 = document.getElementById('btn-connect-m'); if (_bm3) { _bm3.textContent = 'Connect Wallet'; _bm3.className = 'btn-connect-mob'; }
+        // Verify before clearing — some wallets (Trust Wallet, TokenPocket) fire
+        // spurious accountsChanged([]) during init while still connected
+        window.ethereum.request({ method: 'eth_accounts' }).then(verified => {
+          if (verified.length === 0) {
+            // Genuinely disconnected
+            userAddr = null; signer = null; provider = null;
+            localStorage.removeItem('cnova_connected');
+            const b = document.getElementById('btn-connect');
+            b.textContent = 'Connect Wallet'; b.classList.remove('connected');
+            const _bm3 = document.getElementById('btn-connect-m'); if (_bm3) { _bm3.textContent = 'Connect Wallet'; _bm3.className = 'btn-connect-mob'; }
+          }
+          // else: spurious event — wallet still connected, ignore
+        }).catch(() => {});
       } else if (accounts[0].toLowerCase() !== (userAddr||'').toLowerCase()) {
         setTimeout(() => connectWallet(true).catch(()=>{}), 300);
       }
