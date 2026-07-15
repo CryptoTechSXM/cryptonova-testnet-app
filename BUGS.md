@@ -15,6 +15,7 @@
 - **Frequency:** Intermittent
 - **What happened:** It's still showing v8.36
 - **What was expected:** Should show V8.37
+- **Notes:** ✅ **Cache issue** — V8.37 is live. Do a hard refresh: `Ctrl + Shift + R` (PC) or `Cmd + Shift + R` (Mac). Vercel CDN caches aggressively; new builds take 1–3 min to propagate globally.
 - **Submitted:** Wed, 15 Jul 2026 13:55:58 GMT
 
 
@@ -26,6 +27,7 @@
 - **Frequency:** Consistent
 - **What happened:** When payment is made and confirmed on MM, it just keeps rolling on CryptoNova and does not conclude the transaction until you refresh the page. Thereby making the registration process slower.
 - **What was expected:** The registration process can be smoother
+- **Notes:** ⏳ **Investigating** — The page polls for tx confirmation with a 10s timeout then refreshes. On a slow RPC the tx receipt can take 15–30s, making the spinner appear to hang. Not a failed tx — the registration lands on-chain, the UI just takes time to confirm. Post-launch improvement: show a "transaction submitted" state immediately after wallet confirmation so members know the tx is in flight. Logged for V8.38.
 - **Submitted:** Wed, 15 Jul 2026 13:45:24 GMT
 
 
@@ -37,6 +39,7 @@
 - **Frequency:** Intermittent
 - **What happened:** Cannot connect wallet
 - **What was expected:** wallet should connect seamlessly
+- **Notes:** ℹ️ **Likely extension issue** — Intermittent wallet connect failures are typically caused by the MetaMask extension not responding to the page request. Fix: refresh the page, unlock MetaMask, then click Connect again. If it persists, disable/re-enable the MetaMask extension in browser settings. Not reproduced on admin.crypto-nova.app.
 - **Submitted:** Wed, 15 Jul 2026 13:33:44 GMT
 
 
@@ -95,6 +98,7 @@ Previously Withdrawn − $0.00
 ↳ Crossing Reserve (locked)− $10.00
 = Available to Claim - $8.43
 - **What was expected:** It should have automatically re-entered without me having to come out of pocket again.
+- **Notes:** ✅ **Fixed in V8.37 (UX) + works as designed (contract)**. Two issues: (1) Pre-V8.37, if member was softParked in T1.2, the dashboard only scanned T1.1 and showed the "limbo" (manual re-entry) panel instead of the "rescue" (auto-rescue) panel. V8.37 scans all pairs — parked members in T1.2 now correctly see the rescue section. (2) Auto-rescue is genuine but has a 24h grace period (by design) before the keeper fires. Contract confirms: `softParkIdle` releases crossing reserve back to withdrawable, so effective balance = $18.43 > $10 entry fee — rescue fires automatically. V8.37 adds a "⏳ Auto-rescue active — within 24 hours" hint so members know not to take manual action.
 - **Submitted:** Sat, 11 Jul 2026 09:42:41 GMT
 
 
@@ -106,7 +110,7 @@ Previously Withdrawn − $0.00
 - **Frequency:** Consistent
 - **What happened:** Trying to use coupon to sign up and it's saying "coupon not found or Expired"
 - **What was expected:** Easy registration
-- **Notes:** Coupon was issued on V8.32 or V8.33 contract — now void after V8.34 fresh deploy. Action needed: Kolawole or any admin issues a fresh V8.34 coupon for Sherwyn's wallet 0x1e8e...b1f7.
+- **Notes:** ⏳ **Pending admin action** — Coupon was issued on V8.32/V8.33, now void after V8.34+ fresh deploy. Admin must issue a fresh V8.37 coupon for Sherwyn's wallet 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7 via Dashboard → Coupon tab → Issue Coupon. Share new code with Sherwyn directly.
 - **Submitted:** Wed, 08 Jul 2026 21:24:37 GMT
 
 ---
@@ -149,3 +153,6 @@ Previously Withdrawn − $0.00
 | 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x301a) — "not positioned in matrix." Root cause: V8.34 is a fresh deploy; wallet needs to register on V8.34. | V8.34 |
 | 2026-07-09 | 2026-07-09 | index.html | Sherwyn (0x7744) — self rescue failed with raw tx error. Root cause: reported at 13:32 UTC against V8.33 T2 corrupted state. V8.34 went live at 17:00 UTC. Member should re-register on V8.34 and retry self rescue on clean matrices. | V8.34 |
 | 2026-07-09 | 2026-07-09 | index.html | Kolawole Ola (0x5704) — coupons from V8.32/V8.33 still showing and cancel fails ("only issuer" revert). Root cause: localStorage-stored coupons persist across deploys; `cancelCoupon()` on V8.34 returns issuer=0x0000 for old-contract hashes → revert. Fix: `loadMyCoupons()` now detects zero-address issuer and renders "PREV. VERSION" badge (greyed out, no action buttons) instead of ACTIVE. | f7156d5 |
+| 2026-07-11 | 2026-07-15 | index.html | Koach100 (0x2444) — withdrew $17.64 but only $4.66 arrived. Root cause: dashboard showed raw `totalW` (on-chain withdrawable) but contract deducts $10 crossing reserve per active in-matrix position at withdrawal time. V8.37 introduces `realW` which pre-deducts the $10 lock — displayed amount now matches what the member actually receives. | V8.37 cbcbe06 |
+| 2026-07-11 | 2026-07-15 | index.html | Kolawole Ola (0x33b5) — auto-reentry didn't engage after softParkIdle. Root cause (UX): pre-V8.37 the dashboard only scanned T1.1; if member was parked in T1.2 they saw the "limbo" (manual re-entry) card instead of the "rescue" (auto-reentry) card. Root cause (design): auto-rescue has a 24h grace period — it's not instant. Contract confirmed: `softParkIdle` releases crossing reserve to withdrawable, so effective balance covers re-entry; keeper fires within 24h. V8.37: all pairs scanned + "Auto-rescue active — within 24h" hint added to rescue card. | V8.37 cbcbe06 |
+| 2026-07-15 | 2026-07-15 | index.html | Les Gay Jr (0x7343) — referrals not counting and "My Node ID" label confused with My Directs. Root cause: V8.36 matrix scanner only covered T1.1; referrals in T1.2 were invisible (count undercount). "My Node ID" is a permanent stat card showing BFS position — not replaced by My Directs tab (UX, not a bug). V8.37 scans all pairs via allPairsStatus() — referral counts now correct. | V8.37 cbcbe06 |
