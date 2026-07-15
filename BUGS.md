@@ -7,18 +7,6 @@
 
 ## Open Issues
 
-### [2026-07-15] Dashboard (index.html) — Shows V8.36
-- **Reporter:** Anthony L
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x3af00d7309c89270889a1ac0fa2ce279b8a9fd91
-- **Frequency:** Consistent
-- **What happened:** Shows V8.36
-- **What was expected:** Should show V8.37
-- **Notes:** \u2705 **Cache issue** \u2014 V8.37 is live. Do a hard refresh: `Ctrl + Shift + R` (PC) or `Cmd + Shift + R` (Mac). Vercel CDN caches aggressively; new builds take 1\u20133 min to propagate globally.
-- **Submitted:** Wed, 15 Jul 2026 14:22:14 GMT
-
-
 ### [2026-07-15] Onboarding / Registration \u2014 Registration spinner hangs after wallet confirmation
 - **Reporter:** KolaOla
 - **Page:** Onboarding / Registration
@@ -77,3 +65,5 @@
 | 2026-07-15 | 2026-07-15 | index.html | KolaOla (0x5704) \u2014 intermittent wallet connect failure. MetaMask extension issue \u2014 refresh page, unlock MetaMask, reconnect. Not reproduced on admin.crypto-nova.app. No code change needed. | \u2014 |
 | 2026-07-11 | 2026-07-15 | index.html | Koach100 (0x9ae3) \u2014 registration tx keeps failing. RPC rate limit \u2014 transient, retry after a few seconds resolves. No code change. | \u2014 |
 | 2026-07-08 | 2026-07-15 | Coupon System | Sherwyn (0x1e8e) \u2014 coupon void after V8.34+ redeploy. Root cause: coupons are contract-bound; old codes are invalid on fresh deploys. Coupon system verified working on V8.37 (tested with another member). Closed \u2014 reopen if Sherwyn reports again on V8.37. | \u2014 |
+| 2026-07-15 | 2026-07-15 | index.html | Anthony L (0x3af0) — nav header still showing V8.36. Root cause: version badge (`vb-d`/`vb-m` spans) was hardcoded to V8.36 and not bumped at deploy time. Fixed: updated badge + gate-pill default + roadmap subtitle to V8.37. | e36fbf7+ |
+| 2026-07-15 | 2026-07-15 | index.html | Anthony L (0x3af0) — nav header still showing V8.36. Root cause: version badge (`vb-d`/`vb-m` spans) hardcoded to V8.36, not bumped at deploy. Fixed: badge + gate-pill-label default + roadmap subtitle updated to V8.37. | (this commit) |
