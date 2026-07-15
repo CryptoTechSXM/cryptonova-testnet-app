@@ -4000,7 +4000,7 @@ async function loadDashboardData() {
     // Fetch T1 cycles from TierRouter (manual upgrade gate)
     const t1CyclesTR = await tr.tierCycles(userAddr, 0).catch(() => 0n);
 
-    let totalW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
+    let totalW = 0n, realW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
     let activePositions = []; // [{label, bfs, bfsUnknown}]
     let activeCycles = 0n; // highest tier's cycles (for upgrade widget)
     let highestTier = 0;
@@ -4042,6 +4042,7 @@ async function loadDashboardData() {
       const member = matResults[i];
       if (member && member.hasEverJoined) {
         totalW += BigInt(member.withdrawable);
+        { const _wraw = BigInt(member.withdrawable); realW += (member.isInMatrix && _wraw > 10_000_000n) ? _wraw - 10_000_000n : (member.isInMatrix ? 0n : _wraw); }
         totalE += BigInt(member.totalEarned);
         totalWD += BigInt(member.totalWithdrawn ?? 0n);
         if (!memberId) { memberId = Number(member.id); memberReferrer = member.referrer; }
@@ -4127,22 +4128,22 @@ async function loadDashboardData() {
     const TIER_NAMES = ['—','Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime','Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
 
     // Render
-    setText('dash-withdrawable',   fmt6(totalW));
-    setText('dash-withdraw-amount',fmt6(totalW));
-    window._maxWithdrawable = totalW; // used by partial withdraw UI
+    setText('dash-withdrawable',   fmt6(realW));
+    setText('dash-withdraw-amount',fmt6(realW));
+    window._maxWithdrawable = realW; // real cap — deducts in-matrix $10 lock per active position
 
     // Withdrawal fee breakdown — read withdrawalFeeBps from T1A (same on all matrices)
     try {
       const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
       const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
       window._withdrawFeeBps = feeBps;
-      const feeAmt = totalW * feeBps / 10000n;
-      const netAmt = totalW - feeAmt;
+      const feeAmt = realW * feeBps / 10000n;
+      const netAmt = realW - feeAmt;
       const feePct = (Number(feeBps) / 100).toFixed(1);
       const breakdown = document.getElementById('withdraw-fee-breakdown');
-      if (totalW > 0n) {
+      if (realW > 0n) {
         document.getElementById('wfee-pct').textContent  = feePct;
-        document.getElementById('wfee-gross').textContent = fmt6(totalW);
+        document.getElementById('wfee-gross').textContent = fmt6(realW);
         document.getElementById('wfee-fee').textContent   = '−' + fmt6(feeAmt);
         document.getElementById('wfee-net').textContent   = fmt6(netAmt);
         if (breakdown) breakdown.style.display = 'block';
@@ -4448,7 +4449,7 @@ async function loadDashboardData() {
         }
 
         if (reserved > 0n) {
-          const free = totalW > reserved ? totalW - reserved : 0n;
+          const free = realW > reserved ? realW - reserved : 0n;
           window._maxWithdrawable  = free;   // cap partial withdraw to free amount
           window._protocolReserved = reserved;
 
@@ -4646,16 +4647,14 @@ async function renderWithdrawableDetail(el, rp) {
   const { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt } = await _getAllMatrixMembers(userAddr, rp);
 
   // Fetch crossing reserve locked across all active tier matrices
-  const tierKeys = Object.keys(ADDRS).filter(k => /^T\d+$/.test(k));
+  // Use _buildAllMatrixObjects so T1.2, T1.3 etc. are included after factory expansion
+  const _allMatObjs = await _buildAllMatrixObjects(rp);
   let totalCrossingReserve = 0n;
-  await Promise.all(tierKeys.flatMap(tk => {
-    const tier = ADDRS[tk];
-    return [tier.matA, tier.matB].filter(a => a && a !== ethers.ZeroAddress).map(addr =>
-      new ethers.Contract(addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
-        totalCrossingReserve += BigInt(r);
-      })
-    );
-  }));
+  await Promise.all(_allMatObjs.map(({ addr }) =>
+    new ethers.Contract(addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
+      totalCrossingReserve += BigInt(r);
+    })
+  ));
 
   const autoDeducted    = totalEarned > (totalWithdrawn + totalWithdrawable)
     ? totalEarned - totalWithdrawn - totalWithdrawable : 0n;
@@ -4962,8 +4961,9 @@ async function doWithdrawPartial() {
       remaining -= pullAmt;
       withdrawn = true;
     }
-    const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} could not be sourced)` : '';
-    setStatus('withdraw-status', withdrawn ? `✅ Withdrew $${val.toFixed(2)}!${leftOver}` : 'Nothing withdrawn.', withdrawn ? 'ok' : 'info');
+    const actualWithdrawn = amtMicro - remaining;
+    const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} of the $${val.toFixed(2)} requested could not be sourced — in-matrix position may have a $10 reserve lock)` : '';
+    setStatus('withdraw-status', withdrawn ? `✅ Withdrew $${(Number(actualWithdrawn)/1e6).toFixed(2)}!${leftOver}` : 'Nothing withdrawn.', withdrawn ? 'ok' : 'info');
     if (inp) inp.value = '';
     onWithdrawAmountInput();
     if (withdrawn) await new Promise(r => setTimeout(r, 3500));
@@ -5047,7 +5047,16 @@ async function getMatrixForTier() {
   const tiers = { 1: ADDRS.T1, 2: ADDRS.T2, 3: ADDRS.T3, 4: ADDRS.T4, 5: ADDRS.T5,
                   6: ADDRS.T6, 7: ADDRS.T7, 8: ADDRS.T8, 9: ADDRS.T9, 10: ADDRS.T10 };
   const tier = tiers[tierNum] || ADDRS.T1;
-  return tier[side] || tier.matA; // fall back to matA if matB not deployed yet
+  // Resolve active pair via PairManager (handles T1.2, T2.2, etc. after factory expansion)
+  if (tier.pm) {
+    try {
+      const _rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _pm = new ethers.Contract(tier.pm, PM_ABI, _rp);
+      const _activeAddr = side === 'matB' ? await _pm.currentMatB() : await _pm.currentMatA();
+      if (_activeAddr && _activeAddr !== ethers.ZeroAddress) return _activeAddr;
+    } catch(_) {}
+  }
+  return tier[side] || tier.matA; // fall back to hardcoded if PM call fails
 }
 
 // Fetch posToMember in chunks to avoid RPC in-flight limit
@@ -5185,19 +5194,31 @@ async function loadMyTree() {
   if (treeEl) treeEl.style.display='none';
   document.getElementById('my-directs-card').style.display='none';
   try {
-    // Find which matrix the user is currently active in
-    const allMats = [
-      {addr: ADDRS.T1.matA, label:'T1 Matrix A'}, {addr: ADDRS.T1.matB, label:'T1 Matrix B'},
-      {addr: ADDRS.T2.matA, label:'T2 Matrix A'}, {addr: ADDRS.T2.matB, label:'T2 Matrix B'},
-      {addr: ADDRS.T3.matA, label:'T3 Matrix A'}, {addr: ADDRS.T3.matB, label:'T3 Matrix B'},
-      ...(ADDRS.T4.matA ? [{addr:ADDRS.T4.matA,label:'T4 Matrix A'},{addr:ADDRS.T4.matB,label:'T4 Matrix B'}] : []),
-      ...(ADDRS.T5.matA ? [{addr:ADDRS.T5.matA,label:'T5 Matrix A'},{addr:ADDRS.T5.matB,label:'T5 Matrix B'}] : []),
-      ...(ADDRS.T6.matA ? [{addr:ADDRS.T6.matA,label:'T6 Matrix A'},{addr:ADDRS.T6.matB,label:'T6 Matrix B'}] : []),
-      ...(ADDRS.T7.matA ? [{addr:ADDRS.T7.matA,label:'T7 Matrix A'},{addr:ADDRS.T7.matB,label:'T7 Matrix B'}] : []),
-      ...(ADDRS.T8.matA ? [{addr:ADDRS.T8.matA,label:'T8 Matrix A'},{addr:ADDRS.T8.matB,label:'T8 Matrix B'}] : []),
-      ...(ADDRS.T9.matA ? [{addr:ADDRS.T9.matA,label:'T9 Matrix A'},{addr:ADDRS.T9.matB,label:'T9 Matrix B'}] : []),
-      ...(ADDRS.T10.matA ? [{addr:ADDRS.T10.matA,label:'T10 Matrix A'},{addr:ADDRS.T10.matB,label:'T10 Matrix B'}] : []),
-    ];
+    // Find which matrix the user is currently active in.
+    // Use allPairsStatus() per tier so T1.2, T2.2, etc. are included after factory expansion.
+    const allMats = [];
+    const _tierKeys = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
+    for (const _t of _tierKeys) {
+      if (!ADDRS[_t]?.matA) continue;
+      const _tNum = _t.slice(1);
+      if (ADDRS[_t].pm) {
+        try {
+          const _pmT = new ethers.Contract(ADDRS[_t].pm, PM_ABI, rp);
+          const [_matAs, _matBs] = await _pmT.allPairsStatus();
+          for (let _pi = 0; _pi < _matAs.length; _pi++) {
+            const _pSuffix = _matAs.length > 1 ? \` (pair ${_pi + 1})\` : '';
+            if (_matAs[_pi] && _matAs[_pi] !== ethers.ZeroAddress)
+              allMats.push({addr: _matAs[_pi], label: `T${_tNum} Matrix A${_pSuffix}`});
+            if (_matBs[_pi] && _matBs[_pi] !== ethers.ZeroAddress)
+              allMats.push({addr: _matBs[_pi], label: `T${_tNum} Matrix B${_pSuffix}`});
+          }
+          continue;
+        } catch(_) {}
+      }
+      // Fallback: use hardcoded addresses
+      allMats.push({addr: ADDRS[_t].matA, label: `T${_tNum} Matrix A`});
+      allMats.push({addr: ADDRS[_t].matB, label: `T${_tNum} Matrix B`});
+    }
     let activeMat = null, activeBFS = 0n, activeLabel = '', activeMSize = 64n, activeBFSUnknown = false;
     let anyReadFailed = false;
     for (const m of allMats) {
@@ -5280,10 +5301,18 @@ async function _getDirectReferrals(addr, rp) {
   // ── Fallback: matrix scan (T1 only for testnet — higher tiers rarely used) ─
   try {
     const trD   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const mats  = [ADDRS.T1?.matA, ADDRS.T1?.matB,
-      ...(ADDRS.T2?.matA ? [ADDRS.T2.matA, ADDRS.T2.matB] : []),
-      ...(ADDRS.T3?.matA ? [ADDRS.T3.matA, ADDRS.T3.matB] : []),
-    ].filter(Boolean);
+    // Resolve T1 pairs dynamically (handles T1.2, T1.3, etc. after factory expansion)
+    const mats = [];
+    try {
+      const _pm1scan = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
+      const [_t1As, _t1Bs] = await _pm1scan.allPairsStatus();
+      _t1As.forEach(a => { if (a && a !== ethers.ZeroAddress) mats.push(a); });
+      _t1Bs.forEach(a => { if (a && a !== ethers.ZeroAddress) mats.push(a); });
+    } catch(_) {
+      if (ADDRS.T1?.matA) { mats.push(ADDRS.T1.matA); mats.push(ADDRS.T1.matB); }
+    }
+    if (ADDRS.T2?.matA) { mats.push(ADDRS.T2.matA); mats.push(ADDRS.T2.matB); }
+    if (ADDRS.T3?.matA) { mats.push(ADDRS.T3.matA); mats.push(ADDRS.T3.matB); }
     const seen  = new Set();
     let incomplete = false;
     for (const matAddr of mats) {
