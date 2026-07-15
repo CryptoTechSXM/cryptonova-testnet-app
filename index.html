@@ -2364,6 +2364,13 @@ async function connectWallet(silent=false) {
     const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' }).catch(() => window.ethereum.chainId || '0x0');
     const chainId = parseInt(chainIdHex || '0', 16);
     if (chainId !== CHAIN_ID) {
+      // Phantom doesn't support Base Sepolia (or Base Sepolia testnet) — bail early with a clear message
+      if (walletName === 'Phantom') {
+        isConnecting = false;
+        if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
+        if (!silent) toast('Phantom doesn\'t support Base Sepolia. Please use MetaMask, Rabby, or TokenPocket.', 'error');
+        return;
+      }
       // Auto-attempt network switch before showing banner
       try {
         await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
