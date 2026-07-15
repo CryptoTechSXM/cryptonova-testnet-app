@@ -815,10 +815,14 @@ document.addEventListener('DOMContentLoaded', () => {
 function detectWalletType() {
   const e = window.ethereum;
   if (!e) return '';
-  if (e.isRabby) return 'Rabby';
-  if (e.isCoinbaseWallet) return 'Coinbase';
-  if (e.isMetaMask) return 'MetaMask';
-  if (e.isTrust) return 'Trust';
+  if (e.isTokenPocket)    return 'TokenPocket';
+  if (e.isRabby)          return 'Rabby';
+  if (e.isCoinbaseWallet) return 'Coinbase Wallet';
+  if (e.isBraveWallet)    return 'Brave Wallet';
+  if (e.isTrust)          return 'Trust Wallet';
+  if (e.isOKExWallet || window.okxwallet) return 'OKX Wallet';
+  if (e.isPhantom)        return 'Phantom';
+  if (e.isMetaMask)       return 'MetaMask';
   return 'Wallet';
 }
 async function connectWallet(silent = false) {
