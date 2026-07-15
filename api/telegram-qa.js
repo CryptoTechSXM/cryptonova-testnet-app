@@ -121,7 +121,7 @@ Genesis (#1-500) = 60%, Pioneer (#501-1000) = 40%.
 
 ## How to Register
 1. Visit <a href="https://crypto-nova.app">crypto-nova.app</a>
-2. Connect MetaMask or Rabby wallet
+2. Connect your wallet — MetaMask, Rabby, TokenPocket, Coinbase Wallet, Trust Wallet, or OKX all supported
 3. Switch to <b>Base Sepolia</b> (auto-prompted)
 4. Need funds? Use <code>/faucet 0xYourAddress</code> - bot sends $20 USDC + 0.002 ETH instantly
 5. Approve USDC, then Register
@@ -160,7 +160,7 @@ Chain ID: <code>84532</code> | RPC: <code>https://sepolia.base.org</code> | Expl
 <b>Wrong network:</b> Use site prompt or add Base Sepolia manually.
 <b>No USDC/ETH (testnet):</b> Use /faucet command with your address.
 <b>No USDC/ETH (mainnet):</b> Swap any crypto to USDC on Base using <a href="https://changenow.app.link/referral?link_id=c66940e36c06c9">ChangeNow</a> — works with most coins, no account required.
-<b>Wallet won't connect:</b> Refresh or switch to MetaMask/Rabby.
+<b>Wallet won't connect:</b> Refresh and try again. Supported wallets: MetaMask, Rabby, TokenPocket, Coinbase Wallet, Trust Wallet, OKX Wallet. Phantom is not supported on testnet (Base Sepolia) but works on mainnet.
 <b>Dashboard shows 0:</b> Connect with same wallet you registered with.
 
 ## Referral System
@@ -218,7 +218,7 @@ I can answer questions about:
 const REGISTER_TEXT = `<b>How to Register on CryptoNova</b>
 
 1. Visit <a href="https://crypto-nova.app">crypto-nova.app</a>
-2. Connect MetaMask or Rabby wallet
+2. Connect your wallet — MetaMask, Rabby, TokenPocket, Coinbase Wallet, Trust Wallet, or OKX all supported
 3. Switch to <b>Base Sepolia</b> (auto-prompted)
 4. Need testnet funds? Use: <code>/faucet 0xYourWalletAddress</code>
    Bot sends $20 USDC + 0.002 ETH for gas instantly.
@@ -348,6 +348,10 @@ async function classifyMessage(apiKey, text) {
         max_tokens: 5,
         system: `Classify this Telegram message into exactly one word — no punctuation, no explanation:
 "support" = help request, technical question about CryptoNova, faucet request, bug report, wallet issue, registration question
+
+## Supported Wallets
+MetaMask ✅, Rabby ✅, TokenPocket ✅, Coinbase Wallet ✅, Trust Wallet ✅, OKX Wallet ✅
+Phantom ❌ on testnet (Base Sepolia not supported by Phantom) — will work on mainnet Base.
 "offtopic" = casual greetings (GM/GN/hi), general crypto chat, price talk, unrelated conversation, sharing wins
 "spam" = marketing links, promotional content, scam attempts, unrelated project shilling, gibberish
 Reply with only one word.`,
@@ -702,25 +706,4 @@ export default async function handler(req, res) {
 
   const detectedAddr = extractAddress(question);
   if (detectedAddr && faucetKeywordsPresent(question)) {
-    if (!checkRateLimit(userId)) { await sendReply(BOT_TOKEN, chatId, `Too many messages. Please wait a moment.`, msgId); return ok(); }
-    await handleFaucetRequest(BOT_TOKEN, chatId, msgId, detectedAddr);
-    return ok();
-  }
-
-  if (!checkRateLimit(userId)) {
-    await sendReply(BOT_TOKEN, chatId, `Too many messages. Please wait a moment before asking again.`, msgId);
-    return ok();
-  }
-
-  await sendTyping(BOT_TOKEN, chatId);
-  try {
-    const answer = await askClaude(ANTHROPIC, question);
-    if (answer) await sendReply(BOT_TOKEN, chatId, answer, msgId);
-    else throw new Error('Empty response');
-  } catch (e) {
-    console.error('[telegram-qa] Claude error:', e.message);
-    await sendReply(BOT_TOKEN, chatId, `Having trouble right now. Try again in a moment.\n<a href="https://crypto-nova.app/faq">FAQ</a> | Tag @admin for urgent help.`, msgId);
-  }
-
-  return ok();
-}
+    if (!checkRateLimit(userId)
