@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-15] Other — Hey CT I am using the latest ver 8.36 and I am having proble…
+- **Reporter:** Les Gay Jr
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7343484d4904a18dba49310575d54bab6f15604a
+- **Frequency:** Consistent
+- **What happened:** Hey CT I am using the latest ver 8.36 and I am having problems with my referrals not lining up. I am also having problems with the matrix screen.  I am seeing MY NODE ID Instead of MY DIRECTS. Both of these errors are occurring in Metamask and Robby. It happens also if I click on the MY DIRECTS tab too in both metamask and rabby
+- **What was expected:** My referrals are not lining up. The matrix screen should read MY DIRECTS not MY NODE ID in both Metamask and Robby. I have screenshots of all this but no way to send this in this bug report.
+- **Notes:** I have screen shots where do I send this
+- **Submitted:** Wed, 15 Jul 2026 11:51:14 GMT
+
+
 ### [2026-07-11] Governance / DAO (governance.html) — I attempted to withdraw 17.64 USDC. After the fee I should h…
 - **Reporter:** @Koach100
 - **Page:** Governance / DAO (governance.html)
