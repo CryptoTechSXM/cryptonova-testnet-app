@@ -1,146 +1,222 @@
 # CryptoNova July 19 Launch Runbook
 
-> Last updated: 2026-07-05  
-> Contract: V8.31 (deployed on Base Sepolia for testnet dry-run; mainnet deploy T-minus ~7 days)
+> Last updated: 2026-07-09  
+> Contract: V8.34 (live on Base Sepolia testnet; mainnet deploy target ~July 14–16)
 
 ---
 
-## PHASE 1 — Pre-Deploy (T-7 days, ~July 12)
+## TIMELINE OVERVIEW
 
-### Contract deploy checklist
-These must be done BEFORE July 19 — ideally July 12 to give a week of soak time.
+| Event | Date | Time |
+|---|---|---|
+| Testnet gate opens (leaders/testers) | **July 12, 2026** | **9:00 AM EDT** |
+| Mainnet contract deploy | **~July 14–16, 2026** | — |
+| Mainnet EA opens (coupon-only) | **July 19, 2026** | **9:00 AM EDT** |
+| Mainnet public open (cryptonova.ai) | **July 19, 2026** | **12:00 PM EDT** |
 
-- [ ] Run full test suite: `npx hardhat test` — must see 173/173 pass
-- [ ] Run predeploy_check.js: `npx hardhat run scripts/predeploy_check.js --network baseSepolia` — 91/91 checks
-- [ ] Disable ALL 7 Windows Task Scheduler keepers before deploy (`schtasks /Change /TN "\CryptoNova-*" /DISABLE`)
-- [ ] Verify deployer key = `0x5EaEfA3` (clean EOA, not EIP-7702 delegated)
-- [ ] Verify ADDRESSES_FILE in `.env` points to correct version file
-- [ ] Run deploy: `npx hardhat run scripts/deploy_v8.js --network baseSepolia`
-- [ ] **IMMEDIATELY commit deployed_addresses_vX_XX.json to git** (never lose addresses again)
-- [ ] Run setTierMatrices for all tiers (registerTier alone is not enough)
-- [ ] Register new Chainlink upkeep for MatrixKeeper
-- [ ] Update ADDRESSES_FILE in `.env` → new version
-- [ ] Run update_addrs.py to update all HTML files
-- [ ] Run truncation check: `tail -5 index.html` → must end `</body></html>`
-- [ ] Re-enable keepers after frontend is updated and deployed
+---
 
-### Frontend push checklist (every deploy)
+## PHASE 1 — Pre-Deploy (target ~July 14–16)
+
+### Before you deploy — critical checks
+
+- [ ] Deployer key = **`0x5EaEfA3`** (clean EOA — NOT `0xCd0Af6`, which is EIP-7702 delegated and BANNED)
+- [ ] Stop all 6 VPS keeper cron jobs before deploy (avoids keeper writes during deploy window)
+  ```bash
+  ssh -i C:\Users\CryptoTech\.ssh\do_keeper root@167.99.0.250
+  crontab -e    # comment out all 6 CryptoNova lines
+  ```
+- [ ] Verify `ADDRESSES_FILE` in `.env` is pointing to the PREVIOUS version (not a stale path)
+- [ ] Verify `PARKED_GRACE_SECS=172800` in `.env` for mainnet (48 hours — testnet uses 86400/24h)
+
+### Contract deploy
+
+- [ ] `npx hardhat compile --force`
+- [ ] `npx hardhat test` — must see **205/205 pass** (or current count, 0 failing)
+- [ ] `npx hardhat run scripts/predeploy_check.js --network baseSepolia` — 91/91 (testnet); update `--network base` for mainnet
+- [ ] Update `hardhat.config.js` with mainnet RPC + chain ID 8453 before mainnet deploy
+- [ ] Set USDC to real USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` (Base mainnet — NOT mock)
+- [ ] **`npx hardhat run scripts/deploy_v8.js --network base`** ← ALWAYS `npx hardhat run`, NEVER `node`
+  - Red flags if you see: deployer=0xf39Fd6e5, Network=hardhat, done in <2 min → you ran `node`, not `npx hardhat run`
+
+### Immediately after deploy (do not skip)
+
+- [ ] **Commit `deployed_addresses_vX_XX.json` to git immediately** — V8.29 was lost because this was skipped
+- [ ] Run `setTierMatrices` for all 10 tiers — `registerTier` alone is not enough; `manualUpgrade` reverts without it
+- [ ] Run `seed_w1.js` to place W1 at matrix position 1
+- [ ] Set parked grace: `node scripts/set_parked_grace.js 172800` (mainnet = 48h)
+- [ ] Register Chainlink Automation upkeep on mainnet registry and fund with LINK
+- [ ] Verify BaseScan contract verification passes
+
+### Frontend update (post-deploy)
+
+- [ ] Run `update_addrs.py` to replace all contract addresses across all HTML files
+- [ ] Update `TIER_ROUTER` constant in `api/telegram-qa.js` to new mainnet address
+- [ ] Update VPS keeper scripts with new mainnet addresses (edit `.env` on VPS)
+- [ ] Truncation check: `tail -5 index.html` → must end `</body></html>`
+
+### Frontend push checklist (every deploy — 3-stage mandatory)
+
 ```
 Stage 1: git push origin admin
-Stage 2: tail -5 index.html  ← MUST see </body></html> before continuing
-Stage 3: git push origin admin:preview --force   ← STOP, show QA team
-Stage 4: git push origin admin:main --force      ← STOP, wait for leader sign-off
+          ↓ verify: tail -5 index.html → </body></html>
+Stage 2: git push origin admin:preview --force   ← STOP — show QA/leaders
+Stage 3: git push origin admin:main --force      ← STOP — wait for leader sign-off
 ```
 
-**If Vercel ignores force-push:** `git commit --allow-empty -m "trigger deploy"` then push again.
+**NEVER push to `main` before `preview`. NEVER skip stages. NEVER push without explicit approval.**
+
+If Vercel ignores force-push: `git commit --allow-empty -m "trigger deploy"` then push again.
 
 ---
 
 ## PHASE 2 — Pre-Launch Day (July 18 evening)
 
 ### System health verification
+
+- [ ] SSH to VPS: confirm all 6 keeper cron jobs are running and last-run times are recent
+  ```
+  ssh -i C:\Users\CryptoTech\.ssh\do_keeper root@167.99.0.250
+  crontab -l
+  ls -lt ~/keeper/logs/
+  ```
 - [ ] Run `node scripts/monitor_v8.js` — check Telegram report looks clean
-- [ ] Check SF balance: `npx hardhat run scripts/sf_topup_t1.js --network baseSepolia` dry-run
-- [ ] Top up SF if < $200: `npx hardhat run scripts/sf_topup_t1.js --network baseSepolia`
-- [ ] Verify keeper is running: check Task Scheduler `\CryptoNova-Rescue` last run time
-- [ ] Confirm Chainlink upkeep has LINK balance (check upkeep page on automation.chain.link)
-- [ ] Verify admin.crypto-nova.app loads and wallet connects (hard refresh first)
-- [ ] Confirm Telegram bot responds to `/status` with V8.31 contract address
+- [ ] Check SF balance — minimum $500 buffer recommended at launch
+  - If low: `npx hardhat run scripts/sf_topup_t1.js --network base`
+- [ ] Confirm Chainlink upkeep has LINK balance (check automation.chain.link on mainnet)
+- [ ] Hard refresh admin.cryptonova.ai — wallet connects, all stats load (not frozen)
+- [ ] Confirm Telegram bot responds with V8.34 mainnet address when asked about contracts
+- [ ] Send test channel pulse: `node ~/keeper/channel_pulse.js` on VPS — verify member count matches website
 
-### Vercel env var checklist
-These must be set in the CORRECT Vercel project:
+### Vercel env var checklist (mainnet project = cryptonova-mainnet-app)
 
-| Project | Required Env Vars |
+| Var | Mainnet value |
 |---|---|
-| cryptonova-testnet-app | TELEGRAM_QA_BOT_TOKEN, ANTHROPIC_API_KEY, BASE_SEPOLIA_RPC, FAUCET_PRIVATE_KEY, GITHUB_TOKEN, BUG_REPORT_PASSWORD |
-| cryptonova-preview | (same as above) |
-| cryptonova-main | TELEGRAM_QA_BOT_TOKEN, ANTHROPIC_API_KEY, BASE_RPC (mainnet), GITHUB_TOKEN, BUG_REPORT_PASSWORD, GAS_GIFT_PRIVATE_KEY |
+| `ANTHROPIC_API_KEY` | Claude Haiku — same key as testnet |
+| `TELEGRAM_QA_BOT_TOKEN` | Same bot token (webhook will be re-registered to mainnet domain) |
+| `BASE_RPC_URL` | Mainnet Base RPC (NOT Base Sepolia) |
+| `GITHUB_TOKEN` | Contents R+W on cryptonova-testnet-app repo (bug reports) |
+| `BUG_REPORT_PASSWORD` | Same as testnet |
+| `FAUCET_PRIVATE_KEY` | Leave empty / remove for mainnet (faucet is testnet only) |
+| `GAS_GIFT_PRIVATE_KEY` | Set on mainnet — funds new-member ETH gas gifts |
 
-**Never delete a Vercel project** — all env vars, domains, and settings are wiped permanently with no undo.
+**✅ GITHUB_TOKEN updated 2026-07-09** — fine-grained PAT (CryptoNova-BugReport, no expiration, Contents R+W on cryptonova-testnet-app repo). Bug reports via crypto-nova.app/v8 are live.
+
+**NEVER delete a Vercel project.** Wipes all env vars, domains, settings. Permanent — no undo.
 
 ---
 
 ## PHASE 3 — Launch Day (July 19)
 
-### Opening sequence (9am EST)
-1. Hard refresh admin.crypto-nova.app — verify everything loads clean
-2. Open gates in this order:
-   - ea.cryptonova.ai (coupon-only) — opens 9am EST
-   - cryptonova.ai (open registration) — opens 12pm EST
-3. Monitor Telegram bot for early member questions
-4. Keep PowerShell open with `drip_fill.ps1` ready as backup in case keepers lag
-5. Watch `\CryptoNova-Rescue` task — should auto-trigger within 5 min of first parked member
+### Opening sequence
+
+1. Hard refresh admin.cryptonova.ai — verify everything loads clean, no frozen spinners
+2. Open gates in order:
+   - **ea.cryptonova.ai** (coupon-only) — opens 9am EDT
+   - **cryptonova.ai** (open registration) — opens 12pm EDT
+3. Monitor Telegram bot for member questions
+4. Watch VPS keeper logs: `tail -f ~/keeper/logs/direct_keeper.log`
+5. Check that first registration cycles correctly (W1 seats, SF balance draws, keeper responds)
 
 ### Day-of monitoring cadence
-- Every 30 min: Check Telegram for member questions
-- Every 1 hr: Run `node scripts/monitor_v8.js` manually if automated report missed
-- Every 2 hr: Check SF balance via `sf_diag.js`
-- Flag for attention: Any "ALERT" line in monitor report, any keeper failure in Task Scheduler
 
-### Member-facing communications
+- Every 30 min: Check Telegram for member questions
+- Every 1 hr: Run `node scripts/monitor_v8.js` manually if automated Telegram report missed
+- Every 2 hr: Check SF balance — `node ~/keeper/sf_diag.js` on VPS
+- Flag for attention: Any "CRITICAL" or "ALERT" line in monitor report; any keeper cron job failing (check `~/keeper/logs/`)
+
+### Member-facing comms
+
 - Leaders with referral links go live day 1
 - Coupons active day 1 (coupon issuance costs $10 USDC → covers new member's entry fee)
-- Testnet members who asked: point them to the gas gift flow for ETH, USDC faucet for first $10
+- For new members with no ETH for gas: gas gift flow via GAS_GIFT_PRIVATE_KEY
 
 ---
 
 ## PHASE 4 — Rollback Plan
 
 ### If contract has a critical bug post-launch
-1. Do NOT delete Vercel projects
-2. Disable keepers immediately (Task Scheduler)
+
+1. **Do NOT delete Vercel projects**
+2. Disable all 6 VPS keeper cron jobs immediately: `crontab -e` → comment out all CryptoNova lines
 3. Update frontend to show "Maintenance — back shortly" banner
-4. Fix contract, deploy new version, update addresses via update_addrs.py
-5. Resume from Stage 1 of frontend push checklist
+4. Fix contract, deploy new version, update addresses via `update_addrs.py`
+5. Re-enable keepers after frontend is updated and verified
+6. Resume from Stage 1 of frontend push checklist
 
 ### If frontend is broken (spinners frozen)
-1. Run: `tail -5 index.html` — if not `</body></html>`, file is truncated
-2. Restore from git: `git show HEAD:index.html > index.html.new && mv index.html.new index.html`
-3. Run truncation check again, then push
+
+**ALWAYS check truncation FIRST before assuming RPC or wallet issues.**
+
+```bash
+tail -5 index.html
+```
+Must end with `</body></html>`. If not — file is truncated. Fix:
+```bash
+git show HEAD:index.html > index.html.new && mv index.html.new index.html
+tail -5 index.html   # verify
+# then git add + commit + push
+```
 
 ### If Vercel deploy is stuck
-1. `git commit --allow-empty -m "trigger deploy"` and push
+
+1. `git commit --allow-empty -m "trigger deploy"` then push
 2. Check Vercel build logs for error
 3. Never force-push to main without verifying preview first
 
 ---
 
-## PHASE 5 — Known Issues at Launch (document these for members)
+## PHASE 5 — Known Issues at Launch
 
 | Issue | Status | Workaround |
 |---|---|---|
 | Crossing reserve ($5) locked during active matrix | By design — unlocks at cycle completion | Wait for your matrix to cycle |
-| Pre-V8.31 coupon members can't set Auto-Reentry | V8.32 fix (Aug 19) | Contact admin to update options manually |
-| Member ID can gap slightly with coupon registrations | Known V8.30 side-effect, fixed in V8.31 | Cosmetic only — earnings not affected |
-| Register page shows "already registered" after joining | UI bug — needs page reload | Hard refresh the page |
+| Members who registered before V8.31 via coupon can't set Auto-Reentry | Fixed in V8.32 — requires re-registration or admin update | Contact admin |
+| Member ID can gap slightly with coupon registrations | Cosmetic only — earnings not affected | None needed |
 | Position >127 display confusing members | Members see totalJoined, not BFS position | FAQ explains this |
+| VPS keeper rescue latency (up to 5 min) | By design — cron schedule | Members wait briefly before slot clears |
 
 ---
 
-## Quick-Reference: Key Addresses & Files (V8.31)
+## Quick-Reference: V8.34 Addresses & Files
 
 | Item | Value |
 |---|---|
-| Contract version | V8.31 |
-| Addresses file | `deployed_addresses_v8_31.json` |
-| TierRouter | `0x3A569619f0FB2A0ef48d7eDB1BFeA34AeF35512c` |
-| CNOVA Token | `0x8e81Ea3fE21DfFe30804cB46bE8543bD32CeC626` |
-| CNOVA Treasury | `0x3980ed891B29d8745E6e116B8e010ac74701Da6f` |
-| CouponRegistry | `0x20b66F6fb4554d0CD283590d747c5474d2923971` |
-| Deployer EOA | `0x5EaEfA3...` (clean, non-delegated) |
+| Contract version | **V8.34** |
+| Addresses file | `deployed_addresses_v8_34.json` |
+| TierRouter | `0x8a02C52F...` (Base Sepolia testnet) |
+| MatrixKeeper | `0xcf6c9439...` (Base Sepolia testnet) |
+| Deployer EOA | `0x5EaEfA3...` (clean EOA — non-delegated) |
+| W1 wallet | `0x6512e9B5...` |
 | Working branch | `admin` |
-| Admin frontend | https://admin.crypto-nova.app |
-| Testnet QA | https://early.crypto-nova.app |
-| Monitor script | `scripts/monitor_v8.js` |
-| SF top-up | `npx hardhat run scripts/sf_topup_t1.js --network baseSepolia` |
+| Admin frontend (testnet) | https://admin.crypto-nova.app |
+| Testnet preview | https://early.crypto-nova.app |
+| Mainnet admin | https://admin.cryptonova.ai |
+| VPS SSH | `ssh -i C:\Users\CryptoTech\.ssh\do_keeper root@167.99.0.250` |
+| Keeper logs | `~/keeper/logs/` on VPS |
+
+**Mainnet addresses will be different — update this table after mainnet deploy.**
 
 ---
 
-## PowerShell Rules (always)
+## Gate Timestamps
 
-- **NEVER chain commands with `&&`** — one command at a time, wait for output
+| Domain | Opens | Timestamp (ms) |
+|---|---|---|
+| early.crypto-nova.app | July 12 2026 9:00 AM EDT | `1783861200000` |
+| crypto-nova.app | July 12 2026 9:00 AM EDT | `1783861200000` |
+| cryptonova.ai (mainnet EA) | July 19 2026 9:00 AM EDT | `1784466000000` |
+| cryptonova.ai (auto-open) | July 19 2026 12:00 PM EDT | `1784476800000` |
+
+---
+
+## Standing Rules (always)
+
+- **NEVER chain commands with `&&` in PowerShell** — one command at a time, wait for output
 - **NEVER put keys/credentials in PowerShell commands** — all secrets in `.env`
 - **NEVER delete a Vercel project** — no undo, permanent data loss
+- **ALWAYS `npx hardhat run scripts/deploy_v8.js --network base`** — NEVER `node`
+- **ALWAYS commit addresses JSON immediately after deploy** — V8.29 was lost by skipping this
 
 ## Git Lock Recovery
 
@@ -149,3 +225,5 @@ If `git add` fails with "index.lock: File exists":
 Remove-Item "C:\CryptoNova-Testnet-App\.git\index.lock" -Force
 Remove-Item "C:\CryptoNova-Testnet-App\.git\HEAD.lock" -Force
 ```
+
+All git operations run from **PowerShell**, not bash (bash git lock is a mount phantom on Windows).
