@@ -3420,9 +3420,19 @@ async function loadRegisterTab() {
         btnApprove.className = 'btn btn-ghost full-w';
         btnApprove.style.borderColor = 'var(--green)';
         btnApprove.style.color = 'var(--green)';
-        btnReg.disabled = false;
-        btnReg.className = 'btn btn-green full-w';
         document.getElementById('default-sponsor-warn').style.display = 'none';
+        if (bal >= T1_FEE) {
+          // Sufficient balance — enable register
+          btnReg.disabled = false;
+          btnReg.className = 'btn btn-green full-w';
+        } else {
+          // Approved but 0 USDC — ERC20 approve() doesn't check balance, so this is possible.
+          // Disable Step 2 and tell them to use the faucet.
+          btnReg.disabled = true;
+          btnReg.className = 'btn btn-ghost full-w';
+          const rsEl = document.getElementById('reg-status');
+          if (rsEl) { rsEl.textContent = '⚠️ Approved but no USDC balance — use the faucet button below to get test USDC.'; rsEl.style.color = 'var(--yellow)'; }
+        }
       } else {
         // Not yet approved — Step 1 is active, check referrer
         const refVal = (document.getElementById('input-referrer')?.value || '').trim();
@@ -3637,6 +3647,15 @@ async function doRegister() {
   // Guard: check on-chain before wasting a TX
   try {
     const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    // USDC balance pre-check: approve() succeeds with 0 balance, but transferFrom() will revert.
+    // Catch this client-side to give a clear error instead of a raw wallet rejection.
+    const usdcPre = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+    const usdcBal = await usdcPre.balanceOf(userAddr).catch(() => null);
+    if (usdcBal !== null && usdcBal < T1_FEE) {
+      setStatus('reg-status', '❌ Insufficient USDC — use the faucet below to get test USDC first.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Step 2: Register ($10 USDC)'; }
+      return;
+    }
     const tr0 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     // Retry so a flaky RPC doesn't skip this gas-saving guard; on persistent failure
     // fall through to false — worst case the on-chain register() call reverts safely.
@@ -5763,11 +5782,14 @@ function friendlyError(e) {
   }
 
   // ── Fallback — guard against raw tx hash leaking to the user ───────────
-  // TokenPocket surfaces raw tx JSON as error; check all text fields
+  // TokenPocket and some other wallets surface raw tx JSON or ethers v6 error fragments.
+  // Ethers v6 uses both "from":"0x..." (JSON) and from="0x..." (template string) formats.
   const allRaw = msg + raw + rawDeep;
   const isTxHash = /^"?0x[0-9a-f]{40,}"?/i.test(msg.trim()) ||
-    allRaw.includes('"from":') || allRaw.includes('"to":') || allRaw.includes('"data":');
-  if (isTxHash) return '❌ Transaction failed — please try again or contact support.';
+    allRaw.includes('"from":') || allRaw.includes('"to":') || allRaw.includes('"data":') ||
+    allRaw.includes('from="') || allRaw.includes('to="') ||
+    (msg.trim() === '' && (allRaw.includes('0x') && allRaw.length > 10));
+  if (isTxHash) return '❌ Transaction failed — check your USDC balance, then try again. If the problem persists, contact support.';
   return '❌ ' + msg.slice(0, 120);
 }
 
