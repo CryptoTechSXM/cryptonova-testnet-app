@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-15] Dashboard (index.html) — It's still showing v8.36
+- **Reporter:** KolaOla
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
+- **Frequency:** Intermittent
+- **What happened:** It's still showing v8.36
+- **What was expected:** Should show V8.37
+- **Submitted:** Wed, 15 Jul 2026 13:55:58 GMT
+
+
 ### [2026-07-15] Onboarding / Registration — When payment is made and confirmed on MM, it just keeps roll…
 - **Reporter:** KolaOla
 - **Page:** Onboarding / Registration
