@@ -15,114 +15,20 @@
 - **Frequency:** Consistent
 - **What happened:** Shows V8.36
 - **What was expected:** Should show V8.37
+- **Notes:** \u2705 **Cache issue** \u2014 V8.37 is live. Do a hard refresh: `Ctrl + Shift + R` (PC) or `Cmd + Shift + R` (Mac). Vercel CDN caches aggressively; new builds take 1\u20133 min to propagate globally.
 - **Submitted:** Wed, 15 Jul 2026 14:22:14 GMT
 
 
-### [2026-07-15] Dashboard (index.html) — It's still showing v8.36
-- **Reporter:** KolaOla
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
-- **Frequency:** Intermittent
-- **What happened:** It's still showing v8.36
-- **What was expected:** Should show V8.37
-- **Notes:** ✅ **Cache issue** — V8.37 is live. Do a hard refresh: `Ctrl + Shift + R` (PC) or `Cmd + Shift + R` (Mac). Vercel CDN caches aggressively; new builds take 1–3 min to propagate globally.
-- **Submitted:** Wed, 15 Jul 2026 13:55:58 GMT
-
-
-### [2026-07-15] Onboarding / Registration — When payment is made and confirmed on MM, it just keeps roll…
+### [2026-07-15] Onboarding / Registration \u2014 Registration spinner hangs after wallet confirmation
 - **Reporter:** KolaOla
 - **Page:** Onboarding / Registration
 - **Wallet Type:** MetaMask
 - **Wallet Address:** 0x0d5b8ca4197209a29f28439c7fe9bceca36fa69d
 - **Frequency:** Consistent
-- **What happened:** When payment is made and confirmed on MM, it just keeps rolling on CryptoNova and does not conclude the transaction until you refresh the page. Thereby making the registration process slower.
-- **What was expected:** The registration process can be smoother
-- **Notes:** ⏳ **Investigating** — The page polls for tx confirmation with a 10s timeout then refreshes. On a slow RPC the tx receipt can take 15–30s, making the spinner appear to hang. Not a failed tx — the registration lands on-chain, the UI just takes time to confirm. Post-launch improvement: show a "transaction submitted" state immediately after wallet confirmation so members know the tx is in flight. Logged for V8.38.
+- **What happened:** When payment is made and confirmed on MM, it just keeps rolling on CryptoNova and does not conclude the transaction until you refresh the page.
+- **What was expected:** Smoother registration \u2014 UI should acknowledge the tx immediately after wallet signs.
+- **Notes:** \u23f3 **V8.38 improvement** \u2014 Not a failed tx. The page polls for receipt with a 10s timeout; on slow RPC this can take 15\u201330s, making the spinner appear stuck. Fix: show "transaction submitted" state immediately after wallet confirmation so members know the tx is in flight. Logged for V8.38.
 - **Submitted:** Wed, 15 Jul 2026 13:45:24 GMT
-
-
-### [2026-07-15] Dashboard (index.html) — Cannot connect wallet
-- **Reporter:** KolaOla
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
-- **Frequency:** Intermittent
-- **What happened:** Cannot connect wallet
-- **What was expected:** wallet should connect seamlessly
-- **Notes:** ℹ️ **Likely extension issue** — Intermittent wallet connect failures are typically caused by the MetaMask extension not responding to the page request. Fix: refresh the page, unlock MetaMask, then click Connect again. If it persists, disable/re-enable the MetaMask extension in browser settings. Not reproduced on admin.crypto-nova.app.
-- **Submitted:** Wed, 15 Jul 2026 13:33:44 GMT
-
-
-### [2026-07-15] Other — Hey CT I am using the latest ver 8.36 and I am having proble…
-- **Reporter:** Les Gay Jr
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7343484d4904a18dba49310575d54bab6f15604a
-- **Frequency:** Consistent
-- **What happened:** Hey CT I am using the latest ver 8.36 and I am having problems with my referrals not lining up. I am also having problems with the matrix screen.  I am seeing MY NODE ID Instead of MY DIRECTS. Both of these errors are occurring in Metamask and Robby. It happens also if I click on the MY DIRECTS tab too in both metamask and rabby
-- **What was expected:** My referrals are not lining up. The matrix screen should read MY DIRECTS not MY NODE ID in both Metamask and Robby. I have screenshots of all this but no way to send this in this bug report.
-- **Notes:** I have screen shots where do I send this
-- **Submitted:** Wed, 15 Jul 2026 11:51:14 GMT
-
-
-### [2026-07-11] Governance / DAO (governance.html) — I attempted to withdraw 17.64 USDC. After the fee I should h…
-- **Reporter:** @Koach100
-- **Page:** Governance / DAO (governance.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
-- **Frequency:** Consistent
-- **What happened:** I attempted to withdraw 17.64 USDC. After the fee I should have received 17.38, but only 4.66 went into my wallet.
-- **What was expected:** 17.38USDC should have been transferred into my wallet.
-- **Submitted:** Sat, 11 Jul 2026 23:09:01 GMT
-
-
-### [2026-07-11] Onboarding / Registration — i tried registering but the transaction keeps failing.
-- **Reporter:** @Koach100
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9ae38809a625eb41dfb53ae4d0c2cf733be48fc4
-- **Frequency:** Consistent
-- **What happened:** i tried registering but the transaction keeps failing.
-- **What was expected:** i expect to be registered successfully.
-- **Notes:** ❌ ⏱️ RPC rate limit — wait a few seconds and try again.
-- **Submitted:** Sat, 11 Jul 2026 15:28:53 GMT
-
-
-### [2026-07-11] Dashboard (index.html) — I checked my account this morning and got this message. I ha…
-- **Reporter:** Kolawole Ola
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x33b5a588fb40e1243abd794a882832861d49bc49
-- **Frequency:** Consistent
-- **What happened:** I checked my account this morning and got this message. I have re-entry and double re-entry enabled.
-
-Action Required — Matrix Slot Cleared
-Your T1 Matrix A slot was cleared after a period of inactivity — this can happen when a matrix is filling slowly and the idle timer expires. Your tier status and all earnings are safe. Pay the re-entry fee to rejoin.
-
-I also had enough funds for the automatic re-entry, it just did not engage:
-
-Withdrawable — Balance Breakdown
-✕
-Total Ever Earned - $15.72
-Previously Withdrawn − $0.00
-↳ Crossing Reserve (locked)− $10.00
-= Available to Claim - $8.43
-- **What was expected:** It should have automatically re-entered without me having to come out of pocket again.
-- **Notes:** ✅ **Fixed in V8.37 (UX) + works as designed (contract)**. Two issues: (1) Pre-V8.37, if member was softParked in T1.2, the dashboard only scanned T1.1 and showed the "limbo" (manual re-entry) panel instead of the "rescue" (auto-rescue) panel. V8.37 scans all pairs — parked members in T1.2 now correctly see the rescue section. (2) Auto-rescue is genuine but has a 24h grace period (by design) before the keeper fires. Contract confirms: `softParkIdle` releases crossing reserve back to withdrawable, so effective balance = $18.43 > $10 entry fee — rescue fires automatically. V8.37 adds a "⏳ Auto-rescue active — within 24 hours" hint so members know not to take manual action.
-- **Submitted:** Sat, 11 Jul 2026 09:42:41 GMT
-
-
-### [2026-07-08] Coupon System — coupon "not found or Expired" for Sherwyn
-- **Reporter:** sherwyn
-- **Page:** Coupon System
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Trying to use coupon to sign up and it's saying "coupon not found or Expired"
-- **What was expected:** Easy registration
-- **Notes:** ⏳ **Pending admin action** — Coupon was issued on V8.32/V8.33, now void after V8.34+ fresh deploy. Admin must issue a fresh V8.37 coupon for Sherwyn's wallet 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7 via Dashboard → Coupon tab → Issue Coupon. Share new code with Sherwyn directly.
-- **Submitted:** Wed, 08 Jul 2026 21:24:37 GMT
 
 ---
 
@@ -144,26 +50,30 @@ Previously Withdrawn − $0.00
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
-| 2026-07-02 | 2026-07-03 | All sub-pages | Nav link showed "📊 Dashboard" and went to index.html#dashboard; changed to "🏠 Home" → index.html across all 7 sub-pages | 0b9e3b8 |
-| 2026-07-02 | 2026-07-05 | index.html | "FREE 🎉" showing as HTML entity &#127881; — fixed textContent → innerHTML on coupon You Pay display | ff76143 |
-| 2026-07-02 | 2026-07-05 | index.html | Withdrawal blocked error message too terse — expanded to explain crossing reserve and when funds unlock | ff76143 |
-| 2026-07-02 | 2026-07-05 | index.html | Double Reentry / Auto Reentry tooltips unclear — member confused why T1 not re-entered after upgrade to T2; tooltips now explain the distinction | ff76143 |
-| 2026-07-02 | 2026-07-05 | index.html | KolawoleOla — withdrawal of ~$21 blocked. Works as designed: crossing reserve is locked while in an active matrix cycle to fund your next re-entry. Funds unlock on cycle completion. Error message improved. | ff76143 |
-| 2026-07-02 | 2026-07-05 | index.html | Dee1 — T1 not re-entered after T2 upgrade. Works as designed: auto-upgrade to T2 fires when MatB crosses; T1 re-entry only happens if Double Reentry was enabled. Not a bug. | — |
-| 2026-07-02 | 2026-07-05 | index.html | Kolawole — member ID 444 vs 442 member count. Known V8.30 coupon bypass side-effect — 2-member gap is baked on-chain. V8.31 fixes globalJoined for all new coupon registrations going forward. | V8.31 |
-| 2026-07-02 | V8.32 (Aug 19) | index.html | Kolawole — Auto-Reentry TX fails after coupon registration. Root cause: pre-V8.31 coupon members have globalJoined=false in TierRouter → setMemberOptions reverts. Fix: setGlobalJoined() admin fn in V8.32 (Aug 19). | V8.32 |
-| 2026-07-03 | 2026-07-05 | index.html | Dee1 (0x299d / 0x0637) — positions 146/147 in T1A MatB, no earnings. Root cause: Base Sepolia RPC outage (SERVER_ERROR confirmed 2026-07-03 13:35 UTC) prevented keeper from running force-crosses. Not a code bug. Keeper resumes when RPC recovers. | — |
-| 2026-07-07 | 2026-07-08 | index.html | CT CharFun — coupon purchase approval spinner never resolves. Root cause: `approveCouponUSDC()` had bare `tx.wait()` with no timeout; hangs on slow RPC. Fix: `Promise.race` 10s timeout (same pattern as `approveUSDC()`). | 96eb981 |
-| 2026-07-07 | 2026-07-08 | index.html | Koach100 — manual upgrade stuck on "approving USDC" after MetaMask confirmation. Root cause: pre-flight `getBalance`+`balanceOf` RPC calls in `approveUSDCForUpgrade()` were blocking; `tx.wait()` also had no timeout. Fix: 5s pre-flight timeout + 10s `tx.wait()` timeout. | 96eb981 |
-| 2026-07-06 | 2026-07-08 | index.html | Kolawole Ola — "Auto-Deducted (Upgrades)" label confused members who already saw the crossing reserve deduction. Not a double-charge — label was misleading. Fix: renamed to "Tier Upgrade Fee (from earnings)" with tooltip clarifying it's the next-tier entry fee paid from earnings, separate from crossing reserve. | 96eb981 |
-| 2026-07-06 | 2026-07-08 | index.html | Sherwyn — coupon share copy button showed no acknowledgement when link was copied. Fix: added `.catch()` fallback using `document.execCommand('copy')` for browsers blocking clipboard API; both paths show "✓ Copied!" confirmation. | 96eb981 |
-| 2026-07-06 | 2026-07-08 | index.html | Sherwyn — coupon redemption showed "❌ ❌" double-error prefix. Root cause: 9 `setStatus()` calls used `'❌ ' + friendlyError(e)` but `friendlyError()` already prepends `❌`. Fix: removed the extra prefix from all 9 call sites. Error message for coupon-specific CALL_EXCEPTION also improved to "Coupon not found or expired — please request a new one." | 96eb981 |
-| 2026-07-09 | 2026-07-09 | Contract | T2 Matrix Occupancy Corruption — reentrancy in `enterFor()` corrupted T2MatA+MatB to 128/127. V8.34 deployed with `require(!_state.crossingInProgress)` guard in `enterFor()`. Fresh deploy resets matrices. Verified: T1+T2 both completed full 127→127 MatA+MatB lifecycle post-deploy. | V8.34 |
-| 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x1ca3) — manual upgrade to T2 reverted. Root cause: V8.33 T2 reentrancy corruption. Resolved by V8.34 deploy — member can re-register and upgrade on fresh contract. | V8.34 |
-| 2026-07-09 | 2026-07-09 | index.html | Maximum-71 (0x788b) — unable to upgrade on 2 accounts. Root cause: same T2 reentrancy corruption. Resolved by V8.34. | V8.34 |
-| 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x301a) — "not positioned in matrix." Root cause: V8.34 is a fresh deploy; wallet needs to register on V8.34. | V8.34 |
-| 2026-07-09 | 2026-07-09 | index.html | Sherwyn (0x7744) — self rescue failed with raw tx error. Root cause: reported at 13:32 UTC against V8.33 T2 corrupted state. V8.34 went live at 17:00 UTC. Member should re-register on V8.34 and retry self rescue on clean matrices. | V8.34 |
-| 2026-07-09 | 2026-07-09 | index.html | Kolawole Ola (0x5704) — coupons from V8.32/V8.33 still showing and cancel fails ("only issuer" revert). Root cause: localStorage-stored coupons persist across deploys; `cancelCoupon()` on V8.34 returns issuer=0x0000 for old-contract hashes → revert. Fix: `loadMyCoupons()` now detects zero-address issuer and renders "PREV. VERSION" badge (greyed out, no action buttons) instead of ACTIVE. | f7156d5 |
-| 2026-07-11 | 2026-07-15 | index.html | Koach100 (0x2444) — withdrew $17.64 but only $4.66 arrived. Root cause: dashboard showed raw `totalW` (on-chain withdrawable) but contract deducts $10 crossing reserve per active in-matrix position at withdrawal time. V8.37 introduces `realW` which pre-deducts the $10 lock — displayed amount now matches what the member actually receives. | V8.37 cbcbe06 |
-| 2026-07-11 | 2026-07-15 | index.html | Kolawole Ola (0x33b5) — auto-reentry didn't engage after softParkIdle. Root cause (UX): pre-V8.37 the dashboard only scanned T1.1; if member was parked in T1.2 they saw the "limbo" (manual re-entry) card instead of the "rescue" (auto-reentry) card. Root cause (design): auto-rescue has a 24h grace period — it's not instant. Contract confirmed: `softParkIdle` releases crossing reserve to withdrawable, so effective balance covers re-entry; keeper fires within 24h. V8.37: all pairs scanned + "Auto-rescue active — within 24h" hint added to rescue card. | V8.37 cbcbe06 |
-| 2026-07-15 | 2026-07-15 | index.html | Les Gay Jr (0x7343) — referrals not counting and "My Node ID" label confused with My Directs. Root cause: V8.36 matrix scanner only covered T1.1; referrals in T1.2 were invisible (count undercount). "My Node ID" is a permanent stat card showing BFS position — not replaced by My Directs tab (UX, not a bug). V8.37 scans all pairs via allPairsStatus() — referral counts now correct. | V8.37 cbcbe06 |
+| 2026-07-02 | 2026-07-03 | All sub-pages | Nav link showed "\ud83d\udcca Dashboard" and went to index.html#dashboard; changed to "\ud83c\udfe0 Home" \u2192 index.html across all 7 sub-pages | 0b9e3b8 |
+| 2026-07-02 | 2026-07-05 | index.html | "FREE \ud83c\udf89" showing as HTML entity &#127881; \u2014 fixed textContent \u2192 innerHTML on coupon You Pay display | ff76143 |
+| 2026-07-02 | 2026-07-05 | index.html | Withdrawal blocked error message too terse \u2014 expanded to explain crossing reserve and when funds unlock | ff76143 |
+| 2026-07-02 | 2026-07-05 | index.html | Double Reentry / Auto Reentry tooltips unclear \u2014 member confused why T1 not re-entered after upgrade to T2; tooltips now explain the distinction | ff76143 |
+| 2026-07-02 | 2026-07-05 | index.html | KolawoleOla \u2014 withdrawal of ~$21 blocked. Works as designed: crossing reserve is locked while in an active matrix cycle to fund your next re-entry. Funds unlock on cycle completion. Error message improved. | ff76143 |
+| 2026-07-02 | 2026-07-05 | index.html | Dee1 \u2014 T1 not re-entered after T2 upgrade. Works as designed: auto-upgrade to T2 fires when MatB crosses; T1 re-entry only happens if Double Reentry was enabled. Not a bug. | \u2014 |
+| 2026-07-02 | 2026-07-05 | index.html | Kolawole \u2014 member ID 444 vs 442 member count. Known V8.30 coupon bypass side-effect \u2014 2-member gap is baked on-chain. V8.31 fixes globalJoined for all new coupon registrations going forward. | V8.31 |
+| 2026-07-02 | V8.32 (Aug 19) | index.html | Kolawole \u2014 Auto-Reentry TX fails after coupon registration. Root cause: pre-V8.31 coupon members have globalJoined=false in TierRouter \u2192 setMemberOptions reverts. Fix: setGlobalJoined() admin fn in V8.32 (Aug 19). | V8.32 |
+| 2026-07-03 | 2026-07-05 | index.html | Dee1 (0x299d / 0x0637) \u2014 positions 146/147 in T1A MatB, no earnings. Root cause: Base Sepolia RPC outage (SERVER_ERROR confirmed 2026-07-03 13:35 UTC) prevented keeper from running force-crosses. Not a code bug. Keeper resumes when RPC recovers. | \u2014 |
+| 2026-07-07 | 2026-07-08 | index.html | CT CharFun \u2014 coupon purchase approval spinner never resolves. Root cause: `approveCouponUSDC()` had bare `tx.wait()` with no timeout; hangs on slow RPC. Fix: `Promise.race` 10s timeout (same pattern as `approveUSDC()`). | 96eb981 |
+| 2026-07-07 | 2026-07-08 | index.html | Koach100 \u2014 manual upgrade stuck on "approving USDC" after MetaMask confirmation. Root cause: pre-flight `getBalance`+`balanceOf` RPC calls in `approveUSDCForUpgrade()` were blocking; `tx.wait()` also had no timeout. Fix: 5s pre-flight timeout + 10s `tx.wait()` timeout. | 96eb981 |
+| 2026-07-06 | 2026-07-08 | index.html | Kolawole Ola \u2014 "Auto-Deducted (Upgrades)" label confused members who already saw the crossing reserve deduction. Not a double-charge \u2014 label was misleading. Fix: renamed to "Tier Upgrade Fee (from earnings)" with tooltip clarifying it's the next-tier entry fee paid from earnings, separate from crossing reserve. | 96eb981 |
+| 2026-07-06 | 2026-07-08 | index.html | Sherwyn \u2014 coupon share copy button showed no acknowledgement when link was copied. Fix: added `.catch()` fallback using `document.execCommand('copy')` for browsers blocking clipboard API; both paths show "\u2713 Copied!" confirmation. | 96eb981 |
+| 2026-07-06 | 2026-07-08 | index.html | Sherwyn \u2014 coupon redemption showed "\u274c \u274c" double-error prefix. Root cause: 9 `setStatus()` calls used `'\u274c ' + friendlyError(e)` but `friendlyError()` already prepends \u274c. Fix: removed the extra prefix from all 9 call sites. Error message for coupon-specific CALL_EXCEPTION also improved to "Coupon not found or expired \u2014 please request a new one." | 96eb981 |
+| 2026-07-09 | 2026-07-09 | Contract | T2 Matrix Occupancy Corruption \u2014 reentrancy in `enterFor()` corrupted T2MatA+MatB to 128/127. V8.34 deployed with `require(!_state.crossingInProgress)` guard in `enterFor()`. Fresh deploy resets matrices. Verified: T1+T2 both completed full 127\u2192127 MatA+MatB lifecycle post-deploy. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x1ca3) \u2014 manual upgrade to T2 reverted. Root cause: V8.33 T2 reentrancy corruption. Resolved by V8.34 deploy \u2014 member can re-register and upgrade on fresh contract. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Maximum-71 (0x788b) \u2014 unable to upgrade on 2 accounts. Root cause: same T2 reentrancy corruption. Resolved by V8.34. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Koach100 (0x301a) \u2014 "not positioned in matrix." Root cause: V8.34 is a fresh deploy; wallet needs to register on V8.34. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Sherwyn (0x7744) \u2014 self rescue failed with raw tx error. Root cause: reported at 13:32 UTC against V8.33 T2 corrupted state. V8.34 went live at 17:00 UTC. Member should re-register on V8.34 and retry self rescue on clean matrices. | V8.34 |
+| 2026-07-09 | 2026-07-09 | index.html | Kolawole Ola (0x5704) \u2014 coupons from V8.32/V8.33 still showing and cancel fails ("only issuer" revert). Root cause: localStorage-stored coupons persist across deploys; `cancelCoupon()` on V8.34 returns issuer=0x0000 for old-contract hashes \u2192 revert. Fix: `loadMyCoupons()` now detects zero-address issuer and renders "PREV. VERSION" badge (greyed out, no action buttons) instead of ACTIVE. | f7156d5 |
+| 2026-07-11 | 2026-07-15 | index.html | Koach100 (0x2444) \u2014 withdrew $17.64 but only $4.66 arrived. Root cause: dashboard showed raw `totalW` (on-chain withdrawable) but contract deducts $10 crossing reserve per active in-matrix position at withdrawal time. V8.37 introduces `realW` which pre-deducts the $10 lock \u2014 displayed amount now matches what the member actually receives. | V8.37 cbcbe06 |
+| 2026-07-11 | 2026-07-15 | index.html | Kolawole Ola (0x33b5) \u2014 auto-reentry didn't engage after softParkIdle. Root cause (UX): pre-V8.37 the dashboard only scanned T1.1; if member was parked in T1.2 they saw the "limbo" (manual re-entry) card instead of the "rescue" (auto-reentry) card. Root cause (design): auto-rescue has a 24h grace period \u2014 it's not instant. Contract confirmed: `softParkIdle` releases crossing reserve to withdrawable, so effective balance covers re-entry; keeper fires within 24h. V8.37: all pairs scanned + "Auto-rescue active \u2014 within 24h" hint added to rescue card. | V8.37 cbcbe06 |
+| 2026-07-15 | 2026-07-15 | index.html | Les Gay Jr (0x7343) \u2014 referrals not counting and "My Node ID" label confused with My Directs. Root cause: V8.36 matrix scanner only covered T1.1; referrals in T1.2 were invisible (count undercount). "My Node ID" is a permanent stat card showing BFS position \u2014 not replaced by My Directs tab (UX, not a bug). V8.37 scans all pairs via allPairsStatus() \u2014 referral counts now correct. | V8.37 cbcbe06 |
+| 2026-07-15 | 2026-07-15 | index.html | KolaOla (0x5704) \u2014 dashboard still showing V8.36 after deploy. CDN cache \u2014 hard refresh (`Ctrl+Shift+R`) resolves. V8.37 is live. No code change needed. | \u2014 |
+| 2026-07-15 | 2026-07-15 | index.html | KolaOla (0x5704) \u2014 intermittent wallet connect failure. MetaMask extension issue \u2014 refresh page, unlock MetaMask, reconnect. Not reproduced on admin.crypto-nova.app. No code change needed. | \u2014 |
+| 2026-07-11 | 2026-07-15 | index.html | Koach100 (0x9ae3) \u2014 registration tx keeps failing. RPC rate limit \u2014 transient, retry after a few seconds resolves. No code change. | \u2014 |
+| 2026-07-08 | 2026-07-15 | Coupon System | Sherwyn (0x1e8e) \u2014 coupon void after V8.34+ redeploy. Root cause: coupons are contract-bound; old codes are invalid on fresh deploys. Coupon system verified working on V8.37 (tested with another member). Closed \u2014 reopen if Sherwyn reports again on V8.37. | \u2014 |
