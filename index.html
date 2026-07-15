@@ -3678,6 +3678,29 @@ async function doRegister() {
       : (refInput && ethers.isAddress(refInput.value.trim())
           ? refInput.value.trim() : ethers.ZeroAddress);
 
+    // Dry-run via read provider BEFORE sending to wallet.
+    // Simulates the full register logic on-chain without submitting a TX.
+    // If this fails → contract revert (show clear error, skip wallet popup).
+    // If this succeeds but wallet later rejects → pure wallet-layer issue.
+    try {
+      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _trSim = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp2);
+      if (c) {
+        await _trSim.registerWithCoupon.staticCall(referrer, c.codeHash, { from: userAddr });
+      } else {
+        await _trSim.register.staticCall(referrer, { from: userAddr });
+      }
+    } catch(_simErr) {
+      // Contract would revert — surface the real error without sending to wallet
+      btn.disabled = false;
+      const _acX = window._activeCoupon;
+      btn.textContent = _acX ? 'Step 2: Register (' + (_acX.youPay === 0 ? 'FREE 🎉' : '$' + _acX.youPay.toFixed(2) + ' USDC)') : 'Step 2: Register ($10 USDC)';
+      const _simFe = friendlyError(_simErr).replace(/^❌\s*/, '');
+      setStatus('reg-status', '❌ ' + _simFe, 'err');
+      if (_simErr.code !== 4001) reportEvent('TX_FAILED', { action: 'register-sim', error: _simErr.message || String(_simErr) });
+      return;
+    }
+
     let tx;
     if (c) {
       // Coupon path: V8.31 — call registerWithCoupon() on TierRouter so globalJoined is set
