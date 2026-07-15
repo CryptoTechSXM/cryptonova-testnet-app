@@ -7,6 +7,19 @@
 
 ## Open Issues
 
+### [2026-07-15] Dashboard (index.html) — V8.36 was still showing
+- **Reporter:** @ThanksAndPraises
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
+- **Frequency:** Intermittent
+- **What happened:** V8.36 was still showing
+- **What was expected:** Should have been V8.37
+
+Problem rectified with a soft relaunch of crypto-nova.app
+- **Submitted:** Wed, 15 Jul 2026 14:47:32 GMT
+
+
 ### [2026-07-15] Onboarding / Registration \u2014 Registration spinner hangs after wallet confirmation
 - **Reporter:** KolaOla
 - **Page:** Onboarding / Registration
