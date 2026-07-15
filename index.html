@@ -2388,16 +2388,18 @@ async function connectWallet(silent=false) {
         if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
         return connectWallet(silent);
       } catch(swErr) {
-        if (swErr.code === 4902 || swErr.code === -32603) {
-          // Chain not in wallet yet — try adding it
+        // Trust Wallet and some wallets use non-standard codes for "chain not in wallet"
+        // (4902 is standard, but -32602, -32603, or even string errors are seen in the wild).
+        // Attempt addEthereumChain for any error EXCEPT explicit user rejection (4001).
+        if (swErr.code !== 4001) {
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy', 'https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy', 'https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
           } catch(addErr) { /* user rejected add — fall through to banner */ }
         }
-        // User rejected switch or unknown error — show banner below
+        // User rejected switch — show banner below
       }
       showNetworkBanner();
       if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
@@ -2454,7 +2456,8 @@ async function switchToBaseSepolia() {
     hideNetworkBanner();
     if (!userAddr) await connectWallet();
   } catch(e) {
-    if (e.code === 4902 || e.code === -32603) {
+    if (e.code !== 4001) {
+      // Non-rejection error: try adding the chain (handles Trust Wallet and other non-standard codes)
       try {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
