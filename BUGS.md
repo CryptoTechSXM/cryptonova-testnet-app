@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-15] Onboarding / Registration — When payment is made and confirmed on MM, it just keeps roll…
+- **Reporter:** KolaOla
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x0d5b8ca4197209a29f28439c7fe9bceca36fa69d
+- **Frequency:** Consistent
+- **What happened:** When payment is made and confirmed on MM, it just keeps rolling on CryptoNova and does not conclude the transaction until you refresh the page. Thereby making the registration process slower.
+- **What was expected:** The registration process can be smoother
+- **Submitted:** Wed, 15 Jul 2026 13:45:24 GMT
+
+
 ### [2026-07-15] Dashboard (index.html) — Cannot connect wallet
 - **Reporter:** KolaOla
 - **Page:** Dashboard (index.html)
