@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-15] Dashboard (index.html) — Cannot connect wallet
+- **Reporter:** KolaOla
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x5704e5f537069127a8a53e7c85d522264a0135ed
+- **Frequency:** Intermittent
+- **What happened:** Cannot connect wallet
+- **What was expected:** wallet should connect seamlessly
+- **Submitted:** Wed, 15 Jul 2026 13:33:44 GMT
+
+
 ### [2026-07-15] Other — Hey CT I am using the latest ver 8.36 and I am having proble…
 - **Reporter:** Les Gay Jr
 - **Page:** Other
