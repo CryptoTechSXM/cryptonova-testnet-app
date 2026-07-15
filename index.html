@@ -1160,7 +1160,7 @@
           <li>
             <div class="step-content">
               <strong data-i18n="idx.how_s1_h">Connect Your Wallet</strong>
-              <span data-i18n="idx.how_s1_b">Click "Connect Wallet" in the top-right. MetaMask and Rabby are both supported. Make sure you're on Base Sepolia testnet.</span>
+              <span data-i18n="idx.how_s1_b">Click "Connect Wallet" in the top-right. MetaMask, TokenPocket, and Rabby are all supported. Make sure you're on Base Sepolia testnet.</span>
             </div>
           </li>
           <li>
@@ -1172,7 +1172,7 @@
           <li>
             <div class="step-content">
               <strong data-i18n="idx.how_s3_h">Approve USDC</strong>
-              <span data-i18n="idx.how_s3_b">Allow the Matrix contract to spend $10 USDC on your behalf. One MetaMask confirmation.</span>
+              <span data-i18n="idx.how_s3_b">Allow the Matrix contract to spend $10 USDC on your behalf. One wallet confirmation.</span>
             </div>
           </li>
           <li>
@@ -1209,7 +1209,7 @@
     <div id="dash-no-wallet" class="card" style="text-align:center;padding:40px;display:none">
       <div style="font-size:32px;margin-bottom:12px"><span style="filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(0.85)">👛</span></div>
       <div style="font-size:16px;font-weight:600;margin-bottom:8px" data-i18n="dash.no_wallet_h">Connect Your Wallet</div>
-      <div style="color:var(--text2);font-size:14px;margin-bottom:20px" data-i18n="dash.no_wallet_body">Connect MetaMask to view your dashboard and earnings.</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:20px" data-i18n="dash.no_wallet_body">Connect a Web3 wallet (MetaMask, TokenPocket, Rabby…) to view your dashboard and earnings.</div>
       <button class="btn btn-green" onclick="window.ethereum ? connectWallet() : showMetaMaskModal()" data-i18n="dash.no_wallet_btn">Connect Wallet</button>
     </div>
 
@@ -2238,6 +2238,7 @@ function getDevice() {
 
 function detectWalletName() {
   if (!window.ethereum) return 'no-wallet';
+  if (window.ethereum.isTokenPocket)    return 'TokenPocket';
   if (window.ethereum.isRabby)          return 'Rabby';
   if (window.ethereum.isCoinbaseWallet) return 'Coinbase Wallet';
   if (window.ethereum.isBraveWallet)    return 'Brave Wallet';
@@ -5654,9 +5655,10 @@ function friendlyError(e) {
   const msgLow  = (msg + rawDeep).toLowerCase();
 
   // ── User cancelled ──────────────────────────────────────────────────────
-  if (code === 'ACTION_REJECTED' || e.code === 4001 ||
+  if (code === 'ACTION_REJECTED' || e.code === 4001 || e.code === -32603 ||
       msgLow.includes('user rejected') || msgLow.includes('user denied') ||
-      msgLow.includes('user cancelled'))
+      msgLow.includes('user cancelled') || msgLow.includes('user cancel') ||
+      (msgLow.includes('cancelled') && msgLow.includes('sign')))
     return '✋ You cancelled — nothing was sent.';
 
   // ── RPC / network rate limit ────────────────────────────────────────────
@@ -5742,7 +5744,10 @@ function friendlyError(e) {
   }
 
   // ── Fallback — guard against raw tx hash leaking to the user ───────────
-  const isTxHash = /^"?0x[0-9a-f]{40,}"?/i.test(msg.trim()) || msg.includes('"from":');
+  // TokenPocket surfaces raw tx JSON as error; check all text fields
+  const allRaw = msg + raw + rawDeep;
+  const isTxHash = /^"?0x[0-9a-f]{40,}"?/i.test(msg.trim()) ||
+    allRaw.includes('"from":') || allRaw.includes('"to":') || allRaw.includes('"data":');
   if (isTxHash) return '❌ Transaction failed — please try again or contact support.';
   return '❌ ' + msg.slice(0, 120);
 }
