@@ -706,4 +706,25 @@ export default async function handler(req, res) {
 
   const detectedAddr = extractAddress(question);
   if (detectedAddr && faucetKeywordsPresent(question)) {
-    if (!checkRateLimit(userId)
+    if (!checkRateLimit(userId)) { await sendReply(BOT_TOKEN, chatId, `Too many messages. Please wait a moment.`, msgId); return ok(); }
+    await handleFaucetRequest(BOT_TOKEN, chatId, msgId, detectedAddr);
+    return ok();
+  }
+
+  if (!checkRateLimit(userId)) {
+    await sendReply(BOT_TOKEN, chatId, `Too many messages. Please wait a moment before asking again.`, msgId);
+    return ok();
+  }
+
+  await sendTyping(BOT_TOKEN, chatId);
+  try {
+    const answer = await askClaude(ANTHROPIC, question);
+    if (answer) await sendReply(BOT_TOKEN, chatId, answer, msgId);
+    else throw new Error('Empty response');
+  } catch (e) {
+    console.error('[telegram-qa] Claude error:', e.message);
+    await sendReply(BOT_TOKEN, chatId, `Having trouble right now. Try again in a moment.\n<a href="https://crypto-nova.app/faq">FAQ</a> | Tag @admin for urgent help.`, msgId);
+  }
+
+  return ok();
+}

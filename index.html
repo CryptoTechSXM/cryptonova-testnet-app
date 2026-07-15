@@ -3244,12 +3244,11 @@ async function loadUserData() {
         refInput.value = urlRef;
       } else {
         try {
-          const pm1 = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
-          const activeMatA = await pm1.currentMatA();
-          const matA1 = new ethers.Contract(activeMatA, MATRIX_ABI, rp);
-          const root = await matA1.posToMember(1n);
-          if (root && root !== ethers.ZeroAddress) {
-            refInput.placeholder = 'Auto: ' + short(root) + ' (current root)';
+          // Always show the fixed defaultReferrer (W1) — not the current MatA root,
+          // which changes each time a new pair is created by MatrixPairFactory.
+          const defRef = await tr.defaultReferrer();
+          if (defRef && defRef !== ethers.ZeroAddress) {
+            refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
           }
         } catch(_) {}
       }
