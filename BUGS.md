@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-15] Dashboard (index.html) — Self-Rescue Action Required for Re- Entry into the Queue. Th…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x728ff08035fffbc5a2f512a081cc88a4221f5f00
+- **Frequency:** Consistent
+- **What happened:** Self-Rescue Action Required for Re- Entry into the Queue. The transaction failed. This also occurred in accounts 1 - 4.
+- **What was expected:** Expected Re-entry into the queue with subsequent upgrade of the account.
+- **Submitted:** Wed, 15 Jul 2026 23:43:25 GMT
+
+
 ### [2026-07-15] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
 - **Reporter:** Maximum_71
 - **Page:** Dashboard (index.html)
