@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-15] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x6c854f94757893616a952e2e67adab5112573e86
+- **Frequency:** Consistent
+- **What happened:** "[From https://sepolia.base.org] gas limit too high"
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Submitted:** Wed, 15 Jul 2026 22:08:23 GMT
+
+
 ---
 
 ## Template
