@@ -2359,7 +2359,10 @@ async function connectWallet(silent=false) {
     } else {
       await provider.send('eth_requestAccounts', []);
     }
-    const chainId = parseInt(window.ethereum.chainId || '0', 16); // sync check avoids ethers pinned-network mismatch throw
+    // eth_chainId (async) avoids race condition where sync chainId prop is null before wallet fires 'connect' event
+    // (affects TokenPocket and other wallets that populate chainId asynchronously)
+    const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' }).catch(() => window.ethereum.chainId || '0x0');
+    const chainId = parseInt(chainIdHex || '0', 16);
     if (chainId !== CHAIN_ID) {
       // Auto-attempt network switch before showing banner
       try {

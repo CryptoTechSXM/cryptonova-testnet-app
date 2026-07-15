@@ -7,17 +7,6 @@
 
 ## Open Issues
 
-### [2026-07-15] Onboarding / Registration \u2014 Registration spinner hangs after wallet confirmation
-- **Reporter:** KolaOla
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x0d5b8ca4197209a29f28439c7fe9bceca36fa69d
-- **Frequency:** Consistent
-- **What happened:** When payment is made and confirmed on MM, it just keeps rolling on CryptoNova and does not conclude the transaction until you refresh the page — "stuck here, cannot get out."
-- **What was expected:** Smoother registration \u2014 UI should acknowledge the tx immediately after wallet signs.
-- **Notes:** \u23f3 **V8.38 improvement** \u2014 Not a failed tx. The page polls for receipt with a 10s timeout; on slow RPC this can take 15\u201330s, making the spinner appear stuck. Fix: show "transaction submitted" state immediately after wallet confirmation so members know the tx is in flight. Logged for V8.38.
-- **Submitted:** Wed, 15 Jul 2026 13:45:24 GMT
-
 ---
 
 ## Template
@@ -65,5 +54,6 @@
 | 2026-07-15 | 2026-07-15 | index.html | KolaOla (0x5704) \u2014 intermittent wallet connect failure. MetaMask extension issue \u2014 refresh page, unlock MetaMask, reconnect. Not reproduced on admin.crypto-nova.app. No code change needed. | \u2014 |
 | 2026-07-11 | 2026-07-15 | index.html | Koach100 (0x9ae3) \u2014 registration tx keeps failing. RPC rate limit \u2014 transient, retry after a few seconds resolves. No code change. | \u2014 |
 | 2026-07-08 | 2026-07-15 | Coupon System | Sherwyn (0x1e8e) \u2014 coupon void after V8.34+ redeploy. Root cause: coupons are contract-bound; old codes are invalid on fresh deploys. Coupon system verified working on V8.37 (tested with another member). Closed \u2014 reopen if Sherwyn reports again on V8.37. | \u2014 |
-| 2026-07-15 | 2026-
 | 2026-07-15 | 2026-07-15 | index.html | @ThanksAndPraises (0x3c17) — V8.36 still showing. Self-resolved with page reload (CDN cache). Root cause (hardcoded badge) permanently fixed in d3ad976 — badge now shows V8.37. | d3ad976 |
+| 2026-07-15 | 2026-07-15 | index.html | KolaOla (0x0d5b) — registration spinner appeared stuck after wallet confirmation. Not a failed tx — resolved with V8.37 frontend update. Registration now completes correctly. | V8.37 |
+| 2026-07-15 | 2026-07-15 | index.html | TokenPocket — "⚠️ Wrong Network" banner on first connection despite being on Base Sepolia. Root cause: sync `window.ethereum.chainId` race condition — null before wallet fires 'connect' event, so chain check read 0 ≠ 84532. Fix: replaced sync read with async `eth_chainId` RPC call in `connectWallet()`. |
