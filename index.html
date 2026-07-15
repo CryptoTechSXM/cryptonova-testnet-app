@@ -3701,15 +3701,32 @@ async function doRegister() {
       return;
     }
 
+    // Estimate gas using our read RPC so the wallet gets a pre-calculated limit.
+    // Some wallets (TokenPocket) can't estimate gas for complex multi-contract calls
+    // and show an empty fee / fail on submit when we pass a raw hardcoded limit.
+    // Using our Alchemy endpoint for estimation avoids the wallet's internal estimator.
+    let _gasLimit = c ? 600_000 : 800_000; // safe fallback
+    try {
+      const _rp3 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _trEst = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp3);
+      const _est = c
+        ? await _trEst.registerWithCoupon.estimateGas(referrer, c.codeHash, { from: userAddr })
+        : await _trEst.register.estimateGas(referrer, { from: userAddr });
+      // Add 25% buffer so the wallet has headroom without triggering its own re-estimation
+      _gasLimit = Number(_est) + Math.ceil(Number(_est) * 0.25);
+    } catch(_estErr) {
+      console.warn('[register] gas estimation failed, using fallback:', _estErr.message);
+    }
+
     let tx;
     if (c) {
       // Coupon path: V8.31 — call registerWithCoupon() on TierRouter so globalJoined is set
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      tx = await tr.registerWithCoupon(referrer, c.codeHash, { gasLimit: 600_000 });
+      tx = await tr.registerWithCoupon(referrer, c.codeHash, { gasLimit: _gasLimit });
     } else {
       // Normal path: call register() on TierRouter
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      tx = await tr.register(referrer, { gasLimit: 800_000 });
+      tx = await tr.register(referrer, { gasLimit: _gasLimit });
     }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
