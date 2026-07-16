@@ -4027,8 +4027,9 @@ async function _buildAllMatrixObjects(rp) {
       try {
         const [matAs, matBs] = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp).allPairsStatus();
         for (let pi = 0; pi < matAs.length; pi++) {
-          result.push({ addr: matAs[pi], label: `T${tNum} Matrix A` });
-          result.push({ addr: matBs[pi], label: `T${tNum} Matrix B` });
+          const _pairSuffix = matAs.length > 1 ? `.${pi + 1}` : '';
+          result.push({ addr: matAs[pi], label: `T${tNum}${_pairSuffix} Matrix A` });
+          result.push({ addr: matBs[pi], label: `T${tNum}${_pairSuffix} Matrix B` });
         }
         added = true;
       } catch(e) {}
