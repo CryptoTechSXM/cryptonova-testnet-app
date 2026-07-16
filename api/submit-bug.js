@@ -168,6 +168,31 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Could not save report — try again' });
     }
 
+    // ── Telegram admin notification (best-effort — never blocks the response) ──
+    const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    const TG_CHAT  = process.env.TELEGRAM_CHAT_ID;
+    if (TG_TOKEN && TG_CHAT) {
+      const shortSummary = happened.length > 100 ? happened.slice(0, 100) + '…' : happened;
+      const addrShort    = walletAddress ? walletAddress.slice(0,6) + '…' + walletAddress.slice(-4) : 'n/a';
+      const tgMsg = [
+        `🐛 <b>New Bug Report</b>`,
+        ``,
+        `👤 <b>Reporter:</b> ${reporter}`,
+        `📄 <b>Page:</b> ${page}`,
+        `💳 <b>Wallet:</b> ${wallet} (${addrShort})`,
+        `⚡ <b>Frequency:</b> ${frequency}`,
+        `📝 ${shortSummary}`,
+        ``,
+        `🔗 <a href="https://admin.crypto-nova.app/reports">View all reports</a>`,
+      ].join('\n');
+      fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ chat_id: TG_CHAT, text: tgMsg, parse_mode: 'HTML',
+                                  disable_web_page_preview: true }),
+      }).catch(e => console.warn('TG notify failed:', e.message));
+    }
+
     return res.status(200).json({ ok: true });
   }
 

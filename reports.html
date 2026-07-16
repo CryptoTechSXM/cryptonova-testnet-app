@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CryptoNova — Bug Reports</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #0a0f1a;
+      --bg2:    #111827;
+      --bg3:    #1e2a3a;
+      --border: #1e3a5f;
+      --text1:  #e2e8f0;
+      --text2:  #94a3b8;
+      --text3:  #64748b;
+      --green:  #22c55e;
+      --yellow: #eab308;
+      --red:    #ef4444;
+      --blue:   #3b82f6;
+      --purple: #a855f7;
+    }
+    body { background: var(--bg); color: var(--text1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* ── Auth screen ── */
+    #auth-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+    }
+    .auth-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px; width: 100%; max-width: 360px; text-align: center;
+    }
+    .auth-card h1 { font-size: 20px; margin-bottom: 6px; }
+    .auth-card p  { color: var(--text3); font-size: 13px; margin-bottom: 24px; }
+    .auth-card input {
+      width: 100%; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text1); font-size: 14px; margin-bottom: 12px; outline: none;
+    }
+    .auth-card input:focus { border-color: var(--blue); }
+    .btn-primary {
+      width: 100%; padding: 11px; background: var(--blue); border: none; border-radius: 8px;
+      color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .85; }
+    .auth-err { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ── Main dashboard ── */
+    #dashboard { display: none; }
+    header {
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
+    }
+    header h1 { font-size: 18px; font-weight: 700; }
+    header .meta { font-size: 12px; color: var(--text3); }
+    .refresh-btn {
+      padding: 6px 14px; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text2); font-size: 12px; cursor: pointer;
+    }
+    .refresh-btn:hover { border-color: var(--blue); color: var(--text1); }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+    /* ── Tally cards ── */
+    .tally-row { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+    .tally-card {
+      flex: 1; min-width: 140px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .tally-card .num  { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .tally-card .lbl  { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
+    .num-open     { color: var(--yellow); }
+    .num-resolved { color: var(--green); }
+    .num-total    { color: var(--blue); }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--text3); margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Open issues ── */
+    .issue-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px 18px; margin-bottom: 10px; position: relative;
+    }
+    .issue-card .issue-top {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+      margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .issue-card .issue-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; }
+    .issue-card .badge-page {
+      font-size: 11px; background: rgba(59,130,246,.15); color: var(--blue);
+      border: 1px solid rgba(59,130,246,.3); padding: 2px 8px; border-radius: 10px;
+      white-space: nowrap;
+    }
+    .issue-card .issue-meta { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+    .issue-card .issue-meta span { margin-right: 14px; }
+    .issue-card .issue-body { font-size: 13px; color: var(--text2); line-height: 1.5; }
+    .issue-card .issue-addr {
+      font-size: 11px; color: var(--text3); font-family: monospace; margin-top: 6px;
+    }
+    .freq-badge {
+      display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px;
+      margin-left: 6px; vertical-align: middle;
+      background: rgba(234,179,8,.12); color: var(--yellow); border: 1px solid rgba(234,179,8,.25);
+    }
+    .freq-badge.consistent { background: rgba(239,68,68,.12); color: var(--red); border-color: rgba(239,68,68,.25); }
+
+    /* ── Resolved table ── */
+    .resolved-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden;
+    }
+    .resolved-table th {
+      background: var(--bg3); padding: 10px 14px; text-align: left;
+      font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--text3); font-weight: 600; border-bottom: 1px solid var(--border);
+    }
+    .resolved-table td {
+      padding: 10px 14px; border-bottom: 1px solid rgba(30,58,95,.4);
+      color: var(--text2); vertical-align: top;
+    }
+    .resolved-table tr:last-child td { border-bottom: none; }
+    .resolved-table tr:hover td { background: var(--bg3); }
+    .commit-link { color: var(--blue); text-decoration: none; font-family: monospace; font-size: 12px; }
+    .commit-link:hover { text-decoration: underline; }
+
+    .empty-state { color: var(--text3); font-size: 13px; padding: 24px 0; text-align: center; }
+
+    /* ── Loading overlay ── */
+    #loading {
+      position: fixed; inset: 0; background: var(--bg); display: flex;
+      align-items: center; justify-content: center; font-size: 14px; color: var(--text3);
+      display: none;
+    }
+    .spinner {
+      width: 20px; height: 20px; border: 2px solid var(--border);
+      border-top-color: var(--blue); border-radius: 50%;
+      animation: spin .7s linear infinite; margin-right: 10px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Link back ── */
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); text-decoration: none; margin-bottom: 20px; }
+    .back-link:hover { color: var(--text1); }
+  </style>
+</head>
+<body>
+
+<!-- ── Auth screen ──────────────────────────────────────────────────── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <h1>🐛 Bug Reports</h1>
+    <p>Admin access required</p>
+    <input type="password" id="pw-input" placeholder="Password" autocomplete="current-password">
+    <button class="btn-primary" onclick="login()">View Reports</button>
+    <div class="auth-err" id="auth-err">Incorrect password</div>
+  </div>
+</div>
+
+<!-- ── Loading indicator ─────────────────────────────────────────────── -->
+<div id="loading">
+  <div class="spinner"></div> Loading reports…
+</div>
+
+<!-- ── Dashboard ─────────────────────────────────────────────────────── -->
+<div id="dashboard">
+  <header>
+    <div>
+      <h1>🐛 Bug Reports</h1>
+      <div class="meta" id="fetched-at"></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="refresh-btn" onclick="loadReports()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <a href="/" class="back-link">← Back to site</a>
+
+    <!-- Tally -->
+    <div class="tally-row">
+      <div class="tally-card">
+        <div class="num num-open" id="count-open">—</div>
+        <div class="lbl">Open</div>
+      </div>
+      <div class="tally-card">
+        <div class="num num-resolved" id="count-resolved">—</div>
+        <div class="lbl">Resolved</div>
+      </div>
+      <div class="tally-card">
+        <div class="num num-total" id="count-total">—</div>
+        <div class="lbl">Total</div>
+      </div>
+    </div>
+
+    <!-- Open issues -->
+    <div class="section-title">Open Issues</div>
+    <div id="open-list">
+      <div class="empty-state">Loading…</div>
+    </div>
+
+    <div style="height:32px"></div>
+
+    <!-- Resolved issues -->
+    <div class="section-title">Resolved Issues</div>
+    <div id="resolved-list">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let _pw = sessionStorage.getItem('reports_pw') || '';
+
+  // Auto-login if password already in session
+  if (_pw) attemptLogin(_pw);
+
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function login() {
+    const pw = document.getElementById('pw-input').value.trim();
+    if (!pw) return;
+    attemptLogin(pw);
+  }
+
+  async function attemptLogin(pw) {
+    const r = await fetch('/api/submit-bug', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify', password: pw }),
+    });
+    if (r.ok) {
+      _pw = pw;
+      sessionStorage.setItem('reports_pw', pw);
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display   = 'block';
+      loadReports();
+    } else {
+      document.getElementById('auth-err').style.display = 'block';
+      sessionStorage.removeItem('reports_pw');
+    }
+  }
+
+  async function loadReports() {
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('open-list').innerHTML     = '<div class="empty-state">Loading…</div>';
+    document.getElementById('resolved-list').innerHTML = '<div class="empty-state">Loading…</div>';
+    try {
+      const r = await fetch('/api/get-reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: _pw }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      const data = await r.json();
+      renderDashboard(data);
+    } catch (e) {
+      document.getElementById('open-list').innerHTML = `<div class="empty-state" style="color:var(--red)">Error: ${e.message}</div>`;
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  function renderDashboard(data) {
+    document.getElementById('count-open').textContent     = data.openCount;
+    document.getElementById('count-resolved').textContent = data.resolvedCount;
+    document.getElementById('count-total').textContent    = data.total;
+    document.getElementById('fetched-at').textContent     = 'As of ' + data.fetchedAt;
+
+    // ── Open issues ──
+    const openEl = document.getElementById('open-list');
+    if (data.openIssues.length === 0) {
+      openEl.innerHTML = '<div class="empty-state">✅ No open issues</div>';
+    } else {
+      openEl.innerHTML = data.openIssues.map(issue => {
+        const freqClass = (issue.frequency || '').toLowerCase().includes('consist') ? 'consistent' : '';
+        const addrShort = issue.walletAddress && issue.walletAddress !== 'not provided'
+          ? issue.walletAddress.slice(0,6) + '…' + issue.walletAddress.slice(-4)
+          : null;
+        return `
+          <div class="issue-card">
+            <div class="issue-top">
+              <div class="issue-title">${escHtml(issue.title)}</div>
+              <span class="badge-page">${escHtml(issue.page)}</span>
+            </div>
+            <div class="issue-meta">
+              <span>📅 ${escHtml(issue.date)}</span>
+              <span>👤 ${escHtml(issue.reporter)}</span>
+              <span>💳 ${escHtml(issue.wallet)}</span>
+              ${issue.frequency ? `<span>⚡ <span class="freq-badge ${freqClass}">${escHtml(issue.frequency)}</span></span>` : ''}
+            </div>
+            <div class="issue-body">${escHtml(issue.happened)}</div>
+            ${addrShort ? `<div class="issue-addr">Wallet: ${escHtml(issue.walletAddress)}</div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // ── Resolved issues ──
+    const resolvedEl = document.getElementById('resolved-list');
+    if (data.resolvedIssues.length === 0) {
+      resolvedEl.innerHTML = '<div class="empty-state">No resolved issues yet</div>';
+    } else {
+      const rows = data.resolvedIssues.map(row => {
+        const commitHref = row.commit && row.commit !== '—'
+          ? `<a class="commit-link" href="https://github.com/CryptoTechSXM/cryptonova-testnet-app/commit/${row.commit.replace(/[^a-f0-9]/gi,'')}" target="_blank">${escHtml(row.commit)}</a>`
+          : (row.commit || '—');
+        return `<tr>
+          <td>${escHtml(row.dateReported)}</td>
+          <td>${escHtml(row.dateFixed)}</td>
+          <td>${escHtml(row.page)}</td>
+          <td>${escHtml(row.summary)}</td>
+          <td>${commitHref}</td>
+        </tr>`;
+      }).join('');
+      resolvedEl.innerHTML = `
+        <table class="resolved-table">
+          <thead><tr>
+            <th>Reported</th><th>Fixed</th><th>Page</th><th>Summary</th><th>Commit</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+</script>
+</body>
+</html>
