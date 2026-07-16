@@ -6211,7 +6211,14 @@ async function doSelfRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const SELF_RESCUE_ABI = ['function selfRescue() external'];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
-    const tx     = await matrix.selfRescue({ gasLimit: 3_000_000 }); // matrix may need to cycle 127 slots
+    // Estimate gas — a full 127-slot cycle-out can use up to 15M gas.
+    // Cap at 15M (Base Sepolia per-tx limit) to avoid "gas limit too high" RPC rejection.
+    let _rescueGas = 15_000_000;
+    try {
+      const _est = await matrix.selfRescue.estimateGas({ from: await signer.getAddress() });
+      _rescueGas = Math.min(15_000_000, Number(_est) + Math.ceil(Number(_est) * 0.30));
+    } catch (_) { /* estimation failed — use 15M cap */ }
+    const tx     = await matrix.selfRescue({ gasLimit: _rescueGas });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You're back in! Refreshing your dashboard…"; }
@@ -6304,15 +6311,4 @@ function updateAddrsFromDeployed(d) {
 document.addEventListener('click', function(e){
   var b = e.target.closest('.tip-badge');
   if(!b) return;
-  var p = b.querySelector('.tip-popup');
-  if(!p) return;
-  var shown = p.style.display === 'block';
-  // Hide all popups first
-  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
-  if(!shown) { p.style.display='block'; e.stopPropagation(); }
-});
-document.addEventListener('click', function(){ 
-  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
-});
-</script>
-</body></html>
+  var p = b.querySelector('.tip-popup'
