@@ -6311,4 +6311,15 @@ function updateAddrsFromDeployed(d) {
 document.addEventListener('click', function(e){
   var b = e.target.closest('.tip-badge');
   if(!b) return;
-  var p = b.querySelector('.tip-popup'
+  var p = b.querySelector('.tip-popup');
+  if(!p) return;
+  var shown = p.style.display === 'block';
+  // Hide all popups first
+  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
+  if(!shown) { p.style.display='block'; e.stopPropagation(); }
+});
+document.addEventListener('click', function(){ 
+  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
+});
+</script>
+</body></html>
