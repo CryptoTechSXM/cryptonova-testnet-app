@@ -7,6 +7,21 @@
 
 ## Open Issues
 
+### [2026-07-16] Other — When trying to register, there is an error message
+
+❌ "", "f…
+- **Reporter:** Barbara
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x997b9a4f7c107b07ae5b5ab9ce19f6a8b728b4f6
+- **Frequency:** Intermittent
+- **What happened:** When trying to register, there is an error message
+
+❌ "", "from": "0x997b9A4f7c107b07ae5b5AB9cE19f6a8B728b4F6", "to": "0x98A004bB73fbb06b436f2F1FC1d8433Ce
+- **What was expected:** ❌ "", "from": "0x997b9A4f7c107b07ae5b5AB9cE19f6a8B728b4F6", "to": "0x98A004bB73fbb06b436f2F1FC1d8433Ce
+- **Submitted:** Thu, 16 Jul 2026 00:11:08 GMT
+
+
 ### [2026-07-15] Dashboard (index.html) — Self-Rescue Action Required for Re- Entry into the Queue. Th…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
