@@ -5217,7 +5217,7 @@ async function setDoubleReentryOption(enabled) {
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled — second entry fires when surplus covers fee');
-    toast('Failed: ' + (e.reason || e.message || 'unknown error').slice(0, 80), 'error');
+    toast(friendlyError(e), 'error');
   }
 }
 
@@ -5246,7 +5246,7 @@ async function setAutoUpgradeOption(enabled) {
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
-    toast('Failed: ' + (e.reason || e.message || 'unknown error').slice(0, 80), 'error');
+    toast(friendlyError(e), 'error');
   }
 }
 
@@ -5274,7 +5274,7 @@ async function setAutoReentryOption(enabled) {
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
-    toast('Failed: ' + (e.reason || e.message || 'unknown error').slice(0, 80), 'error');
+    toast(friendlyError(e), 'error');
   }
 }
 
@@ -5818,6 +5818,10 @@ function friendlyError(e) {
   // ── TierRouter revert strings (TR:) ────────────────────────────────────
   if (msgLow.includes('tr: not registered') || msgLow.includes('tr: already joined'))
     return '✅ This wallet is already registered — view your Dashboard.';
+  if (msgLow.includes('cross to matb first') || msgLow.includes('whale gate'))
+    return '⏳ You need to complete your T1 cycle before upgrading — keep earning in your current position!';
+  if (msgLow.includes('tr: already in tier') || msgLow.includes('tr: max tiers'))
+    return '✅ You are already at this tier or higher — view your Dashboard.';
 
   // ── Matrix revert strings (F8V8:) ──────────────────────────────────────
   if (msgLow.includes('f8v8: must keep crossing reserve') ||
@@ -5831,15 +5835,15 @@ function friendlyError(e) {
       msgLow.includes('already joined'))
     return '✅ This wallet is already registered — view your Dashboard.';
   if (msgLow.includes('not a member'))
-    return '❌ Wallet not recognised as a member.';
+    return '❌ Wallet not recognised as a member — make sure you are connected with the right wallet.';
   if (msgLow.includes('still in matrix'))
-    return '❌ You are still active in the matrix — no rescue needed.';
+    return '✅ You are still active in the matrix — no rescue needed right now. Refresh your dashboard to see your current position.';
   if (msgLow.includes('not parked'))
-    return '❌ You are not in the rescue queue.';
+    return '🎉 Looks like you\'ve already been rescued! Refresh your dashboard to see your active position.';
   if (msgLow.includes('sf: below floor') || msgLow.includes('sf: not authorized'))
     return '❌ Stability Fund error — please try Self Rescue instead.';
   if (msgLow.includes('allowance') && msgLow.includes('usdc'))
-    return '❌ USDC not approved — complete Step 1 first.';
+    return '🔒 USDC not approved yet — please complete the Approve step (Step 1) first.';
   if (msgLow.includes('transfer amount exceeds balance') ||
       msgLow.includes('erc20: transfer amount exceeds'))
     return '❌ Insufficient USDC balance.';
@@ -6023,9 +6027,9 @@ async function approveBulkUpgrade() {
     if (upgradeBtn) { upgradeBtn.disabled = false; upgradeBtn.classList.remove('btn-ghost'); upgradeBtn.classList.add('btn-green'); }
   } catch(e) {
     const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected'))
+    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
       ? '✋ Cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'unknown error');
+      : friendlyError(e);
     if (status) status.textContent = friendly;
     if (btn) btn.disabled = false;
   }
@@ -6048,9 +6052,9 @@ async function doBulkUpgrade() {
     setTimeout(() => loadDashboardData(), 2500);
   } catch(e) {
     const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected'))
+    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
       ? '✋ Cancelled — nothing was sent.'
-      : '❌ ' + (e.reason || e.shortMessage || e.message || 'unknown error');
+      : friendlyError(e);
     if (status) status.textContent = friendly;
     if (btn) btn.disabled = false;
   }
@@ -6124,7 +6128,7 @@ async function approveUSDCForUpgrade() {
     } else if (msg.includes('insufficient funds') || (e.code === 'CALL_EXCEPTION' && !e.data)) {
       friendly = '⛽ Looks like your wallet is short on Base Sepolia ETH for gas. Visit the faucet (top nav) to get a small amount for free!';
     } else {
-      friendly = '❌ Something went wrong: ' + (e.reason || e.shortMessage || e.message || 'unknown error');
+      friendly = friendlyError(e);
     }
     _setS(friendly);
     if (btnReg)  btnReg.disabled  = false;
@@ -6183,7 +6187,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     } else if (data.startsWith('0x7939f424') || msg.includes('insufficient balance')) {
       friendly = '💳 Insufficient USDC — visit the faucet to top up!';
     } else {
-      friendly = '❌ ' + (e.reason || e.shortMessage || e.message || 'unknown error');
+      friendly = friendlyError(e);
     }
     if (status) status.textContent = friendly;
     if (btn) btn.disabled = false;
