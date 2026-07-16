@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-16] Onboarding / Registration — ❌ transaction execution reverted (action="sendTransaction", …
+- **Reporter:** sherwyn
+- **Page:** Onboarding / Registration
+- **Wallet Type:** Other / Unknown
+- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
+- **Frequency:** Consistent
+- **What happened:** ❌ transaction execution reverted (action="sendTransaction", data=null, reason=null, invocation=null, revert=null, transaction={ "data": "", "from": "0x774481DAc8584CfAFb5B6b6fAD883787b343C573", "to": "0x98A004bB73fbb06b436f2F1FC1d8433CeCb77ae5" }, receipt={ "_type": "TransactionReceipt", "blockHash": "0x0000000000000000000000000000000000000000000000000000000000000000", "blockNumber": 44222914, "contractAddress": null, "cumulativeGasUsed": "6489855", "from": "0x774481DAc8584CfAFb5B6b6fAD883787b343C573", "gasPrice": "6000000", "gasUsed": "1887591", "hash": "0x86b43d049cfd4d7d214d9dbb4569fd065c6afc724241de47b676f23959af50a0", "index": 24, "logs": [ ], "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "root": null, "status": 0, "to": "0x98A004bB73fbb06b436f2F1FC1d8433CeCb77ae5" }, code=CALL_EXCEPTION, version=6.7.1)
+- **What was expected:** To be upgraded
+- **Notes:** Same thing happening with self rescue and this is in Token Pocket..
+- **Submitted:** Thu, 16 Jul 2026 15:10:54 GMT
+
+
 ### [2026-07-16] Other — On the Telegram reports / announcements there is a discrepan…
 - **Reporter:** Janice V
 - **Page:** Other
