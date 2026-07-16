@@ -3362,10 +3362,20 @@ async function loadRegisterTab() {
         }
         // Fetch cycles to determine locked / eligible state (hiTier already confirmed < 2 above)
         const cycles     = Number(await tr.tierCycles(userAddr, 0).catch(() => 0n));
+        // Check ALL T1 MatBs — members in T1.1 MatB (pre-factory) must also qualify
         const _pm1Reg    = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
-        const _activeMatBReg = await _pm1Reg.currentMatB().catch(() => ADDRS.T1.matB);
-        const t1matB     = new ethers.Contract(_activeMatBReg, MATRIX_ABI, rp);
-        const inT1MatB   = await t1matB.isActiveInMatrix(userAddr).catch(() => false);
+        let inT1MatB = false;
+        try {
+          const _allT1MatBs = (await _pm1Reg.allPairsStatus())[1];
+          for (const _mbAddr of _allT1MatBs) {
+            if (!_mbAddr || _mbAddr === ethers.ZeroAddress) continue;
+            const _inThis = await new ethers.Contract(_mbAddr, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
+            if (_inThis) { inT1MatB = true; break; }
+          }
+        } catch (_) {
+          const _fbAddr = await _pm1Reg.currentMatB().catch(() => ADDRS.T1.matB);
+          inT1MatB = await new ethers.Contract(_fbAddr, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
+        }
         const hint   = document.getElementById('upgrade-tier-hint');
         const btnApp = document.getElementById('btn-upgrade-approve');
         const btnUp  = document.getElementById('btn-upgrade');
@@ -4325,17 +4335,26 @@ async function loadDashboardData() {
       // on a flaky public RPC it could silently fall back to false and hide this whole
       // section even for a genuinely-eligible member (curTierCycles=0 + a dropped read =
       // canUpgrade false). Retried like every other read in this function now.
-      // Resolve active MatB for highestTier via PairManager (handles factory-spawned pairs like T1.2)
+      // Check ALL MatBs in tier — members in T1.1 MatB (who crossed before factory created T1.2)
+      // were invisible when we only checked currentMatB(). allPairsStatus()[1] covers every pair.
       const _tierKey = 'T' + highestTier;
       const _pmDash  = ADDRS[_tierKey]?.pm ? new ethers.Contract(ADDRS[_tierKey].pm, PM_ABI, rp) : null;
-      const _curMatBAddrDash = _pmDash
-        ? await _pmDash.currentMatB().catch(() => ADDRS[_tierKey]?.matB || null)
-        : (ADDRS[_tierKey]?.matB || null);
-      const _inCurMatBDashRead = _curMatBAddrDash
-        ? await retryRead(() => new ethers.Contract(_curMatBAddrDash, MATRIX_ABI, rp).isActiveInMatrix(userAddr))
-        : { ok: true, value: false };
-      const _inCurMatBDash = _inCurMatBDashRead.ok ? _inCurMatBDashRead.value : false;
-      const canUpgrade = (Number(curTierCycles) >= 1 || _inCurMatBDash) && highestTier < MAX_DEPLOYED_TIER;
+      let _inAnyMatBDash = false;
+      try {
+        const _allMatBsDash = _pmDash
+          ? (await _pmDash.allPairsStatus())[1]
+          : [ADDRS[_tierKey]?.matB].filter(Boolean);
+        for (const _mbAddr of _allMatBsDash) {
+          if (!_mbAddr || _mbAddr === ethers.ZeroAddress) continue;
+          const _inThis = await new ethers.Contract(_mbAddr, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
+          if (_inThis) { _inAnyMatBDash = true; break; }
+        }
+      } catch (_) {
+        // RPC failed — fall back to currentMatB only
+        const _fb = _pmDash ? await _pmDash.currentMatB().catch(() => ADDRS[_tierKey]?.matB) : ADDRS[_tierKey]?.matB;
+        if (_fb) _inAnyMatBDash = await new ethers.Contract(_fb, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
+      }
+      const canUpgrade = (Number(curTierCycles) >= 1 || _inAnyMatBDash) && highestTier < MAX_DEPLOYED_TIER;
       upgradeSection.style.display = canUpgrade ? 'block' : 'none';
       if (canUpgrade) {
         // v8.19 fix (2026-06-20): UPGRADE_NAMES used to be a separate hardcoded list that
