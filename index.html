@@ -4199,6 +4199,17 @@ async function loadDashboardData() {
     }
     if (followUps.length) await Promise.allSettled(followUps); // allSettled — never throws
 
+    // Graduated tiers — tiers below highestTier where member has no active seat.
+    // Used in Member Info panel to render "✓ Graduated" rows.
+    const _graduatedTierNums = [];
+    for (let _gi = 1; _gi < highestTier; _gi++) {
+      const _hasActive = activePositions.some(p => {
+        const _m = p.label.match(/^T(\d+)/);
+        return _m && parseInt(_m[1]) === _gi;
+      });
+      if (!_hasActive) _graduatedTierNums.push(_gi);
+    }
+
     // Determine limboInfo: reclaimed-limbo only shown when member has no active position
     // and is not in the rescue (parked) queue. Pick the highest-tier MatA candidate.
     let limboInfo = null;
@@ -4280,6 +4291,10 @@ async function loadDashboardData() {
       if (activePositions.length === 0) {
         posList.innerHTML = '<div class="info-row"><span class="info-key">Active Positions</span><span class="info-val" style="color:var(--text3)">—</span></div>';
       } else {
+        // Graduated tiers — show a subtle row for each tier the member has left
+        const _gradRows = _graduatedTierNums.map(tNum =>
+          `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x2713; Graduated</span></span><span class="info-val" style="color:var(--text3);font-size:11px">Re-enter &middot; V8.38</span></div>`
+        ).join('');
         posList.innerHTML = activePositions.map(p => {
           const bfsStr = p.bfsUnknown
             ? unknownBadge('Could not read matrix position — try refreshing.')
@@ -4289,7 +4304,7 @@ async function loadDashboardData() {
             ? `<div class="info-row" style="padding-top:2px;padding-bottom:6px"><span class="info-key" style="color:var(--text3);font-size:12px;padding-left:14px">↳ Crossing Reserve</span><span class="info-val" style="color:#a855f7;font-size:12px" title="Locked toward next matrix crossing — released as earnings when the matrix cycles">${fmt6(p.crossingReserve)}</span></div>`
             : '';
           return `<div class="info-row"><span class="info-key" style="color:var(--text2)">${p.label}</span><span class="info-val green">${bfsStr}</span></div>${resRow}`;
-        }).join('');
+        }).join('') + _gradRows;
       }
     })();
     setText('dash-cycles',         activeCycles.toString());
