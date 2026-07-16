@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-16] Other — On the Telegram reports / announcements there is a discrepan…
+- **Reporter:** Janice V
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** On the Telegram reports / announcements there is a discrepancy in the members count. Daily update shows 568 while pulse shows 468!
+- **What was expected:** I expected both to be the same number of members.
+- **Submitted:** Thu, 16 Jul 2026 13:23:53 GMT
+
+
 ### [2026-07-16] Dashboard (index.html) — I reentered the matrix T1 on several accounts crossed to T1 …
 - **Reporter:** Gemma
 - **Page:** Dashboard (index.html)
