@@ -118,6 +118,14 @@
       "destination": "/bug-report.html"
     },
     {
+      "source": "/reports",
+      "destination": "/reports.html"
+    },
+    {
+      "source": "/reports.html",
+      "destination": "/reports.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
