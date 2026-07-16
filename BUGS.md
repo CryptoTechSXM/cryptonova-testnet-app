@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-16] Dashboard (index.html) — I reentered the matrix T1 on several accounts crossed to T1 …
+- **Reporter:** Gemma
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x85ec71aac242084905e2b385d81e129be7913cb7
+- **Frequency:** Consistent
+- **What happened:** I reentered the matrix T1 on several accounts crossed to T1 MatB but T2 did not open!
+- **What was expected:** T2 Mat A should have opened up. I should have been able to upgrade to T2 Mat A
+- **Notes:** Please assist I have the funds to upgrade but unable to do so.
+- **Submitted:** Thu, 16 Jul 2026 11:35:25 GMT
+
+
 ### [2026-07-16] Other — When trying to register, there is an error message
 
 ❌ "", "f…
