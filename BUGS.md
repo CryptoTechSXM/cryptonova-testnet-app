@@ -7,6 +7,55 @@
 
 ## Open Issues
 
+### [2026-07-16] Dashboard (index.html) — I reentered the matrix T1 on several accounts crossed to T1 …
+- **Reporter:** Gemma
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x85ec71aac242084905e2b385d81e129be7913cb7
+- **Frequency:** Consistent
+- **What happened:** I reentered the matrix T1 on several accounts crossed to T1 MatB but T2 did not open!
+- **What was expected:** T2 Mat A should have opened up. I should have been able to upgrade to T2 Mat A
+- **Notes:** Please assist I have the funds to upgrade but unable to do so.
+- **Submitted:** Thu, 16 Jul 2026 11:35:25 GMT
+
+
+### [2026-07-16] Other — When trying to register, there is an error message
+
+❌ "", "f…
+- **Reporter:** Barbara
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x997b9a4f7c107b07ae5b5ab9ce19f6a8b728b4f6
+- **Frequency:** Intermittent
+- **What happened:** When trying to register, there is an error message
+
+❌ "", "from": "0x997b9A4f7c107b07ae5b5AB9cE19f6a8B728b4F6", "to": "0x98A004bB73fbb06b436f2F1FC1d8433Ce
+- **What was expected:** ❌ "", "from": "0x997b9A4f7c107b07ae5b5AB9cE19f6a8B728b4F6", "to": "0x98A004bB73fbb06b436f2F1FC1d8433Ce
+- **Submitted:** Thu, 16 Jul 2026 00:11:08 GMT
+
+
+### [2026-07-15] Dashboard (index.html) — Self-Rescue Action Required for Re- Entry into the Queue. Th…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x728ff08035fffbc5a2f512a081cc88a4221f5f00
+- **Frequency:** Consistent
+- **What happened:** Self-Rescue Action Required for Re- Entry into the Queue. The transaction failed. This also occurred in accounts 1 - 4.
+- **What was expected:** Expected Re-entry into the queue with subsequent upgrade of the account.
+- **Submitted:** Wed, 15 Jul 2026 23:43:25 GMT
+
+
+### [2026-07-15] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x6c854f94757893616a952e2e67adab5112573e86
+- **Frequency:** Consistent
+- **What happened:** "[From https://sepolia.base.org] gas limit too high"
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Submitted:** Wed, 15 Jul 2026 22:08:23 GMT
+
+
 ---
 
 ## Template
