@@ -505,9 +505,9 @@
       }
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
-        // Gate: 2026-07-15 9:30 AM EDT (13:30 UTC)
-        var EARLY_MS = 1784122200000;
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.37 Early Access — Opens 9:30 AM EDT';
+        // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
+        var EARLY_MS = 1784309400000;
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.38 Early Access — Opens 1:30 PM EDT';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
@@ -531,8 +531,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.37 Testnet — Opens 10:00 AM EDT';
-        var MAIN_MS  = 1784124000000; // Gate: 2026-07-15 10:00 AM EDT (14:00 UTC)
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.38 Testnet — Opens 2:00 PM EDT';
+        var MAIN_MS  = 1784311200000; // Gate: 2026-07-17 2:00 PM EDT (18:00 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
