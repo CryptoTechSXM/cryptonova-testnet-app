@@ -5818,6 +5818,8 @@ function friendlyError(e) {
   // ── TierRouter revert strings (TR:) ────────────────────────────────────
   if (msgLow.includes('tr: not registered') || msgLow.includes('tr: already joined'))
     return '✅ This wallet is already registered — view your Dashboard.';
+  if (msgLow.includes('already seated in target tier') || msgLow.includes('tr: already seated'))
+    return '✅ You are already in this tier — no upgrade needed! Open your Dashboard to see your current position.';
   if (msgLow.includes('cross to matb first') || msgLow.includes('whale gate'))
     return '⏳ You need to complete your T1 cycle before upgrading — keep earning in your current position!';
   if (msgLow.includes('tr: already in tier') || msgLow.includes('tr: max tiers'))
@@ -6149,11 +6151,17 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     const rp    = provider || readProvider;
     const usdcC = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
     const trR   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const [fee, bal, uAllowance] = await Promise.all([
+    const [fee, bal, uAllowance, highestTier] = await Promise.all([
       trR.tierEntryFees(tierIdx).catch(() => 0n),
       usdcC.balanceOf(userAddr).catch(() => 0n),
       usdcC.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
+      trR.memberHighestTier(userAddr).catch(() => 0),
     ]);
+    if (Number(highestTier) >= tierIdx + 1) {
+      _setS(`✅ You are already in T${tierIdx + 1} — no upgrade needed! Open your Dashboard to see your current position.`);
+      if (btn) btn.disabled = false;
+      return;
+    }
     if (bal < fee) {
       const needed = (Number(fee) / 1e6).toFixed(2);
       const has    = (Number(bal)  / 1e6).toFixed(2);

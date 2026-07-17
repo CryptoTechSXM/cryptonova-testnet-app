@@ -30,6 +30,27 @@
 - **Submitted:** Thu, 16 Jul 2026 00:11:08 GMT
 - **Status:** ⚠️ Needs more info — ask Barbara to retry and share the full error or screenshot
 
+### [2026-07-16] index.html — Upgrade TX reverts (TokenPocket, already in T2)
+- **Reporter:** Sherwyn
+- **Page:** Onboarding / Registration (upgrade card)
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
+- **Frequency:** Consistent
+- **What happened:** manualUpgrade(1) reverted — "TR: already seated in target tier"
+- **Root cause:** memberHighestTier=T2; wallet is already in T2. UI showed upgrade button regardless.
+- **Fix:** Added `memberHighestTier` to `_executeUpgrade` pre-flight — now shows "✅ Already in T2" before submitting tx. Also added to `friendlyError()`.
+- **Status:** ✅ Fixed — pending push
+
+### [2026-07-17] index.html — T2 upgrade TX fails (MetaMask)
+- **Reporter:** Sherwyn
+- **Page:** index (upgrade card)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xfb3adda5454d23f5a60ee12caf75891e9712f9d3
+- **Frequency:** Consistent (at time of report)
+- **What happened:** manualUpgrade(1) reverted with empty error message
+- **Root cause:** On-chain simulation NOW passes ($82 USDC, $25 allowance, T1 member). Likely transient RPC blip or stale state at time of report.
+- **Status:** ✅ Resolved — ask Sherwyn to retry; simulation confirms tx will succeed
+
 ---
 
 ## Template
