@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-17] Other — ❌ "", "from": "0xFB3Adda5454d23f5A60Ee12cAF75891e9712f9D3", …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xfb3adda5454d23f5a60ee12caf75891e9712f9d3
+- **Frequency:** Consistent
+- **What happened:** ❌ "", "from": "0xFB3Adda5454d23f5A60Ee12cAF75891e9712f9D3", "to": "0x98A004bB73fbb06b436f2F1FC1d8433Ce ...
+- **What was expected:** To be upgraded...
+- **Notes:** getting this error when trying to upgrade to T2 using MM....  Seems like MM is sending to a different address from CNova.. Approval didn't give this error.
+- **Submitted:** Fri, 17 Jul 2026 01:29:53 GMT
+
+
 ### [2026-07-16] Other — When trying to register, there is an error message
 - **Reporter:** Barbara
 - **Page:** Other
