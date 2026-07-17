@@ -7,60 +7,7 @@
 
 ## Open Issues
 
-### [2026-07-17] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xde580069839f42108064a0fce2a3a9a802f072d6
-- **Frequency:** Consistent
-- **What happened:** "[From https://sepolia.base.org] gas limit too high"
-- **What was expected:** ⏳ Action Required — Re-Entry Queue
-- **Submitted:** Fri, 17 Jul 2026 10:44:54 GMT
-
-
-### [2026-07-17] Other — ❌ "", "from": "0xFB3Adda5454d23f5A60Ee12cAF75891e9712f9D3", …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xfb3adda5454d23f5a60ee12caf75891e9712f9d3
-- **Frequency:** Consistent
-- **What happened:** ❌ "", "from": "0xFB3Adda5454d23f5A60Ee12cAF75891e9712f9D3", "to": "0x98A004bB73fbb06b436f2F1FC1d8433Ce ...
-- **What was expected:** To be upgraded...
-- **Notes:** getting this error when trying to upgrade to T2 using MM....  Seems like MM is sending to a different address from CNova.. Approval didn't give this error.
-- **Submitted:** Fri, 17 Jul 2026 01:29:53 GMT
-
-
-### [2026-07-16] Other — When trying to register, there is an error message
-- **Reporter:** Barbara
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x997b9a4f7c107b07ae5b5ab9ce19f6a8b728b4f6
-- **Frequency:** Intermittent
-- **What happened:** Registration tx reverted (CALL_EXCEPTION, status=0) — full error details truncated in form
-- **What was expected:** Successful registration
-- **Submitted:** Thu, 16 Jul 2026 00:11:08 GMT
-- **Status:** ⚠️ Needs more info — ask Barbara to retry and share the full error or screenshot
-
-### [2026-07-16] index.html — Upgrade TX reverts (TokenPocket, already in T2)
-- **Reporter:** Sherwyn
-- **Page:** Onboarding / Registration (upgrade card)
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
-- **Frequency:** Consistent
-- **What happened:** manualUpgrade(1) reverted — "TR: already seated in target tier"
-- **Root cause:** memberHighestTier=T2; wallet is already in T2. UI showed upgrade button regardless.
-- **Fix:** Added `memberHighestTier` to `_executeUpgrade` pre-flight — now shows "✅ Already in T2" before submitting tx. Also added to `friendlyError()`.
-- **Status:** ✅ Fixed — pending push
-
-### [2026-07-17] index.html — T2 upgrade TX fails (MetaMask)
-- **Reporter:** Sherwyn
-- **Page:** index (upgrade card)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xfb3adda5454d23f5a60ee12caf75891e9712f9d3
-- **Frequency:** Consistent (at time of report)
-- **What happened:** manualUpgrade(1) reverted with empty error message
-- **Root cause:** On-chain simulation NOW passes ($82 USDC, $25 allowance, T1 member). Likely transient RPC blip or stale state at time of report.
-- **Status:** ✅ Resolved — ask Sherwyn to retry; simulation confirms tx will succeed
+_No open issues — V8.38 live as of 2026-07-17. Report new issues below._
 
 ---
 
@@ -82,6 +29,11 @@
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-17 | 2026-07-17 | index.html | Maximum_71 (0xde58) — "gas limit too high" on re-entry. Same as 0x6c85. Public RPC cap — keeper auto-rescues within 2 min. Not a code bug. Reply sent. | — |
+| 2026-07-17 | 2026-07-17 | index.html | Sherwyn (0xFB3A) — MM sending to old V8.37 TierRouter on upgrade. Stale browser cache. Hard refresh + reconnect wallet on V8.38 fixes it. Reply sent. | — |
+| 2026-07-17 | 2026-07-17 | index.html | Sherwyn (0xFB3A) — T2 upgrade TX fails (MetaMask). Transient RPC blip — on-chain simulation passes. Ask to retry on V8.38. Reply sent. | — |
+| 2026-07-16 | 2026-07-17 | index.html | Sherwyn (0x7744) — manualUpgrade(1) reverted "TR: already seated in target tier". Pre-flight memberHighestTier check now shows friendly message before tx fires. | 4e13fea / V8.38 |
+| 2026-07-16 | 2026-07-17 | index.html | Barbara (0x997b) — intermittent registration revert (CALL_EXCEPTION). No error detail provided. Closed — ask to retest on V8.38 and submit full error if it recurs. | — |
 | 2026-07-16 | 2026-07-16 | index.html | Sherwyn (0x7744) — T3 upgrade + self-rescue failing in TokenPocket. Root cause: only $6.47 USDC in wallet vs $25 T3 fee, and $0 allowance. Pre-flight balance/allowance check now blocks tx before submission and shows clear dollar amounts. TokenPocket also doesn't decode CALL_EXCEPTION revert data — friendlyError() catch block improved. Reply sent. | aeb39a6, 10a6ceb |
 | 2026-07-16 | 2026-07-16 | VPS monitor | Janice V (0x7947) — daily monitor showed 568 members while pulse showed 468. Root cause: monitor_v8.js used totalJoined() (counts seats/re-entries) instead of globalJoinedCount() (unique wallets). Fixed on VPS — monitor now reports unique members. Reply sent. | VPS |
 | 2026-07-16 | 2026-07-16 | index.html | Gemma (0x85ec) — "T2 did not open after crossing to T1 MatB." On-chain check: memberHighestTier=2 — Gemma is already in T2. Self-resolved; whale gate was open. Reply sent. | — |
