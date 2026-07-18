@@ -2058,6 +2058,7 @@ const TIER_ROUTER_ABI = [
   'function tierFirstEntries(uint8 tierNum) external view returns (uint256)',        // V8.35
   'function tierGateThreshold(uint8 tierNum) external view returns (uint256)',       // V8.35
   'event BulkUpgrade(address indexed member, uint8 fromTier, uint8 toTier, uint256 totalFee)', // V8.35
+  'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.11
 ];
 
 const COUPON_REGISTRY_ABI = [
@@ -4308,7 +4309,10 @@ async function loadDashboardData() {
       }
     })();
     setText('dash-cycles',         activeCycles.toString());
-    setText('dash-id',             memberId > 0 ? '#' + memberId : '—');
+    // V8.38 fix: show global join order (MemberEnrolled event) as Member ID,
+    // not the per-matrix sequential counter which resets for each pair/contract.
+    const _gjo = await _getGlobalJoinOrder(userAddr, rp);
+    setText('dash-id',             (_gjo > 0 ? _gjo : memberId) > 0 ? '#' + (_gjo > 0 ? _gjo : memberId) : '—');
     setText('dash-orig-referrer',  memberReferrer && memberReferrer !== ethers.ZeroAddress
       ? memberReferrer.slice(0,6)+'…'+memberReferrer.slice(-4) : 'Direct');
 
@@ -4742,6 +4746,25 @@ async function openDashDetail(type, cardEl) {
   }
 }
 
+// ── Global join order (true registration sequence #) ─────────────────
+// Reads MemberEnrolled event from TierRouter to get the member's global
+// join position — distinct from member.id which is a per-matrix counter.
+// Cached in localStorage so it only hits the RPC once per wallet.
+async function _getGlobalJoinOrder(addr, rp) {
+  const cacheKey = 'gjo_' + ADDRS.tierRouter.toLowerCase() + '_' + addr.toLowerCase();
+  const cached = parseInt(localStorage.getItem(cacheKey) || '0');
+  if (cached > 0) return cached;
+  try {
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const events = await tr.queryFilter(tr.filters.MemberEnrolled(addr));
+    if (events.length > 0) {
+      const order = Number(events[0].args.joinedCount);
+      if (order > 0) { localStorage.setItem(cacheKey, String(order)); return order; }
+    }
+  } catch {}
+  return 0; // fallback: caller uses member.id from matrix
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────
 async function _getAllMatrixMembers(userAddr, rp) {
   const matObjs = await _buildAllMatrixObjects(rp);
@@ -4939,11 +4962,15 @@ async function renderCommunityDetail(el, rp) {
   const usdc  = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
   const cwBal = await usdc.balanceOf(ADDRS.communityWallet).catch(() => 0n);
 
-  // Member ID
+  // Member ID — use global join order (MemberEnrolled event) for correct
+  // Genesis/Pioneer classification. member.id is per-matrix and resets per
+  // pair contract; globalJoinOrder is the true Nth-member-ever sequence.
   const { memberId } = await _getAllMatrixMembers(userAddr, rp);
+  const _cwGjo = await _getGlobalJoinOrder(userAddr, rp);
+  const _joinId = _cwGjo > 0 ? _cwGjo : memberId; // prefer global join order
 
-  const isGenesis  = memberId >= 1   && memberId <= 500;
-  const isPioneer  = memberId > 500  && memberId <= 1000;
+  const isGenesis  = _joinId >= 1   && _joinId <= 500;
+  const isPioneer  = _joinId > 500  && _joinId <= 1000;
   const isEligible = isGenesis || isPioneer;
 
   const groupLabel    = isGenesis ? 'Genesis (members #1–500)' : isPioneer ? 'Pioneer (members #501–1,000)' : 'Not eligible (above #1,000)';
@@ -4960,8 +4987,8 @@ async function renderCommunityDetail(el, rp) {
     <div class="detail-row"><span class="detail-key">Monthly Distributable (50%)</span><span class="detail-val">${fmt6(distributable)}</span></div>
     <div class="detail-row"><span class="detail-key">Rolls Over (50%)</span><span class="detail-val">${fmt6(cwBal - distributable)}</span></div>
     <div class="detail-section">Your Eligibility</div>
-    <div class="detail-row"><span class="detail-key">Your Member ID</span><span class="detail-val">${memberId ? '#' + memberId : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">${eligIcon} ${memberId ? groupLabel : 'Loading…'}</span></div>
+    <div class="detail-row"><span class="detail-key">Your Member ID</span><span class="detail-val">${_joinId ? '#' + _joinId : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">${eligIcon} ${_joinId ? groupLabel : 'Loading…'}</span></div>
     ${isEligible ? `
     <div class="detail-row"><span class="detail-key">Your Group's Share</span><span class="detail-val">${(groupShare*100).toFixed(0)}% of distributable = ${fmt6(groupPool)}</span></div>
     <div class="detail-row total"><span class="detail-key">Est. Your Share / Month</span><span class="detail-val green">${fmt6(estShare)} <span style="color:var(--text3);font-size:11px;font-weight:400">÷ max ${groupMax} members</span></span></div>
@@ -5297,6 +5324,7 @@ async function loadQueueView() {
     setText('matrix-bfs',   Number(mSize) + ' seats');
     const myBfs = userAddr ? await mc.matrixPos(userAddr).catch(()=>0n) : 0n;
     setText('matrix-my-node', myBfs > 0n ? '#'+myBfs.toString() : '—');
+    document.getElementById('matrix-my-node-label').textContent = 'My Node ID';
     if (loadingEl) loadingEl.style.display='none';
     if (treeEl) { treeEl.style.display='block'; treeEl.innerHTML = renderF8Tree(nodes, userAddr, occ, mSize); }
   } catch(e) {
@@ -5375,6 +5403,7 @@ async function loadMyTree() {
     setText('matrix-my-node', activeBFSUnknown
       ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
       : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
+    document.getElementById('matrix-my-node-label').textContent = 'My Position';
     const banner = document.getElementById('matrix-pos-banner');
     if (banner) {
       banner.style.display='block';
