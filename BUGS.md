@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 5 changed from the orig…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x96482bb0c13903563bd647bcfa77c67230010b2a
+- **Frequency:** Intermittent
+- **What happened:** The referrer addresses for account # 5 changed from the originally submitted address. The account and referral address were verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a
+- **What was expected:** The Referrer should be the main account address above.
+- **Submitted:** Sat, 18 Jul 2026 15:27:37 GMT
+
+
 ### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 4 changed from the orig…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
