@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-18] Dashboard (index.html) — I registered #502 but the display shows "Member ID #139"
+- **Reporter:** MsTech
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1c56c63a7c501acbccd32cdab0485b0a8ec906b7
+- **Frequency:** Consistent
+- **What happened:** I registered #502 but the display shows "Member ID #139"
+- **What was expected:** I was expecting it to be "Member ID #502"
+- **Notes:** Navigating through to Matric Tab, navigating from load queue to my position to my direct the 4th window card don't change...
+- **Submitted:** Sat, 18 Jul 2026 05:04:06 GMT
+
+
 _No open issues — V8.38 live as of 2026-07-17. Report new issues below._
 
 ---
