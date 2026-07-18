@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-18] Dashboard (index.html) — I tried to self rescue from T1.2. I clicked to approve the u…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x74d5715c5cc7e842d5f32e02eb47c6e4ab4eb58c
+- **Frequency:** Consistent
+- **What happened:** I tried to self rescue from T1.2. I clicked to approve the usdc and that was successful. I clicked the self rescue button the transaction failed.
+- **What was expected:** I should have been able to self rescue from that matrix.
+- **Notes:** Message in metamask said transaction failed timed 0ut.   Prior to this I self rescued and upgraded 10 accounts.
+- **Submitted:** Sat, 18 Jul 2026 18:47:47 GMT
+
+
 ### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 5 changed from the orig…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
