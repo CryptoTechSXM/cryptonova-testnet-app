@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-18] Dashboard (index.html) — I am unable to modify the wallet address in the bug support …
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x737c3309c3d6f5702c8f4bb81494568f8d0d1be5
+- **Frequency:** Intermittent
+- **What happened:** I am unable to modify the wallet address in the bug support portal. The affected accounts begin with Account #2, account #0x832b95A579478784fada54AD7b62c7963e21feFb. The referrer addresses for accounts 2 through 5 have been changed from the originally submitted address. Each account and referral address was verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a.
+- **What was expected:** Account 2 - 5 referrer address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a
+- **Notes:** The wallet address above is not the wallet that is affected. However, unable to change it, does it remain the same for each bug report that is submitted?
+- **Submitted:** Sat, 18 Jul 2026 14:39:06 GMT
+
+
 ### [2026-07-18] Dashboard (index.html) — I registered #502 but the display shows "Member ID #139"
 - **Reporter:** MsTech
 - **Page:** Dashboard (index.html)
