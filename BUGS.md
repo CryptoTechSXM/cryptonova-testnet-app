@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-18] Dashboard (index.html) — ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", …
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x20325876f47c5d30da4ac38c52a73ef342eafd56
+- **Frequency:** Consistent
+- **What happened:** ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", "to": "0x4856D38246Ed0D2C444fb725940DDce2E
+- **What was expected:** Self Rescue
+- **Notes:** This experience on several accts so cant move forward
+- **Submitted:** Sat, 18 Jul 2026 21:46:08 GMT
+
+
 ### [2026-07-18] Dashboard (index.html) — I tried to self rescue from T1.2. I clicked to approve the u…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
