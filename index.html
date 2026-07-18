@@ -2413,7 +2413,7 @@ async function connectWallet(silent=false) {
     signer = await provider.getSigner();
     userAddr = await signer.getAddress();
     // Report unsupported/unrecognised wallet names for tracking
-    if (!['MetaMask','Rabby'].includes(walletName)) {
+    if (!['MetaMask','Rabby','TokenPocket','Trust Wallet','Coinbase Wallet'].includes(walletName)) {
       reportEvent('WALLET_OTHER', {
         wallet: walletName, action: 'connect',
         error: `${walletName} connected — not yet in supported list`,
