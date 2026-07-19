@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-19] Onboarding / Registration — Can not register my account. Several attempts were made, and…
+- **Reporter:** @Lavern_Gay
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** Can not register my account. Several attempts were made, and this message was received:  ⏱️ RPC rate limit — wait a few seconds and try again. Failure Timed out; Transaction relay error.
+- **What was expected:** Expectation is to register my account #1 successfully.
+- **Submitted:** Sun, 19 Jul 2026 12:11:42 GMT
+
+
 ### [2026-07-19] Dashboard (index.html) — i attempted a self rescue from T1 matrix A but the transacti…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
