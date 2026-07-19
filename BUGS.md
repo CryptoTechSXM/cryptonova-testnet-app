@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-19] Dashboard (index.html) — i attempted a self rescue from T1 matrix A but the transacti…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
+- **Frequency:** Consistent
+- **What happened:** i attempted a self rescue from T1 matrix A but the transaction failed.
+- **What was expected:** I expected to cycle out of the matrix.
+- **Notes:** the message in metamask said failed timeout. This is happening with all my accounts eligible for self rescue/
+- **Submitted:** Sun, 19 Jul 2026 10:24:41 GMT
+
+
 ### [2026-07-19] Onboarding / Registration — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
 - **Reporter:** Sherwyn
 - **Page:** Onboarding / Registration
