@@ -16,8 +16,13 @@ const CNOVA_TREASURY    = '0xdCF79Fdeb40fe11900F60Ff5d756554bb0058728'; // V8.39
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
 // COMMUNITY_GROUP_LINK: invite link for the community group (e.g. https://t.me/+abc123)
-const SUPPORT_GROUP_ID    = process.env.SUPPORT_GROUP_ID    || '';
-const COMMUNITY_GROUP_URL = process.env.COMMUNITY_GROUP_LINK || 'https://t.me/CryptoNovaHQ';
+const SUPPORT_GROUP_ID       = process.env.SUPPORT_GROUP_ID             || '';
+const COMMUNITY_GROUP_URL    = process.env.COMMUNITY_GROUP_LINK          || 'https://t.me/CryptoNovaHQ';
+// Private errors channel (keeper/system alerts) → auto-log to BUGS.md
+const PRIVATE_ERRORS_CHAT_ID  = process.env.TELEGRAM_CHAT_ID              || '';
+// Community chat → /bug command
+const COMMUNITY_CHAT_ID        = process.env.TELEGRAM_ANNOUNCE_CHANNEL_ID  || '';
+const GITHUB_REPO              = process.env.GITHUB_REPO || 'CryptoTechSXM/cryptonova-testnet-app';
 const BASESCAN          = 'https://sepolia.basescan.org';
 const FAUCET_AMOUNT     = 20_000_000n;
 const FAUCET_ETH_AMOUNT = '0.002';
@@ -450,6 +455,86 @@ async function handleFaucetRequest(token, chatId, msgId, rawAddress) {
   }
 }
 
+// ── BUGS.md auto-log helpers ──────────────────────────────────────────────────
+// Used by: private errors channel monitor + /bug command
+
+async function bugsGetFile(token) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/BUGS.md`;
+  const r = await fetch(`${url}?ref=admin`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'cnova-bot' },
+  });
+  if (!r.ok) throw new Error(`GitHub GET ${r.status}`);
+  const j = await r.json();
+  return { sha: j.sha, content: Buffer.from(j.content, 'base64').toString('utf8') };
+}
+
+async function bugsPutFile(token, content, sha, message) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/BUGS.md`;
+  const r = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json',
+      'User-Agent': 'cnova-bot', 'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message, content: Buffer.from(content).toString('base64'), sha, branch: 'admin' }),
+  });
+  if (!r.ok) throw new Error(`GitHub PUT ${r.status} ${await r.text()}`);
+}
+
+function isDuplicateInBugs(bugsContent, checkText) {
+  const openStart    = bugsContent.indexOf('## Open Issues');
+  const resolvedStart = bugsContent.indexOf('## Resolved Issues');
+  if (openStart === -1) return false;
+  const openBlock = (resolvedStart !== -1
+    ? bugsContent.slice(openStart, resolvedStart)
+    : bugsContent.slice(openStart)).toLowerCase();
+
+  // Match by wallet address
+  const addrs = checkText.match(/0x[0-9a-fA-F]{40}/g) || [];
+  for (const addr of addrs) {
+    if (openBlock.includes(addr.toLowerCase())) return true;
+  }
+  // Match by leading text snippet (first 60 chars)
+  const snippet = checkText.slice(0, 60).toLowerCase().trim();
+  if (snippet.length > 20 && openBlock.includes(snippet)) return true;
+  return false;
+}
+
+async function appendBugEntry(token, title, details) {
+  const { sha, content } = await bugsGetFile(token);
+  if (isDuplicateInBugs(content, `${title} ${details}`)) {
+    console.log('[bugs] duplicate, skipping:', title.slice(0, 60));
+    return false;
+  }
+  const today  = new Date().toISOString().slice(0, 10);
+  const entry  = `\n### [${today}] ${title}\n${details}\n`;
+  // Insert before Template section; fall back to before Resolved
+  let insertAt = content.indexOf('\n## Template');
+  if (insertAt === -1) insertAt = content.indexOf('\n## Resolved');
+  if (insertAt === -1) throw new Error('Cannot find insertion point in BUGS.md');
+  const updated = content.slice(0, insertAt) + entry + content.slice(insertAt);
+  await bugsPutFile(token, updated, sha, `bug-bot: ${title.slice(0, 70)}`);
+  console.log('[bugs] logged:', title.slice(0, 60));
+  return true;
+}
+
+// Handles a raw text message arriving in the private errors channel.
+// Skips web-form notifications (already in BUGS.md) and very short noise.
+async function handlePrivateErrorReport(rawText, token) {
+  if (/🐛|New Bug Report/i.test(rawText.slice(0, 40))) return; // already logged by submit-bug.js
+  if (rawText.length < 25) return;                              // noise
+  const lines   = rawText.split('\n');
+  const title   = lines[0].replace(/^\[.*?\]\s*/, '').slice(0, 100);
+  const rest    = lines.slice(1).join('\n').trim();
+  const details = `- **Source:** Keeper / system alert\n` +
+    (rest ? `- **Details:** ${rest}` : `- **Raw:** ${rawText.slice(0, 500)}`);
+  try {
+    await appendBugEntry(token, title, details);
+  } catch (e) {
+    console.error('[bugs] private-errors write failed:', e.message);
+  }
+}
+
 export default async function handler(req, res) {
   const ok = () => res.status(200).json({ ok: true });
   if (req.method !== 'POST') return ok();
@@ -572,6 +657,15 @@ export default async function handler(req, res) {
       await sendReply(BOT_TOKEN, chatId,
         `Having trouble right now — try DM-ing me directly: @${BOT_USERNAME}`, repostMsgId);
     }
+    return ok();
+  }
+
+  // ── Private errors channel → auto-log to BUGS.md ────────────────────────────
+  // Keeper/system alerts sent here are written as open issues automatically.
+  // Web-form bug report notifications (already in BUGS.md) are skipped.
+  if (PRIVATE_ERRORS_CHAT_ID && String(chatId) === String(PRIVATE_ERRORS_CHAT_ID)) {
+    const ghToken = process.env.GITHUB_TOKEN;
+    if (ghToken && rawText) await handlePrivateErrorReport(rawText, ghToken);
     return ok();
   }
 
@@ -700,6 +794,38 @@ export default async function handler(req, res) {
       }
       await deleteMessage(BOT_TOKEN, chatId, targetMsgId);
       await deleteMessage(BOT_TOKEN, chatId, msgId);  // also remove the /del command itself
+      return ok();
+    }
+    if (cmd === '/bug') {
+      // Submit a bug report directly from Telegram — logged to BUGS.md via GitHub API
+      const description = parts.slice(1).join(' ').trim();
+      if (!description) {
+        await sendReply(BOT_TOKEN, chatId,
+          `<b>Report a Bug</b>\n\nUsage:\n<code>/bug [what happened and which page]</code>\n\nExample:\n<code>/bug index.html — upgrade button not loading after wallet connect</code>`,
+          msgId);
+        return ok();
+      }
+      const reporterName = msg.from?.username
+        ? `@${msg.from.username}`
+        : (msg.from?.first_name || 'Member');
+      const bugTitle   = description.slice(0, 100);
+      const bugDetails = `- **Reporter:** ${reporterName}\n- **Source:** Telegram /bug command\n- **Description:** ${description}`;
+      const ghToken    = process.env.GITHUB_TOKEN;
+      if (ghToken) {
+        try {
+          const logged = await appendBugEntry(ghToken, bugTitle, bugDetails);
+          await sendReply(BOT_TOKEN, chatId,
+            logged
+              ? `✅ <b>Bug logged!</b> We'll look into it.\n\n<i>Track status at <a href="https://admin.crypto-nova.app/reports">admin.crypto-nova.app/reports</a></i>`
+              : `ℹ️ Looks like we already have this one on our radar. Tag @admin if it's urgent.`,
+            msgId);
+        } catch (e) {
+          console.error('[bugs] /bug write failed:', e.message);
+          await sendReply(BOT_TOKEN, chatId, `Got it — we'll look into it. Tag @admin if urgent.`, msgId);
+        }
+      } else {
+        await sendReply(BOT_TOKEN, chatId, `Thanks for the report! Tag @admin if it's urgent.`, msgId);
+      }
       return ok();
     }
   }
