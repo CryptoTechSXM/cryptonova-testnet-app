@@ -5841,7 +5841,8 @@ function friendlyError(e) {
   const msgLow  = (msg + rawDeep).toLowerCase();
 
   // ── User cancelled ──────────────────────────────────────────────────────
-  if (code === 'ACTION_REJECTED' || e.code === 4001 || e.code === -32603 ||
+  // Note: -32603 is a JSON-RPC "Internal error" (NOT user cancel) — do NOT include here.
+  if (code === 'ACTION_REJECTED' || e.code === 4001 ||
       msgLow.includes('user rejected') || msgLow.includes('user denied') ||
       msgLow.includes('user cancelled') || msgLow.includes('user cancel') ||
       (msgLow.includes('cancelled') && msgLow.includes('sign')))
@@ -5849,8 +5850,9 @@ function friendlyError(e) {
 
   // ── RPC / network rate limit ────────────────────────────────────────────
   if (msgLow.includes('rate limit') || msgLow.includes('over rate limit') ||
-      msgLow.includes('-32016') || msgLow.includes('coalesce'))
-    return '⏱️ RPC rate limit — wait a few seconds and try again.';
+      msgLow.includes('-32016') || msgLow.includes('coalesce') ||
+      msgLow.includes('too many errors') || msgLow.includes('too many requests'))
+    return '⏱️ Network busy — wait a few seconds and try again.';
 
   // ── Network / RPC connectivity ──────────────────────────────────────────
   if (msgLow.includes('could not detect network') || msgLow.includes('network changed') ||
