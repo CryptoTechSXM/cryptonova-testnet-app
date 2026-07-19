@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-19] Onboarding / Registration — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
+- **Reporter:** Sherwyn
+- **Page:** Onboarding / Registration
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Intermittent
+- **What happened:** ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", "to": "0x03d532100Cb0b1a757Be45d050c27c595
+- **What was expected:** To be registered
+- **Notes:** Keeps happening at this moment on all other accounts as well... refreshing the page doesn't resolve this error message..
+- **Submitted:** Sun, 19 Jul 2026 05:54:03 GMT
+
+
 _No open issues — V8.39 live as of 2026-07-18. Report new issues below._
 
 ---
