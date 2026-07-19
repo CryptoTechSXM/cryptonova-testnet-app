@@ -573,47 +573,6 @@
 </div>
 <!-- ── END MAINTENANCE GATE ──────────────────────────────────────────── -->
 
-<!-- ── V8.40 MAINTENANCE COUNTDOWN BANNER — remove after V8.40 redeploy opens ── -->
-<div id="maint-banner" style="display:none;background:#7c2d12;border-bottom:2px solid #ea580c;padding:12px 24px;text-align:center;font-size:14px;color:#fed7aa;position:relative;z-index:200;"></div>
-<script>
-(function(){
-  var OFFLINE_AT = 1784487600000; // 2026-07-19 3:00 PM EDT (19:00 UTC)
-  var h = window.location.hostname;
-  if (h === 'admin.crypto-nova.app' || h.startsWith('admin.')) return; // admin always open
-
-  var banner = document.getElementById('maint-banner');
-  if (!banner) return;
-
-  function showOverlay() {
-    var o = document.createElement('div');
-    o.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;';
-    o.innerHTML = '<div style="font-size:clamp(28px,6vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:32px;"><span style="color:#e2e8f0;">Crypto</span><span style="color:#00e5a0;">Nova</span></div>'
-      + '<div style="font-size:48px;margin-bottom:24px;">🔧</div>'
-      + '<h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">Maintenance in Progress</h1>'
-      + '<p style="color:#94a3b8;font-size:16px;max-width:420px;line-height:1.7;margin:0 0 28px;">We\'re deploying V8.40. This usually takes 30–60 minutes.<br>We\'ll announce in Telegram when registration reopens.</p>'
-      + '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:10px 24px;color:#00e5a0;font-size:14px;font-weight:500;">'
-      + '<span style="width:7px;height:7px;border-radius:50%;background:#ea580c;animation:pulse2 1.5s ease-in-out infinite;display:inline-block;"></span>Offline — Back Soon</div>'
-      + '<style>@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.3}}</style>';
-    document.body.appendChild(o);
-  }
-
-  function tick() {
-    var diff = OFFLINE_AT - Date.now();
-    if (diff <= 0) { banner.style.display = 'none'; showOverlay(); return; }
-    banner.style.display = 'block';
-    var tot = Math.floor(diff / 1000);
-    var sec = tot % 60, min = Math.floor(tot / 60) % 60, hr = Math.floor(tot / 3600);
-    var t = (hr > 0 ? hr + 'h ' : '') + min + 'm ' + (sec < 10 ? '0' : '') + sec + 's';
-    banner.innerHTML = '⚠️ <strong style="color:#fff;">Site going offline at 3:00 PM EDT for V8.40 redeploy.</strong>'
-      + ' &nbsp;Please <strong style="color:#fbbf24;">withdraw all earnings now</strong> — balances reset on redeploy.'
-      + ' &nbsp;Time remaining: <strong style="color:#fb923c;font-variant-numeric:tabular-nums;">' + t + '</strong>';
-    setTimeout(tick, 1000);
-  }
-
-  tick();
-})();
-</script>
-<!-- ── END MAINTENANCE COUNTDOWN BANNER ──────────────────────────────── -->
 
 <div id="file-protocol-banner" style="background:rgba(239,68,68,.1);border-bottom:1px solid rgba(239,68,68,.3);padding:10px 24px;text-align:center;font-size:13px;color:#ef4444;display:none">
   ⚠️ <strong>File opened directly</strong> — MetaMask won't inject into <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:3px">file://</code> pages.
