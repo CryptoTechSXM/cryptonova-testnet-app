@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-19] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x20325876f47c5d30da4ac38c52a73ef342eafd56
+- **Frequency:** Consistent
+- **What happened:** "[From https://sepolia.base.org] gas limit too high"
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Notes:** This is happening on several accts so cant go forward with any accts
+- **Submitted:** Sun, 19 Jul 2026 12:23:05 GMT
+
+
 ### [2026-07-19] Onboarding / Registration — Registration failed. Message received after failure: ❌ "", "…
 - **Reporter:** @Lavern_Gay
 - **Page:** Onboarding / Registration
