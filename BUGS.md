@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-19] Onboarding / Registration — Registration failed. Message received after failure: ❌ "", "…
+- **Reporter:** @Lavern_Gay
+- **Page:** Onboarding / Registration
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** Registration failed. Message received after failure: ❌ "", "from": "0x185B19c7D3872692981568985b21AE6F7f6BE2A4", "to": "0x03d532100Cb0b1a757Be45d050c27c595
+- **What was expected:** Registration of my account.
+- **Submitted:** Sun, 19 Jul 2026 12:19:07 GMT
+
+
 ### [2026-07-19] Onboarding / Registration — Can not register my account. Several attempts were made, and…
 - **Reporter:** @Lavern_Gay
 - **Page:** Onboarding / Registration
