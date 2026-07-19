@@ -13,6 +13,18 @@
 
 ## Open Issues
 
+### [2026-07-19] Other — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", "to": "0xeb20e72d816634ED34fE99948f9b489D9
+- **What was expected:** To be rescued
+- **Notes:** Self rescue has stop working and is throwing the above error.. Did 2 self rescued and now it has stopped working..
+- **Submitted:** Sun, 19 Jul 2026 23:55:20 GMT
+
+
 ### [2026-07-19] Status Page (status.html) — Tier 1.2 opened up, that is good, T1.2 shows as active  Tier…
 - **Reporter:** Mr.Tech
 - **Page:** Status Page (status.html)
