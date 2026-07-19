@@ -13,6 +13,18 @@
 
 ## Open Issues
 
+### [2026-07-19] Status Page (status.html) — Tier 1.2 opened up, that is good, T1.2 shows as active  Tier…
+- **Reporter:** Mr.Tech
+- **Page:** Status Page (status.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xa2dfd8c3b99b4395550558acf6cffe79017b702c
+- **Frequency:** Consistent
+- **What happened:** Tier 1.2 opened up, that is good, T1.2 shows as active  Tier and filling up with no rotations not good.
+- **What was expected:** I expected to see rotations because the last upgrade promised rotations in T1.1 and rotations out of T1.1 to T1.2
+- **Notes:** Could be a front end display issue or a bug in the contract please advice.
+- **Submitted:** Sun, 19 Jul 2026 23:54:04 GMT
+
+
 _No open issues._
 
 ## Resolved Issues
