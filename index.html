@@ -4294,7 +4294,7 @@ async function loadDashboardData() {
       } else {
         // Graduated tiers — show a subtle row for each tier the member has left
         const _gradRows = _graduatedTierNums.map(tNum =>
-          `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x2713; Graduated</span></span><span class="info-val" style="color:var(--text3);font-size:11px">Re-enter &middot; V8.39</span></div>`
+          `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x2713; Graduated</span></span><span class="info-val" style="display:flex;align-items:center;gap:6px"><button id="btn-grad-reenter-${tNum}" onclick="doGraduatedReenter(${tNum})" style="font-size:11px;padding:2px 10px;border-radius:6px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:var(--blue);cursor:pointer">Re-enter T${tNum}</button><span id="stat-grad-reenter-${tNum}" style="font-size:11px;color:var(--text3)"></span></span></div>`
         ).join('');
         posList.innerHTML = activePositions.map(p => {
           const bfsStr = p.bfsUnknown
@@ -5218,6 +5218,48 @@ async function fetchNodes(mc, n) {
     if (end < n) await new Promise(r => setTimeout(r, 150));
   }
   return results;
+}
+
+// Graduated tier re-entry — calls manualUpgrade(tierIdx) for a tier the member
+// has already graduated (no active seat there). Auto-approves USDC if needed.
+async function doGraduatedReenter(tNum) {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const tierIdx = tNum - 1; // TierRouter is 0-indexed
+  const btn  = document.getElementById(`btn-grad-reenter-${tNum}`);
+  const stat = document.getElementById(`stat-grad-reenter-${tNum}`);
+  const _s   = t => { if (stat) stat.textContent = t; };
+  if (btn) btn.disabled = true;
+  try {
+    const rp    = provider || readProvider;
+    const usdcR = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+    const trR   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const [fee, bal, allowance] = await Promise.all([
+      trR.tierEntryFees(tierIdx).catch(() => 0n),
+      usdcR.balanceOf(userAddr).catch(() => 0n),
+      usdcR.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
+    ]);
+    const feeNum = Number(fee) / 1e6;
+    const balNum = Number(bal)  / 1e6;
+    if (bal < fee) {
+      _s(`❌ Need $${feeNum.toFixed(2)} USDC — wallet has $${balNum.toFixed(2)}`);
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (allowance < fee) {
+      _s('⏳ Approving USDC…');
+      const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+      await (await usdcW.approve(ADDRS.tierRouter, fee, { gasLimit: 100_000 })).wait();
+    }
+    _s('⏳ Submitting re-entry…');
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+    await (await tr.manualUpgrade(tierIdx, { gasLimit: 2_000_000 })).wait();
+    _s('✅ Re-entered!');
+    toast(`T${tNum} re-entry successful!`, 'success');
+    setTimeout(() => loadDashboardData(), 2000);
+  } catch(e) {
+    _s(friendlyError(e));
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function setDoubleReentryOption(enabled) {

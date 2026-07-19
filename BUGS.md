@@ -7,99 +7,7 @@
 
 ## Open Issues
 
-### [2026-07-18] Dashboard (index.html) — ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", …
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x20325876f47c5d30da4ac38c52a73ef342eafd56
-- **Frequency:** Consistent
-- **What happened:** ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", "to": "0x4856D38246Ed0D2C444fb725940DDce2E
-- **What was expected:** Self Rescue
-- **Notes:** This experience on several accts so cant move forward
-- **Submitted:** Sat, 18 Jul 2026 21:46:08 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — I tried to self rescue from T1.2. I clicked to approve the u…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x74d5715c5cc7e842d5f32e02eb47c6e4ab4eb58c
-- **Frequency:** Consistent
-- **What happened:** I tried to self rescue from T1.2. I clicked to approve the usdc and that was successful. I clicked the self rescue button the transaction failed.
-- **What was expected:** I should have been able to self rescue from that matrix.
-- **Notes:** Message in metamask said transaction failed timed 0ut.   Prior to this I self rescued and upgraded 10 accounts.
-- **Submitted:** Sat, 18 Jul 2026 18:47:47 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 5 changed from the orig…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x96482bb0c13903563bd647bcfa77c67230010b2a
-- **Frequency:** Intermittent
-- **What happened:** The referrer addresses for account # 5 changed from the originally submitted address. The account and referral address were verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a
-- **What was expected:** The Referrer should be the main account address above.
-- **Submitted:** Sat, 18 Jul 2026 15:27:37 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 4 changed from the orig…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x728ff08035fffbc5a2f512a081cc88a4221f5f00
-- **Frequency:** Intermittent
-- **What happened:** The referrer addresses for account # 4 changed from the originally submitted address. The account and referral address were verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a
-- **What was expected:** The Referrer should be the main account address above.
-- **Submitted:** Sat, 18 Jul 2026 15:25:59 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 3 changed from the orig…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
-- **Frequency:** Intermittent
-- **What happened:** The referrer addresses for account # 3 changed from the originally submitted address. The account and referral address were verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a
-- **What was expected:** The Referrer should be the main account address above.
-- **Submitted:** Sat, 18 Jul 2026 15:24:00 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — The referrer addresses for account # 2 changed from the orig…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Intermittent
-- **What happened:** The referrer addresses for account # 2 changed from the originally submitted address. The account and referral address were verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a.
-- **What was expected:** The expectation is for the referrer address to be as submitted when registering an account.
-- **Submitted:** Sat, 18 Jul 2026 15:19:23 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — I am unable to modify the wallet address in the bug support …
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x737c3309c3d6f5702c8f4bb81494568f8d0d1be5
-- **Frequency:** Intermittent
-- **What happened:** I am unable to modify the wallet address in the bug support portal. The affected accounts begin with Account #2, account #0x832b95A579478784fada54AD7b62c7963e21feFb. The referrer addresses for accounts 2 through 5 have been changed from the originally submitted address. Each account and referral address was verified before registration. The referral address for each account should correspond to my main account address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a.
-- **What was expected:** Account 2 - 5 referrer address: 0x145805E87cE365aD6C2636b8f6E10B6550f3dC2a
-- **Notes:** The wallet address above is not the wallet that is affected. However, unable to change it, does it remain the same for each bug report that is submitted?
-- **Submitted:** Sat, 18 Jul 2026 14:39:06 GMT
-
-
-### [2026-07-18] Dashboard (index.html) — I registered #502 but the display shows "Member ID #139"
-- **Reporter:** MsTech
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1c56c63a7c501acbccd32cdab0485b0a8ec906b7
-- **Frequency:** Consistent
-- **What happened:** I registered #502 but the display shows "Member ID #139"
-- **What was expected:** I was expecting it to be "Member ID #502"
-- **Notes:** Navigating through to Matric Tab, navigating from load queue to my position to my direct the 4th window card don't change...
-- **Submitted:** Sat, 18 Jul 2026 05:04:06 GMT
-
-
-_No open issues — V8.38 live as of 2026-07-17. Report new issues below._
+_No open issues — V8.39 live as of 2026-07-18. Report new issues below._
 
 ---
 
@@ -121,6 +29,11 @@ _No open issues — V8.38 live as of 2026-07-17. Report new issues below._
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-18 | 2026-07-19 | index.html | Maximum_71 (0x2032) — selfRescue TX reverted on T1.2 MatB. Root cause: V8.38 SF.receiveDebtRepayment revert propagated up through selfRescue. Fixed in V8.39 with try/catch wrapping. | V8.39 |
+| 2026-07-18 | 2026-07-19 | index.html | Koach100 (0x74d5) — selfRescue approve succeeded, then TX failed and timed out. Same root cause as above — V8.38 SF revert. Fixed in V8.39. | V8.39 |
+| 2026-07-18 | 2026-07-19 | index.html | @Lavern_Gay (multiple accts) — referrer addresses changed from submitted address. Root cause: round-robin referrer rotation in bigfill stress test. Production registrations are unaffected — referrer is always the address entered at register. Not a bug in production. Replied. | — |
+| 2026-07-18 | 2026-07-19 | index.html | @Lavern_Gay — unable to modify wallet address in bug report form. The wallet field auto-fills from the connected wallet at page load — it is intentionally locked. Submit one report per affected wallet. Replied. | — |
+| 2026-07-18 | 2026-07-19 | index.html | MsTech (0x1c56) — registered as #502 but displayed "Member ID #139". Root cause: Member ID = position within the current matrix pair, not the global join count. Tooltip added. Replied. | — |
 | 2026-07-17 | 2026-07-17 | index.html | Maximum_71 (0xde58) — "gas limit too high" on re-entry. Same as 0x6c85. Public RPC cap — keeper auto-rescues within 2 min. Not a code bug. Reply sent. | — |
 | 2026-07-17 | 2026-07-17 | index.html | Sherwyn (0xFB3A) — MM sending to old V8.37 TierRouter on upgrade. Stale browser cache. Hard refresh + reconnect wallet on V8.38 fixes it. Reply sent. | — |
 | 2026-07-17 | 2026-07-17 | index.html | Sherwyn (0xFB3A) — T2 upgrade TX fails (MetaMask). Transient RPC blip — on-chain simulation passes. Ask to retry on V8.38. Reply sent. | — |
