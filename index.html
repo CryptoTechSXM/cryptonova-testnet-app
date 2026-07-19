@@ -466,9 +466,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.39 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.40 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.39 is live — keeperForceRotateRoot, SF try/catch guards, dust fix &amp; factory pairAdmin decoupled.<br>Opening in:
+      V8.40 is live — oldest-first pair routing, selfRescue MatB-full guard.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -492,7 +492,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.39 Testnet</span>
+    <span id="gate-pill-label">V8.40 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -507,7 +507,7 @@
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
         var EARLY_MS = 1000; // gate open
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.39 Early Access — Now Open';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.40 Early Access — Now Open';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
@@ -531,7 +531,7 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.39 Testnet — Now Open';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.40 Testnet — Now Open';
         var MAIN_MS  = 1000; // gate open
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -621,7 +621,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.39</span><span class="vb-m">V8.39</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.40</span><span class="vb-m">V8.40</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -1752,7 +1752,7 @@
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">V8.39 live on testnet — leader preview open July 19, community open July 26</div>
+            <div class="phase-subtitle">V8.40 live on testnet — leader preview open July 19, community open July 26</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
