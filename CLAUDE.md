@@ -8,8 +8,8 @@ Read this file at the start of every session before touching any frontend code.
 
 | Item | Value |
 |------|-------|
-| Live contract version | V8.38 |
-| Addresses file | `deployed_addresses_v8_38.json` |
+| Live contract version | V8.39 |
+| Addresses file | `deployed_addresses_v8_39.json` |
 | Working branch | `admin` |
 | Admin frontend | https://admin.crypto-nova.app |
 
