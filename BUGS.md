@@ -1,4 +1,10 @@
 # CryptoNova — Issue Tracker
+| 2026-07-19 | 2026-07-19 | index.html | Maximum_71 — Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
+-  | Manual close |
+| 2026-07-19 | 2026-07-19 | index.html | @Lavern_Gay — Onboarding / Registration — Registration failed. Message received after failure: | Manual close |
+| 2026-07-19 | 2026-07-19 | index.html | @Lavern_Gay — Onboarding / Registration — Can not register my account. Several attempts were m | Manual close |
+| 2026-07-19 | 2026-07-19 | index.html | @Koach100 — Dashboard (index.html) — i attempted a self rescue from T1 matrix A but the tran | Manual close |
+| 2026-07-19 | 2026-07-19 | index.html | Sherwyn — Onboarding / Registration — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72 | Manual close |
 
 > Drop new issues here as members report them. Start a session with "check BUGS.md" and Claude will read this directly.
 > Format: **[Page] — What happened / What was expected** + wallet type if relevant + consistent or intermittent
@@ -7,81 +13,7 @@
 
 ## Open Issues
 
-### [2026-07-19] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x20325876f47c5d30da4ac38c52a73ef342eafd56
-- **Frequency:** Consistent
-- **What happened:** "[From https://sepolia.base.org] gas limit too high"
-- **What was expected:** ⏳ Action Required — Re-Entry Queue
-- **Notes:** This is happening on several accts so cant go forward with any accts
-- **Submitted:** Sun, 19 Jul 2026 12:23:05 GMT
-
-
-### [2026-07-19] Onboarding / Registration — Registration failed. Message received after failure: ❌ "", "…
-- **Reporter:** @Lavern_Gay
-- **Page:** Onboarding / Registration
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** Registration failed. Message received after failure: ❌ "", "from": "0x185B19c7D3872692981568985b21AE6F7f6BE2A4", "to": "0x03d532100Cb0b1a757Be45d050c27c595
-- **What was expected:** Registration of my account.
-- **Submitted:** Sun, 19 Jul 2026 12:19:07 GMT
-
-
-### [2026-07-19] Onboarding / Registration — Can not register my account. Several attempts were made, and…
-- **Reporter:** @Lavern_Gay
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** Can not register my account. Several attempts were made, and this message was received:  ⏱️ RPC rate limit — wait a few seconds and try again. Failure Timed out; Transaction relay error.
-- **What was expected:** Expectation is to register my account #1 successfully.
-- **Submitted:** Sun, 19 Jul 2026 12:11:42 GMT
-
-
-### [2026-07-19] Dashboard (index.html) — i attempted a self rescue from T1 matrix A but the transacti…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
-- **Frequency:** Consistent
-- **What happened:** i attempted a self rescue from T1 matrix A but the transaction failed.
-- **What was expected:** I expected to cycle out of the matrix.
-- **Notes:** the message in metamask said failed timeout. This is happening with all my accounts eligible for self rescue/
-- **Submitted:** Sun, 19 Jul 2026 10:24:41 GMT
-
-
-### [2026-07-19] Onboarding / Registration — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
-- **Reporter:** Sherwyn
-- **Page:** Onboarding / Registration
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Intermittent
-- **What happened:** ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", "to": "0x03d532100Cb0b1a757Be45d050c27c595
-- **What was expected:** To be registered
-- **Notes:** Keeps happening at this moment on all other accounts as well... refreshing the page doesn't resolve this error message..
-- **Submitted:** Sun, 19 Jul 2026 05:54:03 GMT
-
-
-_No open issues — V8.39 live as of 2026-07-18. Report new issues below._
-
----
-
-## Template
-
-```
-### [YYYY-MM-DD] Short title
-- **Page:** index / buy / governance / liquidity / status / comp / terms / faq
-- **Wallet:** MetaMask / Rabby / Other
-- **What happened:** ...
-- **What was expected:** ...
-- **Consistent or intermittent:** Consistent / Only sometimes
-- **Notes:** (screenshot path, member address, anything else useful)
-```
-
----
+_No open issues._
 
 ## Resolved Issues
 
