@@ -437,13 +437,6 @@
       #launch-banner { gap: 10px; padding: 8px 14px; }
       #launch-banner .bn-date { display: none; }
     }
-
-    /* ── Novice Tooltips ──────────────────────────── */
-    .tip-badge{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(0,229,160,0.15);border:1px solid rgba(0,229,160,0.4);color:var(--green);font-size:9px;font-weight:700;cursor:help;margin-left:3px;vertical-align:middle;flex-shrink:0;position:relative;user-select:none}
-    .tip-badge:hover .tip-popup,.tip-badge:focus .tip-popup,.tip-badge.open .tip-popup{display:block}
-    .tip-popup{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);width:230px;background:var(--bg2);border:1px solid var(--green2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.5;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);pointer-events:none;font-weight:400}
-    .tip-popup::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--green2)}
-    @media(max-width:480px){.tip-popup{width:190px;left:0;transform:none}}
     </style>
 </head>
 <body>
@@ -466,9 +459,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.38 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.34 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.38 is live — upgrade multi-pair fix, frozen MatB auto-rotation &amp; pre-flight already-seated check.<br>Opening in:
+      V8.34 is live — reentrancy fix, 100% rescue repayment &amp; proposal fee.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -492,7 +485,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.38 Testnet</span>
+    <span id="gate-pill-label">V8.34 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -505,9 +498,9 @@
       }
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
-        // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1784309400000;
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.38 Early Access — Opens 1:30 PM EDT';
+        // Gate: 2026-07-12 12:00 PM EDT (16:00 UTC)
+        var EARLY_MS = 1783872000000;
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.34 Early Access — Opens 12PM EDT';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
@@ -531,8 +524,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.38 Testnet — Opens 2:00 PM EDT';
-        var MAIN_MS  = 1784311200000; // Gate: 2026-07-17 2:00 PM EDT (18:00 UTC)
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.34 Testnet — Opens 3PM EDT';
+        var MAIN_MS = 1783882800000; // Gate: 2026-07-12 3:00 PM EDT (19:00 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
@@ -620,7 +613,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.38</span><span class="vb-m">V8.38</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.34</span><span class="vb-m">V8.34</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -643,25 +636,10 @@
   <button onclick="showTab('tiers')" data-i18n="idx.nav_tiers">🏆 Tiers</button>
   <button onclick="showTab('roadmap')" data-i18n="idx.nav_roadmap">🗺️ Roadmap</button>
   <button onclick="window.location.href='status.html'" data-i18n="idx.nav_status">🛡️ Status</button>
-  <button id="nav-btn-buy" onclick="window.location.href='buy.html'">💎 Buy CNOVA</button>
-  <button id="nav-btn-gov" onclick="window.location.href='governance.html'">⚖️ Governance</button>
-  <button id="nav-btn-liq" onclick="window.location.href='liquidity.html'">💧 Liquidity</button>
+  <button onclick="window.location.href='buy.html'">💎 Buy CNOVA</button>
+  <button onclick="window.location.href='governance.html'">⚖️ Governance</button>
+  <button onclick="window.location.href='liquidity.html'">💧 Liquidity</button>
 </nav>
-<script>
-/* Feature gate — hide Buy/Governance/Liquidity nav on non-admin domains */
-(function(){
-  var h=location.hostname;
-  var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
-  if(!isAdmin){
-    ['nav-btn-buy','nav-btn-gov','nav-btn-liq'].forEach(function(id){
-      var el=document.getElementById(id);if(el)el.style.display='none';
-    });
-    document.addEventListener('DOMContentLoaded',function(){
-      var el=document.getElementById('btn-view-proposals');if(el)el.parentElement.style.display='none';
-    });
-  }
-})();
-</script>
 
 <main>
 <!-- CNOVA token logo symbol — referenced inline throughout page -->
@@ -715,8 +693,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x592428c2e8d22115ce1D988EAC8f7572B72EAdFa" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x592428c2e8d22115ce1D988EAC8f7572B72EAdFa" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x592428c2e8d22115ce1D988EAC8f7572B72EAdFa</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x73906fbD986C353AfCD44bBc39F236EC58E1b980" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x73906fbD986C353AfCD44bBc39F236EC58E1b980" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x73906fbD986C353AfCD44bBc39F236EC58E1b980</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
         </div>
       </div>
@@ -794,7 +772,7 @@
         </div>
         <div style="flex:2;min-width:200px;text-align:right">
           <div id="dao-latest-label" style="font-size:12px;color:var(--text3);margin-bottom:8px">—</div>
-          <button id="btn-view-proposals" onclick="window.location.href='governance.html'" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:14px">View Proposals →</button>
+          <button onclick="window.location.href='governance.html'" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:14px">View Proposals →</button>
         </div>
       </div>
     </div>
@@ -802,13 +780,13 @@
     <!-- Entry split -->
     <div class="card">
       <div class="section-title"><div class="dot"></div> <span data-i18n="split.title">Entry Fee Split — per $10 at T1</span></div>
-      <div class="split-row" style="border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:4px"><span class="split-label">🔐 Crossing Reserve<span class="tip-badge" tabindex="0">?<span class="tip-popup">50% of your $10 entry held by the smart contract. When your 127-seat matrix fills and cycles, this automatically covers your re-entry fee — so your first crossing is free.</span></span> <span style="font-size:10px;color:var(--text3)">(funds your first re-entry)</span></span><span><span class="split-amount">50%</span> <span class="split-pct">$5.00</span></span></div>
-      <div class="split-row" style="margin-bottom:8px"><span class="split-label">⚡ Instant Earn<span class="tip-badge" tabindex="0">?<span class="tip-popup">2.5% of your entry fee ($0.25 at T1) credited to your withdrawable balance the moment you register. Available to withdraw immediately — no waiting.</span></span> <span style="font-size:10px;color:var(--text3)">(credited to withdrawable on join)</span></span><span><span class="split-amount">2.5%</span> <span class="split-pct">$0.25</span></span></div>
-      <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool<span class="tip-badge" tabindex="0">?<span class="tip-popup">18% of each entry pools together. When all 127 seats fill (~$229 at T1), this distributes position-weighted to all 126 members. Later/deeper positions get a larger share to compensate for joining later.</span></span></span><span><span class="split-amount">18%</span> <span class="split-pct">$1.80</span></span></div>
-      <div class="split-row"><span class="split-label">⛓️ Chain Pay L1<span class="tip-badge" tabindex="0">?<span class="tip-popup">The L1 referral bonus — 5% of the entry fee goes directly to the person who referred the new joiner (the person whose referral link they used). This is YOUR bonus when you refer someone.</span></span> <span style="font-size:10px;color:var(--text3)">(direct referrer)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
-      <div class="split-row"><span class="split-label" data-i18n="split.chain_pay">⛓️ Chain Pay L2–L6<span class="tip-badge" tabindex="0">?<span class="tip-popup">2.7% per level goes to each of the 5 matrix position ancestors above the new member (levels L2-L6). These are automatically determined by the BFS tree structure — not by referral links. You earn from ANYONE below you in the matrix, not just your referrals.</span></span> <span style="font-size:10px;color:var(--text3)">(per level, flat rate)</span></span><span><span class="split-amount">2.7% ea</span> <span class="split-pct">$0.27 ea</span></span></div>
-      <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund<span class="tip-badge" tabindex="0">?<span class="tip-popup">3% of each entry builds the Stability Rescue Fund. This fund automatically steps in when a member's crossing reserve falls short — ensuring the matrix always cycles smoothly without manual intervention.</span></span> <span style="font-size:10px;color:var(--text3)" data-i18n="split.stability_sub">(rescue reserve)</span></span><span><span class="split-amount">3%</span> <span class="split-pct">$0.30</span></span></div>
-      <div class="split-row"><span class="split-label">🏦 CNOVA Treasury<span class="tip-badge" tabindex="0">?<span class="tip-popup">5% builds the on-chain CNOVA Treasury. The floor price formula: Treasury USDC ÷ total CNOVA supply. More members joining = more USDC in Treasury = higher floor. The floor only goes up, never down.</span></span> <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
+      <div class="split-row" style="border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:4px"><span class="split-label">🔐 Crossing Reserve <span style="font-size:10px;color:var(--text3)">(funds your first re-entry)</span></span><span><span class="split-amount">50%</span> <span class="split-pct">$5.00</span></span></div>
+      <div class="split-row" style="margin-bottom:8px"><span class="split-label">⚡ Instant Earn <span style="font-size:10px;color:var(--text3)">(credited to withdrawable on join)</span></span><span><span class="split-amount">2.5%</span> <span class="split-pct">$0.25</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool</span><span><span class="split-amount">18%</span> <span class="split-pct">$1.80</span></span></div>
+      <div class="split-row"><span class="split-label">⛓️ Chain Pay L1 <span style="font-size:10px;color:var(--text3)">(direct referrer)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.chain_pay">⛓️ Chain Pay L2–L6 <span style="font-size:10px;color:var(--text3)">(per level, flat rate)</span></span><span><span class="split-amount">2.7% ea</span> <span class="split-pct">$0.27 ea</span></span></div>
+      <div class="split-row"><span class="split-label">🌊 CNOVA Stability Fund <span style="font-size:10px;color:var(--text3)" data-i18n="split.stability_sub">(rescue reserve)</span></span><span><span class="split-amount">3%</span> <span class="split-pct">$0.30</span></span></div>
+      <div class="split-row"><span class="split-label">🏦 CNOVA Treasury <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.dev">⚙️ Dev</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.ops">⚙️ Ops</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.community">🏛️ Community</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
@@ -835,16 +813,16 @@
           <th style="text-align:left;padding:8px 10px;color:var(--text3)" data-i18n="tiers.th_gate">Gate</th>
         </tr></thead>
         <tbody>
-          <tr id="tier-row-t1" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)"><span id="tier-lbl-t1">T1</span></td><td style="padding:8px 10px">Nova Seed</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$10</td><td style="padding:8px 10px;text-align:right" id="tier-t1a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t1b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t1-gate" class="pill pill-green" style="font-size:10px">Open</span></td></tr>
-          <tr id="tier-row-t2" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)"><span id="tier-lbl-t2">T2</span></td><td style="padding:8px 10px">Nova Rise</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$25</td><td style="padding:8px 10px;text-align:right" id="tier-t2a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t2b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t2-gate" class="pill pill-green" style="font-size:10px">Open</span></td></tr>
-          <tr id="tier-row-t3" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)"><span id="tier-lbl-t3">T3</span></td><td style="padding:8px 10px">Nova Star</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$50</td><td style="padding:8px 10px;text-align:right" id="tier-t3a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t3b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t3-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t4" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t4">T4</span></td><td style="padding:8px 10px">Nova Core</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$100</td><td style="padding:8px 10px;text-align:right" id="tier-t4a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t4b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t4-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t5" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t5">T5</span></td><td style="padding:8px 10px">Nova Prime</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$250</td><td style="padding:8px 10px;text-align:right" id="tier-t5a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t5b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t5-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t6" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t6">T6</span></td><td style="padding:8px 10px">Nova Apex</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$500</td><td style="padding:8px 10px;text-align:right" id="tier-t6a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t6b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t6-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t7" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t7">T7</span></td><td style="padding:8px 10px">Nova Pinnacle</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$1,000</td><td style="padding:8px 10px;text-align:right" id="tier-t7a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t7b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t7-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t8" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t8">T8</span></td><td style="padding:8px 10px">SuperNova Titan</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$2,500</td><td style="padding:8px 10px;text-align:right" id="tier-t8a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t8b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t8-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t9" style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t9">T9</span></td><td style="padding:8px 10px">SuperNova Legend</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$5,000</td><td style="padding:8px 10px;text-align:right" id="tier-t9a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t9b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t9-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
-          <tr id="tier-row-t10"><td style="padding:8px 10px;font-weight:700;color:var(--text2)"><span id="tier-lbl-t10">T10</span></td><td style="padding:8px 10px">SuperNova Apex</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$10,000</td><td style="padding:8px 10px;text-align:right" id="tier-t10a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t10b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t10-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)">T1</td><td style="padding:8px 10px">Nova Seed</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$10</td><td style="padding:8px 10px;text-align:right" id="tier-t1a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t1b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t1-gate" class="pill pill-green" style="font-size:10px">Open</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)">T2</td><td style="padding:8px 10px">Nova Rise</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$25</td><td style="padding:8px 10px;text-align:right" id="tier-t2a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t2b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t2-gate" class="pill pill-green" style="font-size:10px">Open</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--green)">T3</td><td style="padding:8px 10px">Nova Star</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$50</td><td style="padding:8px 10px;text-align:right" id="tier-t3a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t3b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t3-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T4</td><td style="padding:8px 10px">Nova Core</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$100</td><td style="padding:8px 10px;text-align:right" id="tier-t4a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t4b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t4-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T5</td><td style="padding:8px 10px">Nova Prime</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$250</td><td style="padding:8px 10px;text-align:right" id="tier-t5a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t5b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t5-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T6</td><td style="padding:8px 10px">Nova Apex</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$500</td><td style="padding:8px 10px;text-align:right" id="tier-t6a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t6b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t6-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T7</td><td style="padding:8px 10px">Nova Pinnacle</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$1,000</td><td style="padding:8px 10px;text-align:right" id="tier-t7a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t7b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t7-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T8</td><td style="padding:8px 10px">SuperNova Titan</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$2,500</td><td style="padding:8px 10px;text-align:right" id="tier-t8a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t8b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t8-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T9</td><td style="padding:8px 10px">SuperNova Legend</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$5,000</td><td style="padding:8px 10px;text-align:right" id="tier-t9a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t9b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t9-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
+          <tr><td style="padding:8px 10px;font-weight:700;color:var(--text2)">T10</td><td style="padding:8px 10px">SuperNova Apex</td><td style="padding:8px 10px;text-align:right;font-family:monospace">$10,000</td><td style="padding:8px 10px;text-align:right" id="tier-t10a-fill">&#8212;</td><td style="padding:8px 10px;text-align:right" id="tier-t10b-fill">&#8212;</td><td style="padding:8px 10px"><span id="tier-t10-gate" class="pill" style="font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)">Velocity Gated</span></td></tr>
         </tbody>
       </table>
       <div style="margin-top:10px;font-size:11px;color:var(--text3)">Velocity gate opens when previous tier MatB reaches 80%. Each matrix holds 127 seats (2<sup>7</sup>&#8722;1).</div>
@@ -1121,15 +1099,8 @@
         <div class="card" id="upgrade-card" style="display:none;margin-top:20px">
           <div style="font-size:15px;font-weight:700;margin-bottom:4px" data-i18n="reg.upgrade_title">⬆️ Upgrade Tier</div>
           <div style="font-size:13px;color:var(--text3);margin-bottom:14px" data-i18n="reg.upgrade_desc">Complete your cycle requirement, then pay the next tier's fee to earn in a bigger pool.</div>
-          <!-- V8.35 Whale Gate banner — shown when member is T1-T4 and gate not yet open -->
           <div id="upgrade-whale-gate" style="display:none;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--yellow)">
-            <div style="font-weight:700;margin-bottom:6px">🐋 Whale Gate — Pioneer Milestone</div>
-            <div style="margin-bottom:4px">T2–T5 unlock together when <strong id="whale-gate-t5-progress">…</strong> / <strong id="whale-gate-t5-threshold">25</strong> T5 pioneers join.</div>
-            <div style="background:rgba(0,0,0,.25);border-radius:4px;height:6px;margin:6px 0 4px">
-              <div id="whale-gate-t5-bar" style="background:var(--yellow);height:6px;border-radius:4px;width:0%;transition:width .4s"></div>
-            </div>
-            <div id="whale-gate-t5-status" style="font-size:12px;opacity:.85">Loading…</div>
-            <div id="upgrade-fasttrack-badge" style="margin-top:6px"></div>
+            <span data-i18n="reg.whale_gate_pre">🐋 <strong>Whale Gate</strong> — Tiers 5–7 require sequential progression until</span> <span id="upgrade-whale-progress">0</span> / 25 <span data-i18n="reg.whale_gate_suf">SuperNova Genesis members reached.</span> <span id="upgrade-fasttrack-badge"></span>
           </div>
           <div class="form-group">
             <label data-i18n="reg.target_tier">Target Tier</label>
@@ -1160,7 +1131,7 @@
           <li>
             <div class="step-content">
               <strong data-i18n="idx.how_s1_h">Connect Your Wallet</strong>
-              <span data-i18n="idx.how_s1_b">Click "Connect Wallet" in the top-right. MetaMask, TokenPocket, and Rabby are all supported. Make sure you're on Base Sepolia testnet.</span>
+              <span data-i18n="idx.how_s1_b">Click "Connect Wallet" in the top-right. MetaMask and Rabby are both supported. Make sure you're on Base Sepolia testnet.</span>
             </div>
           </li>
           <li>
@@ -1172,7 +1143,7 @@
           <li>
             <div class="step-content">
               <strong data-i18n="idx.how_s3_h">Approve USDC</strong>
-              <span data-i18n="idx.how_s3_b">Allow the Matrix contract to spend $10 USDC on your behalf. One wallet confirmation.</span>
+              <span data-i18n="idx.how_s3_b">Allow the Matrix contract to spend $10 USDC on your behalf. One MetaMask confirmation.</span>
             </div>
           </li>
           <li>
@@ -1190,7 +1161,7 @@
         </ul>
 
         <div style="margin-top:20px;padding:14px;background:var(--bg3);border-radius:8px;font-size:13px">
-          <div style="color:var(--green);font-weight:700;margin-bottom:6px" data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)<span class="tip-badge" tabindex="0">?<span class="tip-popup">A "cycle" = all 127 seats in your matrix filled by new members. Each seat filled sends chain pay upward. When all 127 fill, the pool pays out and the matrix resets.</span></span></div>
+          <div style="color:var(--green);font-weight:700;margin-bottom:6px" data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)</div>
           <div style="color:var(--text2);line-height:1.6">
             <span data-i18n="reg.earn_passive">Passive (0 referrals): <strong style="color:var(--text)">~$3.00</strong> chain pay per cycle (~30% ROI)</span><br>
             <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">~$4.00</strong> per cycle (~40% ROI)</span><br>
@@ -1209,7 +1180,7 @@
     <div id="dash-no-wallet" class="card" style="text-align:center;padding:40px;display:none">
       <div style="font-size:32px;margin-bottom:12px"><span style="filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(0.85)">👛</span></div>
       <div style="font-size:16px;font-weight:600;margin-bottom:8px" data-i18n="dash.no_wallet_h">Connect Your Wallet</div>
-      <div style="color:var(--text2);font-size:14px;margin-bottom:20px" data-i18n="dash.no_wallet_body">Connect a Web3 wallet (MetaMask, TokenPocket, Rabby…) to view your dashboard and earnings.</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:20px" data-i18n="dash.no_wallet_body">Connect MetaMask to view your dashboard and earnings.</div>
       <button class="btn btn-green" onclick="window.ethereum ? connectWallet() : showMetaMaskModal()" data-i18n="dash.no_wallet_btn">Connect Wallet</button>
     </div>
 
@@ -1231,7 +1202,7 @@
       <!-- Earnings cards -->
       <div class="grid-4" style="margin-bottom:24px">
         <div class="card-sm clickable" style="border-color:var(--green2)" onclick="openDashDetail('withdrawable',this)" title="Click for breakdown">
-          <div class="stat-label" data-i18n="dash.withdrawable">Withdrawable<span class="tip-badge" tabindex="0">?<span class="tip-popup">USDC you can withdraw to your wallet right now. Includes: your 2.5% instant earn, L1 referral bonuses you've earned, and chain pay from members who joined below you in the matrix.</span></span></div>
+          <div class="stat-label" data-i18n="dash.withdrawable">Withdrawable</div>
           <div class="stat-value green" id="dash-withdrawable">—</div>
           <div id="dash-reserved-badge" style="display:none;color:var(--yellow);font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="stat-sub" id="dash-ready-label" data-i18n="dash.ready_to_claim">Ready to claim</div>
@@ -1249,7 +1220,7 @@
           <div class="stat-sub">Paid out to wallet</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
-          <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance<span class="tip-badge" tabindex="0">?<span class="tip-popup">Protocol tokens minted automatically when you or anyone in your matrix registers. Genesis epoch: 50 CNOVA per T1 entry. Redeem at the floor price anytime — or hold for appreciation.</span></span></span></div>
+          <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span></div>
           <div class="stat-value green" id="dash-cnova">—</div>
           <div class="stat-sub" data-i18n="dash.mined_tokens">Mined · 180-day vest 🔒</div>
           <div class="detail-hint">Details ↗</div>
@@ -1287,9 +1258,6 @@
         <div class="info-row" id="rescue-reserve-row" style="display:none"><span class="info-key">Crossing Reserve</span><span class="info-val green" id="rescue-reserve">—</span></div>
         <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
         <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
-        <div id="rescue-auto-hint" style="margin-top:12px;margin-bottom:4px;padding:10px 14px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);font-size:12px;color:var(--text2);line-height:1.6">
-          <strong style="color:var(--green)">&#9203; Auto-rescue active</strong> &#8212; if your balance covers the entry fee, the keeper will re-enter you automatically within 24&#8239;hours. No out-of-pocket action needed unless you want to re-enter sooner.
-        </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <strong>Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
@@ -1470,20 +1438,6 @@
             </div>
             <div id="upgrade-status-dash" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
           </div>
-
-          <!-- V8.35 Bulk Upgrade — shown when whale gate is open AND member is T1-T4 -->
-          <div id="bulk-upgrade-section" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-            <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔓 Whale Gate Open — Bulk Upgrade</div>
-            <div style="font-size:12px;color:var(--text3);margin-bottom:12px" id="bulk-upgrade-desc">The pioneer milestone has been reached. You can jump directly to a higher tier in one transaction.</div>
-            <div class="info-row"><span class="info-key">Upgrade To</span><span class="info-val green" id="bulk-upgrade-target">—</span></div>
-            <div class="info-row"><span class="info-key">Total Fee</span><span class="info-val" id="bulk-upgrade-fee">—</span></div>
-            <div id="bulk-upgrade-breakdown" style="font-size:11px;color:var(--text3);margin:4px 0 12px;padding:6px 8px;background:var(--bg3);border-radius:6px"></div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <button class="btn btn-ghost full-w" id="btn-bulk-approve" onclick="approveBulkUpgrade()" disabled>Step 1: Approve USDC</button>
-              <button class="btn btn-ghost full-w" id="btn-bulk-upgrade" onclick="doBulkUpgrade()" disabled>Step 2: Bulk Upgrade All Tiers</button>
-            </div>
-            <div id="bulk-upgrade-status" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
-          </div>
         </div>
       </div>
 
@@ -1580,9 +1534,9 @@
 
       <!-- Chain pay breakdown -->
       <div class="card">
-        <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth<span class="tip-badge" tabindex="0">?<span class="tip-popup">Every new member registration sends automatic USDC payments up the matrix tree. L1 = your referral sponsor (5%); L2–L6 = your 5 matrix position ancestors (2.7% each). You earn from ANYONE who joins below you — not just your direct referrals.</span></span></div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">These amounts flow upward automatically from <em>every</em> new member registration that lands below you in the matrix.</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">18.5% of each $10 entry flows upward: $0.50 to your direct referral sponsor (L1) + $0.27 to each of 5 matrix ancestors (L2–L6). <strong style="color:var(--text2)">You are an ancestor to everyone below your position.</strong></div>
+        <div class="section-title"><div class="dot"></div> Chain Pay Structure — Your Node Depth</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">These amounts flow upward from each new member registration through your position.</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">18.5% of each entry fee flows across 6 levels — L1 direct referrer bonus + L2–L6 flat rate per upline level</div>
         <div id="chain-pay-table">
           <div class="chain-row"><span style="color:var(--text2)">L1 — Direct Referrer <span style="font-size:11px;color:var(--text3)">(person who brought you in)</span></span><span><span style="font-weight:600;color:var(--green)">$0.50</span> <span style="font-size:11px;color:var(--text3)">5%</span></span></div>
           <div class="chain-row"><span style="color:var(--text2)">L2 — Upline</span><span><span style="font-weight:600">$0.27</span> <span style="font-size:11px;color:var(--text3)">2.7%</span></span></div>
@@ -1746,22 +1700,19 @@
       <div class="roadmap-phase">
         <div style="display:flex;flex-direction:column;align-items:flex-end;padding-right:20px;padding-top:4px">
           <div class="phase-label active">Phase 2</div>
-          <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px">⚡ Live Now</div>
+          <div style="font-size:10px;color:var(--yellow);text-align:right;margin-top:2px">⚡ Now</div>
         </div>
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">V8.38 live on testnet — leader preview open July 17, community open July 26</div>
+            <div class="phase-subtitle">Soft launch to initial community — testnet testing with real members</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
-              <li><span class="check-icon check-done">✅</span> Dual-matrix cycle confirmed: T1 MatA → MatB → auto-upgrade to T2</li>
-              <li><span class="check-icon check-done">✅</span> V8.36 deployed: MINTER_ROLE factory fix, cross-pair referrer credit, factory threshold fix</li>
-              <li><span class="check-icon check-done">✅</span> 6-language i18n (EN/FR/ES/PT/DE/TR) + 4 more (KO/TH/VI/ZH)</li>
-              <li><span class="check-icon check-done">✅</span> Automated keeper live on VPS — 6 cron scripts, 24/7 rescue &amp; cycling</li>
-              <li><span class="check-icon check-done">✅</span> Coupon system live — leader referral codes for early access</li>
+              <li><span class="check-icon check-pending">⏳</span> Collect feedback and fix remaining UX issues</li>
               <li><span class="check-icon check-pending">⏳</span> Record tutorial video / walkthrough for non-crypto members</li>
-              <li><span class="check-icon check-pending">⏳</span> Confirm referral link flow end-to-end for all leader wallets</li>
+              <li><span class="check-icon check-done">✅</span> Dual-matrix cycle confirmed: T1 MatA fills → MatB fills → wallet auto-upgraded to T2 ✅</li>
+              <li><span class="check-icon check-pending">⏳</span> Confirm referral link flow works end-to-end for all members</li>
             </ul>
           </div>
         </div>
@@ -1771,19 +1722,19 @@
       <div class="roadmap-phase">
         <div style="display:flex;flex-direction:column;align-items:flex-end;padding-right:20px;padding-top:4px">
           <div class="phase-label future">Phase 3</div>
-          <div style="font-size:10px;color:var(--yellow);text-align:right;margin-top:2px">July 19, 2026</div>
+          <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:2px">Weeks 6–8</div>
         </div>
         <div>
-          <div class="phase-card" style="margin-bottom:20px;border-color:rgba(245,158,11,0.4)">
-            <div class="phase-title">🚀 Mainnet Launch <span style="font-size:13px;color:var(--yellow);font-weight:600">— July 19, 2026</span></div>
-            <div class="phase-subtitle">Real USDC. Real earnings. Open to the world — cryptonova.ai</div>
+          <div class="phase-card" style="margin-bottom:20px">
+            <div class="phase-title">🚀 Mainnet Launch</div>
+            <div class="phase-subtitle">Real USDC. Real earnings. Community-ready.</div>
             <ul class="checklist">
-              <li><span class="check-icon check-future">◦</span> Deploy V8.36 full contract suite to Base mainnet</li>
-              <li><span class="check-icon check-future">◦</span> Seed Wave 1 (W1 wallet) — first matrix seat on mainnet</li>
-              <li><span class="check-icon check-future">◦</span> Verify all contracts on BaseScan (removes wallet warnings)</li>
-              <li><span class="check-icon check-future">◦</span> Leader early access opens July 19, 9am EST — coupon codes</li>
-              <li><span class="check-icon check-future">◦</span> Community open access July 19, 12pm EST — auto gates open</li>
-              <li><span class="check-icon check-future">◦</span> VPS keeper migrated to mainnet — 24/7 automated cycling</li>
+              <li><span class="check-icon check-future">◦</span> Deploy full smart contract suite to Base mainnet</li>
+              <li><span class="check-icon check-future">◦</span> Update dApp to point to mainnet contracts + real USDC address</li>
+              <li><span class="check-icon check-future">◦</span> Verify mainnet contracts on BaseScan</li>
+              <li><span class="check-icon check-future">◦</span> Final security review before public launch</li>
+              <li><span class="check-icon check-future">◦</span> Consider renouncing contract ownership (fully decentralised)</li>
+              <li><span class="check-icon check-future">◦</span> Public announcement — open registrations</li>
               <li><span class="check-icon check-future">◦</span> Members begin earning real USDC from day 1</li>
             </ul>
           </div>
@@ -1959,69 +1910,69 @@ const RPC_FALLBACK = 'https://base-sepolia.public.blastapi.io';
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
 const ADDRS = {
-  // V8.39 — deployed 2026-07-18 — keeperForceRotateRoot(), SF try/catch x2 (cycleOut+crossToPartner), deployAndWire try/catch, dust fix, MatrixPairFactory pairAdmin decoupled
+  // V8.34 — deployed 2026-07-09 — reentrancy fix in enterFor(), RESCUE_REPAY_BPS=100%, referrer indexed, proposal fee 100 CNOVA
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0x592428c2e8d22115ce1D988EAC8f7572B72EAdFa',
-  treasury:      '0xdCF79Fdeb40fe11900F60Ff5d756554bb0058728',
-  stabilityFund: '0xA7e6149969cca994F3D40Daf9b6c5D24c90d3754',
-  buybackReserve:'0xBe1EF6fFD831CE3fc8FaF46B6039c8Bf5c8C127d',
-  tierRouter:    '0x03d532100Cb0b1a757Be45d050c27c595C7020B9',
-  matrixKeeper:  '0x98b4f5605F6AdBB83Bd7Bdf2803c22F08DEEf0E8',
-  v8Governance:  '0xEd44a2386E3F98877A9A8FdDedCaC60B833Cf6E1',
-  communityWallet:'0xf5Da1C1580DE0833Fa96c9e879f108Df4E5B8F9b',
+  cnova:         '0x73906fbD986C353AfCD44bBc39F236EC58E1b980',
+  treasury:      '0xe0A3EBd83BFF1B0ab7AEbcc34D43d79F4675D14a',
+  stabilityFund: '0xb4Fd854167b4e349eCaB65CA1BBD73db417B7c58',
+  buybackReserve:'0x515c066e59Cc76b3F3409bf52B3412e0b1FBc9fB',
+  tierRouter:    '0x8a02C52F3691b9eCa735b85FC0F1BE42e38ECb4b',
+  matrixKeeper:  '0xcf6c943908ceF7585Cfb860002e2f56A818D22b9',
+  v8Governance:  '0x5D8775acC76e824949b25D4DcE64aeB181943FcA',
+  communityWallet:'0x391d28410EC65E46FbC7b19EA140d23de36FdE01',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x8F494Ce39458d9556A9Adce45552142bA5a2F3d9',
-  couponRegistry:'0xf46Ac9745f54721acAe0429aee1c4eC57855763F',
+  directSale:    '0x57F531847b53CB51Cb9166B44f15825f4DFa77cd',
+  couponRegistry:'0x3F321247AAE14227142A8142B51d1Ed1C8b08229',
   // V8.30 tier pairs — deployed 2026-06-29
   T1: {
-    pm:   '0x8eEd189Bddc68E0Dd77B129a8BCAa7379d526464',
-    matA: '0xd20DD8D5CDa5E9A6672CEd1e02b307f0B1A38BdF',
-    matB: '0x0c9c4C6ec6446d2EcB0c867cC691b8C14e014d86',
+    pm:   '0x7DDC0a01E315ad389bb7a6a500BBC3289c21c992',
+    matA: '0xa2B7309ed2e2891633CDB1d6F105C9B3044472e9',
+    matB: '0xdFD7F87ce48f9c21ef354B0DF3D326DB24209828',
   },
   T2: {
-    pm:   '0x3E71042fD0110932E0b8ADE6A67eA46B20cf9054',
-    matA: '0x4e583069C04898f306d802337F819DBDe965c902',
-    matB: '0x12dc8d0AC6d3Aa9fefD948a4F458AebC649085f1',
+    pm:   '0xFB4e73c5fD1a7F9898c2CC7376515E17cE2165C8',
+    matA: '0x427B4b0a95D59C710fB74Eba357C912256Aa5245',
+    matB: '0x16f28697B9ce5f285c29dD2E94EFc2ef2F1D442A',
   },
   T3: {
-    pm:   '0x50F1AFb8E52F0c0e9CBeaf9018E8aca18148C1D6',
-    matA: '0x3Ee9036262a3dDC32e944CFDAa230f035Cf35656',
-    matB: '0x68e5B5924A793696090bC54F7452C3d5CfB48839',
+    pm:   '0xF1Ea8dCd522bAe8B5e38a491b0b45e460F1148e6',
+    matA: '0x7B911c9Ada467B813f31AD297974431B726be83A',
+    matB: '0xEc5a7Ad348Ac68878999f7dd8781526166839c88',
   },
   T4: {
-    pm:   '0x6504ddc1eB9e2AD6841fB461e7C95a2375f43472',
-    matA: '0x724bDCD2a085B4Fd6a0B5Abd123bFC36812c3128',
-    matB: '0xb42c8F5D1B18aD8FE625F9dE4368d429eC027d33',
+    pm:   '0xd302f38566e19a821bdb7b8c0E82EFA908A97eac',
+    matA: '0xE66d693228Bd05E6EA1c7503A74d02b470e57c58',
+    matB: '0xA44DAdA9f5a7124aEe9Fb4C719F84c5820e946B3',
   },
   T5: {
-    pm:   '0xaE319E995972E468b6C834A45E8197D27C3BFfBE',
-    matA: '0xf4209D5D540591e70E89A1Ac80fd67493A7b4028',
-    matB: '0xBE98B4169A6aa9CE2634Fd816e995ba3AC179113',
+    pm:   '0xa547cd53cAfcc637Ba57811A9aBEe8c29d26D947',
+    matA: '0x97ABaeFE8925A3DB28A325BB557b6965817bEF81',
+    matB: '0x71d5da0E8cEecC61a2F72c32CFF37BB36b204dD4',
   },
   T6: {
-    pm:   '0x967571A730Be63cc5431dC1008dab31135689821',
-    matA: '0x7547ffbFAe3b1d634a3a9b68484D7A345086C55b',
-    matB: '0xcd85865E04EBdE96D35CE940512b393f93D83dDE',
+    pm:   '0x36Df4ce08eA03bF39F95a7f375eB648877DA9Ed7',
+    matA: '0xFc49c529dfA737D2846C56dBC31b587746fC48CB',
+    matB: '0x39606A3012AD4ae97AD16D829c45b137b6E809BF',
   },
   T7: {
-    pm:   '0xa5c5b92409b2d0248A03Cd38EDd1438A941C846f',
-    matA: '0x3eE77Cc492dcd1F0A51049CE471DE0fC7E03A794',
-    matB: '0xdBefc2b2Bce8fF9ef44aBd020a83E641374865dc',
+    pm:   '0x1B2A82d7B23d2fdD90708006C1009a54b0217329',
+    matA: '0x0e7d45234106c00aFCBEe292CCf4CC2711f4971e',
+    matB: '0x6445366B12FF85953DF31E8C3358752045eD2512',
   },
   T8: {
-    pm:   '0x48BbB3BB11681db1C832eE2d210E87DD5EeaDcbD',
-    matA: '0x94022308a5E3978Fd84A9dECe066139EAB8F3460',
-    matB: '0x252f3dEBbfF2a58212907E85a26323B2D02a22D5',
+    pm:   '0xC2e19BBf463195F55352695929D261BA77c7709A',
+    matA: '0x40A39f26FCCdaCfaEc884552EE2D93DaBA70Df7A',
+    matB: '0xBAeD6c32a4c0ab97Ff8E863139A482FEB9123280',
   },
   T9: {
-    pm:   '0xcecCBe9080BE99571D3598CbE2C86923C194be7C',
-    matA: '0xcD35b80150fCd26408dDfdFBCFaE2b277DeCC58f',
-    matB: '0xD31FAdcb219028f9dF1958Ebe46307D03C65D3a6',
+    pm:   '0xB5B6568BB0D59AEe64223CaED357b98B2e851896',
+    matA: '0x8f594eb9012b5DE776823Ef86f782015F58c72d0',
+    matB: '0xC8B01746F94B7307fEB6D60B719A12449ac49006',
   },
   T10: {
-    pm:   '0x7eE8eDbfeBE0048BDaA8fff4F17059E64a40D449',
-    matA: '0x8C88F3f795572843CDeE6f480B95bf9A6C2F7576',
-    matB: '0xE8ccb2dbe3fb392D4dcF63AF5848d3bC3fcdFe46',
+    pm:   '0xF5b6E9506426a60ca1D832F35AAfB81D616Eb540',
+    matA: '0xB131590EdED3A01E1B35AD2d49711C59fE4809F2',
+    matB: '0x52916eFA3f201abD441ac5c0a4d438AB0265f880',
   },
 };
 
@@ -2054,11 +2005,6 @@ const TIER_ROUTER_ABI = [
   'function tierVelocityGreen(uint8 tierIdx) external view returns (bool)',
   'function globalJoinedCount() external view returns (uint256)',
   'function registerWithCoupon(address referrer, bytes32 couponCodeHash) external', // V8.31
-  'function bulkUpgrade(uint8 targetTierIndex) external',                           // V8.35
-  'function tierFirstEntries(uint8 tierNum) external view returns (uint256)',        // V8.35
-  'function tierGateThreshold(uint8 tierNum) external view returns (uint256)',       // V8.35
-  'event BulkUpgrade(address indexed member, uint8 fromTier, uint8 toTier, uint256 totalFee)', // V8.35
-  'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.11
 ];
 
 const COUPON_REGISTRY_ABI = [
@@ -2131,8 +2077,6 @@ const PM_ABI = [
   'function allPairsStatus() external view returns (address[] memory, address[] memory, uint256[] memory, uint256[] memory, uint256[] memory, bool[] memory)',
   'function activePairIndex() external view returns (uint256)',
   'function pairCount() external view returns (uint256)',
-  'function currentMatA() external view returns (address)',
-  'function currentMatB() external view returns (address)',
 ];
 
 const TREASURY_ABI = [
@@ -2239,7 +2183,6 @@ function getDevice() {
 
 function detectWalletName() {
   if (!window.ethereum) return 'no-wallet';
-  if (window.ethereum.isTokenPocket)    return 'TokenPocket';
   if (window.ethereum.isRabby)          return 'Rabby';
   if (window.ethereum.isCoinbaseWallet) return 'Coinbase Wallet';
   if (window.ethereum.isBraveWallet)    return 'Brave Wallet';
@@ -2314,19 +2257,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     window.ethereum.on('accountsChanged', (accounts) => {
       if (accounts.length === 0) {
-        // Verify before clearing — some wallets (Trust Wallet, TokenPocket) fire
-        // spurious accountsChanged([]) during init while still connected
-        window.ethereum.request({ method: 'eth_accounts' }).then(verified => {
-          if (verified.length === 0) {
-            // Genuinely disconnected
-            userAddr = null; signer = null; provider = null;
-            localStorage.removeItem('cnova_connected');
-            const b = document.getElementById('btn-connect');
-            b.textContent = 'Connect Wallet'; b.classList.remove('connected');
-            const _bm3 = document.getElementById('btn-connect-m'); if (_bm3) { _bm3.textContent = 'Connect Wallet'; _bm3.className = 'btn-connect-mob'; }
-          }
-          // else: spurious event — wallet still connected, ignore
-        }).catch(() => {});
+        userAddr = null; signer = null; provider = null;
+        localStorage.removeItem('cnova_connected'); // clear so refresh doesn't try to reconnect
+        const b = document.getElementById('btn-connect');
+        b.textContent = 'Connect Wallet'; b.classList.remove('connected');
+      const _bm3 = document.getElementById('btn-connect-m'); if (_bm3) { _bm3.textContent = 'Connect Wallet'; _bm3.className = 'btn-connect-mob'; }
       } else if (accounts[0].toLowerCase() !== (userAddr||'').toLowerCase()) {
         setTimeout(() => connectWallet(true).catch(()=>{}), 300);
       }
@@ -2368,19 +2303,8 @@ async function connectWallet(silent=false) {
     } else {
       await provider.send('eth_requestAccounts', []);
     }
-    // eth_chainId (async) avoids race condition where sync chainId prop is null before wallet fires 'connect' event
-    // (affects TokenPocket and other wallets that populate chainId asynchronously)
-    const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' }).catch(() => window.ethereum.chainId || '0x0');
-    const chainId = parseInt(chainIdHex || '0', 16);
+    const chainId = parseInt(window.ethereum.chainId || '0', 16); // sync check avoids ethers pinned-network mismatch throw
     if (chainId !== CHAIN_ID) {
-      // Phantom doesn't support Base Sepolia testnet (chainId 84532) but DOES support Base mainnet (8453).
-      // Bail early on testnet with a clear message rather than showing the wrong-network banner.
-      if (walletName === 'Phantom' && CHAIN_ID === 84532) {
-        isConnecting = false;
-        if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
-        if (!silent) toast('Phantom doesn\'t support Base Sepolia. Please use MetaMask, Rabby, or TokenPocket.', 'error');
-        return;
-      }
       // Auto-attempt network switch before showing banner
       try {
         await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14A34' }] });
@@ -2389,18 +2313,16 @@ async function connectWallet(silent=false) {
         if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
         return connectWallet(silent);
       } catch(swErr) {
-        // Trust Wallet and some wallets use non-standard codes for "chain not in wallet"
-        // (4902 is standard, but -32602, -32603, or even string errors are seen in the wild).
-        // Attempt addEthereumChain for any error EXCEPT explicit user rejection (4001).
-        if (swErr.code !== 4001) {
+        if (swErr.code === 4902 || swErr.code === -32603) {
+          // Chain not in wallet yet — try adding it
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy', 'https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy', 'https://base-sepolia.public.blastapi.io', 'https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
           } catch(addErr) { /* user rejected add — fall through to banner */ }
         }
-        // User rejected switch — show banner below
+        // User rejected switch or unknown error — show banner below
       }
       showNetworkBanner();
       if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
@@ -2414,7 +2336,7 @@ async function connectWallet(silent=false) {
     signer = await provider.getSigner();
     userAddr = await signer.getAddress();
     // Report unsupported/unrecognised wallet names for tracking
-    if (!['MetaMask','Rabby','TokenPocket','Trust Wallet','Coinbase Wallet'].includes(walletName)) {
+    if (!['MetaMask','Rabby'].includes(walletName)) {
       reportEvent('WALLET_OTHER', {
         wallet: walletName, action: 'connect',
         error: `${walletName} connected — not yet in supported list`,
@@ -2457,8 +2379,7 @@ async function switchToBaseSepolia() {
     hideNetworkBanner();
     if (!userAddr) await connectWallet();
   } catch(e) {
-    if (e.code !== 4001) {
-      // Non-rejection error: try adding the chain (handles Trust Wallet and other non-standard codes)
+    if (e.code === 4902 || e.code === -32603) {
       try {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
@@ -2802,14 +2723,8 @@ async function loadHomeStats() {
                     'stat-cycles','stat-epoch','stat-supply','stat-treasury-usdc','stat-floor-price','stat-reward','stat-buyback'];
 
   async function _fetchStats(provider) {
-    // Resolve active T1 pair addresses via PairManager (shows T1.2 when factory has fired)
-    const pm1 = new ethers.Contract(ADDRS.T1.pm, PM_ABI, provider);
-    const [activeMatA1addr, activeMatB1addr] = await Promise.all([
-      pm1.currentMatA().catch(() => ADDRS.T1.matA),
-      pm1.currentMatB().catch(() => ADDRS.T1.matB),
-    ]);
-    const matA1 = new ethers.Contract(activeMatA1addr, MATRIX_ABI, provider);
-    const matB1 = new ethers.Contract(activeMatB1addr, MATRIX_ABI, provider);
+    const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, provider);
+    const matB1 = new ethers.Contract(ADDRS.T1.matB, MATRIX_ABI, provider);
     const matA2 = new ethers.Contract(ADDRS.T2.matA, MATRIX_ABI, provider);
     const matB2 = new ethers.Contract(ADDRS.T2.matB, MATRIX_ABI, provider);
     const matA3 = new ethers.Contract(ADDRS.T3.matA, MATRIX_ABI, provider);
@@ -3036,77 +2951,6 @@ async function loadDaoWidget() {
 }
 
 
-
-// ── V8.36: Multi-pair sub-row renderer ─────────────────────────────────────
-// Called from loadTiersStats() when allPairsStatus() returns >1 pair for a tier.
-// Zero additional RPC calls — all data comes from the existing allPairsStatus() result.
-function renderPairSubRows(t, matrixAs, occupancyA, occupancyB, actives) {
-  const mainRow = document.getElementById('tier-row-' + t);
-  if (!mainRow) return;
-  const tbody = mainRow.parentNode;
-  const TU = t.toUpperCase(); // 't1' → 'T1'
-
-  // Remove stale sub-rows from a previous load
-  tbody.querySelectorAll('.pair-sub-row[data-tier="' + t + '"]').forEach(r => r.remove());
-
-  // Inject one sub-row per pair, in order, after the main row
-  let anchor = mainRow;
-  for (let i = 0; i < matrixAs.length; i++) {
-    const pairNum = i + 1;
-    const isActive = actives[i];
-    const occA = Number(occupancyA[i]);
-    const occB = Number(occupancyB[i]);
-    // A pair is "full" if MatB also has members (or MatA is 127) AND it is not the active pair
-    const aFull = !isActive && occA >= 127;
-    const status = aFull
-      ? '<span style="color:var(--text3);font-size:11px">✅ Full</span>'
-      : isActive
-        ? '<span style="color:var(--green);font-size:11px">🟢 Active</span>'
-        : '<span style="color:var(--text3);font-size:11px">⏳ New</span>';
-    const fillA = aFull ? '127/127' : (occA + '/127');
-    const fillB = (aFull || occB > 0) ? (aFull ? '127/127' : occB + '/127') : '—';
-    const tr = document.createElement('tr');
-    tr.className = 'pair-sub-row';
-    tr.dataset.tier = t;
-    tr.style.cssText = 'display:none;background:var(--bg3);transition:opacity .15s';
-    tr.innerHTML =
-      '<td style="padding:3px 10px 3px 22px;font-size:12px;font-weight:700;color:var(--text2)">' + TU + '.' + pairNum + '</td>' +
-      '<td style="padding:3px 10px;font-size:12px">' + status + '</td>' +
-      '<td></td>' +
-      '<td style="padding:3px 10px;text-align:right;font-size:12px;color:var(--text3);font-family:monospace">' + fillA + '</td>' +
-      '<td style="padding:3px 10px;text-align:right;font-size:12px;color:var(--text3);font-family:monospace">' + fillB + '</td>' +
-      '<td></td>';
-    anchor.after(tr);
-    anchor = tr;
-  }
-
-  // Update tier label cell with pair count chip
-  const lbl = document.getElementById('tier-lbl-' + t);
-  if (lbl && !lbl.dataset.pairWired) {
-    const n = matrixAs.length;
-    lbl.dataset.pairWired = '1';
-    lbl.innerHTML = TU + '&thinsp;<span id="pair-chip-' + t + '" style="font-size:9px;color:var(--text3);font-weight:400;letter-spacing:0">▸&thinsp;' + n + ' pairs</span>';
-  } else if (lbl) {
-    const chip = document.getElementById('pair-chip-' + t);
-    if (chip) chip.innerHTML = (mainRow.dataset.pairsOpen === '1' ? '▾' : '▸') + '&thinsp;' + matrixAs.length + ' pairs';
-  }
-
-  // Wire click toggle (idempotent)
-  if (!mainRow.dataset.pairToggleWired) {
-    mainRow.style.cursor = 'pointer';
-    mainRow.addEventListener('click', function() {
-      const open = mainRow.dataset.pairsOpen === '1';
-      tbody.querySelectorAll('.pair-sub-row[data-tier="' + t + '"]').forEach(r => {
-        r.style.display = open ? 'none' : '';
-      });
-      mainRow.dataset.pairsOpen = open ? '0' : '1';
-      const chip = document.getElementById('pair-chip-' + t);
-      if (chip) chip.innerHTML = (open ? '▸' : '▾') + '&thinsp;' + matrixAs.length + ' pairs';
-    });
-    mainRow.dataset.pairToggleWired = '1';
-  }
-}
-
 // ═══════════════════════════════════════════════════════════════════════
 // TIERS TAB DATA
 // ═══════════════════════════════════════════════════════════════════════
@@ -3169,11 +3013,6 @@ async function loadTiersStats() {
           setText('tier-'+t+'b-fill', occBn+'/127');
           const bB = document.getElementById(t+'b-bar'); if (bB) bB.style.width = pctB+'%';
         }
-      }
-
-      // V8.36: render expandable sub-rows when factory has spawned >1 pair for this tier
-      if (status && status[0].length > 1) {
-        renderPairSubRows(t, status[0], status[2], status[3], status[5]);
       }
 
       const rotCnt = details[i*2];
@@ -3245,11 +3084,10 @@ async function loadUserData() {
         refInput.value = urlRef;
       } else {
         try {
-          // Always show the fixed defaultReferrer (W1) — not the current MatA root,
-          // which changes each time a new pair is created by MatrixPairFactory.
-          const defRef = await tr.defaultReferrer();
-          if (defRef && defRef !== ethers.ZeroAddress) {
-            refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
+          const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
+          const root = await matA1.posToMember(1n);
+          if (root && root !== ethers.ZeroAddress) {
+            refInput.placeholder = 'Auto: ' + short(root) + ' (current root)';
           }
         } catch(_) {}
       }
@@ -3363,20 +3201,8 @@ async function loadRegisterTab() {
         }
         // Fetch cycles to determine locked / eligible state (hiTier already confirmed < 2 above)
         const cycles     = Number(await tr.tierCycles(userAddr, 0).catch(() => 0n));
-        // Check ALL T1 MatBs — members in T1.1 MatB (pre-factory) must also qualify
-        const _pm1Reg    = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
-        let inT1MatB = false;
-        try {
-          const _allT1MatBs = (await _pm1Reg.allPairsStatus())[1];
-          for (const _mbAddr of _allT1MatBs) {
-            if (!_mbAddr || _mbAddr === ethers.ZeroAddress) continue;
-            const _inThis = await new ethers.Contract(_mbAddr, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
-            if (_inThis) { inT1MatB = true; break; }
-          }
-        } catch (_) {
-          const _fbAddr = await _pm1Reg.currentMatB().catch(() => ADDRS.T1.matB);
-          inT1MatB = await new ethers.Contract(_fbAddr, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
-        }
+        const t1matB     = new ethers.Contract(ADDRS.T1.matB, MATRIX_ABI, rp);
+        const inT1MatB   = await t1matB.isActiveInMatrix(userAddr).catch(() => false);
         const hint   = document.getElementById('upgrade-tier-hint');
         const btnApp = document.getElementById('btn-upgrade-approve');
         const btnUp  = document.getElementById('btn-upgrade');
@@ -3393,14 +3219,10 @@ async function loadRegisterTab() {
           if (btnApp) { btnApp.disabled = true; btnApp.textContent = 'Step 1: Approve USDC (locked until cycle complete)'; }
           if (btnUp)  { btnUp.disabled = true; }
         }
-        // Load referrer address from contract — check active pair first, then T1.1 fallback
+        // Load referrer address from contract
         try {
-          const _pm1Ref   = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
-          const _actMatA  = await _pm1Ref.currentMatA().catch(() => ADDRS.T1.matA);
-          let member      = await new ethers.Contract(_actMatA, MATRIX_ABI, rp).getMember(userAddr).catch(() => null);
-          if (!member || member.referrer === ethers.ZeroAddress) {
-            member = await new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp).getMember(userAddr).catch(() => null);
-          }
+          const matA1  = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
+          const member = await matA1.getMember(userAddr).catch(() => null);
           const rInp   = document.getElementById('upgrade-referrer');
           if (rInp) {
             if (member && member.referrer && member.referrer !== ethers.ZeroAddress) {
@@ -3433,19 +3255,9 @@ async function loadRegisterTab() {
         btnApprove.className = 'btn btn-ghost full-w';
         btnApprove.style.borderColor = 'var(--green)';
         btnApprove.style.color = 'var(--green)';
+        btnReg.disabled = false;
+        btnReg.className = 'btn btn-green full-w';
         document.getElementById('default-sponsor-warn').style.display = 'none';
-        if (bal >= T1_FEE) {
-          // Sufficient balance — enable register
-          btnReg.disabled = false;
-          btnReg.className = 'btn btn-green full-w';
-        } else {
-          // Approved but 0 USDC — ERC20 approve() doesn't check balance, so this is possible.
-          // Disable Step 2 and tell them to use the faucet.
-          btnReg.disabled = true;
-          btnReg.className = 'btn btn-ghost full-w';
-          const rsEl = document.getElementById('reg-status');
-          if (rsEl) { rsEl.textContent = '⚠️ Approved but no USDC balance — use the faucet button below to get test USDC.'; rsEl.style.color = 'var(--yellow)'; }
-        }
       } else {
         // Not yet approved — Step 1 is active, check referrer
         const refVal = (document.getElementById('input-referrer')?.value || '').trim();
@@ -3586,11 +3398,11 @@ function _updateApproveForCoupon() {
 
 async function approveUSDC() {
   if (!signer) { toast('Connect wallet first', 'error'); return; }
-  // Network guard — use eth_chainId RPC (not window.ethereum.chainId property, which is null on Trust Wallet)
-  const chainId = parseInt(await window.ethereum.request({method:'eth_chainId'}).catch(()=>'0x0'), 16);
+  // Network guard — MetaMask must be on Base Sepolia before any tx
+  const chainId = parseInt(window.ethereum?.chainId || '0', 16);
   if (chainId !== CHAIN_ID) {
     try { await switchToBaseSepolia(); } catch(_) {}
-    const c2 = parseInt(await window.ethereum.request({method:'eth_chainId'}).catch(()=>'0x0'), 16);
+    const c2 = parseInt(window.ethereum?.chainId || '0', 16);
     if (c2 !== CHAIN_ID) { toast('Please switch to Base Sepolia first', 'error'); return; }
   }
   const btn = document.getElementById('btn-approve');
@@ -3660,15 +3472,6 @@ async function doRegister() {
   // Guard: check on-chain before wasting a TX
   try {
     const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-    // USDC balance pre-check: approve() succeeds with 0 balance, but transferFrom() will revert.
-    // Catch this client-side to give a clear error instead of a raw wallet rejection.
-    const usdcPre = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-    const usdcBal = await usdcPre.balanceOf(userAddr).catch(() => null);
-    if (usdcBal !== null && usdcBal < T1_FEE) {
-      setStatus('reg-status', '❌ Insufficient USDC — use the faucet below to get test USDC first.', 'err');
-      if (btn) { btn.disabled = false; btn.textContent = 'Step 2: Register ($10 USDC)'; }
-      return;
-    }
     const tr0 = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     // Retry so a flaky RPC doesn't skip this gas-saving guard; on persistent failure
     // fall through to false — worst case the on-chain register() call reverts safely.
@@ -3691,55 +3494,15 @@ async function doRegister() {
       : (refInput && ethers.isAddress(refInput.value.trim())
           ? refInput.value.trim() : ethers.ZeroAddress);
 
-    // Dry-run via read provider BEFORE sending to wallet.
-    // Simulates the full register logic on-chain without submitting a TX.
-    // If this fails → contract revert (show clear error, skip wallet popup).
-    // If this succeeds but wallet later rejects → pure wallet-layer issue.
-    try {
-      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-      const _trSim = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp2);
-      if (c) {
-        await _trSim.registerWithCoupon.staticCall(referrer, c.codeHash, { from: userAddr });
-      } else {
-        await _trSim.register.staticCall(referrer, { from: userAddr });
-      }
-    } catch(_simErr) {
-      // Contract would revert — surface the real error without sending to wallet
-      btn.disabled = false;
-      const _acX = window._activeCoupon;
-      btn.textContent = _acX ? 'Step 2: Register (' + (_acX.youPay === 0 ? 'FREE 🎉' : '$' + _acX.youPay.toFixed(2) + ' USDC)') : 'Step 2: Register ($10 USDC)';
-      const _simFe = friendlyError(_simErr).replace(/^❌\s*/, '');
-      setStatus('reg-status', '❌ ' + _simFe, 'err');
-      if (_simErr.code !== 4001) reportEvent('TX_FAILED', { action: 'register-sim', error: _simErr.message || String(_simErr) });
-      return;
-    }
-
-    // Estimate gas using our read RPC so the wallet gets a pre-calculated limit.
-    // Some wallets (TokenPocket) can't estimate gas for complex multi-contract calls
-    // and show an empty fee / fail on submit when we pass a raw hardcoded limit.
-    // Using our Alchemy endpoint for estimation avoids the wallet's internal estimator.
-    let _gasLimit = c ? 600_000 : 800_000; // safe fallback
-    try {
-      const _rp3 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-      const _trEst = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp3);
-      const _est = c
-        ? await _trEst.registerWithCoupon.estimateGas(referrer, c.codeHash, { from: userAddr })
-        : await _trEst.register.estimateGas(referrer, { from: userAddr });
-      // Add 25% buffer so the wallet has headroom without triggering its own re-estimation
-      _gasLimit = Number(_est) + Math.ceil(Number(_est) * 0.25);
-    } catch(_estErr) {
-      console.warn('[register] gas estimation failed, using fallback:', _estErr.message);
-    }
-
     let tx;
     if (c) {
       // Coupon path: V8.31 — call registerWithCoupon() on TierRouter so globalJoined is set
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      tx = await tr.registerWithCoupon(referrer, c.codeHash, { gasLimit: _gasLimit });
+      tx = await tr.registerWithCoupon(referrer, c.codeHash, { gasLimit: 600_000 });
     } else {
       // Normal path: call register() on TierRouter
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-      tx = await tr.register(referrer, { gasLimit: _gasLimit });
+      tx = await tr.register(referrer, { gasLimit: 800_000 });
     }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
@@ -3909,11 +3672,11 @@ async function approveCouponUSDC() {
   if (!signer) { toast('Connect wallet first', 'error'); return; }
   const code = (document.getElementById('issue-coupon-code')?.value || '').trim();
   if (!code) { toast('Enter a coupon code first', 'error'); return; }
-  // Network guard — use eth_chainId RPC (not window.ethereum.chainId property, which is null on Trust Wallet)
-  const chainId = parseInt(await window.ethereum.request({method:'eth_chainId'}).catch(()=>'0x0'), 16);
+  // Network guard -- switch to Base Sepolia before any tx
+  const chainId = parseInt(window.ethereum?.chainId || '0', 16);
   if (chainId !== CHAIN_ID) {
     try { await switchToBaseSepolia(); } catch(_) {}
-    const c2 = parseInt(await window.ethereum.request({method:'eth_chainId'}).catch(()=>'0x0'), 16);
+    const c2 = parseInt(window.ethereum?.chainId || '0', 16);
     if (c2 !== CHAIN_ID) { toast('Please switch to Base Sepolia first', 'error'); return; }
   }
   const btn = document.getElementById('btn-coupon-approve');
@@ -4011,39 +3774,6 @@ async function doCancelCoupon(codeHash) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// MULTI-PAIR MATRIX DISCOVERY
-// Discovers all deployed pair matrices across all tiers (T1.1, T1.2 …).
-// Used by loadDashboardData(), withdrawal functions, and helpers.
-// Falls back to static ADDRS if PM discovery fails.
-// ═══════════════════════════════════════════════════════════════════════
-async function _buildAllMatrixObjects(rp) {
-  const TK = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
-  const result = [];
-  for (let i = 0; i < TK.length; i++) {
-    const t = TK[i];
-    const tNum = i + 1;
-    if (!ADDRS[t]?.matA) continue;
-    let added = false;
-    if (ADDRS[t]?.pm) {
-      try {
-        const [matAs, matBs] = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp).allPairsStatus();
-        for (let pi = 0; pi < matAs.length; pi++) {
-          const _pairSuffix = matAs.length > 1 ? `.${pi + 1}` : '';
-          result.push({ addr: matAs[pi], label: `T${tNum}${_pairSuffix} Matrix A` });
-          result.push({ addr: matBs[pi], label: `T${tNum}${_pairSuffix} Matrix B` });
-        }
-        added = true;
-      } catch(e) {}
-    }
-    if (!added) {
-      result.push({ addr: ADDRS[t].matA, label: `T${tNum} Matrix A` });
-      result.push({ addr: ADDRS[t].matB, label: `T${tNum} Matrix B` });
-    }
-  }
-  return result;
-}
-
-// ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
 async function loadDashboardData() {
@@ -4069,26 +3799,18 @@ async function loadDashboardData() {
     }
     const joined = joinedRead.value;
 
-    // Discover all pair matrices dynamically (includes factory pairs like T1.2, T2.2 …)
-    // This must run before the coupon check so we can scan all T1 MatAs.
-    const matrices = await _buildAllMatrixObjects(rp);
-
     if (!joined) {
-      // Coupon-registered members bypass TierRouter globalJoined.
-      // Check ANY T1 Matrix A (T1.1, T1.2 …) for hasEverJoined so T1.2 coupon
-      // members don't incorrectly see "not registered".
-      const t1MatAs = matrices.filter(m => m.label === 'T1 Matrix A');
-      let foundInT1 = false;
-      for (const m of t1MatAs) {
-        try {
-          const mData = await new ethers.Contract(m.addr, MATRIX_ABI, rp).getMember(userAddr);
-          if (mData.hasEverJoined) { foundInT1 = true; break; }
-        } catch(_) {}
-      }
-      if (!foundInT1) {
+      // Coupon-registered members bypass TierRouter globalJoined — check MatA directly
+      try {
+        const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
+        const mData = await matA1.getMember(userAddr);
+        if (!mData.hasEverJoined) {
+          hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
+        }
+        // Member is in MatA via coupon path — proceed with dashboard
+      } catch(_) {
         hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
       }
-      // Member is in a T1 MatA via coupon path — proceed with dashboard
     }
 
     hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); showEl('dash-content');
@@ -4096,7 +3818,24 @@ async function loadDashboardData() {
     // Fetch T1 cycles from TierRouter (manual upgrade gate)
     const t1CyclesTR = await tr.tierCycles(userAddr, 0).catch(() => 0n);
 
-    let totalW = 0n, realW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
+    // Query all 6 matrices (T1A, T1B, T2A, T2B, T3A, T3B)
+    const matrices = [
+      { addr: ADDRS.T1.matA, label: 'T1 Matrix A' },
+      { addr: ADDRS.T1.matB, label: 'T1 Matrix B' },
+      { addr: ADDRS.T2.matA, label: 'T2 Matrix A' },
+      { addr: ADDRS.T2.matB, label: 'T2 Matrix B' },
+      { addr: ADDRS.T3.matA, label: 'T3 Matrix A' },
+      { addr: ADDRS.T3.matB, label: 'T3 Matrix B' },
+      ...(ADDRS.T4.matA ? [{addr:ADDRS.T4.matA,label:'T4 Matrix A'},{addr:ADDRS.T4.matB,label:'T4 Matrix B'}] : []),
+      ...(ADDRS.T5.matA ? [{addr:ADDRS.T5.matA,label:'T5 Matrix A'},{addr:ADDRS.T5.matB,label:'T5 Matrix B'}] : []),
+      ...(ADDRS.T6.matA ? [{addr:ADDRS.T6.matA,label:'T6 Matrix A'},{addr:ADDRS.T6.matB,label:'T6 Matrix B'}] : []),
+      ...(ADDRS.T7.matA ? [{addr:ADDRS.T7.matA,label:'T7 Matrix A'},{addr:ADDRS.T7.matB,label:'T7 Matrix B'}] : []),
+      ...(ADDRS.T8.matA ? [{addr:ADDRS.T8.matA,label:'T8 Matrix A'},{addr:ADDRS.T8.matB,label:'T8 Matrix B'}] : []),
+      ...(ADDRS.T9.matA ? [{addr:ADDRS.T9.matA,label:'T9 Matrix A'},{addr:ADDRS.T9.matB,label:'T9 Matrix B'}] : []),
+      ...(ADDRS.T10.matA ? [{addr:ADDRS.T10.matA,label:'T10 Matrix A'},{addr:ADDRS.T10.matB,label:'T10 Matrix B'}] : []),
+    ];
+
+    let totalW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
     let activePositions = []; // [{label, bfs, bfsUnknown}]
     let activeCycles = 0n; // highest tier's cycles (for upgrade widget)
     let highestTier = 0;
@@ -4138,7 +3877,6 @@ async function loadDashboardData() {
       const member = matResults[i];
       if (member && member.hasEverJoined) {
         totalW += BigInt(member.withdrawable);
-        { const _wraw = BigInt(member.withdrawable); realW += (member.isInMatrix && _wraw > 10_000_000n) ? _wraw - 10_000_000n : (member.isInMatrix ? 0n : _wraw); }
         totalE += BigInt(member.totalEarned);
         totalWD += BigInt(member.totalWithdrawn ?? 0n);
         if (!memberId) { memberId = Number(member.id); memberReferrer = member.referrer; }
@@ -4200,17 +3938,6 @@ async function loadDashboardData() {
     }
     if (followUps.length) await Promise.allSettled(followUps); // allSettled — never throws
 
-    // Graduated tiers — tiers below highestTier where member has no active seat.
-    // Used in Member Info panel to render "✓ Graduated" rows.
-    const _graduatedTierNums = [];
-    for (let _gi = 1; _gi < highestTier; _gi++) {
-      const _hasActive = activePositions.some(p => {
-        const _m = p.label.match(/^T(\d+)/);
-        return _m && parseInt(_m[1]) === _gi;
-      });
-      if (!_hasActive) _graduatedTierNums.push(_gi);
-    }
-
     // Determine limboInfo: reclaimed-limbo only shown when member has no active position
     // and is not in the rescue (parked) queue. Pick the highest-tier MatA candidate.
     let limboInfo = null;
@@ -4235,22 +3962,22 @@ async function loadDashboardData() {
     const TIER_NAMES = ['—','Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime','Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
 
     // Render
-    setText('dash-withdrawable',   fmt6(realW));
-    setText('dash-withdraw-amount',fmt6(realW));
-    window._maxWithdrawable = realW; // real cap — deducts in-matrix $10 lock per active position
+    setText('dash-withdrawable',   fmt6(totalW));
+    setText('dash-withdraw-amount',fmt6(totalW));
+    window._maxWithdrawable = totalW; // used by partial withdraw UI
 
     // Withdrawal fee breakdown — read withdrawalFeeBps from T1A (same on all matrices)
     try {
       const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
       const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
       window._withdrawFeeBps = feeBps;
-      const feeAmt = realW * feeBps / 10000n;
-      const netAmt = realW - feeAmt;
+      const feeAmt = totalW * feeBps / 10000n;
+      const netAmt = totalW - feeAmt;
       const feePct = (Number(feeBps) / 100).toFixed(1);
       const breakdown = document.getElementById('withdraw-fee-breakdown');
-      if (realW > 0n) {
+      if (totalW > 0n) {
         document.getElementById('wfee-pct').textContent  = feePct;
-        document.getElementById('wfee-gross').textContent = fmt6(realW);
+        document.getElementById('wfee-gross').textContent = fmt6(totalW);
         document.getElementById('wfee-fee').textContent   = '−' + fmt6(feeAmt);
         document.getElementById('wfee-net').textContent   = fmt6(netAmt);
         if (breakdown) breakdown.style.display = 'block';
@@ -4292,10 +4019,6 @@ async function loadDashboardData() {
       if (activePositions.length === 0) {
         posList.innerHTML = '<div class="info-row"><span class="info-key">Active Positions</span><span class="info-val" style="color:var(--text3)">—</span></div>';
       } else {
-        // Graduated tiers — show a subtle row for each tier the member has left
-        const _gradRows = _graduatedTierNums.map(tNum =>
-          `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x2713; Graduated</span></span><span class="info-val" style="color:var(--text3);font-size:11px">Re-enter &middot; V8.38</span></div>`
-        ).join('');
         posList.innerHTML = activePositions.map(p => {
           const bfsStr = p.bfsUnknown
             ? unknownBadge('Could not read matrix position — try refreshing.')
@@ -4305,14 +4028,11 @@ async function loadDashboardData() {
             ? `<div class="info-row" style="padding-top:2px;padding-bottom:6px"><span class="info-key" style="color:var(--text3);font-size:12px;padding-left:14px">↳ Crossing Reserve</span><span class="info-val" style="color:#a855f7;font-size:12px" title="Locked toward next matrix crossing — released as earnings when the matrix cycles">${fmt6(p.crossingReserve)}</span></div>`
             : '';
           return `<div class="info-row"><span class="info-key" style="color:var(--text2)">${p.label}</span><span class="info-val green">${bfsStr}</span></div>${resRow}`;
-        }).join('') + _gradRows;
+        }).join('');
       }
     })();
     setText('dash-cycles',         activeCycles.toString());
-    // V8.38 fix: show global join order (MemberEnrolled event) as Member ID,
-    // not the per-matrix sequential counter which resets for each pair/contract.
-    const _gjo = await _getGlobalJoinOrder(userAddr, rp);
-    setText('dash-id',             (_gjo > 0 ? _gjo : memberId) > 0 ? '#' + (_gjo > 0 ? _gjo : memberId) : '—');
+    setText('dash-id',             memberId > 0 ? '#' + memberId : '—');
     setText('dash-orig-referrer',  memberReferrer && memberReferrer !== ethers.ZeroAddress
       ? memberReferrer.slice(0,6)+'…'+memberReferrer.slice(-4) : 'Direct');
 
@@ -4355,26 +4075,12 @@ async function loadDashboardData() {
       // on a flaky public RPC it could silently fall back to false and hide this whole
       // section even for a genuinely-eligible member (curTierCycles=0 + a dropped read =
       // canUpgrade false). Retried like every other read in this function now.
-      // Check ALL MatBs in tier — members in T1.1 MatB (who crossed before factory created T1.2)
-      // were invisible when we only checked currentMatB(). allPairsStatus()[1] covers every pair.
-      const _tierKey = 'T' + highestTier;
-      const _pmDash  = ADDRS[_tierKey]?.pm ? new ethers.Contract(ADDRS[_tierKey].pm, PM_ABI, rp) : null;
-      let _inAnyMatBDash = false;
-      try {
-        const _allMatBsDash = _pmDash
-          ? (await _pmDash.allPairsStatus())[1]
-          : [ADDRS[_tierKey]?.matB].filter(Boolean);
-        for (const _mbAddr of _allMatBsDash) {
-          if (!_mbAddr || _mbAddr === ethers.ZeroAddress) continue;
-          const _inThis = await new ethers.Contract(_mbAddr, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
-          if (_inThis) { _inAnyMatBDash = true; break; }
-        }
-      } catch (_) {
-        // RPC failed — fall back to currentMatB only
-        const _fb = _pmDash ? await _pmDash.currentMatB().catch(() => ADDRS[_tierKey]?.matB) : ADDRS[_tierKey]?.matB;
-        if (_fb) _inAnyMatBDash = await new ethers.Contract(_fb, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
-      }
-      const canUpgrade = (Number(curTierCycles) >= 1 || _inAnyMatBDash) && highestTier < MAX_DEPLOYED_TIER;
+      const _curMatBAddrDash = ADDRS['T' + highestTier] ? ADDRS['T' + highestTier].matB : null;
+      const _inCurMatBDashRead = _curMatBAddrDash
+        ? await retryRead(() => new ethers.Contract(_curMatBAddrDash, MATRIX_ABI, rp).isActiveInMatrix(userAddr))
+        : { ok: true, value: false };
+      const _inCurMatBDash = _inCurMatBDashRead.ok ? _inCurMatBDashRead.value : false;
+      const canUpgrade = (Number(curTierCycles) >= 1 || _inCurMatBDash) && highestTier < MAX_DEPLOYED_TIER;
       upgradeSection.style.display = canUpgrade ? 'block' : 'none';
       if (canUpgrade) {
         // v8.19 fix (2026-06-20): UPGRADE_NAMES used to be a separate hardcoded list that
@@ -4412,9 +4118,6 @@ async function loadDashboardData() {
         }
       }
     }
-
-    // ── V8.35 Whale Gate UI ─────────────────────────────────────────────
-    await updateWhaleGateUI(highestTier, rp).catch(() => {});
 
     // ── Parked / Rescue section ──────────────────────────────────────────
     const rescueSection = document.getElementById('rescue-section');
@@ -4572,7 +4275,7 @@ async function loadDashboardData() {
         }
 
         if (reserved > 0n) {
-          const free = realW > reserved ? realW - reserved : 0n;
+          const free = totalW > reserved ? totalW - reserved : 0n;
           window._maxWithdrawable  = free;   // cap partial withdraw to free amount
           window._protocolReserved = reserved;
 
@@ -4746,29 +4449,19 @@ async function openDashDetail(type, cardEl) {
   }
 }
 
-// ── Global join order (true registration sequence #) ─────────────────
-// Reads MemberEnrolled event from TierRouter to get the member's global
-// join position — distinct from member.id which is a per-matrix counter.
-// Cached in localStorage so it only hits the RPC once per wallet.
-async function _getGlobalJoinOrder(addr, rp) {
-  const cacheKey = 'gjo_' + ADDRS.tierRouter.toLowerCase() + '_' + addr.toLowerCase();
-  const cached = parseInt(localStorage.getItem(cacheKey) || '0');
-  if (cached > 0) return cached;
-  try {
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const events = await tr.queryFilter(tr.filters.MemberEnrolled(addr));
-    if (events.length > 0) {
-      const order = Number(events[0].args.joinedCount);
-      if (order > 0) { localStorage.setItem(cacheKey, String(order)); return order; }
-    }
-  } catch {}
-  return 0; // fallback: caller uses member.id from matrix
-}
-
 // ── Helpers ──────────────────────────────────────────────────────────
 async function _getAllMatrixMembers(userAddr, rp) {
-  const matObjs = await _buildAllMatrixObjects(rp);
-  const mats = matObjs.map(m => m.addr);
+  const mats = [
+    ADDRS.T1.matA, ADDRS.T1.matB, ADDRS.T2.matA, ADDRS.T2.matB,
+    ADDRS.T3.matA, ADDRS.T3.matB,
+    ...(ADDRS.T4?.matA ? [ADDRS.T4.matA, ADDRS.T4.matB] : []),
+    ...(ADDRS.T5?.matA ? [ADDRS.T5.matA, ADDRS.T5.matB] : []),
+    ...(ADDRS.T6?.matA ? [ADDRS.T6.matA, ADDRS.T6.matB] : []),
+    ...(ADDRS.T7?.matA ? [ADDRS.T7.matA, ADDRS.T7.matB] : []),
+    ...(ADDRS.T8?.matA ? [ADDRS.T8.matA, ADDRS.T8.matB] : []),
+    ...(ADDRS.T9?.matA ? [ADDRS.T9.matA, ADDRS.T9.matB] : []),
+    ...(ADDRS.T10?.matA ? [ADDRS.T10.matA, ADDRS.T10.matB] : []),
+  ];
   let totalEarned = 0n, totalWithdrawn = 0n, totalWithdrawable = 0n, joinedAt = 0n, memberId = 0;
   for (const addr of mats) {
     const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
@@ -4789,14 +4482,16 @@ async function renderWithdrawableDetail(el, rp) {
   const { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt } = await _getAllMatrixMembers(userAddr, rp);
 
   // Fetch crossing reserve locked across all active tier matrices
-  // Use _buildAllMatrixObjects so T1.2, T1.3 etc. are included after factory expansion
-  const _allMatObjs = await _buildAllMatrixObjects(rp);
+  const tierKeys = Object.keys(ADDRS).filter(k => /^T\d+$/.test(k));
   let totalCrossingReserve = 0n;
-  await Promise.all(_allMatObjs.map(({ addr }) =>
-    new ethers.Contract(addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
-      totalCrossingReserve += BigInt(r);
-    })
-  ));
+  await Promise.all(tierKeys.flatMap(tk => {
+    const tier = ADDRS[tk];
+    return [tier.matA, tier.matB].filter(a => a && a !== ethers.ZeroAddress).map(addr =>
+      new ethers.Contract(addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
+        totalCrossingReserve += BigInt(r);
+      })
+    );
+  }));
 
   const autoDeducted    = totalEarned > (totalWithdrawn + totalWithdrawable)
     ? totalEarned - totalWithdrawn - totalWithdrawable : 0n;
@@ -4962,15 +4657,11 @@ async function renderCommunityDetail(el, rp) {
   const usdc  = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
   const cwBal = await usdc.balanceOf(ADDRS.communityWallet).catch(() => 0n);
 
-  // Member ID — use global join order (MemberEnrolled event) for correct
-  // Genesis/Pioneer classification. member.id is per-matrix and resets per
-  // pair contract; globalJoinOrder is the true Nth-member-ever sequence.
+  // Member ID
   const { memberId } = await _getAllMatrixMembers(userAddr, rp);
-  const _cwGjo = await _getGlobalJoinOrder(userAddr, rp);
-  const _joinId = _cwGjo > 0 ? _cwGjo : memberId; // prefer global join order
 
-  const isGenesis  = _joinId >= 1   && _joinId <= 500;
-  const isPioneer  = _joinId > 500  && _joinId <= 1000;
+  const isGenesis  = memberId >= 1   && memberId <= 500;
+  const isPioneer  = memberId > 500  && memberId <= 1000;
   const isEligible = isGenesis || isPioneer;
 
   const groupLabel    = isGenesis ? 'Genesis (members #1–500)' : isPioneer ? 'Pioneer (members #501–1,000)' : 'Not eligible (above #1,000)';
@@ -4987,8 +4678,8 @@ async function renderCommunityDetail(el, rp) {
     <div class="detail-row"><span class="detail-key">Monthly Distributable (50%)</span><span class="detail-val">${fmt6(distributable)}</span></div>
     <div class="detail-row"><span class="detail-key">Rolls Over (50%)</span><span class="detail-val">${fmt6(cwBal - distributable)}</span></div>
     <div class="detail-section">Your Eligibility</div>
-    <div class="detail-row"><span class="detail-key">Your Member ID</span><span class="detail-val">${_joinId ? '#' + _joinId : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">${eligIcon} ${_joinId ? groupLabel : 'Loading…'}</span></div>
+    <div class="detail-row"><span class="detail-key">Your Member ID</span><span class="detail-val">${memberId ? '#' + memberId : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">${eligIcon} ${memberId ? groupLabel : 'Loading…'}</span></div>
     ${isEligible ? `
     <div class="detail-row"><span class="detail-key">Your Group's Share</span><span class="detail-val">${(groupShare*100).toFixed(0)}% of distributable = ${fmt6(groupPool)}</span></div>
     <div class="detail-row total"><span class="detail-key">Est. Your Share / Month</span><span class="detail-val green">${fmt6(estShare)} <span style="color:var(--text3);font-size:11px;font-weight:400">÷ max ${groupMax} members</span></span></div>
@@ -5081,8 +4772,18 @@ async function doWithdrawPartial() {
   if (btnA) btnA.disabled = true;
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
-    const _matObjs = await _buildAllMatrixObjects(rp);
-    const matrices = _matObjs.map(m => m.addr);
+    const matrices = [
+      ADDRS.T1.matA, ADDRS.T1.matB,
+      ADDRS.T2.matA, ADDRS.T2.matB,
+      ADDRS.T3.matA, ADDRS.T3.matB,
+      ...(ADDRS.T4.matA ? [ADDRS.T4.matA, ADDRS.T4.matB] : []),
+      ...(ADDRS.T5.matA ? [ADDRS.T5.matA, ADDRS.T5.matB] : []),
+      ...(ADDRS.T6.matA ? [ADDRS.T6.matA, ADDRS.T6.matB] : []),
+      ...(ADDRS.T7.matA ? [ADDRS.T7.matA, ADDRS.T7.matB] : []),
+      ...(ADDRS.T8.matA ? [ADDRS.T8.matA, ADDRS.T8.matB] : []),
+      ...(ADDRS.T9.matA ? [ADDRS.T9.matA, ADDRS.T9.matB] : []),
+      ...(ADDRS.T10.matA ? [ADDRS.T10.matA, ADDRS.T10.matB] : []),
+    ];
     let remaining = amtMicro;
     let withdrawn = false;
     for (const addr of matrices) {
@@ -5107,9 +4808,8 @@ async function doWithdrawPartial() {
       remaining -= pullAmt;
       withdrawn = true;
     }
-    const actualWithdrawn = amtMicro - remaining;
-    const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} of the $${val.toFixed(2)} requested could not be sourced — in-matrix position may have a $10 reserve lock)` : '';
-    setStatus('withdraw-status', withdrawn ? `✅ Withdrew $${(Number(actualWithdrawn)/1e6).toFixed(2)}!${leftOver}` : 'Nothing withdrawn.', withdrawn ? 'ok' : 'info');
+    const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} could not be sourced)` : '';
+    setStatus('withdraw-status', withdrawn ? `✅ Withdrew $${val.toFixed(2)}!${leftOver}` : 'Nothing withdrawn.', withdrawn ? 'ok' : 'info');
     if (inp) inp.value = '';
     onWithdrawAmountInput();
     if (withdrawn) await new Promise(r => setTimeout(r, 3500));
@@ -5140,8 +4840,18 @@ async function doWithdraw() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Withdrawing…';
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
-    const _matObjs = await _buildAllMatrixObjects(rp);
-    const matrices = _matObjs.map(m => m.addr);
+    const matrices = [
+      ADDRS.T1.matA, ADDRS.T1.matB,
+      ADDRS.T2.matA, ADDRS.T2.matB,
+      ADDRS.T3.matA, ADDRS.T3.matB,
+      ...(ADDRS.T4.matA ? [ADDRS.T4.matA, ADDRS.T4.matB] : []),
+      ...(ADDRS.T5.matA ? [ADDRS.T5.matA, ADDRS.T5.matB] : []),
+      ...(ADDRS.T6.matA ? [ADDRS.T6.matA, ADDRS.T6.matB] : []),
+      ...(ADDRS.T7.matA ? [ADDRS.T7.matA, ADDRS.T7.matB] : []),
+      ...(ADDRS.T8.matA ? [ADDRS.T8.matA, ADDRS.T8.matB] : []),
+      ...(ADDRS.T9.matA ? [ADDRS.T9.matA, ADDRS.T9.matB] : []),
+      ...(ADDRS.T10.matA ? [ADDRS.T10.matA, ADDRS.T10.matB] : []),
+    ];
     let withdrawn = false;
     for (const addr of matrices) {
       const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
@@ -5193,16 +4903,7 @@ async function getMatrixForTier() {
   const tiers = { 1: ADDRS.T1, 2: ADDRS.T2, 3: ADDRS.T3, 4: ADDRS.T4, 5: ADDRS.T5,
                   6: ADDRS.T6, 7: ADDRS.T7, 8: ADDRS.T8, 9: ADDRS.T9, 10: ADDRS.T10 };
   const tier = tiers[tierNum] || ADDRS.T1;
-  // Resolve active pair via PairManager (handles T1.2, T2.2, etc. after factory expansion)
-  if (tier.pm) {
-    try {
-      const _rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
-      const _pm = new ethers.Contract(tier.pm, PM_ABI, _rp);
-      const _activeAddr = side === 'matB' ? await _pm.currentMatB() : await _pm.currentMatA();
-      if (_activeAddr && _activeAddr !== ethers.ZeroAddress) return _activeAddr;
-    } catch(_) {}
-  }
-  return tier[side] || tier.matA; // fall back to hardcoded if PM call fails
+  return tier[side] || tier.matA; // fall back to matA if matB not deployed yet
 }
 
 // Fetch posToMember in chunks to avoid RPC in-flight limit
@@ -5244,7 +4945,7 @@ async function setDoubleReentryOption(enabled) {
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled — second entry fires when surplus covers fee');
-    toast(friendlyError(e), 'error');
+    toast('Failed: ' + (e.reason || e.message || 'unknown error').slice(0, 80), 'error');
   }
 }
 
@@ -5273,7 +4974,7 @@ async function setAutoUpgradeOption(enabled) {
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
-    toast(friendlyError(e), 'error');
+    toast('Failed: ' + (e.reason || e.message || 'unknown error').slice(0, 80), 'error');
   }
 }
 
@@ -5301,7 +5002,7 @@ async function setAutoReentryOption(enabled) {
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
-    toast(friendlyError(e), 'error');
+    toast('Failed: ' + (e.reason || e.message || 'unknown error').slice(0, 80), 'error');
   }
 }
 
@@ -5324,7 +5025,6 @@ async function loadQueueView() {
     setText('matrix-bfs',   Number(mSize) + ' seats');
     const myBfs = userAddr ? await mc.matrixPos(userAddr).catch(()=>0n) : 0n;
     setText('matrix-my-node', myBfs > 0n ? '#'+myBfs.toString() : '—');
-    document.getElementById('matrix-my-node-label').textContent = 'My Node ID';
     if (loadingEl) loadingEl.style.display='none';
     if (treeEl) { treeEl.style.display='block'; treeEl.innerHTML = renderF8Tree(nodes, userAddr, occ, mSize); }
   } catch(e) {
@@ -5341,31 +5041,19 @@ async function loadMyTree() {
   if (treeEl) treeEl.style.display='none';
   document.getElementById('my-directs-card').style.display='none';
   try {
-    // Find which matrix the user is currently active in.
-    // Use allPairsStatus() per tier so T1.2, T2.2, etc. are included after factory expansion.
-    const allMats = [];
-    const _tierKeys = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
-    for (const _t of _tierKeys) {
-      if (!ADDRS[_t]?.matA) continue;
-      const _tNum = _t.slice(1);
-      if (ADDRS[_t].pm) {
-        try {
-          const _pmT = new ethers.Contract(ADDRS[_t].pm, PM_ABI, rp);
-          const [_matAs, _matBs] = await _pmT.allPairsStatus();
-          for (let _pi = 0; _pi < _matAs.length; _pi++) {
-            const _pSuffix = _matAs.length > 1 ? ` (pair ${_pi + 1})` : '';
-            if (_matAs[_pi] && _matAs[_pi] !== ethers.ZeroAddress)
-              allMats.push({addr: _matAs[_pi], label: `T${_tNum} Matrix A${_pSuffix}`});
-            if (_matBs[_pi] && _matBs[_pi] !== ethers.ZeroAddress)
-              allMats.push({addr: _matBs[_pi], label: `T${_tNum} Matrix B${_pSuffix}`});
-          }
-          continue;
-        } catch(_) {}
-      }
-      // Fallback: use hardcoded addresses
-      allMats.push({addr: ADDRS[_t].matA, label: `T${_tNum} Matrix A`});
-      allMats.push({addr: ADDRS[_t].matB, label: `T${_tNum} Matrix B`});
-    }
+    // Find which matrix the user is currently active in
+    const allMats = [
+      {addr: ADDRS.T1.matA, label:'T1 Matrix A'}, {addr: ADDRS.T1.matB, label:'T1 Matrix B'},
+      {addr: ADDRS.T2.matA, label:'T2 Matrix A'}, {addr: ADDRS.T2.matB, label:'T2 Matrix B'},
+      {addr: ADDRS.T3.matA, label:'T3 Matrix A'}, {addr: ADDRS.T3.matB, label:'T3 Matrix B'},
+      ...(ADDRS.T4.matA ? [{addr:ADDRS.T4.matA,label:'T4 Matrix A'},{addr:ADDRS.T4.matB,label:'T4 Matrix B'}] : []),
+      ...(ADDRS.T5.matA ? [{addr:ADDRS.T5.matA,label:'T5 Matrix A'},{addr:ADDRS.T5.matB,label:'T5 Matrix B'}] : []),
+      ...(ADDRS.T6.matA ? [{addr:ADDRS.T6.matA,label:'T6 Matrix A'},{addr:ADDRS.T6.matB,label:'T6 Matrix B'}] : []),
+      ...(ADDRS.T7.matA ? [{addr:ADDRS.T7.matA,label:'T7 Matrix A'},{addr:ADDRS.T7.matB,label:'T7 Matrix B'}] : []),
+      ...(ADDRS.T8.matA ? [{addr:ADDRS.T8.matA,label:'T8 Matrix A'},{addr:ADDRS.T8.matB,label:'T8 Matrix B'}] : []),
+      ...(ADDRS.T9.matA ? [{addr:ADDRS.T9.matA,label:'T9 Matrix A'},{addr:ADDRS.T9.matB,label:'T9 Matrix B'}] : []),
+      ...(ADDRS.T10.matA ? [{addr:ADDRS.T10.matA,label:'T10 Matrix A'},{addr:ADDRS.T10.matB,label:'T10 Matrix B'}] : []),
+    ];
     let activeMat = null, activeBFS = 0n, activeLabel = '', activeMSize = 64n, activeBFSUnknown = false;
     let anyReadFailed = false;
     for (const m of allMats) {
@@ -5403,7 +5091,6 @@ async function loadMyTree() {
     setText('matrix-my-node', activeBFSUnknown
       ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
       : (activeBFS > 0n ? '#'+activeBFS.toString() : '—'));
-    document.getElementById('matrix-my-node-label').textContent = 'My Position';
     const banner = document.getElementById('matrix-pos-banner');
     if (banner) {
       banner.style.display='block';
@@ -5449,18 +5136,10 @@ async function _getDirectReferrals(addr, rp) {
   // ── Fallback: matrix scan (T1 only for testnet — higher tiers rarely used) ─
   try {
     const trD   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    // Resolve T1 pairs dynamically (handles T1.2, T1.3, etc. after factory expansion)
-    const mats = [];
-    try {
-      const _pm1scan = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
-      const [_t1As, _t1Bs] = await _pm1scan.allPairsStatus();
-      _t1As.forEach(a => { if (a && a !== ethers.ZeroAddress) mats.push(a); });
-      _t1Bs.forEach(a => { if (a && a !== ethers.ZeroAddress) mats.push(a); });
-    } catch(_) {
-      if (ADDRS.T1?.matA) { mats.push(ADDRS.T1.matA); mats.push(ADDRS.T1.matB); }
-    }
-    if (ADDRS.T2?.matA) { mats.push(ADDRS.T2.matA); mats.push(ADDRS.T2.matB); }
-    if (ADDRS.T3?.matA) { mats.push(ADDRS.T3.matA); mats.push(ADDRS.T3.matB); }
+    const mats  = [ADDRS.T1?.matA, ADDRS.T1?.matB,
+      ...(ADDRS.T2?.matA ? [ADDRS.T2.matA, ADDRS.T2.matB] : []),
+      ...(ADDRS.T3?.matA ? [ADDRS.T3.matA, ADDRS.T3.matB] : []),
+    ].filter(Boolean);
     const seen  = new Set();
     let incomplete = false;
     for (const matAddr of mats) {
@@ -5799,10 +5478,9 @@ function friendlyError(e) {
   const msgLow  = (msg + rawDeep).toLowerCase();
 
   // ── User cancelled ──────────────────────────────────────────────────────
-  if (code === 'ACTION_REJECTED' || e.code === 4001 || e.code === -32603 ||
+  if (code === 'ACTION_REJECTED' || e.code === 4001 ||
       msgLow.includes('user rejected') || msgLow.includes('user denied') ||
-      msgLow.includes('user cancelled') || msgLow.includes('user cancel') ||
-      (msgLow.includes('cancelled') && msgLow.includes('sign')))
+      msgLow.includes('user cancelled'))
     return '✋ You cancelled — nothing was sent.';
 
   // ── RPC / network rate limit ────────────────────────────────────────────
@@ -5847,12 +5525,6 @@ function friendlyError(e) {
   // ── TierRouter revert strings (TR:) ────────────────────────────────────
   if (msgLow.includes('tr: not registered') || msgLow.includes('tr: already joined'))
     return '✅ This wallet is already registered — view your Dashboard.';
-  if (msgLow.includes('already seated in target tier') || msgLow.includes('tr: already seated'))
-    return '✅ You are already in this tier — no upgrade needed! Open your Dashboard to see your current position.';
-  if (msgLow.includes('cross to matb first') || msgLow.includes('whale gate'))
-    return '⏳ You need to complete your T1 cycle before upgrading — keep earning in your current position!';
-  if (msgLow.includes('tr: already in tier') || msgLow.includes('tr: max tiers'))
-    return '✅ You are already at this tier or higher — view your Dashboard.';
 
   // ── Matrix revert strings (F8V8:) ──────────────────────────────────────
   if (msgLow.includes('f8v8: must keep crossing reserve') ||
@@ -5866,15 +5538,15 @@ function friendlyError(e) {
       msgLow.includes('already joined'))
     return '✅ This wallet is already registered — view your Dashboard.';
   if (msgLow.includes('not a member'))
-    return '❌ Wallet not recognised as a member — make sure you are connected with the right wallet.';
+    return '❌ Wallet not recognised as a member.';
   if (msgLow.includes('still in matrix'))
-    return '✅ You are still active in the matrix — no rescue needed right now. Refresh your dashboard to see your current position.';
+    return '❌ You are still active in the matrix — no rescue needed.';
   if (msgLow.includes('not parked'))
-    return '🎉 Looks like you\'ve already been rescued! Refresh your dashboard to see your active position.';
+    return '❌ You are not in the rescue queue.';
   if (msgLow.includes('sf: below floor') || msgLow.includes('sf: not authorized'))
     return '❌ Stability Fund error — please try Self Rescue instead.';
   if (msgLow.includes('allowance') && msgLow.includes('usdc'))
-    return '🔒 USDC not approved yet — please complete the Approve step (Step 1) first.';
+    return '❌ USDC not approved — complete Step 1 first.';
   if (msgLow.includes('transfer amount exceeds balance') ||
       msgLow.includes('erc20: transfer amount exceeds'))
     return '❌ Insufficient USDC balance.';
@@ -5894,14 +5566,8 @@ function friendlyError(e) {
   }
 
   // ── Fallback — guard against raw tx hash leaking to the user ───────────
-  // TokenPocket and some other wallets surface raw tx JSON or ethers v6 error fragments.
-  // Ethers v6 uses both "from":"0x..." (JSON) and from="0x..." (template string) formats.
-  const allRaw = msg + raw + rawDeep;
-  const isTxHash = /^"?0x[0-9a-f]{40,}"?/i.test(msg.trim()) ||
-    allRaw.includes('"from":') || allRaw.includes('"to":') || allRaw.includes('"data":') ||
-    allRaw.includes('from="') || allRaw.includes('to="') ||
-    (msg.trim() === '' && (allRaw.includes('0x') && allRaw.length > 10));
-  if (isTxHash) return '❌ Transaction failed — check your USDC balance, then try again. If the problem persists, contact support.';
+  const isTxHash = /^"?0x[0-9a-f]{40,}"?/i.test(msg.trim()) || msg.includes('"from":');
+  if (isTxHash) return '❌ Transaction failed — please try again or contact support.';
   return '❌ ' + msg.slice(0, 120);
 }
 
@@ -5955,140 +5621,6 @@ function copyReferralLink() {
   }).catch(() => {
     inp.select(); document.execCommand('copy');
   });
-}
-
-// ── V8.35 Whale Gate helpers ─────────────────────────────────────────────────
-
-// Reads whale gate state and updates both the register-tab banner and the
-// dashboard bulk-upgrade section. Called from loadDashboardData().
-async function updateWhaleGateUI(highestTier, rp) {
-  const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-
-  // T2-T5 share T5's gate (tierNum=5). T6-T10 independent (not yet shown in UI).
-  let t5First = 0n, t5Thresh = 25n;
-  try { t5First  = await tr.tierFirstEntries(5);  } catch(_) {}
-  try { t5Thresh = await tr.tierGateThreshold(5); } catch(_) {}
-
-  const t5GateOpen = t5First >= t5Thresh;
-  const pct = t5Thresh > 0n ? Math.min(100, Math.round(Number(t5First) * 100 / Number(t5Thresh))) : 0;
-
-  // Register-tab banner (shown when member is T1-T4 and gate is closed or just opened)
-  const banner = document.getElementById('upgrade-whale-gate');
-  if (banner) {
-    const showBanner = highestTier >= 1 && highestTier <= 4;
-    banner.style.display = showBanner ? 'block' : 'none';
-    if (showBanner) {
-      const progEl   = document.getElementById('whale-gate-t5-progress');
-      const threshEl = document.getElementById('whale-gate-t5-threshold');
-      const barEl    = document.getElementById('whale-gate-t5-bar');
-      const statEl   = document.getElementById('whale-gate-t5-status');
-      const badgeEl  = document.getElementById('upgrade-fasttrack-badge');
-      if (progEl)   progEl.textContent   = t5First.toString();
-      if (threshEl) threshEl.textContent = t5Thresh.toString();
-      if (barEl)    barEl.style.width    = pct + '%';
-      if (statEl) {
-        if (t5GateOpen) {
-          statEl.innerHTML = '<span style="color:var(--green)">🔓 Gate open — T2–T5 unlocked!</span>';
-          if (badgeEl) badgeEl.innerHTML = '<span style="background:var(--green);color:#000;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">UNLOCKED</span>';
-        } else {
-          statEl.textContent = pct + '% — ' + (Number(t5Thresh) - Number(t5First)) + ' more pioneers needed to unlock T2–T5.';
-          if (badgeEl) badgeEl.innerHTML = '';
-        }
-      }
-    }
-  }
-
-  // Dashboard bulk-upgrade section (shown when gate is open AND member is T1-T4)
-  const bulkSection = document.getElementById('bulk-upgrade-section');
-  if (bulkSection) {
-    const showBulk = t5GateOpen && highestTier >= 1 && highestTier <= 4;
-    bulkSection.style.display = showBulk ? 'block' : 'none';
-    if (showBulk) {
-      const TIER_FEES = [0n,10_000_000n,25_000_000n,50_000_000n,100_000_000n,200_000_000n,
-                         500_000_000n,1_000_000_000n,2_000_000_000n,5_000_000_000n,10_000_000_000n];
-      let totalFee = 0n;
-      const feeLines = [];
-      for (let t = highestTier + 1; t <= 5; t++) {
-        let fee = TIER_FEES[t] || 0n;
-        try { fee = await tr.tierEntryFees(t - 1); } catch(_) {}
-        totalFee += fee;
-        feeLines.push('T' + t + ': ' + fmt6(fee));
-      }
-      const targetTierIndex = 4; // T5 is index 4
-      window._bulkUpgradeFee       = totalFee;
-      window._bulkUpgradeTierIndex = targetTierIndex;
-      setText('bulk-upgrade-target', 'T5 — Quantum Horizon');
-      setText('bulk-upgrade-fee',    fmt6(totalFee));
-      const breakdown = document.getElementById('bulk-upgrade-breakdown');
-      if (breakdown) breakdown.textContent = feeLines.join(' + ') + ' = ' + fmt6(totalFee) + ' total';
-      const approveBtn = document.getElementById('btn-bulk-approve');
-      const upgradeBtn = document.getElementById('btn-bulk-upgrade');
-      if (approveBtn) { approveBtn.disabled = false; approveBtn.classList.remove('btn-ghost'); approveBtn.classList.add('btn-green'); }
-      if (upgradeBtn) upgradeBtn.disabled = true;
-      try {
-        const usdc2 = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-        const userAddrU = await signer.getAddress();
-        const allow = await usdc2.allowance(userAddrU, ADDRS.tierRouter);
-        if (allow >= totalFee && upgradeBtn) {
-          upgradeBtn.disabled = false;
-          upgradeBtn.classList.remove('btn-ghost');
-          upgradeBtn.classList.add('btn-green');
-          const st = document.getElementById('bulk-upgrade-status');
-          if (st && !st.textContent) st.textContent = '✅ USDC approved — click Step 2 to bulk upgrade.';
-        }
-      } catch(_) {}
-    }
-  }
-}
-
-async function approveBulkUpgrade() {
-  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
-  const btn    = document.getElementById('btn-bulk-approve');
-  const status = document.getElementById('bulk-upgrade-status');
-  const fee    = window._bulkUpgradeFee || 0n;
-  try {
-    if (btn) btn.disabled = true;
-    if (status) status.textContent = 'Approving USDC…';
-    const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    const tx   = await usdc.approve(ADDRS.tierRouter, fee);
-    if (status) status.textContent = 'Waiting for confirmation…';
-    await tx.wait();
-    if (status) status.textContent = '✅ Approved. Click Step 2 to bulk upgrade.';
-    const upgradeBtn = document.getElementById('btn-bulk-upgrade');
-    if (upgradeBtn) { upgradeBtn.disabled = false; upgradeBtn.classList.remove('btn-ghost'); upgradeBtn.classList.add('btn-green'); }
-  } catch(e) {
-    const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Cancelled — nothing was sent.'
-      : friendlyError(e);
-    if (status) status.textContent = friendly;
-    if (btn) btn.disabled = false;
-  }
-}
-
-async function doBulkUpgrade() {
-  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
-  const btn       = document.getElementById('btn-bulk-upgrade');
-  const status    = document.getElementById('bulk-upgrade-status');
-  const tierIndex = window._bulkUpgradeTierIndex ?? 4;
-  try {
-    if (btn) btn.disabled = true;
-    if (status) status.textContent = 'Submitting bulk upgrade…';
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.bulkUpgrade(tierIndex, { gasLimit: 3_000_000 });
-    if (status) status.textContent = 'Waiting for confirmation…';
-    await tx.wait();
-    if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Bulk upgrade complete — you\'re now in T' + (tierIndex + 1) + '! Refreshing…</span>';
-    toast('Bulk upgrade successful!', 'success');
-    setTimeout(() => loadDashboardData(), 2500);
-  } catch(e) {
-    const msg = (e.message || '').toLowerCase();
-    const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Cancelled — nothing was sent.'
-      : friendlyError(e);
-    if (status) status.textContent = friendly;
-    if (btn) btn.disabled = false;
-  }
 }
 
 async function approveUSDCForUpgrade() {
@@ -6159,7 +5691,7 @@ async function approveUSDCForUpgrade() {
     } else if (msg.includes('insufficient funds') || (e.code === 'CALL_EXCEPTION' && !e.data)) {
       friendly = '⛽ Looks like your wallet is short on Base Sepolia ETH for gas. Visit the faucet (top nav) to get a small amount for free!';
     } else {
-      friendly = friendlyError(e);
+      friendly = '❌ Something went wrong: ' + (e.reason || e.shortMessage || e.message || 'unknown error');
     }
     _setS(friendly);
     if (btnReg)  btnReg.disabled  = false;
@@ -6171,60 +5703,23 @@ async function approveUSDCForUpgrade() {
 async function _executeUpgrade(btnId, statusId, tierIdx) {
   const btn    = document.getElementById(btnId);
   const status = document.getElementById(statusId);
-  const _setS  = t => { if (status) status.textContent = t; };
   try {
     if (btn) btn.disabled = true;
-    _setS('Checking USDC balance…');
-
-    // ── Pre-flight: verify balance + allowance before burning a tx ────────────────────
-    const rp    = provider || readProvider;
-    const usdcC = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-    const trR   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const [fee, bal, uAllowance, highestTier] = await Promise.all([
-      trR.tierEntryFees(tierIdx).catch(() => 0n),
-      usdcC.balanceOf(userAddr).catch(() => 0n),
-      usdcC.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
-      trR.memberHighestTier(userAddr).catch(() => 0),
-    ]);
-    if (Number(highestTier) >= tierIdx + 1) {
-      _setS(`✅ You are already in T${tierIdx + 1} — no upgrade needed! Open your Dashboard to see your current position.`);
-      if (btn) btn.disabled = false;
-      return;
-    }
-    if (bal < fee) {
-      const needed = (Number(fee) / 1e6).toFixed(2);
-      const has    = (Number(bal)  / 1e6).toFixed(2);
-      _setS(`💳 You need $${needed} USDC to upgrade to T${tierIdx + 1} but your wallet only has $${has}. Visit the faucet to top up!`);
-      if (btn) btn.disabled = false;
-      return;
-    }
-    if (uAllowance < fee) {
-      _setS('🔒 Please complete Step 1 (Approve USDC) before upgrading.');
-      if (btn) btn.disabled = false;
-      return;
-    }
-    // ────────────────────────────────────────────────────────────────────────────
-
-    _setS('Submitting upgrade transaction…');
+    if (status) status.textContent = 'Submitting upgrade transaction…';
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: 2_000_000 });
-    _setS('Waiting for confirmation…');
+    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: 5_000_000 });
+    if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
     toast('Tier upgraded successfully!', 'success');
     setTimeout(() => loadDashboardData(), 2000);
   } catch(e) {
-    const msg  = (e.message || '').toLowerCase();
-    const data = (e.data || '').toString();
+    const msg = (e.message || '').toLowerCase();
     let friendly;
     if (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied')) {
       friendly = '✋ Transaction cancelled — no worries, nothing was sent.';
-    } else if (data.startsWith('0xfb8f41b2') || msg.includes('insufficient allowance')) {
-      friendly = '🔒 USDC not approved — please complete Step 1 (Approve USDC) first.';
-    } else if (data.startsWith('0x7939f424') || msg.includes('insufficient balance')) {
-      friendly = '💳 Insufficient USDC — visit the faucet to top up!';
     } else {
-      friendly = friendlyError(e);
+      friendly = '❌ ' + (e.reason || e.shortMessage || e.message || 'unknown error');
     }
     if (status) status.textContent = friendly;
     if (btn) btn.disabled = false;
@@ -6318,14 +5813,7 @@ async function doSelfRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const SELF_RESCUE_ABI = ['function selfRescue() external'];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
-    // Estimate gas — a full 127-slot cycle-out can use up to 15M gas.
-    // Cap at 15M (Base Sepolia per-tx limit) to avoid "gas limit too high" RPC rejection.
-    let _rescueGas = 15_000_000;
-    try {
-      const _est = await matrix.selfRescue.estimateGas({ from: await signer.getAddress() });
-      _rescueGas = Math.min(15_000_000, Number(_est) + Math.ceil(Number(_est) * 0.30));
-    } catch (_) { /* estimation failed — use 15M cap */ }
-    const tx     = await matrix.selfRescue({ gasLimit: _rescueGas });
+    const tx     = await matrix.selfRescue({ gasLimit: 5_000_000 }); // matrix may need to cycle 127 slots
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You're back in! Refreshing your dashboard…"; }
@@ -6376,7 +5864,7 @@ async function doCoPayRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const COPAY_ABI = ['function coPayRescue(address member) external'];
     const matrix    = new ethers.Contract(matrixAddr, COPAY_ABI, signer);
-    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 3_000_000 }); // matrix may need to cycle 127 slots
+    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 5_000_000 }); // matrix may need to cycle 127 slots
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
@@ -6412,21 +5900,4 @@ function updateAddrsFromDeployed(d) {
     <div style="text-align:center;padding:24px 0 24px;border-top:1px solid var(--border,#1e3a5f);margin-top:32px">
       <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here</a>
     </div>
-
-<script>
-// Novice tooltip: tap on mobile toggles popup
-document.addEventListener('click', function(e){
-  var b = e.target.closest('.tip-badge');
-  if(!b) return;
-  var p = b.querySelector('.tip-popup');
-  if(!p) return;
-  var shown = p.style.display === 'block';
-  // Hide all popups first
-  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
-  if(!shown) { p.style.display='block'; e.stopPropagation(); }
-});
-document.addEventListener('click', function(){ 
-  document.querySelectorAll('.tip-popup').forEach(function(el){ el.style.display=''; });
-});
-</script>
 </body></html>
