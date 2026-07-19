@@ -13,6 +13,18 @@
 
 ## Open Issues
 
+### [2026-07-19] Dashboard (index.html) — When my directs are parked they do not show up in my directs…
+- **Reporter:** Ms Tech
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xa2dfd8c3b99b4395550558acf6cffe79017b702c
+- **Frequency:** Consistent
+- **What happened:** When my directs are parked they do not show up in my directs. It looks like i have no directs at all if all are parked.
+- **What was expected:** I would expect to see active direct, inactive directs and total directs
+- **Notes:** e should probably have three lines one for active direct, one for inactive directs and one for total directs
+- **Submitted:** Sun, 19 Jul 2026 23:58:10 GMT
+
+
 ### [2026-07-19] Other — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
 - **Reporter:** Sherwyn
 - **Page:** Other
