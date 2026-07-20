@@ -663,6 +663,7 @@
   const MATRIX_ABI = [
     'function occupancy() external view returns (uint256)',
     'function poolAccumulator() external view returns (uint256)',
+    'function rotationCount() external view returns (uint256)',  // V8.37+
     'function getParkedCount() external view returns (uint256)',
     'function getParkedMember(uint256 idx) external view returns (address)',
     'function isParked(address) external view returns (bool)',
@@ -1142,62 +1143,101 @@
   // ── Matrix Progress ───────────────────────────────────────
   async function loadMatrix(provider) {
     try {
-      // Resolve active T1 pair via PairManager — shows T1.2 when factory has fired
+      // Resolve ALL T1 pairs via PairManager — shows T1.1 + T1.2, etc. after factory expands
       const pm1 = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
-      const [activeMatAAddr, activeMatBAddr] = await Promise.all([
-        pm1.currentMatA().catch(() => ADDRS.T1matA),
-        pm1.currentMatB().catch(() => ADDRS.T1matB),
-      ]);
-      const matA = new ethers.Contract(activeMatAAddr, MATRIX_ABI, provider);
-      const matB = new ethers.Contract(activeMatBAddr, MATRIX_ABI, provider);
-      const t2matA = new ethers.Contract(ADDRS.T2matA, MATRIX_ABI, provider);
-      const tr   = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
+      let matAAddrs = [ADDRS.T1matA], matBAddrs = [ADDRS.T1matB], pairActives = [true];
+      let occAs = [], occBs = [];
+      try {
+        const [_matAs, _matBs, _occAs, _occBs, , _actives] = await pm1.allPairsStatus();
+        if (_matAs.length > 0) {
+          matAAddrs  = Array.from(_matAs);
+          matBAddrs  = Array.from(_matBs);
+          occAs      = Array.from(_occAs);
+          occBs      = Array.from(_occBs);
+          pairActives = Array.from(_actives);
+        }
+      } catch(_) {}
 
-      const [occA, occB, poolA, poolB, occT2A, cycles, totalJoined] = await Promise.all([
-        matA.occupancy().catch(()=>0n),
-        matB.occupancy().catch(()=>0n),
-        matA.poolAccumulator().catch(()=>0n),
-        matB.poolAccumulator().catch(()=>0n),
+      const t2matA = new ethers.Contract(ADDRS.T2matA, MATRIX_ABI, provider);
+      const tr     = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
+
+      // Query per-pair data: occupancy (already in occAs/occBs) + pool + rotationCount
+      const pairData = await Promise.all(matAAddrs.map(async (_, pi) => {
+        const mcA = new ethers.Contract(matAAddrs[pi], MATRIX_ABI, provider);
+        const mcB = new ethers.Contract(matBAddrs[pi], MATRIX_ABI, provider);
+        const [occA, occB, poolA, poolB, rotCount] = await Promise.all([
+          occAs[pi] !== undefined ? Promise.resolve(occAs[pi]) : mcA.occupancy().catch(()=>0n),
+          occBs[pi] !== undefined ? Promise.resolve(occBs[pi]) : mcB.occupancy().catch(()=>0n),
+          mcA.poolAccumulator().catch(()=>0n),
+          mcB.poolAccumulator().catch(()=>0n),
+          mcB.rotationCount().catch(()=>0n),
+        ]);
+        return { occA, occB, poolA, poolB, rotCount, active: pairActives[pi] };
+      }));
+
+      const [occT2A, cycles, totalJoined] = await Promise.all([
         t2matA.occupancy().catch(()=>0n),
         tr.totalSystemCycles().catch(()=>0n),
         tr.globalJoinedCount().catch(()=>0n),
       ]);
 
-      const pctA = Math.round(Number(occA) * 100 / Number(MATRIX_SIZE));
-      const pctB = Math.round(Number(occB) * 100 / Number(MATRIX_SIZE));
+      // Routing target pair (V8.40: oldest-first) — use for pill display
+      const routingIdx = pairActives.findIndex(Boolean);
+      const displayPair = pairData[routingIdx >= 0 ? routingIdx : 0];
+      const pctA = Math.round(Number(displayPair.occA) * 100 / Number(MATRIX_SIZE));
+      const pctB = Math.round(Number(displayPair.occB) * 100 / Number(MATRIX_SIZE));
 
-      // Summary pill
+      // Summary pill — shows routing-target pair stats
       const pillInd = document.getElementById('pill-matrix');
-      const bothFull = occA >= MATRIX_SIZE && occB >= MATRIX_SIZE;
+      const bothFull = displayPair.occA >= MATRIX_SIZE && displayPair.occB >= MATRIX_SIZE;
       pillInd.className = bothFull ? 'pill-indicator yellow' : 'pill-indicator green';
-      setText('pill-matrix-val', `${occA}/${MATRIX_SIZE} · ${occB}/${MATRIX_SIZE}`);
+      setText('pill-matrix-val', `${displayPair.occA}/${MATRIX_SIZE} · ${displayPair.occB}/${MATRIX_SIZE}`);
       setText('pill-matrix-sub', `MatA ${pctA}% · MatB ${pctB}%`);
       document.getElementById('badge-matrix').className = 'card-badge badge-blue';
       setText('badge-matrix', `${Number(cycles)} ${t('statusPage.js.cycles_suffix', 'CYCLES')}`);
 
-      // Progress bars
-      const colorA = pctA >= 95 ? 'yellow' : 'green';
-      const colorB = pctB >= 95 ? 'yellow' : 'green';
+      // Progress bars — show ALL T1 pairs with rotation counts
       const wrap = document.getElementById('matrix-progress-wrap');
-      wrap.innerHTML = `
-        <div class="prog-wrap">
-          <div class="prog-label">
-            <span>${t('statusPage.label_t1_mata','T1 MatA')}</span>
-            <span>${occA} / ${MATRIX_SIZE} (${pctA}%)</span>
+      let html = '';
+      const multiPair = pairData.length > 1;
+      for (let pi = 0; pi < pairData.length; pi++) {
+        const { occA, occB, rotCount, active } = pairData[pi];
+        const _pctA = Math.round(Number(occA) * 100 / Number(MATRIX_SIZE));
+        const _pctB = Math.round(Number(occB) * 100 / Number(MATRIX_SIZE));
+        const colorA = _pctA >= 95 ? 'yellow' : 'green';
+        const colorB = _pctB >= 95 ? 'yellow' : 'green';
+        const pairSuffix = multiPair ? ` ${pi + 1}` : '';
+        const activeTag  = (multiPair && active)
+          ? `<span style="font-size:10px;background:var(--green-dim);color:var(--green);padding:1px 5px;border-radius:4px;margin-left:4px">new members</span>`
+          : '';
+        const rotLabel = ` · ${Number(rotCount)} rotation${Number(rotCount) !== 1 ? 's' : ''}`;
+        html += `
+          <div class="prog-wrap">
+            <div class="prog-label">
+              <span>T1 MatA${pairSuffix}${activeTag}</span>
+              <span>${occA} / ${MATRIX_SIZE} (${_pctA}%)</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill ${colorA}" style="width:${_pctA}%"></div></div>
           </div>
-          <div class="prog-track"><div class="prog-fill ${colorA}" style="width:${pctA}%"></div></div>
-        </div>
-        <div class="prog-wrap">
-          <div class="prog-label">
-            <span>${t('statusPage.label_t1_matb','T1 MatB')}</span>
-            <span>${occB} / ${MATRIX_SIZE} (${pctB}%)</span>
-          </div>
-          <div class="prog-track"><div class="prog-fill ${colorB}" style="width:${pctB}%"></div></div>
-        </div>
-      `;
+          <div class="prog-wrap">
+            <div class="prog-label">
+              <span>T1 MatB${pairSuffix}${rotLabel}</span>
+              <span>${occB} / ${MATRIX_SIZE} (${_pctB}%)</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill ${colorB}" style="width:${_pctB}%"></div></div>
+          </div>`;
+        // Explanatory note for completed pairs
+        if (multiPair && !active && Number(rotCount) > 0) {
+          html += `<div style="font-size:11px;color:var(--text3);padding:2px 0 8px 2px">
+            Pair ${pi + 1} completed ${rotCount} cycle(s) — new members now enter Pair ${routingIdx >= 0 ? routingIdx + 1 : pi + 2}
+          </div>`;
+        }
+      }
+      wrap.innerHTML = html;
 
-      setText('mx-pool-a', fmt6(poolA));
-      setText('mx-pool-b', fmt6(poolB));
+      // Stats — use routing-target pair pool values
+      setText('mx-pool-a', fmt6(displayPair.poolA));
+      setText('mx-pool-b', fmt6(displayPair.poolB));
       setText('mx-cycles', Number(cycles).toString());
       setText('mx-total', Number(totalJoined).toString());
       setText('mx-t2a', `${occT2A} / ${MATRIX_SIZE}`);

@@ -4326,6 +4326,15 @@ async function loadDashboardData() {
       setText('dash-directs', result.incomplete
         ? `${result.count} ` + unknownBadge('Some reads failed — count may be incomplete. Refresh to retry.')
         : result.count.toString());
+      // Async: show parked breakdown in dash-directs (e.g. "3 (2 parked)")
+      if (result.addrs.length > 0) {
+        _enrichDirectsWithParkedStatus(result.addrs, rp).then(({ parkedCount, totalCount }) => {
+          if (parkedCount > 0) {
+            const el = document.getElementById('dash-directs');
+            if (el) el.innerHTML = `${totalCount} <span style="font-size:11px;color:var(--yellow)">(${parkedCount} parked)</span>`;
+          }
+        }).catch(() => {});
+      }
     })();
 
     // Withdraw button
@@ -5540,13 +5549,52 @@ async function _getDirectReferrals(addr, rp) {
 }
 
 // Render helper — used by both the panel and any future callers
+// Each row gets id="direct-row-{i}" and a status span id="direct-status-{i}"
+// so _enrichDirectsWithParkedStatus can update them asynchronously.
 function _renderDirectRows(rowsEl, addrs) {
-  rowsEl.innerHTML = addrs.map(a =>
-    `<div class="info-row">
+  rowsEl.innerHTML = addrs.map((a, i) =>
+    `<div class="info-row" id="direct-row-${i}">
       <span class="info-key" style="font-family:monospace;font-size:12px">${a.slice(0,6)}…${a.slice(-4)}</span>
-      <span class="info-val"><a href="https://sepolia.basescan.org/address/${a}" target="_blank" style="color:var(--green);font-size:12px">View ↗</a></span>
+      <span class="info-val" style="display:flex;gap:8px;align-items:center">
+        <span id="direct-status-${i}" style="font-size:11px"></span>
+        <a href="https://sepolia.basescan.org/address/${a}" target="_blank" style="color:var(--green);font-size:12px">View ↗</a>
+      </span>
     </div>`
   ).join('');
+}
+
+// Async: check parkedAt() for each direct across all known matrices.
+// Updates DOM status spans (direct-status-{i}) if they exist, and returns { parkedCount, totalCount }.
+// Safe to call from dashboard (when panel is not open) — DOM updates are no-ops if elements missing.
+async function _enrichDirectsWithParkedStatus(addrs, rp) {
+  if (!addrs || addrs.length === 0) return { parkedCount: 0, totalCount: 0 };
+  const mats = [];
+  try {
+    const pm1 = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
+    const [matAs, matBs] = await pm1.allPairsStatus();
+    matAs.forEach(a => { if (a && a !== ethers.ZeroAddress) mats.push(a); });
+    matBs.forEach(a => { if (a && a !== ethers.ZeroAddress) mats.push(a); });
+  } catch(_) {
+    if (ADDRS.T1?.matA) { mats.push(ADDRS.T1.matA); mats.push(ADDRS.T1.matB); }
+  }
+  if (ADDRS.T2?.matA) { mats.push(ADDRS.T2.matA); mats.push(ADDRS.T2.matB); }
+  if (ADDRS.T3?.matA) { mats.push(ADDRS.T3.matA); mats.push(ADDRS.T3.matB); }
+  const parkedStatuses = await Promise.all(addrs.map(async (addr, i) => {
+    let parked = false;
+    for (const matAddr of mats) {
+      try {
+        const ts = await new ethers.Contract(matAddr, MATRIX_ABI, rp).parkedAt(addr);
+        if (BigInt(ts) > 0n) { parked = true; break; }
+      } catch(_) {}
+    }
+    const el = document.getElementById(`direct-status-${i}`);
+    if (el) {
+      el.textContent = parked ? '⛔ parked' : '✅ active';
+      el.style.color  = parked ? 'var(--yellow)' : 'var(--green)';
+    }
+    return parked;
+  }));
+  return { parkedCount: parkedStatuses.filter(Boolean).length, totalCount: addrs.length };
 }
 
 async function loadMyDirects() {
@@ -5597,6 +5645,13 @@ async function loadMyDirects() {
   setText('matrix-my-node', result.count.toString() + (result.incomplete ? ' ⚠️' : ''));
   document.getElementById('matrix-my-node-label').textContent = 'My Directs';
   listEl.style.display = 'block';
+  // Async: add active/parked badges to each row (non-blocking)
+  _enrichDirectsWithParkedStatus(result.addrs, rp).then(({ parkedCount, totalCount }) => {
+    if (parkedCount > 0) {
+      const nodeEl = document.getElementById('matrix-my-node');
+      if (nodeEl) nodeEl.innerHTML = `${totalCount} <span style="font-size:11px;color:var(--yellow)">(${parkedCount} parked)</span>`;
+    }
+  }).catch(() => {/* silent — status badges are cosmetic */});
 
   if (result.fromCache) {
     const note = document.createElement('div');
@@ -5900,6 +5955,10 @@ function friendlyError(e) {
     return '✅ You are already at this tier or higher — view your Dashboard.';
 
   // ── Matrix revert strings (F8V8:) ──────────────────────────────────────
+  // V8.40: partner full guard — check ALL error string locations (Rabby formats differently)
+  if (msgLow.includes('partner full') ||
+      (msg + raw + rawDeep).toLowerCase().includes('partner full'))
+    return '⏳ MatB is currently full — the keeper will rescue you automatically within minutes. No action needed.';
   if (msgLow.includes('f8v8: must keep crossing reserve') ||
       msgLow.includes('f8v8: balance fully reserved'))
     return '⏳ Your balance is locked while you hold an active matrix position. The system reserves your entry fee ($10) to fund your next crossing. Once your current matrix cycle completes and pays out, you can withdraw freely. If you have Auto-Reentry disabled, you will not be re-entered and your full balance will be available after the cycle.';
