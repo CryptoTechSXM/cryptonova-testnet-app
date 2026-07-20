@@ -498,9 +498,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.40 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.41 — Fresh Reset in Progress</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.40 is live — oldest-first pair routing, selfRescue MatB-full guard.<br>Opening in:
+      We're seeding the new matrix for a clean start. Back online in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -538,11 +538,11 @@
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1000; // gate open
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.40 Early Access — Now Open';
+        var EARLY_MS = 1784554200000; // 2026-07-20 09:30 EDT (13:30 UTC)
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.41 Early Access — Opening 9:30 AM EDT';
         // Override countdown block text for early domain
-        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'Leader & Tester Preview';
-        var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'CryptoNova opens for selected leaders and testers in:';
+        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.41 — Fresh Reset in Progress';
+        var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'Leaders &amp; testers — we\'re seeding the new matrix. Back online in:';
         var openEarlyCoupon = function() {
           // localStorage only bypasses gate AFTER the countdown has expired
           try { if (localStorage.getItem('cnova_ea_access') === '1') { document.getElementById('maintenance-gate').remove(); return; } } catch(e){}
@@ -563,8 +563,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.40 Testnet — Now Open';
-        var MAIN_MS  = 1000; // gate open
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.41 Testnet — Opening 9:45 AM EDT';
+        var MAIN_MS  = 1784555100000; // 2026-07-20 09:45 EDT (13:45 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
