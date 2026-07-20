@@ -457,7 +457,9 @@
 <script>
 (function(){
   var h = window.location.hostname;
-  if (h === 'admin.crypto-nova.app' || h === 'admin.cryptonova.ai' || h.startsWith('admin.') || h === 'localhost') return;
+  if (h === 'admin.crypto-nova.app' || h === 'admin.cryptonova.ai' || h.startsWith('admin.') || h === 'localhost') {
+    var b = document.getElementById('maint-banner'); if (b) b.remove(); return;
+  }
   var TARGET = 1784552400000; // 2026-07-20 09:00 EDT (13:00 UTC)
   var banner = document.getElementById('maint-banner');
   var timer  = document.getElementById('maint-timer');
