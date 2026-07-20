@@ -13,6 +13,18 @@
 
 ## Open Issues
 
+### [2026-07-20] Dashboard (index.html) — ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", …
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x20325876f47c5d30da4ac38c52a73ef342eafd56
+- **Frequency:** Consistent
+- **What happened:** ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", "to": "0xeb20e72d816634ED34fE99948f9b489D9
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Notes:** This issue is experienced on several accts and unable to go forward
+- **Submitted:** Mon, 20 Jul 2026 09:21:52 GMT
+
+
 ### [2026-07-20] Other — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
 - **Reporter:** Sherwyn
 - **Page:** Other
