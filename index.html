@@ -1431,7 +1431,9 @@
           <div id="dash-cycles-breakdown" style="font-size:12px;color:var(--text3);padding:4px 10px;background:var(--bg3);border-radius:6px;margin:-4px 0 6px 0;display:none"></div>
           
           <div class="info-row"><span class="info-key" data-i18n="dash.referrer">Referrer</span><span class="info-val addr" id="dash-orig-referrer">—</span></div>
-          <div class="info-row"><span class="info-key" data-i18n="dash.direct_referrals">Direct Referrals</span><span class="info-val" id="dash-directs">—</span></div>
+          <div class="info-row"><span class="info-key" data-i18n="dash.direct_referrals">Direct Referrals</span><span class="info-val" id="dash-directs-total">—</span></div>
+          <div class="info-row" style="padding-left:14px;margin-top:-4px"><span class="info-key" style="font-size:12px;color:var(--green)">↳ Active</span><span class="info-val" style="font-size:12px;color:var(--green)" id="dash-directs-active">—</span></div>
+          <div class="info-row" style="padding-left:14px;margin-top:-4px"><span class="info-key" style="font-size:12px;color:var(--yellow)">↳ Parked</span><span class="info-val" style="font-size:12px;color:var(--yellow)" id="dash-directs-parked">—</span></div>
           <div class="info-row" style="padding-top:10px;margin-top:6px;border-top:1px solid var(--border)">
             <span class="info-key" title="When enabled, at your next cycle-out you re-enter BOTH the new tier (or same tier) AND your previous tier simultaneously — so you hold two active positions at once. Requires enough balance to cover both entry fees.">Double Reentry ⓘ</span>
             <span class="info-val" style="display:flex;align-items:center;gap:8px">
@@ -1681,6 +1683,7 @@
         No direct referrals found yet. Share your referral link to grow your team!
       </div>
       <div id="my-directs-list" style="display:none">
+        <div id="my-directs-summary" style="display:flex;gap:16px;margin-bottom:12px;padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:13px"></div>
         <div id="my-directs-rows"></div>
       </div>
     </div>
@@ -4321,22 +4324,30 @@ async function loadDashboardData() {
       ? memberReferrer.slice(0,6)+'…'+memberReferrer.slice(-4) : 'Direct');
 
     // Direct referrals count — events-first, scan fallback, localStorage cache.
-    // Shows cached count immediately so the field is never blank on load.
+    // Shows total/active/parked split. Cached count shown immediately so field is never blank.
     (async () => {
       const cached = _cache.get('directs_' + userAddr.toLowerCase(), 30 * 60 * 1000);
-      if (cached) setText('dash-directs', cached.count.toString()); // instant from cache
+      if (cached) setText('dash-directs-total', cached.count.toString());
       const result = await _getDirectReferrals(userAddr, rp);
-      setText('dash-directs', result.incomplete
+      const dTotal  = document.getElementById('dash-directs-total');
+      const dActive = document.getElementById('dash-directs-active');
+      const dParked = document.getElementById('dash-directs-parked');
+      if (dTotal) dTotal.innerHTML = result.incomplete
         ? `${result.count} ` + unknownBadge('Some reads failed — count may be incomplete. Refresh to retry.')
-        : result.count.toString());
-      // Async: show parked breakdown in dash-directs (e.g. "3 (2 parked)")
-      if (result.addrs.length > 0) {
+        : result.count.toString();
+      if (result.addrs.length === 0) {
+        if (dActive) dActive.textContent = '0';
+        if (dParked) dParked.textContent = '0';
+      } else {
+        if (dActive) dActive.textContent = '…';
+        if (dParked) dParked.textContent = '…';
         _enrichDirectsWithParkedStatus(result.addrs, rp).then(({ parkedCount, totalCount }) => {
-          if (parkedCount > 0) {
-            const el = document.getElementById('dash-directs');
-            if (el) el.innerHTML = `${totalCount} <span style="font-size:11px;color:var(--yellow)">(${parkedCount} parked)</span>`;
-          }
-        }).catch(() => {});
+          if (dActive) dActive.textContent = (totalCount - parkedCount).toString();
+          if (dParked) dParked.textContent = parkedCount.toString();
+        }).catch(() => {
+          if (dActive) dActive.textContent = '—';
+          if (dParked) dParked.textContent = '—';
+        });
       }
     })();
 
@@ -5566,6 +5577,42 @@ function _renderDirectRows(rowsEl, addrs) {
   ).join('');
 }
 
+// Grouped render: Active section first, then Parked/Inactive section.
+function _renderGroupedDirectRows(rowsEl, summaryEl, addrs, parkedStatuses) {
+  const activeAddrs = addrs.filter((_, i) => !parkedStatuses[i]);
+  const parkedAddrs = addrs.filter((_, i) =>  parkedStatuses[i]);
+  const total = addrs.length;
+  const basescan = 'https://sepolia.basescan.org/address/';
+  let html = '';
+  if (activeAddrs.length > 0) {
+    html += `<div style="font-size:11px;font-weight:600;color:var(--green);padding:6px 0 4px;letter-spacing:.05em;text-transform:uppercase">Active (${activeAddrs.length})</div>`;
+    html += activeAddrs.map(a =>
+      `<div class="info-row">
+        <span class="info-key" style="font-family:monospace;font-size:12px">${a.slice(0,6)}…${a.slice(-4)}</span>
+        <span class="info-val" style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:11px;color:var(--green)">✅ active</span>
+          <a href="${basescan}${a}" target="_blank" style="color:var(--green);font-size:12px">View ↗</a>
+        </span>
+      </div>`).join('');
+  }
+  if (parkedAddrs.length > 0) {
+    html += `<div style="font-size:11px;font-weight:600;color:var(--yellow);padding:${activeAddrs.length > 0 ? '10px' : '6px'} 0 4px;letter-spacing:.05em;text-transform:uppercase">Parked / Inactive (${parkedAddrs.length})</div>`;
+    html += parkedAddrs.map(a =>
+      `<div class="info-row">
+        <span class="info-key" style="font-family:monospace;font-size:12px">${a.slice(0,6)}…${a.slice(-4)}</span>
+        <span class="info-val" style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:11px;color:var(--yellow)">⛔ parked</span>
+          <a href="${basescan}${a}" target="_blank" style="color:var(--green);font-size:12px">View ↗</a>
+        </span>
+      </div>`).join('');
+  }
+  rowsEl.innerHTML = html;
+  if (summaryEl) summaryEl.innerHTML =
+    `<span style="color:var(--text2)">Total: <strong>${total}</strong></span>` +
+    `<span style="color:var(--green)">Active: <strong>${activeAddrs.length}</strong></span>` +
+    `<span style="color:var(--yellow)">Parked: <strong>${parkedAddrs.length}</strong></span>`;
+}
+
 // Async: check parkedAt() for each direct across all known matrices.
 // Updates DOM status spans (direct-status-{i}) if they exist, and returns { parkedCount, totalCount }.
 // Safe to call from dashboard (when panel is not open) — DOM updates are no-ops if elements missing.
@@ -5597,7 +5644,7 @@ async function _enrichDirectsWithParkedStatus(addrs, rp) {
     }
     return parked;
   }));
-  return { parkedCount: parkedStatuses.filter(Boolean).length, totalCount: addrs.length };
+  return { parkedCount: parkedStatuses.filter(Boolean).length, totalCount: addrs.length, parkedStatuses };
 }
 
 async function loadMyDirects() {
@@ -5644,17 +5691,17 @@ async function loadMyDirects() {
     return;
   }
 
-  _renderDirectRows(rowsEl, result.addrs);
+  _renderDirectRows(rowsEl, result.addrs); // flat list while enrichment loads
   setText('matrix-my-node', result.count.toString() + (result.incomplete ? ' ⚠️' : ''));
   document.getElementById('matrix-my-node-label').textContent = 'My Directs';
   listEl.style.display = 'block';
-  // Async: add active/parked badges to each row (non-blocking)
-  _enrichDirectsWithParkedStatus(result.addrs, rp).then(({ parkedCount, totalCount }) => {
-    if (parkedCount > 0) {
-      const nodeEl = document.getElementById('matrix-my-node');
-      if (nodeEl) nodeEl.innerHTML = `${totalCount} <span style="font-size:11px;color:var(--yellow)">(${parkedCount} parked)</span>`;
-    }
-  }).catch(() => {/* silent — status badges are cosmetic */});
+  // Async: re-render grouped (active / parked) once statuses are known
+  const summaryEl = document.getElementById('my-directs-summary');
+  _enrichDirectsWithParkedStatus(result.addrs, rp).then(({ parkedCount, totalCount, parkedStatuses }) => {
+    _renderGroupedDirectRows(rowsEl, summaryEl, result.addrs, parkedStatuses);
+    const nodeEl = document.getElementById('matrix-my-node');
+    if (nodeEl) nodeEl.innerHTML = `${totalCount} <span style="font-size:11px;color:var(--yellow)">${parkedCount > 0 ? '(' + parkedCount + ' parked)' : ''}</span>`;
+  }).catch(() => {/* silent — grouping is cosmetic, flat list remains */});
 
   if (result.fromCache) {
     const note = document.createElement('div');
