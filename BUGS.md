@@ -1,10 +1,4 @@
 # CryptoNova — Issue Tracker
-| 2026-07-19 | 2026-07-19 | index.html | Maximum_71 — Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
--  | Manual close |
-| 2026-07-19 | 2026-07-19 | index.html | @Lavern_Gay — Onboarding / Registration — Registration failed. Message received after failure: | Manual close |
-| 2026-07-19 | 2026-07-19 | index.html | @Lavern_Gay — Onboarding / Registration — Can not register my account. Several attempts were m | Manual close |
-| 2026-07-19 | 2026-07-19 | index.html | @Koach100 — Dashboard (index.html) — i attempted a self rescue from T1 matrix A but the tran | Manual close |
-| 2026-07-19 | 2026-07-19 | index.html | Sherwyn — Onboarding / Registration — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72 | Manual close |
 
 > Drop new issues here as members report them. Start a session with "check BUGS.md" and Claude will read this directly.
 > Format: **[Page] — What happened / What was expected** + wallet type if relevant + consistent or intermittent
@@ -13,72 +7,17 @@
 
 ## Open Issues
 
-### [2026-07-20] Dashboard (index.html) — ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", …
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x20325876f47c5d30da4ac38c52a73ef342eafd56
-- **Frequency:** Consistent
-- **What happened:** ❌ "", "from": "0x20325876F47c5D30DA4Ac38C52a73eF342eAfd56", "to": "0xeb20e72d816634ED34fE99948f9b489D9
-- **What was expected:** ⏳ Action Required — Re-Entry Queue
-- **Notes:** This issue is experienced on several accts and unable to go forward
-- **Submitted:** Mon, 20 Jul 2026 09:21:52 GMT
-
-
-### [2026-07-20] Other — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", "to": "0xeb20e72d816634ED34fE99948f9b489D9
-- **What was expected:** To be rescued
-- **Notes:** Metamask keep reporting this failure as... F8V8: partner full - wait for rotation.  Is this a testnet thing? The first rescue when through no issues and then this on the second account.. Happening also in Rabby.
-- **Submitted:** Mon, 20 Jul 2026 08:53:51 GMT
-
-
-### [2026-07-19] Dashboard (index.html) — When my directs are parked they do not show up in my directs…
-- **Reporter:** Ms Tech
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xa2dfd8c3b99b4395550558acf6cffe79017b702c
-- **Frequency:** Consistent
-- **What happened:** When my directs are parked they do not show up in my directs. It looks like i have no directs at all if all are parked.
-- **What was expected:** I would expect to see active direct, inactive directs and total directs
-- **Notes:** e should probably have three lines one for active direct, one for inactive directs and one for total directs
-- **Submitted:** Sun, 19 Jul 2026 23:58:10 GMT
-
-
-### [2026-07-19] Other — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", "to": "0xeb20e72d816634ED34fE99948f9b489D9
-- **What was expected:** To be rescued
-- **Notes:** Self rescue has stop working and is throwing the above error.. Did 2 self rescued and now it has stopped working..
-- **Submitted:** Sun, 19 Jul 2026 23:55:20 GMT
-
-
-### [2026-07-19] Status Page (status.html) — Tier 1.2 opened up, that is good, T1.2 shows as active  Tier…
-- **Reporter:** Mr.Tech
-- **Page:** Status Page (status.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xa2dfd8c3b99b4395550558acf6cffe79017b702c
-- **Frequency:** Consistent
-- **What happened:** Tier 1.2 opened up, that is good, T1.2 shows as active  Tier and filling up with no rotations not good.
-- **What was expected:** I expected to see rotations because the last upgrade promised rotations in T1.1 and rotations out of T1.1 to T1.2
-- **Notes:** Could be a front end display issue or a bug in the contract please advice.
-- **Submitted:** Sun, 19 Jul 2026 23:54:04 GMT
-
-
 _No open issues._
 
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-20 | 2026-07-20 | index.html | Maximum_71 (0x2032) — re-entry TX pointing at old V8.40 TierRouter (0xeb20e72d). Root cause: V8.41 fresh deploy + matrix reset. Hard refresh required. | V8.41 |
+| 2026-07-20 | 2026-07-20 | Other | Sherwyn (0x1e8e) — selfRescue TX pointing at old V8.40 TierRouter. "Partner full" = V8.40 MatB state no longer valid. Root cause: V8.41 fresh deploy. Hard refresh + re-register on V8.41. | V8.41 |
+| 2026-07-19 | 2026-07-20 | index.html | Ms Tech (0xa2df) — parked directs not showing in directs list. Noted as enhancement: show active/inactive/total directs separately. Logged for future sprint. | — |
+| 2026-07-19 | 2026-07-20 | Other | Sherwyn (0x1e8e) — selfRescue stopped working after 2 rescues (Rabby). Root cause: V8.40 contract state. Superseded by V8.41 fresh deploy. | V8.41 |
+| 2026-07-19 | 2026-07-20 | status.html | Mr.Tech (0xa2df) — T1.2 filling with no rotations shown. Root cause: V8.40 display; FIFO routing (V8.41) ensures external→pair 0, graduates→pair 1. Fresh matrix on V8.41. | V8.41 |
 | 2026-07-19 | 2026-07-19 | System | Maximum_71, @Lavern_Gay x2, @Koach100, Sherwyn — morning registration failures and frozen spinners. Root cause: T1.1 MatB frozen at occ=127/127 rotationCount=0 (factory never triggered T1.2 deploy). MatA also full → no seats for new registrations. Wallets 52–59 parked in MatA, selfRescue spamming RESC WARN because MatB was full. Fix: manual adminForceRotateRoot (8M gas) unfroze MatB; wallets 52–59 rescued + upgraded to T2; T1.2 factory auto-deployed on natural cycle-out. frozen_matb_keeper.js corrected to call adminForceRotateRoot (was calling keeperForceRotateRoot — wrong caller). Registrations resuming by RUN #123. | 7524b0d |
 | 2026-07-18 | 2026-07-19 | index.html | Maximum_71 (0x2032) — selfRescue TX reverted on T1.2 MatB. Root cause: V8.38 SF.receiveDebtRepayment revert propagated up through selfRescue. Fixed in V8.39 with try/catch wrapping. | V8.39 |
 | 2026-07-18 | 2026-07-19 | index.html | Koach100 (0x74d5) — selfRescue approve succeeded, then TX failed and timed out. Same root cause as above — V8.38 SF revert. Fixed in V8.39. | V8.39 |

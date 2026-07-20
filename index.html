@@ -3252,6 +3252,7 @@ async function loadUserData() {
           const defRef = await tr.defaultReferrer();
           if (defRef && defRef !== ethers.ZeroAddress) {
             refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
+            window._defaultReferrer = defRef;
           }
         } catch(_) {}
       }
@@ -3691,7 +3692,8 @@ async function doRegister() {
     const referrer = c && c.issuer && c.issuer !== ethers.ZeroAddress
       ? c.issuer
       : (refInput && ethers.isAddress(refInput.value.trim())
-          ? refInput.value.trim() : ethers.ZeroAddress);
+          ? refInput.value.trim()
+          : (window._defaultReferrer || ethers.ZeroAddress));
 
     // Dry-run via read provider BEFORE sending to wallet.
     // Simulates the full register logic on-chain without submitting a TX.
