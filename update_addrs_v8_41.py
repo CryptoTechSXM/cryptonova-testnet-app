@@ -46,16 +46,26 @@ REPLACEMENTS.append((
 REPLACEMENTS.append(("[v8.40]", "[v8.41]"))
 REPLACEMENTS.append(("v8.40", "v8.41"))
 
+# Telegram bot system prompt version label (MANDATORY — bot goes stale without this)
+REPLACEMENTS.append((
+    "## Contracts (Base Sepolia — V8.40)",
+    "## Contracts (Base Sepolia — V8.41)"
+))
+
 print(f"\nFound {len(REPLACEMENTS)} replacement(s):")
 for old, new in REPLACEMENTS[:10]:
     print(f"  {old[:42]} -> {new[:42]}")
 if len(REPLACEMENTS) > 10:
     print(f"  ... and {len(REPLACEMENTS)-10} more")
 
-HTML_FILES = ["index.html", "status.html", "buy.html", "governance.html", "liquidity.html", "early.html"]
+# MANDATORY: api/telegram-qa.js must always be in this list — bot goes stale after every deploy.
+ALL_FILES = [
+    "index.html", "status.html", "buy.html", "governance.html", "liquidity.html", "early.html",
+    "api/telegram-qa.js",
+]
 
 total_changes = 0
-for fname in HTML_FILES:
+for fname in ALL_FILES:
     fpath = os.path.join(BASE, fname)
     if not os.path.exists(fpath):
         print(f"  SKIP (not found): {fname}")

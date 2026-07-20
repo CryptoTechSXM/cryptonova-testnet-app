@@ -177,7 +177,7 @@ The referral system is fully live in the smart contracts.
 - On mainnet, members who use a referral link will show the referrer's wallet address. Members who register directly will always show "Direct" — permanently.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
-## Contracts (Base Sepolia — V8.38)
+## Contracts (Base Sepolia — V8.41)
 TierRouter: <code>0xAA00D5225b9C5150fe39B3B08D4790012D14bF61</code>
 MatrixKeeper: <code>0x0d668D200837507e43F6946337c87E6c1383cDED</code>
 CNOVA Token: <code>0xF1769D5d69AE6df66Fe6687fAA9D25c97Ab377Fd</code>

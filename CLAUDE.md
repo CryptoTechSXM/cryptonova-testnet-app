@@ -8,8 +8,8 @@ Read this file at the start of every session before touching any frontend code.
 
 | Item | Value |
 |------|-------|
-| Live contract version | V8.40 |
-| Addresses file | `deployed_addresses_v8_40.json` |
+| Live contract version | V8.41 |
+| Addresses file | `deployed_addresses_v8_41.json` |
 | Working branch | `admin` |
 | Admin frontend | https://admin.crypto-nova.app |
 
@@ -127,4 +127,9 @@ If index.html is truncated after a push:
 
 ## Common address variables in this repo
 
-All contract addresses live in the `const ADDRS = {...}` block near the top of each HTML file. When a new version deploys, run the `update_addrs.py` script (in the Cowork outputs folder) to replace all addresses across all HTML files in one pass. Always verify with truncation check afterward.
+All contract addresses live in the `const ADDRS = {...}` block near the top of each HTML file. When a new version deploys, run the `update_addrs_vX_XX.py` script to replace all addresses in one pass.
+
+**MANDATORY: `update_addrs_vX_XX.py` MUST include `api/telegram-qa.js` in its `ALL_FILES` list.**  
+The Telegram bot has 3 hardcoded addresses (TIER_ROUTER, CNOVA_TOKEN, CNOVA_TREASURY) and a version label in the SYSTEM_PROMPT (`## Contracts (Base Sepolia — VX.XX)`) that go stale after every deploy. The script handles all of them automatically — do NOT skip it.
+
+Always verify with truncation check afterward (`tail -5 index.html`).
