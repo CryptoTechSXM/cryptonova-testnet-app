@@ -448,6 +448,38 @@
 </head>
 <body>
 
+<!-- ── V8.41 MAINTENANCE BANNER ────────────────────────────────────────────────── -->
+<div id="maint-banner" style="position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(90deg,#7c1d1d,#b91c1c);color:#fff;text-align:center;padding:10px 16px;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.4);">
+  <span>⚠️ SITE GOING OFFLINE FOR RESET — Withdraw all assets now! Nothing carries over.</span>
+  <span style="background:rgba(0,0,0,0.3);border-radius:6px;padding:4px 12px;font-variant-numeric:tabular-nums;letter-spacing:1px;" id="maint-timer">--:--:--</span>
+  <span id="maint-label" style="opacity:0.85;font-weight:400;">until offline (9 AM EST)</span>
+</div>
+<script>
+(function(){
+  var TARGET = 1784556000000; // 2026-07-20 09:00 EST (14:00 UTC)
+  var banner = document.getElementById('maint-banner');
+  var timer  = document.getElementById('maint-timer');
+  var label  = document.getElementById('maint-label');
+  function tick(){
+    var d = TARGET - Date.now();
+    if(d <= 0){
+      timer.textContent = 'OFFLINE';
+      label.textContent = '— returning at 9 AM EST';
+      banner.style.background = 'linear-gradient(90deg,#1e3a5f,#1d4ed8)';
+      return;
+    }
+    var s=Math.floor(d/1000),m=Math.floor(s/60),h=Math.floor(m/60);
+    s%=60; m%=60;
+    timer.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    setTimeout(tick,500);
+  }
+  tick();
+  // push page content down so banner doesn't overlap nav
+  document.body.style.paddingTop='46px';
+})();
+</script>
+<!-- ── END MAINTENANCE BANNER ────────────────────────────────────────────────── -->
+
 <!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.31 is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
