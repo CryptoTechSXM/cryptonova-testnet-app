@@ -13,6 +13,18 @@
 
 ## Open Issues
 
+### [2026-07-20] Other — ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** ❌ "", "from": "0x1e8e2dCF876D0d94077c93a7e33Bda2AB72ab1F7", "to": "0xeb20e72d816634ED34fE99948f9b489D9
+- **What was expected:** To be rescued
+- **Notes:** Metamask keep reporting this failure as... F8V8: partner full - wait for rotation.  Is this a testnet thing? The first rescue when through no issues and then this on the second account.. Happening also in Rabby.
+- **Submitted:** Mon, 20 Jul 2026 08:53:51 GMT
+
+
 ### [2026-07-19] Dashboard (index.html) — When my directs are parked they do not show up in my directs…
 - **Reporter:** Ms Tech
 - **Page:** Dashboard (index.html)
