@@ -3750,9 +3750,14 @@ async function doRegister() {
     }
     setStatus('reg-status', '⏳ Confirming transaction…', 'info');
     await tx.wait();
-    // V8.32 fix: removed inline setMemberOptions() call — it fired a hidden second
-    // MetaMask popup that caused the page to appear frozen. Members can set options
-    // from the Dashboard. V8.33 will default enableReentry=true at the contract level.
+    // Auto-enable reentry for new members (fire-and-forget — separate tx, separate popup)
+    // disableUpgrade=false (auto-upgrade ON), enableReentry=true, enableDouble=false
+    try {
+      setStatus('reg-status', '⏳ Enabling auto re-entry…', 'info');
+      const trOpts = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      const txOpts = await trOpts.setMemberOptions(false, true, false, { gasLimit: 120_000 });
+      await txOpts.wait();
+    } catch(_) { /* non-fatal — member can toggle from dashboard */ }
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
