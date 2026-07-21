@@ -538,6 +538,25 @@
       </div>
     </div>
 
+    <!-- All Tiers Overview card -->
+    <div class="status-card" id="card-all-tiers">
+      <div class="card-header" onclick="toggleCard('card-all-tiers')">
+        <div class="card-header-left">
+          <div class="card-icon">📈</div>
+          <div>
+            <div class="card-title-text">All Tiers Overview <span class="card-badge" id="badge-all-tiers">—</span></div>
+            <div class="card-summary" id="summary-all-tiers">Live fill, pool &amp; gate for all 10 tiers</div>
+          </div>
+        </div>
+        <div class="chevron" id="chev-card-all-tiers">▼</div>
+      </div>
+      <div class="card-body" id="body-card-all-tiers">
+        <div id="all-tiers-wrap">
+          <div class="loading-row">Loading…</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Stability Fund card -->
     <div class="status-card" id="card-sf">
       <div class="card-header" onclick="toggleCard('card-sf')">
@@ -772,6 +791,7 @@
         loadKeeper(provider, blk),
         loadParked(provider, blk),
         loadMatrix(provider),
+        loadAllTiers(provider),
         loadSF(provider),
       ]);
 
@@ -1275,6 +1295,142 @@
 
     } catch(e) {
       console.error('Matrix load error:', e);
+    }
+  }
+
+  // ── All Tiers Overview ────────────────────────────────────
+  async function loadAllTiers(provider) {
+    const wrap = document.getElementById('all-tiers-wrap');
+    if (!wrap) return;
+    const MSIZE = 127;
+    const TIER_META = [
+      { label:'T1',  name:'Nova Seed',       fee:'$10',     color:'#00e5a0', matAKey:null,      matBKey:null,      usePM:true  },
+      { label:'T2',  name:'Nova Rise',       fee:'$25',     color:'#3b82f6', matAKey:'T2matA',  matBKey:'T2matB',  usePM:false },
+      { label:'T3',  name:'Nova Star',       fee:'$50',     color:'#3b82f6', matAKey:'T3matA',  matBKey:'T3matB',  usePM:false },
+      { label:'T4',  name:'Nova Core',       fee:'$100',    color:'#94a3b8', matAKey:'T4matA',  matBKey:'T4matB',  usePM:false },
+      { label:'T5',  name:'Nova Prime',      fee:'$250',    color:'#94a3b8', matAKey:'T5matA',  matBKey:'T5matB',  usePM:false },
+      { label:'T6',  name:'Nova Apex',       fee:'$500',    color:'#94a3b8', matAKey:'T6matA',  matBKey:'T6matB',  usePM:false },
+      { label:'T7',  name:'Nova Pinnacle',   fee:'$1,000',  color:'#94a3b8', matAKey:'T7matA',  matBKey:'T7matB',  usePM:false },
+      { label:'T8',  name:'SuperNova Titan', fee:'$2,500',  color:'#f59e0b', matAKey:'T8matA',  matBKey:'T8matB',  usePM:false },
+      { label:'T9',  name:'SuperNova Legend',fee:'$5,000',  color:'#f59e0b', matAKey:'T9matA',  matBKey:'T9matB',  usePM:false },
+      { label:'T10', name:'SuperNova Apex',  fee:'$10,000', color:'#f59e0b', matAKey:'T10matA', matBKey:'T10matB', usePM:false },
+    ];
+    try {
+      // Velocity gates
+      const trExt = new ethers.Contract(ADDRS.tierRouter,
+        ['function getVelocityGates() external view returns (bool[10] memory)'], provider);
+      let gates = Array(10).fill(true);
+      try { gates = await trExt.getVelocityGates(); } catch(_) {}
+
+      // T1 — aggregate across all pairs via PairManager
+      const pm1 = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
+      let t1occA = 0n, t1occB = 0n, t1poolA = 0n, t1poolB = 0n, t1parked = 0n, t1pairs = 1;
+      try {
+        const [_matAs, _matBs, _occAs, _occBs] = await pm1.allPairsStatus();
+        t1pairs = _matAs.length || 1;
+        for (let i = 0; i < _matAs.length; i++) {
+          t1occA += BigInt(_occAs[i]);
+          t1occB += BigInt(_occBs[i]);
+        }
+        const pairFetches = Array.from({length: _matAs.length}, (_, i) => {
+          const mcA = new ethers.Contract(_matAs[i], MATRIX_ABI, provider);
+          const mcB = new ethers.Contract(_matBs[i], MATRIX_ABI, provider);
+          return Promise.all([
+            mcA.poolAccumulator().catch(()=>0n),
+            mcB.poolAccumulator().catch(()=>0n),
+            mcA.getParkedCount().catch(()=>0n),
+            mcB.getParkedCount().catch(()=>0n),
+          ]);
+        });
+        const pairResults = await Promise.all(pairFetches);
+        for (const [pA, pB, pkA, pkB] of pairResults) {
+          t1poolA += BigInt(pA); t1poolB += BigInt(pB);
+          t1parked += BigInt(pkA) + BigInt(pkB);
+        }
+      } catch(_) {}
+
+      // T2–T10 — read directly from single pair contracts
+      const t2to10 = await Promise.all(TIER_META.slice(1).map(async m => {
+        if (!ADDRS[m.matAKey]) return { occA:0n, occB:0n, poolA:0n, poolB:0n, parked:0n };
+        const mcA = new ethers.Contract(ADDRS[m.matAKey], MATRIX_ABI, provider);
+        const mcB = new ethers.Contract(ADDRS[m.matBKey], MATRIX_ABI, provider);
+        const [occA, occB, poolA, poolB, pkA, pkB] = await Promise.all([
+          mcA.occupancy().catch(()=>0n),   mcB.occupancy().catch(()=>0n),
+          mcA.poolAccumulator().catch(()=>0n), mcB.poolAccumulator().catch(()=>0n),
+          mcA.getParkedCount().catch(()=>0n),  mcB.getParkedCount().catch(()=>0n),
+        ]);
+        return { occA:BigInt(occA), occB:BigInt(occB), poolA:BigInt(poolA), poolB:BigInt(poolB), parked:BigInt(pkA)+BigInt(pkB) };
+      }));
+
+      const allData = [
+        { ...TIER_META[0], occA:t1occA, occB:t1occB, poolA:t1poolA, poolB:t1poolB, parked:t1parked, pairs:t1pairs },
+        ...TIER_META.slice(1).map((m, i) => ({ ...m, ...t2to10[i], pairs:1 })),
+      ];
+
+      // ── Render ──────────────────────────────────────────────
+      let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="font-size:11px;color:var(--text2);border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:6px 8px;font-weight:400;white-space:nowrap">Tier</th>
+            <th style="text-align:left;padding:6px 8px;font-weight:400" colspan="2">MatA / MatB</th>
+            <th style="text-align:right;padding:6px 8px;font-weight:400">Pool</th>
+            <th style="text-align:right;padding:6px 8px;font-weight:400">Parked</th>
+            <th style="text-align:right;padding:6px 8px;font-weight:400">Gate</th>
+          </tr>
+        </thead><tbody>`;
+
+      let activeTiers = 0;
+      for (let i = 0; i < allData.length; i++) {
+        const d = allData[i];
+        const gateOpen = Boolean(gates[i]);
+        const cap = MSIZE * d.pairs;
+        const hasActivity = Number(d.occA) > 0 || Number(d.occB) > 0;
+        if (hasActivity) activeTiers++;
+        const opacity = hasActivity ? '1' : '0.4';
+        const pctA = cap > 0 ? Math.round(Number(d.occA) * 100 / cap) : 0;
+        const pctB = cap > 0 ? Math.round(Number(d.occB) * 100 / cap) : 0;
+        const poolUSD = (Number(d.poolA + d.poolB) / 1e6).toFixed(2);
+        const parkedN = Number(d.parked);
+        const pairNote = i === 0 && d.pairs > 1
+          ? `<span style="font-size:10px;color:var(--text3);margin-left:3px">·&nbsp;${d.pairs}p</span>` : '';
+        const gateBadge = gateOpen
+          ? `<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(0,229,160,0.12);color:#00e5a0;border:0.5px solid rgba(0,229,160,0.35)">Open</span>`
+          : `<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,0.12);color:#f59e0b;border:0.5px solid rgba(245,158,11,0.35)">Velocity</span>`;
+
+        html += `<tr style="border-bottom:0.5px solid var(--border);opacity:${opacity}">
+          <td style="padding:8px 8px;white-space:nowrap;vertical-align:middle">
+            <div style="font-weight:500;color:${d.color};line-height:1.2">${d.label}${pairNote}</div>
+            <div style="font-size:10px;color:var(--text3);white-space:nowrap">${d.name} · ${d.fee}</div>
+          </td>
+          <td style="padding:8px 4px;width:170px;vertical-align:middle">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+              <span style="font-size:10px;color:var(--text3);width:10px">A</span>
+              <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pctA}%;background:${d.color};border-radius:3px"></div></div>
+              <span style="font-size:11px;color:var(--text2);min-width:48px;text-align:right">${Number(d.occA)}/${cap}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:10px;color:var(--text3);width:10px">B</span>
+              <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pctB}%;background:${d.color};opacity:0.55;border-radius:3px"></div></div>
+              <span style="font-size:11px;color:var(--text2);min-width:48px;text-align:right">${Number(d.occB)}/${cap}</span>
+            </div>
+          </td>
+          <td></td>
+          <td style="padding:8px 8px;text-align:right;color:#00e5a0;font-size:13px;vertical-align:middle">${Number(d.poolA + d.poolB) > 0 ? '$'+poolUSD : '—'}</td>
+          <td style="padding:8px 8px;text-align:right;font-size:13px;vertical-align:middle;color:${parkedN > 0 ? '#f59e0b' : 'var(--text3)'}">${parkedN > 0 ? parkedN : '—'}</td>
+          <td style="padding:8px 8px;text-align:right;vertical-align:middle">${gateBadge}</td>
+        </tr>`;
+      }
+      html += `</tbody></table>`;
+      wrap.innerHTML = html;
+
+      const badgeEl = document.getElementById('badge-all-tiers');
+      if (badgeEl) badgeEl.textContent = `${activeTiers} active`;
+      const summEl  = document.getElementById('summary-all-tiers');
+      if (summEl)  summEl.textContent  = `${activeTiers} of 10 tiers have activity`;
+
+    } catch(e) {
+      console.error('loadAllTiers error:', e);
+      wrap.innerHTML = '<div class="loading-row" style="color:var(--red)">Failed to load — check console</div>';
     }
   }
 
