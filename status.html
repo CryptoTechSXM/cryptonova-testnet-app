@@ -513,9 +513,26 @@
           <span class="detail-key" data-i18n="statusPage.row_total_registered">Total members joined</span>
           <span class="detail-val" id="mx-total">—</span>
         </div>
+        <div class="detail-section">T2 Status</div>
         <div class="detail-row">
-          <span class="detail-key" data-i18n="statusPage.row_t2_mata_occupancy">T2 MatA occupancy</span>
+          <span class="detail-key">T2 MatA occupancy</span>
           <span class="detail-val" id="mx-t2a">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">T2 MatB occupancy</span>
+          <span class="detail-val" id="mx-t2b">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">T2 MatA pool</span>
+          <span class="detail-val green" id="mx-t2a-pool">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">T2 MatB pool</span>
+          <span class="detail-val green" id="mx-t2b-pool">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">T2 parked members</span>
+          <span class="detail-val" id="mx-t2-parked" style="color:var(--yellow)">—</span>
         </div>
         <div class="info-note" data-i18n="statusPage.matrix_info_note"><strong>MatA fills first</strong> (127 members), then force-crosses to MatB. When MatB fills to 127, the pool distributes and members cycle back to MatA. The keeper drives the crossing.</div>
       </div>
@@ -1159,6 +1176,7 @@
       } catch(_) {}
 
       const t2matA = new ethers.Contract(ADDRS.T2matA, MATRIX_ABI, provider);
+      const t2matB = new ethers.Contract(ADDRS.T2matB, MATRIX_ABI, provider);
       const tr     = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
 
       // Query per-pair data: occupancy (already in occAs/occBs) + pool + rotationCount
@@ -1175,8 +1193,13 @@
         return { occA, occB, poolA, poolB, rotCount, active: pairActives[pi] };
       }));
 
-      const [occT2A, cycles, totalJoined] = await Promise.all([
+      const [occT2A, occT2B, poolT2A, poolT2B, parkedT2A, parkedT2B, cycles, totalJoined] = await Promise.all([
         t2matA.occupancy().catch(()=>0n),
+        t2matB.occupancy().catch(()=>0n),
+        t2matA.poolAccumulator().catch(()=>0n),
+        t2matB.poolAccumulator().catch(()=>0n),
+        t2matA.getParkedCount().catch(()=>0n),
+        t2matB.getParkedCount().catch(()=>0n),
         tr.totalSystemCycles().catch(()=>0n),
         tr.globalJoinedCount().catch(()=>0n),
       ]);
@@ -1241,6 +1264,13 @@
       setText('mx-cycles', Number(cycles).toString());
       setText('mx-total', Number(totalJoined).toString());
       setText('mx-t2a', `${occT2A} / ${MATRIX_SIZE}`);
+      setText('mx-t2b', `${occT2B} / ${MATRIX_SIZE}`);
+      setText('mx-t2a-pool', fmt6(poolT2A));
+      setText('mx-t2b-pool', fmt6(poolT2B));
+      const t2parked = Number(parkedT2A) + Number(parkedT2B);
+      setText('mx-t2-parked', t2parked.toString());
+      const parkedEl = document.getElementById('mx-t2-parked');
+      if (parkedEl) parkedEl.style.color = t2parked > 0 ? 'var(--yellow)' : 'var(--text2)';
       setText('summary-matrix', `MatA ${pctA}% · MatB ${pctB}% · ${cycles} ${t('statusPage.js.cycles_suffix','CYCLES').toLowerCase()}`);
 
     } catch(e) {
