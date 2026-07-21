@@ -7,6 +7,30 @@
 
 ## Open Issues
 
+### [2026-07-21] Dashboard (index.html) — This account had a back-to-back re-enter queue message. One …
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xa40c541bd7f6354b0920f75ace6aff5375093867
+- **Frequency:** Intermittent
+- **What happened:** This account had a back-to-back re-enter queue message. One amount was $8.00, and the second rescue amount was $3,81.
+- **What was expected:** One self-rescue.
+- **Notes:** What caused such a large amount to be self-rescued?
+- **Submitted:** Tue, 21 Jul 2026 20:27:23 GMT
+
+
+### [2026-07-21] Governance / DAO (governance.html) — I attempted to self rescue from T2.1 Matrix A but the transa…
+- **Reporter:** @Koach100
+- **Page:** Governance / DAO (governance.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x301afb29e6f4b68c97f20686ad23e7adc3955170
+- **Frequency:** Consistent
+- **What happened:** I attempted to self rescue from T2.1 Matrix A but the transaction failed.
+- **What was expected:** I should have been able to cycle out of that matrix.
+- **Notes:** message on MM was transaction failed on chain F8V8 partner full wait for rotation. This happened in another account and after some time when I tried again the transaction was successful.
+- **Submitted:** Tue, 21 Jul 2026 19:42:17 GMT
+
+
 ### [2026-07-21] Other — enter T2
 ❌ "", "from": "0x7D3c94885d2022200934d4908BCa7B4790…
 - **Reporter:** Sherwyn
