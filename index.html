@@ -1064,7 +1064,7 @@
               ⚠️ <strong style="color:var(--yellow)" data-i18n="reg.no_ref_title">No referrer entered.</strong> <span data-i18n="reg.no_ref_body">You will be assigned to a default founding member as your permanent sponsor. If someone invited you, enter their address above before continuing.</span>
               <div style="margin-top:8px;display:flex;gap:8px">
                 <button onclick="document.getElementById('input-referrer').focus();document.getElementById('default-sponsor-warn').style.background='rgba(245,158,11,.14)'" style="background:none;border:1px solid var(--yellow);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600" data-i18n="reg.no_ref_enter">Enter a Referrer</button>
-                <button onclick="(function(){var inp=document.getElementById('input-referrer');var warn=document.getElementById('default-sponsor-warn');var btn=document.getElementById('btn-approve');if(inp&&window._defaultReferrer){inp.value=window._defaultReferrer;checkDefaultSponsorWarn();}else{if(warn)warn.style.display='none';if(btn){btn.disabled=false;btn.className='btn btn-green full-w';}}})()" style="background:var(--yellow);border:none;border-radius:6px;padding:5px 14px;font-size:12px;color:#000;cursor:pointer;font-weight:700" data-i18n="reg.no_ref_continue">Continue with Default</button>
+                <button onclick="useDefaultSponsor()" style="background:var(--yellow);border:none;border-radius:6px;padding:5px 14px;font-size:12px;color:#000;cursor:pointer;font-weight:700" data-i18n="reg.no_ref_continue">Continue with Default</button>
               </div>
             </div>
           </div>
@@ -6077,6 +6077,31 @@ async function addUSDCtoMetaMask() {
       params: { type: 'ERC20', options: { address: ADDRS.usdc, symbol: 'USDC', decimals: 6 }},
     });
   } catch(e) { console.error(e); }
+}
+
+async function useDefaultSponsor() {
+  const inp  = document.getElementById('input-referrer');
+  const warn = document.getElementById('default-sponsor-warn');
+  const btn  = document.getElementById('btn-approve');
+  // Try to get default referrer — use cached value or fetch fresh
+  let defRef = window._defaultReferrer;
+  if (!defRef || defRef === ethers.ZeroAddress) {
+    try {
+      const p  = new ethers.BrowserProvider(window.ethereum);
+      const tr = new ethers.Contract(ADDRS.tierRouter,
+        ['function defaultReferrer() view returns (address)'], p);
+      defRef = await tr.defaultReferrer();
+      if (defRef && defRef !== ethers.ZeroAddress) window._defaultReferrer = defRef;
+    } catch(e) { console.warn('useDefaultSponsor: could not fetch defaultReferrer', e); }
+  }
+  if (inp && defRef && defRef !== ethers.ZeroAddress) {
+    inp.value = defRef;
+    checkDefaultSponsorWarn();
+  } else {
+    // Fallback: enable the button even without the address
+    if (warn) warn.style.display = 'none';
+    if (btn)  { btn.disabled = false; btn.className = 'btn btn-green full-w'; }
+  }
 }
 
 function checkDefaultSponsorWarn() {
