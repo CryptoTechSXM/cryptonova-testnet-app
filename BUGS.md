@@ -7,6 +7,17 @@
 
 ## Open Issues
 
+### [2026-07-21] Dashboard (index.html) — T1 seems to have stopped moving for some time then started a…
+- **Reporter:** @CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** T1 seems to have stopped moving for some time then started again with a accounts goind from 1 directly to graduated and not being parked for self rescue.
+- **What was expected:** Should have been parked for self rescue. Noticed in about 4 accounts so far.
+- **Submitted:** Tue, 21 Jul 2026 03:38:43 GMT
+
+
 ### [2026-07-21] Other — ❌ "", "from": "0x7C409fD9771963Ab4Bd56a3129Fb0B9677917444", …
 - **Reporter:** Michael
 - **Page:** Other
