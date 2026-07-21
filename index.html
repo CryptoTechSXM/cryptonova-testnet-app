@@ -1064,7 +1064,7 @@
               ⚠️ <strong style="color:var(--yellow)" data-i18n="reg.no_ref_title">No referrer entered.</strong> <span data-i18n="reg.no_ref_body">You will be assigned to a default founding member as your permanent sponsor. If someone invited you, enter their address above before continuing.</span>
               <div style="margin-top:8px;display:flex;gap:8px">
                 <button onclick="document.getElementById('input-referrer').focus();document.getElementById('default-sponsor-warn').style.background='rgba(245,158,11,.14)'" style="background:none;border:1px solid var(--yellow);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--yellow);cursor:pointer;font-weight:600" data-i18n="reg.no_ref_enter">Enter a Referrer</button>
-                <button onclick="(function(){var inp=document.getElementById('input-referrer');if(inp&&window._defaultReferrer){inp.value=window._defaultReferrer;inp.readOnly=true;inp.style.opacity='0.7';inp.style.cursor='not-allowed';}checkDefaultSponsorWarn();var btn=document.getElementById('btn-approve');if(btn){btn.scrollIntoView({behavior:'smooth',block:'center'});btn.style.transition='box-shadow 0.3s';btn.style.boxShadow='0 0 0 4px rgba(0,229,160,0.4)';setTimeout(function(){btn.style.boxShadow='';},1500);}})()" style="background:var(--yellow);border:none;border-radius:6px;padding:5px 14px;font-size:12px;color:#000;cursor:pointer;font-weight:700" data-i18n="reg.no_ref_continue">Continue with Default</button>
+                <button onclick="(function(){var inp=document.getElementById('input-referrer');if(inp&&window._defaultReferrer){inp.value=window._defaultReferrer;}checkDefaultSponsorWarn();})()" style="background:var(--yellow);border:none;border-radius:6px;padding:5px 14px;font-size:12px;color:#000;cursor:pointer;font-weight:700" data-i18n="reg.no_ref_continue">Continue with Default</button>
               </div>
             </div>
           </div>
@@ -3255,13 +3255,7 @@ async function loadUserData() {
           const defRef = await tr.defaultReferrer();
           if (defRef && defRef !== ethers.ZeroAddress) {
             window._defaultReferrer = defRef;
-            // Pre-fill the field with the default address so the user can see it.
-            // They can clear it and type their own referrer — it's not locked until
-            // they explicitly click "Continue with Default".
-            refInput.value = defRef;
-            refInput.placeholder = '';
-            // Immediately enable the approve button since a valid address is now set.
-            checkDefaultSponsorWarn();
+            refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
           }
         } catch(_) {}
       }
