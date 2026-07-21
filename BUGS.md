@@ -7,6 +7,20 @@
 
 ## Open Issues
 
+### [2026-07-21] Other — enter T2
+❌ "", "from": "0x7D3c94885d2022200934d4908BCa7B4790…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** enter T2
+❌ "", "from": "0x7D3c94885d2022200934d4908BCa7B47905BbCF6", "to": "0x0F041e7F70Cd25DAcF619bea5847fB688
+- **What was expected:** To be re enter into T2 Matrix
+- **Notes:** Keeps failing when trying to re enter T2 using the button/link, blockchain is saying execution reverted...
+- **Submitted:** Tue, 21 Jul 2026 14:27:18 GMT
+
+
 ### [2026-07-21] Dashboard (index.html) — T1 seems to have stopped moving for some time then started a…
 - **Reporter:** @CryptoJan22
 - **Page:** Dashboard (index.html)
