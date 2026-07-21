@@ -7,6 +7,18 @@
 
 ## Open Issues
 
+### [2026-07-21] Other — ❌ "", "from": "0x7C409fD9771963Ab4Bd56a3129Fb0B9677917444", …
+- **Reporter:** Michael
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x7c409fd9771963ab4bd56a3129fb0b9677917444
+- **Frequency:** Consistent
+- **What happened:** ❌ "", "from": "0x7C409fD9771963Ab4Bd56a3129Fb0B9677917444", "to": "0xB6C9Ed9c08853e014141387cC73DE0Cfc
+- **What was expected:** transaction should have been successful after paying fees to regain place in queue
+- **Notes:** After self rescue the error came up saying transaction failed.
+- **Submitted:** Tue, 21 Jul 2026 03:28:49 GMT
+
+
 _No open issues._
 
 ## Resolved Issues
