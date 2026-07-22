@@ -1237,12 +1237,14 @@
           <div class="stat-value green" id="dash-withdrawable">—</div>
           <div id="dash-reserved-badge" style="display:none;color:var(--yellow);font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="stat-sub" id="dash-ready-label" data-i18n="dash.ready_to_claim">Ready to claim</div>
+          <div id="dash-withdraw-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#2a3348)"></div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('earned',this)" title="Click for tier breakdown">
           <div class="stat-label" data-i18n="dash.total_earned">Total Earned</div>
           <div class="stat-value" id="dash-total-earned">—</div>
           <div class="stat-sub" id="dash-total-earned-sub" data-i18n="dash.all_tiers_lifetime" title="Total USDC ever credited to your account. Includes current balance, amounts auto-deducted for tier upgrades, and past withdrawals.">All tiers lifetime</div>
+          <div id="dash-earned-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#2a3348)"></div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm" title="Total USDC you have successfully withdrawn to your wallet across all tiers.">
@@ -4111,6 +4113,7 @@ async function loadDashboardData() {
     const t1CyclesTR = await tr.tierCycles(userAddr, 0).catch(() => 0n);
 
     let totalW = 0n, realW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
+    const tierBreakdown = {}; // tNum -> { earned, withdrawable, active } for per-tier card breakdowns
     let activePositions = []; // [{label, bfs, bfsUnknown}]
     let activeCycles = 0n; // highest tier's cycles (for upgrade widget)
     let highestTier = 0;
@@ -4157,6 +4160,15 @@ async function loadDashboardData() {
         totalWD += BigInt(member.totalWithdrawn ?? 0n);
         if (!memberId) { memberId = Number(member.id); memberReferrer = member.referrer; }
         const tNum = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
+        // Per-tier breakdown for the earnings + withdrawable cards
+        // (withdrawable mirrors the realW lock logic so rows sum to the headline number)
+        {
+          const tb = tierBreakdown[tNum] || (tierBreakdown[tNum] = { earned: 0n, withdrawable: 0n, active: 0 });
+          tb.earned += BigInt(member.totalEarned);
+          const _wtb = BigInt(member.withdrawable);
+          tb.withdrawable += (member.isInMatrix && _wtb > 10_000_000n) ? _wtb - 10_000_000n : (member.isInMatrix ? 0n : _wtb);
+          if (member.isInMatrix) tb.active++;
+        }
         highestTier = Math.max(highestTier, tNum);
         if (member.isInMatrix) {
           const pos = { label: m.label, bfs: 0n, bfsUnknown: false, crossingReserve: 0n };
@@ -4280,6 +4292,33 @@ async function loadDashboardData() {
     }
     setText('dash-total-earned',   fmt6(totalE));
     setText('dash-total-withdrawn', fmt6(totalWD));
+
+    // ── Per-tier breakdowns on the Withdrawable + Total Earned cards ─────────
+    try {
+      const _tiersWithData = Object.keys(tierBreakdown).map(Number).sort((a, b) => a - b);
+      const _rowStyle = 'display:flex;justify-content:space-between;font-size:11px;line-height:1.7;color:var(--text3)';
+      const wbEl = document.getElementById('dash-withdraw-breakdown');
+      if (wbEl) {
+        wbEl.innerHTML = _tiersWithData.length > 1
+          ? _tiersWithData.map(t => {
+              const tb = tierBreakdown[t];
+              return `<div style="${_rowStyle}"><span>T${t}${tb.active > 1 ? ' ×' + tb.active : ''}</span><span style="color:var(--green)">${fmt6(tb.withdrawable)}</span></div>`;
+            }).join('')
+          : '';
+        wbEl.style.display = _tiersWithData.length > 1 ? 'block' : 'none';
+      }
+      const ebEl = document.getElementById('dash-earned-breakdown');
+      if (ebEl) {
+        ebEl.innerHTML = _tiersWithData.length > 1
+          ? _tiersWithData.map(t => {
+              const tb = tierBreakdown[t];
+              return `<div style="${_rowStyle}"><span>T${t}${tb.active > 1 ? ' ×' + tb.active : ''}</span><span>${fmt6(tb.earned)}</span></div>`;
+            }).join('')
+          : '';
+        ebEl.style.display = _tiersWithData.length > 1 ? 'block' : 'none';
+      }
+      window._tierBreakdown = tierBreakdown;
+    } catch(_) {}
     // Show deducted/claimed gap so accounting is transparent
     try {
       const deducted = totalE > totalW + totalEscrow ? totalE - totalW - totalEscrow : 0n;
