@@ -2062,6 +2062,8 @@ const TIER_ROUTER_ABI = [
   'function bulkUpgrade(uint8 targetTierIndex) external',                           // V8.35
   'function tierFirstEntries(uint8 tierNum) external view returns (uint256)',        // V8.35
   'function tierGateThreshold(uint8 tierNum) external view returns (uint256)',       // V8.35
+  'function isWhaleGateActiveForTier(uint8 tierNum) external view returns (bool)',   // V8.35 — authoritative (admin override included)
+  'function reservedFor(address member) external view returns (uint256)',            // authoritative automation reserve
   'event BulkUpgrade(address indexed member, uint8 fromTier, uint8 toTier, uint256 totalFee)', // V8.35
   'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.11
 ];
@@ -4601,6 +4603,12 @@ async function loadDashboardData() {
           }
         }
 
+        // Authoritative on-chain value overrides the local mirror when available
+        try {
+          const onchainReserved = await tr.reservedFor(userAddr);
+          if (onchainReserved !== undefined && onchainReserved !== null) reserved = BigInt(onchainReserved);
+        } catch(_) {}
+
         if (reserved > 0n) {
           const free = realW > reserved ? realW - reserved : 0n;
           window._maxWithdrawable  = free;   // cap partial withdraw to free amount
@@ -5313,6 +5321,7 @@ async function setDoubleReentryOption(enabled) {
       ? 'Enabled — second entry fires when surplus covers fee'
       : 'Disabled';
     toast(enabled ? '✅ Double reentry enabled' : 'Double reentry disabled', 'success');
+    try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled — second entry fires when surplus covers fee');
@@ -5342,6 +5351,7 @@ async function setAutoUpgradeOption(enabled) {
     try { if (userAddr) localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
     if (lbl) lbl.textContent = enabled ? 'Enabled' : 'Disabled';
     toast(enabled ? '✅ Auto-upgrade enabled' : 'Auto-upgrade disabled', 'success');
+    try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
@@ -5370,6 +5380,7 @@ async function setAutoReentryOption(enabled) {
     try { if (userAddr) localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
     if (lbl) lbl.textContent = enabled ? 'Enabled' : 'Disabled';
     toast(enabled ? '✅ Auto-reentry enabled' : 'Auto-reentry disabled', 'success');
+    try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
   } catch(e) {
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
@@ -6190,26 +6201,48 @@ async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
     }
   }
 
-  // Dashboard bulk-upgrade section (shown when gate is open AND member is T1-T4)
+  // Dashboard bulk-upgrade section:
+  //  - T1-T4 members: shown when the shared T5 gate is open (bulk buy up to T5)
+  //  - T5-T9 members: shown when the NEXT tier's independent gate (T6-T10) is open
   const bulkSection = document.getElementById('bulk-upgrade-section');
   if (bulkSection) {
-    const showBulk = t5GateOpen && highestTier >= 1 && highestTier <= 4;
+    // V8.35 T6-T10: check the next tier's independent gate for T5+ members
+    let hiGateOpen = false;
+    let hiTarget   = 0;
+    if (highestTier >= 5 && highestTier <= 9) {
+      hiTarget = highestTier + 1;
+      try { hiGateOpen = await tr.isWhaleGateActiveForTier(hiTarget); } catch(_) {}
+      if (!hiGateOpen) {
+        // Fallback: derive from counters if the view call fails
+        try {
+          const f = await tr.tierFirstEntries(hiTarget);
+          const th = await tr.tierGateThreshold(hiTarget);
+          hiGateOpen = th > 0n && f >= th;
+        } catch(_) {}
+      }
+    }
+    const showBulkLow  = t5GateOpen && highestTier >= 1 && highestTier <= 4;
+    const showBulkHigh = hiGateOpen && hiTarget > 0;
+    const showBulk = showBulkLow || showBulkHigh;
     bulkSection.style.display = showBulk ? 'block' : 'none';
     if (showBulk) {
       const TIER_FEES = [0n,10_000_000n,25_000_000n,50_000_000n,100_000_000n,200_000_000n,
                          500_000_000n,1_000_000_000n,2_000_000_000n,5_000_000_000n,10_000_000_000n];
+      const TIER_NAMES = ['','Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime',
+                          'Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
+      const targetTierNum = showBulkLow ? 5 : hiTarget;
       let totalFee = 0n;
       const feeLines = [];
-      for (let t = highestTier + 1; t <= 5; t++) {
+      for (let t = highestTier + 1; t <= targetTierNum; t++) {
         let fee = TIER_FEES[t] || 0n;
         try { fee = await tr.tierEntryFees(t - 1); } catch(_) {}
         totalFee += fee;
         feeLines.push('T' + t + ': ' + fmt6(fee));
       }
-      const targetTierIndex = 4; // T5 is index 4
+      const targetTierIndex = targetTierNum - 1; // 0-based index for bulkUpgrade()
       window._bulkUpgradeFee       = totalFee;
       window._bulkUpgradeTierIndex = targetTierIndex;
-      setText('bulk-upgrade-target', 'T5 — Quantum Horizon');
+      setText('bulk-upgrade-target', 'T' + targetTierNum + ' — ' + (TIER_NAMES[targetTierNum] || ''));
       setText('bulk-upgrade-fee',    fmt6(totalFee));
       const breakdown = document.getElementById('bulk-upgrade-breakdown');
       if (breakdown) breakdown.textContent = feeLines.join(' + ') + ' = ' + fmt6(totalFee) + ' total';
