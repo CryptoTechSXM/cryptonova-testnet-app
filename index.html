@@ -1237,14 +1237,12 @@
           <div class="stat-value green" id="dash-withdrawable">—</div>
           <div id="dash-reserved-badge" style="display:none;color:var(--yellow);font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="stat-sub" id="dash-ready-label" data-i18n="dash.ready_to_claim">Ready to claim</div>
-          <div id="dash-withdraw-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#2a3348)"></div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('earned',this)" title="Click for tier breakdown">
           <div class="stat-label" data-i18n="dash.total_earned">Total Earned</div>
           <div class="stat-value" id="dash-total-earned">—</div>
           <div class="stat-sub" id="dash-total-earned-sub" data-i18n="dash.all_tiers_lifetime" title="Total USDC ever credited to your account. Includes current balance, amounts auto-deducted for tier upgrades, and past withdrawals.">All tiers lifetime</div>
-          <div id="dash-earned-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#2a3348)"></div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm" title="Total USDC you have successfully withdrawn to your wallet across all tiers.">
@@ -4293,32 +4291,8 @@ async function loadDashboardData() {
     setText('dash-total-earned',   fmt6(totalE));
     setText('dash-total-withdrawn', fmt6(totalWD));
 
-    // ── Per-tier breakdowns on the Withdrawable + Total Earned cards ─────────
-    try {
-      const _tiersWithData = Object.keys(tierBreakdown).map(Number).sort((a, b) => a - b);
-      const _rowStyle = 'display:flex;justify-content:space-between;font-size:11px;line-height:1.7;color:var(--text3)';
-      const wbEl = document.getElementById('dash-withdraw-breakdown');
-      if (wbEl) {
-        wbEl.innerHTML = _tiersWithData.length > 1
-          ? _tiersWithData.map(t => {
-              const tb = tierBreakdown[t];
-              return `<div style="${_rowStyle}"><span>T${t}${tb.active > 1 ? ' ×' + tb.active : ''}</span><span style="color:var(--green)">${fmt6(tb.withdrawable)}</span></div>`;
-            }).join('')
-          : '';
-        wbEl.style.display = _tiersWithData.length > 1 ? 'block' : 'none';
-      }
-      const ebEl = document.getElementById('dash-earned-breakdown');
-      if (ebEl) {
-        ebEl.innerHTML = _tiersWithData.length > 1
-          ? _tiersWithData.map(t => {
-              const tb = tierBreakdown[t];
-              return `<div style="${_rowStyle}"><span>T${t}${tb.active > 1 ? ' ×' + tb.active : ''}</span><span>${fmt6(tb.earned)}</span></div>`;
-            }).join('')
-          : '';
-        ebEl.style.display = _tiersWithData.length > 1 ? 'block' : 'none';
-      }
-      window._tierBreakdown = tierBreakdown;
-    } catch(_) {}
+    // Per-tier data cached for detail modals (breakdown shown there, not on cards)
+    window._tierBreakdown = tierBreakdown;
     // Show deducted/claimed gap so accounting is transparent
     try {
       const deducted = totalE > totalW + totalEscrow ? totalE - totalW - totalEscrow : 0n;
@@ -4845,10 +4819,10 @@ async function _getGlobalJoinOrder(addr, rp) {
 // ── Helpers ──────────────────────────────────────────────────────────
 async function _getAllMatrixMembers(userAddr, rp) {
   const matObjs = await _buildAllMatrixObjects(rp);
-  const mats = matObjs.map(m => m.addr);
   let totalEarned = 0n, totalWithdrawn = 0n, totalWithdrawable = 0n, joinedAt = 0n, memberId = 0;
-  for (const addr of mats) {
-    const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
+  const byTier = {}; // tNum -> { earned, withdrawable, active }
+  for (const mo of matObjs) {
+    const mc = new ethers.Contract(mo.addr, MATRIX_ABI, rp);
     const m  = await mc.getMember(userAddr).catch(() => null);
     if (m && m.hasEverJoined) {
       totalEarned      += BigInt(m.totalEarned);
@@ -4856,14 +4830,19 @@ async function _getAllMatrixMembers(userAddr, rp) {
       totalWithdrawable += BigInt(m.withdrawable);
       if (!joinedAt && m.joinedAt) joinedAt = BigInt(m.joinedAt);
       if (!memberId) memberId = Number(m.id);
+      const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
+      const tb = byTier[tNum] || (byTier[tNum] = { earned: 0n, withdrawable: 0n, active: 0 });
+      tb.earned       += BigInt(m.totalEarned);
+      tb.withdrawable += BigInt(m.withdrawable);
+      if (m.isInMatrix) tb.active++;
     }
   }
-  return { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt, memberId };
+  return { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt, memberId, byTier };
 }
 
 // ── Withdrawable breakdown ────────────────────────────────────────────
 async function renderWithdrawableDetail(el, rp) {
-  const { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt } = await _getAllMatrixMembers(userAddr, rp);
+  const { totalEarned, totalWithdrawn, totalWithdrawable, joinedAt, byTier } = await _getAllMatrixMembers(userAddr, rp);
 
   // Fetch crossing reserve locked across all active tier matrices
   // Use _buildAllMatrixObjects so T1.2, T1.3 etc. are included after factory expansion
@@ -4897,6 +4876,14 @@ async function renderWithdrawableDetail(el, rp) {
     ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
     ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
+    ${(() => {
+      const tiers = Object.keys(byTier || {}).map(Number).sort((a,b) => a-b);
+      if (tiers.length < 2) return '';
+      return `<div class="detail-section">${_t('modal.by_tier','Balance by Tier')}</div>` + tiers.map(t => {
+        const tb = byTier[t];
+        return `<div class="detail-row"><span class="detail-key">T${t}${tb.active > 1 ? ' · ' + tb.active + ' seats' : ''}</span><span class="detail-val green">${fmt6(tb.withdrawable)}</span></div>`;
+      }).join('');
+    })()}
     ${totalWithdrawable > 0n ? `
     <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
     <div class="detail-row"><span class="detail-key">${_t('modal.fee_deducted','Fee Deducted')}</span><span class="detail-val red">− ${fmt6(feeAmt)}</span></div>
@@ -4916,20 +4903,21 @@ async function renderEarnedDetail(el, rp) {
     Promise.all(Array.from({length: numTiers}, (_, i) => tr.tierEntryFees(i).catch(() => 0n))),
   ]);
 
+  const { totalEarned, byTier } = await _getAllMatrixMembers(userAddr, rp);
+
   const TIER_NAMES = ['Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime','Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
   let totalCycles = 0n;
   const rows = cycArr.map((c, i) => {
     totalCycles += c;
-    if (!c || c === 0n) return '';
+    const tEarned = byTier?.[i+1]?.earned ?? 0n;
+    if ((!c || c === 0n) && tEarned === 0n) return '';
     const label = TIER_NAMES[i] || `T${i+1}`;
     const fee   = feeArr[i] || 0n;
     return `<div class="detail-row">
       <span class="detail-key">T${i+1} · ${label}</span>
-      <span class="detail-val">${c.toString()} cycle${c===1n?'':'s'} <span style="color:var(--text3);font-weight:400;font-size:11px">· ${fmt6(fee)} entry</span></span>
+      <span class="detail-val"><span class="green">${fmt6(tEarned)}</span> <span style="color:var(--text3);font-weight:400;font-size:11px">· ${c.toString()} cycle${c===1n?'':'s'} · ${fmt6(fee)} entry</span></span>
     </div>`;
   }).join('');
-
-  const { totalEarned } = await _getAllMatrixMembers(userAddr, rp);
   const avgPerCycle = totalCycles > 0n ? fmt6(totalEarned / totalCycles) : '—';
 
   el.innerHTML = `
