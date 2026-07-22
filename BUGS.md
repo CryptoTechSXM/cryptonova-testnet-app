@@ -7,6 +7,24 @@
 
 ## Open Issues
 
+### [2026-07-22] Dashboard (index.html) — When Auto-reentry, AutoUpgrade and/or Double-reentry are tog…
+- **Reporter:** @ThanksAndPraises
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
+- **Frequency:** Consistent
+- **What happened:** When Auto-reentry, AutoUpgrade and/or Double-reentry are toggled 
+OFF or ON in any combination, what happens is:
+
+(1) The Withdrawal Amount 
+      and
+(2) The Reserved Amounts 
+
+      are NOT ACCURATELY CALCULATED!!
+- **What was expected:** The withdrawal Amount and the Reserved Amount should accurately reflect amounts based on which of the Auto-reentry, AutoUpgrade and Double-reentry switches are ON or OFF!!!
+- **Submitted:** Wed, 22 Jul 2026 19:10:07 GMT
+
+
 ### [2026-07-21] Dashboard (index.html) — This account had a back-to-back re-enter queue message. One …
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
