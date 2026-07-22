@@ -5,86 +5,46 @@
 
 ---
 
+## Next Deploy (V8.43) — Owner items 2026-07-22
+
+### 1. Whale gate blocked after self rescue — open to ALL members
+- Members are asked to complete a tier cycle before whale gate bulk upgrade unlocks, even right after self rescue.
+- **Wanted:** whale gate purchases open to every member, regardless of cycle status.
+- Contract change: remove completed-cycle/active-MatB eligibility requirement from `bulkUpgrade()` in TierRouter.sol. Frontend: remove the matching `canUpgrade` gate added in 40200ef/af1ff8a.
+
+### 2. New registrations should be able to buy all 5 tiers immediately
+- New members currently must complete tier(s) before upgrading. They should be able to buy T1–T5 (and beyond per whale gate config) at registration.
+- Contract change (same root cause as #1) + register-page UI: "buy multiple tiers now" option.
+
+### 3. Verify CNOVA minting on multi-tier whale gate purchases
+- Suspicion: some mints are lost along the way when bulkUpgrade covers several tiers.
+- **Action:** verification script — replay recent bulkUpgrade txs, compare expected mint per tier vs actual CNOVA Transfer events. Fix contract if a gap is confirmed.
+
+### 4. Pair .2 opening math — self-sustaining loop capacity
+- **Rule locked 2026-07-22 (two thresholds):**
+  - Pair .1 self-sustaining loop capacity = 127 × 4 (should never be reached).
+  - **Deploy** pair .2 when pair .1 hits 125 × 3 — early buffer so the pair exists before it's needed (factory deploy is heavy; avoids a repeat of the July 19 frozen-MatB incident).
+  - **Route** at 127 × 3: once .1 hits 127 × 3, ALL overflow routes to .2 — new external registrations, double-entry second seats, and self-rescue re-entries.
+- Prevents .2 sitting open/empty for long periods and confusing members.
+- Change to V8.42 hybrid routing thresholds in TierRouter.sol / PairManagerV8.sol.
+
+### 5. Upgrade at MatA→MatB cross should use in-matrix earnings
+- `onCrossToMatB()` already auto-upgrades at cross, but only checks the member's **wallet** USDC + a standing allowance to TierRouter — it ignores earnings inside the matrix. Since the frontend approves exact per-tx amounts, the allowance is almost never there → members wait a full extra cycle.
+- **Fix:** at cross, if in-matrix withdrawable covers the next tier fee, deduct from earnings and upgrade immediately (same funding logic as `handleCycleOut`, moved earlier). Needs a mid-cycle release function on FigureEightMatrixV8 + a new branch in `onCrossToMatB`.
+- **Design CONFIRMED 2026-07-22:** withdrawable only — crossing reserve stays locked for re-entry. If withdrawable < fee, silently skip (no revert, no error) and continue normal cycle flow; member upgrades at cycle-out as today.
+
+### 6. Toggle semantics — make auto-reentry / auto-upgrade / double-reentry ADDITIVE
+- **Current (wrong):** when auto-upgrade fires at cycle-out, the member's seat moves to the next tier and they LEAVE the old tier — old-tier seat is only kept if double reentry is on (`secIndex = isUpgrade ? tierIndex : destTierIndex` in `_executeAndDouble`).
+- **Wanted (owner, 2026-07-22):** toggles are independent and additive:
+  - Auto-reentry ON → always re-enter current tier at cycle-out; member never graduates while it's on.
+  - + Auto-upgrade ON → additionally enter next tier (in both tiers).
+  - + Double reentry ON → additionally a 2nd seat in the same matrix (2 seats current tier + 1 seat next tier).
+- **Funding priority (proposed, pending owner confirm):** re-entry → upgrade → double seat, each silently skipped if remaining withdrawable falls short.
+- Contract: rework `_resolveDest` / `_executeAndDouble` / `_handleDoubleEntry` in TierRouter.sol.
+
+---
+
 ## Open Issues
-
-### [2026-07-22] Dashboard (index.html) — When Auto-reentry, AutoUpgrade and/or Double-reentry are tog…
-- **Reporter:** @ThanksAndPraises
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
-- **Frequency:** Consistent
-- **What happened:** When Auto-reentry, AutoUpgrade and/or Double-reentry are toggled 
-OFF or ON in any combination, what happens is:
-
-(1) The Withdrawal Amount 
-      and
-(2) The Reserved Amounts 
-
-      are NOT ACCURATELY CALCULATED!!
-- **What was expected:** The withdrawal Amount and the Reserved Amount should accurately reflect amounts based on which of the Auto-reentry, AutoUpgrade and Double-reentry switches are ON or OFF!!!
-- **Submitted:** Wed, 22 Jul 2026 19:10:07 GMT
-
-
-### [2026-07-21] Dashboard (index.html) — This account had a back-to-back re-enter queue message. One …
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xa40c541bd7f6354b0920f75ace6aff5375093867
-- **Frequency:** Intermittent
-- **What happened:** This account had a back-to-back re-enter queue message. One amount was $8.00, and the second rescue amount was $3,81.
-- **What was expected:** One self-rescue.
-- **Notes:** What caused such a large amount to be self-rescued?
-- **Submitted:** Tue, 21 Jul 2026 20:27:23 GMT
-
-
-### [2026-07-21] Governance / DAO (governance.html) — I attempted to self rescue from T2.1 Matrix A but the transa…
-- **Reporter:** @Koach100
-- **Page:** Governance / DAO (governance.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x301afb29e6f4b68c97f20686ad23e7adc3955170
-- **Frequency:** Consistent
-- **What happened:** I attempted to self rescue from T2.1 Matrix A but the transaction failed.
-- **What was expected:** I should have been able to cycle out of that matrix.
-- **Notes:** message on MM was transaction failed on chain F8V8 partner full wait for rotation. This happened in another account and after some time when I tried again the transaction was successful.
-- **Submitted:** Tue, 21 Jul 2026 19:42:17 GMT
-
-
-### [2026-07-21] Other — enter T2
-❌ "", "from": "0x7D3c94885d2022200934d4908BCa7B4790…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** enter T2
-❌ "", "from": "0x7D3c94885d2022200934d4908BCa7B47905BbCF6", "to": "0x0F041e7F70Cd25DAcF619bea5847fB688
-- **What was expected:** To be re enter into T2 Matrix
-- **Notes:** Keeps failing when trying to re enter T2 using the button/link, blockchain is saying execution reverted...
-- **Submitted:** Tue, 21 Jul 2026 14:27:18 GMT
-
-
-### [2026-07-21] Dashboard (index.html) — T1 seems to have stopped moving for some time then started a…
-- **Reporter:** @CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** T1 seems to have stopped moving for some time then started again with a accounts goind from 1 directly to graduated and not being parked for self rescue.
-- **What was expected:** Should have been parked for self rescue. Noticed in about 4 accounts so far.
-- **Submitted:** Tue, 21 Jul 2026 03:38:43 GMT
-
-
-### [2026-07-21] Other — ❌ "", "from": "0x7C409fD9771963Ab4Bd56a3129Fb0B9677917444", …
-- **Reporter:** Michael
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x7c409fd9771963ab4bd56a3129fb0b9677917444
-- **Frequency:** Consistent
-- **What happened:** ❌ "", "from": "0x7C409fD9771963Ab4Bd56a3129Fb0B9677917444", "to": "0xB6C9Ed9c08853e014141387cC73DE0Cfc
-- **What was expected:** transaction should have been successful after paying fees to regain place in queue
-- **Notes:** After self rescue the error came up saying transaction failed.
-- **Submitted:** Tue, 21 Jul 2026 03:28:49 GMT
-
 
 _No open issues._
 
@@ -92,6 +52,12 @@ _No open issues._
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-22 | 2026-07-22 | index.html | @ThanksAndPraises (0x3c17) — Withdrawal/Reserved amounts not recalculated when Auto-reentry/AutoUpgrade/Double-reentry toggled. Root cause: reserve only computed on page load, never after toggle change. Fixed: dashboard refresh fires after each toggle confirms + authoritative on-chain reservedFor() now used. | 45fb626 |
+| 2026-07-21 | 2026-07-22 | index.html | @Lavern_Gay (0xa40c) — back-to-back re-enter queue messages ($8.00 + $3.81). Explained to member: two separate rescue events (shortfall amounts differ per cycle position). Closed — explained. | — |
+| 2026-07-21 | 2026-07-22 | governance.html | @Koach100 (0x301a) — selfRescue from T2.1 MatA failed: "F8V8 partner full wait for rotation". Works as designed — MatB was full; succeeded on retry after rotation. Closed — explained. | — |
+| 2026-07-21 | 2026-07-22 | Other | Sherwyn (0x7d3c) — T2 re-entry button reverting. Explained to member. Closed — explained. | — |
+| 2026-07-21 | 2026-07-22 | index.html | @CryptoJan22 (0x7947) — accounts going straight from position 1 to graduated without being parked. Explained to member (rescue keeper auto-rescues within 2 min, so parked window often invisible). Closed — explained. | — |
+| 2026-07-21 | 2026-07-22 | Other | Michael (0x7c40) — self rescue tx failed after paying fees. Explained to member. Closed — explained. | — |
 | 2026-07-20 | 2026-07-20 | index.html | Maximum_71 (0x2032) — re-entry TX pointing at old V8.40 TierRouter (0xeb20e72d). Root cause: V8.41 fresh deploy + matrix reset. Hard refresh required. | V8.41 |
 | 2026-07-20 | 2026-07-20 | Other | Sherwyn (0x1e8e) — selfRescue TX pointing at old V8.40 TierRouter. "Partner full" = V8.40 MatB state no longer valid. Root cause: V8.41 fresh deploy. Hard refresh + re-register on V8.41. | V8.41 |
 | 2026-07-19 | 2026-07-20 | index.html | Ms Tech (0xa2df) — parked directs not showing in directs list. Noted as enhancement: show active/inactive/total directs separately. Logged for future sprint. | — |
