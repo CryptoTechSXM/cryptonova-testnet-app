@@ -6266,7 +6266,7 @@ async function doBulkUpgrade() {
     if (btn) btn.disabled = true;
     if (status) status.textContent = 'Submitting bulk upgrade…';
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.bulkUpgrade(tierIndex, { gasLimit: 3_000_000 });
+    const tx = await tr.bulkUpgrade(tierIndex, { gasLimit: 12_000_000 });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Bulk upgrade complete — you\'re now in T' + (tierIndex + 1) + '! Refreshing…</span>';
