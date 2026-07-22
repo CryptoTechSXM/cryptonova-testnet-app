@@ -4370,6 +4370,7 @@ async function loadDashboardData() {
     if (bsLink) bsLink.href = 'https://sepolia.basescan.org/address/' + userAddr;
 
     // Manual upgrade panel
+    let canUpgrade = false; // hoisted so updateWhaleGateUI can read it below
     const upgradeSection = document.getElementById('upgrade-section');
     if (upgradeSection) {
       // Max deployed tier: 3 (T3 live). Increase when T4+ deployed.
@@ -4403,7 +4404,7 @@ async function loadDashboardData() {
         const _fb = _pmDash ? await _pmDash.currentMatB().catch(() => ADDRS[_tierKey]?.matB) : ADDRS[_tierKey]?.matB;
         if (_fb) _inAnyMatBDash = await new ethers.Contract(_fb, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
       }
-      const canUpgrade = (Number(curTierCycles) >= 1 || _inAnyMatBDash) && highestTier < MAX_DEPLOYED_TIER;
+      canUpgrade = (Number(curTierCycles) >= 1 || _inAnyMatBDash) && highestTier < MAX_DEPLOYED_TIER;
       upgradeSection.style.display = canUpgrade ? 'block' : 'none';
       if (canUpgrade) {
         // v8.19 fix (2026-06-20): UPGRADE_NAMES used to be a separate hardcoded list that
