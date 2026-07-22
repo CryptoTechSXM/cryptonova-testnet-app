@@ -6545,8 +6545,11 @@ async function doSelfRescue() {
     toast('Self Rescue successful! You\'re back in the matrix.', 'success');
     setTimeout(() => loadDashboardData(), 3000);
   } catch (e) {
-    const msg = (e.message || '').toLowerCase();
-    if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
+    const reason = e.reason || e.data?.message || e.shortMessage || '';
+    const raw    = (e.message || '').slice(0, 120);
+    const display = reason ? `Rescue failed: ${reason}` : friendlyError(e);
+    console.error('selfRescue error:', e);
+    if (status) { status.style.color = 'var(--red)'; status.textContent = display; }
     if (btn) btn.disabled = false;
   }
 }
