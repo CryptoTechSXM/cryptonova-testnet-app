@@ -4443,7 +4443,7 @@ async function loadDashboardData() {
     }
 
     // ── V8.35 Whale Gate UI ─────────────────────────────────────────────
-    await updateWhaleGateUI(highestTier, rp).catch(() => {});
+    await updateWhaleGateUI(highestTier, rp, canUpgrade).catch(() => {});
 
     // ── Parked / Rescue section ──────────────────────────────────────────
     const rescueSection = document.getElementById('rescue-section');
@@ -6152,7 +6152,7 @@ function copyReferralLink() {
 
 // Reads whale gate state and updates both the register-tab banner and the
 // dashboard bulk-upgrade section. Called from loadDashboardData().
-async function updateWhaleGateUI(highestTier, rp) {
+async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
   const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
 
   // T2-T5 share T5's gate (tierNum=5). T6-T10 independent (not yet shown in UI).
@@ -6214,6 +6214,14 @@ async function updateWhaleGateUI(highestTier, rp) {
       if (breakdown) breakdown.textContent = feeLines.join(' + ') + ' = ' + fmt6(totalFee) + ' total';
       const approveBtn = document.getElementById('btn-bulk-approve');
       const upgradeBtn = document.getElementById('btn-bulk-upgrade');
+      const stEl = document.getElementById('bulk-upgrade-status');
+      // Gate: member must have completed at least one cycle (same as regular upgrade)
+      if (!canUpgrade) {
+        if (approveBtn) { approveBtn.disabled = true; approveBtn.classList.remove('btn-green'); approveBtn.classList.add('btn-ghost'); }
+        if (upgradeBtn) { upgradeBtn.disabled = true; upgradeBtn.classList.remove('btn-green'); upgradeBtn.classList.add('btn-ghost'); }
+        if (stEl) stEl.textContent = '⏳ Complete your current tier cycle first — once your MatB cycle finishes, bulk upgrade unlocks automatically.';
+        return;
+      }
       if (approveBtn) { approveBtn.disabled = false; approveBtn.classList.remove('btn-ghost'); approveBtn.classList.add('btn-green'); }
       if (upgradeBtn) upgradeBtn.disabled = true;
       try {
@@ -6266,13 +6274,18 @@ async function doBulkUpgrade() {
     if (btn) btn.disabled = true;
     if (status) status.textContent = 'Submitting bulk upgrade…';
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    let bulkGasLimit = 8_000_000;
+    let bulkGasLimit = 6_000_000;
     try {
       const est = await tr.bulkUpgrade.estimateGas(tierIndex);
-      bulkGasLimit = Math.ceil(Number(est) * 1.3);
+      const estNum = Number(est);
+      if (estNum > 10_000_000) {
+        throw new Error('You need to complete at least one cycle in your current tier before bulk upgrading. Keep earning in your matrix — once your cycle completes, the upgrade unlocks.');
+      }
+      bulkGasLimit = Math.ceil(estNum * 1.3);
     } catch (estErr) {
-      const em = (estErr.reason || estErr.shortMessage || estErr.message || '').slice(0, 200);
-      throw new Error('Upgrade check failed: ' + em);
+      const em = estErr.message || '';
+      if (em.includes('complete') || em.includes('cycle')) throw estErr;
+      throw new Error('Upgrade check failed: ' + em.slice(0, 200));
     }
     const tx = await tr.bulkUpgrade(tierIndex, { gasLimit: bulkGasLimit });
     if (status) status.textContent = 'Waiting for confirmation…';
