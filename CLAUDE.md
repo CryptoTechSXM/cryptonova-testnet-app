@@ -8,8 +8,10 @@ Read this file at the start of every session before touching any frontend code.
 
 | Item | Value |
 |------|-------|
-| Live contract version | V8.41 |
-| Addresses file | `deployed_addresses_v8_41.json` |
+| Live contract version | V8.43 (launched 2026-07-23, gates 10:30/10:45 AM EDT) |
+| Addresses file | `deployed_addresses_v8_43.json` (in CryptoNite-Smart-Contracts/CryptoNova/scripts/) |
+| Mainnet dates | Soft launch TBD (no countdown — opens by flag flip only); flagship June 19, 2027 |
+| Bigfill/stress keeper | OFF (cron line commented on VPS) until owner enables post-community fill |
 | Working branch | `admin` |
 | Admin frontend | https://admin.crypto-nova.app |
 
