@@ -11,7 +11,7 @@ Read this file at the start of every session before touching any frontend code.
 | Live contract version | V8.43 (launched 2026-07-23, gates 10:30/10:45 AM EDT) |
 | Addresses file | `deployed_addresses_v8_43.json` (in CryptoNite-Smart-Contracts/CryptoNova/scripts/) |
 | Mainnet dates | Soft launch TBD (no countdown — opens by flag flip only); flagship June 19, 2027 |
-| Bigfill/stress keeper | OFF (cron line commented on VPS) until owner enables post-community fill |
+| Bigfill/stress keeper | ON since 2026-07-23 ~20:15 UTC (cron `*/5` + flock on VPS 167.99.0.250, `/root/keeper/stress_keeper.js`). State reset to wallet #0 for V8.43; ladder extended T1→T10 (deployer funds each rung; skips log `UPGR SKIP` if deployer USDC low — top up via `mint_deployer_usdc.js`, minted $20M 2026-07-23, balance ~$20.8M). Master copy: CryptoNite-MT5-Bots/stress_keeper.js. Watch `/root/keeper/stress.log` + deployer Base Sepolia ETH. |
 | Working branch | `admin` |
 | Admin frontend | https://admin.crypto-nova.app |
 | Comp-plan docs | Synced to V8.43 contract truth 2026-07-23 (commit af8f569): faq/comp pages, all 10 locales, bot SYSTEM_PROMPT. On admin only — not yet pushed to preview/main. |
