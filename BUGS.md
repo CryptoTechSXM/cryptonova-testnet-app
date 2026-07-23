@@ -45,6 +45,18 @@
 
 ## Open Issues
 
+### [2026-07-23] Dashboard (index.html) — I attempted to withdraw the withdrawable amount of 284 USDC.…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
+- **Frequency:** Consistent
+- **What happened:** I attempted to withdraw the withdrawable amount of 284 USDC. I first deselected the automation features. After 3 attempts I was able to successfully withdraw a little over 48 USDC.
+- **What was expected:** I should have been able to withdraw 284 minus 1.5% on the first try.
+- **Notes:** There were warnings of malicious tokens in MM in connection with this transaction.
+- **Submitted:** Thu, 23 Jul 2026 07:09:59 GMT
+
+
 _No open issues._
 
 ## Resolved Issues
