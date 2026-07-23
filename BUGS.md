@@ -45,6 +45,20 @@
 
 ## Open Issues
 
+### [2026-07-23] Other — I registered 2 directs but there are 4 in this account.
+- **Reporter:** @koach100
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Intermittent
+- **What happened:** I registered 2 directs but there are 4 in this account.
+- **What was expected:** I expect to see only 2 directs attached to my account.
+- **Notes:** Here are the addresses   
+0x8c5B4F273D2a972C06109fC424D4897933763175
+    0xB783BA3D846F00d1B1B217aC7359D5783B630a6A
+- **Submitted:** Thu, 23 Jul 2026 21:24:59 GMT
+
+
 ### [2026-07-23] Onboarding / Registration — I could not register this account. The registration failed a…
 - **Reporter:** @Lavern-Gay
 - **Page:** Onboarding / Registration
