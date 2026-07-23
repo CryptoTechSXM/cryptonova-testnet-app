@@ -45,36 +45,14 @@
 
 ## Open Issues
 
-### [2026-07-23] Dashboard (index.html) — 1500 was showing reserved and after turning off the 3 switch…
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x8e9da9cfca45c5eaa1f4ffc4eacad05f4d258b07
-- **Frequency:** Consistent
-- **What happened:** 1500 was showing reserved and after turning off the 3 switches, only 547 is available to withdraw. However when i activated a withdrawal the 547 went down to 391
-- **What was expected:** i was expecting 1500 to be available for withdrawal
-- **Notes:** Please advise.
-- **Submitted:** Thu, 23 Jul 2026 10:52:45 GMT
-
-
-### [2026-07-23] Dashboard (index.html) — I attempted to withdraw the withdrawable amount of 284 USDC.…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
-- **Frequency:** Consistent
-- **What happened:** I attempted to withdraw the withdrawable amount of 284 USDC. I first deselected the automation features. After 3 attempts I was able to successfully withdraw a little over 48 USDC.
-- **What was expected:** I should have been able to withdraw 284 minus 1.5% on the first try.
-- **Notes:** There were warnings of malicious tokens in MM in connection with this transaction.
-- **Submitted:** Thu, 23 Jul 2026 07:09:59 GMT
-
-
 _No open issues._
 
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-23 | 2026-07-23 | index.html | Maximum_71 (0x8e9d) — expected $1500 withdrawable after toggles off, got $547→$391. Works as designed: toggles-off releases only the AUTOMATION reserve; each active seat keeps its own crossing lock (fee − crossingReserve per matrix, stacks across tiers). V8.42 matrix reset with V8.43 launch; new per-tier breakdown modal shows the per-tier locks. Explained. | — |
+| 2026-07-23 | 2026-07-23 | index.html | @Koach100 (0x2444) — expected $284 withdrawal, got ~$48. Same per-seat crossing locks across multiple tiers (T4/T5 seats lock $50/$125 each). MM "malicious token" warning = usual testnet mock-USDC false positive. V8.42 reset with V8.43 launch. Explained. | — |
 | 2026-07-22 | 2026-07-22 | index.html | @ThanksAndPraises (0x3c17) — Withdrawal/Reserved amounts not recalculated when Auto-reentry/AutoUpgrade/Double-reentry toggled. Root cause: reserve only computed on page load, never after toggle change. Fixed: dashboard refresh fires after each toggle confirms + authoritative on-chain reservedFor() now used. | 45fb626 |
 | 2026-07-21 | 2026-07-22 | index.html | @Lavern_Gay (0xa40c) — back-to-back re-enter queue messages ($8.00 + $3.81). Explained to member: two separate rescue events (shortfall amounts differ per cycle position). Closed — explained. | — |
 | 2026-07-21 | 2026-07-22 | governance.html | @Koach100 (0x301a) — selfRescue from T2.1 MatA failed: "F8V8 partner full wait for rotation". Works as designed — MatB was full; succeeded on retry after rotation. Closed — explained. | — |
