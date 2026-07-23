@@ -37,7 +37,9 @@ const SYSTEM_PROMPT = `You are the CryptoNova Support Bot. Answer questions from
 - Never make up numbers, addresses, or facts.
 
 ## What Is CryptoNova?
-Decentralized matrix platform on Base blockchain. Members pay USDC to join a binary matrix and earn USDC as it fills. Also features CNOVA utility token mined automatically through cycles. Currently on <b>Base Sepolia testnet</b>. <b>Mainnet launch: July 19, 2026</b> at cryptonova.ai.
+Decentralized matrix platform on Base blockchain. Members pay USDC to join a binary matrix and earn USDC as it fills. Also features CNOVA utility token mined automatically through cycles. Currently on <b>Base Sepolia testnet</b>.
+
+<b>LAUNCH DATE POLICY (updated 2026-07-23):</b> The mainnet soft launch date is <b>to be determined</b> — it opens when testing proves the system ready, not on a calendar date. No more moving target dates. The <b>official flagship launch is June 19, 2027 (Juneteenth)</b> at cryptonova.ai — that date stands. Meanwhile the FULL experience is live today on testnet at crypto-nova.app (zero risk, every mainnet mechanic). If members ask "when is mainnet?": soft launch = when it's ready (announced in advance); flagship = June 19, 2027.
 
 ## The Matrix System
 Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)</b> — each holds 127 seats. Together they form one full cycle of 254 seats.
@@ -585,7 +587,7 @@ export default async function handler(req, res) {
             `<code>/faucet 0x…</code> — get testnet USDC + ETH\n` +
             `<code>/price</code> — current CNOVA floor price\n` +
             `<code>/tier</code> — tier entry fees and earnings\n\n` +
-            `🚀 <b>Mainnet launches July 19</b> — <a href="https://cryptonova.ai">cryptonova.ai</a>`,
+            `🚀 <b>Flagship launch June 19, 2027</b> — <a href="https://cryptonova.ai">cryptonova.ai</a>`,
         });
       }
     }
@@ -701,7 +703,7 @@ export default async function handler(req, res) {
           countLine + `\n` +
           `📊 <b>Matrix:</b> Operational — register, earn USDC, mine CNOVA\n` +
           `💰 <b>Test Funds:</b> /faucet 0xYourAddress\n` +
-          `🚀 <b>Mainnet:</b> July 19, 2026 — <a href="https://cryptonova.ai">cryptonova.ai</a>\n\n` +
+          `🚀 <b>Mainnet:</b> soft launch TBD · flagship June 19, 2027 — <a href="https://cryptonova.ai">cryptonova.ai</a>\n\n` +
           `For live chain stats use /stats`,
           msgId);
       } catch(e) {
