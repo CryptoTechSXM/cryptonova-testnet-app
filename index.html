@@ -717,8 +717,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0xD898B35CdF0AAB38eB6082FAaAe42C9167FdB88D" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0xD898B35CdF0AAB38eB6082FAaAe42C9167FdB88D" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0xD898B35CdF0AAB38eB6082FAaAe42C9167FdB88D</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0xCd05d19cA83Ca363585a6902A8deB6a41589F1e4" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0xCd05d19cA83Ca363585a6902A8deB6a41589F1e4" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0xCd05d19cA83Ca363585a6902A8deB6a41589F1e4</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
         </div>
       </div>
@@ -1961,72 +1961,103 @@ const CHAIN_ID = 84532;
 
 const RPC_URL      = 'https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy';
 const RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
+
+// ── V8.43: Default-sponsor rotation pool ─────────────────────────────────
+// Members who register WITHOUT a referral link are shared across these
+// founding wallets instead of all stacking on one root. Deterministic:
+// each new member's address hashes to the same sponsor every time
+// (support traceability). To change the pool, edit this list and push —
+// every address must already be a REGISTERED member before receiving orphans.
+const DEFAULT_SPONSOR_POOL = [
+  '0x6512e9B5FE1690F2570AFEE5E7b904EF106C9435',
+  '0x19a59fbD6d2c1289668795D41453e1505B7B8102',
+  '0x1D3E33aAFFDb694E5a45d793B6946120467e93AB',
+  '0x5179A012b54EE6E6c7db92f820C9b3d8126Eead2',
+  '0xa2Dfd8c3b99b4395550558acf6cFFe79017b702C',
+  '0x8fb7ca44D27c67b0cFED5153aeEE4F70F4aed6c2',
+  '0xdFD9e186b8D8A9000cBeE47BE14310a43Bdf602e',
+  '0x141a5B0d42B0ba2AF1BE4eC771B96Db460896a50',
+  '0x30196CD21fb0DF32cbA9e71D197A788d2a3739eB',
+  '0x0f50998163F3DeE028a3D72153659D08aede45F3',
+  '0x26388a81eb9448DF02144cc765Bb448444e61f9B',
+  '0x391ab9edC83960e6ec468bDb7e6abE5858656F68',
+];
+
+function pickDefaultSponsor(memberAddr) {
+  try {
+    if (memberAddr && ethers.isAddress(memberAddr)) {
+      const h = ethers.keccak256(ethers.getAddress(memberAddr));
+      return DEFAULT_SPONSOR_POOL[Number(BigInt(h) % BigInt(DEFAULT_SPONSOR_POOL.length))];
+    }
+  } catch(_) {}
+  return DEFAULT_SPONSOR_POOL[Math.floor(Math.random() * DEFAULT_SPONSOR_POOL.length)];
+}
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
 const ADDRS = {
-  // V8.42 — deployed 2026-07-20 — Hybrid self-sustaining + expansion routing (pairExpansionThreshold=381)
+  // V8.43 — deployed 2026-07-23 — additive toggles + two-threshold pair opening + upgrade-at-cross + overflow rescue
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0xD898B35CdF0AAB38eB6082FAaAe42C9167FdB88D',
-  treasury:      '0xabDb1cbAd11A11183FaB9352978B1f404262c681',
-  stabilityFund: '0xb88D74D2a1660D08101D7855C294A6aEC494eCff',
-  buybackReserve:'0x7Cc0389A479c1831A5f5a60A7E26A4c8146A19aD',
-  tierRouter:    '0x0F041e7F70Cd25DAcF619bea5847fB68846c8EFf',
-  matrixKeeper:  '0xdf672091dccd0466Bd31d3083b41414fFBA990B7',
-  v8Governance:  '0x440495E6d5dFd1Fac7d8e5eB051902700F4Cc3bC',
-  communityWallet:'0x46bA64e0DD51De5A20b9c293Dbe81aD03C6EF820',
+  cnova:         '0xCd05d19cA83Ca363585a6902A8deB6a41589F1e4',
+  treasury:      '0xCe103F4B6AB5038eB5f4cA985708aDbE94AEeD55',
+  stabilityFund: '0x90a1a5616c2AFBc2DDEDB434Fd009c5cEEb0d48c',
+  buybackReserve:'0x6dDbd590ab61feb69c6E80Edc847dC71Ee8Cb8F4',
+  tierRouter:    '0xc21EbFcabBc7dAD11Db2b0B6250f564b268b5793',
+  matrixKeeper:  '0xD1f6c3171fcBE2B7598D5Ae6f58bB603e4cd28Cf',
+  v8Governance:  '0xeF2B54A0b8c06B4eD8Afa2b4B70eBbD935444c4c',
+  communityWallet:'0x24D18D086E3480e9fe3CDf3C636a9958BfeEb37d',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x9Cffcfac3d4c3787DbA3D38c6E35D199e3447c47',
-  couponRegistry:'0xdaA48D582a1007035Cb9b7E74a6b4c1321eA40c2',
+  directSale:    '0xfDA945331def2D8658e56cBC35e2b41F65b2f419',
+  couponRegistry:'0x1B13a689a649734EeA8F131cb7438b261E0C11bc',
   // V8.30 tier pairs — deployed 2026-06-29
   T1: {
-    pm:   '0x7B5F2EB43ED6C44c5FA57eeA644bd7FaC6e4cf7c',
-    matA: '0xB6C9Ed9c08853e014141387cC73DE0Cfc65C00E7',
-    matB: '0x955fd285Af357C0fA6575F6e12Dd67FC1e63cE26',
+    pm:   '0xFE748E578B93541038d82bF4ADDE65016b4E02BC',
+    matA: '0xf3dE22E36649613dc019a14a7d863776990EFF32',
+    matB: '0xf32bcb883aAbe5AE3E069c724b3e9b7CAC56c448',
   },
   T2: {
-    pm:   '0x0BE66cC954F4C99007C5F0fA95b3eE26D7312ec5',
-    matA: '0xCC7d7ba28AE85b5E31b1F4335A956d019355aE8a',
-    matB: '0xD5c4f51131c544Ae8D9DfaDF4F7238b0138aC7FB',
+    pm:   '0xa0984266c66e66537108403872cE390800c03a35',
+    matA: '0xec96f951B66E5618364Aa8cC2F4A49D0c7dDDA30',
+    matB: '0x5acA574CF6F0b484082308F71dE9C2E37C43c5D1',
   },
   T3: {
-    pm:   '0x278716A2c731910F1741Dfd1CcAdc0960d158cfB',
-    matA: '0x6bD2a969C5966260Ebe9B56bfa9Facf5dbed5f3F',
-    matB: '0xA57541d47e4A11660b3eFad8cf5637294DA9A202',
+    pm:   '0xc168C936A266278B3403A3ce5Bf6d6c17BC34F8E',
+    matA: '0xD429878920fa634F43e8F2E4A238906a4270286a',
+    matB: '0x711Fd9aE2a39fc67F1E78C6a6c9EF082AEA0805C',
   },
   T4: {
-    pm:   '0x32c0A0A6C248C85481f375695d50e77B4847F66F',
-    matA: '0x45D170d03eC311eAE27bA02E2479e04c6a0B239c',
-    matB: '0x4A1Efcf044831b9B58810467E88af199d72B5b86',
+    pm:   '0x8E63A59E362a3cFe229a100240F7e86B08d7d2c5',
+    matA: '0xc821Fc20Aa09263e25E223700C2455CadedEE56D',
+    matB: '0xF35bCF0e5AB978Cc36B0E06E02880D86Fe4D4534',
   },
   T5: {
-    pm:   '0xc2DA839a94a6278327fCc4365072D1c2ecD44EE4',
-    matA: '0xf42bfcF9f301BBc62626613869E58E7Cb48E83DB',
-    matB: '0x0Cc7aaEe9751d2C994037c51FceB5c1825ae4317',
+    pm:   '0x6Aa64797db0a8eAf9c5D35fF4154fD02BE79D7EB',
+    matA: '0x3e35e7453A305eAed32507d2Ae65e245fD5a7cC9',
+    matB: '0x1187f27C3570164A15b1f0E93e9C0bd8De8f280F',
   },
   T6: {
-    pm:   '0xEFf37ff2448A3e17AEcFDA9204Bffc279BdEe9A3',
-    matA: '0x12b8bFb706850523ec8b90e9C999288369b97FE3',
-    matB: '0x38f376da99055F8E00405F07903B9270AFF4FC4F',
+    pm:   '0x94714F50Af2f388924dE468CE05743972A0e5302',
+    matA: '0x86EfEAC2343Bb9C0B907255183f14ef6aEEDD474',
+    matB: '0x77C9C9A59eD4a551B5875104e73f6dA2eE43a636',
   },
   T7: {
-    pm:   '0x9472A2b15b678Bf557c6792F7e8854D815fBa16d',
-    matA: '0xcc80638D898554A497DcBe05Ae142d170e065c70',
-    matB: '0x8cfb6a9Ea73cfC52CfE4825AceCa94Df57b1A648',
+    pm:   '0x276Fb873D6D66954CD908Ff942Df90FfD39EB312',
+    matA: '0x2EFb02F542f67F22cB4772b5C2659a0f6C4ac967',
+    matB: '0xf6687edb36fceAa63A2989E856786FC40FE5207B',
   },
   T8: {
-    pm:   '0x9091f21626c7B7125Afc84366Ba33B0010382841',
-    matA: '0x2b77a47c31118a7B8a9D9CDf53574752B094743A',
-    matB: '0x0B57CBc237eCA990c63bC76D9023353bA4b54a19',
+    pm:   '0x751d7458CCa8b1149C87Acc4BD19e2EE30e25fE2',
+    matA: '0xF955545710f2f3815f3eF0e7D73a863E39B73828',
+    matB: '0xEB890709064A0eCBd16F8B061C41691EBaAEA9AF',
   },
   T9: {
-    pm:   '0x2618d5fF0F2ce2f4B49627335D35CD1f3d219815',
-    matA: '0xbD5945e8ff4a1d9755e9160936ADee62DBdEF3f1',
-    matB: '0x8b8919a96d9c8AD1FA2F5869e25FA1C0d1De0838',
+    pm:   '0x1E6e42297faFfb65062a57BE9E0AdeD2F002CCCf',
+    matA: '0x1AaB42598cE4FF19E0881a5aec7A8576508Ae436',
+    matB: '0xFb9B7aAbE9b4bd31A1E904D2fA230293F23f5481',
   },
   T10: {
-    pm:   '0xB92B64cd9f8e56Dc5B6092Ed75229DdF7050bB1D',
-    matA: '0x859FDB67ac6c0D7589d90B48867289C59C647823',
-    matB: '0x6D31eD7CD9580d1B7017fbb39AA15ff6b496Cf6e',
+    pm:   '0x4E0Eed3e2A8B8Afcf03Cab714E1E5555a52334F7',
+    matA: '0x2ED78DF70F4A1F3903a4Eb792666DBC15C21D5E0',
+    matB: '0x61FCB7a8A3Cea71F6a1b631dA9fC2cb80549F36e',
   },
 };
 
@@ -3251,15 +3282,12 @@ async function loadUserData() {
       if (urlRef && ethers.isAddress(urlRef)) {
         refInput.value = urlRef;
       } else {
-        try {
-          // Always show the fixed defaultReferrer (W1) — not the current MatA root,
-          // which changes each time a new pair is created by MatrixPairFactory.
-          const defRef = await tr.defaultReferrer();
-          if (defRef && defRef !== ethers.ZeroAddress) {
-            window._defaultReferrer = defRef;
-            refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
-          }
-        } catch(_) {}
+        // V8.43: no ?ref= link — assign a sponsor from the rotation pool
+        // (deterministic hash of the member's address) so orphan registrations
+        // are shared across the founding wallets instead of stacking on W1.
+        const defRef = pickDefaultSponsor(userAddr);
+        window._defaultReferrer = defRef;
+        refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
       }
     }
 
@@ -3698,7 +3726,7 @@ async function doRegister() {
       ? c.issuer
       : (refInput && ethers.isAddress(refInput.value.trim())
           ? refInput.value.trim()
-          : (window._defaultReferrer || ethers.ZeroAddress));
+          : (window._defaultReferrer || pickDefaultSponsor(userAddr))); // V8.43: rotation pool, never ZeroAddress
 
     // Dry-run via read provider BEFORE sending to wallet.
     // Simulates the full register logic on-chain without submitting a TX.
@@ -6134,16 +6162,11 @@ async function useDefaultSponsor() {
   const inp  = document.getElementById('input-referrer');
   const warn = document.getElementById('default-sponsor-warn');
   const btn  = document.getElementById('btn-approve');
-  // Try to get default referrer — use cached value or fetch fresh
+  // V8.43: default sponsor comes from the rotation pool (deterministic by member)
   let defRef = window._defaultReferrer;
   if (!defRef || defRef === ethers.ZeroAddress) {
-    try {
-      const p  = new ethers.BrowserProvider(window.ethereum);
-      const tr = new ethers.Contract(ADDRS.tierRouter,
-        ['function defaultReferrer() view returns (address)'], p);
-      defRef = await tr.defaultReferrer();
-      if (defRef && defRef !== ethers.ZeroAddress) window._defaultReferrer = defRef;
-    } catch(e) { console.warn('useDefaultSponsor: could not fetch defaultReferrer', e); }
+    defRef = pickDefaultSponsor(typeof userAddr !== 'undefined' ? userAddr : null);
+    window._defaultReferrer = defRef;
   }
   if (inp && defRef && defRef !== ethers.ZeroAddress) {
     inp.value = defRef;
