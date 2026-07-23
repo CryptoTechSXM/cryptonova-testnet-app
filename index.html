@@ -3756,17 +3756,22 @@ async function doRegister() {
     // Some wallets (TokenPocket) can't estimate gas for complex multi-contract calls
     // and show an empty fee / fail on submit when we pass a raw hardcoded limit.
     // Using our Alchemy endpoint for estimation avoids the wallet's internal estimator.
-    let _gasLimit = c ? 600_000 : 800_000; // safe fallback
+    // V8.43 gas note (2026-07-23): registering into a FULL matrix triggers the
+    // rotation cascade (~15.5M gas measured live), and public RPCs reject tx gas
+    // limits above ~17M with -32003 "gas limit too high". So: 5% buffer on the
+    // estimate (25% overshot the RPC cap on cascade entries), and a cascade-sized
+    // fallback — unused gas is always refunded, so a high limit costs nothing.
+    let _gasLimit = 16_000_000; // fallback covers worst-case cascade
     try {
       const _rp3 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
       const _trEst = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp3);
       const _est = c
         ? await _trEst.registerWithCoupon.estimateGas(referrer, c.codeHash, { from: userAddr })
         : await _trEst.register.estimateGas(referrer, { from: userAddr });
-      // Add 25% buffer so the wallet has headroom without triggering its own re-estimation
-      _gasLimit = Number(_est) + Math.ceil(Number(_est) * 0.25);
+      // Small 5% buffer so the wallet has headroom without tripping the RPC's tx gas cap
+      _gasLimit = Number(_est) + Math.ceil(Number(_est) * 0.05);
     } catch(_estErr) {
-      console.warn('[register] gas estimation failed, using fallback:', _estErr.message);
+      console.warn('[register] gas estimation failed, using cascade-safe fallback:', _estErr.message);
     }
 
     let tx;
@@ -5346,7 +5351,13 @@ async function doGraduatedReenter(tNum) {
     }
     _s('⏳ Submitting re-entry…');
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    await (await tr.manualUpgrade(tierIdx, { gasLimit: 2_000_000 })).wait();
+    // V8.43: upgrades into a full matrix cascade (~15.5M gas) — estimate +5%, cascade-safe fallback
+    let _upGas = 16_000_000;
+    try {
+      const _upEst = await tr.manualUpgrade.estimateGas(tierIdx);
+      _upGas = Number(_upEst) + Math.ceil(Number(_upEst) * 0.05);
+    } catch(_) {}
+    await (await tr.manualUpgrade(tierIdx, { gasLimit: _upGas })).wait();
     _s('✅ Re-entered!');
     toast(`T${tNum} re-entry successful!`, 'success');
     setTimeout(() => loadDashboardData(), 2000);
@@ -6367,10 +6378,11 @@ async function doBulkUpgrade() {
       step++;
       const enteringTier = highest + 1; // tier number being purchased this tx
       if (status) status.textContent = `Upgrading to T${enteringTier} (${step}/${totalSteps}) — confirm in wallet…`;
-      let gasLimit = 9_000_000;
+      let gasLimit = 16_000_000;
       try {
         const est = await tr.bulkUpgrade.estimateGas(highest);
-        gasLimit = Math.min(Math.ceil(Number(est) * 1.3), 14_000_000);
+        // V8.43: +5% buffer only — cascades run ~15.5M and public RPCs reject limits above ~17M (-32003)
+        gasLimit = Math.min(Math.ceil(Number(est) * 1.05), 16_500_000);
       } catch (estErr) {
         const reason = estErr.reason || estErr.shortMessage || '';
         throw new Error(reason ? `T${enteringTier} upgrade would fail: ${reason}` : `T${enteringTier} upgrade check failed — try again in a moment (RPC may be busy).`);
