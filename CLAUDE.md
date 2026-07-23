@@ -14,6 +14,12 @@ Read this file at the start of every session before touching any frontend code.
 | Bigfill/stress keeper | OFF (cron line commented on VPS) until owner enables post-community fill |
 | Working branch | `admin` |
 | Admin frontend | https://admin.crypto-nova.app |
+| Comp-plan docs | Synced to V8.43 contract truth 2026-07-23 (commit af8f569): faq/comp pages, all 10 locales, bot SYSTEM_PROMPT. On admin only — not yet pushed to preview/main. |
+| Marketing package | `CryptoNova-App/marketing/`: Member one-pager + 4 how-to PDFs + `CryptoNova_Explainer_Scripts_V8.md` (all contract-verified; QR/link placeholders pending). Old `CryptoNova_Video_Scripts.md` superseded. |
+
+## Doctrine: code is truth
+
+**The deployed contract is the single source of truth — never copy comp-plan facts from site pages, locale files, or the bot prompt without verifying against the Solidity source** (CryptoNite-Smart-Contracts/CryptoNova/contracts/). Verified V8.43 facts: 50% crossing reserve (funds HALF the crossing fee — crossing costs the full entry fee, earnings cover the rest, shortfall → parked → self-rescue with no debt) · 2.5% instant earn · 5% L1 · 2.7%×5 chain pay (L2–L6) · 18% equalization pool distributed EVERY ROTATION across seats 2–127 weighted by depth (NO root lump payout, NO "2× entry" payout — these are common stale/invented claims) · treasury 5% · SF 3% · dev+ops 1.5% · CW/buyback/liquidity 0.5% each · Whale Gate: T2–T5 open at 25 T5 pioneers, T6–T10 at own 25-member milestone; auto-upgrades never gated · V8.43 additive cycle-out: re-entry → upgrade → double seat (defaults: re-entry ON, upgrade ON first 5 cycles) · pair overflow: deploy next pair at 375 entries, route ALL overflow at 381. NOTE: locale JSONs override HTML via i18n.js — fixing page HTML alone is not enough; non-EN locales currently carry corrected ENGLISH text for changed keys, retranslation pending.
 
 ## Branch → Domain map
 
