@@ -6275,14 +6275,10 @@ async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
       if (breakdown) breakdown.textContent = feeLines.join(' + ') + ' = ' + fmt6(totalFee) + ' total';
       const approveBtn = document.getElementById('btn-bulk-approve');
       const upgradeBtn = document.getElementById('btn-bulk-upgrade');
-      const stEl = document.getElementById('bulk-upgrade-status');
-      // Gate: member must have completed at least one cycle (same as regular upgrade)
-      if (!canUpgrade) {
-        if (approveBtn) { approveBtn.disabled = true; approveBtn.classList.remove('btn-green'); approveBtn.classList.add('btn-ghost'); }
-        if (upgradeBtn) { upgradeBtn.disabled = true; upgradeBtn.classList.remove('btn-green'); upgradeBtn.classList.add('btn-ghost'); }
-        if (stEl) stEl.textContent = '⏳ Complete your current tier cycle first — once your MatB cycle finishes, bulk upgrade unlocks automatically.';
-        return;
-      }
+      // V8.43: whale gate open to ALL members — no cycle requirement.
+      // (The old "complete a cycle first" gate was a misdiagnosis: the real
+      // blocker was 3+ tier bulk txs exceeding the 15M gas cap. doBulkUpgrade
+      // now climbs tier-by-tier, so every member can upgrade any time.)
       if (approveBtn) { approveBtn.disabled = false; approveBtn.classList.remove('btn-ghost'); approveBtn.classList.add('btn-green'); }
       if (upgradeBtn) upgradeBtn.disabled = true;
       try {
@@ -6330,34 +6326,46 @@ async function doBulkUpgrade() {
   if (!signer) { toast('Connect your wallet first.', 'error'); return; }
   const btn       = document.getElementById('btn-bulk-upgrade');
   const status    = document.getElementById('bulk-upgrade-status');
-  const tierIndex = window._bulkUpgradeTierIndex ?? 4;
+  const targetIdx = window._bulkUpgradeTierIndex ?? 4;
+  // V8.43: sequential tier-by-tier climb. One tier entry costs ~7M gas (full
+  // MatA triggers a root cycle-out cascade), so 3+ tiers in one tx exceeds the
+  // 15M Base Sepolia cap — that was the REAL cause of "gas limit too high".
+  // bulkUpgrade(memberHighestTier) enters exactly one tier per call.
   try {
     if (btn) btn.disabled = true;
-    if (status) status.textContent = 'Submitting bulk upgrade…';
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    let bulkGasLimit = 6_000_000;
-    try {
-      const est = await tr.bulkUpgrade.estimateGas(tierIndex);
-      const estNum = Number(est);
-      if (estNum > 10_000_000) {
-        throw new Error('You need to complete at least one cycle in your current tier before bulk upgrading. Keep earning in your matrix — once your cycle completes, the upgrade unlocks.');
+    const meAddr = await signer.getAddress();
+    let highest = Number(await tr.memberHighestTier(meAddr)); // 1-based; also the 0-based index of the NEXT tier
+    const totalSteps = (targetIdx + 1) - highest;
+    if (totalSteps < 1) { if (status) status.textContent = 'Already at or above the target tier.'; return; }
+    let step = 0;
+    while (highest <= targetIdx) {
+      step++;
+      const enteringTier = highest + 1; // tier number being purchased this tx
+      if (status) status.textContent = `Upgrading to T${enteringTier} (${step}/${totalSteps}) — confirm in wallet…`;
+      let gasLimit = 9_000_000;
+      try {
+        const est = await tr.bulkUpgrade.estimateGas(highest);
+        gasLimit = Math.min(Math.ceil(Number(est) * 1.3), 14_000_000);
+      } catch (estErr) {
+        const reason = estErr.reason || estErr.shortMessage || '';
+        throw new Error(reason ? `T${enteringTier} upgrade would fail: ${reason}` : `T${enteringTier} upgrade check failed — try again in a moment (RPC may be busy).`);
       }
-      bulkGasLimit = Math.ceil(estNum * 1.3);
-    } catch (estErr) {
-      const em = estErr.message || '';
-      if (em.includes('complete') || em.includes('cycle')) throw estErr;
-      throw new Error('Upgrade check failed: ' + em.slice(0, 200));
+      const tx = await tr.bulkUpgrade(highest, { gasLimit });
+      if (status) status.textContent = `Upgrading to T${enteringTier} (${step}/${totalSteps}) — waiting for confirmation…`;
+      await tx.wait();
+      // Don't re-read memberHighestTier here — RPC reads can lag a block and
+      // return stale state, causing a duplicate send. A confirmed tx = +1 tier.
+      highest += 1;
+      if (status) status.textContent = `✅ T${enteringTier} secured (${step}/${totalSteps})`;
     }
-    const tx = await tr.bulkUpgrade(tierIndex, { gasLimit: bulkGasLimit });
-    if (status) status.textContent = 'Waiting for confirmation…';
-    await tx.wait();
-    if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Bulk upgrade complete — you\'re now in T' + (tierIndex + 1) + '! Refreshing…</span>';
+    if (status) status.innerHTML = '<span style="color:var(--green)">🎉 All upgrades complete — you\'re now in T' + highest + '! Refreshing…</span>';
     toast('Bulk upgrade successful!', 'success');
     setTimeout(() => loadDashboardData(), 2500);
   } catch(e) {
     const msg = (e.message || '').toLowerCase();
     const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
-      ? '✋ Cancelled — nothing was sent.'
+      ? '✋ Cancelled — progress so far is kept; click again to continue from where you stopped.'
       : friendlyError(e);
     if (status) status.textContent = friendly;
     if (btn) btn.disabled = false;

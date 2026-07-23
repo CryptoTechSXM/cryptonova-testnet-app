@@ -7,18 +7,17 @@
 
 ## Next Deploy (V8.43) — Owner items 2026-07-22
 
-### 1. Whale gate blocked after self rescue — open to ALL members
-- Members are asked to complete a tier cycle before whale gate bulk upgrade unlocks, even right after self rescue.
-- **Wanted:** whale gate purchases open to every member, regardless of cycle status.
-- Contract change: remove completed-cycle/active-MatB eligibility requirement from `bulkUpgrade()` in TierRouter.sol. Frontend: remove the matching `canUpgrade` gate added in 40200ef/af1ff8a.
+### 1. Whale gate blocked after self rescue — ✅ RESOLVED 2026-07-23 (frontend only)
+- **Real root cause found:** the contract has NO cycle requirement in `bulkUpgrade()`. Each tier entry costs ~7M gas (full pair-0 MatA triggers root cycle-out cascade), so 3+ tiers in one tx exceeds the 15M Base Sepolia cap → estimateGas died → frontend showed an invented "complete a cycle first" message (added in af1ff8a misdiagnosis).
+- **Fix:** doBulkUpgrade() now climbs tier-by-tier — one `bulkUpgrade(nextIdx)` tx per tier (~7M each, always under cap), with progress display and resume-on-cancel. Fake eligibility gate removed. Stale-RPC-read guard: after a confirmed tx, tier is incremented locally (immediate re-reads can lag a block and cause duplicate sends).
+- **Proven on-chain 2026-07-23:** fresh wallet 0xc9a83C9C, zero cycles, register → T5 in 4 sequential txs (gasUsed ~7.05–7.58M each).
 
-### 2. New registrations should be able to buy all 5 tiers immediately
-- New members currently must complete tier(s) before upgrading. They should be able to buy T1–T5 (and beyond per whale gate config) at registration.
-- Contract change (same root cause as #1) + register-page UI: "buy multiple tiers now" option.
+### 2. New registrations can buy all 5 tiers immediately — ✅ RESOLVED 2026-07-23 (same fix)
+- With the fake gate removed, a fresh registrant sees the bulk upgrade section on their dashboard right away (T5 gate is open) and can climb to T5 immediately. Proven with the same test wallet.
 
-### 3. Verify CNOVA minting on multi-tier whale gate purchases
-- Suspicion: some mints are lost along the way when bulkUpgrade covers several tiers.
-- **Action:** verification script — replay recent bulkUpgrade txs, compare expected mint per tier vs actual CNOVA Transfer events. Fix contract if a gap is confirmed.
+### 3. Verify CNOVA minting on multi-tier whale gate purchases — ✅ VERIFIED CLEAN 2026-07-22
+- `mint_verify.js` scanned blocks 44375186→44505186 on V8.42: entries vs mints 1:1 on every tier (T1 2076/2076 … T6 35/35), all matrices hold MINTER_ROLE. **No lost mints — no contract change needed.**
+- Note: mintReward uses `_mintVested` (cliff-vested) — tokens are minted immediately but not spendable until vest matures, which can look like a missing mint in a wallet.
 
 ### 4. Pair .2 opening math — self-sustaining loop capacity
 - **Rule locked 2026-07-22 (two thresholds):**
@@ -39,7 +38,7 @@
   - Auto-reentry ON → always re-enter current tier at cycle-out; member never graduates while it's on.
   - + Auto-upgrade ON → additionally enter next tier (in both tiers).
   - + Double reentry ON → additionally a 2nd seat in the same matrix (2 seats current tier + 1 seat next tier).
-- **Funding priority (proposed, pending owner confirm):** re-entry → upgrade → double seat, each silently skipped if remaining withdrawable falls short.
+- **Funding priority CONFIRMED 2026-07-22:** re-entry → upgrade → double seat, each silently skipped if remaining withdrawable falls short.
 - Contract: rework `_resolveDest` / `_executeAndDouble` / `_handleDoubleEntry` in TierRouter.sol.
 
 ---
