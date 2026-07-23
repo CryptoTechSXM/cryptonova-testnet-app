@@ -45,6 +45,18 @@
 
 ## Open Issues
 
+### [2026-07-23] Onboarding / Registration — I could not register this account. The registration failed a…
+- **Reporter:** @Lavern-Gay
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** I could not register this account. The registration failed after several attempts.
+- **What was expected:** To register this account without problems.
+- **Notes:** This is the first time for this problem.
+- **Submitted:** Thu, 23 Jul 2026 17:09:35 GMT
+
+
 _No open issues._
 
 ## Resolved Issues
