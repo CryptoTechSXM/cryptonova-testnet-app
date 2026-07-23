@@ -36,6 +36,8 @@ REPLACEMENTS.append((
 # Version tag used in console logs / comments
 REPLACEMENTS.append(("[v8.42]", "[v8.43]"))
 REPLACEMENTS.append(("v8.42", "v8.43"))
+# UPPERCASE variant — badge, gate headings, roadmap (missed in V8.43 first pass: badge kept showing V8.42)
+REPLACEMENTS.append(("V8.42", "V8.43"))
 # Telegram bot system prompt version label (MANDATORY — bot goes stale without this)
 REPLACEMENTS.append((
     "## Contracts (Base Sepolia — V8.42)",
