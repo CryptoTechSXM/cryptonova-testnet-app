@@ -45,6 +45,18 @@
 
 ## Open Issues
 
+### [2026-07-23] Dashboard (index.html) — 1500 was showing reserved and after turning off the 3 switch…
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x8e9da9cfca45c5eaa1f4ffc4eacad05f4d258b07
+- **Frequency:** Consistent
+- **What happened:** 1500 was showing reserved and after turning off the 3 switches, only 547 is available to withdraw. However when i activated a withdrawal the 547 went down to 391
+- **What was expected:** i was expecting 1500 to be available for withdrawal
+- **Notes:** Please advise.
+- **Submitted:** Thu, 23 Jul 2026 10:52:45 GMT
+
+
 ### [2026-07-23] Dashboard (index.html) — I attempted to withdraw the withdrawable amount of 284 USDC.…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
