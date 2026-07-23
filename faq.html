@@ -116,9 +116,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.31 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.43 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.31 is live — crossing reserve, instant earn &amp; improved stability.<br>Opening in:
+      V8.43 is live — overflow routing, additive automation &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -142,7 +142,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.31 Testnet</span>
+    <span id="gate-pill-label">V8.43 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -160,13 +160,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.43 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.43 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -280,7 +280,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="bfs queue matrix position breadth first search">
       <div class="acronym">BFS Matrix</div>
       <div class="full-name" data-i18n="faqPage.g1_full">Breadth-First Search Matrix</div>
-      <div class="definition" data-i18n="faqPage.g1_def">CryptoNova uses a 127-seat BFS (breadth-first) queue per tier — a 7-level binary tree. Members fill positions level-by-level. When all 127 seats are filled, the root member cycles out, receives their pool payout, and the matrix resets for the next cycle. Position determines chain pay depth.</div>
+      <div class="definition" data-i18n="faqPage.g1_def">CryptoNova uses a 127-seat BFS (breadth-first) queue per tier — a 7-level binary tree. Members fill positions level-by-level. Once full, every new entry rotates the matrix: the root cycles out, everyone advances one seat, and the equalization pool distributes across the seated members weighted by depth. Position determines chain pay depth and pool share.</div>
     </div>
 
     <div class="glossary-card" data-terms="cnova token reward crypto nova">
@@ -292,19 +292,19 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="cnova treasury floor price backing usdc reserve">
       <div class="acronym">CNOVA Treasury</div>
       <div class="full-name" data-i18n="faqPage.g3_full">CNOVA Floor Price Reserve</div>
-      <div class="definition" data-i18n="faqPage.g3_def">4.5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.</div>
+      <div class="definition" data-i18n="faqPage.g3_def">5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.</div>
     </div>
 
     <div class="glossary-card" data-terms="stability rescue fund parked member rescue sf">
       <div class="acronym">Stability Rescue Fund</div>
       <div class="full-name" data-i18n="faqPage.g14_full">Member Rescue Reserve</div>
-      <div class="definition" data-i18n="faqPage.g14_def">2.7% of every entry fee flows into the Stability Rescue Fund. It backstops partial rescue contributions for &ldquo;parked&rdquo; members &mdash; those who completed a matrix cycle but didn't have enough withdrawable balance to self-fund re-entry. This is separate from the CNOVA Treasury, which backs the token's floor price.</div>
+      <div class="definition" data-i18n="faqPage.g14_def">3% of every entry fee flows into the Stability Rescue Fund. It backstops partial rescue contributions for &ldquo;parked&rdquo; members &mdash; those who completed a matrix cycle but didn't have enough withdrawable balance to self-fund re-entry. This is separate from the CNOVA Treasury, which backs the token's floor price.</div>
     </div>
 
     <div class="glossary-card" data-terms="dev wallet protocol development engineering reserve">
       <div class="acronym">Dev</div>
       <div class="full-name" data-i18n="faqPage.g4_full">Development Reserve</div>
-      <div class="definition" data-i18n="faqPage.g4_def">0.9% of each entry fee (from the 45% payout base) flows to Dev + Ops &mdash; it funds ongoing smart contract development, audits, and protocol engineering. It is not used for CNOVA redemption and is not accessible to individual members.</div>
+      <div class="definition" data-i18n="faqPage.g4_def">1.5% of each entry fee (from the 47.5% payout base) flows to Dev + Ops &mdash; it funds ongoing smart contract development, audits, and protocol engineering. It is not used for CNOVA redemption and is not accessible to individual members.</div>
     </div>
 
     <div class="glossary-card" data-terms="usdc usd coin stablecoin circle">
@@ -358,7 +358,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="roi return on investment earnings">
       <div class="acronym">ROI</div>
       <div class="full-name" data-i18n="faqPage.g13_full">Return on Investment</div>
-      <div class="definition" data-i18n="faqPage.g13_def">The percentage of profit relative to the amount invested. In CryptoNova Matrix, ROI comes from chain pay (17% of entries flowing up 6 levels), referral bonuses ($1.00 per direct sign-up), equalization pool payouts ($4.40), and CNOVA token rewards. <strong>ROI is not guaranteed.</strong></div>
+      <div class="definition" data-i18n="faqPage.g13_def">The percentage of profit relative to the amount invested. In CryptoNova Matrix, ROI comes from chain pay (2.7% per entry to each of 5 upline levels), referral bonuses (5% per direct sign-up and upgrade), equalization pool shares (18% of every entry, distributed each rotation weighted by seat depth), instant earn (2.5% on join), and CNOVA token rewards. <strong>ROI is not guaranteed.</strong></div>
     </div>
 
   </div>
@@ -409,16 +409,16 @@ function toggleTheme() {
         <p data-i18n="faqPage.q4_a1">Tier 1 (Nova Seed) entry fee is <strong>$10.00 USDC</strong>. Fees scale with each tier up to Tier 10 (SuperNova Apex). You also need a small amount of ETH for gas &mdash; typically under $0.10 on Base.</p>
         <p data-i18n="faqPage.q4_a2">Your $10 T1 entry is split instantly by the smart contract:</p>
         <ul>
-          <li data-i18n="faqPage.q4_li1"><strong>$5.00 (50%)</strong> &mdash; Your crossing reserve — held for you, covers your first matrix cycle-out</li>
-          <li data-i18n="faqPage.q4_li2"><strong>$0.50 (5%)</strong> &mdash; Instant earn — credited to your balance immediately on join</li>
+          <li data-i18n="faqPage.q4_li1"><strong>$5.00 (50%)</strong> &mdash; Your crossing reserve — held for you, pre-funds half of your crossing fee when your matrix fills</li>
+          <li data-i18n="faqPage.q4_li2"><strong>$0.25 (2.5%)</strong> &mdash; Instant earn — credited to your balance immediately on join</li>
           <li data-i18n="faqPage.q4_li3"><strong>$1.80 (18%)</strong> &mdash; Equalization pool — flat rate at all tiers</li>
-          <li data-i18n="faqPage.q4_li4"><strong>$0.32 (3.15%)</strong> &mdash; L1 direct referral to your sponsor</li>
+          <li data-i18n="faqPage.q4_li4"><strong>$0.50 (5%)</strong> &mdash; L1 direct referral to your sponsor</li>
           <li data-i18n="faqPage.q4_li5"><strong>$0.27 each (2.7%)</strong> &mdash; Chain pay to L2–L6 upline BFS positions (each equal)</li>
-          <li data-i18n="faqPage.q4_li6"><strong>$0.45 (4.5%)</strong> &mdash; CNOVA Treasury (backs CNOVA floor price)</li>
-          <li data-i18n="faqPage.q4_li7"><strong>$0.27 (2.7%)</strong> &mdash; Stability Rescue Fund</li>
-          <li data-i18n="faqPage.q4_li8"><strong>$0.135 (1.35%)</strong> &mdash; Dev + Ops</li>
-          <li data-i18n="faqPage.q4_li9"><strong>$0.09 (0.9%)</strong> &mdash; Liquidity Reserve</li>
-          <li data-i18n="faqPage.q4_li10"><strong>$0.09 (0.9%)</strong> &mdash; Community Wallet + Buyback Reserve (0.45% each)</li>
+          <li data-i18n="faqPage.q4_li6"><strong>$0.50 (5%)</strong> &mdash; CNOVA Treasury (backs CNOVA floor price)</li>
+          <li data-i18n="faqPage.q4_li7"><strong>$0.30 (3%)</strong> &mdash; Stability Rescue Fund</li>
+          <li data-i18n="faqPage.q4_li8"><strong>$0.15 (1.5%)</strong> &mdash; Dev + Ops</li>
+          <li data-i18n="faqPage.q4_li9"><strong>$0.05 (0.5%)</strong> &mdash; Liquidity Reserve</li>
+          <li data-i18n="faqPage.q4_li10"><strong>$0.10 (1%)</strong> &mdash; Community Wallet + Buyback Reserve (0.5% each)</li>
         </ul>
       </div></div>
     </div>
@@ -446,7 +446,7 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q6_a1">CryptoNova uses a 127-seat breadth-first search (BFS) matrix per tier &mdash; a 7-level binary tree. Members fill positions level-by-level: position 1 (root), then positions 2&ndash;3, then 4&ndash;7, then 8&ndash;15, and so on through level 7 (positions 64&ndash;127). When you join, you take the next available BFS slot.</p>
-        <p data-i18n="faqPage.q6_a2">When all 127 seats are filled, the root member completes their cycle: they receive a payout from the equalization pool and re-enter at the next available position in the active matrix. The matrix then resets for the next wave.</p>
+        <p data-i18n="faqPage.q6_a2">Once all 127 seats are filled, every new entry rotates the matrix: the root member cycles out, everyone advances one seat, and the equalization pool distributes across the seated members — weighted by seat depth, so deeper seats earn larger shares. The cycling member crosses to Matrix B (from MatA) or is automatically re-entered/upgraded (from MatB).</p>
       </div></div>
     </div>
 
@@ -467,7 +467,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q8_a1">A cycle completes when <strong>all 127 positions in a matrix are filled</strong>. The member at position 1 (root) receives their equalization pool payout and is automatically re-entered into the active matrix at the next available slot. There is no manual action required.</p>
+        <p data-i18n="faqPage.q8_a1">A cycle completes for a member when they reach <strong>position 1 (root) of a full matrix</strong> and the next entry rotates them out. From MatA, the cycling member crosses into MatB — the crossing costs the full entry fee, funded half by their crossing reserve and half by accumulated earnings. From MatB, the additive engine automatically re-enters and/or upgrades them from their accumulated funds. No manual action required.</p>
         <p data-i18n="faqPage.q8_a2">Throughout the cycle, chain pay flows to upline positions as each new member joins &mdash; earnings are continuous, not a single event at cycle completion.</p>
       </div></div>
     </div>
@@ -501,8 +501,8 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q11_a1">CryptoNova includes an <strong>auto-upgrade system</strong>. When you complete a cycle at your current tier, a portion of your equalization pool payout is automatically used to register you at the next tier up &mdash; no manual action needed. Your original referrer is preserved across all tier upgrades.</p>
-        <p data-i18n="faqPage.q11_a2">Higher tiers have larger entry fees, larger chain pay amounts, and larger cycle payouts. You can also be upgraded manually from the Dashboard if you have sufficient earnings.</p>
+        <p data-i18n="faqPage.q11_a1">CryptoNova V8.43 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles; adjust anytime with the Dashboard toggles (Member Options). Your original referrer is preserved across all tier upgrades.</p>
+        <p data-i18n="faqPage.q11_a2">Higher tiers have larger entry fees, larger chain pay amounts, and larger pool flow. You can also upgrade manually once you've completed a cycle or crossed into MatB at your current tier — or anytime the target tier's Whale Gate is open (T2–T5 open together at 25 T5 pioneers; T6–T10 each at their own 25-member milestone).</p>
       </div></div>
     </div>
 
@@ -520,10 +520,10 @@ function toggleTheme() {
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q12_a1">Every $10 T1 entry generates income across four streams:</p>
         <ul>
-          <li data-i18n="faqPage.q12_li1"><strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pays your first re-entry fee when your 127-seat matrix fills (costs you nothing extra).</li>
-          <li data-i18n="faqPage.q12_li2"><strong>Instant earn &mdash; $0.50 (5%)</strong> &mdash; credited to your withdrawable balance the moment you join.</li>
-          <li data-i18n="faqPage.q12_li3"><strong>Chain pay &mdash; $1.665 total (16.65%)</strong> &mdash; L1 earns $0.315, L2–L6 each earn $0.27, distributed up the BFS tree.</li>
-          <li data-i18n="faqPage.q12_li4"><strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier, accumulates and pays out when 127 seats fill, then restarts.</li>
+          <li data-i18n="faqPage.q12_li1"><strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-funds half of your crossing fee when your 127-seat matrix fills (your earnings cover the rest).</li>
+          <li data-i18n="faqPage.q12_li2"><strong>Instant earn &mdash; $0.25 (2.5%)</strong> &mdash; credited to your withdrawable balance the moment you join.</li>
+          <li data-i18n="faqPage.q12_li3"><strong>Referral + chain pay &mdash; $1.85 total (18.5%)</strong> &mdash; L1 (direct referrer) earns $0.50, L2–L6 upline positions each earn $0.27, on every entry below them.</li>
+          <li data-i18n="faqPage.q12_li4"><strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.</li>
         </ul>
         <p data-i18n="faqPage.q12_a2">The remaining split goes to protocol reserves and programs (CNOVA Treasury, Stability Rescue Fund, Dev, Ops, Liquidity Reserve, Buyback Reserve) — these back the protocol's long-term health and are not directly withdrawable by individual members. The exception is the Community Wallet: if you're one of the first 1,000 members to register, your share of that pool is claimable monthly from the Dashboard — see the Compensation Plan page for details.</p>
       </div></div>
@@ -574,7 +574,7 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q16_a1">When you first register, the wallet that referred you is recorded permanently on-chain as your <strong>original referrer</strong> and locked forever &mdash; it never changes, even across tier upgrades.</p>
-        <p data-i18n="faqPage.q16_a2">Your referrer earns the <strong>$2.00 L1 referral bonus</strong> whenever you register at any tier. This rewards the person who brought you in for your lifetime participation.</p>
+        <p data-i18n="faqPage.q16_a2">Your referrer earns the <strong>5% L1 referral bonus</strong> ($0.50 at T1, $500 at T10) whenever you register or upgrade at any tier. This rewards the person who brought you in for your lifetime participation.</p>
       </div></div>
     </div>
 
@@ -584,7 +584,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q17_a1">44% of each entry fee ($4.40 at T1) flows into the equalization pool for that matrix. When all 127 seats are filled, the pool balance is paid to the root member and used to automatically re-enter them into the next active matrix &mdash; no action required on your part.</p>
+        <p data-i18n="faqPage.q17_a1">18% of each entry fee ($1.80 at T1) flows into the equalization pool for that matrix. Each rotation, the pool distributes across all seated members weighted by seat depth — deeper seats receive larger shares, which offsets the wait. When you cycle out, re-entry costs the full entry fee: your crossing reserve covers half and your accumulated earnings the rest, applied automatically &mdash; no action required on your part.</p>
         <p data-i18n="faqPage.q17_a2">If the pool accumulates before the matrix fills (from multiple cycles), the excess funds the root member's re-entry fee automatically. You can also top up your pool balance manually from the Dashboard if you want to accelerate re-entry.</p>
       </div></div>
     </div>
@@ -639,8 +639,8 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q21_a1">10% of every entry fee ($1.00 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.totalBalance() / CNOVA.totalSupply()</code>.</p>
-        <p data-i18n="faqPage.q21_a2">At launch with 50 CNOVA minted per $10 entry and $1.00 going to the CNOVA Treasury: $1.00 / 50 = <strong>$0.02 starting floor</strong>. The floor only rises as more members join and more USDC flows into the Treasury.</p>
+        <p data-i18n="faqPage.q21_a1">5% of every entry fee ($0.50 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.totalBalance() / CNOVA.totalSupply()</code>.</p>
+        <p data-i18n="faqPage.q21_a2">At launch with 50 CNOVA minted per $10 entry and $0.50 going to the CNOVA Treasury: $0.50 / 50 = <strong>$0.01 starting floor</strong>. The floor only rises as more members join and more USDC flows into the Treasury.</p>
         <p data-i18n="faqPage.q21_a3">You can redeem CNOVA for USDC at the exact floor price at any time using the <strong>Redeem CNOVA</strong> section on the Dashboard &mdash; no admin approval, fully on-chain.</p>
       </div></div>
     </div>

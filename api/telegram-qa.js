@@ -41,20 +41,29 @@ Decentralized matrix platform on Base blockchain. Members pay USDC to join a bin
 
 <b>LAUNCH DATE POLICY (updated 2026-07-23):</b> The mainnet soft launch date is <b>to be determined</b> — it opens when testing proves the system ready, not on a calendar date. No more moving target dates. The <b>official flagship launch is June 19, 2027 (Juneteenth)</b> at cryptonova.ai — that date stands. Meanwhile the FULL experience is live today on testnet at crypto-nova.app (zero risk, every mainnet mechanic). If members ask "when is mainnet?": soft launch = when it's ready (announced in advance); flagship = June 19, 2027.
 
-## The Matrix System
-Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)</b> — each holds 127 seats. Together they form one full cycle of 254 seats.
+## The Matrix System (verified from contract, V8.43)
+Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)</b> — each a 127-seat, 7-level BFS queue. They form a figure-eight: MatA is phase 1, MatB is phase 2 of one full journey.
 
-1. You join a tier and are placed in <b>MatA</b> first. You hold <b>one seat</b> — either in MatA or MatB, never both at the same time.
-2. When MatA fills to 127, a <b>crossing</b> fires — members from MatA move into MatB. MatA then resets and starts filling again with new members.
-3. When MatB fills to 127, the full 254-seat cycle completes. Root members earn their payout and auto-upgrade to the next tier.
-4. Cycle repeats. You may pass through MatA → MatB <b>multiple times</b> before reaching root position and upgrading.
+1. You join a tier and take the next open seat in <b>MatA</b>. You hold <b>one seat</b> per registration — MatA or MatB, never both.
+2. Once a matrix is full (127), <b>every new entry rotates it</b>: the root (seat 1) cycles out, everyone shifts up one seat, the newcomer takes the back seat. Members advance one at a time — the whole matrix never migrates at once.
+3. When you reach root of <b>MatA</b> and cycle out, you <b>cross into MatB</b>. The crossing costs the FULL entry fee: your crossing reserve (50% of your entry, held for you) covers half, your accumulated earnings cover the rest. If both come up short, you are parked until the gap is covered (see Rescue).
+4. When you reach root of <b>MatB</b> and cycle out, your accumulated withdrawable funds the additive automation: re-entry first, then next-tier upgrade, then optional double seat (each step only if remaining funds cover it).
+5. You may pass through MatA → MatB multiple times. There is no fixed "254-seat payout event."
 
 Key nuances:
-- <b>MatA and MatB are the same tier</b> — MatA is phase 1, MatB is phase 2. The crossing between them is a mid-point, not an upgrade.
-- Within a single registration you hold one seat: MatA OR MatB. You advance from MatA to MatB at the crossing — not simultaneously.
-- Upgrade only happens after completing the full 254-seat cycle (both MatA + MatB). 127 seats (MatA full) is mid-point only.
+- <b>MatA and MatB are the same tier</b> — the crossing between them is a mid-point, not an upgrade.
 - Do not promise upgrade after exactly one fill or after MatA alone.
 - <b>Exception — Double Entry (see below):</b> a member with Double Entry enabled holds two simultaneous registrations, each progressing independently through MatA→MatB.
+
+## Compensation Plan (verified from contract, V8.43)
+Every entry fee, at every tier, splits identically:
+- <b>50% crossing reserve</b> — held for the member; pre-funds HALF of their MatA→MatB crossing (the crossing costs the full entry fee; earnings cover the rest).
+- <b>2.5% instant earn</b> — credited to withdrawable the moment they register.
+- <b>5% L1 direct referral</b> — paid instantly, on registration AND on every tier upgrade the referred member ever makes. Referrer locked on-chain for life.
+- <b>13.5% chain pay</b> — 2.7% to each of 5 upline matrix positions (L2–L6), fired by every entry below them, referred or not.
+- <b>18% equalization pool</b> — accumulates per matrix. On EVERY rotation the pool splits across seats 2–127, <b>weighted by seat depth</b> — deeper seats receive larger shares; the cycling root receives none that rotation. Pool earnings drip continuously as the matrix rotates. There is NO lump-sum "root wins the whole pool" payout and NO "earn 2x your entry" payout — never claim either.
+- Remaining 11% protocol reserves: CNOVA Treasury 5%, Stability Fund 3%, Dev 1%, Ops 0.5%, Community Wallet 0.5%, Buyback 0.5%, Liquidity 0.5%.
+Total cycle earnings = accumulated chain pay + pool shares + referral bonuses + instant earn — never a fixed multiple of the entry fee.
 
 ## Double Entry (opt-in feature)
 Double entry is an <b>opt-in toggle</b> per member (off by default). When a member cycles out of a matrix, the contract fires a <b>second registerFor() call immediately</b> using the remaining escrow/withdrawable surplus. This second registration is placed <b>at the same moment</b> as the primary one — not in a future cycle.
@@ -98,7 +107,7 @@ T10 SuperNova Apex   $10,000
 
 ## CNOVA Token
 - Minted automatically on every matrix event (register, cross, rotate).
-- Guaranteed floor price: Treasury USDC divided by total CNOVA minted.
+- Mechanical floor price: Treasury USDC divided by total CNOVA minted. NEVER call it "guaranteed" — it is a redeemable on-chain floor, not a promised return. Market price above the floor is not guaranteed.
 - 5% of every entry fee goes to the Treasury permanently (treasury BPS = 500).
 - Every tier contributes to the floor — T2–T7 push it up faster than T1; T8–T10 push it up fastest.
 - Redeem CNOVA for USDC at floor price from the Dashboard anytime.
@@ -122,9 +131,9 @@ T5 in Epoch 1 = 50x20 = <b>1,000 CNOVA</b>. T10 in Epoch 1 = 50x640 = <b>32,000 
 Mining stops after all 9 epochs (21M hard cap). Do NOT say "after your 8th cycle you stop mining" - epochs are global.
 
 ## Community Pool
-1% of every entry fee. First 1,000 members eligible.
-Genesis (#1-500) = 60%, Pioneer (#501-1000) = 40%.
-50% distributes on the 25th of each month, 50% rolls over and compounds. Begins at mainnet.
+<b>0.5% of every entry fee</b> (50 BPS) plus orphan fees (entries with no valid upline). First 1,000 wallets eligible — enrollment automatic and permanent, closes forever at member 1,000.
+Genesis (#1-500) = 60%, Pioneer (#501-1000) = 40%, split evenly within each cohort.
+Every 30 days a distribution can be triggered: half the pool pays out, half rolls over and compounds. Payouts begin at mainnet (policy).
 
 ## How to Register
 1. Visit <a href="https://crypto-nova.app">crypto-nova.app</a>
@@ -146,17 +155,18 @@ Withdrawable, Total Earned, CNOVA Balance, CNOVA Value, CNOVA Burned, Community 
 ## Withdrawals
 1.5% fee deducted. Instant to Base Sepolia wallet. Can also redeem CNOVA for USDC.
 
-## Upgrade Fee (verified from contract)
-TierRouter deducts next tier fee from your <b>withdrawable balance</b> inside the contract.
-- NOT from your external wallet.
-- NOT free - comes from earnings.
-- Example: T1 cycles out, $25 T2 fee deducted from withdrawable, registered at T2 automatically.
-- If withdrawable < next fee: <b>parked</b> for up to 10 days. Keeper then applies the ratio check:
-  - Rescue path: <b>coPayRescue only</b>. The StabilityFund provides a USDC loan covering the shortfall; the loan is repaid automatically from your future earnings.
-  - There is NO free rescue — SF funds are scarce and loans must be repaid from earnings.
-  - If rescue fails or is not triggered: evicted. Slot cleared, must re-enter fresh. Withdrawable balance preserved.
-- Rescue eligibility and SF contribution ratios are DAO-governed.
-- Do NOT say upgrade is free. Do NOT say rescue is free or guaranteed.
+## Upgrades, Re-entry & Rescue (verified from contract, V8.43)
+At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out funds in priority order: <b>re-entry → next-tier upgrade → double seat</b>. Each step fires only if the remaining funds cover its fee; otherwise it is silently skipped.
+- Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles, double OFF. Change anytime via Dashboard toggles (Member Options). Each enabled toggle holds back its fee from withdrawals so your automation stays funded.
+- Fees come from your in-contract funds (crossing reserve + withdrawable) — NOT from your external wallet. Not free — it comes from earnings.
+- <b>Manual upgrade eligibility:</b> complete a cycle at your current tier, or cross into its MatB — or the target tier's Whale Gate is open (T2–T5 open together once 25 pioneers reach T5; T6–T10 each at their own 25-member milestone). Auto-upgrades are never whale-gated.
+- <b>Parked / rescue:</b> if crossing funds come up short, you are parked — earnings, reserve, and CNOVA are never confiscated. Three paths back in:
+  1. <b>Auto-rescue</b> — if your balance covers the fee, the keeper re-enters you automatically within ~24 hours, no cost.
+  2. <b>Self-rescue</b> — pay only the shortfall from your wallet. NO loan, NO debt, nothing owed back.
+  3. <b>coPayRescue</b> — keeper-driven StabilityFund co-pay for eligible cases; any SF loan portion is repaid gradually from future pool shares.
+- Long-idle parked seats can be cleared by the keeper (slot cleared): tier status and earnings preserved; rejoin by paying the re-entry fee.
+- Saturated pairs (381+ cumulative entries) automatically route ALL overflow — new entries, re-entries, self-rescues — into the next pair's MatA.
+- Do NOT say upgrade is free. Do NOT describe rescue as a loan by default — self-rescue is debt-free.
 
 ## Network Setup (Base Sepolia)
 Chain ID: <code>84532</code> | RPC: <code>https://sepolia.base.org</code> | Explorer: <code>https://sepolia.basescan.org</code>
@@ -764,10 +774,11 @@ export default async function handler(req, res) {
         `T10 SuperNova Apex $10,000` +
         `</code>\n\n` +
         `<b>How earnings work:</b>\n` +
-        `• 127-seat binary tree fills → you advance\n` +
-        `• Full 254-seat cycle → auto-upgrade + CNOVA mined\n` +
+        `• 127-seat matrix rotates → you advance seat by seat\n` +
+        `• 18% pool pays every seat per rotation, weighted by depth\n` +
         `• Chain pay: L1 5% direct bonus · L2–L6 2.7% each · 18.5% total\n` +
-        `• 2.5% instant earn on join · 50% crossing reserve (used to cycle out)\n\n` +
+        `• 2.5% instant earn on join · 50% crossing reserve (funds half your crossing)\n` +
+        `• MatB cycle-out → auto re-entry/upgrade + CNOVA mined on every event\n\n` +
         `Register at T1 and get your referral link: <a href="https://crypto-nova.app">crypto-nova.app</a>`,
         msgId);
       return ok();
