@@ -45,6 +45,18 @@
 
 ## Open Issues
 
+### [2026-07-24] Other — Was kicked out of T1 matrix after completing A & B. Although…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Was kicked out of T1 matrix after completing A & B. Although reentry and auto upgrade was turned on the system although didn't have enough funds put me out.. Had to manually re enter by paying $10 to be put back into T1 to go through again.
+- **What was expected:** I expected that if enough funds weren't available that I would be parked and asked to self rescue and not be kicked out..
+- **Notes:** This was the same issue with all my accounts although the auto re enter option was enable on all of them, so it looks like you go through once and then if not upgraded you are kicked out and ask to re enter by paying $10 again to be put back into the matrix at T1.. This isn't what I understood should happen if the auto re enter option is turned on..
+- **Submitted:** Fri, 24 Jul 2026 00:50:15 GMT
+
+
 ### [2026-07-23] Other — I registered 2 directs but there are 4 in this account.
 - **Reporter:** @koach100
 - **Page:** Other
