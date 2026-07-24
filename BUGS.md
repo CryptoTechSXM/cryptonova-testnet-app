@@ -4,6 +4,7 @@
 > Format: **[Page] — What happened / What was expected** + wallet type if relevant + consistent or intermittent
 > **Triage flow (owner, 2026-07-24):** new reports auto-land under **Open Issues** (do not rename that heading — api/submit-bug.js inserts by that exact marker). Triage each new report → respond to the member → move it to **Pending — Responded** with the response time. After **12 hours with no follow-up**, move to Resolved ("no follow-up after response"). If it recurs, the member files a fresh report. Confirmed engineering bugs move to **Fix In Progress** and close only when the fix ships, regardless of member response.
 > **Owner test reports:** reports from **CryptoTech** are the owner verifying a member's theory — triage them as test evidence (usually straight to Resolved with the finding), not as new member issues.
+> **Bug bounty ($1/accepted find):** when accepting a real find during triage, ALSO add it to `bounties.json` (repo root — powers the dashboard footer score + the bug-report page scoreboard). Group multi-wallet reporters under one entry; mark duplicates/test artifacts with their status; record payouts in `paid_usd`.
 
 ---
 

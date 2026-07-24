@@ -4807,9 +4807,30 @@ async function loadDashboardData() {
     // Community Wallet — load founder status + claimable
     await loadCWData(userAddr, signer, rp).catch(e => console.error('CW load error:', e.message));
     loadMyCoupons().catch(e => console.error('coupons load error:', e.message));
+    updateBountyScore(userAddr); // fire-and-forget — bug bounty footer
 
   } catch(e) { console.error('loadDashboardData:', e.message); }
   finally { window._dashLoadInFlight = false; }
+}
+
+// ── Bug Bounty score (bounties.json, maintained during triage) ─────────────
+async function updateBountyScore(addr) {
+  try {
+    const el = document.getElementById('bounty-score');
+    if (!el || !addr) return;
+    const r = await fetch('/bounties.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return;
+    const data = await r.json();
+    const me = (data.reporters || []).find(rep =>
+      (rep.wallets || []).some(w => w.toLowerCase() === addr.toLowerCase()));
+    if (!me) { el.innerHTML = ''; return; }
+    const accepted = (me.finds || []).filter(f => f.status === 'accepted').length;
+    const earned   = accepted * (data.rate_usd || 1);
+    const paid     = Number(me.paid_usd || 0);
+    el.innerHTML = ' &middot; <span style="color:var(--green);font-weight:600">🏆 ' +
+      accepted + ' accepted find' + (accepted === 1 ? '' : 's') + ' &middot; $' + earned.toFixed(2) + ' earned' +
+      (paid > 0 ? ' ($' + paid.toFixed(2) + ' paid)' : '') + '</span>';
+  } catch(_) {}
 }
 
 /**
@@ -6830,7 +6851,7 @@ function updateAddrsFromDeployed(d) {
 <script src="/i18n.js" defer></script>
     <!-- Bug Report Footer -->
     <div style="text-align:center;padding:24px 0 24px;border-top:1px solid var(--border,#1e3a5f);margin-top:32px">
-      <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here</a>
+      <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here — accepted finds earn $1</a><span id="bounty-score" style="font-size:13px"></span>
     </div>
 
 <script>
