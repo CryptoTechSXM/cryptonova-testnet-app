@@ -54,8 +54,9 @@ _(new reports land here — untriaged; respond, then move to Pending)_
 ### [2026-07-24] Bug-report page — wallet not connecting (Sherwyn, via Telegram)
 - **Reporter:** Sherwyn (reported in Telegram because of this very issue)
 - **What happened:** bug-report page doesn't connect to his wallet.
-- **Triage:** owner test 17:12 UTC (Rabby, desktop) — connect works, address captured. Sherwyn's own reports today also carried addresses. Points to environment-specific injection — likely the TokenPocket in-app browser (his upgrade wallet today). Asked for his environment details (browser vs in-app, wallet, what he sees). Env details pending; nothing reproducible on our side yet.
-- **Responded:** 2026-07-24 ~17:30 UTC → 12h auto-close if no follow-up.
+- **Triage:** owner test 17:12 UTC (Rabby, desktop) — connect works. Sherwyn clarified: dashboard bug-report link, wallet ALREADY connected, form doesn't detect it, hard refresh no help. Root cause found: bug-report.html did ONE immediate eth_accounts check at parse time — in-app wallet browsers (TokenPocket/Trust) inject late and/or return [] on first call, stranding connected members on the connect screen. Fixed: retry over ~4s + ethereum#initialized + accountsChanged listeners; TokenPocket/Trust added to wallet detection + dropdown. Awaiting his retest.
+- **Also confirmed by Sherwyn 2026-07-24 ~18:00 UTC:** upline upgrade commissions now visible after the dashboard fix — that thread CLOSED (moved to Resolved).
+- **Responded:** 2026-07-24 ~18:15 UTC → 12h auto-close if no follow-up.
 
 ## Pending — Responded (12h auto-close)
 
@@ -116,6 +117,7 @@ All accounts have at least auto reentry abled.
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-24 | 2026-07-24 | Dashboard | Sherwyn (Telegram) — upline USDC missing on downline upgrades. On-chain verified commissions WERE paid (leaders held up to $94 in credits); dashboard's hasEverJoined filter hid cross-tier L1 credits. Display fix shipped (f09bbab); Sherwyn confirmed commissions now visible. | f09bbab |
 | 2026-07-24 | 2026-07-24 | bug-report.html | CryptoTech (0xa2f6) — owner test of Sherwyn's wallet-connect claim: Rabby connects and populates the address correctly. Works as designed; Sherwyn's case tracked in Pending as environment-specific. | — |
 | 2026-07-23 | 2026-07-24 | Registration | @Lavern-Gay (0x185b) — registration failed repeatedly. Root cause: full-matrix registrations trigger the rotation cascade (~15.5M gas); frontend's est×1.25 buffer exceeded the RPC's ~17M tx-gas cap and its 800k fallback was far too low. Fixed: est+5% + cascade-safe 16M fallback, shipped to main (729e8dc). Member asked to retry. | 729e8dc |
 | 2026-07-23 | 2026-07-24 | Referrals | @koach100 (0x1ca3) — 4 directs shown, only 2 registered by member. Test artifact: both extra addresses are stress-test infrastructure wallets that used his wallet as sponsor (he was on an early leader list). Marked as test; rotation list corrected to the intended 10-then-39 leader set. To discuss at next meeting. | — |

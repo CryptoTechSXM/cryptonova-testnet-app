@@ -199,6 +199,8 @@
     <select id="wallet-type">
       <option value="">-- Select wallet --</option>
       <option value="MetaMask">MetaMask</option>
+      <option value="TokenPocket">TokenPocket</option>
+      <option value="Trust Wallet">Trust Wallet</option>
       <option value="Rabby">Rabby</option>
       <option value="Coinbase Wallet">Coinbase Wallet</option>
       <option value="WalletConnect">WalletConnect</option>
@@ -241,16 +243,47 @@
   var walletAddress = '';
   var sessionPw = sessionStorage.getItem('cnova_bug_pw') || '';
 
+  // 2026-07-24 (Sherwyn report): in-app wallet browsers (TokenPocket, Trust) inject
+  // window.ethereum LATE and/or return [] from the first eth_accounts call even when
+  // connected. A single immediate check stranded connected members on the connect
+  // screen. Retry over ~4s and re-check when an account silently appears.
   (function init() {
-    if (!window.ethereum) { showWallet(); return; }
-    window.ethereum.request({ method: 'eth_accounts' }).then(function(accounts) {
-      if (accounts && accounts[0]) {
-        walletAddress = accounts[0];
-        if (sessionPw) { showForm(); } else { showPasswordScreen(); }
-      } else {
-        showWallet();
+    var attempts = 0;
+    function tryDetect() {
+      attempts++;
+      if (!window.ethereum) {
+        if (attempts < 6) { setTimeout(tryDetect, 700); } else { showWallet(); }
+        return;
       }
-    }).catch(function() { showWallet(); });
+      window.ethereum.request({ method: 'eth_accounts' }).then(function(accounts) {
+        if (accounts && accounts[0]) {
+          walletAddress = accounts[0];
+          if (sessionPw) { showForm(); } else { showPasswordScreen(); }
+        } else if (attempts < 6) {
+          setTimeout(tryDetect, 700);
+        } else {
+          showWallet();
+        }
+      }).catch(function() {
+        if (attempts < 6) { setTimeout(tryDetect, 700); } else { showWallet(); }
+      });
+    }
+    tryDetect();
+    // Late injection (some in-app browsers fire this after load)
+    window.addEventListener('ethereum#initialized', tryDetect, { once: true });
+    // Wallet connects/switches account after page load
+    var _wireChanged = function() {
+      if (window.ethereum && window.ethereum.on && !window._bugAccWired) {
+        window._bugAccWired = true;
+        window.ethereum.on('accountsChanged', function(accounts) {
+          if (accounts && accounts[0]) {
+            walletAddress = accounts[0];
+            if (sessionPw) { showForm(); } else { showPasswordScreen(); }
+          }
+        });
+      }
+    };
+    _wireChanged(); setTimeout(_wireChanged, 2000);
   })();
 
   document.getElementById('pw-input').addEventListener('keydown', function(e) {
@@ -259,7 +292,9 @@
 
   function detectWalletType() {
     if (!window.ethereum) return '';
+    if (window.ethereum.isTokenPocket)    return 'TokenPocket';
     if (window.ethereum.isRabby)          return 'Rabby';
+    if (window.ethereum.isTrust)          return 'Trust Wallet';
     if (window.ethereum.isCoinbaseWallet) return 'Coinbase Wallet';
     if (window.ethereum.isMetaMask)       return 'MetaMask';
     return 'Other / Unknown';
