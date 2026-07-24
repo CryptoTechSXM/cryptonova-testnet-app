@@ -2,6 +2,7 @@
 
 > Drop new issues here as members report them. Start a session with "check BUGS.md" and Claude will read this directly.
 > Format: **[Page] — What happened / What was expected** + wallet type if relevant + consistent or intermittent
+> **Triage policy (owner, 2026-07-24):** once a response has been sent to the reporter, the issue auto-resolves after **12 hours with no follow-up** — move it to Resolved ("no follow-up after response"). If it recurs, the member files a fresh report. Contract bugs tracked in V8_44_PLAN.md stay open until the fix ships regardless of member response.
 
 ---
 
