@@ -46,6 +46,18 @@
 
 ## Open Issues
 
+### [2026-07-24] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Other / Unknown
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Error message has changed but still the same results.... hard refresh didn't do anything..
+- **What was expected:** To be upgraded to T2
+- **Notes:** In the wallet type... it's Token Pocket being used to complete upgrade.
+- **Submitted:** Fri, 24 Jul 2026 15:07:51 GMT
+
+
 _(new reports land here — untriaged; respond, then move to Pending)_
 
 ## Pending — Responded (12h auto-close)
