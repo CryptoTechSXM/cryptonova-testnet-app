@@ -46,30 +46,6 @@
 
 ## Open Issues
 
-### [2026-07-24] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. This account is also giving the same issue..
-- **What was expected:** Trying to upgrade to T2..
-- **Notes:** The wallet type is "Token Pocket"...
-- **Submitted:** Fri, 24 Jul 2026 15:11:45 GMT
-
-
-### [2026-07-24] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Other / Unknown
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Error message has changed but still the same results.... hard refresh didn't do anything..
-- **What was expected:** To be upgraded to T2
-- **Notes:** In the wallet type... it's Token Pocket being used to complete upgrade.
-- **Submitted:** Fri, 24 Jul 2026 15:07:51 GMT
-
-
 _(new reports land here — untriaged; respond, then move to Pending)_
 
 ## Pending — Responded (12h auto-close)
@@ -85,6 +61,7 @@ _(new reports land here — untriaged; respond, then move to Pending)_
 - **Submitted:** Fri, 24 Jul 2026 13:41:10 GMT
 - **STATUS 2026-07-24 (2nd pass, after member follow-up):** TRUE root cause found — the Register-tab "Upgrade Tier" button (`_executeUpgrade`) still had a hardcoded **2M gas limit** missed in the first gas sweep; upgrades into T2's full pair need ~7.3M (cascade), so every attempt ran out of gas on-chain. Hard refresh couldn't help. Fixed `_executeUpgrade` + `coPayRescue` (3M static, same class) with estimate+5% and cascade-safe fallback. Member's wallet re-verified eligible; asked to retry once fix reaches main. Side finding for V8.44: `bulkUpgrade` hard-requires the whale gate (rejects cycle/MatB eligibility that `manualUpgrade` accepts) — inconsistent gate rules between the two upgrade entrypoints.
 - **Responded (2nd):** 2026-07-24 ~16:30 UTC → auto-close 12h after member confirms or goes silent post-fix.
+- **Follow-ups folded in:** two further reports (15:07 UTC same wallet; 15:11 UTC second account 0x1e8e2dcf, TokenPocket) — both submitted BEFORE the `_executeUpgrade` fix reached main (~16:45 UTC, e9107b8), same root cause, no new bug. All of Sherwyn's accounts should upgrade normally after one more hard refresh.
 
 ## Fix In Progress — closes when the fix ships
 
