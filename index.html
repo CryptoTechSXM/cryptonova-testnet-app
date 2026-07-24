@@ -6089,10 +6089,20 @@ function friendlyError(e) {
   // ── EARLY guard: raw ethers v6 tx data leaking (TokenPocket, Rabby, etc.) ─
   // Must be FIRST — before any branch that might fall through to raw msg output.
   const _earlyRaw = raw + rawDeep;
+  // V8.43: RPC rejects gas limits above ~17M — happens when a matrix is full and the
+  // tx triggers the rotation cascade. Stale cached pages (pre gas-fix) hit this too.
+  if (_earlyRaw.includes('gas limit too high') || _earlyRaw.includes('-32003'))
+    return '⛽ Network rejected the transaction size — hard-refresh this page (Ctrl+Shift+R) to load the latest version, then try again.';
   if (_earlyRaw.includes('"from":') || _earlyRaw.includes('"to":') ||
       _earlyRaw.includes('"data":') || _earlyRaw.includes('from="') ||
-      _earlyRaw.includes('to="') || /^"?0x[0-9a-f]{40,}"?/i.test(raw.trim()))
-    return '❌ Transaction failed — check your USDC balance and try again.';
+      _earlyRaw.includes('to="') || /^"?0x[0-9a-f]{40,}"?/i.test(raw.trim())) {
+    // Surface the contract's actual revert reason when ethers extracted one,
+    // instead of guessing "check your USDC balance" (misleading — see bug 2026-07-24).
+    const _reason = e.reason || e.shortMessage || '';
+    if (_reason && _reason.length < 140 && _reason.indexOf('0x') === -1 && _reason.indexOf('{') === -1)
+      return '❌ ' + _reason;
+    return '❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.';
+  }
   const msg     = e.reason || e.shortMessage || e.data?.message ||
                   e.info?.error?.message || e.error?.message || raw;
   const msgLow  = (msg + rawDeep).toLowerCase();
@@ -6206,7 +6216,7 @@ function friendlyError(e) {
     allRaw.includes('"from":') || allRaw.includes('"to":') || allRaw.includes('"data":') ||
     allRaw.includes('from="') || allRaw.includes('to="') ||
     (msg.trim() === '' && (allRaw.includes('0x') && allRaw.length > 10));
-  if (isTxHash) return '❌ Transaction failed — check your USDC balance, then try again. If the problem persists, contact support.';
+  if (isTxHash) return '❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.';
   return '❌ ' + msg.slice(0, 120);
 }
 

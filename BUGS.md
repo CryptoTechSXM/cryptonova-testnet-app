@@ -106,6 +106,16 @@ All accounts have at least auto reentry abled.
 - **Submitted:** Thu, 23 Jul 2026 17:09:35 GMT
 
 
+## Mainnet-Prep Design Questions (not bugs — decide before mainnet launch)
+
+### Graceful exit path — crossing locks have no way out (logged 2026-07-23)
+- **Pattern:** 3 member reports (ThanksAndPraises, Maximum_71, Koach100) show the same expectation: turning all automation toggles OFF should make everything withdrawable. In reality each active seat keeps its crossing funding locked (crossingReserve + the fee−reserve top-up from withdrawable, per seat, per tier — T5 seat locks $125+).
+- **Gap:** there is NO exit mechanism that releases the crossing lock — a member who wants to fully leave must wait for their current cycle to complete in every tier they hold a seat in. Acceptable on testnet (resets), but on MAINNET this is real money locked with no exit door.
+- **Options to weigh:** (a) status quo + clearer education (locks fund the mechanic that pays everyone); (b) exitSeat() with a penalty (forfeit crossing reserve or a % — protects the loop while giving an exit); (c) exit queue — seat released to the next joiner, funds returned when backfilled.
+- **Decide before mainnet.** Related follow-ups: fresh-member Auto Upgrade toggle display (should show Enabled by default — verify on a new V8.43 member); cosmetic `staticNetwork.matches` console warning in _getDirectReferrals.
+
+---
+
 _No open issues._
 
 ## Resolved Issues
