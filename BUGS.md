@@ -45,6 +45,17 @@
 
 ## Open Issues
 
+### [2026-07-24] Other — ❌ Transaction failed — check your USDC balance and try again…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed — check your USDC balance and try again. I have over 621 usdc in wallet, not sure why it's giving this message...
+- **What was expected:** To be upgraded to T2
+- **Submitted:** Fri, 24 Jul 2026 13:41:10 GMT
+
+
 ### [2026-07-24] Dashboard (index.html) — T1 has graduated on 4 of my accounts so far including this o…
 - **Reporter:** @CryptoJan
 - **Page:** Dashboard (index.html)
