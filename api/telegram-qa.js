@@ -166,6 +166,7 @@ At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out fund
   3. <b>coPayRescue</b> — keeper-driven StabilityFund co-pay for eligible cases; any SF loan portion is repaid gradually from future pool shares.
 - Long-idle parked seats can be cleared by the keeper (slot cleared): tier status and earnings preserved; rejoin by paying the re-entry fee.
 - Saturated pairs (381+ cumulative entries) automatically route ALL overflow — new entries, re-entries, self-rescues — into the next pair's MatA.
+- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy EARLY as a standby buffer — the factory fires when the previous pair reaches 375 cumulative entries OR its MatB hits 90% occupancy, whichever comes first. The new pair then stays empty until the previous pair fully saturates at 381 cumulative entries — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.43 anti-freeze buffer).
 - Do NOT say upgrade is free. Do NOT describe rescue as a loan by default — self-rescue is debt-free.
 
 ## Network Setup (Base Sepolia)
