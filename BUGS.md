@@ -49,6 +49,18 @@
 ### [2026-07-24] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
 - **Reporter:** Sherwyn
 - **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. This account is also giving the same issue..
+- **What was expected:** Trying to upgrade to T2..
+- **Notes:** The wallet type is "Token Pocket"...
+- **Submitted:** Fri, 24 Jul 2026 15:11:45 GMT
+
+
+### [2026-07-24] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Sherwyn
+- **Page:** Other
 - **Wallet Type:** Other / Unknown
 - **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
 - **Frequency:** Consistent
