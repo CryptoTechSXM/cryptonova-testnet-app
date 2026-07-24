@@ -16,6 +16,7 @@ Read this file at the start of every session before touching any frontend code.
 | Admin frontend | https://admin.crypto-nova.app |
 | Comp-plan docs | Synced to V8.43 contract truth 2026-07-23 (commit af8f569): faq/comp pages, all 10 locales, bot SYSTEM_PROMPT. On admin only — not yet pushed to preview/main. |
 | Marketing package | `CryptoNova-App/marketing/`: Member one-pager + 4 how-to PDFs + `CryptoNova_Explainer_Scripts_V8.md` (all contract-verified; QR/link placeholders pending). Old `CryptoNova_Video_Scripts.md` superseded. |
+| V8.44 pending | CONFIRMED BUG (2026-07-24, Sherwyn + CryptoJan reports): MatB cycle-out passes escrow=0 → additive engine can't see the member's MatB crossingReserve → passive members exit instead of re-enter/park; ~$5/member stranded in MatB storage (~$300 at 60 rotations). Full spec + recovery + test plan: CryptoNite-Smart-Contracts/CryptoNova/V8_44_PLAN.md. Overflow (375/381) passed live test same night. Frontend+keepers gas-hardened (est ladder, RPC cap <~17.8M). |
 
 ## Doctrine: code is truth
 
