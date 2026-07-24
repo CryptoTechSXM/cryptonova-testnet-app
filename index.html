@@ -3231,6 +3231,8 @@ async function loadTiersStats() {
       const status = statuses[i];
       if (!status) { detailCalls.push(Promise.resolve(null), Promise.resolve(null)); }
       else {
+        // NOTE: allPairsStatus's active[] flags the ROUTING pair (V8.40 contract-side),
+        // so findIndex here is already correct — do not recompute with hardcoded thresholds.
         const [matrixAs,,,,, actives] = status;
         const activeIdx = actives.findIndex(a => a);
         const matrixBs = status[1];
@@ -3252,7 +3254,7 @@ async function loadTiersStats() {
 
       if (status) {
         const [matrixAs, matrixBs, occupancyA, occupancyB, registered, actives] = status;
-        const activeIdx = actives.findIndex(a => a);
+        const activeIdx = actives.findIndex(a => a); // routing pair (V8.40 contract-side)
         if (activeIdx >= 0) {
           const occAn = Number(occupancyA[activeIdx]);
           const occBn = Number(occupancyB[activeIdx]);
@@ -3304,9 +3306,12 @@ async function loadTiersStats() {
           } else {
             pill.className = 'pill';
             pill.style.cssText = 'font-size:10px;background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.4)';
-            pill.textContent = 'Velocity Gated';
+            pill.textContent = 'Whale Gated';
           }
         }
+        // Tier label follows gate state — static HTML colors go stale once gates open dynamically
+        const lbl = document.getElementById('tier-lbl-t'+n);
+        if (lbl && lbl.parentElement) lbl.parentElement.style.color = isGreen ? 'var(--green)' : 'var(--text2)';
 
         const dotColor = isGreen ? 'var(--green)' : 'var(--yellow)';
         const dotA = document.getElementById(tNum+'a-dot');
