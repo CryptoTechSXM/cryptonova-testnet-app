@@ -3248,12 +3248,14 @@ async function loadTiersStats() {
     const details = await Promise.all(detailCalls);
 
     // Apply results to DOM
+    const tierHasMembers = {}; // any pair with occupants → tier label shows green
     for (let i = 0; i < TK.length; i++) {
       const t = TK[i].toLowerCase();
       const status = statuses[i];
 
       if (status) {
         const [matrixAs, matrixBs, occupancyA, occupancyB, registered, actives] = status;
+        tierHasMembers[i] = occupancyA.some(v => Number(v) > 0) || occupancyB.some(v => Number(v) > 0);
         const activeIdx = actives.findIndex(a => a); // routing pair (V8.40 contract-side)
         if (activeIdx >= 0) {
           const occAn = Number(occupancyA[activeIdx]);
@@ -3312,9 +3314,10 @@ async function loadTiersStats() {
             pill.title = 'Auto-upgrades into this tier are paused until growth velocity recovers (keeper-managed). Manual upgrades follow the Whale Gate and your own eligibility.';
           }
         }
-        // Tier label follows gate state — static HTML colors go stale once gates open dynamically
+        // Tier label: green when the tier is LIVE (has members) or auto-flow is open —
+        // the amber "Auto-Paused" state belongs to the pill, not the tier itself.
         const lbl = document.getElementById('tier-lbl-t'+n);
-        if (lbl && lbl.parentElement) lbl.parentElement.style.color = isGreen ? 'var(--green)' : 'var(--text2)';
+        if (lbl && lbl.parentElement) lbl.parentElement.style.color = (isGreen || tierHasMembers[i]) ? 'var(--green)' : 'var(--text2)';
 
         const dotColor = isGreen ? 'var(--green)' : 'var(--yellow)';
         const dotA = document.getElementById(tNum+'a-dot');
