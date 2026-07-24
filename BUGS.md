@@ -3,6 +3,7 @@
 > Drop new issues here as members report them. Start a session with "check BUGS.md" and Claude will read this directly.
 > Format: **[Page] — What happened / What was expected** + wallet type if relevant + consistent or intermittent
 > **Triage flow (owner, 2026-07-24):** new reports auto-land under **Open Issues** (do not rename that heading — api/submit-bug.js inserts by that exact marker). Triage each new report → respond to the member → move it to **Pending — Responded** with the response time. After **12 hours with no follow-up**, move to Resolved ("no follow-up after response"). If it recurs, the member files a fresh report. Confirmed engineering bugs move to **Fix In Progress** and close only when the fix ships, regardless of member response.
+> **Owner test reports:** reports from **CryptoTech** are the owner verifying a member's theory — triage them as test evidence (usually straight to Resolved with the finding), not as new member issues.
 
 ---
 
@@ -46,19 +47,15 @@
 
 ## Open Issues
 
-### [2026-07-24] Other — Nothing really testing Sherwin's Theory! He said the wallet …
-- **Reporter:** CryptoTech
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xa2f6fbfdf7bfb5601c3f3c6ef3fbf6ceff4044ed
-- **Frequency:** Consistent
-- **What happened:** Nothing really testing Sherwin's Theory! He said the wallet is not showing up.
-- **What was expected:** I expected the wallet not to display but it did.
-- **Notes:** Maybe there is something else wrong on sherwins's side.
-- **Submitted:** Fri, 24 Jul 2026 17:12:09 GMT
-
-
 _(new reports land here — untriaged; respond, then move to Pending)_
+
+## Pending — Responded (12h auto-close)
+
+### [2026-07-24] Bug-report page — wallet not connecting (Sherwyn, via Telegram)
+- **Reporter:** Sherwyn (reported in Telegram because of this very issue)
+- **What happened:** bug-report page doesn't connect to his wallet.
+- **Triage:** owner test 17:12 UTC (Rabby, desktop) — connect works, address captured. Sherwyn's own reports today also carried addresses. Points to environment-specific injection — likely the TokenPocket in-app browser (his upgrade wallet today). Asked for his environment details (browser vs in-app, wallet, what he sees). Env details pending; nothing reproducible on our side yet.
+- **Responded:** 2026-07-24 ~17:30 UTC → 12h auto-close if no follow-up.
 
 ## Pending — Responded (12h auto-close)
 
@@ -119,6 +116,7 @@ All accounts have at least auto reentry abled.
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-24 | 2026-07-24 | bug-report.html | CryptoTech (0xa2f6) — owner test of Sherwyn's wallet-connect claim: Rabby connects and populates the address correctly. Works as designed; Sherwyn's case tracked in Pending as environment-specific. | — |
 | 2026-07-23 | 2026-07-24 | Registration | @Lavern-Gay (0x185b) — registration failed repeatedly. Root cause: full-matrix registrations trigger the rotation cascade (~15.5M gas); frontend's est×1.25 buffer exceeded the RPC's ~17M tx-gas cap and its 800k fallback was far too low. Fixed: est+5% + cascade-safe 16M fallback, shipped to main (729e8dc). Member asked to retry. | 729e8dc |
 | 2026-07-23 | 2026-07-24 | Referrals | @koach100 (0x1ca3) — 4 directs shown, only 2 registered by member. Test artifact: both extra addresses are stress-test infrastructure wallets that used his wallet as sponsor (he was on an early leader list). Marked as test; rotation list corrected to the intended 10-then-39 leader set. To discuss at next meeting. | — |
 | 2026-07-23 | 2026-07-23 | index.html | Maximum_71 (0x8e9d) — expected $1500 withdrawable after toggles off, got $547→$391. Works as designed: toggles-off releases only the AUTOMATION reserve; each active seat keeps its own crossing lock (fee − crossingReserve per matrix, stacks across tiers). V8.42 matrix reset with V8.43 launch; new per-tier breakdown modal shows the per-tier locks. Explained. | — |
