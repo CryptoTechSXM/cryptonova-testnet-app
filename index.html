@@ -2853,11 +2853,15 @@ async function loadHomeStats() {
     let activeMatA1addr = ADDRS.T1.matA, activeMatB1addr = ADDRS.T1.matB;
     window._t1PairInfo = null;
     try {
-      const [_pc, _thr] = await Promise.all([
-        pm1.pairCount(),
+      // One allPairsStatus() call gives addresses AND occupancies (same source the
+      // status page uses) — avoids separate occupancy() reads that can get
+      // rate-limited into silent .catch(()=>0n) zeros on the public RPC.
+      const [_status, _thr] = await Promise.all([
+        pm1.allPairsStatus(),
         pm1.routeEntryThreshold().catch(() => 381n),
       ]);
-      const _n = Number(_pc);
+      const _matAs = _status[0], _matBs = _status[1], _occAs = _status[2], _occBs = _status[3];
+      const _n = _matAs.length;
       const _rows = [];
       for (let _i = 0; _i < _n; _i++) _rows.push(await pm1.pairs(_i));
       let _routing = -1;
@@ -2865,14 +2869,16 @@ async function loadHomeStats() {
         if (_routing === -1 && _rows[_i][3] < _thr) _routing = _i;
       }
       if (_routing === -1) _routing = _n - 1;
-      activeMatA1addr = _rows[_routing][0];
-      activeMatB1addr = _rows[_routing][1];
+      activeMatA1addr = _matAs[_routing];
+      activeMatB1addr = _matBs[_routing];
       window._t1PairInfo = {
         routingPair: _routing + 1,
         pairCount:   _n,
         total:       Number(_rows[_routing][3]),
         threshold:   Number(_thr),
         standby:     _n > _routing + 1 ? _routing + 2 : 0,
+        occA:        Number(_occAs[_routing]),
+        occB:        Number(_occBs[_routing]),
       };
     } catch(_) {
       try {
@@ -2938,16 +2944,19 @@ async function loadHomeStats() {
     setText('stat-lq-reserve', fmt6(lqBal));
     setText('stat-cycles',   sysCycles.toString());
 
-    // T1A progress
-    const occAn = Number(occA), pctA = Math.round(occAn/127*100);
+    // T1A progress — prefer the occupancy from allPairsStatus (window._t1PairInfo),
+    // which came in one reliable call; the separate occupancy() read can be
+    // rate-limited into a silent 0 by the public RPC.
+    const _pio = window._t1PairInfo;
+    const occAn = (_pio && _pio.occA >= 0) ? _pio.occA : Number(occA), pctA = Math.round(occAn/127*100);
     setText('t1a-occ', occAn.toString());
     setText('t1a-cycles', cyclesA.toString());
     setText('t1a-pct', pctA+'%');
     const barA = document.getElementById('t1a-bar');
     if (barA) barA.style.width = pctA+'%';
 
-    // T1B progress
-    const occBn = Number(occB), pctB = Math.round(occBn/127*100);
+    // T1B progress — same allPairsStatus preference as T1A
+    const occBn = (_pio && _pio.occB >= 0) ? _pio.occB : Number(occB), pctB = Math.round(occBn/127*100);
     setText('t1b-occ', occBn.toString());
     setText('t1b-pool', fmt6(poolB));
     setText('t1b-pct', pctB+'%');
