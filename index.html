@@ -6594,7 +6594,15 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
 
     _setS('Submitting upgrade transaction…');
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: 2_000_000 });
+    // V8.43 (bug: Sherwyn 2026-07-24): upgrades into a full pair cascade (~7M+ gas
+    // measured live) — the old hardcoded 2M limit guaranteed out-of-gas reverts.
+    // Estimate +5% with a cascade-safe fallback, same as register/bulk paths.
+    let _exGas = 16_000_000;
+    try {
+      const _exEst = await tr.manualUpgrade.estimateGas(tierIdx);
+      _exGas = Number(_exEst) + Math.ceil(Number(_exEst) * 0.05);
+    } catch(_) {}
+    const tx = await tr.manualUpgrade(tierIdx, { gasLimit: _exGas });
     _setS('Waiting for confirmation…');
     await tx.wait();
     if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
@@ -6766,7 +6774,13 @@ async function doCoPayRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const COPAY_ABI = ['function coPayRescue(address member) external'];
     const matrix    = new ethers.Contract(matrixAddr, COPAY_ABI, signer);
-    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: 3_000_000 }); // matrix may need to cycle 127 slots
+    // V8.43: rescue can trigger the full rotation cascade — estimate +5%, cascade-safe fallback
+    let _cprGas = 16_000_000;
+    try {
+      const _cprEst = await matrix.coPayRescue.estimateGas(userAddr);
+      _cprGas = Number(_cprEst) + Math.ceil(Number(_cprEst) * 0.05);
+    } catch(_) {}
+    const tx        = await matrix.coPayRescue(userAddr, { gasLimit: _cprGas });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }

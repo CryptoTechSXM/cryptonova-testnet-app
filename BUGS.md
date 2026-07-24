@@ -83,8 +83,8 @@ _(new reports land here — untriaged; respond, then move to Pending)_
 - **What happened:** ❌ Transaction failed — check your USDC balance and try again. I have over 621 usdc in wallet, not sure why it's giving this message...
 - **What was expected:** To be upgraded to T2
 - **Submitted:** Fri, 24 Jul 2026 13:41:10 GMT
-- **STATUS 2026-07-24:** Diagnosed — wallet verified on-chain: eligible (T1 cycle complete), $671 USDC, upgrade simulates OK. Failure was the cascade-gas bug served from a cached pre-fix page (T2 MatA filled during the morning). Member asked to hard-refresh and retry. Error handler also fixed to surface real revert reasons (was misleadingly saying "check USDC balance").
-- **Responded:** 2026-07-24 ~15:30 UTC → auto-close after 2026-07-25 ~03:30 UTC if no follow-up.
+- **STATUS 2026-07-24 (2nd pass, after member follow-up):** TRUE root cause found — the Register-tab "Upgrade Tier" button (`_executeUpgrade`) still had a hardcoded **2M gas limit** missed in the first gas sweep; upgrades into T2's full pair need ~7.3M (cascade), so every attempt ran out of gas on-chain. Hard refresh couldn't help. Fixed `_executeUpgrade` + `coPayRescue` (3M static, same class) with estimate+5% and cascade-safe fallback. Member's wallet re-verified eligible; asked to retry once fix reaches main. Side finding for V8.44: `bulkUpgrade` hard-requires the whale gate (rejects cycle/MatB eligibility that `manualUpgrade` accepts) — inconsistent gate rules between the two upgrade entrypoints.
+- **Responded (2nd):** 2026-07-24 ~16:30 UTC → auto-close 12h after member confirms or goes silent post-fix.
 
 ## Fix In Progress — closes when the fix ships
 
