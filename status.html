@@ -1258,7 +1258,7 @@
         }
         const gateTag = d.gateOpen
           ? `<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(0,229,160,0.12);color:#00e5a0;border:0.5px solid rgba(0,229,160,0.35);margin-left:6px">Open</span>`
-          : `<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(245,158,11,0.12);color:#f59e0b;border:0.5px solid rgba(245,158,11,0.35);margin-left:6px">Velocity</span>`;
+          : `<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(245,158,11,0.12);color:#f59e0b;border:0.5px solid rgba(245,158,11,0.35);margin-left:6px">Whale Gate</span>`;
         const totalPool = d.pairs.reduce((s, p) => s + p.poolA + p.poolB, 0n);
         const poolTxt = totalPool > 0n ? `<span style="font-size:10px;color:var(--text3);margin-left:auto;padding-left:6px">Pool: <span style="color:var(--green)">$${(Number(totalPool)/1e6).toFixed(2)}</span></span>` : '';
         html += `<div style="padding:7px 0;border-bottom:0.5px solid var(--border)">
@@ -1275,8 +1275,13 @@
           const cA = _pA >= 95 ? '#f59e0b' : d.color;
           const cB = _pB >= 95 ? '#f59e0b' : d.color;
           const rotTxt = Number(p.rotCount) > 0 ? ` · ${Number(p.rotCount)} rot` : '';
-          const newTag = (d.pairs.length > 1 && p.active)
-            ? `<span style="font-size:9px;background:var(--green-dim);color:var(--green);padding:0 4px;border-radius:3px;margin-left:3px">new</span>` : '';
+          // V8.43: an empty extra pair is a pre-deployed standby buffer — it opens
+          // automatically when the previous pair saturates. Label it honestly instead
+          // of "new" (p.active follows activePairIndex, which points at the buffer).
+          const newTag = (d.pairs.length > 1 && Number(p.occA) === 0 && Number(p.occB) === 0)
+            ? `<span title="Deployed in advance — opens automatically when the previous pair saturates. No action needed." style="font-size:9px;background:rgba(245,158,11,0.12);color:#f59e0b;border:0.5px solid rgba(245,158,11,0.35);padding:0 4px;border-radius:3px;margin-left:3px">standby</span>`
+            : (d.pairs.length > 1 && p.active && Number(p.occA) > 0)
+              ? `<span style="font-size:9px;background:var(--green-dim);color:var(--green);padding:0 4px;border-radius:3px;margin-left:3px">new</span>` : '';
           html += `<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
               <span style="font-size:10px;color:var(--text3);width:22px;flex-shrink:0">A${sfx}</span>
               <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${_pA}%;background:${cA};border-radius:3px"></div></div>
