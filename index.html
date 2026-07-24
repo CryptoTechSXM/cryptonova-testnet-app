@@ -1127,7 +1127,7 @@
           <!-- V8.35 Whale Gate banner — shown when member is T1-T4 and gate not yet open -->
           <div id="upgrade-whale-gate" style="display:none;margin-bottom:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--yellow)">
             <div style="font-weight:700;margin-bottom:6px">🐋 Whale Gate — Pioneer Milestone</div>
-            <div style="margin-bottom:4px">T2–T5 unlock together when <strong id="whale-gate-t5-progress">…</strong> / <strong id="whale-gate-t5-threshold">25</strong> T5 pioneers join.</div>
+            <div style="margin-bottom:4px">T2–T5 unlock together when <strong id="whale-gate-t5-threshold">25</strong> pioneers enter T5.</div>
             <div style="background:rgba(0,0,0,.25);border-radius:4px;height:6px;margin:6px 0 4px">
               <div id="whale-gate-t5-bar" style="background:var(--yellow);height:6px;border-radius:4px;width:0%;transition:width .4s"></div>
             </div>
@@ -6342,7 +6342,7 @@ async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
           statEl.innerHTML = '<span style="color:var(--green)">🔓 Gate open — T2–T5 unlocked!</span>';
           if (badgeEl) badgeEl.innerHTML = '<span style="background:var(--green);color:#000;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">UNLOCKED</span>';
         } else {
-          statEl.textContent = pct + '% — ' + (Number(t5Thresh) - Number(t5First)) + ' more pioneers needed to unlock T2–T5.';
+          statEl.textContent = t5First + '/' + t5Thresh + ' | ' + pct + '% — ' + (Number(t5Thresh) - Number(t5First)) + ' more pioneers needed to unlock T2–T5.';
           if (badgeEl) badgeEl.innerHTML = '';
         }
       }
