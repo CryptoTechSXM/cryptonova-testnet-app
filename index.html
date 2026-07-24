@@ -4256,12 +4256,17 @@ async function loadDashboardData() {
       const m      = matrices[i];
       const mc     = matContracts[i];
       const member = matResults[i];
-      if (member && member.hasEverJoined) {
+      // V8.43 fix (Sherwyn 2026-07-24): L1 upgrade commissions credit the SPONSOR's
+      // withdrawable in tier matrices they never joined (hasEverJoined=false). The
+      // contract explicitly allows withdrawing these (V8.36), but this filter hid
+      // them — uplines earned invisibly. Count any matrix with a positive balance.
+      const _hasCredit = member && !member.hasEverJoined && BigInt(member.withdrawable) > 0n;
+      if (member && (member.hasEverJoined || _hasCredit)) {
         totalW += BigInt(member.withdrawable);
         { const _wraw = BigInt(member.withdrawable); realW += (member.isInMatrix && _wraw > 10_000_000n) ? _wraw - 10_000_000n : (member.isInMatrix ? 0n : _wraw); }
         totalE += BigInt(member.totalEarned);
         totalWD += BigInt(member.totalWithdrawn ?? 0n);
-        if (!memberId) { memberId = Number(member.id); memberReferrer = member.referrer; }
+        if (!memberId && member.hasEverJoined) { memberId = Number(member.id); memberReferrer = member.referrer; }
         const tNum = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
         // Per-tier breakdown for the earnings + withdrawable cards
         // (withdrawable mirrors the realW lock logic so rows sum to the headline number)
@@ -4272,7 +4277,7 @@ async function loadDashboardData() {
           tb.withdrawable += (member.isInMatrix && _wtb > 10_000_000n) ? _wtb - 10_000_000n : (member.isInMatrix ? 0n : _wtb);
           if (member.isInMatrix) tb.active++;
         }
-        highestTier = Math.max(highestTier, tNum);
+        if (member.hasEverJoined) highestTier = Math.max(highestTier, tNum);
         if (member.isInMatrix) {
           const pos = { label: m.label, bfs: 0n, bfsUnknown: false, crossingReserve: 0n };
           activePositions.push(pos);
