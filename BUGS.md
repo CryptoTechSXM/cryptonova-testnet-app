@@ -54,6 +54,7 @@
 - **What happened:** ❌ Transaction failed — check your USDC balance and try again. I have over 621 usdc in wallet, not sure why it's giving this message...
 - **What was expected:** To be upgraded to T2
 - **Submitted:** Fri, 24 Jul 2026 13:41:10 GMT
+- **STATUS 2026-07-24:** Diagnosed — wallet verified on-chain: eligible (T1 cycle complete), $671 USDC, upgrade simulates OK. Failure was the cascade-gas bug served from a cached pre-fix page (T2 MatA filled during the morning). Member asked to hard-refresh and retry. Error handler also fixed to surface real revert reasons (was misleadingly saying "check USDC balance"). Awaiting retry confirmation.
 
 
 ### [2026-07-24] Dashboard (index.html) — T1 has graduated on 4 of my accounts so far including this o…
@@ -66,6 +67,7 @@
 All accounts have at least auto reentry abled.
 - **What was expected:** Account should have reentered and continued to cycle.
 - **Submitted:** Fri, 24 Jul 2026 01:22:53 GMT
+- **STATUS 2026-07-24:** CONFIRMED CONTRACT BUG — same root cause as Sherwyn's report below. MatB cycle-out passes escrow=0, so the additive engine can't fund re-entry from the member's MatB crossing reserve; passive members exit instead of re-entering/parking, and the $5 reserve is stranded. Full diagnosis + fix + recovery: CryptoNite-Smart-Contracts/CryptoNova/V8_44_PLAN.md. Reserves recoverable in V8.44. Member replied.
 
 
 ### [2026-07-24] Other — Was kicked out of T1 matrix after completing A & B. Although…
@@ -78,32 +80,8 @@ All accounts have at least auto reentry abled.
 - **What was expected:** I expected that if enough funds weren't available that I would be parked and asked to self rescue and not be kicked out..
 - **Notes:** This was the same issue with all my accounts although the auto re enter option was enable on all of them, so it looks like you go through once and then if not upgraded you are kicked out and ask to re enter by paying $10 again to be put back into the matrix at T1.. This isn't what I understood should happen if the auto re enter option is turned on..
 - **Submitted:** Fri, 24 Jul 2026 00:50:15 GMT
+- **STATUS 2026-07-24:** CONFIRMED CONTRACT BUG — member's expectation was the correct design. V8.44 will fund cycle-out from reserve + earnings and park (self-rescue available, no debt) instead of exiting. Stranded reserves recoverable. Spec: V8_44_PLAN.md. Member replied.
 
-
-### [2026-07-23] Other — I registered 2 directs but there are 4 in this account.
-- **Reporter:** @koach100
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
-- **Frequency:** Intermittent
-- **What happened:** I registered 2 directs but there are 4 in this account.
-- **What was expected:** I expect to see only 2 directs attached to my account.
-- **Notes:** Here are the addresses   
-0x8c5B4F273D2a972C06109fC424D4897933763175
-    0xB783BA3D846F00d1B1B217aC7359D5783B630a6A
-- **Submitted:** Thu, 23 Jul 2026 21:24:59 GMT
-
-
-### [2026-07-23] Onboarding / Registration — I could not register this account. The registration failed a…
-- **Reporter:** @Lavern-Gay
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** I could not register this account. The registration failed after several attempts.
-- **What was expected:** To register this account without problems.
-- **Notes:** This is the first time for this problem.
-- **Submitted:** Thu, 23 Jul 2026 17:09:35 GMT
 
 
 ## Mainnet-Prep Design Questions (not bugs — decide before mainnet launch)
@@ -116,12 +94,12 @@ All accounts have at least auto reentry abled.
 
 ---
 
-_No open issues._
-
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---------------|------------|------|---------|--------|
+| 2026-07-23 | 2026-07-24 | Registration | @Lavern-Gay (0x185b) — registration failed repeatedly. Root cause: full-matrix registrations trigger the rotation cascade (~15.5M gas); frontend's est×1.25 buffer exceeded the RPC's ~17M tx-gas cap and its 800k fallback was far too low. Fixed: est+5% + cascade-safe 16M fallback, shipped to main (729e8dc). Member asked to retry. | 729e8dc |
+| 2026-07-23 | 2026-07-24 | Referrals | @koach100 (0x1ca3) — 4 directs shown, only 2 registered by member. Test artifact: both extra addresses are stress-test infrastructure wallets that used his wallet as sponsor (he was on an early leader list). Marked as test; rotation list corrected to the intended 10-then-39 leader set. To discuss at next meeting. | — |
 | 2026-07-23 | 2026-07-23 | index.html | Maximum_71 (0x8e9d) — expected $1500 withdrawable after toggles off, got $547→$391. Works as designed: toggles-off releases only the AUTOMATION reserve; each active seat keeps its own crossing lock (fee − crossingReserve per matrix, stacks across tiers). V8.42 matrix reset with V8.43 launch; new per-tier breakdown modal shows the per-tier locks. Explained. | — |
 | 2026-07-23 | 2026-07-23 | index.html | @Koach100 (0x2444) — expected $284 withdrawal, got ~$48. Same per-seat crossing locks across multiple tiers (T4/T5 seats lock $50/$125 each). MM "malicious token" warning = usual testnet mock-USDC false positive. V8.42 reset with V8.43 launch. Explained. | — |
 | 2026-07-22 | 2026-07-22 | index.html | @ThanksAndPraises (0x3c17) — Withdrawal/Reserved amounts not recalculated when Auto-reentry/AutoUpgrade/Double-reentry toggled. Root cause: reserve only computed on page load, never after toggle change. Fixed: dashboard refresh fires after each toggle confirms + authoritative on-chain reservedFor() now used. | 45fb626 |
