@@ -2,7 +2,7 @@
 
 > Drop new issues here as members report them. Start a session with "check BUGS.md" and Claude will read this directly.
 > Format: **[Page] — What happened / What was expected** + wallet type if relevant + consistent or intermittent
-> **Triage policy (owner, 2026-07-24):** once a response has been sent to the reporter, the issue auto-resolves after **12 hours with no follow-up** — move it to Resolved ("no follow-up after response"). If it recurs, the member files a fresh report. Contract bugs tracked in V8_44_PLAN.md stay open until the fix ships regardless of member response.
+> **Triage flow (owner, 2026-07-24):** new reports auto-land under **Open Issues** (do not rename that heading — api/submit-bug.js inserts by that exact marker). Triage each new report → respond to the member → move it to **Pending — Responded** with the response time. After **12 hours with no follow-up**, move to Resolved ("no follow-up after response"). If it recurs, the member files a fresh report. Confirmed engineering bugs move to **Fix In Progress** and close only when the fix ships, regardless of member response.
 
 ---
 
@@ -46,6 +46,10 @@
 
 ## Open Issues
 
+_(new reports land here — untriaged; respond, then move to Pending)_
+
+## Pending — Responded (12h auto-close)
+
 ### [2026-07-24] Other — ❌ Transaction failed — check your USDC balance and try again…
 - **Reporter:** Sherwyn
 - **Page:** Other
@@ -55,7 +59,10 @@
 - **What happened:** ❌ Transaction failed — check your USDC balance and try again. I have over 621 usdc in wallet, not sure why it's giving this message...
 - **What was expected:** To be upgraded to T2
 - **Submitted:** Fri, 24 Jul 2026 13:41:10 GMT
-- **STATUS 2026-07-24:** Diagnosed — wallet verified on-chain: eligible (T1 cycle complete), $671 USDC, upgrade simulates OK. Failure was the cascade-gas bug served from a cached pre-fix page (T2 MatA filled during the morning). Member asked to hard-refresh and retry. Error handler also fixed to surface real revert reasons (was misleadingly saying "check USDC balance"). Awaiting retry confirmation.
+- **STATUS 2026-07-24:** Diagnosed — wallet verified on-chain: eligible (T1 cycle complete), $671 USDC, upgrade simulates OK. Failure was the cascade-gas bug served from a cached pre-fix page (T2 MatA filled during the morning). Member asked to hard-refresh and retry. Error handler also fixed to surface real revert reasons (was misleadingly saying "check USDC balance").
+- **Responded:** 2026-07-24 ~15:30 UTC → auto-close after 2026-07-25 ~03:30 UTC if no follow-up.
+
+## Fix In Progress — closes when the fix ships
 
 
 ### [2026-07-24] Dashboard (index.html) — T1 has graduated on 4 of my accounts so far including this o…
