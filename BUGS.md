@@ -45,6 +45,18 @@
 
 ## Open Issues
 
+### [2026-07-24] Dashboard (index.html) — T1 has graduated on 4 of my accounts so far including this o…
+- **Reporter:** @CryptoJan
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** T1 has graduated on 4 of my accounts so far including this one.
+All accounts have at least auto reentry abled.
+- **What was expected:** Account should have reentered and continued to cycle.
+- **Submitted:** Fri, 24 Jul 2026 01:22:53 GMT
+
+
 ### [2026-07-24] Other — Was kicked out of T1 matrix after completing A & B. Although…
 - **Reporter:** Sherwyn
 - **Page:** Other
