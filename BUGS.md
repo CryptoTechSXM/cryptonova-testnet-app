@@ -46,6 +46,18 @@
 
 ## Open Issues
 
+### [2026-07-24] Other — Nothing really testing Sherwin's Theory! He said the wallet …
+- **Reporter:** CryptoTech
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xa2f6fbfdf7bfb5601c3f3c6ef3fbf6ceff4044ed
+- **Frequency:** Consistent
+- **What happened:** Nothing really testing Sherwin's Theory! He said the wallet is not showing up.
+- **What was expected:** I expected the wallet not to display but it did.
+- **Notes:** Maybe there is something else wrong on sherwins's side.
+- **Submitted:** Fri, 24 Jul 2026 17:12:09 GMT
+
+
 _(new reports land here — untriaged; respond, then move to Pending)_
 
 ## Pending — Responded (12h auto-close)
