@@ -48,6 +48,18 @@
 
 ## Open Issues
 
+### [2026-07-25] Dashboard (index.html) — Seems to be stuck in the different Tiers and not advancing t…
+- **Reporter:** Sherwyn
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
+- **Frequency:** Consistent
+- **What happened:** Seems to be stuck in the different Tiers and not advancing through. Was in Matrix B for a while now, both T1 and T2..
+- **What was expected:** Seeing more continued looping through the current Tier(s).
+- **Notes:** Trying different options on accounts to get the best strategy and reduce out of pocket payments. Seems like a slow burn..
+- **Submitted:** Sat, 25 Jul 2026 11:39:09 GMT
+
+
 ### [2026-07-25] Dashboard (index.html) — Continued looping through Tiers doesn't seem to be happening…
 - **Reporter:** Sherwyn
 - **Page:** Dashboard (index.html)
