@@ -2696,6 +2696,20 @@ async function loadCWData(userAddr, signer, rp) {
     if (cohortNum === 0) {
       if (notFounder)   notFounder.style.display   = 'block';
       if (founderPanel) founderPanel.style.display = 'none';
+      // 2026-07-25: "Spots Still Available" is wrong for members who joined AFTER the
+      // first 1,000 — the founder window is closed for them. Swap the copy by total count.
+      try {
+        const _trC = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+        const _total = Number(await _trC.globalJoinedCount().catch(() => 0n));
+        if (notFounder && _total >= 1000) {
+          notFounder.innerHTML =
+            '<div style="margin-bottom:8px">🏛️ <strong style="color:var(--text2)">Community Wallet — Founding Window Closed</strong></div>' +
+            'The first <strong>1,000</strong> founding spots have all been claimed, so this lifetime bonus is now closed to new members. ' +
+            'You still earn through all the other streams — referrals, chain pay, the equalization pool, and CNOVA rewards.<br><br>' +
+            '<span style="color:var(--text3);font-size:12px">Founding members (#1–1,000) continue to share the orphan-fee pool: Genesis (#1–500) 60%, Pioneer (#501–1,000) 40%.</span>';
+          notFounder.style.borderColor = 'rgba(148,163,184,.25)';
+        }
+      } catch(_) {}
       return;
     }
 
