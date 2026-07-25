@@ -507,8 +507,8 @@
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1784817000000; // 2026-07-23 10:30 EDT (14:30 UTC)
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.44 Early Access — Opening 10:30 AM EDT';
+        var EARLY_MS = 1785006000000; // V8.44 preview open
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.44 Early Access - Opening 3:00 PM EDT';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.44 — Fresh Reset in Progress';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'Leaders &amp; testers — we\'re seeding the new matrix. Back online in:';
@@ -532,8 +532,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.44 Testnet — Opening 10:45 AM EDT';
-        var MAIN_MS  = 1784817900000; // 2026-07-23 10:45 EDT (14:45 UTC)
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.44 Testnet - Opening 3:30 PM EDT';
+        var MAIN_MS  = 1785007800000; // V8.44 go-live
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
