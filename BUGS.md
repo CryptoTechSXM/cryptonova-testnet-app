@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-25] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To self-rescue this account.
+- **Submitted:** Sat, 25 Jul 2026 23:59:47 GMT
+
+
 ### [2026-07-25] Dashboard (index.html) — The self-rescue fails.
  Transaction failed on-chain — hard-r…
 - **Reporter:** @Lavern_Gay
