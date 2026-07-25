@@ -48,6 +48,19 @@
 
 ## Open Issues
 
+### [2026-07-25] Dashboard (index.html) — Self-rescue failed. Hard refresh was done.
+ Transaction fail…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x728ff08035fffbc5a2f512a081cc88a4221f5f00
+- **Frequency:** Consistent
+- **What happened:** Self-rescue failed. Hard refresh was done.
+ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** I expected the self-rescue to confirm.
+- **Submitted:** Sat, 25 Jul 2026 03:20:10 GMT
+
+
 _(new reports land here — untriaged; respond, then move to Pending)_
 
 ## Pending — Responded (12h auto-close)
