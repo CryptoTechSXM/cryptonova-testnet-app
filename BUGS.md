@@ -48,6 +48,18 @@
 
 ## Open Issues
 
+### [2026-07-25] Dashboard (index.html) — Continued looping through Tiers doesn't seem to be happening…
+- **Reporter:** Sherwyn
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Continued looping through Tiers doesn't seem to be happening. Was stuck at T1.1 for a while now and this was showing before T1.3 and the other T1.xx opened up or may be I haven't fully grasp how it works.
+- **What was expected:** To see a faster cycling of continued looping through T1 matrix.
+- **Notes:** It appears like this main account is in a paused position. Was testing how the auto upgrade would work if you had accounts under you that are active and upgrading...
+- **Submitted:** Sat, 25 Jul 2026 11:29:10 GMT
+
+
 ### [2026-07-25] Dashboard (index.html) — Self-rescue failed.
 Transaction failed on-chain — hard-refre…
 - **Reporter:** @Lavern_Gay
