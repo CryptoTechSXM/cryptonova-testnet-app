@@ -48,6 +48,19 @@
 
 ## Open Issues
 
+### [2026-07-25] Dashboard (index.html) — Self-rescue failed.
+Transaction failed on-chain — hard-refre…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x737c3309c3d6f5702c8f4bb81494568f8d0d1be5
+- **Frequency:** Consistent
+- **What happened:** Self-rescue failed.
+Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** Expected to confirm self-rescue for entry into the matrix.
+- **Submitted:** Sat, 25 Jul 2026 03:28:25 GMT
+
+
 ### [2026-07-25] Dashboard (index.html) — Self-rescue failed. Hard refresh was done.
  Transaction fail…
 - **Reporter:** @Lavern_Gay
