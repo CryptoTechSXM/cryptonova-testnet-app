@@ -37,6 +37,19 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — Auto Self-rescue failed.
+ Transaction failed on-chain — hard…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
+- **Frequency:** Consistent
+- **What happened:** Auto Self-rescue failed.
+ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To re-enter the queue.
+- **Submitted:** Sun, 26 Jul 2026 12:15:16 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — Self=rescue failed. Transaction failed on-chain — hard-refre…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
