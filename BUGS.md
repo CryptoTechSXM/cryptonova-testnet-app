@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — The requested funds were approved to upgrade my main account…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x145805e87ce365ad6c2636b8f6e10b6550f3dc2a
+- **Frequency:** Consistent
+- **What happened:** The requested funds were approved to upgrade my main account, but did not appear in the account.
+- **What was expected:** To be able to upgrade my account with the necessary funds.
+- **Submitted:** Sun, 26 Jul 2026 12:46:14 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — Auto Self-rescue failed.
  Transaction failed on-chain — hard…
 - **Reporter:** @Lavern_Gay
