@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
+- **Reporter:** Kira
+- **Page:** Onboarding / Registration
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** The upgrade option is not visibly working. I an bot able to upgrade from that page. Once registered it is non functional, only available on dashboard!
+- **What was expected:** I expected to have the option to upgrade from either places registration and dashboard!
+- **Submitted:** Sun, 26 Jul 2026 23:08:21 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — T5 upgrade check failed — try again in a moment (RPC may be …
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
