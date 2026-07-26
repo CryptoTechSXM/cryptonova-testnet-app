@@ -37,6 +37,19 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — Could not upgrade bulk tiers.
+5 upgrade check failed — try a…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
+- **Frequency:** Consistent
+- **What happened:** Could not upgrade bulk tiers.
+5 upgrade check failed — try again in a moment (RPC may be busy).
+- **What was expected:** To upgrade to tier 5.
+- **Submitted:** Sun, 26 Jul 2026 19:40:25 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — System not upgrading bulk tiers.
 T5 upgrade check failed — t…
 - **Reporter:** @Lavern_Gay
