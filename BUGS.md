@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — Just checking, it doesn't look like crossing over from one m…
+- **Reporter:** Sherwyn
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Just checking, it doesn't look like crossing over from one matrix to the other is working as ( for me), none of my 4 other accounts have crossed as yet and I've monitor it from since registering...
+- **What was expected:** To have moved to matrix B by now...
+- **Notes:** Not sure if it is that for the last 2 versions I did register late (after the 250 mark) but normally I'm within the first 100 - 150 and crossing is usually fast but these last few times it's been real long and nothing...
+- **Submitted:** Sun, 26 Jul 2026 13:15:03 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — The requested funds were approved to upgrade my main account…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
