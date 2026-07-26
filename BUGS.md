@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — I manually entered my account 2 and placed it under account …
+- **Reporter:** @queensonnie
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x70569791ab42304adde5a34c412ec6e411ae0b0b
+- **Frequency:** Intermittent
+- **What happened:** I manually entered my account 2 and placed it under account 1 then, I copied the referral  link and placed it in the browser to place account 3 under account 1,  but it did not show that account 1 has 2 direct referrals.
+- **What was expected:** Account 1 should have two Direct referrals
+- **Submitted:** Sun, 26 Jul 2026 15:37:52 GMT
+
+
 ### [2026-07-26] Bug Report Page — Back to dash board after submitting report takes you to home…
 - **Reporter:** Sherwyn
 - **Page:** Bug Report Page
