@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — Haven't crossed over from T1 .1 Matrix A to B as yet, not ev…
+- **Reporter:** Sherwyn
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Haven't crossed over from T1 .1 Matrix A to B as yet, not even once and neither has my other accounts as well. Seems like they have stuck and have been in this position from since registrations were at 398 or so.
+- **What was expected:** To have at least moved to matrix B and rotated..
+- **Notes:** Never saw any of the other versions take this long to move through the matrix.
+- **Submitted:** Sun, 26 Jul 2026 01:35:36 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — i am not able to self rescue.
 there is usdc and eth in walle…
 - **Reporter:** CryptoJan22
