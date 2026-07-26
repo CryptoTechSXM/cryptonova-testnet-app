@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — Self=rescue failed. Transaction failed on-chain — hard-refre…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** Self=rescue failed. Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To re-enter the Queque.
+- **Submitted:** Sun, 26 Jul 2026 12:10:39 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — Self-recue failure. Transaction failed on-chain — hard-refre…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
