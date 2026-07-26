@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — Crossing seems to have slowed as I'm been in T1.1 for some t…
+- **Reporter:** Sherwyn
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Crossing seems to have slowed as I'm been in T1.1 for some time and have noticed that T1.3 is opened. and still haven't crossed as yet...
+- **What was expected:** To have moved to matrix B..
+- **Notes:** May be I'm not understanding the crossing and opening of new tiers fully...
+- **Submitted:** Sun, 26 Jul 2026 13:21:13 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — Just checking, it doesn't look like crossing over from one m…
 - **Reporter:** Sherwyn
 - **Page:** Dashboard (index.html)
