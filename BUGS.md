@@ -37,6 +37,21 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — i am not able to self rescue.
+there is usdc and eth in walle…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
+- **Frequency:** Consistent
+- **What happened:** i am not able to self rescue.
+there is usdc and eth in wallet.
+usdc is approved but when self rescue is clicked it says hard refresh and try again. it is happening on all wslleys beside the main.
+Also not able to refresh so restarted phone but same result.
+- **What was expected:** to be able to self rescue on all although i dont want to upgrade except on main account.
+- **Submitted:** Sun, 26 Jul 2026 00:34:57 GMT
+
+
 ### [2026-07-25] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
