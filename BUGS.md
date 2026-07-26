@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Other — Think I can safely say that this account and all downlines a…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Think I can safely say that this account and all downlines attached to this account haven't crossed even once and are stuck in T1.1 Matrix A... Now I'm seeing that I can upgrade to T5 and never had a self rescue on option to upgrade to T2...
+- **What was expected:** More movement at tier 1..
+- **Notes:** Seem like I have this issue of not crossing to other matrices from the last 2 upgraded versions... not sure if it's the wallet or bug...
+- **Submitted:** Sun, 26 Jul 2026 18:19:50 GMT
+
+
 ### [2026-07-26] Other — Account haven't crossed from T1.1 matrix A to B. Not even a …
 - **Reporter:** Sherwyn
 - **Page:** Other
