@@ -467,7 +467,7 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.44 — Fresh Reset in Progress</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.45 — Emergency Fix in Progress</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
       We're seeding the new matrix for a clean start. Back online in:
     </p>
@@ -507,10 +507,10 @@
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1785006000000; // V8.44 preview open
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.44 Early Access - Opening 3:00 PM EDT';
+        var EARLY_MS = 1785037500000; // V8.45 preview
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.45 Early Access - Opening 11:45 PM EDT';
         // Override countdown block text for early domain
-        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.44 — Fresh Reset in Progress';
+        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.45 — Emergency Fix in Progress';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'Leaders &amp; testers — we\'re seeding the new matrix. Back online in:';
         var openEarlyCoupon = function() {
           // localStorage only bypasses gate AFTER the countdown has expired
@@ -532,8 +532,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.44 Testnet - Opening 3:30 PM EDT';
-        var MAIN_MS  = 1785007800000; // V8.44 go-live
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.45 Testnet - Opening 12:00 AM EDT';
+        var MAIN_MS  = 1785038400000; // V8.45 go-live
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }

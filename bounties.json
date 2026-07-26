@@ -1,7 +1,7 @@
 {
   "program": "CryptoNova Bug Bounty — $1 per accepted find (owner-confirmed real bugs; test artifacts and duplicates at owner's discretion)",
   "rate_usd": 1,
-  "updated": "2026-07-24",
+  "updated": "2026-07-26",
   "reporters": [
     {
       "name": "Sherwyn",
@@ -11,34 +11,80 @@
         "0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7"
       ],
       "finds": [
-        { "date": "2026-07-24", "summary": "MatB cycle-out exits members instead of parking (contract bug, V8.44)", "status": "accepted" },
-        { "date": "2026-07-24", "summary": "Upgrade Tier button hardcoded 2M gas limit — upgrades into full matrices failed", "status": "accepted" },
-        { "date": "2026-07-24", "summary": "Upline upgrade commissions hidden by dashboard hasEverJoined filter", "status": "accepted" },
-        { "date": "2026-07-24", "summary": "Bug-report page missed late-injecting in-app wallets (TokenPocket)", "status": "accepted" }
+        {
+          "date": "2026-07-24",
+          "summary": "MatB cycle-out exits members instead of parking (contract bug, V8.44)",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-24",
+          "summary": "Upgrade Tier button hardcoded 2M gas limit — upgrades into full matrices failed",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-24",
+          "summary": "Upline upgrade commissions hidden by dashboard hasEverJoined filter",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-24",
+          "summary": "Bug-report page missed late-injecting in-app wallets (TokenPocket)",
+          "status": "accepted"
+        }
       ],
       "paid_usd": 0
     },
     {
       "name": "CryptoJan",
-      "wallets": ["0x79470c63b5421e333ab4149b3206d55a39c17532"],
+      "wallets": [
+        "0x79470c63b5421e333ab4149b3206d55a39c17532",
+        "0x9e0413a671f48da6317473e81eb089136e9f1273"
+      ],
       "finds": [
-        { "date": "2026-07-24", "summary": "Independent report: accounts graduated despite auto re-entry (corroborated V8.44 contract bug)", "status": "accepted" }
+        {
+          "date": "2026-07-24",
+          "summary": "Independent report: accounts graduated despite auto re-entry (corroborated V8.44 contract bug)",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-26",
+          "summary": "V8.45 CRITICAL: self-rescue failed on-chain — nested entry during rotation corrupted the BFS seat map (phantom seat 128, occupancy drift +44, position 1 emptied -> matrix wedged with 'F8V8: no root'). Forced emergency V8.45 redeploy.",
+          "status": "accepted"
+        }
       ],
       "paid_usd": 0
     },
     {
       "name": "Lavern-Gay",
-      "wallets": ["0x185b19c7d3872692981568985b21ae6f7f6be2a4"],
+      "wallets": [
+        "0x185b19c7d3872692981568985b21ae6f7f6be2a4",
+        "0x145805e87ce365ad6c2636b8f6e10b6550f3dc2a"
+      ],
       "finds": [
-        { "date": "2026-07-23", "summary": "Registration failures — led to cascade-gas fix in register flow", "status": "accepted" }
+        {
+          "date": "2026-07-23",
+          "summary": "Registration failures — led to cascade-gas fix in register flow",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-26",
+          "summary": "V8.45 CRITICAL: self-rescue failed on-chain — nested entry during rotation corrupted the BFS seat map (phantom seat 128, occupancy drift +44, position 1 emptied -> matrix wedged with 'F8V8: no root'). Forced emergency V8.45 redeploy.",
+          "status": "accepted"
+        }
       ],
       "paid_usd": 0
     },
     {
       "name": "koach100",
-      "wallets": ["0x1ca3316ebc2f991c073ccdd1a25c68d482589a94"],
+      "wallets": [
+        "0x1ca3316ebc2f991c073ccdd1a25c68d482589a94"
+      ],
       "finds": [
-        { "date": "2026-07-23", "summary": "Extra directs — test artifact (stress wallets), not a protocol bug", "status": "test-artifact" }
+        {
+          "date": "2026-07-23",
+          "summary": "Extra directs — test artifact (stress wallets), not a protocol bug",
+          "status": "test-artifact"
+        }
       ],
       "paid_usd": 0
     }
