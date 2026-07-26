@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Other — on the tiers page the information is a bit ambiguous.
+- **Reporter:** Kira
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** on the tiers page the information is a bit ambiguous.
+- **What was expected:** the T1.1/T2.1 new pairs could have the count when new.
+- **Notes:** Also the slow down on T1 is very noticeable maybe we can increase the numbers to 400 or 500?
+- **Submitted:** Sun, 26 Jul 2026 23:20:05 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — All day today on a more than ususl occurrence  my accounts h…
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
