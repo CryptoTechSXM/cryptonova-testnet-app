@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Other — Account haven't crossed from T1.1 matrix A to B. Not even a …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
+- **Frequency:** Consistent
+- **What happened:** Account haven't crossed from T1.1 matrix A to B. Not even a self rescue display.. Think the account has been stuck at this level for a while... now I'm seeing to approve for T5 and haven't even gotten to T2..
+- **What was expected:** To see crossing and rotations which aren't happening...
+- **Notes:** None of the other accounts has crossed as well
+- **Submitted:** Sun, 26 Jul 2026 18:11:58 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — I manually entered my account 2 and placed it under account …
 - **Reporter:** @queensonnie
 - **Page:** Dashboard (index.html)
