@@ -622,7 +622,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.44</span><span class="vb-m">V8.44</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.45</span><span class="vb-m">V8.45</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -717,8 +717,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x4A8718146ED44bf069946fAbC079aCcFaFf45cCe" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x4A8718146ED44bf069946fAbC079aCcFaFf45cCe" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x4A8718146ED44bf069946fAbC079aCcFaFf45cCe</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
         </div>
       </div>
@@ -1757,7 +1757,7 @@
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">V8.44 live on testnet — additive automation + open whale gate, fresh reset July 23</div>
+            <div class="phase-subtitle">V8.45 live on testnet — additive automation + open whale gate, fresh reset July 23</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
@@ -1964,7 +1964,7 @@ const CHAIN_ID = 84532;
 const RPC_URL      = 'https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy';
 const RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
 
-// ── V8.44: Default-sponsor rotation pool ─────────────────────────────────
+// ── V8.45: Default-sponsor rotation pool ─────────────────────────────────
 // Members who register WITHOUT a referral link are shared across these
 // founding wallets instead of all stacking on one root. Deterministic:
 // each new member's address hashes to the same sponsor every time
@@ -1997,69 +1997,69 @@ function pickDefaultSponsor(memberAddr) {
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
 const ADDRS = {
-  // V8.44 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
+  // V8.45 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0x4A8718146ED44bf069946fAbC079aCcFaFf45cCe',
-  treasury:      '0x391A7AedbA8FA26278765F91D44E17f303d7f108',
-  stabilityFund: '0xEC087b1131ADF626007B1B363cA13e50A5AC2819',
-  buybackReserve:'0x6987fC8496d8990E757bA61e5434Be2ebB5d9Edb',
-  tierRouter:    '0xFCe307955af73a02E6Bb877DD658F39E8b61600B',
-  matrixKeeper:  '0xEFeEF3af9567b962C892E860Bd6458fEaE4d4d8F',
-  v8Governance:  '0x3b77206C53E695068e9FF89Bc39C9F80f2ba95B3',
-  communityWallet:'0xa04d13B2Ec066280e18c0Dd0729BFE247F7175F4',
+  cnova:         '0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC',
+  treasury:      '0x1b63EdF6C12D498162e091c328b33e7389CF3231',
+  stabilityFund: '0x65883479c581A98B5047205C5a50Db282F3eD4f6',
+  buybackReserve:'0x7D94F2c27a42a74c6daDBdBe75138aa01a0019A6',
+  tierRouter:    '0xC44c1A511DFAebE58D9BB719D087aB540224686A',
+  matrixKeeper:  '0x603db2d933F3B24Ce1aB23BFc2495622D5600C84',
+  v8Governance:  '0xF03456B1716AeCb0fb4c4D08cDfe438B3CeA6a6c',
+  communityWallet:'0x14B1dBd0B7DD0d253A2453b59DA816Bdb3F77032',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x734Ca37772ffd61e64Ddc2E512cA54165d80D3Ed',
-  couponRegistry:'0x6abf01B4121Cb45c2205327e92Fc7F95EA01B89A',
+  directSale:    '0x3ee2FB4835520FE650C2a04B4c7a69eb0C822523',
+  couponRegistry:'0xE5af3088C37e9d1268f35656231A1674b7C32F72',
   // V8.30 tier pairs — deployed 2026-06-29
   T1: {
-    pm:   '0xc74F4c4C736E43f47c78D2029caE2f5c5Fe0C452',
-    matA: '0xf0b5388269B73E41e113607f4f74ac4e61d36ac7',
-    matB: '0x2d36c8597879D66DA90393a19A0494735E6E3C9D',
+    pm:   '0x680F94476789386f43878103f8a9b2750cD91F68',
+    matA: '0x85bCd925b224a4B1fA8769630dd5204d75499c01',
+    matB: '0x7Ff794Bbbd9A41a9cF9a3E01A84EE9aEa96DABbE',
   },
   T2: {
-    pm:   '0x5618cd4667e5aA4a51Ba617a806B1fDA4ED6A562',
-    matA: '0x48a0d452c9218c0374ACfbF45C2B6f2f6130Fadf',
-    matB: '0x1D577949e70dE8Fd1eD2f253A52cBfd2C7107651',
+    pm:   '0xa4Df15CD10861845B9ad982C6540a9A3F35a4188',
+    matA: '0x0cA22E3BE70c87898C66C6c9BF4BF8322A9F1076',
+    matB: '0x16518a1D3e1Ad356892922be41C212A7e7411917',
   },
   T3: {
-    pm:   '0x313A00677fE18fAaeaaCca7798331efa18F501D8',
-    matA: '0xb98abE2A02A113dF062412075a34c77c1Ac7270D',
-    matB: '0x9fcBCc7958B07186b52A492903f100072F07BdD5',
+    pm:   '0xd34787406d8D3A2Cbb0E346A82Cf3707C10c56F9',
+    matA: '0x827B8f8D316919aAC3BB1f5D75A7351D1fA32828',
+    matB: '0x8b587B1731d6ecb97c62256c14722C8E4A2e0512',
   },
   T4: {
-    pm:   '0x48040A6f290fa925B6873B49C13109dB85A822f1',
-    matA: '0x4Bda15FA5619F4f95C581a3e1FFc5bD9c8195658',
-    matB: '0xB0E66B049A975bdFf427FEE2222D61C8Bb628b64',
+    pm:   '0xD6df6ec0F17996564FBc1Fce6326a6D214f03A1C',
+    matA: '0xfB1ef5473a7044417ef800B4A737fF1973c09f91',
+    matB: '0x337ca739b9728A3d224515cF18B289b1b26e37d9',
   },
   T5: {
-    pm:   '0xe3aCF911486Eaf3F187eD7528DcA06f915fb3302',
-    matA: '0xFF887c423Fa0bbEf0A9Cde886898CBCE8587394e',
-    matB: '0xCEf65c0aC459f238681f03d6101D5Adbb351b25A',
+    pm:   '0x74a2CB742Ad500D1203ee10F58A6770E791fDEAB',
+    matA: '0xafB139ba5d11d0549c7f2cC85Bd4011861Faf6C8',
+    matB: '0x70BCc0e573836d209Ba73328F0E87a79EfaCb30D',
   },
   T6: {
-    pm:   '0x0632a6fb3C20d9Fe8e3825972119FF01424229a0',
-    matA: '0xF9937e5Ed18f6a2b05a75042D1f1a93387eA9a15',
-    matB: '0xf7971470c7fF60463C2E66909Be0CC0656Ad25C7',
+    pm:   '0xe1bF07f2f9ac124abaD4cF6c01d798b5E0e63D58',
+    matA: '0x5B85A26Fd4F8bEc033b4eF54651579DB16574B98',
+    matB: '0x02c8BF5a5b31E8d722D062711F124Ff0eE0ca987',
   },
   T7: {
-    pm:   '0x90a9EB757F39125C1ae7C6932f16BdC3217Fc72b',
-    matA: '0x2D0A8Dc89A2A94E8B7FC064D617B0506D8c2daD1',
-    matB: '0x7DCB4dA0455EE92ea5898D72E5582901B4eaCA54',
+    pm:   '0x660A9118CB2709AEe183A3cBBb500e93E3AA7E64',
+    matA: '0xB18503C93f1a37283ee1Db04aE80f6B3271D538b',
+    matB: '0xC50893a30e66b34E00cFBae0ab289e400B9ecD22',
   },
   T8: {
-    pm:   '0x4449c7ef2f7723213d4157144521374D4324a287',
-    matA: '0x6fc3EffC27a9c44c0643f07b25f5Da4483608AAE',
-    matB: '0x504CAb96B93D5C99532404463d3e3A87A5448e25',
+    pm:   '0x38E82118De5261bd26B02b7A8b17ec64690aF59b',
+    matA: '0xd2Bd96684D52585DC51C07c9d001075025744627',
+    matB: '0x44B40FaB2D39F4A7BE7dcc0079e919b1Da621f02',
   },
   T9: {
-    pm:   '0x7ee0A5bA91A5d5915bA5Bc8347a3FE90e20b0fF1',
-    matA: '0x4a58424509f2D7F2d6FB06133171c3C3C2D990Bb',
-    matB: '0xb316D651e8aa1E2E2ac8448C8Dc1482C7a577b99',
+    pm:   '0xC3913Fb905342b4e4B1e9050e5c5A9Ee442835BC',
+    matA: '0xa53034A3b7d62cf26716Fb9E8e41aC2F6809a7e9',
+    matB: '0xd23Fb100d4d641E8A4A788A916E1272f7E194c6E',
   },
   T10: {
-    pm:   '0xFA657d2A51960E97d6f7ED48B3dbCdf9445a0d94',
-    matA: '0xC85E9C863522027b1B71D07babDF9d24A13fBaa8',
-    matB: '0xb3504EF1Cb66FA0Ce4105Fe60C2b0bd1DeB90EA8',
+    pm:   '0x8aE62F2cD26Bf5cac108CAB9fB30CC4c14063f22',
+    matA: '0x5e63A3aC72fD393dedEA4Fad8fb2154515fcdc76',
+    matB: '0x2E2c0c1dfe4a6C7B4A562c95c0A166B7E333e5E7',
   },
 };
 
@@ -2858,7 +2858,7 @@ async function loadHomeStats() {
                     'stat-cycles','stat-epoch','stat-supply','stat-treasury-usdc','stat-floor-price','stat-reward','stat-buyback'];
 
   async function _fetchStats(provider) {
-    // V8.44 FIX: currentMatA() follows activePairIndex, which addPair() advances to the
+    // V8.45 FIX: currentMatA() follows activePairIndex, which addPair() advances to the
     // NEW (empty) buffer pair at deploy time — but registrations actually route to the
     // oldest NON-SATURATED pair (totalRegistered < routeEntryThreshold). Using
     // currentMatA made the home card show the empty standby pair (0/127) while the
@@ -2977,7 +2977,7 @@ async function loadHomeStats() {
     const barB = document.getElementById('t1b-bar');
     if (barB) barB.style.width = pctB+'%';
 
-    // V8.44: pair labels + standby-buffer note on the T1 cards
+    // V8.45: pair labels + standby-buffer note on the T1 cards
     const _pi = window._t1PairInfo;
     const _standbyEl = document.getElementById('t1-standby-note');
     if (_pi && _pi.pairCount > 1) {
@@ -3368,7 +3368,7 @@ async function loadUserData() {
       if (urlRef && ethers.isAddress(urlRef)) {
         refInput.value = urlRef;
       } else {
-        // V8.44: no ?ref= link — assign a sponsor from the rotation pool
+        // V8.45: no ?ref= link — assign a sponsor from the rotation pool
         // (deterministic hash of the member's address) so orphan registrations
         // are shared across the founding wallets instead of stacking on W1.
         const defRef = pickDefaultSponsor(userAddr);
@@ -3812,7 +3812,7 @@ async function doRegister() {
       ? c.issuer
       : (refInput && ethers.isAddress(refInput.value.trim())
           ? refInput.value.trim()
-          : (window._defaultReferrer || pickDefaultSponsor(userAddr))); // V8.44: rotation pool, never ZeroAddress
+          : (window._defaultReferrer || pickDefaultSponsor(userAddr))); // V8.45: rotation pool, never ZeroAddress
 
     // Dry-run via read provider BEFORE sending to wallet.
     // Simulates the full register logic on-chain without submitting a TX.
@@ -3841,7 +3841,7 @@ async function doRegister() {
     // Some wallets (TokenPocket) can't estimate gas for complex multi-contract calls
     // and show an empty fee / fail on submit when we pass a raw hardcoded limit.
     // Using our Alchemy endpoint for estimation avoids the wallet's internal estimator.
-    // V8.44 gas note (2026-07-23): registering into a FULL matrix triggers the
+    // V8.45 gas note (2026-07-23): registering into a FULL matrix triggers the
     // rotation cascade (~15.5M gas measured live), and public RPCs reject tx gas
     // limits above ~17M with -32003 "gas limit too high". So: 5% buffer on the
     // estimate (25% overshot the RPC cap on cascade entries), and a cascade-sized
@@ -4270,7 +4270,7 @@ async function loadDashboardData() {
       const m      = matrices[i];
       const mc     = matContracts[i];
       const member = matResults[i];
-      // V8.44 fix (Sherwyn 2026-07-24): L1 upgrade commissions credit the SPONSOR's
+      // V8.45 fix (Sherwyn 2026-07-24): L1 upgrade commissions credit the SPONSOR's
       // withdrawable in tier matrices they never joined (hasEverJoined=false). The
       // contract explicitly allows withdrawing these (V8.36), but this filter hid
       // them — uplines earned invisibly. Count any matrix with a positive balance.
@@ -5462,7 +5462,7 @@ async function doGraduatedReenter(tNum) {
     }
     _s('⏳ Submitting re-entry…');
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    // V8.44: upgrades into a full matrix cascade (~15.5M gas) — estimate +5%, cascade-safe fallback
+    // V8.45: upgrades into a full matrix cascade (~15.5M gas) — estimate +5%, cascade-safe fallback
     let _upGas = 16_000_000;
     try {
       const _upEst = await tr.manualUpgrade.estimateGas(tierIdx);
@@ -6140,7 +6140,7 @@ function friendlyError(e) {
   // ── EARLY guard: raw ethers v6 tx data leaking (TokenPocket, Rabby, etc.) ─
   // Must be FIRST — before any branch that might fall through to raw msg output.
   const _earlyRaw = raw + rawDeep;
-  // V8.44: RPC rejects gas limits above ~17M — happens when a matrix is full and the
+  // V8.45: RPC rejects gas limits above ~17M — happens when a matrix is full and the
   // tx triggers the rotation cascade. Stale cached pages (pre gas-fix) hit this too.
   if (_earlyRaw.includes('gas limit too high') || _earlyRaw.includes('-32003'))
     return '⛽ Network rejected the transaction size — hard-refresh this page (Ctrl+Shift+R) to load the latest version, then try again.';
@@ -6295,7 +6295,7 @@ async function useDefaultSponsor() {
   const inp  = document.getElementById('input-referrer');
   const warn = document.getElementById('default-sponsor-warn');
   const btn  = document.getElementById('btn-approve');
-  // V8.44: default sponsor comes from the rotation pool (deterministic by member)
+  // V8.45: default sponsor comes from the rotation pool (deterministic by member)
   let defRef = window._defaultReferrer;
   if (!defRef || defRef === ethers.ZeroAddress) {
     defRef = pickDefaultSponsor(typeof userAddr !== 'undefined' ? userAddr : null);
@@ -6431,7 +6431,7 @@ async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
       if (breakdown) breakdown.textContent = feeLines.join(' + ') + ' = ' + fmt6(totalFee) + ' total';
       const approveBtn = document.getElementById('btn-bulk-approve');
       const upgradeBtn = document.getElementById('btn-bulk-upgrade');
-      // V8.44: whale gate open to ALL members — no cycle requirement.
+      // V8.45: whale gate open to ALL members — no cycle requirement.
       // (The old "complete a cycle first" gate was a misdiagnosis: the real
       // blocker was 3+ tier bulk txs exceeding the 15M gas cap. doBulkUpgrade
       // now climbs tier-by-tier, so every member can upgrade any time.)
@@ -6483,7 +6483,7 @@ async function doBulkUpgrade() {
   const btn       = document.getElementById('btn-bulk-upgrade');
   const status    = document.getElementById('bulk-upgrade-status');
   const targetIdx = window._bulkUpgradeTierIndex ?? 4;
-  // V8.44: sequential tier-by-tier climb. One tier entry costs ~7M gas (full
+  // V8.45: sequential tier-by-tier climb. One tier entry costs ~7M gas (full
   // MatA triggers a root cycle-out cascade), so 3+ tiers in one tx exceeds the
   // 15M Base Sepolia cap — that was the REAL cause of "gas limit too high".
   // bulkUpgrade(memberHighestTier) enters exactly one tier per call.
@@ -6502,7 +6502,7 @@ async function doBulkUpgrade() {
       let gasLimit = 16_000_000;
       try {
         const est = await tr.bulkUpgrade.estimateGas(highest);
-        // V8.44: +5% buffer only — cascades run ~15.5M and public RPCs reject limits above ~17M (-32003)
+        // V8.45: +5% buffer only — cascades run ~15.5M and public RPCs reject limits above ~17M (-32003)
         gasLimit = Math.min(Math.ceil(Number(est) * 1.05), 16_500_000);
       } catch (estErr) {
         const reason = estErr.reason || estErr.shortMessage || '';
@@ -6645,7 +6645,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
 
     _setS('Submitting upgrade transaction…');
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
-    // V8.44 (bug: Sherwyn 2026-07-24): upgrades into a full pair cascade (~7M+ gas
+    // V8.45 (bug: Sherwyn 2026-07-24): upgrades into a full pair cascade (~7M+ gas
     // measured live) — the old hardcoded 2M limit guaranteed out-of-gas reverts.
     // Estimate +5% with a cascade-safe fallback, same as register/bulk paths.
     let _exGas = 16_000_000;
@@ -6825,7 +6825,7 @@ async function doCoPayRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const COPAY_ABI = ['function coPayRescue(address member) external'];
     const matrix    = new ethers.Contract(matrixAddr, COPAY_ABI, signer);
-    // V8.44: rescue can trigger the full rotation cascade — estimate +5%, cascade-safe fallback
+    // V8.45: rescue can trigger the full rotation cascade — estimate +5%, cascade-safe fallback
     let _cprGas = 16_000_000;
     try {
       const _cprEst = await matrix.coPayRescue.estimateGas(userAddr);

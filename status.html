@@ -612,36 +612,36 @@
   const T1_FEE   = 10_000_000n; // $10 USDC
 
   const ADDRS = {
-    // V8.44 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
+    // V8.45 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
     usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-    cnova:         '0x4A8718146ED44bf069946fAbC079aCcFaFf45cCe',
-    treasury:      '0x391A7AedbA8FA26278765F91D44E17f303d7f108',
-    stabilityFund: '0xEC087b1131ADF626007B1B363cA13e50A5AC2819',
-    buybackReserve:'0x6987fC8496d8990E757bA61e5434Be2ebB5d9Edb',
+    cnova:         '0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC',
+    treasury:      '0x1b63EdF6C12D498162e091c328b33e7389CF3231',
+    stabilityFund: '0x65883479c581A98B5047205C5a50Db282F3eD4f6',
+    buybackReserve:'0x7D94F2c27a42a74c6daDBdBe75138aa01a0019A6',
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-    tierRouter:    '0xFCe307955af73a02E6Bb877DD658F39E8b61600B',
-    matrixKeeper:  '0xEFeEF3af9567b962C892E860Bd6458fEaE4d4d8F',
-    T1pm:    '0xc74F4c4C736E43f47c78D2029caE2f5c5Fe0C452',
-    T1matA:  '0xf0b5388269B73E41e113607f4f74ac4e61d36ac7',
-    T1matB:  '0x2d36c8597879D66DA90393a19A0494735E6E3C9D',
-    T2matA:  '0x48a0d452c9218c0374ACfbF45C2B6f2f6130Fadf',
-    T2matB:  '0x1D577949e70dE8Fd1eD2f253A52cBfd2C7107651',
-    T3matA:  '0xb98abE2A02A113dF062412075a34c77c1Ac7270D',
-    T3matB:  '0x9fcBCc7958B07186b52A492903f100072F07BdD5',
-    T4matA:  '0x4Bda15FA5619F4f95C581a3e1FFc5bD9c8195658',
-    T4matB:  '0xB0E66B049A975bdFf427FEE2222D61C8Bb628b64',
-    T5matA:  '0xFF887c423Fa0bbEf0A9Cde886898CBCE8587394e',
-    T5matB:  '0xCEf65c0aC459f238681f03d6101D5Adbb351b25A',
-    T6matA:  '0xF9937e5Ed18f6a2b05a75042D1f1a93387eA9a15',
-    T6matB:  '0xf7971470c7fF60463C2E66909Be0CC0656Ad25C7',
-    T7matA:  '0x2D0A8Dc89A2A94E8B7FC064D617B0506D8c2daD1',
-    T7matB:  '0x7DCB4dA0455EE92ea5898D72E5582901B4eaCA54',
-    T8matA:  '0x6fc3EffC27a9c44c0643f07b25f5Da4483608AAE',
-    T8matB:  '0x504CAb96B93D5C99532404463d3e3A87A5448e25',
-    T9matA:  '0x4a58424509f2D7F2d6FB06133171c3C3C2D990Bb',
-    T9matB:  '0xb316D651e8aa1E2E2ac8448C8Dc1482C7a577b99',
-    T10matA: '0xC85E9C863522027b1B71D07babDF9d24A13fBaa8',
-    T10matB: '0xb3504EF1Cb66FA0Ce4105Fe60C2b0bd1DeB90EA8',
+    tierRouter:    '0xC44c1A511DFAebE58D9BB719D087aB540224686A',
+    matrixKeeper:  '0x603db2d933F3B24Ce1aB23BFc2495622D5600C84',
+    T1pm:    '0x680F94476789386f43878103f8a9b2750cD91F68',
+    T1matA:  '0x85bCd925b224a4B1fA8769630dd5204d75499c01',
+    T1matB:  '0x7Ff794Bbbd9A41a9cF9a3E01A84EE9aEa96DABbE',
+    T2matA:  '0x0cA22E3BE70c87898C66C6c9BF4BF8322A9F1076',
+    T2matB:  '0x16518a1D3e1Ad356892922be41C212A7e7411917',
+    T3matA:  '0x827B8f8D316919aAC3BB1f5D75A7351D1fA32828',
+    T3matB:  '0x8b587B1731d6ecb97c62256c14722C8E4A2e0512',
+    T4matA:  '0xfB1ef5473a7044417ef800B4A737fF1973c09f91',
+    T4matB:  '0x337ca739b9728A3d224515cF18B289b1b26e37d9',
+    T5matA:  '0xafB139ba5d11d0549c7f2cC85Bd4011861Faf6C8',
+    T5matB:  '0x70BCc0e573836d209Ba73328F0E87a79EfaCb30D',
+    T6matA:  '0x5B85A26Fd4F8bEc033b4eF54651579DB16574B98',
+    T6matB:  '0x02c8BF5a5b31E8d722D062711F124Ff0eE0ca987',
+    T7matA:  '0xB18503C93f1a37283ee1Db04aE80f6B3271D538b',
+    T7matB:  '0xC50893a30e66b34E00cFBae0ab289e400B9ecD22',
+    T8matA:  '0xd2Bd96684D52585DC51C07c9d001075025744627',
+    T8matB:  '0x44B40FaB2D39F4A7BE7dcc0079e919b1Da621f02',
+    T9matA:  '0xa53034A3b7d62cf26716Fb9E8e41aC2F6809a7e9',
+    T9matB:  '0xd23Fb100d4d641E8A4A788A916E1272f7E194c6E',
+    T10matA: '0x5e63A3aC72fD393dedEA4Fad8fb2154515fcdc76',
+    T10matB: '0x2E2c0c1dfe4a6C7B4A562c95c0A166B7E333e5E7',
   };
 
   const MATRIX_ABI = [
@@ -1275,7 +1275,7 @@
           const cA = _pA >= 95 ? '#f59e0b' : d.color;
           const cB = _pB >= 95 ? '#f59e0b' : d.color;
           const rotTxt = Number(p.rotCount) > 0 ? ` · ${Number(p.rotCount)} rot` : '';
-          // V8.44: p.active flags the ROUTING pair (contract-side since V8.40).
+          // V8.45: p.active flags the ROUTING pair (contract-side since V8.40).
           // Empty + NOT routing → pre-deployed standby buffer, waiting behind a
           // previous pair. Empty + routing → it just went live and is about to
           // receive its first entry. Non-empty + routing + multi-pair → "new".
