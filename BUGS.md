@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Bug Report Page — Back to dash board after submitting report takes you to home…
+- **Reporter:** Sherwyn
+- **Page:** Bug Report Page
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
+- **Frequency:** Consistent
+- **What happened:** Back to dash board after submitting report takes you to home page and not the dash board..
+- **What was expected:** Back to dash board as link states..
+- **Notes:** Know it may just be cosmetics and not a bug but just reporting..
+- **Submitted:** Sun, 26 Jul 2026 13:33:58 GMT
+
+
 ### [2026-07-26] Dashboard (index.html) — Crossing seems to have slowed as I'm been in T1.1 for some t…
 - **Reporter:** Sherwyn
 - **Page:** Dashboard (index.html)
