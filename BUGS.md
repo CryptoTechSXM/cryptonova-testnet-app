@@ -37,6 +37,20 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-26] Dashboard (index.html) — All day today on a more than ususl occurrence  my accounts h…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** All day today on a more than ususl occurrence  my accounts have been sent to self rescue.
+Some being charged as much as $41.00 and some as little as $0.60.
+Sometimes when i take action and pay another self rescue immediately comes up with a smaller charge and when it is done it clears.
+However the c nova tokens and earnings increase everytime.
+- **What was expected:** All charged should be asked for at the same time. Not sure how frequently account should be parked though.
+- **Submitted:** Sun, 26 Jul 2026 23:18:35 GMT
+
+
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
