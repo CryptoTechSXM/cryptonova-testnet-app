@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-27] Dashboard (index.html) — Incomplete information. withdrawable card shows 1507.xx whil…
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** Incomplete information. withdrawable card shows 1507.xx while the withdrawable breakdown does not reflect that.
+- **What was expected:** More details including referral income. without that it looks incomplete.
+- **Notes:** Add more details, income per tier, income from direct referrals, what is available for crossing each tier. that would help members understand better the balance that can be used per tier.
+- **Submitted:** Mon, 27 Jul 2026 17:15:10 GMT
+
+
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
