@@ -5146,10 +5146,68 @@ async function renderWithdrawableDetail(el, rp) {
     </div>`;
   const _toggleReserve = "(function(){var d=document.getElementById('reserve-detail'),c=document.getElementById('reserve-chev');if(!d)return;var open=d.style.display!=='none';d.style.display=open?'none':'block';if(c)c.textContent=open?'\\u25B8':'\\u25BE';})()";
 
+  // -- Automation reserve: a SECOND, unrelated reserve (owner, 2026-07-27) -------
+  // The dashboard card read "$10,000 reserved" while this modal's crossing reserve
+  // came to $2,217.50. Both are correct -- they are different mechanisms sharing
+  // the word "reserved", which is exactly why the number looked unexplainable.
+  //   Crossing reserve   -- half of each tier's entry fee, funded BY the entry fee,
+  //                         locked per seat toward that seat's next crossing.
+  //   Automation reserve -- TierRouter.reservedFor(): EARNINGS held back so your
+  //                         auto-upgrade / auto re-entry can pay its own entry fee.
+  //                         It moves when you change your automation toggles.
+  // Shown with its components so the figure is checkable rather than asserted, and
+  // flagged when the on-chain total disagrees with what the settings imply.
+  let autoReserveBlock = '';
+  try {
+    const _tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const onchainReserved = BigInt(await _tr.reservedFor(userAddr).catch(() => 0n));
+    if (onchainReserved > 0n) {
+      const opts        = window._memberOptions || {};
+      const autoUpgrade = !opts.disableUpgrade;
+      const reentry     = Boolean(opts.enableReentry);
+      const doubleE     = Boolean(opts.enableDouble);
+      const highest     = Number(await _tr.memberHighestTier(userAddr).catch(() => 1));
+      const curFee      = BigInt(await _tr.tierEntryFees(Math.max(highest - 1, 0)).catch(() => 0n));
+      const nextFee     = highest < 10 ? BigInt(await _tr.tierEntryFees(highest).catch(() => 0n)) : 0n;
+
+      const parts = [];
+      if (doubleE && autoUpgrade)  { parts.push(['Seat 1 · auto-upgrade to T' + (highest + 1), nextFee], ['Seat 2 · auto re-entry to T' + highest, curFee]); }
+      else if (doubleE && reentry) { parts.push(['Seat 1 · auto re-entry to T' + highest, curFee], ['Seat 2 · auto re-entry to T' + highest, curFee]); }
+      else if (autoUpgrade)        { parts.push(['Auto-upgrade to T' + (highest + 1), nextFee]); }
+      else if (reentry)            { parts.push(['Auto re-entry to T' + highest, curFee]); }
+
+      const expected = parts.reduce((a, x) => a + x[1], 0n);
+      const mismatch = parts.length > 0 && expected !== onchainReserved;
+      const tgl = "(function(){var d=document.getElementById('autores-detail'),c=document.getElementById('autores-chev');if(!d)return;var o=d.style.display!=='none';d.style.display=o?'none':'block';if(c)c.textContent=o?'▸':'▾';})()";
+
+      autoReserveBlock = `
+        <div class="detail-row" onclick="${tgl}" style="cursor:pointer">
+          <span class="detail-key" style="color:var(--yellow)"><span id="autores-chev">▸</span> ⚙ Automation Reserve (held from earnings) <span style="color:var(--text3);font-weight:400;font-size:11px">· tap for breakdown</span></span>
+          <span class="detail-val" style="color:var(--yellow)">− ${fmt6(onchainReserved)}</span>
+        </div>
+        <div id="autores-detail" style="display:none;padding:2px 0 8px 14px;border-left:2px solid rgba(245,158,11,.35);margin-left:4px">
+          ${parts.length ? parts.map(x => `<div class="detail-row" style="padding:6px 0">
+              <span class="detail-key" style="font-size:12px">${x[0]}</span>
+              <span class="detail-val" style="color:var(--yellow);font-size:12px">${fmt6(x[1])}</span>
+            </div>`).join('')
+            : `<div class="detail-row" style="padding:6px 0"><span class="detail-key" style="font-size:12px;color:var(--text3)">Automation is off — residual reserve from earlier settings</span></div>`}
+          ${mismatch ? `<div class="detail-row" style="padding:6px 0">
+              <span class="detail-key" style="font-size:12px;color:var(--text3)">Your settings imply</span>
+              <span class="detail-val" style="font-size:12px;color:var(--text3)">${fmt6(expected)}</span>
+            </div>
+            <div class="detail-note" style="color:var(--yellow);background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">⚠ The contract is holding ${fmt6(onchainReserved)} but your current settings only account for ${fmt6(expected)}. The contract figure is the one that applies — usually a reserve taken under earlier settings that has not been released yet. Please report it if it does not clear after your next cycle.</div>` : ''}
+          <div class="detail-note" style="margin-top:6px">This is <strong>not</strong> the crossing reserve above. It is earnings the protocol holds so your automatic upgrade or re-entry can pay its own entry fee without you topping up. Turning those settings off releases it back to your claimable balance.</div>
+        </div>`;
+    }
+  } catch (e) {
+    console.warn('[withdrawable] automation reserve unavailable:', e.message);
+  }
+
   el.innerHTML = `
     <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
     <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
     ${crossingLocked > 0n ? `<div class="detail-row"${_resTiers.length ? ` onclick="${_toggleReserve}" style="cursor:pointer"` : ''}><span class="detail-key" style="color:#a855f7">${_resTiers.length ? '<span id="reserve-chev">\u25B8</span> ' : ''}${_t('modal.crossing_reserve','\u21B3 Crossing Reserve (locked)')}${_resTiers.length ? ' <span style="color:var(--text3);font-weight:400;font-size:11px">· tap for breakdown</span>' : ''}</span><span class="detail-val" style="color:#a855f7" title="Locked toward your next matrix crossing — released as earnings when the cycle completes">− ${fmt6(crossingLocked)}</span></div>${reserveDetail}` : ''}
+    ${autoReserveBlock}
     ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
     ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
