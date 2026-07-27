@@ -37,6 +37,42 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-27] Dashboard (index.html) — I am parked and but continue collected from directs, eventua…
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** I am parked and but continue collected from directs, eventually I have enough to self rescue. I need to refresh the page to get the button active.
+- **What was expected:** It should be active like so no need to refresh page. It is easy to click refresh on desktop but mobile might be tricky.
+- **Notes:** Maybe add a refresh button next to the self rescue earning covers it button...
+- **Submitted:** Mon, 27 Jul 2026 14:16:04 GMT
+
+
+### [2026-07-27] Other — Enough funds in wallet to re-enter and upgrade hence I'm get…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** Enough funds in wallet to re-enter and upgrade hence I'm getting a popup saying to self rescue( T1.1) and also option to upgrade to T2..
+- **What was expected:** To be automatically re-entered and upgraded since enough funds are in the account and the auto buttons are enabled...
+- **Notes:** Will hold on self rescue for a while, so you can check the wallet to see what is happening before doing the rescue if you can't fix the issue without a complete system restart.
+- **Submitted:** Mon, 27 Jul 2026 13:43:54 GMT
+
+
+### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** T3 has not cycled. It's at 0 . The position in the matrix is #4. All the other tiers have cycled multiple times.
+- **What was expected:** I expected this tier to cycle like the others.
+- **Notes:** this account is upgraded to Tier 7
+- **Submitted:** Mon, 27 Jul 2026 03:30:19 GMT
+
+
 > **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
 > 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
 >
