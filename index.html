@@ -6158,6 +6158,13 @@ function friendlyError(e) {
   // so we harvest revert strings from several locations before falling through.
   const code    = e.code || '';
   const raw     = e.message || String(e);
+
+  // ── V8.46 (2026-07-27): pass through messages we already wrote for members.
+  // Callers throw pre-formatted, emoji-prefixed errors (balance/allowance checks
+  // in doBulkUpgrade, for example). Without this they fall to the generic
+  // fallback at the bottom of this function and get cut at 120 chars — the live
+  // symptom was "...Top up, or upgrade one ti" with the actionable half missing.
+  if (/^\s*(💵|🔓|✋|⛽|🔒|⚠️|🚧|🛠️|🎉|❌)/u.test(raw)) return raw.trim();
   // Also check nested error shapes emitted by ethers v6 during gas estimation
   const rawDeep = raw + (e.info?.error?.message || '') + (e.error?.message || '');
   // ── EARLY guard: raw ethers v6 tx data leaking (TokenPocket, Rabby, etc.) ─
