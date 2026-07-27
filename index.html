@@ -4806,24 +4806,26 @@ async function loadDashboardData() {
         let reserved = 0n;
         const details = [];
 
-        if (doubleE) {
-          if (autoUpgrade) {
-            // Slot 1 upgrades (next fee) + Slot 2 re-enters (cur fee)
-            reserved = nextFeeRaw + curFeeRaw;
-            details.push(`Position 1 auto-upgrade: $${fmt6(nextFeeRaw)}`);
-            details.push(`Position 2 auto re-entry: $${fmt6(curFeeRaw)}`);
-          } else if (reentry) {
-            // Both slots re-enter
-            reserved = 2n * curFeeRaw;
-            details.push(`Double re-entry (×2): $${fmt6(curFeeRaw)} each`);
-          }
-        } else {
-          if (autoUpgrade) {
-            reserved = nextFeeRaw;
-            details.push(`Auto-upgrade to next tier: $${fmt6(nextFeeRaw)}`);
-          } else if (reentry) {
-            reserved = curFeeRaw;
+        // MIRROR OF TierRouter.reservedFor:1494 — each enabled toggle reserves its
+        // OWN fee, ADDITIVELY. The previous version treated double entry as
+        // "seat 1 upgrades, seat 2 re-enters" and dropped the standalone re-entry
+        // fee, under-reporting by one curFee — live at T8 it listed $7,500 against
+        // the $10,000 the contract actually holds. The on-chain override below
+        // corrected the TOTAL, which hid the error; but this list is what the
+        // member reads, and it was wrong. Found 2026-07-27 when the owner said the
+        // reserve "still is not explained".
+        if (autoUpgrade || reentry) {
+          if (reentry) {
+            reserved += curFeeRaw;
             details.push(`Auto re-entry: $${fmt6(curFeeRaw)}`);
+          }
+          if (autoUpgrade && nextFeeRaw > 0n) {
+            reserved += nextFeeRaw;
+            details.push(`Auto-upgrade to next tier: $${fmt6(nextFeeRaw)}`);
+          }
+          if (doubleE) {
+            reserved += curFeeRaw;
+            details.push(`Double entry · second seat: $${fmt6(curFeeRaw)}`);
           }
         }
 
@@ -5170,11 +5172,21 @@ async function renderWithdrawableDetail(el, rp) {
       const curFee      = BigInt(await _tr.tierEntryFees(Math.max(highest - 1, 0)).catch(() => 0n));
       const nextFee     = highest < 10 ? BigInt(await _tr.tierEntryFees(highest).catch(() => 0n)) : 0n;
 
+      // MIRROR OF TierRouter.reservedFor:1494 -- LINE FOR LINE. Do not "simplify"
+      // this into seat-based either/or logic: my first version did exactly that
+      // ("seat 1 upgrades, seat 2 re-enters") and reported $7,500 where the chain
+      // held $10,000, because the contract adds EACH enabled toggle's own fee
+      // independently -- re-entry AND upgrade AND double, not a choice between
+      // them. The contract guard (!autoUpgrade && !reentry -> 0) means `double`
+      // only ever adds on top of one of the other two.
       const parts = [];
-      if (doubleE && autoUpgrade)  { parts.push(['Seat 1 · auto-upgrade to T' + (highest + 1), nextFee], ['Seat 2 · auto re-entry to T' + highest, curFee]); }
-      else if (doubleE && reentry) { parts.push(['Seat 1 · auto re-entry to T' + highest, curFee], ['Seat 2 · auto re-entry to T' + highest, curFee]); }
-      else if (autoUpgrade)        { parts.push(['Auto-upgrade to T' + (highest + 1), nextFee]); }
-      else if (reentry)            { parts.push(['Auto re-entry to T' + highest, curFee]); }
+      if (!autoUpgrade && !reentry) {
+        // contract returns 0 in this case; anything held is residual
+      } else {
+        if (reentry)                    parts.push(['Auto re-entry to T' + highest, curFee]);
+        if (autoUpgrade && nextFee > 0n) parts.push(['Auto-upgrade to T' + (highest + 1), nextFee]);
+        if (doubleE)                    parts.push(['Double entry · second seat at T' + highest, curFee]);
+      }
 
       const expected = parts.reduce((a, x) => a + x[1], 0n);
       const mismatch = parts.length > 0 && expected !== onchainReserved;
