@@ -8,14 +8,15 @@ Read this file at the start of every session before touching any frontend code.
 
 | Item | Value |
 |------|-------|
+| **PAIR NUMBERING** | **The dashboard numbers pairs from 1 (T1.1/T1.2/T1.3); the contracts index them from 0.** So dashboard T1.3 == `pairs[2]`. All keeper/diagnostic scripts were switched to 1-BASED display on 2026-07-27 to match what you and the members see — the index passed to contract calls is still 0-based. Anything written before that date in this file or in logs may be off by one. |
 | **TIMEZONE** | **Owner is EDT (UTC-4). Work in EDT, not UTC** — UTC makes evening look like the middle of the night. VPS commands: prefix `TZ=America/New_York date`. |
-| **LIVE CONFIG CHANGES 2026-07-26 PM EDT** | **MatA rotation had STOPPED on every saturated pair in all 10 tiers** — members frozen in seats 2..127 permanently (Sherwyn reported it across 3 versions; Kira, CryptoJan22, Lavern corroborated). Fixed with TWO reversible owner calls, **no redeploy, no reset, nobody lost a position**: (1) **8:25 PM** `TierRouter.setPairExpansionThreshold` 381 → **1000000** (block 44671830) — **PERMANENT, do not revert**; revived T2.0/T3.0/T5.0 MatA. (2) **8:50 PM** T1 `PairManager.setEntryThresholds` route 381 → 3000 (block 44672565) — **now managed automatically by the round-robin keeper**. T1.0 MatA verified 254 → 263 at ~26 rotations/hr. Audit trail: `/root/keeper/threshold_changes.log`. Revert commands are logged with every change. |
+| **LIVE CONFIG CHANGES 2026-07-26 PM EDT** | **MatA rotation had STOPPED on every saturated pair in all 10 tiers** — members frozen in seats 2..127 permanently (Sherwyn reported it across 3 versions; Kira, CryptoJan22, Lavern corroborated). Fixed with TWO reversible owner calls, **no redeploy, no reset, nobody lost a position**: (1) **8:25 PM** `TierRouter.setPairExpansionThreshold` 381 → **1000000** (block 44671830) — **PERMANENT, do not revert**; revived T2.1/T3.1/T5.1 MatA. (2) **8:50 PM** T1 `PairManager.setEntryThresholds` route 381 → 3000 (block 44672565) — **now managed automatically by the round-robin keeper**. T1.1 MatA verified 254 → 263 at ~26 rotations/hr. Audit trail: `/root/keeper/threshold_changes.log`. Revert commands are logged with every change. |
 | **Round-robin keeper (NEW)** | `/root/keeper/route_rr.js`, cron `*/5` + flock. Walks the new-member entry stream around T1's pairs so no MatA starves. **Entry-driven, not time-driven** (QUOTA=8 entries, MAX_MIN=30 fallback) because the stress keeper delivers bursts every 30 min. Kill switch: `touch /root/keeper/route_rr.OFF`. Master copy: CryptoNite-MT5-Bots/route_rr.js. Pairs with internal churn hand off fast; starved pairs hold — that allocation is intentional, don't "fix" it to strict fairness. |
 | **Diagnostic scripts (NEW, masters in CryptoNite-MT5-Bots)** | `pair_entries.js` (per-pair entries vs threshold + which pair each threshold selects) · `check_reporters.js` (where every bug reporter's wallet sits) · `set_threshold.js` / `set_route.js` (owner-guarded, simulate-first, log the revert command) · `integrity_check.js` (BFS guard, run after every deploy). |
 | Live contract version | **V8.45 (deployed 2026-07-26 ~02:45 UTC)** — emergency fix of a V8.44 bug that corrupted a matrix's seat map (nested entry during rotation → phantom seat 128, occupancy drift +44, position 1 emptied → `F8V8: no root` wedge → 42 members could not self-rescue). Fix: seat resolved after rotation, never out of range, self-healing root scan. 402 tests green incl. new N1/N2 regressions. Frontend updated (115 replacements, commit 7e44268→e3176f6 on all 3 branches); gates preview 11:45 PM / main 12:00 AM EDT. Keepers on V8.45, **stress keeper OFF pending owner green light**. Integrity gate: `node /root/keeper/integrity_check.js` = INTEGRITY OK. Addresses: TierRouter 0xC44c1A51…, PairFactory 0x71020540…, MatrixKeeper 0x603db2d9… |
 | PREVIOUS (dead) | V8.44 (deployed 2026-07-25, killed within hours by the nested-entry BFS corruption — see V8.45 above). V8.43 and earlier archived in BUGS_PRE_V8_44_ARCHIVE.md. |
 | Addresses file | **`deployed_addresses_v8_45.json`** — every keeper/diagnostic defaults to this. NOTE: `diag_member_rescue.js` still defaults to the DEAD v8_44 file; always pass `ADDRESSES_FILE=deployed_addresses_v8_45.json` when running it. |
-| **V8.46 — THE REAL FIX (next build)** | Root bug found 2026-07-26, **two sites, same mistake**: a capacity concept implemented with a CUMULATIVE lifetime counter. (1) `TierRouter._sameTierTarget:1247` — re-entry goes to own MatB when `pairs[i].totalRegistered >= pairExpansionThreshold`, but the doc at TierRouter:230 says "combined occupancy" (max 254); live T2.0 was at 3064. (2) `PairManagerV8` oldest-first scan `:475-506` — picks the oldest pair with `totalRegistered < routeEntryThreshold`, doc says "whose MatA still has available seats". Both exclude old pairs FOREVER. **Fix: compare live occupancy as both comments already describe.** Test `test/V8_46_MatAStarvation.test.js`: S1 reproduces the freeze (PASSES), S3 proves a cascade does NOT steal the entrant's seat (PASSES), S2 cannot be proven in-harness — a passive member accrues only 7.436 of a 10.0 fee so re-entry parks before routing is reached. **Still unmeasured: cascade gas at 127 seats.** |
+| **V8.46 — THE REAL FIX (next build)** | Root bug found 2026-07-26, **two sites, same mistake**: a capacity concept implemented with a CUMULATIVE lifetime counter. (1) `TierRouter._sameTierTarget:1247` — re-entry goes to own MatB when `pairs[i].totalRegistered >= pairExpansionThreshold`, but the doc at TierRouter:230 says "combined occupancy" (max 254); live T2.1 was at 3064. (2) `PairManagerV8` oldest-first scan `:475-506` — picks the oldest pair with `totalRegistered < routeEntryThreshold`, doc says "whose MatA still has available seats". Both exclude old pairs FOREVER. **Fix: compare live occupancy as both comments already describe.** Test `test/V8_46_MatAStarvation.test.js`: S1 reproduces the freeze (PASSES), S3 proves a cascade does NOT steal the entrant's seat (PASSES), S2 cannot be proven in-harness — a passive member accrues only 7.436 of a 10.0 fee so re-entry parks before routing is reached. **Still unmeasured: cascade gas at 127 seats.** |
 | **FUNDING CONSTRAINT (design fact, not a bug)** | The crossing reserve covers **exactly 50%** of the next entry fee; the member must have earned the other 50% or they PARK. Pool payout is fixed at 18% split across the matrix, so a member with **no referral income can essentially never self-fund a re-entry** — repeated parking with variable shortfalls is the DESIGNED path for them, not a fault. This is the honest answer to CryptoJan22's "$0.60 to $41.00" report. Referral income (5% L1 + 2.7%×5 chain) is what closes the gap. |
 | Mainnet dates | Soft launch TBD (no countdown — opens by flag flip only); flagship June 19, 2027 |
 | V8.44 GO-LIVE | **2026-07-25: preview 3:00 PM EDT, main 3:30 PM EDT — LIVE.** Frontend pushed to all 3 branches (33156be + gate commit 3dc9324); gates verified rendering. Owner Rabby registration test passed. 34/39 round-robin leaders registered via early access. VPS keepers all re-pointed to V8.44 + 8 cron lines active (incl. stress + channel_pulse). Health check: `node /root/keeper/v844_state.js`. First state @20:15 UTC: T1 MatA 88/127 rot=0 parked=0 — awaiting first cross into MatB (THE metric: MatB rot must climb, was frozen at 0 on V8.43). |
@@ -33,7 +34,7 @@ Read this file at the start of every session before touching any frontend code.
 3. **BUGS.md: 6 still open** — the whole upgrade cluster is now explained (see item 1) but Lavern's "approved funds didn't appear" on 0x145805 (wallet holds $8,194, so NOT a funds problem) and @queensonnie's referral count are genuinely undiagnosed. 3 in Pending-Responded await member confirmation.
 4. **Bounties: 13 accepted finds, $13 owed, all `paid_usd: 0`** — payment deferred to go-live by owner decision. Sherwyn 6, Kira 3, CryptoJan 2, Lavern-Gay 2.
 5. **V8.46 contract fix** — see the table above.
-6. Watch `T1.0/T1.1 MatA parked`: an entry into a FULL MatA rotates the queue (good) but the entrant parks (~1 park per rotation). Single digits is fine; dozens means the round-robin trade isn't worth it.
+6. Watch `T1.1/T1.2 MatA parked`: an entry into a FULL MatA rotates the queue (good) but the entrant parks (~1 park per rotation). Single digits is fine; dozens means the round-robin trade isn't worth it.
 
 ## Doctrine: code is truth
 
@@ -67,6 +68,19 @@ Stage 3: git push origin admin:main --force      ← STOP, wait for leader sign-
 ```powershell
 # In the repo directory:
 git show admin:index.html | Select-Object -Last 5
+```
+
+**For the preview and main stages you MUST check the REMOTE ref, not the local one.**
+`git push origin admin:preview` updates the remote branch only — your local `preview`
+ref never moves, so `git show preview:index.html` reads a stale local copy and will
+happily "pass" while showing you a file from days ago. Caught live 2026-07-26: the
+local refs were still on the countdown-gate commit and showed a completely different
+file ending.
+
+```powershell
+git fetch origin
+git show origin/preview:index.html | Select-Object -Last 5
+git show origin/main:index.html    | Select-Object -Last 5
 ```
 
 Or in bash:
