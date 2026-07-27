@@ -1290,8 +1290,31 @@
         <div class="info-row" id="rescue-reserve-row" style="display:none"><span class="info-key">Crossing Reserve</span><span class="info-val green" id="rescue-reserve">—</span></div>
         <div class="info-row"><span class="info-key">Re-Entry Fee</span><span class="info-val" id="rescue-fee">—</span></div>
         <div class="info-row"><span class="info-key">Shortfall</span><span class="info-val" style="color:#f97316" id="rescue-shortfall">—</span></div>
+        <!-- Sherwyn, 2026-07-27: "Enough funds in wallet to re-enter and upgrade,
+             hence I'm getting a popup saying to self rescue." His wallet was funded
+             but his IN-MATRIX balance was $8.85 against a $10 fee. Auto re-entry can
+             ONLY spend the crossing reserve plus earnings held inside the matrix —
+             wallet USDC is not visible to it and is only usable via manual self
+             rescue. The panel showed both numbers without ever saying they are
+             different pots, so "I have the money" and "the contract has the money"
+             looked like the same statement. -->
+        <div class="info-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
+          <span class="info-key">In-matrix total <span style="color:var(--text3);font-size:11px">(reserve + earnings)</span></span>
+          <span class="info-val" id="rescue-inmatrix">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Your wallet USDC <span style="color:var(--text3);font-size:11px">(manual rescue only)</span></span>
+          <span class="info-val" id="rescue-walletbal">—</span>
+        </div>
+        <div id="rescue-two-pot-note" style="margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);font-size:12px;color:var(--text2);line-height:1.6">
+          <strong style="color:#f97316">Two separate balances.</strong> Automatic re-entry and
+          automatic upgrade spend only your <strong>in-matrix</strong> total above — the crossing
+          reserve plus earnings the system already holds for you. Money sitting in your
+          <strong>wallet</strong> cannot be used automatically; it is only spent when you press
+          Self Rescue or Upgrade yourself. So a full wallet does not stop you being parked.
+        </div>
         <div id="rescue-auto-hint" style="margin-top:12px;margin-bottom:4px;padding:10px 14px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);font-size:12px;color:var(--text2);line-height:1.6">
-          <strong style="color:var(--green)">&#9203; Auto-rescue active</strong> &#8212; if your balance covers the entry fee, the keeper will re-enter you automatically within 24&#8239;hours. No out-of-pocket action needed unless you want to re-enter sooner.
+          <strong style="color:var(--green)">&#9203; Auto-rescue active</strong> &#8212; if your <em>in-matrix</em> balance covers the entry fee, the keeper will re-enter you automatically within 24&#8239;hours. No out-of-pocket action needed unless you want to re-enter sooner.
         </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
@@ -1299,6 +1322,18 @@
           </div>
           <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0.00</span> USDC</button>
           <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
+          <!-- Kira, 2026-07-27: "I am parked but continue collecting from directs,
+               eventually I have enough to self rescue. I need to refresh the page to
+               get the button active." Earnings arrive continuously while parked, but
+               the shortfall was only recalculated on a full page load — so the button
+               stayed greyed out until you reloaded, which is awkward on mobile. -->
+          <button class="btn full-w" id="btn-rescue-refresh" onclick="refreshRescueState()"
+                  style="background:transparent;border:1px solid var(--border);color:var(--text2);font-size:13px">
+            &#8635; Refresh balance
+          </button>
+          <div id="rescue-autorefresh-note" style="font-size:11px;color:var(--text3);text-align:center">
+            Checking automatically every 30s while you're parked
+          </div>
           <div id="self-rescue-status" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
         </div>
       </div>
@@ -4613,6 +4648,7 @@ async function loadDashboardData() {
     if (rescueSection) {
       if (parkedInfo) {
         rescueSection.style.display = 'block';
+        startRescuePolling();   // Kira 2026-07-27: keep the shortfall live while parked
         window._parkedMatrixAddr    = parkedInfo.addr;
         window._parkedMatrixLabel   = parkedInfo.label;
         window._parkedWithdrawable  = parkedInfo.withdrawable;
@@ -4634,6 +4670,25 @@ async function loadDashboardData() {
         const _memberShare = _shortfall > _sfShare ? _shortfall - _sfShare : 0n;
         // Self rescue shortfall tracking
         window._selfRescueShortfall = parkedInfo.shortfall;
+
+        // Two-pot display (Sherwyn 2026-07-27). The in-matrix total is what auto
+        // re-entry can actually spend; the wallet balance is what a MANUAL self
+        // rescue can spend. Showing them side by side is the whole point — a
+        // member with $500 in their wallet and $8.85 in-matrix is still parked,
+        // and previously nothing on this page explained why.
+        try {
+          const _inMatrix = (parkedInfo.withdrawable || 0n) + (parkedInfo.crossingReserve || 0n);
+          setText('rescue-inmatrix', fmt6(_inMatrix));
+          const _im = document.getElementById('rescue-inmatrix');
+          if (_im) _im.style.color = _inMatrix >= parkedInfo.fee ? 'var(--green)' : '#f97316';
+          const _usdcRO = new ethers.Contract(ADDRS.usdc, USDC_ABI, provider);
+          const _wal = await _usdcRO.balanceOf(userAddr);
+          setText('rescue-walletbal', fmt6(_wal));
+        } catch (_) {
+          setText('rescue-inmatrix', '—');
+          setText('rescue-walletbal', '—');
+        }
+
         const _selfApproveBtn = document.getElementById('btn-self-approve');
         const _selfRescueBtn  = document.getElementById('btn-self-rescue');
         const _selfShortfallEl = document.getElementById('self-shortfall-display');
@@ -5568,6 +5623,25 @@ async function setAutoReentryOption(enabled) {
     if (chk) chk.checked = !enabled;
     return;
   }
+  // @Koach100, 2026-07-27: reported "T3 has not cycled, it's at 0" while holding
+  // seats only in T5-T8. The chain showed why — he switched this OFF, then cycled
+  // out of T1, T2, T3 and T4, and each of those was recorded as
+  // "PARKED (autoReentry disabled)": a clean graduation that RELEASES the reserve
+  // but does NOT give the seat back. Switching it on again does not restore them.
+  // Nothing warned him, and the consequence is permanent per tier, so make it an
+  // explicit decision rather than a silent one.
+  if (!enabled) {
+    const ok = window.confirm(
+      'Turn OFF automatic re-entry?\n\n' +
+      'Each time you cycle out of a tier from now on, you will LEAVE that tier ' +
+      'instead of re-entering it. Your crossing reserve is returned to your ' +
+      'withdrawable balance, but the seat is gone.\n\n' +
+      'Switching this back on later does NOT restore tiers you have already left — ' +
+      'you would have to re-enter each one manually.\n\n' +
+      'Turn it off anyway?'
+    );
+    if (!ok) { if (chk) chk.checked = true; return; }
+  }
   const prevLabel = lbl ? lbl.textContent : '';
   if (lbl) lbl.textContent = 'Saving…';
   try {
@@ -6150,6 +6224,48 @@ function setStatus(id, msg, type) {
   if (!el) return;
   el.textContent = msg;
   el.style.color = type === 'ok' ? 'var(--green)' : type === 'err' ? 'var(--red)' : 'var(--text2)';
+}
+
+// ── Parked-state refresh (Kira, 2026-07-27) ────────────────────────────────
+// While parked, earnings keep arriving from directs and the shortfall shrinks.
+// The rescue panel was only recalculated on a full page load, so the button
+// stayed disabled until the member reloaded — fiddly on mobile. This gives an
+// explicit refresh and a gentle poll while the rescue section is on screen.
+let _rescuePollTimer = null;
+
+async function refreshRescueState() {
+  const btn = document.getElementById('btn-rescue-refresh');
+  const original = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '&#8635; Checking…'; }
+  try {
+    await loadDashboardData();
+    const el = document.getElementById('self-rescue-status');
+    if (el) {
+      const short = window._selfRescueShortfall || 0n;
+      el.textContent = short === 0n
+        ? '✅ Your earnings now cover the full fee — Self Rescue is free.'
+        : 'Still short ' + fmt6(short) + ' — earnings are still coming in.';
+    }
+  } catch (e) {
+    const el = document.getElementById('self-rescue-status');
+    if (el) el.textContent = friendlyError(e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = original || '&#8635; Refresh balance'; }
+  }
+}
+
+function startRescuePolling() {
+  if (_rescuePollTimer) return;
+  _rescuePollTimer = setInterval(async () => {
+    const sec = document.getElementById('rescue-section');
+    // Stop as soon as the member is no longer parked — no point polling forever.
+    if (!sec || sec.style.display === 'none') { stopRescuePolling(); return; }
+    try { await loadDashboardData(); } catch (_) {}
+  }, 30000);
+}
+
+function stopRescuePolling() {
+  if (_rescuePollTimer) { clearInterval(_rescuePollTimer); _rescuePollTimer = null; }
 }
 
 function friendlyError(e) {
