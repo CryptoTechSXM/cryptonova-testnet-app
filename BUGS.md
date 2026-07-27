@@ -37,63 +37,6 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
-### [2026-07-27] Dashboard (index.html) — I am parked and but continue collected from directs, eventua…
-- **Reporter:** Kira
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
-- **Frequency:** Consistent
-- **What happened:** I am parked and but continue collected from directs, eventually I have enough to self rescue. I need to refresh the page to get the button active.
-- **What was expected:** It should be active like so no need to refresh page. It is easy to click refresh on desktop but mobile might be tricky.
-- **Notes:** Maybe add a refresh button next to the self rescue earning covers it button...
-- **Submitted:** Mon, 27 Jul 2026 14:16:04 GMT
-
-
-### [2026-07-27] Other — Enough funds in wallet to re-enter and upgrade hence I'm get…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Consistent
-- **What happened:** Enough funds in wallet to re-enter and upgrade hence I'm getting a popup saying to self rescue( T1.1) and also option to upgrade to T2..
-- **What was expected:** To be automatically re-entered and upgraded since enough funds are in the account and the auto buttons are enabled...
-- **Notes:** Will hold on self rescue for a while, so you can check the wallet to see what is happening before doing the rescue if you can't fix the issue without a complete system restart.
-- **Submitted:** Mon, 27 Jul 2026 13:43:54 GMT
-
-
-### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
-- **Frequency:** Consistent
-- **What happened:** T3 has not cycled. It's at 0 . The position in the matrix is #4. All the other tiers have cycled multiple times.
-- **What was expected:** I expected this tier to cycle like the others.
-- **Notes:** this account is upgraded to Tier 7
-- **Submitted:** Mon, 27 Jul 2026 03:30:19 GMT
-
-
-> **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
-> 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
->
-> **The three "T5 upgrade check failed" reports were diagnosed after the first pass and
-> moved to Fix In Progress** — they are out-of-USDC errors wearing a network error's
-> clothing. `bulkUpgrade` pulls the TOTAL fee for every remaining tier in one
-> `safeTransferFrom` (TierRouter:979), and OpenZeppelin's `ERC20InsufficientBalance` is a
-> custom error that was missing from the frontend ABI, so ethers returned `reason=null`
-> and the UI blamed the RPC. The three reporting wallets held **$4.86 (0x46cc05),
-> $12.83 (0x832b95) and $13.14 (0x185b19)**. Fix committed as `7b3c327`, not yet pushed.
->
-> **Only 3 reports below are genuinely undiagnosed:**
-> 1. Lavern's "approved funds didn't appear" on 0x145805 — that wallet holds **$8,194**,
->    so unlike the others it is NOT a balance problem. Needs its own look.
-> 2. @queensonnie's direct-referral count not showing 2.
-> 3. Kira's registration-page upgrade button — likely a design gap rather than a fault
->    (the upgrade control only exists on the dashboard), so decide the intent first.
->
-> Separately, Sherwyn observed T5 being offered to an account that never reached T2 —
-> worth checking `_upgradeEligible` against what the dashboard displays.
-
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
@@ -168,6 +111,64 @@ However the c nova tokens and earnings increase everytime.
 
 
 ## Fix In Progress — closes when the fix ships
+
+### [2026-07-27] Dashboard (index.html) — I am parked and but continue collected from directs, eventua…
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** I am parked and but continue collected from directs, eventually I have enough to self rescue. I need to refresh the page to get the button active.
+- **What was expected:** It should be active like so no need to refresh page. It is easy to click refresh on desktop but mobile might be tricky.
+- **Notes:** Maybe add a refresh button next to the self rescue earning covers it button...
+- **Submitted:** Mon, 27 Jul 2026 14:16:04 GMT
+- **FIXED 2026-07-27 (commit 38605d7, on admin):** correct report — earnings arrive continuously while parked but the shortfall was only recalculated on a full page load, so the button stayed disabled until reload. Added a **Refresh balance** button plus a 30s auto-poll that runs only while the rescue panel is visible and stops once you are no longer parked. The status line now states whether earnings cover the fee or how much is still short. Her suggestion of a button beside the rescue control was adopted as-is.
+
+### [2026-07-27] Other — Enough funds in wallet to re-enter and upgrade hence I'm get…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** Enough funds in wallet to re-enter and upgrade hence I'm getting a popup saying to self rescue( T1.1) and also option to upgrade to T2..
+- **What was expected:** To be automatically re-entered and upgraded since enough funds are in the account and the auto buttons are enabled...
+- **Notes:** Will hold on self rescue for a while, so you can check the wallet to see what is happening before doing the rescue if you can't fix the issue without a complete system restart.
+- **Submitted:** Mon, 27 Jul 2026 13:43:54 GMT
+- **DIAGNOSED 2026-07-27 — working as designed, interface was misleading.** On-chain this wallet is SEATED in T1.1 MatA with **reserve $5.00 + withdrawable $3.85 = $8.85** against a $10 fee: short **$1.15 in-matrix**. Automatic re-entry and automatic upgrade can ONLY spend the crossing reserve plus earnings held inside the matrix. Wallet USDC is invisible to them and is only spent by a manual Self Rescue or Upgrade — so a funded wallet does not prevent parking. Options were all correct (autoReentry true, upgrade enabled). **UI fix (38605d7):** the rescue panel now shows *In-matrix total* and *Your wallet USDC* as separate rows, colours the in-matrix figure by whether it covers the fee, and explains that the two are different pots. Nothing to fix in the contract.
+
+### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** T3 has not cycled. It's at 0 . The position in the matrix is #4. All the other tiers have cycled multiple times.
+- **What was expected:** I expected this tier to cycle like the others.
+- **Notes:** this account is upgraded to Tier 7
+- **Submitted:** Mon, 27 Jul 2026 03:30:19 GMT
+
+
+> **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
+> 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
+>
+> **The three "T5 upgrade check failed" reports were diagnosed after the first pass and
+> moved to Fix In Progress** — they are out-of-USDC errors wearing a network error's
+> clothing. `bulkUpgrade` pulls the TOTAL fee for every remaining tier in one
+> `safeTransferFrom` (TierRouter:979), and OpenZeppelin's `ERC20InsufficientBalance` is a
+> custom error that was missing from the frontend ABI, so ethers returned `reason=null`
+> and the UI blamed the RPC. The three reporting wallets held **$4.86 (0x46cc05),
+> $12.83 (0x832b95) and $13.14 (0x185b19)**. Fix committed as `7b3c327`, not yet pushed.
+>
+> **Only 3 reports below are genuinely undiagnosed:**
+> 1. Lavern's "approved funds didn't appear" on 0x145805 — that wallet holds **$8,194**,
+>    so unlike the others it is NOT a balance problem. Needs its own look.
+> 2. @queensonnie's direct-referral count not showing 2.
+> 3. Kira's registration-page upgrade button — likely a design gap rather than a fault
+>    (the upgrade control only exists on the dashboard), so decide the intent first.
+>
+> Separately, Sherwyn observed T5 being offered to an account that never reached T2 —
+> worth checking `_upgradeEligible` against what the dashboard displays.
+- **DIAGNOSED 2026-07-27 — not a fault, but a UX hazard now fixed.** Two separate things: (1) **T3 is at 2 cycles on-chain, not 0** — the dashboard figure he read is wrong and that part is STILL OPEN. (2) He holds seats only in T5-T8 because he switched auto re-entry OFF: `member_history.js` shows his last cycle-out in each of T1/T2/T3/T4 recorded as **PARKED (autoReentry disabled)** — a clean graduation that returns the crossing reserve to withdrawable but does NOT keep the seat. Every earlier cycle-out parked normally with a shortfall. Turning the option back on (it reads true now) does not restore tiers already left; those need 'Graduated tier re-entry'. **UI fix (38605d7):** switching auto re-entry off now requires confirming a dialog that states the consequence explicitly. His trail also surfaced a NINTH silent graduation (tx 0xe9e8067…, T5.1 MatA at block 44668146).
 
 ### [2026-07-26] Dashboard (index.html) — T5 upgrade check failed — try again in a moment (RPC may be …
 - **Reporter:** @Lavern_Gay

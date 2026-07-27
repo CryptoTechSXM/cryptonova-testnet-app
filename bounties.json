@@ -40,6 +40,11 @@
           "date": "2026-07-26",
           "summary": "Bug-report page 'Back to dashboard' link returns to the home page instead of the dashboard",
           "status": "accepted"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "accepted",
+          "summary": "Reported expecting automatic re-entry/upgrade while holding wallet funds. Correct as a UX defect: auto re-entry can only spend the IN-MATRIX pot (reserve + earnings) — his was $8.85 against a $10 fee — while wallet USDC is usable only via manual rescue. The panel showed both figures without ever distinguishing them. Fixed by splitting the two balances and explaining the difference (38605d7). Also held off self-rescuing so the wallet could be inspected live."
         }
       ],
       "paid_usd": 0
@@ -64,6 +69,11 @@
           "date": "2026-07-26",
           "summary": "Tiers page ambiguous — newly opened pairs (T1.1/T2.1) should show their member count",
           "status": "accepted"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "accepted",
+          "summary": "Parked members' self-rescue button stayed disabled until a full page reload, even after earnings from directs had covered the shortfall — awkward on mobile. Suggested a refresh control beside the button; adopted exactly, plus a 30s auto-poll while parked (38605d7)."
         }
       ],
       "paid_usd": 0
@@ -109,7 +119,7 @@
       "paid_usd": 0
     },
     {
-      "name": "koach100",
+      "name": "@Koach100",
       "wallets": [
         "0x1ca3316ebc2f991c073ccdd1a25c68d482589a94"
       ],
@@ -118,6 +128,11 @@
           "date": "2026-07-23",
           "summary": "Extra directs — test artifact (stress wallets), not a protocol bug",
           "status": "test-artifact"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "accepted",
+          "summary": "Reported T3 stuck at 0 cycles. Surfaced two real issues: the dashboard tier-cycle figure disagrees with the chain (T3 is 2, still open), and turning auto re-entry OFF silently graduates you out of every tier you subsequently cycle out of, unrecoverably. Now behind a confirmation dialog (38605d7). His trail also revealed a ninth silent graduation."
         }
       ],
       "paid_usd": 0
