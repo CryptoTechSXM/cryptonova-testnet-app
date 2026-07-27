@@ -7269,7 +7269,24 @@ async function doLimboReEntry() {
   const matA = new ethers.Contract(info.addr, REENTRY_ABI, signer);
   setStatus('limbo-status', '⏳ Submitting re-entry…', 'info');
   try {
-    const tx = await matA.register(info.referrer, { gasLimit: 800_000 });
+    // Sherwyn, 2026-07-27: "Transaction failed on-chain… expected to be re-entered".
+    // This button carried a STATIC 800,000 gas limit — the same class of bug he
+    // found on 2026-07-24 in the Upgrade Tier button (hardcoded 2M), in a
+    // different control. register() into a MatA that is already full triggers a
+    // rotation cascade; measured at production size on 2026-07-27, a peak entry
+    // during rotation costs 5,127,660 gas. 800k could never pay for it, so the
+    // transaction ran out of gas and reverted — and because out-of-gas carries no
+    // custom error, friendlyError() had nothing to decode and fell through to the
+    // generic "Transaction failed on-chain" he quoted.
+    //
+    // Same estimateGas ladder as doSelfRescue: estimate, add 30% headroom, cap at
+    // 15M (Base Sepolia rejects limits above ~17.8M with -32003).
+    let _reGas = 15_000_000;
+    try {
+      const _est = await matA.register.estimateGas(info.referrer, { from: await signer.getAddress() });
+      _reGas = Math.min(15_000_000, Number(_est) + Math.ceil(Number(_est) * 0.30));
+    } catch (_) { /* estimation failed — fall back to the cap rather than a guess */ }
+    const tx = await matA.register(info.referrer, { gasLimit: _reGas });
     setStatus('limbo-status', '⏳ Confirming…', 'info');
     await tx.wait();
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
