@@ -5047,7 +5047,17 @@ async function _getAllMatrixMembers(userAddr, rp) {
   for (const mo of matObjs) {
     const mc = new ethers.Contract(mo.addr, MATRIX_ABI, rp);
     const m  = await mc.getMember(userAddr).catch(() => null);
-    if (m && m.hasEverJoined) {
+    // Kira 2026-07-27 ("withdrawable card shows 1507.xx while the withdrawable
+    // breakdown does not reflect that"): this is the SECOND HALF of Sherwyn's
+    // 2026-07-24 bug. L1 upgrade commissions credit a sponsor's withdrawable in
+    // tier matrices they never joined, so hasEverJoined stays false there while a
+    // real, withdrawable balance accrues (the contract allows claiming it, V8.36).
+    // The dashboard CARD was fixed to count those matrices; this breakdown modal
+    // was not, so a sponsor with many upgrading directs saw a headline of $1,307
+    // against a breakdown of $25 — every commission-only tier was dropped.
+    // The two loops must apply the SAME filter; if one changes, change both.
+    const _hasCredit = m && !m.hasEverJoined && BigInt(m.withdrawable) > 0n;
+    if (m && (m.hasEverJoined || _hasCredit)) {
       totalEarned      += BigInt(m.totalEarned);
       totalWithdrawn   += BigInt(m.totalWithdrawn);
       totalWithdrawable += BigInt(m.withdrawable);
