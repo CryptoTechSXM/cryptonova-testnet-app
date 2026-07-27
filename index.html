@@ -5090,9 +5090,24 @@ async function renderWithdrawableDetail(el, rp) {
   // Use _buildAllMatrixObjects so T1.2, T1.3 etc. are included after factory expansion
   const _allMatObjs = await _buildAllMatrixObjects(rp);
   let totalCrossingReserve = 0n;
-  await Promise.all(_allMatObjs.map(({ addr }) =>
-    new ethers.Contract(addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
-      totalCrossingReserve += BigInt(r);
+  // Owner 2026-07-27: the headline read "$0.00 withdrawable · $10,000 reserved"
+  // against $4,621 lifetime earnings, which looks impossible until you know the
+  // reserve is funded from the ENTRY FEE, not from earnings — so it can exceed
+  // what you have ever earned. Attribute it per matrix so that is demonstrable
+  // rather than asserted. Kept OUT of the dashboard card at the owner's request
+  // ("the member should click to get the information") — it lives behind this
+  // expandable row only.
+  const _reserveByTier = {};
+  await Promise.all(_allMatObjs.map(mo =>
+    new ethers.Contract(mo.addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
+      const v = BigInt(r);
+      totalCrossingReserve += v;
+      if (v > 0n) {
+        const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
+        const slot = _reserveByTier[tNum] || (_reserveByTier[tNum] = { total: 0n, seats: [] });
+        slot.total += v;
+        slot.seats.push({ label: mo.label || `T${tNum}`, amount: v });
+      }
     })
   ));
 
@@ -5111,10 +5126,30 @@ async function renderWithdrawableDetail(el, rp) {
   const daysSince  = joinedAt > 0n ? Math.floor((Date.now()/1000 - Number(joinedAt)) / 86400) : 0;
 
   const _t = window.t || ((k, fb) => fb || k);
+
+  // Collapsed by default — the row stays one line until the member taps it.
+  const _resTiers = Object.keys(_reserveByTier).map(Number).sort((a, b) => a - b);
+  const reserveDetail = _resTiers.length === 0 ? '' : `
+    <div id="reserve-detail" style="display:none;padding:2px 0 8px 14px;border-left:2px solid rgba(168,85,247,.35);margin-left:4px">
+      ${_resTiers.map(t => {
+        const s = _reserveByTier[t];
+        const multi = s.seats.length > 1;
+        return `<div class="detail-row" style="padding:6px 0">
+          <span class="detail-key" style="font-size:12px">T${t}${multi ? ` · ${s.seats.length} seats` : ''}</span>
+          <span class="detail-val" style="color:#a855f7;font-size:12px">${fmt6(s.total)}</span>
+        </div>` + (multi ? s.seats.map(x => `<div class="detail-row" style="padding:3px 0 3px 12px;border-bottom:none">
+          <span class="detail-key" style="font-size:11px;color:var(--text3)">${x.label}</span>
+          <span class="detail-val" style="font-size:11px;color:var(--text3)">${fmt6(x.amount)}</span>
+        </div>`).join('') : '');
+      }).join('')}
+      <div class="detail-note" style="margin-top:6px">Each seat you hold locks half of that tier's entry fee toward its next crossing. It comes from the fee you paid on entry, <strong>not</strong> from your earnings — which is why the reserve can be larger than everything you have earned so far. It is released back to you as each cycle completes.</div>
+    </div>`;
+  const _toggleReserve = "(function(){var d=document.getElementById('reserve-detail'),c=document.getElementById('reserve-chev');if(!d)return;var open=d.style.display!=='none';d.style.display=open?'none':'block';if(c)c.textContent=open?'\\u25B8':'\\u25BE';})()";
+
   el.innerHTML = `
     <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
     <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
-    ${crossingLocked > 0n ? `<div class="detail-row"><span class="detail-key" style="color:#a855f7">${_t('modal.crossing_reserve','\u21B3 Crossing Reserve (locked)')}</span><span class="detail-val" style="color:#a855f7" title="Locked toward your next matrix crossing — released as earnings when the cycle completes">− ${fmt6(crossingLocked)}</span></div>` : ''}
+    ${crossingLocked > 0n ? `<div class="detail-row"${_resTiers.length ? ` onclick="${_toggleReserve}" style="cursor:pointer"` : ''}><span class="detail-key" style="color:#a855f7">${_resTiers.length ? '<span id="reserve-chev">\u25B8</span> ' : ''}${_t('modal.crossing_reserve','\u21B3 Crossing Reserve (locked)')}${_resTiers.length ? ' <span style="color:var(--text3);font-weight:400;font-size:11px">· tap for breakdown</span>' : ''}</span><span class="detail-val" style="color:#a855f7" title="Locked toward your next matrix crossing — released as earnings when the cycle completes">− ${fmt6(crossingLocked)}</span></div>${reserveDetail}` : ''}
     ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
     ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
