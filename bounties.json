@@ -74,6 +74,11 @@
           "date": "2026-07-27",
           "status": "accepted",
           "summary": "Parked members' self-rescue button stayed disabled until a full page reload, even after earnings from directs had covered the shortfall — awkward on mobile. Suggested a refresh control beside the button; adopted exactly, plus a 30s auto-poll while parked (38605d7)."
+        },
+        {
+          "date": "2026-07-27",
+          "status": "accepted",
+          "summary": "Withdrawable card and its breakdown modal disagreed ($1,507 vs a breakdown listing only two tiers). Real bug and the missing half of Sherwyn's 2026-07-24 find: L1 upgrade commissions credit a sponsor's withdrawable in tier matrices they never joined, so hasEverJoined stays false while a claimable balance accrues. The card was fixed for this on the 24th; the breakdown's _getAllMatrixMembers was not, and silently dropped every commission-only tier — worst for the heaviest sponsors. Fixed 81a5793. Her follow-up ask (referral income, per-tier income, per-tier crossing availability) logged as a separate feature."
         }
       ],
       "paid_usd": 0

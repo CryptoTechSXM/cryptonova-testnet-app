@@ -37,18 +37,6 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
-### [2026-07-27] Dashboard (index.html) — Incomplete information. withdrawable card shows 1507.xx whil…
-- **Reporter:** Kira
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
-- **Frequency:** Consistent
-- **What happened:** Incomplete information. withdrawable card shows 1507.xx while the withdrawable breakdown does not reflect that.
-- **What was expected:** More details including referral income. without that it looks incomplete.
-- **Notes:** Add more details, income per tier, income from direct referrals, what is available for crossing each tier. that would help members understand better the balance that can be used per tier.
-- **Submitted:** Mon, 27 Jul 2026 17:15:10 GMT
-
-
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
@@ -123,6 +111,19 @@ However the c nova tokens and earnings increase everytime.
 
 
 ## Fix In Progress — closes when the fix ships
+
+### [2026-07-27] Dashboard (index.html) — Incomplete information. withdrawable card shows 1507.xx whil…
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** Incomplete information. withdrawable card shows 1507.xx while the withdrawable breakdown does not reflect that.
+- **What was expected:** More details including referral income. without that it looks incomplete.
+- **Notes:** Add more details, income per tier, income from direct referrals, what is available for crossing each tier. that would help members understand better the balance that can be used per tier.
+- **Submitted:** Mon, 27 Jul 2026 17:15:10 GMT
+- **FIXED 2026-07-27 (commit 81a5793, on admin):** real bug, and the second half of Sherwyn's 2026-07-24 find. L1 upgrade commissions credit a sponsor's `withdrawable` in tier matrices they never joined, so `hasEverJoined` stays false there while a genuinely claimable balance accrues (allowed by the contract since V8.36). The dashboard CARD was fixed on the 24th to count those matrices; `_getAllMatrixMembers`, which feeds the breakdown modal, was not — it still filtered on `hasEverJoined` alone and silently dropped every commission-only tier. A heavy sponsor therefore saw a headline over $1,300 against a breakdown of $25 listing only the two tiers she personally joined. Both loops now apply the same filter, with a note on each that they must stay in step. Reproduced independently in the owner's own screenshots before fixing.
+- **STILL OPEN (feature, not defect):** her second request — referral income, income per tier, and what is available for crossing at each tier — is a larger addition to the breakdown modal and is tracked separately below.
 
 ### [2026-07-27] Dashboard (index.html) — I am parked and but continue collected from directs, eventua…
 - **Reporter:** Kira

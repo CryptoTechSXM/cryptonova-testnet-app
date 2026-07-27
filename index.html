@@ -2211,6 +2211,10 @@ const CNOVA_ABI = [
   'function maxPenaltyBps() external view returns (uint256)',
   'function lockedBalanceOf(address) external view returns (uint256)',
   'function unlockedBalanceOf(address) external view returns (uint256)',
+  // Per-mint vest records. Each matrix cycle that mints CNOVA appends its own
+  // batch with its own unlockAt, so every mint has an independent countdown —
+  // the contract has always tracked this, the UI only ever showed the total.
+  'function vestBatchesOf(address) external view returns (tuple(uint128 amount, uint128 unlockAt)[])',
   'event Transfer(address indexed from, address indexed to, uint256 value)',
 ];
 
@@ -5129,29 +5133,48 @@ async function renderWithdrawableDetail(el, rp) {
 async function renderEarnedDetail(el, rp) {
   const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
   const onChainTier = Number(await tr.memberHighestTier(userAddr).catch(() => 0));
-  const numTiers    = Math.max(onChainTier, 1);
+
+  const { totalEarned, byTier } = await _getAllMatrixMembers(userAddr, rp);
+
+  // Owner 2026-07-27 ("total earned breakdown should reflect the same"): the row
+  // count used to be memberHighestTier alone. That is the highest tier you JOINED,
+  // so a sponsor earning L1 upgrade commissions in tiers above it had those tiers
+  // omitted entirely — the rows summed to $215 under a headline of $1,537, the
+  // same visible contradiction Kira reported on the withdrawable card. Earnings can
+  // exist in any tier that credited you, joined or not, so extend the range to
+  // cover every tier byTier actually holds. Rows with no cycles AND no earnings are
+  // still skipped below, so widening the loop adds nothing empty.
+  const earnedTiers = Object.keys(byTier || {}).map(Number).filter(n => n > 0);
+  const numTiers = Math.min(10, Math.max(onChainTier, earnedTiers.length ? Math.max(...earnedTiers) : 0, 1));
 
   const [cycArr, feeArr] = await Promise.all([
     Promise.all(Array.from({length: numTiers}, (_, i) => tr.tierCycles(userAddr, i).catch(() => 0n))),
     Promise.all(Array.from({length: numTiers}, (_, i) => tr.tierEntryFees(i).catch(() => 0n))),
   ]);
 
-  const { totalEarned, byTier } = await _getAllMatrixMembers(userAddr, rp);
-
   const TIER_NAMES = ['Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime','Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
-  let totalCycles = 0n;
+  let totalCycles = 0n, cycleEarned = 0n;
   const rows = cycArr.map((c, i) => {
     totalCycles += c;
     const tEarned = byTier?.[i+1]?.earned ?? 0n;
     if ((!c || c === 0n) && tEarned === 0n) return '';
+    if (c > 0n) cycleEarned += tEarned;
     const label = TIER_NAMES[i] || `T${i+1}`;
     const fee   = feeArr[i] || 0n;
+    // A tier with earnings but no cycles is one you were paid in without joining —
+    // L1 upgrade commission from a direct. Saying "0 cycles" there reads like an
+    // error; name the source instead.
+    const detail = c === 0n
+      ? `· ${window.t ? window.t('modal.commission_only','referral commission — not joined') : 'referral commission — not joined'}`
+      : `· ${c.toString()} cycle${c===1n?'':'s'} · ${fmt6(fee)} entry`;
     return `<div class="detail-row">
       <span class="detail-key">T${i+1} · ${label}</span>
-      <span class="detail-val"><span class="green">${fmt6(tEarned)}</span> <span style="color:var(--text3);font-weight:400;font-size:11px">· ${c.toString()} cycle${c===1n?'':'s'} · ${fmt6(fee)} entry</span></span>
+      <span class="detail-val"><span class="green">${fmt6(tEarned)}</span> <span style="color:var(--text3);font-weight:400;font-size:11px">${detail}</span></span>
     </div>`;
   }).join('');
-  const avgPerCycle = totalCycles > 0n ? fmt6(totalEarned / totalCycles) : '—';
+  // Average per cycle must divide CYCLE earnings by cycles. Dividing the all-tiers
+  // total (which now includes commission-only tiers) would overstate it.
+  const avgPerCycle = totalCycles > 0n ? fmt6(cycleEarned / totalCycles) : '—';
 
   el.innerHTML = `
     <div class="detail-section">Cycles Completed by Tier</div>
@@ -5168,13 +5191,15 @@ async function renderCnovaDetail(el, rp) {
   const cnova  = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   const usdcC  = new ethers.Contract(ADDRS.usdc,  USDC_ABI,  rp);
 
-  const [cnovabal, supply, treasuryUsdc, epochNum, lockedBal, unlockedBal] = await Promise.all([
+  const [cnovabal, supply, treasuryUsdc, epochNum, lockedBal, unlockedBal, vestBatches, vestDur] = await Promise.all([
     cnova.balanceOf(userAddr).catch(() => 0n),
     cnova.totalSupply().catch(() => 0n),
     usdcC.balanceOf(ADDRS.treasury).catch(() => 0n),
     cnova.currentEpochNumber().catch(() => 1),
     cnova.lockedBalanceOf(userAddr).catch(() => null),
     cnova.unlockedBalanceOf(userAddr).catch(() => null),
+    cnova.vestBatchesOf(userAddr).catch(() => []),
+    cnova.vestDuration().catch(() => 15552000n),   // 180 days
   ]);
 
   const cnovaValRaw = supply > 0n ? (cnovabal * treasuryUsdc) / supply : 0n;
@@ -5185,15 +5210,60 @@ async function renderCnovaDetail(el, rp) {
 
   // Vesting breakdown rows
   const fmtCnova = v => Number(ethers.formatEther(v)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const vestDays = Math.round(Number(vestDur) / 86400);
   const vestRows = (lockedBal !== null && unlockedBal !== null) ? `
     <div class="detail-row">
       <span class="detail-key" style="color:var(--green)">✅ Transferable (unlocked)</span>
       <span class="detail-val green">${fmtCnova(unlockedBal)} CNOVA</span>
     </div>
     <div class="detail-row">
-      <span class="detail-key" style="color:var(--yellow)">🔒 Vesting (locked 180 days)</span>
+      <span class="detail-key" style="color:var(--yellow)">🔒 Vesting (locked ${vestDays} days)</span>
       <span class="detail-val" style="color:var(--yellow)">${fmtCnova(lockedBal)} CNOVA</span>
     </div>` : '';
+
+  // Owner 2026-07-27: "if this week i minted 50 my run starts, then a week later I
+  // get another rotation, I should have a separate release date hence a separate
+  // countdown". The contract already works exactly that way — CNOVAToken:157-162
+  // stores a VestBatch{amount, unlockAt} per mint and vestBatchesOf() returns them
+  // all. Only the UI was collapsing them into one locked total. Each batch is now
+  // listed with its own release date and countdown, newest first.
+  const _now = Math.floor(Date.now() / 1000);
+  const _batches = (vestBatches || []).map((b, i) => ({
+    idx: i,
+    amount: BigInt(b.amount ?? b[0]),
+    unlockAt: Number(b.unlockAt ?? b[1]),
+  })).sort((a, b) => b.unlockAt - a.unlockAt);
+
+  const _countdown = (secs) => {
+    if (secs <= 0) return 'unlocked';
+    const d = Math.floor(secs / 86400);
+    const h = Math.floor((secs % 86400) / 3600);
+    if (d >= 1) return `${d}d ${h}h`;
+    const m = Math.floor((secs % 3600) / 60);
+    return `${h}h ${m}m`;
+  };
+
+  const batchRows = _batches.length === 0 ? '' : `
+    <div class="detail-section">Vesting Schedule — one lock per mint</div>
+    ${_batches.map(b => {
+      const remaining = b.unlockAt - _now;
+      const unlocked  = remaining <= 0;
+      const date = new Date(b.unlockAt * 1000).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+      // Progress through this batch's own lock period.
+      const pct = unlocked ? 100
+        : Math.max(0, Math.min(100, Math.round((1 - remaining / Number(vestDur)) * 100)));
+      return `<div class="detail-row">
+        <span class="detail-key">
+          ${unlocked ? '✅' : '🔒'} ${fmtCnova(b.amount)} CNOVA
+          <span style="color:var(--text3);font-weight:400;font-size:11px">· releases ${date}</span>
+        </span>
+        <span class="detail-val" style="color:${unlocked ? 'var(--green)' : 'var(--yellow)'}">
+          ${_countdown(remaining)}
+          ${unlocked ? '' : `<span style="color:var(--text3);font-weight:400;font-size:11px"> · ${pct}%</span>`}
+        </span>
+      </div>`;
+    }).join('')}
+    <div class="detail-note">🔒 Every completed cycle mints its own batch with its own ${vestDays}-day countdown — an older mint can be transferable while a newer one is still locked. Batches unlock independently, on the dates shown.</div>`;
 
   // Epoch reward schedule (8 epochs)
   const epochRewards = await Promise.all(
@@ -5215,10 +5285,11 @@ async function renderCnovaDetail(el, rp) {
     ${vestRows}
     <div class="detail-row"><span class="detail-key">Floor Price</span><span class="detail-val">${floorPerToken} / CNOVA</span></div>
     <div class="detail-row total"><span class="detail-key">USD Value at Floor</span><span class="detail-val green">${fmt6(cnovaValRaw)}</span></div>
+    ${batchRows}
     <div class="detail-section">Mining Schedule</div>
     ${epochRows || '<div class="detail-row"><span class="detail-key" style="color:var(--text3)">Epoch data unavailable</span></div>'}
     <div class="detail-note">◈ CNOVA is minted each time you complete a matrix cycle. The reward decreases each epoch as total supply grows. Floor price = CNOVA Treasury USDC ÷ total supply — guaranteed minimum redemption value.</div>
-    <div class="detail-note" style="color:var(--yellow);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2)">🔒 Matrix-minted CNOVA vests over 180 days — it cannot be transferred or sold until the lock expires. CNOVA purchased via the Buy CNOVA page is immediately transferable.</div>`;
+    <div class="detail-note" style="color:var(--yellow);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2)">🔒 Matrix-minted CNOVA vests over ${vestDays} days from the moment each batch is minted — it cannot be transferred or sold until that batch's lock expires. CNOVA purchased via the Buy CNOVA page is immediately transferable.</div>`;
 }
 
 // ── CNOVA Burned breakdown ────────────────────────────────────────────
