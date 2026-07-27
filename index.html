@@ -2099,6 +2099,20 @@ const TIER_ROUTER_ABI = [
   'function reservedFor(address member) external view returns (uint256)',            // authoritative automation reserve
   'event BulkUpgrade(address indexed member, uint8 fromTier, uint8 toTier, uint256 totalFee)', // V8.35
   'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.11
+  // ── V8.46 (2026-07-27): custom errors MUST be declared or ethers cannot decode
+  // them. V8.44/V8.45 replaced revert strings with custom errors to fit under the
+  // EIP-170 size limit, but the ABI was never updated — so every revert arrived
+  // with reason=null and the UI fell through to "RPC may be busy" / "Transaction
+  // failed on-chain". That single gap produced 5+ member reports.
+  'error TRZero()',      // zero address / zero value argument
+  'error TRBadValue()',  // value outside the allowed menu/range
+  'error TRAuth()',      // caller not authorized
+  'error TRState()',     // wrong state / not registered / not deployed
+  // OpenZeppelin ERC20 custom errors — bulkUpgrade pulls the TOTAL fee for every
+  // tier in one safeTransferFrom, so an underfunded member reverts HERE, not in
+  // our own code. Undeclared, these looked like an RPC fault.
+  'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
+  'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
 ];
 
 const COUPON_REGISTRY_ABI = [
@@ -2137,6 +2151,15 @@ const MATRIX_ABI = [
   'function getParkedCount() external view returns (uint256)',
   'function rescueDebtOf(address) external view returns (uint256)',
   'function crossingReserveOf(address) external view returns (uint256)',  // V8.31
+  // ── V8.46 (2026-07-27): see the note on TIER_ROUTER_ABI. Self-rescue reverts
+  // were reaching members as "Transaction failed on-chain — hard-refresh and try
+  // again" because these four were undeclared and ethers returned reason=null.
+  'error F8V8_ZeroAddress()',
+  'error F8V8_NotAuthorized()',
+  'error F8V8_BadValue()',
+  'error F8V8_BadConfig()',
+  'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
+  'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
 ];
 
 const CNOVA_ABI = [
@@ -6140,6 +6163,46 @@ function friendlyError(e) {
   // ── EARLY guard: raw ethers v6 tx data leaking (TokenPocket, Rabby, etc.) ─
   // Must be FIRST — before any branch that might fall through to raw msg output.
   const _earlyRaw = raw + rawDeep;
+
+  // ── V8.46 (2026-07-27): decoded custom errors. Before this, TierRouter and
+  // matrix reverts arrived with reason=null (the errors were missing from the
+  // ABIs) and members were told "RPC may be busy" or "hard-refresh and try
+  // again" when the chain had actually said exactly what was wrong. Members
+  // then topped up gas, restarted phones and refiled reports chasing a network
+  // problem that did not exist. Money errors are checked FIRST because they were
+  // the most common and the most misleading.
+  const _errName = e.revert?.name || e.errorName || '';
+  const _errArgs = e.revert?.args || e.errorArgs || [];
+  const _usd = v => { try { return '$' + (Number(v) / 1e6).toFixed(2); } catch { return '—'; } };
+
+  if (_errName === 'ERC20InsufficientBalance' || _earlyRaw.includes('ERC20InsufficientBalance')) {
+    const have = _errArgs[1] !== undefined ? _usd(_errArgs[1]) : null;
+    const need = _errArgs[2] !== undefined ? _usd(_errArgs[2]) : null;
+    return (have && need)
+      ? `💵 Not enough USDC — this needs ${need} and your wallet holds ${have}. Top up and try again.`
+      : '💵 Not enough USDC in your wallet for this transaction. Top up and try again.';
+  }
+  if (_errName === 'ERC20InsufficientAllowance' || _earlyRaw.includes('ERC20InsufficientAllowance')) {
+    const need = _errArgs[2] !== undefined ? _usd(_errArgs[2]) : null;
+    return need
+      ? `🔓 USDC approval too low — approve at least ${need}, then try again. (Bulk upgrades need the total for every tier at once, not one tier at a time.)`
+      : '🔓 Your USDC approval is too low for this amount — approve again, then retry.';
+  }
+  if (_errName === 'TRState'  || _earlyRaw.includes('TRState()'))
+    return '🚧 Not available yet for this account — you need to be registered, and the tier must be deployed. If you just registered, wait a moment and refresh.';
+  if (_errName === 'TRAuth'   || _earlyRaw.includes('TRAuth()'))
+    return '🔒 This action is not permitted from your wallet.';
+  if (_errName === 'TRBadValue' || _earlyRaw.includes('TRBadValue()'))
+    return '⚠️ That tier is out of range — pick a tier between T2 and T10.';
+  if (_errName === 'TRZero'   || _earlyRaw.includes('TRZero()'))
+    return '⚠️ Missing or zero value in the request — refresh the page and try again.';
+  if (_errName === 'F8V8_NotAuthorized' || _earlyRaw.includes('F8V8_NotAuthorized()'))
+    return '🔒 That action is not permitted on this matrix from your wallet.';
+  if (_errName === 'F8V8_BadValue' || _earlyRaw.includes('F8V8_BadValue()'))
+    return '⚠️ The amount is not valid for this action — refresh and try again.';
+  if (_errName === 'F8V8_BadConfig' || _earlyRaw.includes('F8V8_BadConfig()'))
+    return '🛠️ This matrix is mid-configuration — try again shortly, and report it if it persists.';
+
   // V8.45: RPC rejects gas limits above ~17M — happens when a matrix is full and the
   // tx triggers the rotation cascade. Stale cached pages (pre gas-fix) hit this too.
   if (_earlyRaw.includes('gas limit too high') || _earlyRaw.includes('-32003'))
@@ -6505,7 +6568,30 @@ async function doBulkUpgrade() {
         // V8.45: +5% buffer only — cascades run ~15.5M and public RPCs reject limits above ~17M (-32003)
         gasLimit = Math.min(Math.ceil(Number(est) * 1.05), 16_500_000);
       } catch (estErr) {
-        const reason = estErr.reason || estErr.shortMessage || '';
+        // V8.46 (2026-07-27): this branch used to blame the RPC for every failed
+        // estimate. Three members reported "T5 upgrade check failed — try again
+        // in a moment (RPC may be busy)" on wallets holding $4.86, $12.83 and
+        // $13.14 — they had simply run out of USDC, and bulkUpgrade pulls the
+        // TOTAL for every remaining tier in one transfer. Check the money first
+        // and say so plainly; only mention the network when it really is unclear.
+        try {
+          const usdcC = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+          const [bal, allow] = await Promise.all([
+            usdcC.balanceOf(meAddr),
+            usdcC.allowance(meAddr, ADDRS.tierRouter),
+          ]);
+          let owed = 0n;
+          for (let t = highest; t <= targetIdx; t++) owed += await tr.tierEntryFees(t);
+          const usd = v => '$' + (Number(v) / 1e6).toFixed(2);
+          if (bal < owed)
+            throw new Error(`💵 Not enough USDC — upgrading through T${targetIdx + 1} costs ${usd(owed)} in total and your wallet holds ${usd(bal)}. Top up, or upgrade one tier at a time.`);
+          if (allow < owed)
+            throw new Error(`🔓 USDC approval too low — this needs ${usd(owed)} approved in one go (all remaining tiers together), currently ${usd(allow)}. Approve again, then retry.`);
+        } catch (fundsErr) {
+          if ((fundsErr.message || '').startsWith('💵') || (fundsErr.message || '').startsWith('🔓')) throw fundsErr;
+          // balance/allowance lookup itself failed — fall through to the decoded reason
+        }
+        const reason = estErr.reason || estErr.shortMessage || friendlyError(estErr) || '';
         throw new Error(reason ? `T${enteringTier} upgrade would fail: ${reason}` : `T${enteringTier} upgrade check failed — try again in a moment (RPC may be busy).`);
       }
       const tx = await tr.bulkUpgrade(highest, { gasLimit });

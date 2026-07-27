@@ -1,7 +1,7 @@
 {
   "program": "CryptoNova Bug Bounty — $1 per accepted find (owner-confirmed real bugs; test artifacts and duplicates at owner's discretion)",
   "rate_usd": 1,
-  "updated": "2026-07-26",
+  "updated": "2026-07-27",
   "reporters": [
     {
       "name": "Sherwyn",
@@ -29,6 +29,40 @@
         {
           "date": "2026-07-24",
           "summary": "Bug-report page missed late-injecting in-app wallets (TokenPocket)",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-26",
+          "summary": "MAJOR: reported 'haven't crossed from Matrix A to B, not even once' across 4 wallets and 3 consecutive versions, and pinpointed being stuck in T1.1 while T1.3 was already open. Root cause found 2026-07-27: TierRouter._sameTierTarget and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold documented as capacity, so a pair is excluded permanently once past it and its MatA loses every entry source — rotation stops dead and seats 2..127 freeze forever. Verified live: 5 MatAs unchanged over a 10-minute sample. Fixed without redeploy; T1.0 MatA resumed at ~26 rotations/hr. Reporter was correct on V8.43, V8.44 and V8.45.",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-26",
+          "summary": "Bug-report page 'Back to dashboard' link returns to the home page instead of the dashboard",
+          "status": "accepted"
+        }
+      ],
+      "paid_usd": 0
+    },
+    {
+      "name": "Kira",
+      "wallets": [
+        "0x0f50998163f3dee028a3d72153659d08aede45f3"
+      ],
+      "finds": [
+        {
+          "date": "2026-07-26",
+          "summary": "Independent catch of the T1 slowdown ('the slow down on T1 is very noticeable'), corroborating the MatA starvation finding from a second reporter — and suggested raising the pair capacity numbers, which pointed at the expansion threshold where the bug actually lived.",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-26",
+          "summary": "Upgrade option non-functional on the Onboarding/Registration page once registered — only available from the dashboard",
+          "status": "accepted"
+        },
+        {
+          "date": "2026-07-26",
+          "summary": "Tiers page ambiguous — newly opened pairs (T1.1/T2.1) should show their member count",
           "status": "accepted"
         }
       ],
