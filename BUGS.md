@@ -37,13 +37,26 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
-> **Triage pass 2026-07-27, ~9:30 PM EDT — 20 reports.**
-> 9 Resolved, 3 Pending-Responded, 2 Fix In Progress, 6 still Open.
-> The 6 below stay open because they were **never investigated** — the night went on
-> rotation. The upgrade cluster needs `_upgradeEligible` / `hybridUpgrade` read against
-> what the dashboard actually displays before any of it is closed. Sherwyn separately
-> observed T5 being offered to an account that never reached T2, which suggests the
-> eligibility display is wrong rather than the upgrade itself.
+> **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
+> 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
+>
+> **The three "T5 upgrade check failed" reports were diagnosed after the first pass and
+> moved to Fix In Progress** — they are out-of-USDC errors wearing a network error's
+> clothing. `bulkUpgrade` pulls the TOTAL fee for every remaining tier in one
+> `safeTransferFrom` (TierRouter:979), and OpenZeppelin's `ERC20InsufficientBalance` is a
+> custom error that was missing from the frontend ABI, so ethers returned `reason=null`
+> and the UI blamed the RPC. The three reporting wallets held **$4.86 (0x46cc05),
+> $12.83 (0x832b95) and $13.14 (0x185b19)**. Fix committed as `7b3c327`, not yet pushed.
+>
+> **Only 3 reports below are genuinely undiagnosed:**
+> 1. Lavern's "approved funds didn't appear" on 0x145805 — that wallet holds **$8,194**,
+>    so unlike the others it is NOT a balance problem. Needs its own look.
+> 2. @queensonnie's direct-referral count not showing 2.
+> 3. Kira's registration-page upgrade button — likely a design gap rather than a fault
+>    (the upgrade control only exists on the dashboard), so decide the intent first.
+>
+> Separately, Sherwyn observed T5 being offered to an account that never reached T2 —
+> worth checking `_upgradeEligible` against what the dashboard displays.
 
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
@@ -54,40 +67,6 @@ behaviour stays distinguishable from V8.43 history.
 - **What happened:** The upgrade option is not visibly working. I an bot able to upgrade from that page. Once registered it is non functional, only available on dashboard!
 - **What was expected:** I expected to have the option to upgrade from either places registration and dashboard!
 - **Submitted:** Sun, 26 Jul 2026 23:08:21 GMT
-
-### [2026-07-26] Dashboard (index.html) — T5 upgrade check failed — try again in a moment (RPC may be …
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
-- **Frequency:** Consistent
-- **What happened:** T5 upgrade check failed — try again in a moment (RPC may be busy
-- **What was expected:** To upgrade to tier 5.
-- **Submitted:** Sun, 26 Jul 2026 20:48:40 GMT
-
-### [2026-07-26] Dashboard (index.html) — Could not upgrade bulk tiers.
-5 upgrade check failed — try a…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** Could not upgrade bulk tiers.
-5 upgrade check failed — try again in a moment (RPC may be busy).
-- **What was expected:** To upgrade to tier 5.
-- **Submitted:** Sun, 26 Jul 2026 19:40:25 GMT
-
-### [2026-07-26] Dashboard (index.html) — System not upgrading bulk tiers.
-T5 upgrade check failed — t…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** System not upgrading bulk tiers.
-T5 upgrade check failed — try again in a moment (RPC may be busy).
-- **What was expected:** Upgrading to tier 5.
-- **Submitted:** Sun, 26 Jul 2026 19:34:46 GMT
 
 ### [2026-07-26] Dashboard (index.html) — I manually entered my account 2 and placed it under account …
 - **Reporter:** @queensonnie
@@ -153,6 +132,43 @@ However the c nova tokens and earnings increase everytime.
 
 
 ## Fix In Progress — closes when the fix ships
+
+### [2026-07-26] Dashboard (index.html) — T5 upgrade check failed — try again in a moment (RPC may be …
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
+- **Frequency:** Consistent
+- **What happened:** T5 upgrade check failed — try again in a moment (RPC may be busy
+- **What was expected:** To upgrade to tier 5.
+- **Submitted:** Sun, 26 Jul 2026 20:48:40 GMT
+- **DIAGNOSED 2026-07-27 -> Fix In Progress:** not an RPC fault. `bulkUpgrade` collects the TOTAL fee for every remaining tier in one `safeTransferFrom`; this wallet did not hold it. The real revert was OpenZeppelin `ERC20InsufficientBalance`, a custom error absent from the frontend ABI, so ethers returned reason=null and the UI fell back to "RPC may be busy". Fix `7b3c327` declares all 8 contract custom errors + the 2 ERC20 ones, decodes them with real figures, and checks balance/allowance before blaming the network. Closes when pushed.
+
+### [2026-07-26] Dashboard (index.html) — Could not upgrade bulk tiers.
+5 upgrade check failed — try a…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
+- **Frequency:** Consistent
+- **What happened:** Could not upgrade bulk tiers.
+5 upgrade check failed — try again in a moment (RPC may be busy).
+- **What was expected:** To upgrade to tier 5.
+- **Submitted:** Sun, 26 Jul 2026 19:40:25 GMT
+- **DIAGNOSED 2026-07-27 -> Fix In Progress:** not an RPC fault. `bulkUpgrade` collects the TOTAL fee for every remaining tier in one `safeTransferFrom`; this wallet did not hold it. The real revert was OpenZeppelin `ERC20InsufficientBalance`, a custom error absent from the frontend ABI, so ethers returned reason=null and the UI fell back to "RPC may be busy". Fix `7b3c327` declares all 8 contract custom errors + the 2 ERC20 ones, decodes them with real figures, and checks balance/allowance before blaming the network. Closes when pushed.
+
+### [2026-07-26] Dashboard (index.html) — System not upgrading bulk tiers.
+T5 upgrade check failed — t…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** System not upgrading bulk tiers.
+T5 upgrade check failed — try again in a moment (RPC may be busy).
+- **What was expected:** Upgrading to tier 5.
+- **Submitted:** Sun, 26 Jul 2026 19:34:46 GMT
+- **DIAGNOSED 2026-07-27 -> Fix In Progress:** not an RPC fault. `bulkUpgrade` collects the TOTAL fee for every remaining tier in one `safeTransferFrom`; this wallet did not hold it. The real revert was OpenZeppelin `ERC20InsufficientBalance`, a custom error absent from the frontend ABI, so ethers returned reason=null and the UI fell back to "RPC may be busy". Fix `7b3c327` declares all 8 contract custom errors + the 2 ERC20 ones, decodes them with real figures, and checks balance/allowance before blaming the network. Closes when pushed.
 
 ### [2026-07-26] Other — on the tiers page the information is a bit ambiguous.
 - **Reporter:** Kira
