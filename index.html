@@ -2217,6 +2217,9 @@ const CNOVA_ABI = [
   'function vestBatchesOf(address) external view returns (tuple(uint128 amount, uint128 unlockAt)[])',
   'function penaltyDestination() external view returns (address)',
   'function earlyUnlock(uint256 batchIndex) external returns (uint256 released, uint256 penaltyAmt)',
+  // An early unlock DELETES the batch (swap-and-pop), so the only surviving record
+  // of it is this event — without reading it the member's history simply vanishes.
+  'event EarlyUnlock(address indexed member, uint256 batchIndex, uint256 released, uint256 penaltyAmount)',
   'event Transfer(address indexed from, address indexed to, uint256 value)',
 ];
 
@@ -5249,6 +5252,47 @@ async function renderCnovaDetail(el, rp) {
     return `${h}h ${m}m`;
   };
 
+  // Owner 2026-07-27, after testing the unlock button: "it worked, only caveat is
+  // no history". Correct — earlyUnlock removes the batch with swap-and-pop, so once
+  // released the batch is simply gone from vestBatchesOf() and the member has no
+  // record of what they released or what it cost. The EarlyUnlock event is the only
+  // surviving trace, so read it back and show the permanent ledger.
+  let historyRows = '';
+  try {
+    const evs = await cnova.queryFilter(cnova.filters.EarlyUnlock(userAddr), 0, 'latest');
+    if (evs.length) {
+      const blks = await Promise.all(evs.map(e => rp.getBlock(e.blockNumber).catch(() => null)));
+      let totRel = 0n, totPen = 0n;
+      const rows = evs.map((e, i) => {
+        const rel = BigInt(e.args.released), pen = BigInt(e.args.penaltyAmount);
+        totRel += rel; totPen += pen;
+        const ts = blks[i]?.timestamp;
+        const when = ts
+          ? new Date(ts * 1000).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' })
+          : `block ${e.blockNumber}`;
+        return { when, rel, pen, ts: ts || 0, hash: e.transactionHash };
+      }).sort((a, b) => b.ts - a.ts);
+      historyRows = `
+        <div class="detail-section">Early Unlock History</div>
+        ${rows.map(r => `<div class="detail-row">
+          <span class="detail-key">⚡ ${r.when}
+            <span style="color:var(--text3);font-weight:400;font-size:11px">· released ${fmtCnova(r.rel)} CNOVA</span>
+          </span>
+          <span class="detail-val" style="color:var(--red,#ef4444)">−${fmtCnova(r.pen)} CNOVA
+            <span style="color:var(--text3);font-weight:400;font-size:11px">penalty</span>
+          </span>
+        </div>`).join('')}
+        <div class="detail-row total">
+          <span class="detail-key">Total released early</span>
+          <span class="detail-val">${fmtCnova(totRel)} CNOVA
+            <span style="color:var(--text3);font-weight:400;font-size:11px">· ${fmtCnova(totPen)} given up</span>
+          </span>
+        </div>`;
+    }
+  } catch (e) {
+    console.warn('[cnova] EarlyUnlock history unavailable:', e.message);
+  }
+
   const batchRows = _batches.length === 0 ? '' : `
     <div class="detail-section">Vesting Schedule — one lock per mint</div>
     ${_batches.map(b => {
@@ -5309,6 +5353,7 @@ async function renderCnovaDetail(el, rp) {
     <div class="detail-row"><span class="detail-key">Floor Price</span><span class="detail-val">${floorPerToken} / CNOVA</span></div>
     <div class="detail-row total"><span class="detail-key">USD Value at Floor</span><span class="detail-val green">${fmt6(cnovaValRaw)}</span></div>
     ${batchRows}
+    ${historyRows}
     <div class="detail-section">Mining Schedule</div>
     ${epochRows || '<div class="detail-row"><span class="detail-key" style="color:var(--text3)">Epoch data unavailable</span></div>'}
     <div class="detail-note">◈ CNOVA is minted each time you complete a matrix cycle. The reward decreases each epoch as total supply grows. Floor price = CNOVA Treasury USDC ÷ total supply — guaranteed minimum redemption value.</div>
