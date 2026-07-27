@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-27] Dashboard (index.html) — I am parked and but continue collected from directs, eventua…
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** I am parked and but continue collected from directs, eventually I have enough to self rescue. I need to refresh the page to get the button active.
+- **What was expected:** It should be active like so no need to refresh page. It is easy to click refresh on desktop but mobile might be tricky.
+- **Notes:** Maybe add a refresh button next to the self rescue earning covers it button...
+- **Submitted:** Mon, 27 Jul 2026 14:16:04 GMT
+
+
 ### [2026-07-27] Other — Enough funds in wallet to re-enter and upgrade hence I'm get…
 - **Reporter:** Sherwyn
 - **Page:** Other
