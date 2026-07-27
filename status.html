@@ -476,6 +476,44 @@
           <span class="detail-key" data-i18n="statusPage.row_last_rescue">Last rescue</span>
           <span class="detail-val green" id="kp-last-rescue">—</span>
         </div>
+        <!-- V8.46 (owner request 2026-07-27): the panel showed only that rescues
+             happened, not who borrowed, how much, or how often. A purely passive
+             member never earns the 50% they must cover, so they park every cycle;
+             without a per-wallet view a single wallet can be funded indefinitely
+             and nobody would see it. Also fixes a real undercount — the query was
+             T1-only while loans occur across every tier. -->
+        <div class="detail-row">
+          <span class="detail-key">Total loaned by SF</span>
+          <span class="detail-val" id="kp-loaned">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Repaid at cycle-out</span>
+          <span class="detail-val green" id="kp-repaid">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Outstanding loans</span>
+          <span class="detail-val" id="kp-outstanding">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Loans by tier</span>
+          <span class="detail-val" id="kp-loans-by-tier" style="font-size:11px;color:var(--text3)">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Borrowing wallets</span>
+          <span class="detail-val" id="kp-borrowers">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Repeat borrowers (5+ loans)</span>
+          <span class="detail-val" id="kp-repeat">—</span>
+        </div>
+        <div class="detail-section">Top Borrowers — loans per wallet</div>
+        <div id="kp-borrower-list">
+          <div class="loading-row">Loading…</div>
+        </div>
+        <div class="info-note">Each row is one wallet's total across every tier: number of
+          loans taken, USDC advanced by the Stability Fund, and how much has come back at
+          cycle-out. A wallet climbing this list without repaying is being carried by the
+          fund — that is the pattern a per-wallet cap would target.</div>
         <div class="detail-section" data-i18n="statusPage.section_parked_wallet_list">Parked Wallet List</div>
         <div id="parked-list-wrap">
           <div class="loading-row" data-i18n="statusPage.js.loading">Loading…</div>
@@ -792,21 +830,101 @@
       // which runs in the context of FigureEightMatrixV8, so the event originates from matA/matB.
       // Works with manual_rescue.js (ParkedRescued on MatrixKeeper is never emitted on that path).
       const fromBlock = Math.max(0, blk - 100000); // ~56h on Base Sepolia (2s/block)
-      // Query RescueLoanIssued across all T1 pairs (T1.1, T1.2, …) via PairManager
-      const pm1ForKeeper = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
-      let allT1PairAddrs = [ADDRS.T1matA, ADDRS.T1matB];
-      try {
-        const [matAs, matBs] = await pm1ForKeeper.allPairsStatus();
-        allT1PairAddrs = [...matAs, ...matBs];
-      } catch(_) {}
-      const rescueLogArrays = await Promise.all(
-        allT1PairAddrs.map(addr => {
+
+      // V8.46: scan EVERY tier, not just T1. The previous version queried only
+      // T1 pairs, so the displayed count excluded every loan issued in T2–T10 —
+      // a large undercount, since higher tiers advance far bigger amounts
+      // (a T6 shortfall averages ~$83 against T1's ~$2).
+      const trForKeeper = new ethers.Contract(ADDRS.tierRouter,
+        ['function tierPairManagers(uint8) external view returns (address)'], provider);
+      const keeperPmAddrs = [ADDRS.T1pm];
+      await Promise.all(Array.from({ length: 9 }, async (_, i) => {
+        try {
+          const pmA = await trForKeeper.tierPairManagers(i + 1);
+          if (pmA && pmA !== ethers.ZeroAddress) keeperPmAddrs[i + 1] = pmA;
+        } catch(_) {}
+      }));
+
+      // matrix address -> tier label, so each loan can be attributed to a tier
+      const matTier = new Map();
+      await Promise.all(keeperPmAddrs.map(async (pmAddr, tierIdx) => {
+        if (!pmAddr) return;
+        try {
+          const c = new ethers.Contract(pmAddr, PM_ABI, provider);
+          const [matAs, matBs] = await c.allPairsStatus();
+          [...matAs, ...matBs].forEach(m => {
+            if (m && m !== ethers.ZeroAddress) matTier.set(m.toLowerCase(), 'T' + (tierIdx + 1));
+          });
+        } catch(_) {}
+      }));
+      if (matTier.size === 0) {
+        matTier.set(ADDRS.T1matA.toLowerCase(), 'T1');
+        matTier.set(ADDRS.T1matB.toLowerCase(), 'T1');
+      }
+
+      const allMatAddrs = [...matTier.keys()];
+      const [loanArrays, repayArrays] = await Promise.all([
+        Promise.all(allMatAddrs.map(addr => {
           const c = new ethers.Contract(addr, MATRIX_ABI, provider);
           return c.queryFilter(c.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
-        })
-      );
-      const keeperRescueLogs = rescueLogArrays.flat();
+        })),
+        Promise.all(allMatAddrs.map(addr => {
+          const c = new ethers.Contract(addr, MATRIX_ABI, provider);
+          return c.queryFilter(c.filters.RescueDebtRepaid(), fromBlock, blk).catch(()=>[]);
+        })),
+      ]);
+      const keeperRescueLogs = loanArrays.flat();
       const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
+
+      // ── per-wallet loan book ────────────────────────────────────────────────
+      const _book = new Map();     // wallet -> { loans, loaned, repaid, tiers:Set }
+      const _byTier = new Map();   // tier   -> { loans, loaned }
+      const _bump = w => {
+        const k = w.toLowerCase();
+        if (!_book.has(k)) _book.set(k, { loans: 0, loaned: 0n, repaid: 0n, tiers: new Set() });
+        return _book.get(k);
+      };
+      keeperRescueLogs.forEach(lg => {
+        const tier = matTier.get(lg.address.toLowerCase()) || '?';
+        const rec  = _bump(lg.args[0]);
+        rec.loans++; rec.loaned += lg.args[1]; rec.tiers.add(tier);
+        const tt = _byTier.get(tier) || { loans: 0, loaned: 0n };
+        tt.loans++; tt.loaned += lg.args[1]; _byTier.set(tier, tt);
+      });
+      repayArrays.flat().forEach(lg => { _bump(lg.args[0]).repaid += lg.args[1]; });
+
+      const _usd = v => '$' + (Number(v) / 1e6).toFixed(2);
+      const _totLoaned = [..._book.values()].reduce((s, r) => s + r.loaned, 0n);
+      const _totRepaid = [..._book.values()].reduce((s, r) => s + r.repaid, 0n);
+      const _repeat    = [..._book.values()].filter(r => r.loans >= 5).length;
+
+      setText('kp-loaned', _usd(_totLoaned));
+      setText('kp-repaid', _usd(_totRepaid));
+      setText('kp-outstanding', _usd(_totLoaned - _totRepaid));
+      setText('kp-borrowers', _book.size.toString());
+      setText('kp-repeat', _repeat + ' of ' + _book.size);
+      setText('kp-loans-by-tier', [..._byTier.entries()]
+        .sort((a,b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
+        .map(([t, v]) => t + ': ' + v.loans + ' (' + _usd(v.loaned) + ')').join(' · ') || '—');
+
+      const _rows = [..._book.entries()]
+        .map(([w, r]) => ({ w, ...r }))
+        .sort((a, b) => (b.loaned > a.loaned ? 1 : b.loaned < a.loaned ? -1 : 0))
+        .slice(0, 15);
+      const _wrap = document.getElementById('kp-borrower-list');
+      if (_wrap) {
+        _wrap.innerHTML = _rows.length === 0
+          ? '<div class="loading-row">No rescue loans in this window</div>'
+          : _rows.map(r => {
+              const net = r.loaned - r.repaid;
+              const hot = r.loans >= 10 ? ' style="color:var(--yellow)"' : '';
+              return '<div class="detail-row"><span class="detail-key" style="font-family:monospace;font-size:11px">' +
+                r.w.slice(0,8) + '…' + r.w.slice(-6) +
+                ' <span style="color:var(--text3)">[' + [...r.tiers].join(',') + ']</span></span>' +
+                '<span class="detail-val"' + hot + '>' + r.loans + ' loans · ' + _usd(r.loaned) +
+                ' · owes ' + _usd(net) + '</span></div>';
+            }).join('');
+      }
       const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
       if (rescueCount > 0) {
