@@ -37,18 +37,6 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
-### [2026-07-27] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Using bug report because none of the above worked...
-- **What was expected:** To be reentered..
-- **Notes:** Not sure why re-enter matrix and not self rescue...
-- **Submitted:** Mon, 27 Jul 2026 20:01:59 GMT
-
-
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
@@ -123,6 +111,20 @@ However the c nova tokens and earnings increase everytime.
 
 
 ## Fix In Progress — closes when the fix ships
+
+### [2026-07-27] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Using bug report because none of the above worked...
+- **What was expected:** To be reentered..
+- **Notes:** Not sure why re-enter matrix and not self rescue...
+- **Submitted:** Mon, 27 Jul 2026 20:01:59 GMT
+- **FIXED 2026-07-27 (commit c7916c8, live on all branches):** the **Re-Enter Matrix** button carried a static `gasLimit: 800_000`. `register()` into a full MatA triggers a rotation cascade — measured at production size the same day at **5,127,660 gas** for a peak entry during rotation — so the transaction ran out of gas and reverted. Out-of-gas carries no custom error, so the custom-error decoding shipped earlier that day had nothing to decode and fell through to the generic "Transaction failed on-chain" message he quoted. **Same class as his own 2026-07-24 find** (Upgrade Tier hardcoded at 2M). Now on the estimateGas ladder used by self-rescue (est +30%, capped at 15M). Swept the rest of index.html: every other static gas limit is on a cheap non-cascading call.
+- **SECOND FINDING — his auto re-entry is OFF.** `member_history.js` on this wallet shows two cycle-outs recorded as `PARKED (autoReentry disabled)`. He expected automatic re-entry; the contract was following his settings. This is exactly @Koach100's report — the toggle silently changes every future cycle-out — and the confirmation dialog shipped 2026-07-27 (38605d7) exists to prevent it. It bit Sherwyn before that warning existed. **He should be told directly**, or he will keep cycling out and stopping.
+- **THIRD FINDING — a tenth orphaned cycle-out.** Tx `0x462bf842b1b63afba13b4cbfef96b71d81d3639b786ded4ef311b3e72f7c4294`, block 44700243, T1.1 MatA cycle #2: `MemberCycledOut` with **no park, no cross, no event of any kind**. His four other cycle-outs all emitted something, including one from the same MatA under the same settings — so disabled auto re-entry does not explain it. Matches the silent-graduation signature (MatrixLogicLib:513 empty catch; V8.46-C fixes it, not yet deployed). **First graduation instance with a specific replayable tx hash** — forking Base Sepolia at that block and replaying with tracing would reveal what actually reverted, unknown since the first eight. That answer decides whether V8.46-B's depth guard is needed.
 
 ### [2026-07-27] Dashboard (index.html) — Incomplete information. withdrawable card shows 1507.xx whil…
 - **Reporter:** Kira

@@ -45,6 +45,11 @@
           "date": "2026-07-27",
           "status": "accepted",
           "summary": "Reported expecting automatic re-entry/upgrade while holding wallet funds. Correct as a UX defect: auto re-entry can only spend the IN-MATRIX pot (reserve + earnings) — his was $8.85 against a $10 fee — while wallet USDC is usable only via manual rescue. The panel showed both figures without ever distinguishing them. Fixed by splitting the two balances and explaining the difference (38605d7). Also held off self-rescuing so the wallet could be inspected live."
+        },
+        {
+          "date": "2026-07-27",
+          "status": "accepted",
+          "summary": "\"Transaction failed on-chain\" on Re-Enter Matrix, plus the sharp observation \"not sure why re-enter matrix and not self rescue\". Three findings from one report. (1) The Re-Enter button carried a static 800,000 gas limit while a rotation cascade needs up to 5,127,660 — the same class as his own 2026-07-24 Upgrade Tier find, in a different control; fixed c7916c8. (2) His own trail showed auto re-entry switched OFF, which is why nothing re-entered him — the exact hazard @Koach100 reported and the new confirmation dialog now prevents. (3) His question about the limbo panel led to a TENTH orphaned cycle-out, tx 0x462bf842… block 44700243 — the first silent graduation with a specific replayable transaction hash, which is the route to the cause that has been unknown since the first eight."
         }
       ],
       "paid_usd": 0
