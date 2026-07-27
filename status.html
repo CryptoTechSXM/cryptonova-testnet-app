@@ -854,15 +854,30 @@
       // T1 pairs, so the displayed count excluded every loan issued in T2–T10 —
       // a large undercount, since higher tiers advance far bigger amounts
       // (a T6 shortfall averages ~$83 against T1's ~$2).
+      // 2026-07-27 — THE ABOVE FIX DID NOT WORK, and failed silently. It declared
+      //     function tierPairManagers(uint8) ...
+      // but `tierPairManagers` is a public FIXED-SIZE ARRAY (TierRouter:149), and
+      // Solidity's auto-generated getter for one takes a uint256. The selector is
+      // hashed from the signature, so tierPairManagers(uint8) is a DIFFERENT
+      // function that does not exist — every call reverted, `catch(_){}` ate the
+      // revert, keeperPmAddrs stayed [T1pm], and the panel confidently reported
+      // "Loans by tier — T1: 1965" with no other tier present.
+      //
+      // That reading was false. The keeper log showed T2 and T3 rescues running
+      // the whole time. Cost of the silent catch: a real diagnosis was built on a
+      // display artifact. Use getAllTiers() — one call, no per-index guessing, and
+      // it fails loudly if the ABI is ever wrong again.
       const trForKeeper = new ethers.Contract(ADDRS.tierRouter,
-        ['function tierPairManagers(uint8) external view returns (address)'], provider);
+        ['function getAllTiers() external view returns (address[10], uint256[10])'], provider);
       const keeperPmAddrs = [ADDRS.T1pm];
-      await Promise.all(Array.from({ length: 9 }, async (_, i) => {
-        try {
-          const pmA = await trForKeeper.tierPairManagers(i + 1);
-          if (pmA && pmA !== ethers.ZeroAddress) keeperPmAddrs[i + 1] = pmA;
-        } catch(_) {}
-      }));
+      try {
+        const [pmList] = await trForKeeper.getAllTiers();
+        pmList.forEach((pmA, i) => {
+          if (pmA && pmA !== ethers.ZeroAddress) keeperPmAddrs[i] = pmA;
+        });
+      } catch (e) {
+        console.warn('[status] getAllTiers failed — loan book will show T1 only:', e.message);
+      }
 
       // matrix address -> tier label, so each loan can be attributed to a tier
       const matTier = new Map();
