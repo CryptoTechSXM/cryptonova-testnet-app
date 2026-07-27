@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** T3 has not cycled. It's at 0 . The position in the matrix is #4. All the other tiers have cycled multiple times.
+- **What was expected:** I expected this tier to cycle like the others.
+- **Notes:** this account is upgraded to Tier 7
+- **Submitted:** Mon, 27 Jul 2026 03:30:19 GMT
+
+
 > **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
 > 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
 >
