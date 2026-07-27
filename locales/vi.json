@@ -308,7 +308,7 @@
     "row_work_type": "Loại công việc",
     "section_recent_activity": "Hoạt Động Gần Đây",
     "row_last_rescue": "Lần cứu trợ gần nhất",
-    "row_total_rescues": "Tổng lần cứu trợ (50k block gần nhất)",
+    "row_total_rescues": "Tổng lần cứu trợ (100k block gần nhất)",
     "section_infrastructure": "Cơ Sở Hạ Tầng",
     "row_matrixkeeper_contract": "Hợp đồng MatrixKeeper",
     "row_automation_method": "Phương thức tự động hóa",

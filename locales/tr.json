@@ -310,7 +310,7 @@
     "row_work_type": "İş türü",
     "section_recent_activity": "Son Aktivite",
     "row_last_rescue": "Son kurtarma",
-    "row_total_rescues": "Toplam kurtarma (son 50k blok)",
+    "row_total_rescues": "Toplam kurtarma (son 100k blok)",
     "section_infrastructure": "Altyapı",
     "row_matrixkeeper_contract": "MatrixKeeper Sözleşmesi",
     "row_automation_method": "Otomasyon yöntemi",

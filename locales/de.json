@@ -310,7 +310,7 @@
     "row_work_type": "Art der Arbeit",
     "section_recent_activity": "Letzte Aktivität",
     "row_last_rescue": "Letzte Rettung",
-    "row_total_rescues": "Gesamtrettungen (letzte 50k Blöcke)",
+    "row_total_rescues": "Gesamtrettungen (letzte 100k Blöcke)",
     "section_infrastructure": "Infrastruktur",
     "row_matrixkeeper_contract": "MatrixKeeper-Vertrag",
     "row_automation_method": "Automatisierungsmethode",

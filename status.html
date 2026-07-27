@@ -132,7 +132,15 @@
     .card-summary{font-size:12px;color:var(--text3);margin-top:2px}
     .chevron{font-size:16px;color:var(--text3);transition:transform .25s,color .2s}
     .card-body{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .3s}
-    .card-body.open{padding:0 20px 20px;max-height:1200px}
+    /* 2026-07-27 (owner: "the parked members card overruns"): .status-card sets
+       overflow:hidden and this rule capped an OPEN body at 1200px, so anything
+       taller was silently clipped mid-row. The Parked card grew past that when
+       the per-wallet loan ledger added ~15 borrower rows plus the parked wallet
+       list. Cap raised well above any realistic body height. Do NOT switch this
+       to scrollHeight-on-toggle: the card contents load asynchronously from
+       chain queries, so a measurement taken at open time is short and clips
+       again once the data lands. */
+    .card-body.open{padding:0 20px 20px;max-height:6000px}
 
     /* Detail rows */
     .detail-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
@@ -476,44 +484,6 @@
           <span class="detail-key" data-i18n="statusPage.row_last_rescue">Last rescue</span>
           <span class="detail-val green" id="kp-last-rescue">—</span>
         </div>
-        <!-- V8.46 (owner request 2026-07-27): the panel showed only that rescues
-             happened, not who borrowed, how much, or how often. A purely passive
-             member never earns the 50% they must cover, so they park every cycle;
-             without a per-wallet view a single wallet can be funded indefinitely
-             and nobody would see it. Also fixes a real undercount — the query was
-             T1-only while loans occur across every tier. -->
-        <div class="detail-row">
-          <span class="detail-key">Total loaned by SF</span>
-          <span class="detail-val" id="kp-loaned">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Repaid at cycle-out</span>
-          <span class="detail-val green" id="kp-repaid">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Outstanding loans</span>
-          <span class="detail-val" id="kp-outstanding">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Loans by tier</span>
-          <span class="detail-val" id="kp-loans-by-tier" style="font-size:11px;color:var(--text3)">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Borrowing wallets</span>
-          <span class="detail-val" id="kp-borrowers">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Repeat borrowers (5+ loans)</span>
-          <span class="detail-val" id="kp-repeat">—</span>
-        </div>
-        <div class="detail-section">Top Borrowers — loans per wallet</div>
-        <div id="kp-borrower-list">
-          <div class="loading-row">Loading…</div>
-        </div>
-        <div class="info-note">Each row is one wallet's total across every tier: number of
-          loans taken, USDC advanced by the Stability Fund, and how much has come back at
-          cycle-out. A wallet climbing this list without repaying is being carried by the
-          fund — that is the pattern a per-wallet cap would target.</div>
         <div class="detail-section" data-i18n="statusPage.section_parked_wallet_list">Parked Wallet List</div>
         <div id="parked-list-wrap">
           <div class="loading-row" data-i18n="statusPage.js.loading">Loading…</div>
@@ -578,6 +548,55 @@
           <span class="detail-key">Outstanding loans</span>
           <span class="detail-val yellow" id="sf-loans-outstanding">—</span>
         </div>
+
+        <!-- Per-wallet loan book. Built 2026-07-27 on owner request: the page showed
+             only THAT rescues happened, not who borrowed, how much, at which tier, or
+             how often — so a wallet being carried indefinitely was invisible. Moved
+             here from the Parked Members card 2026-07-27 (owner: "the loan info
+             belongs in the SF Fund vs the Parked members") — these are fund outflows,
+             not member state.
+
+             The three rows above come from the SF contract's own lifetime counters.
+             The rows below are rebuilt from RescueLoanIssued / RescueDebtRepaid events
+             over a ~56h window, which is why the totals are much smaller. Labels say
+             so explicitly — the two sets were easy to confuse when the figures sat in
+             different cards. -->
+        <div class="detail-section">Loan Book — last 100k blocks (~56h)</div>
+        <div class="detail-row">
+          <span class="detail-key">Loaned in window</span>
+          <span class="detail-val" id="kp-loaned">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Repaid in window</span>
+          <span class="detail-val green" id="kp-repaid">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Net advanced in window</span>
+          <span class="detail-val" id="kp-outstanding">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Loans by tier</span>
+          <span class="detail-val" id="kp-loans-by-tier" style="font-size:11px;color:var(--text3)">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Borrowing wallets</span>
+          <span class="detail-val" id="kp-borrowers">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Repeat borrowers (5+ loans)</span>
+          <span class="detail-val" id="kp-repeat">—</span>
+        </div>
+        <div class="detail-section">Top Borrowers — loans per wallet</div>
+        <div id="kp-borrower-list">
+          <div class="loading-row">Loading…</div>
+        </div>
+        <div class="info-note">Each row is one wallet's total across every tier: number of
+          loans taken, USDC advanced by the Stability Fund, and how much has come back at
+          cycle-out. A wallet climbing this list without repaying is being carried by the
+          fund — that is the pattern a per-wallet cap would target. <strong>Loans by tier</strong>
+          is the fairness check: if only one tier appears while other tiers hold parked
+          members, the rescue keeper is not reaching them.</div>
+
         <div class="detail-section" data-i18n="statusPage.section_health">Health</div>
         <div class="sf-health">
           <div style="flex:1">
