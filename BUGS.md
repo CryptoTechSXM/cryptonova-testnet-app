@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Other — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Rescue would fail: ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Trying to self rescue and this error.
+- **What was expected:** To be self rescues.
+- **Notes:** My other 3 accounts went through with no issues but this one keeps failing..
+- **Submitted:** Tue, 28 Jul 2026 21:20:00 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — cant self rescue. it says already in matrix.
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
