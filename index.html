@@ -3392,8 +3392,17 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
           '<div class="progress-bar" style="width:' + pctPair + '%;' +
           (p === activeIdx ? '' : 'background:var(--text2);opacity:.55') + '"></div>' +
         '</div>' +
-        '<span style="font-family:monospace;color:var(--text2);min-width:74px;text-align:right;font-size:11px" ' +
-          'title="Entries toward saturation">' + reg.toLocaleString() + '/' + thr.toLocaleString() + '</span>' +
+        // 2026-07-28, owner: "7,687/888 — there are not actually that amount of
+        // members seating there". Correct, and the denominator was the problem.
+        // totalRegistered counts every seat ever TAKEN in this pair, re-entries
+        // included, so it is not a headcount and it is not bounded by 254. The
+        // threshold it was being shown against only decides when the NEXT pair
+        // opens — meaningful for the pair currently filling, meaningless once
+        // that pair is full. So the ratio is shown only where it means something.
+        '<span style="font-family:monospace;color:var(--text2);min-width:88px;text-align:right;font-size:11px" ' +
+          'title="Seat entries over this pair\'s lifetime, re-entries included — not a headcount">' +
+          (p === activeIdx ? reg.toLocaleString() + '/' + thr.toLocaleString()
+                           : reg.toLocaleString()) + '</span>' +
         '<span style="color:' + colour + ';font-size:11px;min-width:70px;text-align:right">' + state + '</span>' +
       '</div>');
   }
@@ -3442,6 +3451,9 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     '&#9203; ' + pairCount + ' pairs</span>' +
     rows.join('') + totalRow +
     '<div style="margin-top:8px;color:var(--text2);font-size:11px">' +
+      '<b>Seats</b> (left) = members sitting in Matrix A &#183; Matrix B right now. ' +
+      '<b>Entries</b> (right) = every seat taken here since launch, re-entries included &mdash; ' +
+      'not a headcount, and not capped at 254. ' +
       'Cards above show the pair receiving new entries.' + tail + '</div>';
 }
 
