@@ -7586,11 +7586,18 @@ async function doSelfRescue() {
       // is not subject to the same single-transaction ceiling, so waiting is a
       // real answer rather than a brush-off.
       if (Number(_est) > 15_000_000) {
+        // 2026-07-28: the first wording quoted the estimate and the network
+        // limit side by side — "16.5M gas, network limit ~17.8M" — which reads
+        // as though it should have fitted, and a member said so. It does not:
+        // wallets add their own safety margin on top (Rabby uses ~1.15x), so a
+        // 16.5M estimate is submitted as ~19M and the node refuses it outright.
+        // Quote ONE number and say what it means.
         throw new Error(
-          '⚠️ This rescue is too large for a single transaction right now (' +
-          (Number(_est) / 1e6).toFixed(1) + 'M gas, network limit ~17.8M). ' +
-          'Nothing was sent and nothing was charged. The auto-rescue keeper will ' +
-          're-enter you — please report this so we can look at your position.');
+          '⚠️ Your position spans several tiers, so re-entering touches too many ' +
+          'matrices to fit in one transaction. Nothing was sent and nothing was ' +
+          'charged, and your seats and balances are untouched. The rescue keeper ' +
+          're-enters members like you automatically — please report this so we ' +
+          'can prioritise your account.');
       }
       _rescueGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
     } catch (estErr) {
