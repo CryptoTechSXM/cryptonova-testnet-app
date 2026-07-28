@@ -6031,7 +6031,20 @@ function setActiveMatrixBtn(id) {
   });
 }
 
-function onMatrixTierChange() { loadQueueView(); setActiveMatrixBtn('btn-load-tree'); }
+// Re-run WHATEVER VIEW IS OPEN, rather than always jumping to the queue.
+// 2026-07-28 (@Koach100): changing the tier while looking at "My Position"
+// silently switched to Load Queue, so from the member's side the dropdown did
+// something other than what it said. A control should refresh the thing you are
+// looking at, not replace it.
+function onMatrixTierChange() {
+  const active = ['btn-my-position', 'btn-my-directs', 'btn-load-tree']
+    .find(id => document.getElementById(id)?.classList.contains('matrix-active'))
+    || 'btn-load-tree';
+  if (active === 'btn-my-position')      loadMyTree();
+  else if (active === 'btn-my-directs')  loadMyDirects();
+  else                                   loadQueueView();
+  setActiveMatrixBtn(active);
+}
 
 let _selectedMatrix = 'A'; // 'A' or 'B'
 
@@ -6293,9 +6306,25 @@ async function loadMyTree() {
       allMats.push({addr: ADDRS[_t].matA, label: `T${_tNum} Matrix A`});
       allMats.push({addr: ADDRS[_t].matB, label: `T${_tNum} Matrix B`});
     }
+    // HONOUR THE TIER SELECTOR. 2026-07-28 (@Koach100): this scanned every tier
+    // and showed the FIRST matrix the member was found in, ignoring the "Viewing
+    // Tier" dropdown completely. A member holding six seats always saw T1, and
+    // changing the selector appeared to do nothing — "the banner did not change
+    // to show the new selection neither did the matrix".
+    //
+    // Search the SELECTED tier first. Only fall back to a full scan if they hold
+    // nothing there, and say so plainly rather than silently showing a different
+    // tier than the one asked for.
+    const _selEl   = document.getElementById('matrix-tier-select');
+    const _selTier = _selEl ? (parseInt(_selEl.value) || 1) : 1;
+    const inTier   = allMats.filter(m => m.label.startsWith(`T${_selTier} `));
+    const others   = allMats.filter(m => !m.label.startsWith(`T${_selTier} `));
+    const ordered  = inTier.concat(others);
+
     let activeMat = null, activeBFS = 0n, activeLabel = '', activeMSize = 64n, activeBFSUnknown = false;
     let anyReadFailed = false;
-    for (const m of allMats) {
+    let foundOutsideSelection = false;
+    for (const m of ordered) {
       const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
       const memberRes = await retryRead(() => mc.getMember(userAddr));
       if (!memberRes.ok) { anyReadFailed = true; continue; } // can't tell if this is the active matrix — don't assume "not a member"
@@ -6303,6 +6332,7 @@ async function loadMyTree() {
       if (member && member.isInMatrix) {
         activeMat = m.addr;
         activeLabel = m.label;
+        foundOutsideSelection = !m.label.startsWith(`T${_selTier} `);
         const bfsRes = await retryRead(() => mc.matrixPos(userAddr));
         activeBFS = bfsRes.ok ? bfsRes.value : 0n;
         activeBFSUnknown = !bfsRes.ok;
@@ -6334,7 +6364,10 @@ async function loadMyTree() {
     const banner = document.getElementById('matrix-pos-banner');
     if (banner) {
       banner.style.display='block';
-      setText('matrix-pos-level', activeLabel);
+      // Never let the banner quietly disagree with the dropdown — that is the
+      // whole complaint. If we had to look outside the selected tier, say so.
+      setText('matrix-pos-level', activeLabel +
+        (foundOutsideSelection ? `  (you hold no seat in Tier ${_selTier})` : ''));
       setText('matrix-pos-slots', activeBFSUnknown
         ? unknownBadge('Could not read your matrix position after retries. Refresh to try again.')
         : 'Position #' + activeBFS.toString());
