@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Other — Rescue would fail: F8V8: already in matrix
+- **Reporter:** Maximum - 71
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5f3f81525655ec12659bc1ef7d74e0d1b99d9a74
+- **Frequency:** Consistent
+- **What happened:** Rescue would fail: F8V8: already in matrix
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Submitted:** Tue, 28 Jul 2026 20:20:19 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
 - **Reporter:** Cynthia Brown
 - **Page:** Dashboard (index.html)
