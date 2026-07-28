@@ -7517,8 +7517,25 @@ async function doSelfRescue() {
     let _rescueGas;
     try {
       const _est = await matrix.selfRescue.estimateGas({ from: await signer.getAddress() });
+      // 2026-07-28, measured live: an estimate of 17,762,199 came back on a real
+      // member rescue. Base Sepolia refuses a transaction whose gas limit is
+      // above roughly 17.8M, so that rescue CANNOT be sent — and clamping the
+      // limit down to fit would only trade "gas limit too high" for an
+      // out-of-gas revert that costs the member their fee.
+      //
+      // Say so plainly instead. The keeper's rescue path batches differently and
+      // is not subject to the same single-transaction ceiling, so waiting is a
+      // real answer rather than a brush-off.
+      if (Number(_est) > 15_000_000) {
+        throw new Error(
+          '⚠️ This rescue is too large for a single transaction right now (' +
+          (Number(_est) / 1e6).toFixed(1) + 'M gas, network limit ~17.8M). ' +
+          'Nothing was sent and nothing was charged. The auto-rescue keeper will ' +
+          're-enter you — please report this so we can look at your position.');
+      }
       _rescueGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
     } catch (estErr) {
+      if ((estErr.message || '').startsWith('⚠️')) throw estErr;
       const _r = estErr.reason || estErr.shortMessage || friendlyError(estErr) || '';
       // Surface the contract's own words. "not parked" and "insufficient
       // withdrawable for rescue" are the two the member can actually act on.
@@ -7531,10 +7548,23 @@ async function doSelfRescue() {
     toast('Self Rescue successful! You\'re back in the matrix.', 'success');
     setTimeout(() => loadDashboardData(), 3000);
   } catch (e) {
-    const reason = e.reason || e.data?.message || e.shortMessage || '';
-    const raw    = (e.message || '').slice(0, 120);
-    const display = reason ? `Rescue failed: ${reason}` : friendlyError(e);
     console.error('selfRescue error:', e);
+    const msg = e.message || '';
+    const low = msg.toLowerCase();
+    let display;
+    if (msg.startsWith('⚠️') || msg.startsWith('Rescue would fail') || msg.startsWith('Rescue check failed')) {
+      // Our own pre-flight messages already read plainly — do not re-wrap them.
+      display = msg;
+    } else if (e.code === 'ACTION_REJECTED' || low.includes('user rejected') ||
+               low.includes('user denied') || low.includes('rejected')) {
+      // 2026-07-28: this printed "Rescue failed: rejected", which reads like the
+      // CONTRACT refused the member. It is the wallet reporting a cancelled or
+      // un-creatable transaction. Nothing was sent and nothing was spent.
+      display = '✋ Cancelled — nothing was sent and nothing was charged.';
+    } else {
+      const reason = e.reason || e.data?.message || e.shortMessage || '';
+      display = reason ? `Rescue failed: ${reason}` : friendlyError(e);
+    }
     if (status) { status.style.color = 'var(--red)'; status.textContent = display; }
     if (btn) btn.disabled = false;
   }
