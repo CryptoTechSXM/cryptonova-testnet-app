@@ -3338,28 +3338,55 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     if (!grid) return;
     note = document.createElement('div');
     note.id = t + '-standby-note';
-    note.style.cssText = 'margin:-12px 0 20px;padding:10px 14px;background:rgba(245,158,11,.07);' +
-                         'border:1px solid rgba(245,158,11,.2);border-radius:8px;font-size:12px;' +
-                         'color:var(--text2);line-height:1.6';
     grid.after(note);
   }
-  note.style.display = 'block';
+  // Applied on EVERY render, not just on creation — the T1 strip already exists
+  // in the HTML with the older, darker styling and would otherwise keep it.
+  note.style.cssText = 'margin:-12px 0 20px;padding:12px 16px;background:rgba(245,158,11,.13);' +
+                       'border:1px solid rgba(245,158,11,.38);border-radius:8px;font-size:12px;' +
+                       'color:var(--text);line-height:1.55;display:block';
 
-  // One entry per pair: full / filling now / standby.
-  const parts = [];
+  // One row per pair, each with its own fill bar, plus a tier-wide total.
+  // The cards can only ever show ONE pair, so the tier's real fill has to live
+  // here or it is invisible: T6 holds 253 members and its card reads 0/127.
+  let sumA = 0, sumB = 0, capacity = 0;
+  const rows = [];
   for (let p = 0; p < pairCount; p++) {
-    const a = (occA && occA[p] !== undefined) ? Number(occA[p]) : null;
-    const b = (occB && occB[p] !== undefined) ? Number(occB[p]) : null;
-    const fill = a === null ? '' : ' <span style="font-family:monospace;color:var(--text3)">' +
-                 a + '/127' + (b !== null ? ' &#183; ' + b + '/127' : '') + '</span>';
+    const a = (occA && occA[p] !== undefined) ? Number(occA[p]) : 0;
+    const b = (occB && occB[p] !== undefined) ? Number(occB[p]) : 0;
+    sumA += a; sumB += b; capacity += 254;
+    const pctPair = Math.round((a + b) / 254 * 100);
+
     let state, colour;
-    if (p === activeIdx)                  { state = 'filling now'; colour = 'var(--green)'; }
-    else if (a !== null && a >= 127)      { state = 'full';        colour = 'var(--text3)'; }
-    else if (a === 0 && (b === 0 || b === null)) { state = 'standby'; colour = '#fbbf24'; }
-    else                                  { state = 'open';        colour = 'var(--text3)'; }
-    parts.push('<b style="color:' + colour + '">' + TU + '.' + (p + 1) + '</b>' + fill +
-               ' <span style="color:' + colour + ';font-size:11px">' + state + '</span>');
+    if (p === activeIdx)                { state = 'filling now'; colour = 'var(--green)'; }
+    else if (a >= 127 && b >= 126)      { state = 'full';        colour = 'var(--text3)'; }
+    else if (a === 0 && b === 0)        { state = 'standby';     colour = '#fbbf24'; }
+    else                                { state = 'open';        colour = 'var(--text3)'; }
+
+    rows.push(
+      '<div style="display:flex;align-items:center;gap:8px;margin-top:5px">' +
+        '<b style="color:' + colour + ';min-width:46px">' + TU + '.' + (p + 1) + '</b>' +
+        '<span style="font-family:monospace;color:var(--text3);min-width:104px;font-size:11px">' +
+          a + '/127 &#183; ' + b + '/127</span>' +
+        '<div class="progress-wrap" style="flex:1;height:6px">' +
+          '<div class="progress-bar" style="width:' + pctPair + '%;' +
+          (p === activeIdx ? '' : 'background:var(--text3);opacity:.5') + '"></div>' +
+        '</div>' +
+        '<span style="color:' + colour + ';font-size:11px;min-width:74px;text-align:right">' + state + '</span>' +
+      '</div>');
   }
+  const seated = sumA + sumB;
+  const pctTier = capacity ? Math.round(seated / capacity * 100) : 0;
+  const totalRow =
+    '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;' +
+    'border-top:1px solid var(--border)">' +
+      '<b style="min-width:46px;color:var(--text2)">Tier</b>' +
+      '<span style="font-family:monospace;color:var(--text2);min-width:104px;font-size:11px">' +
+        seated + '/' + capacity + '</span>' +
+      '<div class="progress-wrap" style="flex:1;height:6px">' +
+        '<div class="progress-bar" style="width:' + pctTier + '%"></div></div>' +
+      '<span style="color:var(--green);font-size:11px;min-width:74px;text-align:right">' + pctTier + '% full</span>' +
+    '</div>';
 
   // Saturation count only when the threshold read succeeded — on T1 it is
   // live-managed by the round-robin keeper, so an assumed value would lie.
@@ -3377,13 +3404,12 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   }
 
   note.innerHTML =
-    '<span style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45);color:#fbbf24;' +
-    'font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-right:8px;white-space:nowrap">' +
+    '<span style="background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.6);color:#fcd34d;' +
+    'font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap">' +
     '&#9203; ' + pairCount + ' pairs</span>' +
-    parts.join(' &nbsp;&#183;&nbsp; ') +
-    (tail ? '<div style="margin-top:6px;color:var(--text3)">' + tail +
-            ' Cards above show the pair receiving new entries.</div>'
-          : '<div style="margin-top:6px;color:var(--text3)">Cards above show the pair receiving new entries.</div>');
+    rows.join('') + totalRow +
+    '<div style="margin-top:8px;color:var(--text2);font-size:11px">' +
+      'Cards above show the pair receiving new entries.' + tail + '</div>';
 }
 
 // ═══════════════════════════════════════════════════════════════════════
