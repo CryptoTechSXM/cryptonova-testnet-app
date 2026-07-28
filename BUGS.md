@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Other — I tried to view my position on each matrix on the Matrix pag…
+- **Reporter:** @Koach100
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Consistent
+- **What happened:** I tried to view my position on each matrix on the Matrix page. The display banner above the Matrix was showing T1 Matrix B. I changed the View Tier banner to another tier the banner above the matrix did not change to show the new selection neither did the matrix.
+- **What was expected:** If I select a tier on the View Tier banner the Matrix should reflect that choice.
+- **Notes:** This is my experience with all my accounts.
+- **Submitted:** Tue, 28 Jul 2026 18:32:39 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — I tried to self rescue from T2.1 Matrix A and it kept failin…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
