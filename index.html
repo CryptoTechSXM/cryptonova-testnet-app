@@ -3342,50 +3342,66 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   }
   // Applied on EVERY render, not just on creation — the T1 strip already exists
   // in the HTML with the older, darker styling and would otherwise keep it.
-  note.style.cssText = 'margin:-12px 0 20px;padding:12px 16px;background:rgba(245,158,11,.13);' +
-                       'border:1px solid rgba(245,158,11,.38);border-radius:8px;font-size:12px;' +
+  note.style.cssText = 'margin:-12px 0 20px;padding:12px 16px;background:rgba(245,158,11,.22);' +
+                       'border:1px solid rgba(245,158,11,.55);border-radius:8px;font-size:12px;' +
                        'color:var(--text);line-height:1.55;display:block';
 
   // One row per pair, each with its own fill bar, plus a tier-wide total.
   // The cards can only ever show ONE pair, so the tier's real fill has to live
   // here or it is invisible: T6 holds 253 members and its card reads 0/127.
-  let sumA = 0, sumB = 0, capacity = 0;
+  // The bar measures ENTRIES against routeEntryThreshold (127x3 = 381 by
+  // default), NOT seats.
+  //
+  // 2026-07-28, owner correction: I first drew it against 127x2 seats per pair
+  // (508 for two pairs). Wrong measure — a pair's seats say how many people are
+  // sitting in it, but the number that actually MATTERS is how close the pair is
+  // to saturating, because that is what opens the next one. That is
+  // totalRegistered vs routeEntryThreshold, and the threshold is read live: it
+  // is owner-settable per tier and the round-robin keeper moves T1's, so any
+  // hardcoded 381 here would go stale the moment either changes.
+  const thr = (threshold !== null && threshold !== undefined && Number(threshold) > 0)
+    ? Number(threshold) : 381;
+  let sumReg = 0;
   const rows = [];
   for (let p = 0; p < pairCount; p++) {
-    const a = (occA && occA[p] !== undefined) ? Number(occA[p]) : 0;
-    const b = (occB && occB[p] !== undefined) ? Number(occB[p]) : 0;
-    sumA += a; sumB += b; capacity += 254;
-    const pctPair = Math.round((a + b) / 254 * 100);
+    const a   = (occA && occA[p] !== undefined) ? Number(occA[p]) : 0;
+    const b   = (occB && occB[p] !== undefined) ? Number(occB[p]) : 0;
+    const reg = (registered && registered[p] !== undefined) ? Number(registered[p]) : 0;
+    sumReg += reg;
+    const pctPair = Math.min(100, Math.round(reg / thr * 100));
 
     let state, colour;
-    if (p === activeIdx)                { state = 'filling now'; colour = 'var(--green)'; }
-    else if (a >= 127 && b >= 126)      { state = 'full';        colour = 'var(--text3)'; }
-    else if (a === 0 && b === 0)        { state = 'standby';     colour = '#fbbf24'; }
-    else                                { state = 'open';        colour = 'var(--text3)'; }
+    if (p === activeIdx)           { state = 'filling now'; colour = 'var(--green)'; }
+    else if (reg >= thr)           { state = 'saturated';   colour = 'var(--text2)'; }
+    else if (a === 0 && b === 0)   { state = 'standby';     colour = '#fcd34d'; }
+    else                           { state = 'open';        colour = 'var(--text2)'; }
 
     rows.push(
       '<div style="display:flex;align-items:center;gap:8px;margin-top:5px">' +
-        '<b style="color:' + colour + ';min-width:46px">' + TU + '.' + (p + 1) + '</b>' +
-        '<span style="font-family:monospace;color:var(--text3);min-width:104px;font-size:11px">' +
-          a + '/127 &#183; ' + b + '/127</span>' +
+        '<b style="color:' + colour + ';min-width:44px">' + TU + '.' + (p + 1) + '</b>' +
+        '<span style="font-family:monospace;color:var(--text2);min-width:102px;font-size:11px" ' +
+          'title="Seats filled: Matrix A and Matrix B">' + a + '/127 &#183; ' + b + '/127</span>' +
         '<div class="progress-wrap" style="flex:1;height:6px">' +
           '<div class="progress-bar" style="width:' + pctPair + '%;' +
-          (p === activeIdx ? '' : 'background:var(--text3);opacity:.5') + '"></div>' +
+          (p === activeIdx ? '' : 'background:var(--text2);opacity:.55') + '"></div>' +
         '</div>' +
-        '<span style="color:' + colour + ';font-size:11px;min-width:74px;text-align:right">' + state + '</span>' +
+        '<span style="font-family:monospace;color:var(--text2);min-width:74px;text-align:right;font-size:11px" ' +
+          'title="Entries toward saturation">' + reg.toLocaleString() + '/' + thr.toLocaleString() + '</span>' +
+        '<span style="color:' + colour + ';font-size:11px;min-width:70px;text-align:right">' + state + '</span>' +
       '</div>');
   }
-  const seated = sumA + sumB;
-  const pctTier = capacity ? Math.round(seated / capacity * 100) : 0;
+  const capacity = pairCount * thr;
+  const pctTier  = capacity ? Math.min(100, Math.round(sumReg / capacity * 100)) : 0;
   const totalRow =
     '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;' +
-    'border-top:1px solid var(--border)">' +
-      '<b style="min-width:46px;color:var(--text2)">Tier</b>' +
-      '<span style="font-family:monospace;color:var(--text2);min-width:104px;font-size:11px">' +
-        seated + '/' + capacity + '</span>' +
+    'border-top:1px solid rgba(245,158,11,.3)">' +
+      '<b style="min-width:44px;color:var(--text)">Tier</b>' +
+      '<span style="min-width:102px;font-size:11px;color:var(--text2)">all pairs</span>' +
       '<div class="progress-wrap" style="flex:1;height:6px">' +
         '<div class="progress-bar" style="width:' + pctTier + '%"></div></div>' +
-      '<span style="color:var(--green);font-size:11px;min-width:74px;text-align:right">' + pctTier + '% full</span>' +
+      '<span style="font-family:monospace;color:var(--text);min-width:74px;text-align:right;font-size:11px">' +
+        sumReg.toLocaleString() + '/' + capacity.toLocaleString() + '</span>' +
+      '<span style="color:var(--green);font-size:11px;min-width:70px;text-align:right">' + pctTier + '%</span>' +
     '</div>';
 
   // Saturation count only when the threshold read succeeded — on T1 it is
