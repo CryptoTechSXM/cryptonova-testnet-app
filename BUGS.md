@@ -41,6 +41,17 @@ behaviour stays distinguishable from V8.43 history.
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
 - **Wallet Type:** MetaMask
+- **Wallet Address:** 0x5fc30b093b1728129353d76888e1af0636a36705
+- **Frequency:** Consistent
+- **What happened:** cant self rescue. it says already in matrix.
+- **What was expected:** pay fee and move on.
+- **Submitted:** Tue, 28 Jul 2026 21:19:20 GMT
+
+
+### [2026-07-28] Dashboard (index.html) — cant self rescue. it says already in matrix.
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
 - **Wallet Address:** 0x3289a65c0ee26fd369a6bbd45d214209832db8f0
 - **Frequency:** Consistent
 - **What happened:** cant self rescue. it says already in matrix.
