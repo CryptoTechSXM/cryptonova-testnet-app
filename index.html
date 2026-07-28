@@ -3361,13 +3361,13 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   // hardcoded 381 here would go stale the moment either changes.
   const thr = (threshold !== null && threshold !== undefined && Number(threshold) > 0)
     ? Number(threshold) : 381;
-  let sumReg = 0;
+  let sumReg = 0, sumSeats = 0;
   const rows = [];
   for (let p = 0; p < pairCount; p++) {
     const a   = (occA && occA[p] !== undefined) ? Number(occA[p]) : 0;
     const b   = (occB && occB[p] !== undefined) ? Number(occB[p]) : 0;
     const reg = (registered && registered[p] !== undefined) ? Number(registered[p]) : 0;
-    sumReg += reg;
+    sumReg += reg; sumSeats += a + b;
     const pctPair = Math.min(100, Math.round(reg / thr * 100));
 
     let state, colour;
@@ -3390,18 +3390,28 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
         '<span style="color:' + colour + ';font-size:11px;min-width:70px;text-align:right">' + state + '</span>' +
       '</div>');
   }
-  const capacity = pairCount * thr;
-  const pctTier  = capacity ? Math.min(100, Math.round(sumReg / capacity * 100)) : 0;
+  // The tier row measures SEATS, not entries.
+  //
+  // 2026-07-28: it first summed entries against pairCount x threshold and read
+  // "11,644/3,088  100%" on T1 — nonsense, because a saturated pair keeps
+  // counting entries long after it passes its own threshold, so the sum has no
+  // meaningful ceiling. Seats do: every pair is exactly 254 (127 + 127), so
+  // "774/1,016 seats" answers the question a member is actually asking — how
+  // many people are in this tier. Per-pair bars stay on entries, because that
+  // is what decides when the next pair opens. Two measures, two questions.
+  const seats    = pairCount * 254;
+  const pctTier  = seats ? Math.min(100, Math.round(sumSeats / seats * 100)) : 0;
   const totalRow =
     '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;' +
     'border-top:1px solid rgba(245,158,11,.3)">' +
       '<b style="min-width:44px;color:var(--text)">Tier</b>' +
-      '<span style="min-width:102px;font-size:11px;color:var(--text2)">all pairs</span>' +
+      '<span style="min-width:102px;font-size:11px;color:var(--text2)">' + pairCount + ' pairs</span>' +
       '<div class="progress-wrap" style="flex:1;height:6px">' +
         '<div class="progress-bar" style="width:' + pctTier + '%"></div></div>' +
-      '<span style="font-family:monospace;color:var(--text);min-width:74px;text-align:right;font-size:11px">' +
-        sumReg.toLocaleString() + '/' + capacity.toLocaleString() + '</span>' +
-      '<span style="color:var(--green);font-size:11px;min-width:70px;text-align:right">' + pctTier + '%</span>' +
+      '<span style="font-family:monospace;color:var(--text);min-width:74px;text-align:right;font-size:11px" ' +
+        'title="Seats occupied across every pair, Matrix A and B">' +
+        sumSeats.toLocaleString() + '/' + seats.toLocaleString() + '</span>' +
+      '<span style="color:var(--green);font-size:11px;min-width:70px;text-align:right">' + pctTier + '% seated</span>' +
     '</div>';
 
   // Saturation count only when the threshold read succeeded — on T1 it is
@@ -7435,13 +7445,18 @@ async function doLimboReEntry() {
     // custom error, friendlyError() had nothing to decode and fell through to the
     // generic "Transaction failed on-chain" he quoted.
     //
-    // Same estimateGas ladder as doSelfRescue: estimate, add 30% headroom, cap at
-    // 15M (Base Sepolia rejects limits above ~17.8M with -32003).
-    let _reGas = 15_000_000;
+    // 2026-07-28: the static 15,000,000 fallback is GONE here too. It was
+    // rejected by the public RPC as "gas limit too high", so it never rescued a
+    // failed estimate — it only replaced the real reason with a misleading one.
+    // A failed estimate means the call would revert; say why instead of sending.
+    let _reGas;
     try {
       const _est = await matA.register.estimateGas(info.referrer, { from: await signer.getAddress() });
-      _reGas = Math.min(15_000_000, Number(_est) + Math.ceil(Number(_est) * 0.30));
-    } catch (_) { /* estimation failed — fall back to the cap rather than a guess */ }
+      _reGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
+    } catch (estErr) {
+      const _r = estErr.reason || estErr.shortMessage || friendlyError(estErr) || '';
+      throw new Error(_r ? `Re-entry would fail: ${_r}` : 'Re-entry check failed — try again in a moment.');
+    }
     const tx = await matA.register(info.referrer, { gasLimit: _reGas });
     setStatus('limbo-status', '⏳ Confirming…', 'info');
     await tx.wait();
@@ -7490,13 +7505,25 @@ async function doSelfRescue() {
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const SELF_RESCUE_ABI = ['function selfRescue() external'];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
-    // Estimate gas — a full 127-slot cycle-out can use up to 15M gas.
-    // Cap at 15M (Base Sepolia per-tx limit) to avoid "gas limit too high" RPC rejection.
-    let _rescueGas = 15_000_000;
+    // 2026-07-28: this used to fall back to a STATIC 15,000,000 whenever the
+    // estimate threw. Two problems, and members hit both:
+    //   1. 15M is rejected outright by the public RPC ("gas limit too high"),
+    //      so the fallback could never succeed — it only replaced the real
+    //      reason with a misleading one.
+    //   2. A failed estimate means the call WOULD REVERT. Sending it anyway
+    //      just burns gas. The estimate failing is the diagnosis, not noise.
+    // Measured worst-case cascade is 4.65M (V8_46_CascadeGas.test.js), so a
+    // 1.15x buffer on a real estimate is ample. Same ladder the keepers use.
+    let _rescueGas;
     try {
       const _est = await matrix.selfRescue.estimateGas({ from: await signer.getAddress() });
-      _rescueGas = Math.min(15_000_000, Number(_est) + Math.ceil(Number(_est) * 0.30));
-    } catch (_) { /* estimation failed — use 15M cap */ }
+      _rescueGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
+    } catch (estErr) {
+      const _r = estErr.reason || estErr.shortMessage || friendlyError(estErr) || '';
+      // Surface the contract's own words. "not parked" and "insufficient
+      // withdrawable for rescue" are the two the member can actually act on.
+      throw new Error(_r ? `Rescue would fail: ${_r}` : 'Rescue check failed — try again in a moment.');
+    }
     const tx     = await matrix.selfRescue({ gasLimit: _rescueGas });
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
