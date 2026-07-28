@@ -37,6 +37,19 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Dashboard (index.html) — I tried to self rescue from T2.1 Matrix A and it kept failin…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
+- **Frequency:** Consistent
+- **What happened:** I tried to self rescue from T2.1 Matrix A and it kept failing even though I did several hard refreshes.
+- **What was expected:** I should have been able to cycle.
+- **Notes:** here's the pop up message.    
+Rescue would fail: ❌ Transaction failed on-chain
+- **Submitted:** Tue, 28 Jul 2026 17:59:18 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — This rescue is too large for a single transaction right now …
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
