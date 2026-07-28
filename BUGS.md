@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Other — My self rescue is $5.00 short fall and I'm assuming it's to …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Intermittent
+- **What happened:** My self rescue is $5.00 short fall and I'm assuming it's to cross to the next matrix in T1.. my account says that there is $6.50 in T1.. Is this $6.50 part of the reserved held or is the $6.50 plus the $5 in reserves... If this is the case why do I need to self rescue when there is funds to cover the crossing..
+- **What was expected:** To cross over since there is funds to cover the crossing...
+- **Notes:** Still trying to get the bigger picture...lol..
+- **Submitted:** Tue, 28 Jul 2026 00:46:43 GMT
+
+
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
