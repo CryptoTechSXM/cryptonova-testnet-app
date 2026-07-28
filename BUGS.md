@@ -37,6 +37,20 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Dashboard (index.html) — I tried upgrading to tier 2 but the transactions failed even…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Consistent
+- **What happened:** I tried upgrading to tier 2 but the transactions failed even after several hard refreshes. I also tried bulk upgrade but it didn't work.
+- **What was expected:** I expected the upgrade to go through.
+- **Notes:** Here's the message that came up.  
+                                                                          
+  ❌ T2 upgrade would fail: F8V8: already in matrix
+- **Submitted:** Tue, 28 Jul 2026 10:11:09 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
 - **Reporter:** Maximum_71
 - **Page:** Dashboard (index.html)
