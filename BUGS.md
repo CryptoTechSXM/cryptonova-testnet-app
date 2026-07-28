@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Dashboard (index.html) — This rescue is too large for a single transaction right now …
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
+- **Frequency:** Consistent
+- **What happened:** This rescue is too large for a single transaction right now (16.5M gas, network limit ~17.8M). Nothing was sent and nothing was charged. The auto-rescue keeper will re-enter you — please report this so we can look at your position.
+- **What was expected:** The expectation was to self-rescue this account.
+- **Submitted:** Tue, 28 Jul 2026 17:25:13 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — I tried several times to self rescue from T3.1 Matrix A but …
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
