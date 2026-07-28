@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Dashboard (index.html) — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
+- **Reporter:** Cynthia Brown
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xb9e6aed964ad17f2a9779f99dbc009f872e32919
+- **Frequency:** Intermittent
+- **What happened:** Rescue would fail: ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To be able to self rescue
+- **Submitted:** Tue, 28 Jul 2026 19:42:27 GMT
+
+
 ### [2026-07-28] Other — I tried to view my position on each matrix on the Matrix pag…
 - **Reporter:** @Koach100
 - **Page:** Other
