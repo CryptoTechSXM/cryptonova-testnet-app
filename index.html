@@ -4872,7 +4872,39 @@ async function loadDashboardData() {
         const _fb = _pmDash ? await _pmDash.currentMatB().catch(() => ADDRS[_tierKey]?.matB) : ADDRS[_tierKey]?.matB;
         if (_fb) _inAnyMatBDash = await new ethers.Contract(_fb, MATRIX_ABI, rp).isActiveInMatrix(userAddr).catch(() => false);
       }
-      canUpgrade = (Number(curTierCycles) >= 1 || _inAnyMatBDash) && highestTier < MAX_DEPLOYED_TIER;
+      // THE THIRD ELIGIBILITY RULE — missing here until 2026-07-28.
+      // TierRouter._upgradeEligible (:862) accepts THREE routes:
+      //   (a) tierCycles[member][prev] >= 1        -> curTierCycles below
+      //   (b) _isTierUnlockedForManualEntry(target) -> the whale gate  <-- WAS MISSING
+      //   (c) seated in ANY of prev tier's MatBs    -> _inAnyMatBDash below
+      // This panel implemented (a) and (c) only. A member sitting in a FULL MatA
+      // with no cycle yet — Titan, T8 seat 127 — is eligible via (b), the contract
+      // would accept manualUpgrade(8), and the dashboard hid the button anyway.
+      // The only control left was Bulk Upgrade, whose estimate exceeds the RPC gas
+      // ceiling, so the member met "gas limit too high" for an upgrade that had a
+      // perfectly good cheap path. Same shape as the V8.43 contract bug the
+      // comment at TierRouter:851 describes, mirrored into the frontend: two
+      // buttons, two different eligibility rules, one of them wrong.
+      //
+      // Mirrored line-for-line from _isTierUnlockedForManualEntry (:1505):
+      //   tierNum <= 1  -> always open
+      //   tierNum <= 5  -> tierWhaleGateActive[5]   (T2-T5 share T5's gate)
+      //   else          -> tierWhaleGateActive[tierNum]
+      // Do not "simplify" to isWhaleGateActiveForTier(target) — that reads T2's
+      // own flag, which is never set, and silently re-hides the button for T1-T4.
+      const _targetNum = highestTier + 1;
+      let _gateOpenForNext = false;
+      if (_targetNum <= 1) {
+        _gateOpenForNext = true;
+      } else {
+        const _gateNum  = _targetNum <= 5 ? 5 : _targetNum;
+        // Retried like every other read here: a dropped call must not look like a
+        // closed gate. That is exactly how this panel disappears on a flaky RPC.
+        const _gateRead = await retryRead(() => tr.isWhaleGateActiveForTier(_gateNum));
+        _gateOpenForNext = _gateRead.ok ? _gateRead.value : false;
+      }
+      canUpgrade = (Number(curTierCycles) >= 1 || _inAnyMatBDash || _gateOpenForNext)
+                   && highestTier < MAX_DEPLOYED_TIER;
       upgradeSection.style.display = canUpgrade ? 'block' : 'none';
       if (canUpgrade) {
         // v8.19 fix (2026-06-20): UPGRADE_NAMES used to be a separate hardcoded list that
@@ -4893,9 +4925,15 @@ async function loadDashboardData() {
         setText('upgrade-fee',         fmt6(nextFeeRaw));
         setText('upgrade-usdc-bal',    fmt6(uBal));
         const c = Number(curTierCycles);
+        // Three ways to qualify, so three ways to say so. The old text had two
+        // branches and would have told a gate-eligible member they had "crossed
+        // to Matrix B" when they are sitting in Matrix A — a small lie that makes
+        // a member doubt everything else on the page.
         const _qualifyDesc = c >= 1
           ? `You have completed ${c} T${highestTier} cycle${c !== 1 ? 's' : ''} and qualify for a manual tier upgrade.`
-          : `You've crossed to T${highestTier} Matrix B and qualify for a manual tier upgrade now — no need to wait for the cycle to finish.`;
+          : _inAnyMatBDash
+            ? `You've crossed to T${highestTier} Matrix B and qualify for a manual tier upgrade now — no need to wait for the cycle to finish.`
+            : `T${nextTierNum} is open — the pioneer milestone has been reached, so you can upgrade now without waiting for your T${highestTier} cycle to complete.`;
         setText('upgrade-desc', `${_qualifyDesc} Pay ${fmt6(nextFeeRaw)} USDC from your wallet to enter the next tier.`);
         const approveBtn  = document.getElementById('btn-dash-approve');
         const upgradeBtn  = document.getElementById('btn-manual-upgrade');
@@ -7255,14 +7293,24 @@ async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
     }
     const showBulkLow  = t5GateOpen && highestTier >= 1 && highestTier <= 4;
     const showBulkHigh = hiGateOpen && hiTarget > 0;
-    const showBulk = showBulkLow || showBulkHigh;
+    // BULK MEANS MORE THAN ONE TIER, OR IT IS NOT BULK.
+    // hiTarget is always highestTier + 1, so for every T5-T9 member this card
+    // offered a "bulk upgrade" spanning exactly ONE tier — the same move the
+    // ordinary upgrade card makes, routed through a heavier function. Titan hit
+    // "[From sepolia.base.org] gas limit too high" on it (2026-07-28) while a
+    // one-tier manualUpgrade was available and hidden by the eligibility bug
+    // above. Two buttons for one action, and the worse one was the only one
+    // showing. Show this only when it genuinely saves the member transactions.
+    const _bulkTarget = showBulkLow ? 5 : hiTarget;
+    const _bulkSpan   = _bulkTarget - highestTier;
+    const showBulk = (showBulkLow || showBulkHigh) && _bulkSpan >= 2;
     bulkSection.style.display = showBulk ? 'block' : 'none';
     if (showBulk) {
       const TIER_FEES = [0n,10_000_000n,25_000_000n,50_000_000n,100_000_000n,200_000_000n,
                          500_000_000n,1_000_000_000n,2_000_000_000n,5_000_000_000n,10_000_000_000n];
       const TIER_NAMES = ['','Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime',
                           'Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
-      const targetTierNum = showBulkLow ? 5 : hiTarget;
+      const targetTierNum = _bulkTarget;
       let totalFee = 0n;
       const feeLines = [];
       for (let t = highestTier + 1; t <= targetTierNum; t++) {
@@ -7520,11 +7568,36 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     // V8.45 (bug: Sherwyn 2026-07-24): upgrades into a full pair cascade (~7M+ gas
     // measured live) — the old hardcoded 2M limit guaranteed out-of-gas reverts.
     // Estimate +5% with a cascade-safe fallback, same as register/bulk paths.
-    let _exGas = 16_000_000;
+    // NEVER SEND A DOOMED TRANSACTION. Two failures this estimate used to hide:
+    //
+    // (1) An empty catch fell back to a static 16,000,000. When estimateGas
+    //     REVERTS it is telling us the transaction cannot succeed — sending it
+    //     anyway with a made-up limit costs the member gas to watch it fail, and
+    //     throws away the one thing that explains why.
+    // (2) No ceiling. Base Sepolia refuses a tx above ~17.8M, and wallets pad the
+    //     estimate (Rabby x1.15), so anything over ~15M is either rejected by the
+    //     RPC — "[From sepolia.base.org] gas limit too high", which is the WALLET
+    //     reporting an un-creatable tx, not the contract refusing the member — or
+    //     clamped down into an out-of-gas revert. Titan met exactly this on the
+    //     bulk button (2026-07-28).
+    let _exGas = 0;
     try {
       const _exEst = await tr.manualUpgrade.estimateGas(tierIdx);
       _exGas = Number(_exEst) + Math.ceil(Number(_exEst) * 0.05);
-    } catch(_) {}
+    } catch (estErr) {
+      _setS(friendlyError(estErr));
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (_exGas > 15_000_000) {
+      _setS(`⚠️ This upgrade is currently too large for the network to process ` +
+            `(needs ~${(_exGas / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
+            `Nothing was sent and nothing was charged. This happens when entering a tier ` +
+            `sets off a long chain of matrix rotations — it clears on its own as those ` +
+            `settle. Please try again shortly, and let us know if it persists.`);
+      if (btn) btn.disabled = false;
+      return;
+    }
     const tx = await tr.manualUpgrade(tierIdx, { gasLimit: _exGas });
     _setS('Waiting for confirmation…');
     await tx.wait();
