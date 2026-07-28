@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Dashboard (index.html) — I tried several times to self rescue from T3.1 Matrix A but …
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Consistent
+- **What happened:** I tried several times to self rescue from T3.1 Matrix A but transaction failed.
+- **What was expected:** I should have been able to cycle.
+- **Notes:** Here is the message that popped up.                                                                                        Rescue would fail: F8V8: already in matrix
+- **Submitted:** Tue, 28 Jul 2026 17:11:03 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — I tried upgrading to tier 2 but the transactions failed even…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
