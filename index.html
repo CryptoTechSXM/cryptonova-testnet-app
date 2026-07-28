@@ -2965,6 +2965,11 @@ async function loadHomeStats() {
         standby:     _n > _routing + 1 ? _routing + 2 : 0,
         occA:        Number(_occAs[_routing]),
         occB:        Number(_occBs[_routing]),
+        // Full per-pair arrays for the pair-summary strip (scalars above are the
+        // routing pair only and are used by the T1A/T1B progress bars).
+        occAs:       _occAs.map(Number),
+        occBs:       _occBs.map(Number),
+        regs:        _regs.map(Number),
       };
     } catch(_) {
       try {
@@ -3056,9 +3061,8 @@ async function loadHomeStats() {
     // and the Tiers view cannot drift apart again.
     const _pi = window._t1PairInfo;
     if (_pi) {
-      const _regs = new Array(_pi.pairCount).fill(0);
-      _regs[_pi.routingPair - 1] = _pi.total;
-      renderTierPairHeader('t1', 1, _pi.routingPair - 1, _pi.pairCount, _regs, _pi.threshold);
+      renderTierPairHeader('t1', 1, _pi.routingPair - 1, _pi.pairCount,
+                           _pi.regs, _pi.threshold, _pi.occAs, _pi.occBs);
     }
 
     // T2A progress
@@ -3305,7 +3309,7 @@ const TIER_LABELS = ['', 'Nova Seed', 'Nova Rise', 'Nova Star', 'Nova Core', 'No
 //
 // The standby note element is CREATED on demand and inserted after the tier's
 // card grid, so no HTML change is needed per tier.
-function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, threshold) {
+function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, threshold, occA, occB) {
   const TU = 'T' + tierNum;
   const routing = activeIdx + 1;
 
@@ -3317,10 +3321,16 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   if (ta) ta.innerHTML = suffix + ' Matrix A &#8212; ' + (TIER_LABELS[tierNum] || '');
   if (tb) tb.innerHTML = suffix + ' Matrix B &#8212; Crossing Pool';
 
-  // Standby strip: shown only when a pair exists BEYOND the one being routed to.
-  const standby = pairCount > routing ? routing + 1 : 0;
+  // The strip carries the WHOLE tier, not just a standby flag.
+  //
+  // 2026-07-28, second pass: showing only the routing pair is accurate and
+  // useless. T3.1 had filled to 127/127, so the contract routes new entries to
+  // T3.2 — and the card showed 0/127 with nothing to explain why a tier holding
+  // 127 members looked empty. The strip now lists every pair and its fill, so
+  // "0/127" reads as "a fresh matrix just opened" instead of "broken".
   let note = document.getElementById(t + '-standby-note');
-  if (!standby) { if (note) note.style.display = 'none'; return; }
+  if (pairCount <= 1) { if (note) note.style.display = 'none'; return; }
+  const standby = pairCount > routing ? routing + 1 : 0;
 
   if (!note) {
     const anchor = document.getElementById(t + 'a-occ');
@@ -3335,23 +3345,45 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   }
   note.style.display = 'block';
 
-  // The saturation count is only shown when the threshold read succeeded — a
-  // missing threshold prints the explanation without an invented number.
-  let progress = '';
-  if (threshold !== null && threshold !== undefined && registered && registered[activeIdx] !== undefined) {
+  // One entry per pair: full / filling now / standby.
+  const parts = [];
+  for (let p = 0; p < pairCount; p++) {
+    const a = (occA && occA[p] !== undefined) ? Number(occA[p]) : null;
+    const b = (occB && occB[p] !== undefined) ? Number(occB[p]) : null;
+    const fill = a === null ? '' : ' <span style="font-family:monospace;color:var(--text3)">' +
+                 a + '/127' + (b !== null ? ' &#183; ' + b + '/127' : '') + '</span>';
+    let state, colour;
+    if (p === activeIdx)                  { state = 'filling now'; colour = 'var(--green)'; }
+    else if (a !== null && a >= 127)      { state = 'full';        colour = 'var(--text3)'; }
+    else if (a === 0 && (b === 0 || b === null)) { state = 'standby'; colour = '#fbbf24'; }
+    else                                  { state = 'open';        colour = 'var(--text3)'; }
+    parts.push('<b style="color:' + colour + '">' + TU + '.' + (p + 1) + '</b>' + fill +
+               ' <span style="color:' + colour + ';font-size:11px">' + state + '</span>');
+  }
+
+  // Saturation count only when the threshold read succeeded — on T1 it is
+  // live-managed by the round-robin keeper, so an assumed value would lie.
+  let tail = '';
+  if (standby && threshold !== null && threshold !== undefined &&
+      registered && registered[activeIdx] !== undefined) {
     const total = Number(registered[activeIdx]), thr = Number(threshold);
     if (thr > 0) {
       const pct = Math.min(100, Math.round(total / thr * 100));
-      progress = ': <b style="color:#fbbf24">' + total.toLocaleString() + ' / ' + thr.toLocaleString() +
-                 ' entries (' + pct + '%)</b>';
+      tail = ' ' + TU + '.' + standby + ' opens when ' + TU + '.' + routing + ' saturates: <b style="color:#fbbf24">' +
+             total.toLocaleString() + ' / ' + thr.toLocaleString() + ' entries (' + pct + '%)</b>.';
     }
+  } else if (standby) {
+    tail = ' ' + TU + '.' + standby + ' is built in advance and opens automatically. No action needed.';
   }
+
   note.innerHTML =
     '<span style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45);color:#fbbf24;' +
     'font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-right:8px;white-space:nowrap">' +
-    '&#9203; ' + TU + '.' + standby + ' Standby Buffer</span>' +
-    'Built in advance so growth never stalls &mdash; opens automatically when ' + TU + '.' + routing +
-    ' fully saturates' + progress + '. No action needed.';
+    '&#9203; ' + pairCount + ' pairs</span>' +
+    parts.join(' &nbsp;&#183;&nbsp; ') +
+    (tail ? '<div style="margin-top:6px;color:var(--text3)">' + tail +
+            ' Cards above show the pair receiving new entries.</div>'
+          : '<div style="margin-top:6px;color:var(--text3)">Cards above show the pair receiving new entries.</div>');
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -3432,7 +3464,8 @@ async function loadTiersStats() {
           // 2026-07-28: pair number in the card title + standby strip, for EVERY
           // tier. Both existed for T1 only, so T2-T10 showed "T2 Matrix A" while
           // sitting on pair 2, with no hint that a standby pair even existed.
-          renderTierPairHeader(t, i + 1, activeIdx, matrixAs.length, registered, thresholds[i]);
+          renderTierPairHeader(t, i + 1, activeIdx, matrixAs.length, registered, thresholds[i],
+                               occupancyA, occupancyB);
         }
       }
 
