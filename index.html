@@ -4532,6 +4532,7 @@ async function loadDashboardData() {
     let highestTier = 0;
     let memberId = 0, memberReferrer = ethers.ZeroAddress;
     let parkedInfo = null; // { label, addr, withdrawable, fee, shortfall }
+    const parkedCandidates = [];   // every parked position; the best is chosen below
     let limboCandidates = []; // reclaimed-limbo: hasEverJoined + !isInMatrix + parkedAt==0
 
     // v8.19 fix (2026-06-20): highestTier below is normally derived by scanning all 20
@@ -4604,7 +4605,7 @@ async function loadDashboardData() {
               pos.crossingReserve = BigInt(res);
             })
           );
-        } else if (!parkedInfo) {
+        } else {
           followUps.push((async () => {
             const parkedAt = await mc.parkedAt(userAddr).catch(()=>0n);
             if (BigInt(parkedAt) > 0n) {
@@ -4614,14 +4615,22 @@ async function loadDashboardData() {
               // Shortfall = fee − (crossingReserve + withdrawable), not fee − withdrawable.
               const res = await mc.crossingReserveOf(userAddr).catch(()=>0n);
               const effectiveHave = w + BigInt(res);
-              parkedInfo = {
+              // COLLECT EVERY PARKED POSITION, choose later.
+              // 2026-07-28: this took the FIRST one found and stopped looking
+              // (`else if (!parkedInfo)`). A member parked in two places was
+              // offered whichever came first in iteration order — and if that one
+              // happened to be blocked (parked in MatA while still holding the
+              // pair's MatB, so the rescue would seat them twice) the dashboard
+              // showed them a button that could never work, while a perfectly
+              // rescuable position sat one tier below. Four members hit this.
+              parkedCandidates.push({
                 label: m.label, addr: m.addr,
                 withdrawable: w,
                 crossingReserve: BigInt(res),
                 fee: BigInt(fee),
                 shortfall: BigInt(fee) > effectiveHave ? BigInt(fee) - effectiveHave : 0n,
-              };
-            } else if (m.label.includes('Matrix A')) {
+              });
+            } else if (!parkedInfo && m.label.includes('Matrix A')) {
               // No parkedAt either — this is a reclaimed-limbo member.
               // Fee lookup: try contract with timeout, fall back to known tier constants
               // (same 6-decimal USDC amounts locked in the contract constructor).
@@ -4643,6 +4652,30 @@ async function loadDashboardData() {
       }
     }
     if (followUps.length) await Promise.allSettled(followUps); // allSettled — never throws
+
+    // CHOOSE A RESCUE THAT CAN ACTUALLY SUCCEED.
+    //
+    // A rescue from MatA re-enters the member into that pair's MatB (and vice
+    // versa). If they already hold the other half, the contract refuses with
+    // "F8V8: already in matrix" — correctly, because seating them twice is what
+    // wedges the pair. So a parked position whose SIBLING half the member still
+    // occupies is unrescuable until that seat cycles out.
+    //
+    // Prefer any position without that conflict. Only fall back to a blocked one
+    // when every option is blocked — and then say so, rather than presenting a
+    // button that cannot work.
+    if (parkedCandidates.length) {
+      const pairKey = (lbl) => {
+        const t = lbl.match(/^T(\d+)/)?.[1] || '?';
+        const p = lbl.match(/pair (\d+)/)?.[1] || '1';
+        return `${t}.${p}`;
+      };
+      const heldPairs = new Set(activePositions.map(p => pairKey(p.label)));
+      const free = parkedCandidates.filter(c => !heldPairs.has(pairKey(c.label)));
+      parkedInfo = free[0] || parkedCandidates[0];
+      parkedInfo.blockedByPartner = free.length === 0;
+      parkedInfo.otherParked      = parkedCandidates.length - 1;
+    }
 
     // Graduated tiers — tiers below highestTier where member has no active seat.
     // Used in Member Info panel to render "✓ Graduated" rows.
@@ -4890,6 +4923,24 @@ async function loadDashboardData() {
         window._parkedMatrixAddr    = parkedInfo.addr;
         window._parkedMatrixLabel   = parkedInfo.label;
         window._parkedWithdrawable  = parkedInfo.withdrawable;
+        // Tell the member the truth BEFORE they press a button that cannot work.
+        // 2026-07-28: four members hit "F8V8: already in matrix" with no idea why
+        // — they are parked in one half of a pair while still seated in the other,
+        // so re-entering would seat them twice and the contract refuses. It clears
+        // itself when the held seat cycles out; nothing is lost and nothing is owed.
+        {
+          const _st = document.getElementById('self-rescue-status');
+          if (_st && parkedInfo.blockedByPartner) {
+            _st.style.color = 'var(--yellow)';
+            _st.textContent = '⏳ This rescue can\'t complete yet — you still hold a seat in the other ' +
+              'half of this pair, so re-entering would seat you twice. It clears automatically once ' +
+              'that seat cycles out. Nothing is lost and nothing has been charged.';
+          } else if (_st && parkedInfo.otherParked > 0) {
+            _st.style.color = 'var(--text3)';
+            _st.textContent = `ℹ️ You have ${parkedInfo.otherParked + 1} parked positions. ` +
+              `This one can be rescued now; the others will follow.`;
+          }
+        }
         window._parkedFee           = parkedInfo.fee;
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
