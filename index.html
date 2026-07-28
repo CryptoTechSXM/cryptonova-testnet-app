@@ -3370,8 +3370,15 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     sumReg += reg; sumSeats += a + b;
     const pctPair = Math.min(100, Math.round(reg / thr * 100));
 
+    // ORDER MATTERS. 2026-07-28: this tested entries first and labelled T1.3
+    // "open" while its seats read 127/127 and 126/127 — a member reading that
+    // would try to join a pair with no room in it. Seats decide whether you can
+    // get in; entries decide when the NEXT pair opens. The seat question is the
+    // one being asked, so it wins.
+    const seatsFull = a >= 127 && b >= 126;
     let state, colour;
     if (p === activeIdx)           { state = 'filling now'; colour = 'var(--green)'; }
+    else if (seatsFull)            { state = 'full';        colour = 'var(--text2)'; }
     else if (reg >= thr)           { state = 'saturated';   colour = 'var(--text2)'; }
     else if (a === 0 && b === 0)   { state = 'standby';     colour = '#fcd34d'; }
     else                           { state = 'open';        colour = 'var(--text2)'; }
