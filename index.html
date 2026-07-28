@@ -2242,6 +2242,7 @@ const PM_ABI = [
   'function currentMatB() external view returns (address)',
   'function pairs(uint256) external view returns (address matrixA, address matrixB, uint256 deployedAt, uint256 totalRegistered)',
   'function routeEntryThreshold() external view returns (uint256)',
+  'function deployEntryThreshold() external view returns (uint256)',
 ];
 
 const TREASURY_ABI = [
@@ -3318,7 +3319,7 @@ const TIER_LABELS = ['', 'Nova Seed', 'Nova Rise', 'Nova Star', 'Nova Core', 'No
 //
 // The standby note element is CREATED on demand and inserted after the tier's
 // card grid, so no HTML change is needed per tier.
-function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, threshold, occA, occB) {
+function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, threshold, occA, occB, deployThreshold) {
   const TU = 'T' + tierNum;
   const routing = activeIdx + 1;
 
@@ -3456,12 +3457,23 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   // be presented as one.
   let tail = '';
   const activeReg = (registered && registered[activeIdx] !== undefined) ? Number(registered[activeIdx]) : null;
+  const dep = (deployThreshold !== null && deployThreshold !== undefined && Number(deployThreshold) > 0)
+    ? Number(deployThreshold) : null;
   if (activeReg !== null && thr > 0) {
-    tail = ' ' + TU + '.' + routing + ' is taking new entries; ' +
-           (standby ? TU + '.' + standby + ' is already built and opens'
-                    : 'the next pair is created') +
-           ' once it passes <b style="color:#fcd34d">' + thr.toLocaleString() + ' entries</b>' +
-           ' (now ' + activeReg.toLocaleString() + '). No action needed.';
+    tail = ' ' + TU + '.' + routing + ' is taking new entries (now ' + activeReg.toLocaleString() + ').';
+    if (standby) {
+      tail += ' ' + TU + '.' + standby + ' is already built and starts receiving at <b style="color:#fcd34d">' +
+              thr.toLocaleString() + ' entries</b>.';
+    } else if (dep) {
+      // Two thresholds, two events. The pair is BUILT first and only RECEIVES
+      // later — the gap is deliberate headroom so the new pair is wired and
+      // ready before anyone is sent to it.
+      tail += ' The next pair is built at <b style="color:#fcd34d">' + dep.toLocaleString() +
+              ' entries</b> and starts receiving at <b style="color:#fcd34d">' + thr.toLocaleString() + '</b>.';
+    } else {
+      tail += ' The next pair opens automatically at <b style="color:#fcd34d">' + thr.toLocaleString() + ' entries</b>.';
+    }
+    tail += ' No action needed.';
   }
 
   note.innerHTML =
@@ -3500,6 +3512,15 @@ async function loadTiersStats() {
       new ethers.Contract(ADDRS[t].pm, PM_ABI, rp)
         .routeEntryThreshold()
         .catch(() => null)   // null = unknown; the strip omits the count rather than inventing one
+    ));
+    // deployEntryThreshold too: the next pair is BUILT at this count and only
+    // starts RECEIVING at routeEntryThreshold. Collapsing the two into one
+    // number (as the strip first did) misdescribes the mechanism — the gap
+    // between them is deliberate headroom, widened to 375/400 on 2026-07-28.
+    const deployThresholds = await Promise.all(TK.map(t =>
+      new ethers.Contract(ADDRS[t].pm, PM_ABI, rp)
+        .deployEntryThreshold()
+        .catch(() => null)
     ));
 
     // Phase 2: secondary detail calls for the active pair's rotationCount + poolAccumulator
@@ -3555,7 +3576,7 @@ async function loadTiersStats() {
           // tier. Both existed for T1 only, so T2-T10 showed "T2 Matrix A" while
           // sitting on pair 2, with no hint that a standby pair even existed.
           renderTierPairHeader(t, i + 1, activeIdx, matrixAs.length, registered, thresholds[i],
-                               occupancyA, occupancyB);
+                               occupancyA, occupancyB, deployThresholds[i]);
         }
       }
 
