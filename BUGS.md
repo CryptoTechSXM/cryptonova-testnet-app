@@ -37,6 +37,17 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-28] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
+- **Reporter:** Cynthia Brown
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x7b0ad58fc04fffb74a28cdfe7781619e10801528
+- **Frequency:** Intermittent
+- **What happened:** Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To be able to upgrade to the next level
+- **Submitted:** Tue, 28 Jul 2026 20:13:50 GMT
+
+
 ### [2026-07-28] Dashboard (index.html) — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
 - **Reporter:** Cynthia Brown
 - **Page:** Dashboard (index.html)
