@@ -3292,6 +3292,15 @@ function renderPairSubRows(t, matrixAs, occupancyA, occupancyB, actives) {
   }
 }
 
+// Compact big numbers so a five-figure entry count does not blow out the row on
+// a phone. The full value stays in the title attribute.
+function _abbrNum(n) {
+  n = Number(n) || 0;
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 10000)   return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return n.toLocaleString();
+}
+
 // Tier display names, 1-based so TIER_LABELS[1] === 'Nova Seed'. Declared once
 // here because three separate functions each carried their own private copy.
 const TIER_LABELS = ['', 'Nova Seed', 'Nova Rise', 'Nova Star', 'Nova Core', 'Nova Prime',
@@ -3368,7 +3377,13 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     const b   = (occB && occB[p] !== undefined) ? Number(occB[p]) : 0;
     const reg = (registered && registered[p] !== undefined) ? Number(registered[p]) : 0;
     sumReg += reg; sumSeats += a + b;
-    const pctPair = Math.min(100, Math.round(reg / thr * 100));
+    // ONE MEANING PER BAR: seats. 2026-07-28, third pass — the bar measured
+    // entries against routeEntryThreshold, which made T1.3 draw 88% while every
+    // one of its 253 seats was taken, and made the owner ask why the denominator
+    // was 888 when a pair holds 254. Those are different quantities and a single
+    // bar cannot carry both. Seats fill the bar; the entry threshold appears as
+    // words on the one pair it governs.
+    const pctPair = Math.round((a + b) / 254 * 100);
 
     // ORDER MATTERS. 2026-07-28: this tested entries first and labelled T1.3
     // "open" while its seats read 127/127 and 126/127 — a member reading that
@@ -3400,9 +3415,9 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
         // opens — meaningful for the pair currently filling, meaningless once
         // that pair is full. So the ratio is shown only where it means something.
         '<span style="font-family:monospace;color:var(--text2);min-width:88px;text-align:right;font-size:11px" ' +
-          'title="Seat entries over this pair\'s lifetime, re-entries included — not a headcount">' +
-          (p === activeIdx ? reg.toLocaleString() + '/' + thr.toLocaleString()
-                           : reg.toLocaleString()) + '</span>' +
+          'title="' + reg.toLocaleString() + ' seat entries over this pair\'s lifetime, re-entries ' +
+          'included. Not a headcount — the pair holds 254 people at once.">' +
+          _abbrNum(reg) + ' entries</span>' +
         '<span style="color:' + colour + ';font-size:11px;min-width:70px;text-align:right">' + state + '</span>' +
       '</div>');
   }
@@ -3432,17 +3447,21 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
 
   // Saturation count only when the threshold read succeeded — on T1 it is
   // live-managed by the round-robin keeper, so an assumed value would lie.
+  // The entry threshold is explained in WORDS, on the one pair it governs.
+  // 2026-07-28: shown as a denominator it read as capacity — "why 888 when a
+  // pair holds 254?" It is neither capacity nor a headcount: it is the entry
+  // count at which routing moves to the next pair. On T1 the round-robin keeper
+  // walks it deliberately (772 -> 888 within the hour) to spread new members
+  // across T1's four pairs, so it is not a fixed number there and should never
+  // be presented as one.
   let tail = '';
-  if (standby && threshold !== null && threshold !== undefined &&
-      registered && registered[activeIdx] !== undefined) {
-    const total = Number(registered[activeIdx]), thr = Number(threshold);
-    if (thr > 0) {
-      const pct = Math.min(100, Math.round(total / thr * 100));
-      tail = ' ' + TU + '.' + standby + ' opens when ' + TU + '.' + routing + ' saturates: <b style="color:#fbbf24">' +
-             total.toLocaleString() + ' / ' + thr.toLocaleString() + ' entries (' + pct + '%)</b>.';
-    }
-  } else if (standby) {
-    tail = ' ' + TU + '.' + standby + ' is built in advance and opens automatically. No action needed.';
+  const activeReg = (registered && registered[activeIdx] !== undefined) ? Number(registered[activeIdx]) : null;
+  if (activeReg !== null && thr > 0) {
+    tail = ' ' + TU + '.' + routing + ' is taking new entries; ' +
+           (standby ? TU + '.' + standby + ' is already built and opens'
+                    : 'the next pair is created') +
+           ' once it passes <b style="color:#fcd34d">' + thr.toLocaleString() + ' entries</b>' +
+           ' (now ' + activeReg.toLocaleString() + '). No action needed.';
   }
 
   note.innerHTML =
@@ -3451,10 +3470,10 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     '&#9203; ' + pairCount + ' pairs</span>' +
     rows.join('') + totalRow +
     '<div style="margin-top:8px;color:var(--text2);font-size:11px">' +
-      '<b>Seats</b> (left) = members sitting in Matrix A &#183; Matrix B right now. ' +
-      '<b>Entries</b> (right) = every seat taken here since launch, re-entries included &mdash; ' +
-      'not a headcount, and not capped at 254. ' +
-      'Cards above show the pair receiving new entries.' + tail + '</div>';
+      '<b>Seats</b> = members sitting in Matrix A &#183; Matrix B right now; each pair holds <b>254</b>. ' +
+      'The bar shows how full the pair is. ' +
+      '<b>Entries</b> = every seat taken here since launch, re-entries included &mdash; a running total, ' +
+      'not a headcount, and not limited to 254.' + tail + '</div>';
 }
 
 // ═══════════════════════════════════════════════════════════════════════
