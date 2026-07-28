@@ -2143,6 +2143,10 @@ const TIER_ROUTER_ABI = [
   'error TRBadValue()',  // value outside the allowed menu/range
   'error TRAuth()',      // caller not authorized
   'error TRState()',     // wrong state / not registered / not deployed
+  // V8.46-B: replaced the two long Whale Gate revert STRINGS. Undeclared it
+  // would surface as "unknown custom error" — the exact trap that produced the
+  // five reports the block above describes.
+  'error TRGate()',      // this tier is not open to you yet
   // OpenZeppelin ERC20 custom errors — bulkUpgrade pulls the TOTAL fee for every
   // tier in one safeTransferFrom, so an underfunded member reverts HERE, not in
   // our own code. Undeclared, these looked like an RPC fault.
@@ -6913,6 +6917,12 @@ function friendlyError(e) {
       ? `🔓 USDC approval too low — approve at least ${need}, then try again. (Bulk upgrades need the total for every tier at once, not one tier at a time.)`
       : '🔓 Your USDC approval is too low for this amount — approve again, then retry.';
   }
+  // V8.46-B. Phrased as a STATE, not a failure — the member has done nothing
+  // wrong and there is nothing to retry. It replaces two revert strings, one of
+  // which ("cross to MatB first, or wait for this tier's Whale Gate to open")
+  // was already the clearest message in the contract; keep that clarity.
+  if (_errName === 'TRGate' || _earlyRaw.includes('TRGate()'))
+    return '🔒 This tier isn\'t open to you yet. Either cross into your current tier\'s Matrix B first, or wait for the tier to unlock — nothing was sent and nothing was charged.';
   if (_errName === 'TRState'  || _earlyRaw.includes('TRState()'))
     return '🚧 Not available yet for this account — you need to be registered, and the tier must be deployed. If you just registered, wait a moment and refresh.';
   if (_errName === 'TRAuth'   || _earlyRaw.includes('TRAuth()'))
@@ -7546,8 +7556,9 @@ async function doLimboReEntry() {
       const _est = await matA.register.estimateGas(info.referrer, { from: await signer.getAddress() });
       _reGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
     } catch (estErr) {
-      const _r = estErr.reason || estErr.shortMessage || friendlyError(estErr) || '';
-      throw new Error(_r ? `Re-entry would fail: ${_r}` : 'Re-entry check failed — try again in a moment.');
+      // Same rule as doSelfRescue: never prefix friendlyError's own sentence.
+      const _r = estErr.reason || estErr.shortMessage || '';
+      throw new Error(_r ? `Re-entry would fail: ${_r}` : friendlyError(estErr));
     }
     const tx = await matA.register(info.referrer, { gasLimit: _reGas });
     setStatus('limbo-status', '⏳ Confirming…', 'info');
@@ -7635,10 +7646,15 @@ async function doSelfRescue() {
       _rescueGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
     } catch (estErr) {
       if ((estErr.message || '').startsWith('⚠️')) throw estErr;
-      const _r = estErr.reason || estErr.shortMessage || friendlyError(estErr) || '';
-      // Surface the contract's own words. "not parked" and "insufficient
-      // withdrawable for rescue" are the two the member can actually act on.
-      throw new Error(_r ? `Rescue would fail: ${_r}` : 'Rescue check failed — try again in a moment.');
+      // DO NOT PREFIX friendlyError's OUTPUT. 2026-07-28 (Sherwyn): when the
+      // contract gives no decodable reason, friendlyError already returns a
+      // COMPLETE member-facing sentence — gluing "Rescue would fail:" onto the
+      // front produced
+      //     "Rescue would fail: ❌ Transaction failed on-chain — hard-refresh…"
+      // which says nothing, twice. Prefix only a genuine contract reason; when
+      // there isn't one, let friendlyError speak for itself.
+      const _raw = estErr.reason || estErr.shortMessage || '';
+      throw new Error(_raw ? `Rescue would fail: ${_raw}` : friendlyError(estErr));
     }
     const tx     = await matrix.selfRescue({ gasLimit: _rescueGas });
     if (status) status.textContent = 'Waiting for confirmation…';
