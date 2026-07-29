@@ -37,30 +37,7 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
-### [2026-07-29] Dashboard (index.html) — the self rescue button took some time but it eventually came…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
-- **Frequency:** Consistent
-- **What happened:** the self rescue button took some time but it eventually came up.
-- **What was expected:** success
-- **Submitted:** Wed, 29 Jul 2026 21:15:22 GMT
-
-
-### [2026-07-29] Dashboard (index.html) — i have 2 self rescues .
-first payment was made and self resc…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
-- **Frequency:** Consistent
-- **What happened:** i have 2 self rescues .
-first payment was made and self rescued.
-second payment made but no self rescue button is available.
-- **What was expected:** to be able to be rescued.
-- **Submitted:** Wed, 29 Jul 2026 21:12:09 GMT
-
+_No open reports. New submissions land here automatically._
 
 ## Pending — Responded (12h auto-close)
 
@@ -359,6 +336,31 @@ T5 upgrade check failed — try again in a moment (RPC may be busy).
 ---
 
 ## Resolved Issues
+
+### [2026-07-29] Dashboard (index.html) — the self rescue button took some time but it eventually came…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
+- **Frequency:** Consistent
+- **What happened:** the self rescue button took some time but it eventually came up.
+- **What was expected:** success
+- **Submitted:** Wed, 29 Jul 2026 21:15:22 GMT
+**RESOLVED 2026-07-29:** Working, just slowly. The rescue panel re-checks every 30 seconds while parked, so there is a lag between the approval confirming and the Self Rescue button becoming active — which is what "took some time but eventually came up" describes. Related fix shipped the same day (`5a6dd64`): the button was being dimmed to opacity 0.5 whenever a shortfall existed, and a shortfall does NOT clear when you approve, so every refresh re-dimmed it. It now keys off the ALLOWANCE instead, so once the approval covers the shortfall the button goes full strength and the approve step disappears. **Follow-up worth doing: shorten the poll or refresh immediately after an approval receipt, so the wait is not mistaken for a fault.**
+
+### [2026-07-29] Dashboard (index.html) — i have 2 self rescues .
+first payment was made and self resc…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
+- **Frequency:** Consistent
+- **What happened:** i have 2 self rescues .
+first payment was made and self rescued.
+second payment made but no self rescue button is available.
+- **What was expected:** to be able to be rescued.
+- **Submitted:** Wed, 29 Jul 2026 21:12:09 GMT
+**RESOLVED 2026-07-29:** Both rescues completed — the panel was correct and looked broken. `ticket_triage.js` now shows this wallet at **T10, seated in all ten tiers** (T1.2 MatA + T2-T10 MatB) and parked nowhere. The second Self Rescue button was absent because there was nothing left to rescue: the co-pay rescue keeper (cron :04, every 10 min) reached that position first, so the member's own approval was never needed. **THE REAL GAP: when a rescue completes, the panel simply vanishes — identical, from the member's side, to a button that never appeared.** It should say so instead: a brief "you have been re-entered, nothing pending" confirmation. Queued as frontend work. Also fixed today for members genuinely parked in more than one place: the panel used to show only ONE position with no hint the others existed (`d71254a`).
 
 ### [2026-07-29] Other — I had four directs for this account, but it shows one direct…
 - **Reporter:** @Lavern_Gay
