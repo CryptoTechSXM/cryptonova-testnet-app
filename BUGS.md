@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-29] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Still getting this on self rescue..
+- **What was expected:** To be rescued...
+- **Notes:** Just a follow up and tried this before but was hoping it was a testnet thing...lol
+- **Submitted:** Wed, 29 Jul 2026 00:24:31 GMT
+
+
 ### [2026-07-29] Other — Withdrawing $500 from $514 available.. ❌ Transaction failed …
 - **Reporter:** Sherwyn
 - **Page:** Other
