@@ -7399,9 +7399,35 @@ async function doBulkUpgrade() {
       let gasLimit = 16_000_000;
       try {
         const est = await tr.bulkUpgrade.estimateGas(highest);
-        // V8.45: +5% buffer only — cascades run ~15.5M and public RPCs reject limits above ~17M (-32003)
-        gasLimit = Math.min(Math.ceil(Number(est) * 1.05), 16_500_000);
+        // NEVER CLAMP AN ESTIMATE DOWNWARD. This line was
+        //     Math.min(est * 1.05, 16_500_000)
+        // which is a lie in the one case that matters: when the true cost is
+        // 17.7M, capping it at 16.5M does not make the transaction cheaper. The
+        // wallet then pads ITS own estimate (Rabby x1.15 -> 18.9M), the RPC
+        // refuses outright with "[From sepolia.base.org] gas limit too high",
+        // and the member reads that as the site being broken. Had the RPC
+        // accepted it, the clamp would have bought an out-of-gas revert instead.
+        // Either way a clamp turns "too expensive to send" into a failure with
+        // no explanation. Titan hit exactly this on T8 -> T9 (2026-07-28).
+        //
+        // Ceiling is 15M, not 17.8M: the chain's per-tx cap is ~17.8M and wallets
+        // pad by up to 15%, so 15M is the largest estimate that still fits AFTER
+        // padding. Above it, say so plainly and send nothing.
+        const _padded = Math.ceil(Number(est) * 1.05);
+        if (_padded > 15_000_000) {
+          throw new Error(
+            `⚠️ The T${enteringTier} upgrade is currently too large for the network to process ` +
+            `(needs ~${(_padded / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
+            `Nothing was sent and nothing was charged. This happens when entering a tier sets ` +
+            `off a long chain of matrix rotations; it settles on its own. Please try again shortly.`);
+        }
+        gasLimit = _padded;
       } catch (estErr) {
+        // A ceiling message is OURS and already member-readable. Without this the
+        // funds-diagnosis below would catch it and relabel a gas problem as an
+        // RPC or balance problem — the same mislabelling this block was written
+        // to stop doing.
+        if ((estErr.message || '').startsWith('⚠️')) throw estErr;
         // V8.46 (2026-07-27): this branch used to blame the RPC for every failed
         // estimate. Three members reported "T5 upgrade check failed — try again
         // in a moment (RPC may be busy)" on wallets holding $4.86, $12.83 and
@@ -7678,8 +7704,22 @@ async function doLimboReEntry() {
     let _reGas;
     try {
       const _est = await matA.register.estimateGas(info.referrer, { from: await signer.getAddress() });
-      _reGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
+      // The static fallback went (see above) but the DOWNWARD CLAMP stayed, and
+      // it fails the same way for the same reason: Math.min(est * 1.15, 16.5M)
+      // on a 17M estimate sends 16.5M, which is not enough, so the member pays
+      // gas for an out-of-gas revert. Refuse above the ceiling instead — 15M,
+      // because wallets pad by up to 15% on top and the chain caps at ~17.8M.
+      const _rePad = Math.ceil(Number(_est) * 1.15);
+      if (_rePad > 15_000_000) {
+        throw new Error(
+          `⚠️ This re-entry is currently too large for the network to process ` +
+          `(needs ~${(_rePad / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
+          `Nothing was sent and nothing was charged. It settles as the matrix rotations ` +
+          `ahead of you complete — please try again shortly.`);
+      }
+      _reGas = _rePad;
     } catch (estErr) {
+      if ((estErr.message || '').startsWith('⚠️')) throw estErr;
       // Same rule as doSelfRescue: never prefix friendlyError's own sentence.
       const _r = estErr.reason || estErr.shortMessage || '';
       throw new Error(_r ? `Re-entry would fail: ${_r}` : friendlyError(estErr));
