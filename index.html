@@ -1391,6 +1391,28 @@
             <div id="reserve-total-text" style="color:var(--yellow);font-weight:600;margin-top:6px;font-size:11px"></div>
           </div>
 
+          <!-- ── Collect All: earnings are spread across matrices ──────────────
+               Referral income is credited into the matrix where YOUR DIRECT
+               entered, not where you sit (MatrixLogicLib._credit:928), so a T2
+               member with directs at T5 and T7 holds three separate balances in
+               three contracts. The old single "Available USDC" figure summed them
+               and every withdrawal call could only reach one — which is how a
+               member came to ask why $500 of his $514 would not come out. -->
+          <div id="collect-all-box" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
+            <div class="info-row" style="margin-bottom:4px">
+              <span class="info-key">Total earned</span>
+              <span class="info-val" id="collect-total-earned">—</span>
+            </div>
+            <div class="info-row" style="margin-bottom:8px">
+              <span class="info-key" style="font-weight:700;color:var(--green)">Available now</span>
+              <span class="info-val green" style="font-weight:800" id="collect-available">—</span>
+            </div>
+            <div id="collect-breakdown" style="font-size:11px;color:var(--text3);line-height:1.7;border-top:1px solid var(--border);padding-top:8px;margin-bottom:10px"></div>
+            <div id="collect-parked-warning" style="display:none;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px"></div>
+            <button class="btn btn-green full-w" id="btn-collect-all" onclick="doCollectAll()" disabled>Collect All to Wallet</button>
+            <div id="collect-status" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
+          </div>
+
           <!-- Withdrawal fee breakdown -->
           <div id="withdraw-fee-breakdown" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:14px;display:none">
             <div class="info-row" style="margin-bottom:4px"><span class="info-key" data-i18n="dash.gross_amount">Gross Amount</span><span class="info-val" id="wfee-gross">—</span></div>
@@ -2112,6 +2134,12 @@ const T10_FEE = 10_000_000_000n;   // $10,000 USDC
 // ── ABIs ─────────────────────────────────────────────────────────────
 const TIER_ROUTER_ABI = [
   'function register(address referrer) external',
+  // V8.44 (TierRouter:999). Sweeps the member's free balance out of EVERY matrix
+  // of every tier in ONE transaction. Referral income is credited into the matrix
+  // where the PAYER entered (MatrixLogicLib._credit:928), so a member accrues
+  // money in tiers they have never occupied — this is the only way to gather it
+  // without one transaction per matrix.
+  'function bulkWithdraw() external',
   'function globalJoined(address) external view returns (bool)',
   'function memberReferrer(address) external view returns (address)',
   'function tierCycles(address, uint8) external view returns (uint256)',
@@ -2169,6 +2197,12 @@ const COUPON_REGISTRY_ABI = [
 
 const MATRIX_ABI = [
   'function getMember(address) external view returns (tuple(uint256 id, address referrer, uint256 joinedAt, uint256 withdrawable, uint256 totalEarned, uint256 totalWithdrawn, uint256 cyclesCompleted, bool isInMatrix, bool hasEverJoined))',
+  // V8.44 (G3). The number a member can ACTUALLY take right now: it adds
+  // un-settled pool accrual and subtracts the crossing and automation locks
+  // (FigureEightMatrixV8:616). `withdrawable` on getMember above is the raw
+  // ledger figure and is NOT the same thing — showing that one is how a member
+  // gets quoted a total no single transaction can satisfy.
+  'function freeWithdrawable(address) external view returns (uint256)',
   'function occupancy() external view returns (uint256)',
   'function MATRIX_SIZE() external view returns (uint256)',
   'function ENTRY_FEE() external view returns (uint256)',
@@ -4952,6 +4986,12 @@ async function loadDashboardData() {
     // ── V8.35 Whale Gate UI ─────────────────────────────────────────────
     await updateWhaleGateUI(highestTier, rp, canUpgrade).catch(() => {});
 
+    // ── Collect All (earnings scattered across matrices) ─────────────────
+    // Deliberately not awaited into the critical path: it walks every pair of
+    // every tier, and a slow RPC must not hold up the rest of the dashboard.
+    // Failures are logged, never swallowed silently.
+    loadCollectAll(userAddr, rp).catch(e => console.warn('[collect-all]', e.message));
+
     // ── Parked / Rescue section ──────────────────────────────────────────
     const rescueSection = document.getElementById('rescue-section');
     if (rescueSection) {
@@ -6014,6 +6054,167 @@ function getWithdrawRecipient() {
   const val = inp ? inp.value.trim() : '';
   if (val && ethers.isAddress(val) && val.toLowerCase() !== userAddr.toLowerCase()) return val;
   return null; // null = use connected wallet (regular withdraw function)
+}
+
+// ── Collect All ────────────────────────────────────────────────────────────
+// Walks every matrix of every deployed tier and reports two DIFFERENT numbers:
+//
+//   total earned   sum of getMember().withdrawable — the raw ledger figure
+//   available now  sum of freeWithdrawable()       — after crossing + automation
+//                                                    locks, plus un-settled pool
+//
+// They are not the same and the gap is the whole complaint. A member seated in a
+// tier must keep one entry fee back for their next crossing (withdrawCore:976),
+// and any balance earmarked for automation is withheld entirely (:986).
+//
+// WHY THE PARKED CASE IS CALLED OUT SEPARATELY: selfRescue consumes the parked
+// matrix's withdrawable and crossing reserve DIRECTLY (MatrixLogicLib:1198-1207)
+// and charges no withdrawal fee. Sweeping that balance first costs 1.5% and then
+// makes the member pay the same money back from their wallet — strictly worse.
+// A member who is parked should rescue FIRST and collect afterwards.
+async function loadCollectAll(userAddr, rp) {
+  const box = document.getElementById('collect-all-box');
+  if (!box) return;
+  const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+
+  let totalEarned = 0n, available = 0n;
+  const lines = [];
+  let parkedWhere = null;
+
+  for (let t = 1; t <= 10; t++) {
+    const key = 'T' + t;
+    if (!ADDRS[key] || !ADDRS[key].pm) continue;
+    let matAs = [], matBs = [];
+    try {
+      const st = await new ethers.Contract(ADDRS[key].pm, PM_ABI, rp).allPairsStatus();
+      matAs = st[0]; matBs = st[1];
+    } catch (_) {
+      // A pair list we cannot read is NOT an empty tier. Say so rather than
+      // quietly reporting zero for it — that is the failure mode that produced
+      // three false findings today.
+      lines.push(`T${t}: could not read pairs — any balance here is not counted`);
+      continue;
+    }
+    let tierFree = 0n, tierRaw = 0n;
+    for (const [half, list] of [['A', matAs], ['B', matBs]]) {
+      for (let i = 0; i < list.length; i++) {
+        const addr = list[i];
+        if (!addr || addr === ethers.ZeroAddress) continue;
+        const c = new ethers.Contract(addr, MATRIX_ABI, rp);
+        let raw = 0n, free = 0n, seated = false;
+        try {
+          const m = await c.getMember(userAddr);
+          raw    = m.withdrawable;
+          seated = m.isInMatrix;
+        } catch (_) { continue; }
+        try { free = await c.freeWithdrawable(userAddr); } catch (_) { free = 0n; }
+        if (raw === 0n && free === 0n) continue;
+        tierRaw += raw; tierFree += free;
+        if (!seated) {
+          try {
+            const pAt = await c.parkedAt(userAddr);
+            // parkedAt > 0 AND not seated — the leftover-timestamp trap.
+            if (pAt > 0n) parkedWhere = `T${t}.${i + 1} Matrix ${half}`;
+          } catch (_) {}
+        }
+      }
+    }
+    if (tierRaw > 0n || tierFree > 0n) {
+      totalEarned += tierRaw; available += tierFree;
+      const locked = tierRaw > tierFree ? tierRaw - tierFree : 0n;
+      lines.push(`T${t}: ${fmt6(tierFree)} available` +
+                 (locked > 0n ? ` · ${fmt6(locked)} held for your next crossing` : ''));
+    }
+  }
+
+  if (totalEarned === 0n && available === 0n) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  setText('collect-total-earned', fmt6(totalEarned));
+  setText('collect-available',    fmt6(available));
+  const bd = document.getElementById('collect-breakdown');
+  if (bd) bd.innerHTML = lines.length
+    ? lines.join('<br>') + '<br><span style="color:var(--text3)">Referral earnings sit in the tier your partner joined, which is why this is spread out.</span>'
+    : '';
+
+  const warn = document.getElementById('collect-parked-warning');
+  const btn  = document.getElementById('btn-collect-all');
+  if (parkedWhere && warn) {
+    warn.style.display = 'block';
+    warn.innerHTML = `⚠️ You are parked in <strong>${parkedWhere}</strong>. Re-entering uses that ` +
+      `balance directly with <strong>no withdrawal fee</strong>. Collecting first would take the ` +
+      `1.5% fee and then ask you to pay the same amount again from your wallet — do your Self ` +
+      `Rescue first, then collect.`;
+  } else if (warn) { warn.style.display = 'none'; }
+
+  if (btn) {
+    btn.disabled = available === 0n;
+    btn.textContent = available > 0n ? `Collect ${fmt6(available)} to Wallet` : 'Nothing to collect yet';
+  }
+  window._collectAvailable = available;
+}
+
+async function doCollectAll() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const btn    = document.getElementById('btn-collect-all');
+  const status = document.getElementById('collect-status');
+  const setS   = m => { if (status) status.textContent = m; };
+  if (btn) btn.disabled = true;
+  try {
+    const me = await signer.getAddress();
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+    const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, readProvider || signer);
+    const before = await usdc.balanceOf(me).catch(() => null);
+
+    setS('Checking…');
+    let gas;
+    try {
+      const est = await tr.bulkWithdraw.estimateGas();
+      gas = Math.ceil(Number(est) * 1.15);
+    } catch (estErr) {
+      setS(friendlyError(estErr));
+      if (btn) btn.disabled = false;
+      return;
+    }
+    // bulkWithdraw loops every tier x every pair x both matrices, so it grows as
+    // the system does. Same ceiling as every other send path — refuse rather
+    // than hand the wallet a transaction the chain will reject.
+    if (gas > 15_000_000) {
+      setS(`⚠️ Too many matrices to sweep in one transaction right now ` +
+           `(needs ~${(gas / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
+           `Nothing was sent. Withdraw from individual tiers below for now.`);
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    setS('Collecting — confirm in your wallet…');
+    const tx = await tr.bulkWithdraw({ gasLimit: gas });
+    setS('Waiting for confirmation…');
+    await tx.wait();
+
+    // VERIFY BY READING, NOT BY THE RECEIPT. TierRouter._sweepMatrix (:1018)
+    // wraps each matrix in `try {...} catch {}`, so a sweep that skipped half the
+    // matrices succeeds and looks identical to one that took everything. The only
+    // honest report is the change in the member's actual USDC balance.
+    const after = await usdc.balanceOf(me).catch(() => null);
+    if (before !== null && after !== null) {
+      const got = after > before ? after - before : 0n;
+      if (got === 0n) {
+        setS('Transaction confirmed, but no funds moved — your balance may be held for a crossing or for automation. Nothing was lost.');
+      } else {
+        if (status) status.style.color = 'var(--green)';
+        setS(`✅ Collected ${fmt6(got)} to your wallet (after the 1.5% health fee). You can spend it on upgrades or re-entry.`);
+        toast('Earnings collected!', 'success');
+      }
+    } else {
+      setS('✅ Collected — refreshing your balances…');
+    }
+    setTimeout(() => loadDashboardData(), 2500);
+  } catch (e) {
+    const msg = e.message || '';
+    if (status) status.style.color = 'var(--red)';
+    setS(msg.startsWith('⚠️') ? msg : friendlyError(e));
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function doWithdrawPartial() {
@@ -7808,13 +8009,20 @@ async function doSelfRescue() {
     // catches the case, just less kindly.
     try {
       const _rme = await signer.getAddress();
+      // ENTRY_FEE, NOT entryFee. It is `uint256 public immutable ENTRY_FEE`
+      // (FigureEightMatrixV8:44), so the generated getter carries that exact
+      // name. My first version of this block asked for `entryFee()`, which does
+      // not exist — the call reverted, the catch below swallowed it, and this
+      // whole shortfall check silently did nothing. Written the same hour I fixed
+      // the identical mistake in withdraw_probe.js (`hasEverJoined`), which is
+      // why the read is now VERIFIED against the contract rather than assumed.
       const _mr  = new ethers.Contract(matrixAddr, [
-        'function entryFee() view returns (uint256)',
+        'function ENTRY_FEE() view returns (uint256)',
         'function crossingReserveOf(address) view returns (uint256)',
         'function withdrawableOf(address) view returns (uint256)',
       ], signer);
       const [_fee, _res, _wd] = await Promise.all([
-        _mr.entryFee(), _mr.crossingReserveOf(_rme), _mr.withdrawableOf(_rme),
+        _mr.ENTRY_FEE(), _mr.crossingReserveOf(_rme), _mr.withdrawableOf(_rme),
       ]);
       const _have = _res + _wd;
       if (_fee > 0n && _have < _fee) {
