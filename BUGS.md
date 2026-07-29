@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-29] Other — I had four directs for this account, but it shows one direct…
+- **Reporter:** @Lavern_Gay
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x145805e87ce365ad6c2636b8f6e10b6550f3dc2a
+- **Frequency:** Consistent
+- **What happened:** I had four directs for this account, but it shows one direct.
+- **What was expected:** I expected to see all 
+Four directs.
+- **Submitted:** Wed, 29 Jul 2026 02:55:38 GMT
+
+
 ### [2026-07-29] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
 - **Reporter:** Sherwyn
 - **Page:** Other
