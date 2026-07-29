@@ -37,6 +37,18 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-29] Other — Withdrawing $500 from $514 available.. ❌ Transaction failed …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** Withdrawing $500 from $514 available.. ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** A smooth withdrawal... lol
+- **Notes:** Was trying a withdrawal and not withdraw all option.
+- **Submitted:** Wed, 29 Jul 2026 00:21:30 GMT
+
+
 ### [2026-07-28] Other — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
 - **Reporter:** Sherwyn
 - **Page:** Other
