@@ -37,6 +37,20 @@ behaviour stays distinguishable from V8.43 history.
 
 ## Open Issues
 
+### [2026-07-29] Dashboard (index.html) — i have 2 self rescues .
+first payment was made and self resc…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
+- **Frequency:** Consistent
+- **What happened:** i have 2 self rescues .
+first payment was made and self rescued.
+second payment made but no self rescue button is available.
+- **What was expected:** to be able to be rescued.
+- **Submitted:** Wed, 29 Jul 2026 21:12:09 GMT
+
+
 ### [2026-07-29] Other — I had four directs for this account, but it shows one direct…
 - **Reporter:** @Lavern_Gay
 - **Page:** Other
