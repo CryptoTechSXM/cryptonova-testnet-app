@@ -7024,6 +7024,29 @@ function friendlyError(e) {
   if (/^\s*(💵|🔓|✋|⛽|🔒|⚠️|🚧|🛠️|🎉|❌)/u.test(raw)) return raw.trim();
   // Also check nested error shapes emitted by ethers v6 during gas estimation
   const rawDeep = raw + (e.info?.error?.message || '') + (e.error?.message || '');
+
+  // ── "gas limit too high" — the WALLET's rejection, not the contract's ──────
+  // MEASURED 2026-07-29. We set a gasLimit from our own estimate, but wallets
+  // re-estimate at signing time and submit THEIR figure. On 0xdE5fe7cB our
+  // estimate for T2->T3 was 14,903,722 (under our 15M refusal line, so we let it
+  // through); the transaction the wallet built carried 20,067,248, which is
+  // 19,111,664 x 1.05 — the wallet's own estimate, taken a moment later.
+  //
+  // Both numbers are real, because the cost is BIMODAL: ~12.9M-14.9M when the
+  // entry just takes a seat, ~19M when that entry is the one that fills MatA and
+  // sets off the rotation cascade. Which one a member gets depends on the second
+  // they press the button, so RETRYING GENUINELY WORKS — and telling them to
+  // hard-refresh, as the generic fallback did, does not.
+  //
+  // Nothing dapp-side can prevent this: it happens after we hand off to the
+  // wallet. The permanent fix is V8.46-B's cascade depth cap.
+  if (/gas limit too high|gas limit is too high|-32003/i.test(raw + rawDeep)) {
+    return '⛽ The network could not fit this transaction right now. Entering a tier ' +
+           'sometimes sets off a chain of matrix rotations, and when it does the cost ' +
+           'briefly exceeds what one transaction can carry. Nothing was sent and nothing ' +
+           'was charged. Wait a minute and try again — it usually goes through on the ' +
+           'next attempt.';
+  }
   // ── EARLY guard: raw ethers v6 tx data leaking (TokenPocket, Rabby, etc.) ─
   // Must be FIRST — before any branch that might fall through to raw msg output.
   const _earlyRaw = raw + rawDeep;
