@@ -7984,12 +7984,25 @@ async function doSelfRescue() {
         // wallets add their own safety margin on top (Rabby uses ~1.15x), so a
         // 16.5M estimate is submitted as ~19M and the node refuses it outright.
         // Quote ONE number and say what it means.
+        // The button above still reads "Free — Earnings Cover It", which is true
+        // about the money and flatly contradicts this message about the network.
+        // A member sees both at once and cannot tell which to believe, so retire
+        // the label the moment this fires.
+        const _srb = document.getElementById('btn-self-rescue');
+        if (_srb) { _srb.textContent = '🔑 Self Rescue — try again shortly'; _srb.style.opacity = '0.6'; }
+        // MEASURED 2026-07-29 — the old wording asked the member to file a report,
+        // which was the right thing to say when the cause was unknown. It is known
+        // now: the cost is bimodal (~12.9M when the entry just takes a seat, ~19.1M
+        // when it triggers the rotation cascade), the wallet re-estimates at
+        // signing time, and the next attempt often lands in the cheap mode.
+        // Retrying genuinely works, so say that instead of asking them to wait.
         throw new Error(
-          '⚠️ Your position spans several tiers, so re-entering touches too many ' +
-          'matrices to fit in one transaction. Nothing was sent and nothing was ' +
-          'charged, and your seats and balances are untouched. The rescue keeper ' +
-          're-enters members like you automatically — please report this so we ' +
-          'can prioritise your account.');
+          '⚠️ The network could not fit this re-entry right now. Re-entering sometimes ' +
+          'sets off a chain of matrix rotations, and while that is happening the ' +
+          'transaction is briefly too large to send. Nothing was sent, nothing was ' +
+          'charged, and your seats and balances are untouched. Wait a minute and press ' +
+          'Self Rescue again — it usually goes through on the next attempt. The rescue ' +
+          'keeper will also re-enter you automatically if you would rather leave it.');
       }
       _rescueGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
     } catch (estErr) {
