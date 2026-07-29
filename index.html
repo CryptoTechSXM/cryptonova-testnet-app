@@ -4681,8 +4681,37 @@ async function loadDashboardData() {
                 fee: BigInt(fee),
                 shortfall: BigInt(fee) > effectiveHave ? BigInt(fee) - effectiveHave : 0n,
               });
-            } else if (!parkedInfo && m.label.includes('Matrix A')) {
-              // No parkedAt either — this is a reclaimed-limbo member.
+            } else if (!parkedInfo && m.label.includes('Matrix A') && member.hasEverJoined) {
+              // ONLY A MEMBER WHO ACTUALLY HELD A SLOT HERE CAN HAVE LOST ONE.
+              //
+              // 2026-07-29: this branch had no history test — "not seated, no
+              // parkedAt, it's a MatA" was taken to mean "reclaimed". But the
+              // enclosing guard at :4581 admits a matrix on hasEverJoined OR
+              // _hasCredit, and referral commission is credited into the matrix
+              // where YOUR DIRECT entered (MatrixLogicLib._credit:928). So an
+              // upline accrues balances in tiers they have never occupied, and
+              // every one of those looked exactly like a cleared slot.
+              //
+              // Measured on 0x7CAFC198: TEN false offers, T1.2 through T10.1,
+              // totalling $19,435 — precisely the cost of a full T1→T10 climb.
+              // The panel said "Your T10 Matrix A slot was cleared… Re-Entry Fee
+              // $10,000" for a tier they had never joined, and the button calls
+              // register() DIRECTLY on that matrix, which has no access control.
+              // It succeeds: fee charged, seat taken, TierRouter never sees it,
+              // memberHighestTier left behind, whale gate never counts them.
+              // 0x84A4D33A paid $10,000 into T10 this way — that is the entire
+              // explanation for "seated in T10, recorded as T1".
+              //
+              // A genuinely reclaimed member has hasEverJoined = true. Someone
+              // who merely earned commission here has false, and must never be
+              // shown this panel.
+              //
+              // NOTE this narrows but does not perfect the test: a member who
+              // joined and cycled out cleanly also matches. That is far less
+              // harmful — it can only ever offer re-entry to a tier they really
+              // held, at that tier's own fee — but the honest fix is a
+              // SlotReclaimed check, which belongs with the V8.46 work that
+              // closes register() to the router.
               // Fee lookup: try contract with timeout, fall back to known tier constants
               // (same 6-decimal USDC amounts locked in the contract constructor).
               const TIER_FEES_6 = [0n,10_000_000n,25_000_000n,50_000_000n,100_000_000n,
