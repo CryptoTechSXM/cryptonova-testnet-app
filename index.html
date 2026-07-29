@@ -5140,8 +5140,32 @@ async function loadDashboardData() {
         const _selfShortfallEl = document.getElementById('self-shortfall-display');
         if (_selfShortfallEl) _selfShortfallEl.textContent = fmt6(parkedInfo.shortfall);
         if (parkedInfo.shortfall > 0n) {
-          if (_selfApproveBtn) _selfApproveBtn.style.display = '';
-          if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = '0.5';
+          // DIM ON THE APPROVAL, NOT ON THE SHORTFALL.
+          //
+          // 2026-07-29, reported live: a member approved $15.50, the status line
+          // said "USDC approved — now click Self Rescue", and there was no Self
+          // Rescue button to click. It was there — at opacity 0.5 on a dark
+          // background, which on a phone is invisible.
+          //
+          // The cause is that `shortfall` does NOT drop to zero when you approve.
+          // It measures in-matrix funds against the entry fee, and approving USDC
+          // changes neither. So every dashboard refresh after the approval
+          // re-dimmed the button. approveSelfRescue un-dims it, but only until
+          // the next reload — and the panel polls every 30s while parked.
+          //
+          // The real question is "is the approval still outstanding?", so ask the
+          // allowance. Once it covers the shortfall, show the button at full
+          // strength and hide the approve step entirely.
+          let _alwNow = null;
+          try {
+            _alwNow = await new ethers.Contract(ADDRS.usdc, USDC_ABI, rp)
+              .allowance(userAddr, parkedInfo.addr);
+          } catch (_) { _alwNow = null; }
+          // A failed read leaves BOTH visible — better a redundant approve button
+          // than a hidden rescue button.
+          const _needsApproval = _alwNow === null ? true : _alwNow < parkedInfo.shortfall;
+          if (_selfApproveBtn) _selfApproveBtn.style.display = _needsApproval ? '' : 'none';
+          if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = _needsApproval ? '0.5' : '1';
         } else {
           if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
           if (_selfRescueBtn)  { _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
