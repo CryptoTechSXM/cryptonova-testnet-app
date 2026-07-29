@@ -1399,17 +1399,27 @@
                and every withdrawal call could only reach one — which is how a
                member came to ask why $500 of his $514 would not come out. -->
           <div id="collect-all-box" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
-            <div class="info-row" style="margin-bottom:4px">
-              <span class="info-key">Total earned</span>
-              <span class="info-val" id="collect-total-earned">—</span>
+            <div class="info-row" style="cursor:pointer;margin-bottom:6px" onclick="toggleCollectRow('total')">
+              <span class="info-key" style="font-weight:700"><span id="collect-chev-total">▸</span> Total earned</span>
+              <span class="info-val" style="font-weight:700" id="collect-total-earned">—</span>
             </div>
-            <div class="info-row" style="margin-bottom:8px">
-              <span class="info-key" style="font-weight:700;color:var(--green)">Available now</span>
-              <span class="info-val green" style="font-weight:800" id="collect-available">—</span>
+            <div id="collect-detail-total" style="display:none;font-size:11px;color:var(--text3);line-height:1.7;padding:0 0 8px 14px"></div>
+
+            <div class="info-row" style="cursor:pointer;margin-bottom:6px" onclick="toggleCollectRow('tier')">
+              <span class="info-key"><span id="collect-chev-tier">▸</span> Tier earnings</span>
+              <span class="info-val" id="collect-tier">—</span>
             </div>
-            <div id="collect-breakdown" style="font-size:11px;color:var(--text3);line-height:1.7;border-top:1px solid var(--border);padding-top:8px;margin-bottom:10px"></div>
+            <div id="collect-detail-tier" style="display:none;font-size:11px;color:var(--text3);line-height:1.7;padding:0 0 8px 14px"></div>
+
+            <div class="info-row" style="cursor:pointer;margin-bottom:8px" onclick="toggleCollectRow('ref')">
+              <span class="info-key"><span id="collect-chev-ref">▸</span> Referral earnings</span>
+              <span class="info-val" id="collect-ref">—</span>
+            </div>
+            <div id="collect-detail-ref" style="display:none;font-size:11px;color:var(--text3);line-height:1.7;padding:0 0 8px 14px"></div>
+
+            <div id="collect-note" style="font-size:10px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;margin-bottom:10px;line-height:1.5"></div>
             <div id="collect-parked-warning" style="display:none;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px"></div>
-            <button class="btn btn-green full-w" id="btn-collect-all" onclick="doCollectAll()" disabled>Collect All to Wallet</button>
+            <button class="btn btn-green full-w" id="btn-collect-all" onclick="doCollectAll()" disabled>Collect to Wallet</button>
             <div id="collect-status" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
           </div>
 
@@ -6072,83 +6082,135 @@ function getWithdrawRecipient() {
 // and charges no withdrawal fee. Sweeping that balance first costs 1.5% and then
 // makes the member pay the same money back from their wallet — strictly worse.
 // A member who is parked should rescue FIRST and collect afterwards.
+function toggleCollectRow(which) {
+  const d = document.getElementById('collect-detail-' + which);
+  const c = document.getElementById('collect-chev-' + which);
+  if (!d) return;
+  const open = d.style.display !== 'none';
+  d.style.display = open ? 'none' : 'block';
+  if (c) c.textContent = open ? '▸' : '▾';
+}
+
 async function loadCollectAll(userAddr, rp) {
   const box = document.getElementById('collect-all-box');
   if (!box) return;
-  const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
 
-  let totalEarned = 0n, available = 0n;
-  const lines = [];
+  // SEQUENTIAL READS BROKE THIS ON FIRST RUN (2026-07-29). Walking ~20 matrices
+  // one call at a time is 50+ round trips; the RPC rate-limited us, three whole
+  // tiers came back unreadable, and the totals printed several thousand dollars
+  // light. Fetch in parallel with a small concurrency cap and RETRY, so a busy
+  // node costs a moment instead of a wrong number.
+  const pool = async (items, n, fn) => {
+    const out = new Array(items.length);
+    let i = 0;
+    await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+      while (i < items.length) { const k = i++; out[k] = await fn(items[k], k); }
+    }));
+    return out;
+  };
+  const retry = async (fn, tries = 3) => {
+    for (let k = 0; k < tries; k++) {
+      try { return { ok: true, v: await fn() }; }
+      catch (e) { if (k === tries - 1) return { ok: false, e }; await new Promise(r => setTimeout(r, 400 * (k + 1))); }
+    }
+  };
+
+  // 1. every matrix address, all tiers at once
+  const tiers = [];
+  for (let t = 1; t <= 10; t++) if (ADDRS['T' + t]?.pm) tiers.push(t);
+  const pairSets = await pool(tiers, 5, async (t) => {
+    const r = await retry(() => new ethers.Contract(ADDRS['T' + t].pm, PM_ABI, rp).allPairsStatus());
+    return { t, ok: r.ok, matAs: r.ok ? r.v[0] : [], matBs: r.ok ? r.v[1] : [] };
+  });
+
+  const jobs = [];
+  const unreadable = [];
+  for (const ps of pairSets) {
+    if (!ps.ok) { unreadable.push(ps.t); continue; }
+    for (const [half, list] of [['A', ps.matAs], ['B', ps.matBs]])
+      for (let i = 0; i < list.length; i++)
+        if (list[i] && list[i] !== ethers.ZeroAddress)
+          jobs.push({ tier: ps.t, pair: i + 1, half, addr: list[i] });
+  }
+
+  // 2. balances, in parallel
+  const res = await pool(jobs, 6, async (j) => {
+    const c  = new ethers.Contract(j.addr, MATRIX_ABI, rp);
+    const gm = await retry(() => c.getMember(userAddr));
+    if (!gm.ok) return { ...j, unread: true };
+    const fw = await retry(() => c.freeWithdrawable(userAddr));
+    return {
+      ...j,
+      raw:    gm.v.withdrawable,
+      joined: gm.v.hasEverJoined,
+      seated: gm.v.isInMatrix,
+      free:   fw.ok ? fw.v : 0n,
+      unread: false,
+    };
+  });
+
+  let totalEarned = 0n, available = 0n, tierEarn = 0n, refEarn = 0n;
+  const dTotal = [], dTier = [], dRef = [];
   let parkedWhere = null;
 
-  for (let t = 1; t <= 10; t++) {
-    const key = 'T' + t;
-    if (!ADDRS[key] || !ADDRS[key].pm) continue;
-    let matAs = [], matBs = [];
-    try {
-      const st = await new ethers.Contract(ADDRS[key].pm, PM_ABI, rp).allPairsStatus();
-      matAs = st[0]; matBs = st[1];
-    } catch (_) {
-      // A pair list we cannot read is NOT an empty tier. Say so rather than
-      // quietly reporting zero for it — that is the failure mode that produced
-      // three false findings today.
-      lines.push(`T${t}: could not read pairs — any balance here is not counted`);
-      continue;
-    }
-    let tierFree = 0n, tierRaw = 0n;
-    for (const [half, list] of [['A', matAs], ['B', matBs]]) {
-      for (let i = 0; i < list.length; i++) {
-        const addr = list[i];
-        if (!addr || addr === ethers.ZeroAddress) continue;
-        const c = new ethers.Contract(addr, MATRIX_ABI, rp);
-        let raw = 0n, free = 0n, seated = false;
-        try {
-          const m = await c.getMember(userAddr);
-          raw    = m.withdrawable;
-          seated = m.isInMatrix;
-        } catch (_) { continue; }
-        try { free = await c.freeWithdrawable(userAddr); } catch (_) { free = 0n; }
-        if (raw === 0n && free === 0n) continue;
-        tierRaw += raw; tierFree += free;
-        if (!seated) {
-          try {
-            const pAt = await c.parkedAt(userAddr);
-            // parkedAt > 0 AND not seated — the leftover-timestamp trap.
-            if (pAt > 0n) parkedWhere = `T${t}.${i + 1} Matrix ${half}`;
-          } catch (_) {}
-        }
-      }
-    }
-    if (tierRaw > 0n || tierFree > 0n) {
-      totalEarned += tierRaw; available += tierFree;
-      const locked = tierRaw > tierFree ? tierRaw - tierFree : 0n;
-      lines.push(`T${t}: ${fmt6(tierFree)} available` +
-                 (locked > 0n ? ` · ${fmt6(locked)} held for your next crossing` : ''));
+  for (const r of res) {
+    if (r.unread) { unreadable.push(r.tier); continue; }
+    if (r.raw === 0n && r.free === 0n) continue;
+    totalEarned += r.raw; available += r.free;
+    const locked = r.raw > r.free ? r.raw - r.free : 0n;
+    const label  = `T${r.tier}.${r.pair} ${r.half}`;
+    const line   = `${label}: ${fmt6(r.free)} available` + (locked > 0n ? ` · ${fmt6(locked)} held for your next crossing` : '');
+    dTotal.push(line);
+    // SPLIT BY WHERE THE MONEY SITS. A matrix you have joined is your own tier
+    // position; a matrix you never joined can only hold money someone else's
+    // entry paid you — referral income (_credit, MatrixLogicLib:928). The one
+    // inexact case is a direct who joined a tier you ALSO hold: that lands in a
+    // joined matrix and is counted under Tier. The note under the rows says so.
+    if (r.joined) { tierEarn += r.raw; dTier.push(line); }
+    else          { refEarn  += r.raw; dRef.push(line); }
+    if (!r.seated && r.joined) {
+      const pk = await retry(() => new ethers.Contract(r.addr, MATRIX_ABI, rp).parkedAt(userAddr), 2);
+      if (pk?.ok && pk.v > 0n) parkedWhere = `${label}`;
     }
   }
 
-  if (totalEarned === 0n && available === 0n) { box.style.display = 'none'; return; }
+  if (totalEarned === 0n && available === 0n && !unreadable.length) { box.style.display = 'none'; return; }
   box.style.display = 'block';
   setText('collect-total-earned', fmt6(totalEarned));
-  setText('collect-available',    fmt6(available));
-  const bd = document.getElementById('collect-breakdown');
-  if (bd) bd.innerHTML = lines.length
-    ? lines.join('<br>') + '<br><span style="color:var(--text3)">Referral earnings sit in the tier your partner joined, which is why this is spread out.</span>'
-    : '';
+  setText('collect-tier',         fmt6(tierEarn));
+  setText('collect-ref',          fmt6(refEarn));
+
+  const put = (id, arr) => { const el = document.getElementById(id); if (el) el.innerHTML = arr.length ? arr.join('<br>') : '<span>Nothing here yet.</span>'; };
+  put('collect-detail-total', dTotal);
+  put('collect-detail-tier',  dTier);
+  put('collect-detail-ref',   dRef);
+
+  const note = document.getElementById('collect-note');
+  if (note) {
+    let n = 'Referral earnings sit in the tier your partner joined — if they joined a tier you also hold, it shows under Tier earnings.';
+    if (unreadable.length) {
+      const u = [...new Set(unreadable)].sort((a, b) => a - b).map(x => 'T' + x).join(', ');
+      n += ` <span style="color:var(--yellow)">${u} could not be read just now, so anything there is not included — reload to retry.</span>`;
+    }
+    note.innerHTML = n;
+  }
 
   const warn = document.getElementById('collect-parked-warning');
-  const btn  = document.getElementById('btn-collect-all');
   if (parkedWhere && warn) {
     warn.style.display = 'block';
-    warn.innerHTML = `⚠️ You are parked in <strong>${parkedWhere}</strong>. Re-entering uses that ` +
-      `balance directly with <strong>no withdrawal fee</strong>. Collecting first would take the ` +
-      `1.5% fee and then ask you to pay the same amount again from your wallet — do your Self ` +
-      `Rescue first, then collect.`;
+    warn.innerHTML = `⚠️ You are parked in <strong>${parkedWhere}</strong>. Re-entering uses that balance ` +
+      `directly with <strong>no withdrawal fee</strong>. Collecting first would take the 1.5% fee and then ` +
+      `ask you to pay the same amount again from your wallet — do your Self Rescue first, then collect.`;
   } else if (warn) { warn.style.display = 'none'; }
 
+  const btn = document.getElementById('btn-collect-all');
   if (btn) {
     btn.disabled = available === 0n;
-    btn.textContent = available > 0n ? `Collect ${fmt6(available)} to Wallet` : 'Nothing to collect yet';
+    // NAME THE DESTINATION. bulkWithdraw always pays msg.sender and ignores the
+    // custom "destination wallet" set elsewhere on this card, so a member who set
+    // one would otherwise be sent funds to an address they did not choose.
+    const short = userAddr.slice(0, 6) + '…' + userAddr.slice(-4);
+    btn.textContent = available > 0n ? `Collect ${fmt6(available)} to ${short}` : 'Nothing to collect yet';
   }
   window._collectAvailable = available;
 }
@@ -6202,7 +6264,7 @@ async function doCollectAll() {
         setS('Transaction confirmed, but no funds moved — your balance may be held for a crossing or for automation. Nothing was lost.');
       } else {
         if (status) status.style.color = 'var(--green)';
-        setS(`✅ Collected ${fmt6(got)} to your wallet (after the 1.5% health fee). You can spend it on upgrades or re-entry.`);
+        setS(`✅ Collected ${fmt6(got)} to ${me.slice(0, 6)}…${me.slice(-4)} (after the 1.5% health fee). You can spend it on upgrades or re-entry.`);
         toast('Earnings collected!', 'success');
       }
     } else {
