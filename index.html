@@ -2119,7 +2119,14 @@ const TIER_ROUTER_ABI = [
   'function memberHighestTier(address) external view returns (uint8)',
   'function tierEntryFees(uint256) external view returns (uint256)',
   'function manualUpgrade(uint8 targetTierIndex) external',
-  'event MemberRegistered(address indexed member, uint8 tier, address referrer)',
+  // `referrer` IS INDEXED in the contract (TierRouter:335) — V8.34 indexed it
+  // precisely so uplines could be queried by log topic. Declaring it un-indexed
+  // here put it in the wrong place: ethers expected (tier, referrer) in data when
+  // the chain only puts tier there, so decoding failed, e.args.referrer came back
+  // undefined, and EVERY direct-referral lookup fell through to the scan
+  // fallback. That fallback counts who is SEATED right now, so Lavern's four
+  // directs showed as one (2026-07-29).
+  'event MemberRegistered(address indexed member, uint8 tier, address indexed referrer)',
   'event MemberUpgraded(address indexed member, uint8 fromTier, uint8 toTier, uint256 fee)',
   'function getMemberInfo(address) external view returns (uint8 highestTier, address referrer, uint256 totalCycles, bool doubleEntry, bool whaleGateEligible, bool autoUpgradeEnabled, bool autoReentryEnabled)',
   'function setDoubleEntry(bool enabled) external',
@@ -6531,13 +6538,32 @@ async function _getDirectReferrals(addr, rp) {
     // Use Alchemy directly -- bypass FallbackProvider quorum issues with eth_getLogs
     const logRp = new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, logRp);
-    const events = await Promise.race([
-      tr.queryFilter(tr.filters.MemberRegistered()),          // all blocks
-      new Promise((_,r) => setTimeout(() => r(new Error('evt_timeout')), 30000))
-    ]);
-    const addrs = events
-      .filter(e => e.args?.referrer?.toLowerCase() === addr.toLowerCase())
-      .map(e => e.args.member);
+    // FILTER BY TOPIC, NOT IN JAVASCRIPT. referrer is indexed, so the node can
+    // return only this member's directs instead of every registration ever, which
+    // is both far smaller and immune to the client-side decode that was failing.
+    // Args are the INDEXED ones in order: (member, referrer) — `tier` is not
+    // indexed and is skipped.
+    const filter = tr.filters.MemberRegistered(null, addr);
+    let events;
+    try {
+      events = await Promise.race([
+        tr.queryFilter(filter),                                // whole chain
+        new Promise((_, r) => setTimeout(() => r(new Error('evt_timeout')), 30000)),
+      ]);
+    } catch (wideErr) {
+      // Providers cap eth_getLogs block ranges. Walk backwards in windows rather
+      // than giving up — falling through to the scan silently is what produced a
+      // confidently wrong count.
+      const latest = await logRp.getBlockNumber();
+      const WINDOW = 9000, FLOOR = Math.max(0, latest - 400000); // ~9 days at 2s blocks
+      events = [];
+      for (let to = latest; to > FLOOR; to -= WINDOW) {
+        const from = Math.max(FLOOR, to - WINDOW + 1);
+        const part = await tr.queryFilter(filter, from, to);
+        events.push(...part);
+      }
+    }
+    const addrs = events.map(e => e.args.member);
     const result = { addrs, count: addrs.length, incomplete: false, fromCache: false };
     _cache.set(cacheKey, result);
     return result;
@@ -6584,8 +6610,13 @@ async function _getDirectReferrals(addr, rp) {
       if (!r.ok) { incomplete = true; continue; }
       if (r.value.toLowerCase() === addr.toLowerCase()) addrs.push(uniq[i]);
     }
-    const result = { addrs, count: addrs.length, incomplete, fromCache: false };
-    if (!incomplete) _cache.set(cacheKey, result);
+    // ALWAYS INCOMPLETE, BY CONSTRUCTION — not just when a read fails.
+    // This path counts members currently SEATED in T1's pairs plus T2/T3 pair 1.
+    // A direct who upgraded to T4+, cycled out, parked, or landed in pair 2 is
+    // not in posToMember and cannot be seen here. It is a floor, never a total,
+    // so it must carry the "may be incomplete" badge and must never be cached as
+    // if it were the answer.
+    const result = { addrs, count: addrs.length, incomplete: true, fromCache: false };
     return result;
   } catch(scanErr) {
     console.warn('directs scan failed:', scanErr.message);
