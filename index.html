@@ -1320,6 +1320,17 @@
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <strong>Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
           </div>
+
+          <!-- ── ALL parked positions, not just one ──────────────────────────
+               2026-07-29: the panel only ever offered the single position the
+               picker chose, and nothing said the others existed. Measured across
+               the open tickets: 0x558E7848 is parked in EIGHT positions holding
+               $10,756 in wallet with $0.00 approved anywhere, and 0x832b95A5 is
+               parked in five holding $24,987. Both were one approval per position
+               away from re-entering, and neither could see it. Members were doing
+               rescue → refresh → rescue → refresh, and mostly giving up after the
+               first. Each row now carries its own numbers and its own buttons. -->
+          <div id="parked-list" style="display:none;flex-direction:column;gap:8px"></div>
           <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0.00</span> USDC</button>
           <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
           <!-- Kira, 2026-07-27: "I am parked but continue collecting from directs,
@@ -4705,13 +4716,17 @@ async function loadDashboardData() {
     // when every option is blocked — and then say so, rather than presenting a
     // button that cannot work.
     if (parkedCandidates.length) {
-      const pairKey = (lbl) => {
-        const t = lbl.match(/^T(\d+)/)?.[1] || '?';
-        const p = lbl.match(/pair (\d+)/)?.[1] || '1';
-        return `${t}.${p}`;
-      };
-      const heldPairs = new Set(activePositions.map(p => pairKey(p.label)));
-      const free = parkedCandidates.filter(c => !heldPairs.has(pairKey(c.label)));
+      // Uses the shared _pairKeyOf. The first version of this had its own copy
+      // matching /pair (\d+)/ — a format these labels have never used. They read
+      // "T3.1 Matrix A", with the pair number inside the "T3.1". The regex never
+      // matched, every position in a tier collapsed onto pair 1, and holding ANY
+      // seat in that tier marked EVERY parked position in it as blocked. It fails
+      // safe (over-blocking, never offering a doomed button) but it told members
+      // to wait when a rescue one pair over was ready to go. Shipped 2026-07-28,
+      // caught 2026-07-29 while writing the multi-position list against the real
+      // label format.
+      const heldPairs = new Set(activePositions.map(p => _pairKeyOf(p.label)));
+      const free = parkedCandidates.filter(c => !heldPairs.has(_pairKeyOf(c.label)));
       parkedInfo = free[0] || parkedCandidates[0];
       parkedInfo.blockedByPartner = free.length === 0;
       parkedInfo.otherParked      = parkedCandidates.length - 1;
@@ -5021,6 +5036,12 @@ async function loadDashboardData() {
           }
         }
         window._parkedFee           = parkedInfo.fee;
+        // Render EVERY parked position with its own numbers and buttons. Not
+        // awaited: it reads a USDC allowance per position and must not hold up
+        // the rest of the dashboard. Failures are logged, never swallowed.
+        window._parkedAll = parkedCandidates;
+        renderParkedList(userAddr, rp, parkedCandidates, activePositions)
+          .catch(e => console.warn('[parked-list]', e.message));
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
         // V8.31: show crossing reserve row if non-zero (reduces shortfall)
@@ -7859,6 +7880,114 @@ async function approveSelfRescue() {
     if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
     if (btn) btn.disabled = false;
   }
+}
+
+// ── Parked positions: render every one, with its own state and buttons ──────
+//
+// A member parked in eight tiers used to see one. The blocker is almost never
+// money — measured across the open tickets on 2026-07-29, the wallets held
+// $10,756 and $24,987 with $0.00 approved anywhere. It is that the shortfall must
+// be approved TO THE MATRIX (MatrixLogicLib.selfRescue:1207 pulls it with
+// safeTransferFrom), one approval per position, and nothing said so.
+//
+// Each row resolves to exactly one of four states, in the order the contract
+// hits them:
+//   BLOCKED       they hold the other half of this pair -> re-entry would seat
+//                 them twice and reverts "F8V8: already in matrix". Self-clears.
+//   NEEDS USDC    shortfall exceeds the wallet balance
+//   NEEDS APPROVE has the money, has not approved this matrix
+//   READY         press Self Rescue
+// Labels are built at :4485 as `T${tier}${suffix} Matrix A|B`, where suffix is
+// ".2", ".3"… and is OMITTED when the tier has a single pair. So "T3.1 Matrix A"
+// and "T7 Matrix B" are both valid and must key to "3.1" and "7.1".
+function _pairKeyOf(label) {
+  const m = String(label).match(/^T(\d+)(?:\.(\d+))?/);
+  if (!m) return '?';
+  return `${m[1]}.${m[2] || '1'}`;
+}
+
+async function renderParkedList(userAddr, rp, cands, activePositions) {
+  const box = document.getElementById('parked-list');
+  if (!box || !cands || cands.length === 0) return;
+
+  // One position is the existing card's job; only take over when there are more.
+  if (cands.length < 2) { box.style.display = 'none'; return; }
+
+  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+  const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
+  const held = new Set((activePositions || []).map(p => _pairKeyOf(p.label)));
+
+  const rows = [];
+  for (let i = 0; i < cands.length; i++) {
+    const c = cands[i];
+    const alw = await usdc.allowance(userAddr, c.addr).catch(() => null);
+    let state, note, btns;
+    if (held.has(_pairKeyOf(c.label))) {
+      state = 'BLOCKED';
+      note  = 'You still hold the other half of this pair — re-entering would seat you twice. Clears itself when that seat cycles out. Nothing owed.';
+      btns  = '';
+    } else if (c.shortfall > 0n && bal < c.shortfall) {
+      state = 'NEEDS USDC';
+      note  = `Add ${fmt6(c.shortfall - bal)} to your wallet — the shortfall is paid from your wallet, not your earnings.`;
+      btns  = '';
+    } else if (c.shortfall > 0n && (alw === null || alw < c.shortfall)) {
+      state = 'APPROVE FIRST';
+      note  = `Approve ${fmt6(c.shortfall)} to this matrix, then Self Rescue.`;
+      btns  = `<button class="btn" style="flex:1;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green);font-size:12px;padding:6px" onclick="selectParked(${i},'approve')">Approve ${fmt6(c.shortfall)}</button>`;
+    } else {
+      state = 'READY';
+      note  = c.shortfall > 0n ? 'Approved — press Self Rescue.' : 'Your earnings cover it in full.';
+      btns  = `<button class="btn" style="flex:1;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;font-size:12px;padding:6px" onclick="selectParked(${i},'rescue')">🔑 Self Rescue</button>`;
+    }
+    const colour = state === 'READY' ? 'var(--green)' : state === 'BLOCKED' ? 'var(--yellow)' : 'var(--text2)';
+    rows.push(
+      `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg3)">
+         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+           <span style="font-weight:700;font-size:13px">${c.label}</span>
+           <span style="font-size:11px;font-weight:700;color:${colour}">${state}</span>
+         </div>
+         <div style="font-size:11px;color:var(--text3);line-height:1.6">
+           Re-entry ${fmt6(c.fee)} = reserve ${fmt6(c.crossingReserve)} + earned ${fmt6(c.withdrawable)}
+           ${c.shortfall > 0n ? ` &middot; <strong style="color:var(--text2)">short ${fmt6(c.shortfall)}</strong>` : ' &middot; covered'}
+         </div>
+         <div style="font-size:11px;color:var(--text3);margin-top:4px">${note}</div>
+         ${btns ? `<div style="display:flex;gap:8px;margin-top:8px">${btns}</div>` : ''}
+       </div>`
+    );
+  }
+
+  const totalShort = cands.reduce((s, c) => s + c.shortfall, 0n);
+  box.innerHTML =
+    `<div style="font-size:12px;color:var(--text2);margin-bottom:2px">
+       <strong>${cands.length} parked positions.</strong> Each is re-entered separately, and each
+       shortfall is approved to that matrix on its own. Total to clear all of them:
+       <strong style="color:var(--text2)">${fmt6(totalShort)}</strong> — your wallet holds ${fmt6(bal)}.
+     </div>` + rows.join('');
+  box.style.display = 'flex';
+
+  // The single-position buttons above would act on whichever position the picker
+  // chose, which is ambiguous once the list is showing. Hide them.
+  for (const id of ['btn-self-approve', 'btn-self-rescue']) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+}
+
+// Point the existing, well-tested rescue path at a chosen position. Deliberately
+// reuses approveSelfRescue/doSelfRescue rather than duplicating them — those
+// carry the gas ceiling check, the shortfall pre-check and the ERC20 error
+// decoding, and a second copy would drift out of sync with them.
+function selectParked(i, action) {
+  const p = (window._parkedAll || [])[i];
+  if (!p) return;
+  window._parkedMatrixAddr   = p.addr;
+  window._parkedMatrixLabel  = p.label;
+  window._parkedWithdrawable = p.withdrawable;
+  window._parkedFee          = p.fee;
+  window._selfRescueShortfall = p.shortfall;
+  const st = document.getElementById('self-rescue-status');
+  if (st) { st.style.color = 'var(--text2)'; st.textContent = `${p.label}: working…`; }
+  if (action === 'approve') approveSelfRescue(); else doSelfRescue();
 }
 
 async function doSelfRescue() {
