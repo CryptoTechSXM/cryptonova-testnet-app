@@ -2193,6 +2193,11 @@ const MATRIX_ABI = [
   // ledger figure and is NOT the same thing — showing that one is how a member
   // gets quoted a total no single transaction can satisfy.
   'function freeWithdrawable(address) external view returns (uint256)',
+  // The ONLY proof that a slot was actually reclaimed. Emitted by the keeper
+  // path (MatrixLogicLib:1038 — delegatecall, so the log address is the matrix).
+  // Without it, "joined but not seated" is indistinguishable from a member who
+  // simply cycled out the normal way.
+  'event SlotReclaimed(address indexed member, uint256 position, uint256 idleDuration)',
   'function occupancy() external view returns (uint256)',
   'function MATRIX_SIZE() external view returns (uint256)',
   'function ENTRY_FEE() external view returns (uint256)',
@@ -4706,18 +4711,41 @@ async function loadDashboardData() {
               // who merely earned commission here has false, and must never be
               // shown this panel.
               //
-              // NOTE this narrows but does not perfect the test: a member who
-              // joined and cycled out cleanly also matches. That is far less
-              // harmful — it can only ever offer re-entry to a tier they really
-              // held, at that tier's own fee — but the honest fix is a
-              // SlotReclaimed check, which belongs with the V8.46 work that
-              // closes register() to the router.
+              // hasEverJoined ALONE IS NOT ENOUGH — confirmed live the same day.
+              // It killed the expensive false offers (0x7CAFC198 went from ten
+              // to one, 0x473C629A from eleven to one), but the survivor in both
+              // cases was T1.1 MatA with ZERO SlotReclaimed events: they had
+              // simply cycled out the normal way and lost nothing at all. The
+              // panel still told them their slot "was cleared after a period of
+              // inactivity".
+              //
+              // A slot is only ever cleared by the keeper's reclaim path, and
+              // that path emits SlotReclaimed (MatrixLogicLib:1038). That event
+              // is the only thing that distinguishes "reclaimed" from "left
+              // normally", so it is now REQUIRED before this panel appears.
+              //
+              // A failed log read suppresses the panel rather than showing it:
+              // the cost of hiding a genuine re-entry is a member waiting for
+              // the keeper, which is safe. The cost of showing a false one is
+              // an unnecessary entry fee, which is what started all of this.
               // Fee lookup: try contract with timeout, fall back to known tier constants
               // (same 6-decimal USDC amounts locked in the contract constructor).
               const TIER_FEES_6 = [0n,10_000_000n,25_000_000n,50_000_000n,100_000_000n,
                 250_000_000n,500_000_000n,1_000_000_000n,2_500_000_000n,
                 5_000_000_000n,10_000_000_000n];
               const tIdx = parseInt(m.label.match(/^T(\d+)/)?.[1] || '1');
+
+              // REQUIRE PROOF OF RECLAIM. Suppress on zero events AND on a failed
+              // read — see the note above on which way this must fail.
+              let _wasReclaimed = false;
+              try {
+                const _rcLogs = await raceTimeout(
+                  mc.queryFilter(mc.filters.SlotReclaimed(userAddr)).catch(() => null), 8000
+                ).then(v => v ?? null);
+                _wasReclaimed = Array.isArray(_rcLogs) && _rcLogs.length > 0;
+              } catch (_) { _wasReclaimed = false; }
+              if (!_wasReclaimed) return;   // nothing was cleared — show nothing
+
               const feeRaw = await raceTimeout(mc.ENTRY_FEE().catch(()=>null), 5000).then(v => v ?? null);
               const fee = feeRaw !== null ? BigInt(feeRaw) : (TIER_FEES_6[tIdx] ?? TIER_FEES_6[1]);
               limboCandidates.push({
