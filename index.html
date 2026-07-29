@@ -7770,7 +7770,17 @@ async function doSelfRescue() {
   try {
     const matrixAddr = window._parkedMatrixAddr;
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
-    const SELF_RESCUE_ABI = ['function selfRescue() external'];
+    // A ONE-LINE ABI CANNOT DECODE A REVERT. selfRescue's shortfall is pulled
+    // with safeTransferFrom (MatrixLogicLib:1207), so the commonest failure is an
+    // OpenZeppelin ERC20 custom error — and with only the function declared here,
+    // ethers returns reason=null, friendlyError falls back to its generic
+    // sentence, and the member is told to hard-refresh a healthy network.
+    // Sherwyn reported that twice on 2026-07-28/29 and called it "a testnet thing".
+    const SELF_RESCUE_ABI = [
+      'function selfRescue() external',
+      'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
+      'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
+    ];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
     // 2026-07-28: this used to fall back to a STATIC 15,000,000 whenever the
     // estimate threw. Two problems, and members hit both:
@@ -7781,6 +7791,73 @@ async function doSelfRescue() {
     //      just burns gas. The estimate failing is the diagnosis, not noise.
     // Measured worst-case cascade is 4.65M (V8_46_CascadeGas.test.js), so a
     // 1.15x buffer on a real estimate is ample. Same ladder the keepers use.
+    // SHORTFALL FIRST — this is the commonest reason a rescue cannot proceed and
+    // the only one the member can do anything about, yet it was the one we never
+    // named. 2026-07-29 (Sherwyn, second report): parked in T2.1 MatA holding
+    // $12.50 reserve + $0.63 earned against a $25.00 re-entry, i.e. $11.87 short.
+    // The estimate reverts, no reason decodes, and friendlyError falls back to
+    // "Transaction failed on-chain — hard-refresh". He refreshed, it failed
+    // again, he filed it twice and called it "a testnet thing". Nothing was
+    // broken: the crossing reserve funds exactly HALF the next fee by design and
+    // the other half comes from earnings, so a member with little referral income
+    // parks repeatedly. That is the documented path, not a fault — but being sent
+    // to debug a healthy network is on us.
+    //
+    // Checked BEFORE estimateGas so the member gets the number instead of a
+    // revert. Read failures fall through deliberately: the estimate below still
+    // catches the case, just less kindly.
+    try {
+      const _rme = await signer.getAddress();
+      const _mr  = new ethers.Contract(matrixAddr, [
+        'function entryFee() view returns (uint256)',
+        'function crossingReserveOf(address) view returns (uint256)',
+        'function withdrawableOf(address) view returns (uint256)',
+      ], signer);
+      const [_fee, _res, _wd] = await Promise.all([
+        _mr.entryFee(), _mr.crossingReserveOf(_rme), _mr.withdrawableOf(_rme),
+      ]);
+      const _have = _res + _wd;
+      if (_fee > 0n && _have < _fee) {
+        const _f    = v => '$' + (Number(v) / 1e6).toFixed(2);
+        const _need = _fee - _have;
+
+        // THE SHORTFALL IS PAYABLE FROM THE WALLET — do not tell the member to wait.
+        // MatrixLogicLib.selfRescue:1207 does
+        //     cfg.usdc.safeTransferFrom(member, address(this), shortfall)
+        // so a low in-matrix balance does NOT block the rescue; it just means the
+        // difference comes from their own USDC. My first draft of this message
+        // said "there is nothing to fix and nothing to retry", which would have
+        // sent a member away to wait for earnings when one approval finished it.
+        //
+        // NOTE the approval target: the MATRIX, not TierRouter. Approving the
+        // router here does nothing, and the member sees no reason why.
+        const _usdcR = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+        const [_bal, _alw] = await Promise.all([
+          _usdcR.balanceOf(_rme), _usdcR.allowance(_rme, matrixAddr),
+        ]);
+
+        if (_bal < _need) {
+          throw new Error(
+            `⚠️ Re-entry costs ${_f(_fee)}. You already hold ${_f(_res)} in crossing ` +
+            `reserve plus ${_f(_wd)} earned — ${_f(_have)} of it — so only ${_f(_need)} ` +
+            `is needed from your wallet, and your wallet has ${_f(_bal)}. Top up by ` +
+            `${_f(_need - _bal)} and the rescue will go through. Nothing was sent and ` +
+            `nothing was charged.`);
+        }
+        if (_alw < _need) {
+          throw new Error(
+            `⚠️ Almost there — ${_f(_need)} needs approving first. Re-entry costs ` +
+            `${_f(_fee)}; your crossing reserve and earnings cover ${_f(_have)}, leaving ` +
+            `${_f(_need)} from your wallet (you have ${_f(_bal)}). Click "Approve USDC" ` +
+            `just above, then Self Rescue. Nothing was sent and nothing was charged.`);
+        }
+        // Enough balance and allowance — fall through and let it run.
+      }
+    } catch (shortErr) {
+      if ((shortErr.message || '').startsWith('⚠️')) throw shortErr;
+      // Reads failed — not fatal, the estimate still guards the call.
+    }
+
     let _rescueGas;
     try {
       const _est = await matrix.selfRescue.estimateGas({ from: await signer.getAddress() });
