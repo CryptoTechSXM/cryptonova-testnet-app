@@ -162,6 +162,28 @@ However the c nova tokens and earnings increase everytime.
 
 ## Fix In Progress — closes when the fix ships
 
+### [2026-07-29] FUND LOSS — entering a tier where you already hold commission DESTROYS the balance
+- **Reporter:** Owner (0xe8Ad7bbA), spotted as "withdrew $1k twice but Total Withdrawn is wrong"
+- **Page:** Contract — `MatrixLogicLib._register` (:313-345). Not a frontend bug.
+- **Severity:** HIGHEST open item. **This is the only known bug that can delete money a member already owns.** V8.46 item 8; ship before Thursday/Friday's funded push.
+- **What happened:** Two $1,000 withdrawals. The wallet received **$1,970.00** (= $2,000 x 0.985 after the 1.5% fee), but the dashboard totalled **$1,947.50** — short exactly **$52.50**.
+- **Diagnosis (proven, not inferred):** Sixteen USDC payouts reconciled against the per-matrix ledgers (`wallet_inflow.js`); fifteen matched to the cent. T3.1 MatA paid $51.71 net with `totalWithdrawn` reading $0.00. The receipt (`tx_decode.js` on `0xb11eee58`) shows `withdrawPartial(uint256)` with arg **$52.50**, and BOTH `WithdrawalFeeCharged $0.79` and `EarningsWithdrawn $51.71`, status SUCCESS — so the counter WAS incremented at `withdrawCore:996`. It was zeroed afterwards: withdrawal at block 44796516 (~21:40 UTC), **`joinedAt` now 23:30:02 UTC, nearly two hours later.**
+- **Root cause:** `_register` treats `!hasEverJoined` as "no record exists" and builds a **fresh struct** (`withdrawable: 0, totalEarned: 0, totalWithdrawn: 0, crossingReserve: 0`). But the flag really means "never took a seat here", and two paths write real values without setting it: `_credit` (:928) credits referral commission into the matrix where **your DOWNLINE** entered, and `withdrawCore` gates on `withdrawable > 0` rather than membership, so a commission-only holder can withdraw too. Entering that tier later therefore overwrites live balances and history with zero. The USDC stays in the matrix as unattributed surplus with no claim against it.
+- **Why only one of sixteen:** T3.1 MatA is the only commission-only matrix this member subsequently entered for real.
+- **The owner escaped fund loss by ordering alone** — he had already withdrawn, so `withdrawable` was $0 when the reset landed. Entering first would have DELETED the $52.50 rather than merely unrecording it.
+- **Exposure:** anyone with `hasEverJoined == false && withdrawable > 0` in any matrix. Since `_credit` targets uplines, that is "every member whose direct went higher than they did" — most leaders. Detector to build: `credit_at_risk.js`.
+- **Interim mitigation if V8.46 slips: withdraw BEFORE upgrading.** A withdrawn balance cannot be erased; only the (log-reconstructible) history is lost.
+- **STATUS 2026-07-29 — DIAGNOSED, fix + 5 tests specified in `V8_46_PLAN.md` item 8.** Fix is a field-wise update instead of a struct construction; lives in `MatrixLogicLib`, which is LINKED not embedded, so it costs the factory no bytecode.
+- **Already-destroyed values are not recoverable from state.** They can be rebuilt from logs (`EarningsWithdrawn` for `totalWithdrawn`). No member is owed USDC from this instance — the money was paid out before the reset.
+
+### [2026-07-29] Total Withdrawn under-reported — matrices counted by balance instead of history
+- **Reporter:** Owner, mid-call
+- **Page:** Dashboard (index.html:4613 and :5546)
+- **What happened:** Withdrew ~$1,000 and "Total Withdrawn" barely moved.
+- **Root cause:** `totalWithdrawn` and `totalEarned` are **per-matrix** fields, so the headline is a SUM over an enumerated set — and the filter admitted a commission-only matrix only while `withdrawable > 0`. A tier drained to zero then fails both limbs (never joined, no balance), so **the act of claiming the money removed the record of the claim.** Measured on 0xe8Ad7bbA: ten such matrices held $1,651.00 of history; dashboard showed $296.50 against a true $1,947.50.
+- **STATUS 2026-07-29 — FIXED, commit ce6c734, live on admin.** Filter now tests history: `withdrawable > 0 || totalWithdrawn > 0 || totalEarned > 0`, at BOTH sites (the dashboard loop and the breakdown modal — the in-code comment already warned they must match, which is the only reason the second was found). Members will see Total Withdrawn and Total Earned INCREASE.
+- **Note:** this fix is why the $52.50 above became visible. The remaining $52.50 gap is the contract bug, not this one.
+
 ### [2026-07-29] Auto-upgrade — fails despite sufficient earnings (community call)
 - **Reporter:** Community call (owner relay) — June's account cited
 - **Page:** Dashboard (index.html)
