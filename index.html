@@ -1457,6 +1457,7 @@
             <div style="font-size:12px;color:var(--text3);margin-bottom:8px" data-i18n="dash.redeem_desc">Burn CNOVA at the current floor price to receive USDC from the CNOVA Treasury.</div>
             <div id="redeem-penalty-info" style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px"></div>
             <div class="info-row"><span class="info-key" data-i18n="dash.your_cnova">Your CNOVA</span><span class="info-val green" id="redeem-cnova-bal">—</span></div>
+            <div class="info-row"><span class="info-key" data-i18n="dash.locked_vesting">Locked (vesting)</span><span class="info-val" style="color:var(--yellow)" id="redeem-locked-bal">—</span></div>
             <div class="info-row"><span class="info-key" data-i18n="dash.floor_price">Floor Price</span><span class="info-val" id="redeem-floor">—</span></div>
             <div class="info-row"><span class="info-key" data-i18n="dash.gross_value">Gross Value</span><span class="info-val" id="redeem-gross">—</span></div>
             <div class="info-row" id="redeem-penalty-row"><span class="info-key" style="color:var(--yellow)" data-i18n="dash.early_unlock_penalty">Early Unlock Penalty</span><span class="info-val" style="color:var(--yellow)" id="redeem-penalty-amt">—</span></div>
@@ -1470,6 +1471,10 @@
             <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
               <button class="btn btn-ghost full-w" id="btn-redeem-approve" onclick="approveCNOVAForRedeem()" disabled data-i18n="dash.step1_approve_cnova">Step 1: Approve CNOVA</button>
               <button class="btn btn-ghost full-w" id="btn-redeem" onclick="doRedeemAtFloor()" disabled data-i18n="dash.step2_redeem">Step 2: Redeem for USDC</button>
+            </div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:6px" data-i18n="dash.unlock_all_desc">Convert ALL still-vesting CNOVA to unlocked (redeemable) in one transaction. An early-exit penalty applies to whatever is still vesting; fully-vested batches unlock free.</div>
+              <button class="btn btn-ghost full-w" id="btn-unlock-all" onclick="doUnlockAll()" style="color:var(--yellow)" data-i18n="dash.max_unlock">Max Unlock (early-exit vesting)</button>
             </div>
             <div id="redeem-status" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
           </div>
@@ -2255,6 +2260,7 @@ const CNOVA_ABI = [
   'function vestBatchesOf(address) external view returns (tuple(uint128 amount, uint128 unlockAt)[])',
   'function penaltyDestination() external view returns (address)',
   'function earlyUnlock(uint256 batchIndex) external returns (uint256 released, uint256 penaltyAmt)',
+  'function earlyUnlockAll() external returns (uint256 totalReleased, uint256 totalPenalty)',
   // An early unlock DELETES the batch (swap-and-pop), so the only surviving record
   // of it is this event — without reading it the member's history simply vanishes.
   'event EarlyUnlock(address indexed member, uint256 batchIndex, uint256 released, uint256 penaltyAmount)',
@@ -7024,7 +7030,7 @@ function renderF8Tree(nodes, myAddr, occ, mSize) {
 // ═══════════════════════════════════════════════════════════════════════
 // CNOVA REDEEM
 // ═══════════════════════════════════════════════════════════════════════
-let _redeemFloor = 0n, _redeemBal = 0n, _redeemPenaltyBps = 5000n;
+let _redeemFloor = 0n, _redeemBal = 0n, _redeemPenaltyBps = 5000n, _redeemLocked = 0n;
 
 async function loadRedeemData() {
   if (!userAddr) return;
@@ -7032,13 +7038,16 @@ async function loadRedeemData() {
   try {
     const cnova    = new ethers.Contract(ADDRS.cnova,    CNOVA_ABI,    rp);
     const treasury = new ethers.Contract(ADDRS.treasury, TREASURY_ABI, rp);
-    const [bal, floorRaw, vestDur, penaltyBps] = await Promise.all([
+    const [bal, floorRaw, vestDur, penaltyBps, lockedBal] = await Promise.all([
       cnova.balanceOf(userAddr).catch(()=>0n),
       treasury.floorPrice().catch(()=>0n),   // (usdcReserve * 1e18) / cnovaSupply — 6-dec result
       cnova.vestDuration().catch(()=>BigInt(180*86400)),
       cnova.maxPenaltyBps().catch(()=>5000n),
+      cnova.lockedBalanceOf(userAddr).catch(()=>0n),
     ]);
     _redeemBal        = bal;
+    _redeemLocked     = lockedBal;
+    setText('redeem-locked-bal', Number(ethers.formatEther(lockedBal)).toFixed(2) + ' CNOVA');
     _redeemFloor      = floorRaw;  // usdcOut = cnovaWei * floorRaw / 1e18
     _redeemPenaltyBps = penaltyBps;
 
@@ -7104,7 +7113,7 @@ function updateRedeemPreview() {
 function setMaxRedeem() {
   const input = document.getElementById('redeem-amount');
   if (input && _redeemBal > 0n) {
-    input.value = Number(ethers.formatEther(_redeemBal)).toFixed(4);
+    input.value = (Math.floor(Number(ethers.formatEther(_redeemBal)) * 1e4) / 1e4).toFixed(4);
     updateRedeemPreview();
   }
 }
@@ -7119,7 +7128,8 @@ async function approveCNOVAForRedeem() {
   try {
     const treasuryAddr = ADDRS.treasury;
     const cnovaW = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, signer);
-    const amtWei = BigInt(Math.floor(amt * 1e18));
+    let amtWei = BigInt(Math.floor(amt * 1e18));
+    if (amtWei > _redeemBal) amtWei = _redeemBal; // never request more CNOVA than the wallet holds
     const tx = await cnovaW.approve(treasuryAddr, amtWei);
     setStatus('redeem-status','⏳ Approving CNOVA…','info');
     await tx.wait();
@@ -7142,7 +7152,8 @@ async function doRedeemAtFloor() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Redeeming…';
   try {
     const treasury = new ethers.Contract(ADDRS.treasury, TREASURY_ABI, signer);
-    const amtWei = BigInt(Math.floor(amt * 1e18));
+    let amtWei = BigInt(Math.floor(amt * 1e18));
+    if (amtWei > _redeemBal) amtWei = _redeemBal; // never request more CNOVA than the wallet holds
     const tx = await treasury.redeemAtFloor(amtWei);
     setStatus('redeem-status','⏳ Confirming redemption…','info');
     await tx.wait();
@@ -7156,6 +7167,38 @@ async function doRedeemAtFloor() {
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Redeem for USDC';
     setStatus('redeem-status',friendlyError(e),'err');
+  }
+}
+
+async function doUnlockAll() {
+  if (!signer) { toast('Connect wallet first','error'); return; }
+  const btn = document.getElementById('btn-unlock-all');
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  try {
+    const cnovaR = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
+    const locked = await cnovaR.lockedBalanceOf(userAddr).catch(()=>0n);
+    if (locked === 0n) { toast('No vesting CNOVA to unlock','info'); return; }
+    const cnovaW = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, signer);
+    let released = 0n, penalty = 0n;
+    try { const r = await cnovaW.earlyUnlockAll.staticCall(); released = r[0]; penalty = r[1]; }
+    catch(e) { setStatus('redeem-status', friendlyError(e), 'err'); return; }
+    const lockedStr = Number(ethers.formatEther(locked)).toFixed(2);
+    const relStr    = Number(ethers.formatEther(released)).toFixed(2);
+    const penStr    = Number(ethers.formatEther(penalty)).toFixed(2);
+    if (!confirm('Unlock ALL vesting CNOVA now?\n\nLocked (vesting): ' + lockedStr + ' CNOVA\nEarly-exit penalty (forfeited): ' + penStr + ' CNOVA\nYou keep, now unlocked: ' + relStr + ' CNOVA\n\nThis cannot be undone.')) return;
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Unlocking…';
+    setStatus('redeem-status','⏳ Unlocking all vesting CNOVA…','info');
+    const tx = await cnovaW.earlyUnlockAll();
+    await tx.wait();
+    setStatus('redeem-status','✅ Unlocked ' + relStr + ' CNOVA (penalty ' + penStr + '). Now redeemable.','ok');
+    toast('CNOVA unlocked!','success');
+    btn.disabled = false; btn.textContent = 'Max Unlock (early-exit vesting)';
+    await new Promise(r => setTimeout(r, 3500));
+    await loadRedeemData();
+    await loadDashboardData();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Max Unlock (early-exit vesting)';
+    setStatus('redeem-status', friendlyError(e), 'err');
   }
 }
 
