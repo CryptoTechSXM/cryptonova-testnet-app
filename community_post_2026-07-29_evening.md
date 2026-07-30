@@ -64,11 +64,12 @@ have one person lose a balance tomorrow that we already knew about. 🙏
 
 ---
 
-✅ **Every ticket is closed**
+✅ **43 reports closed — and 10 still open**
 
-Twenty-nine reports came in over the last few days. All of them are now answered
-and closed. Here is the honest breakdown, because "closed" does not always mean
-"we fixed a bug".
+We went through the whole tracker tonight. **43 closed, 10 still open**, and I am
+listing the open ones further down rather than rounding them away. Here is the
+honest breakdown of the closed ones, because "closed" does not always mean "we
+fixed a bug".
 
 **Real bugs, fixed and live** 🔧
 
@@ -87,6 +88,11 @@ CryptoJan22)*
 zero dropped out of the totals — so claiming your money removed the record of the
 claim. **These numbers will go UP when you refresh.** That is the correction, not
 new money.
+
+• **"Back to Dashboard" went to the home page.** 🔗 Sherwyn flagged this on the
+26th and called it cosmetic. It was — the link pointed at the site root instead of
+the dashboard tab. Fixed tonight. Small things get fixed too, and they still count
+as finds.
 
 • Plus the withdrawal lock, the missing Upgrade button, the invisible Self Rescue
 button, the gas message and the matrix tier selector — all covered in this
@@ -121,6 +127,44 @@ funding rule, not a fault: your crossing reserve pre-funds **exactly half** of
 your next entry fee, and the other half has to come from earnings. The shortfall
 is simply whatever you have not earned yet. Your point that all the charges
 should be shown together was fair, and that part is fixed.
+
+---
+
+📋 **Still open — 10 items, named**
+
+Not everything is fixed and I would rather you see the list than wonder.
+
+**Waiting on the V8.46 deploy** — diagnosed, written, tested, not yet live:
+
+• The commission-balance bug above.
+• **Rescue loans that never repay.** Sherwyn's $1.68 that would not clear no
+matter how many times he rotated. The debt belongs to a *specific* matrix and only
+clears from earnings inside that same matrix — so once you have moved on, nothing
+can pay it. The strange part: on one account the money to clear the debt was
+sitting in the very same tier. A one-line change makes a withdrawal settle it.
+
+**Still being diagnosed** — I am not going to pretend I know the cause yet:
+
+• **"Auto-upgrade did not fire even though I had earned enough."** Reported on the
+call for June's account — $0.25 available against $88.98 earned. Those are two
+different measurements sitting next to each other and I suspect that is the whole
+story, but I need the wallet address to prove it. **June, please send it.**
+• **A T2 upgrade behaving as if it needs funds already in T2.**
+• **Accounts with several tiers enabled graduating when they should re-enter**, and
+others cycling over and over without graduating.
+• **Double re-entry appearing to block graduation entirely.**
+• **@Koach100's T3 sitting at 0 cycles** while every other tier cycled, position
+#4. This one has been open since the 27th without a proper answer — that is on us,
+and it is next on the list.
+
+**Frontend work, accepted and queued:**
+
+• **Upgrade controls on the Registration page**, not only the Dashboard. *(Kira)*
+• **The tiers page is ambiguous** and new pairs should show their count. *(Kira)*
+Kira also suggested raising the Tier 1 entry numbers to 400–500 in that same
+report — **that part is done**, and it is why T1 stopped stalling.
+• **A completed rescue vanishes instead of confirming.** The panel just disappears,
+which looks identical to a button that never worked. *(CryptoJan22)*
 
 ---
 
