@@ -37,6 +37,26 @@
 
 ## Open Issues
 
+### [2026-07-30] Other — When I trying to register an account:
+
+after clicking Approv…
+- **Reporter:** Anthony L
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
+- **Frequency:** Consistent
+- **What happened:** When I trying to register an account:
+
+after clicking Approve $10  USDC then confirm from Metamask 
+then I check off the box and click GOT IT and confirm
+
+then the bot that I checked off and clicked GOT IT re-appears with the box already check off, and when i click got it again the same thing happens and that senario keeps reapeating 
+
+I am unable to register any account
+- **What was expected:** the box should repair unchecked allowing me to check the box and CONFIRM to Approve the $10 usdc to register the account
+- **Submitted:** Thu, 30 Jul 2026 19:36:33 GMT
+
+
 ### [2026-07-30] Buy CNOVA (buy.html) — I tried upgrading from T1 to T2 but was unable to do so.
 - **Reporter:** @Koach100
 - **Page:** Buy CNOVA (buy.html)
