@@ -1370,12 +1370,17 @@
         <div style="flex:1">
           <div style="font-weight:700;color:var(--yellow);font-size:14px;margin-bottom:4px">SF Rescue Loan Outstanding</div>
           <div style="font-size:13px;color:var(--text2)">
-            The Stability Fund covered <strong id="rescue-debt-amount" style="color:var(--yellow)">$—</strong> to rescue you when the matrix was full.
-            This will be <strong>repaid automatically</strong> when you cycle out — no action needed.
+            The Stability Fund covered <strong id="rescue-debt-amount" style="color:var(--yellow)">$—</strong> in total to rescue you when a matrix was full.
           </div>
-          <div style="margin-top:8px;font-size:12px;color:var(--text3)">
-            💡 Invite more members to fill spots faster → you cycle out sooner → loan clears.
-          </div>
+          <!-- Per-matrix breakdown. 2026-07-29: this used to be one flat sentence
+               claiming the loan "will be repaid automatically when you cycle out".
+               That is only true while the member is STILL SEATED in the matrix that
+               holds the debt — rescueDebt is per-matrix and clears only from a pool
+               share there (_settlePool:450) or a cycle-out from there
+               (_cycleOutRoot:548). A member who has moved on triggers neither, so
+               the promise was false and the "invite more members" tip was useless
+               advice. Now each debt states its own truth. -->
+          <div id="rescue-debt-list" style="margin-top:8px;font-size:13px;color:var(--text2)"></div>
         </div>
       </div>
 
@@ -5367,13 +5372,64 @@ async function loadDashboardData() {
     } catch(_) {}
 
     // ── SF Rescue Loan banner ─────────────────────────────────────────────
+    // 2026-07-29: rewritten. It previously read ONLY `ADDRS.T1.matA` — pair 1 of
+    // Tier 1 — so a debt in any other tier, or in T1's pairs 2-4, was invisible.
+    // It then told the member the loan "will be repaid automatically when you
+    // cycle out", which is false for anyone no longer seated in the matrix that
+    // holds the debt. Measured on 0xe8Ad7bbA: $2.07 stranded in T1.1 MatA and
+    // $2.75 in T2.1 MatA, neither repayable, while the banner promised both would
+    // clear themselves and suggested inviting more members to speed it up.
     try {
-      const matA1 = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
-      const debt = await matA1.rescueDebtOf(userAddr).catch(() => 0n);
       const banner = document.getElementById('rescue-debt-banner');
+      const list   = document.getElementById('rescue-debt-list');
+      const debts  = [];
+      let totalDebt = 0n;
+
+      for (const t of Object.keys(ADDRS).filter(k => /^T\d+$/.test(k))) {
+        if (!ADDRS[t] || !ADDRS[t].pm) continue;
+        // allPairsStatus returns every pair in ONE call, so this covers pairs 2+
+        // as well — the same one-sided-lookup mistake that hid parked positions.
+        const st = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp)
+          .allPairsStatus().catch(() => null);
+        if (!st) continue;
+        const [matAs, matBs] = st;
+        for (let i = 0; i < matAs.length; i++) {
+          for (const [half, addr] of [['Matrix A', matAs[i]], ['Matrix B', matBs[i]]]) {
+            if (!addr || addr === ethers.ZeroAddress) continue;
+            const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
+            const d  = await mc.rescueDebtOf(userAddr).catch(() => 0n);
+            if (BigInt(d) === 0n) continue;
+            const seated = await mc.isActiveInMatrix(userAddr).catch(() => null);
+            totalDebt += BigInt(d);
+            debts.push({
+              label: `${t}.${i + 1} ${half}`,
+              debt: BigInt(d),
+              // null = the read failed; say so rather than guessing either way.
+              seated,
+            });
+          }
+        }
+      }
+
       if (banner) {
-        if (debt > 0n) {
-          document.getElementById('rescue-debt-amount').textContent = fmt6(debt);
+        if (totalDebt > 0n && list) {
+          document.getElementById('rescue-debt-amount').textContent = fmt6(totalDebt);
+          list.innerHTML = debts.map(d => {
+            const amt = `<strong style="color:var(--yellow)">${fmt6(d.debt)}</strong>`;
+            if (d.seated === true) {
+              return `<div style="margin-top:4px">• ${d.label} — ${amt}. You are still seated here, so this
+                <strong>repays itself</strong> when you cycle out. Filling spots faster brings that forward.</div>`;
+            }
+            if (d.seated === false) {
+              return `<div style="margin-top:4px">• ${d.label} — ${amt}. <strong>You have moved on from this
+                matrix</strong>, so it cannot clear on its own: the loan only repays from earnings inside the
+                matrix that holds it. Rotating in other tiers will not touch it. A contract update is coming
+                that settles it from your next withdrawal. Nothing is owed by you in the meantime and no
+                position is affected.</div>`;
+            }
+            return `<div style="margin-top:4px">• ${d.label} — ${amt}. Could not read your seat status here,
+              so we cannot say whether it will clear automatically. Try a refresh.</div>`;
+          }).join('');
           banner.style.display = 'flex';
         } else {
           banner.style.display = 'none';
