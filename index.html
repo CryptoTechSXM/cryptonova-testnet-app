@@ -6183,8 +6183,22 @@ function setWithdrawMax() {
   if (!inp) return;
   // _maxWithdrawable is set by loadDashboardData (USDC units, 6 decimals)
   const maxUsd = window._maxWithdrawable || 0n;
-  inp.value = maxUsd > 0n ? (Number(maxUsd) / 1e6).toFixed(2) : '';
+  // FLOOR, NEVER toFixed. 2026-07-29: `.toFixed(2)` rounds HALF-UP, so a true max
+  // of $5213.085… was written into the box as 5213.09 — more than the member
+  // actually had. doWithdrawPartial then compares at full 6-decimal precision
+  // (`amtMicro > maxUsd`) and refused it with "Amount exceeds available". The MAX
+  // button handed you a number the same screen would not accept, and the hint
+  // under it quoted the same rounded-up figure. Owner hit it on $5,213.09 and had
+  // to knock 1.5% off by hand to get a value through.
+  inp.value = maxUsd > 0n ? floorUsd2(maxUsd) : '';
   onWithdrawAmountInput();
+}
+
+/** Truncate micro-USDC to a 2dp string that can never exceed the true balance. */
+function floorUsd2(micro) {
+  const m = BigInt(micro);
+  const cents = m / 10_000n;                 // integer division = floor
+  return (Number(cents) / 100).toFixed(2);
 }
 
 function onWithdrawAmountInput() {
@@ -6196,7 +6210,10 @@ function onWithdrawAmountInput() {
   const maxUsd = window._maxWithdrawable || 0n;
   const maxNum = Number(maxUsd) / 1e6;
   if (!val || val <= 0 || val > maxNum) {
-    preview.textContent = val > maxNum ? `⚠️ Max available: $${maxNum.toFixed(2)}` : '';
+    // Quote the FLOORED figure, so the number in the hint is one the withdrawal
+    // will actually accept. Previously this printed the half-up rounding of the
+    // true max, i.e. a value guaranteed to be rejected.
+    preview.textContent = val > maxNum ? `⚠️ Max available: $${floorUsd2(maxUsd)}` : '';
     if (btnP) btnP.disabled = true;
     return;
   }
@@ -6251,9 +6268,19 @@ async function doWithdrawPartial() {
   const inp = document.getElementById('withdraw-amount-input');
   const val = parseFloat(inp ? inp.value : '0');
   if (!val || val <= 0) { toast('Enter an amount', 'error'); return; }
-  const amtMicro = BigInt(Math.round(val * 1e6));
+  let amtMicro = BigInt(Math.round(val * 1e6));
   const maxUsd = window._maxWithdrawable || 0n;
-  if (amtMicro > maxUsd) { toast('Amount exceeds available', 'error'); return; }
+  // Belt and braces alongside the floored MAX fill. The balance ACCRUES while the
+  // panel is open (pool shares settle continuously), so a member who typed the max
+  // a moment ago can be a few micro-USDC over by the time they press the button.
+  // Within one cent, clamp to the true maximum instead of refusing — refusing on
+  // sub-cent dust is what produced "Amount exceeds available" on a figure this
+  // same screen had just offered.
+  if (amtMicro > maxUsd && amtMicro - maxUsd <= 10_000n) amtMicro = maxUsd;
+  if (amtMicro > maxUsd) {
+    toast(`Amount exceeds available — max is $${floorUsd2(maxUsd)}`, 'error');
+    return;
+  }
 
   const btnP = document.getElementById('btn-withdraw-partial');
   const btnA = document.getElementById('btn-withdraw');
