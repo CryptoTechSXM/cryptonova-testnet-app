@@ -162,6 +162,41 @@ However the c nova tokens and earnings increase everytime.
 
 ## Fix In Progress — closes when the fix ships
 
+### [2026-07-29] Auto-upgrade — fails despite sufficient earnings (community call)
+- **Reporter:** Community call (owner relay) — June's account cited
+- **Page:** Dashboard (index.html)
+- **Frequency:** Consistent on affected accounts
+- **What happened:** Account showed only **$0.25 available** against **$88.98 total earned**, and auto-upgrade did not fire.
+- **What was expected:** Auto-upgrade to trigger from accumulated earnings.
+- **STATUS 2026-07-29 — NOT YET DIAGNOSED, address needed.** Leading hypothesis, testable in one run of `member_ledger.js`: `$0.25` is `freeWithdrawable` (after the crossing reserve AND the whole automation reserve are withheld) while `$88.98` is lifetime `totalEarned` across every matrix. Those are different quantities and the screen puts them side by side. If confirmed it is a WORDING bug, not an engine bug — but `_executeAdditive` spends `escrow + withdrawable` in the cycling matrix only, so a genuine funding gap is also possible. **Need June's wallet address to settle it.**
+
+### [2026-07-29] Auto-upgrade — T2 upgrade appears to require funds already in T2 (community call)
+- **Reporter:** Community call (owner relay)
+- **Page:** Dashboard (index.html)
+- **What happened:** A T1→T2 auto-upgrade behaved as though it needed a balance in T2 rather than in T1.
+- **STATUS 2026-07-29 — OPEN, no explanation yet.** Worth checking against `onCrossToMatB` (TierRouter:1136-1143), whose funding paths are the member's WALLET (needs a standing allowance) or `withdrawableOf` in **the MatA they just crossed out of**. If any caller reads the destination tier's balance instead of the source's, that is this bug. Not reproduced yet.
+
+### [2026-07-29] Cycle-out — accounts with several tiers enabled graduate incorrectly; others cycle indefinitely (community call)
+- **Reporter:** Community call (owner relay)
+- **What happened:** Accounts with multiple tier enablements graduate when they should re-enter; other accounts cycle repeatedly without ever graduating.
+- **STATUS 2026-07-29 — OPEN.** Both symptoms point at the additive engine's priority order (`_executeAdditive`, TierRouter:1274-1360): re-entry consumes `curFee` FIRST, then upgrade needs `nextFee` from the remainder, then double needs `curFee` again. Which branch fires is decided purely by how much the cycle-out carried, so the same settings produce different outcomes at different balances. Related and already recorded: **V8.46-C** (silent graduation — the empty catch at `MatrixLogicLib:513` drops a member with no seat, no park and no event; a live instance was confirmed today on `0x473C629A`, which had 15 consecutive re-entries and then simply stopped).
+
+### [2026-07-29] Double re-entry blocks graduation entirely (community call)
+- **Reporter:** Community call (owner relay)
+- **What happened:** With Double Re-entry enabled, accounts never graduate — they stay in continuous cycles.
+- **STATUS 2026-07-29 — OPEN, mechanism plausible from source.** `_executeAdditive` step 3 (`doubleOn && anySeat && escrow + withdrawable >= curFee`) spends a SECOND `curFee` in the current tier after the re-entry has already taken one. A member with double enabled therefore consumes on two same-tier seats the funds that would otherwise have covered `nextFee` and moved them up. If that is the whole story it is working as designed and mis-explained to members — but it needs confirming against a real wallet before we say so.
+
+### [2026-07-29] Rescue loan cannot repay once the member leaves that matrix — V8.46 item 7
+- **Reporter:** Community call (Sherwyn's $1.68) + owner (0xe8Ad7bbA)
+- **What happened:** A rescue loan stays outstanding through many Tier 1 rotations.
+- **STATUS 2026-07-29 — DIAGNOSED, fix specified in `V8_46_PLAN.md` item 7.** `rescueDebt` is per-matrix and clears only from a pool share in that matrix (`_settlePool:450`, gated by `if (share == 0) return;`) or a cycle-out from it (`_cycleOutRoot:548`, needs `withdrawable > 0`). A member who has moved on triggers neither, so rotating elsewhere cannot touch it. `rescueRepayBps` is 10,000 (100%) — not a rate problem. Measured on 0xe8Ad7bbA: T1.1 MatA $2.07 and T2.1 MatA $2.75 outstanding, with **$35.00 withdrawable sitting in that same T2.1 MatA** and `withdrawCore` never reading `rescueDebt`. One deduction in `withdrawCore` fixes it.
+
+### [2026-07-29] Rescue panel vanishes silently when a rescue completes
+- **Reporter:** CryptoJan22 (via the second of two reports today)
+- **Page:** Dashboard (index.html)
+- **What happened:** After the co-pay keeper rescued their second position, the Self Rescue button simply disappeared — indistinguishable from a button that never rendered.
+- **STATUS 2026-07-29 — CONFIRMED, frontend work queued.** Needs a short confirmation ("you have been re-entered, nothing pending") instead of an empty panel. Also: the panel re-checks every 30 seconds, so there is a visible lag between an approval confirming and the button activating — refresh on the approval receipt instead of waiting for the next tick.
+
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
 - **Page:** Onboarding / Registration
@@ -321,6 +356,14 @@ T5 upgrade check failed — try again in a moment (RPC may be busy).
 
 
 ## Mainnet-Prep Design Questions (not bugs — decide before mainnet launch)
+
+### [2026-07-29] Pay-it-forward voucher gifting (community idea — Sherwyn)
+- **Proposal:** A new member gifts their initial $10 entry onward to the next joiner, chaining entries.
+- **STATUS 2026-07-29:** Owner agreed to test. Design questions before it can be built: does the gift create a referral relationship (and therefore an L1 commission path), or an unattributed entry? `register(address referrer)` requires a referrer, and `_credit` pays commission into the matrix where the entry lands — so a gifted entry with no sponsor needs an explicit rule. Coupon machinery already exists (`registerWithCoupon`, `routerCouponEntry`) and is the likely vehicle.
+
+### [2026-07-29] Syndicate / group account (community idea)
+- **Proposal:** A shared account funded by several members.
+- **STATUS 2026-07-29:** Discussed, not specified. Blocking question: the contract enforces one position per member per tier (`_requireNotSeated` / the V8.46 pair guard), and earnings credit a single address. A syndicate therefore needs off-chain custody or a wrapper contract, and the payout split is not something the matrix can express. Decide before mainnet — retro-fitting it would touch the entry path.
 
 ### Exit penalty rate — confirm before mainnet
 - `exitSeat()` ships with **20%** of the released crossing reserve as the penalty

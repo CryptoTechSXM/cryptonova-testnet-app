@@ -4600,7 +4600,20 @@ async function loadDashboardData() {
       // withdrawable in tier matrices they never joined (hasEverJoined=false). The
       // contract explicitly allows withdrawing these (V8.36), but this filter hid
       // them — uplines earned invisibly. Count any matrix with a positive balance.
-      const _hasCredit = member && !member.hasEverJoined && BigInt(member.withdrawable) > 0n;
+      // HISTORY, NOT JUST A BALANCE. 2026-07-29: the test was `withdrawable > 0`,
+      // which means WITHDRAWING removes the matrix from the count that reports
+      // the withdrawal. A commission-only tier drained to zero fails both limbs
+      // — never joined, no balance — so its totalWithdrawn and totalEarned vanish
+      // from the headline the moment the member claims them.
+      //
+      // Measured on 0xe8Ad7bbA: ten such matrices held $1,651.00 of withdrawal
+      // history. Dashboard showed ~$296.50 against a true $1,947.50, and TOTAL
+      // EARNED was short by the same amount. That is the "withdrew $1k but Total
+      // Withdrawn is wrong" report.
+      const _hasCredit = member && !member.hasEverJoined &&
+        (BigInt(member.withdrawable) > 0n ||
+         BigInt(member.totalWithdrawn ?? 0n) > 0n ||
+         BigInt(member.totalEarned ?? 0n) > 0n);
       if (member && (member.hasEverJoined || _hasCredit)) {
         totalW += BigInt(member.withdrawable);
         // THE HEADLINE FIGURE, FROM THE CONTRACT INSTEAD OF A GUESS.
@@ -5528,7 +5541,12 @@ async function _getAllMatrixMembers(userAddr, rp) {
     // was not, so a sponsor with many upgrading directs saw a headline of $1,307
     // against a breakdown of $25 — every commission-only tier was dropped.
     // The two loops must apply the SAME filter; if one changes, change both.
-    const _hasCredit = m && !m.hasEverJoined && BigInt(m.withdrawable) > 0n;
+    // Kept identical to the dashboard loop above, per the note — a matrix with
+    // withdrawal or earnings HISTORY counts even after its balance reaches zero.
+    const _hasCredit = m && !m.hasEverJoined &&
+      (BigInt(m.withdrawable) > 0n ||
+       BigInt(m.totalWithdrawn ?? 0n) > 0n ||
+       BigInt(m.totalEarned ?? 0n) > 0n);
     if (m && (m.hasEverJoined || _hasCredit)) {
       totalEarned      += BigInt(m.totalEarned);
       totalWithdrawn   += BigInt(m.totalWithdrawn);
