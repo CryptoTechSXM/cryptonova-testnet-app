@@ -37,6 +37,24 @@
 
 ## Open Issues
 
+### [2026-07-30] Dashboard (index.html) — this account is upgraded all the way to T10.
+T2 has graduate…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** this account is upgraded all the way to T10.
+T2 has graduated a couple days ago and has not reentered T2.
+it says the reserve is 20,000 .
+this or none of my other accounts have assets to claim or withdraw.
+this account has 4 direct referrals and 4 second level referrals.
+- **What was expected:** reentry into T3 by now.
+i am supprised about the quantity of reserve.
+to be able to have some withdrawable assets.
+- **Submitted:** Thu, 30 Jul 2026 16:07:01 GMT
+
+
 ### [2026-07-30] Dashboard (index.html) — "upgrade too large for the network" / "gas limit too high" (4 reports consolidated)
 - **Reporter:** Maximum_71 (wallets 0x99b52ee9, 0x7010ad1e, 0xde580069, 0x18750a2c)
 - **Page:** Dashboard (index.html) — upgrade / re-entry
