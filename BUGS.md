@@ -51,6 +51,7 @@
 - **STATUS 2026-07-29 — DIAGNOSED, fix + 5 tests specified in `V8_46_PLAN.md` item 8.** Fix is a field-wise update instead of a struct construction; lives in `MatrixLogicLib`, which is LINKED not embedded, so it costs the factory no bytecode.
 - **Already-destroyed values are not recoverable from state.** They can be rebuilt from logs (`EarningsWithdrawn` for `totalWithdrawn`). No member is owed USDC from this instance — the money was paid out before the reset.
 
+
 ### [2026-07-29] Auto-upgrade — fails despite sufficient earnings (community call)
 - **Reporter:** Community call (owner relay) — June's account cited
 - **Page:** Dashboard (index.html)
@@ -58,33 +59,32 @@
 - **What happened:** Account showed only **$0.25 available** against **$88.98 total earned**, and auto-upgrade did not fire.
 - **What was expected:** Auto-upgrade to trigger from accumulated earnings.
 - **STATUS 2026-07-29 — NOT YET DIAGNOSED, address needed.** Leading hypothesis, testable in one run of `member_ledger.js`: `$0.25` is `freeWithdrawable` (after the crossing reserve AND the whole automation reserve are withheld) while `$88.98` is lifetime `totalEarned` across every matrix. Those are different quantities and the screen puts them side by side. If confirmed it is a WORDING bug, not an engine bug — but `_executeAdditive` spends `escrow + withdrawable` in the cycling matrix only, so a genuine funding gap is also possible. **Need June's wallet address to settle it.**
-
-### [2026-07-29] Auto-upgrade — T2 upgrade appears to require funds already in T2 (community call)
-- **Reporter:** Community call (owner relay)
-- **Page:** Dashboard (index.html)
-- **What happened:** A T1→T2 auto-upgrade behaved as though it needed a balance in T2 rather than in T1.
-- **STATUS 2026-07-29 — OPEN, no explanation yet.** Worth checking against `onCrossToMatB` (TierRouter:1136-1143), whose funding paths are the member's WALLET (needs a standing allowance) or `withdrawableOf` in **the MatA they just crossed out of**. If any caller reads the destination tier's balance instead of the source's, that is this bug. Not reproduced yet.
+- **DIAGNOSIS 2026-07-30 — mechanism confirmed on a SIBLING account, not yet on hers.** June is Koach100, who runs several test accounts; neither wallet on file matches the reported $88.98, so the exact account is still unidentified. But the pattern is reproduced exactly on `0x1ca3316E`: **$5,540.35 total earned against $389.92 releasable**, because lifetime `totalEarned` spans every tier while "available" is `freeWithdrawable` after the crossing lock and the automation reserve. Her `$0.25 vs $88.98` is the same ratio at a smaller scale. **Almost certainly a labelling problem rather than an engine fault — but I will not close it on a sibling account.** Need her wallet address to confirm, then this closes as wording.
 
 ### [2026-07-29] Cycle-out — accounts with several tiers enabled graduate incorrectly; others cycle indefinitely (community call)
 - **Reporter:** Community call (owner relay)
 - **What happened:** Accounts with multiple tier enablements graduate when they should re-enter; other accounts cycle repeatedly without ever graduating.
 - **STATUS 2026-07-29 — OPEN.** Both symptoms point at the additive engine's priority order (`_executeAdditive`, TierRouter:1274-1360): re-entry consumes `curFee` FIRST, then upgrade needs `nextFee` from the remainder, then double needs `curFee` again. Which branch fires is decided purely by how much the cycle-out carried, so the same settings produce different outcomes at different balances. Related and already recorded: **V8.46-C** (silent graduation — the empty catch at `MatrixLogicLib:513` drops a member with no seat, no park and no event; a live instance was confirmed today on `0x473C629A`, which had 15 consecutive re-entries and then simply stopped).
 
+
 ### [2026-07-29] Double re-entry blocks graduation entirely (community call)
 - **Reporter:** Community call (owner relay)
 - **What happened:** With Double Re-entry enabled, accounts never graduate — they stay in continuous cycles.
 - **STATUS 2026-07-29 — OPEN, mechanism plausible from source.** `_executeAdditive` step 3 (`doubleOn && anySeat && escrow + withdrawable >= curFee`) spends a SECOND `curFee` in the current tier after the re-entry has already taken one. A member with double enabled therefore consumes on two same-tier seats the funds that would otherwise have covered `nextFee` and moved them up. If that is the whole story it is working as designed and mis-explained to members — but it needs confirming against a real wallet before we say so.
+
 
 ### [2026-07-29] Rescue loan cannot repay once the member leaves that matrix — V8.46 item 7
 - **Reporter:** Community call (Sherwyn's $1.68) + owner (0xe8Ad7bbA)
 - **What happened:** A rescue loan stays outstanding through many Tier 1 rotations.
 - **STATUS 2026-07-29 — DIAGNOSED, fix specified in `V8_46_PLAN.md` item 7.** `rescueDebt` is per-matrix and clears only from a pool share in that matrix (`_settlePool:450`, gated by `if (share == 0) return;`) or a cycle-out from it (`_cycleOutRoot:548`, needs `withdrawable > 0`). A member who has moved on triggers neither, so rotating elsewhere cannot touch it. `rescueRepayBps` is 10,000 (100%) — not a rate problem. Measured on 0xe8Ad7bbA: T1.1 MatA $2.07 and T2.1 MatA $2.75 outstanding, with **$35.00 withdrawable sitting in that same T2.1 MatA** and `withdrawCore` never reading `rescueDebt`. One deduction in `withdrawCore` fixes it.
 
+
 ### [2026-07-29] Rescue panel vanishes silently when a rescue completes
 - **Reporter:** CryptoJan22 (via the second of two reports today)
 - **Page:** Dashboard (index.html)
 - **What happened:** After the co-pay keeper rescued their second position, the Self Rescue button simply disappeared — indistinguishable from a button that never rendered.
 - **STATUS 2026-07-29 — CONFIRMED, frontend work queued.** Needs a short confirmation ("you have been re-entered, nothing pending") instead of an empty panel. Also: the panel re-checks every 30 seconds, so there is a visible lag between an approval confirming and the button activating — refresh on the approval receipt instead of waiting for the next tick.
+
 
 ### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
 - **Reporter:** Kira
@@ -96,6 +96,7 @@
 - **What was expected:** I expected to have the option to upgrade from either places registration and dashboard!
 - **Submitted:** Sun, 26 Jul 2026 23:08:21 GMT
 **CONFIRMED 2026-07-29 — still open.** The upgrade controls exist only on the Dashboard. Adding them to the Registration page is queued as frontend work; no contract change needed. Members can upgrade from the Dashboard meanwhile.
+
 
 ### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
 - **Reporter:** @Koach100
@@ -130,6 +131,7 @@
 > Separately, Sherwyn observed T5 being offered to an account that never reached T2 —
 > worth checking `_upgradeEligible` against what the dashboard displays.
 - **DIAGNOSED 2026-07-27 — not a fault, but a UX hazard now fixed.** Two separate things: (1) **T3 is at 2 cycles on-chain, not 0** — the dashboard figure he read is wrong and that part is STILL OPEN. (2) He holds seats only in T5-T8 because he switched auto re-entry OFF: `member_history.js` shows his last cycle-out in each of T1/T2/T3/T4 recorded as **PARKED (autoReentry disabled)** — a clean graduation that returns the crossing reserve to withdrawable but does NOT keep the seat. Every earlier cycle-out parked normally with a shortfall. Turning the option back on (it reads true now) does not restore tiers already left; those need 'Graduated tier re-entry'. **UI fix (38605d7):** switching auto re-entry off now requires confirming a dialog that states the consequence explicitly. His trail also surfaced a NINTH silent graduation (tx 0xe9e8067…, T5.1 MatA at block 44668146).
+- **PARTIAL 2026-07-30 — and the tool could not answer the question.** `member_ledger.js` on `0x1ca3316E` shows **T3.1 MatA and MatB both `left`**, so she passed through T3 and out; `memberHighestTier` is now T10. That is consistent with T3 having cycled. But her report was specifically about the *cycle count* reading 0, and `member_ledger` prints state and balances — **not `cyclesCompleted`** — so it cannot see the field the question is about. Adding that column is the next step; guessing from state would be exactly the kind of plausible-but-unverified answer that wasted two hours tonight. **Also flagged: this ticket sat from 2026-07-27 to 2026-07-30 without a reply. That is on us, not the reporter.**
 
 ### [2026-07-26] Other — on the tiers page the information is a bit ambiguous.
 - **Reporter:** Kira
@@ -143,10 +145,12 @@
 - **Submitted:** Sun, 26 Jul 2026 23:20:05 GMT
 - **FIX IN PROGRESS:** accepted, not yet shipped.
 
+
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-29 | 2026-07-30 | Dashboard (index.html) | Auto-upgrade appeared to need funds in the destination tier - working as designed, wording owed · Community call | `member_ledger` |
 | 2026-07-25 | 2026-07-26 | Dashboard (index.html) | Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an · @Lavern_Gay | — |
 | 2026-07-25 | 2026-07-26 | Dashboard (index.html) | The self-rescue fails. · @Lavern_Gay | — |
 | 2026-07-26 | 2026-07-29 | Dashboard (index.html) | I manually entered my account 2 and placed it under account · @queensonnie | `a873e8d` |
@@ -193,6 +197,14 @@
 ---
 
 ### Detail — resolved report write-ups
+
+### [2026-07-29] Auto-upgrade — T2 upgrade appears to require funds already in T2 (community call)
+- **Reporter:** Community call (owner relay)
+- **Page:** Dashboard (index.html)
+- **What happened:** A T1→T2 auto-upgrade behaved as though it needed a balance in T2 rather than in T1.
+- **STATUS 2026-07-29 — OPEN, no explanation yet.** Worth checking against `onCrossToMatB` (TierRouter:1136-1143), whose funding paths are the member's WALLET (needs a standing allowance) or `withdrawableOf` in **the MatA they just crossed out of**. If any caller reads the destination tier's balance instead of the source's, that is this bug. Not reproduced yet.
+- **RESOLVED 2026-07-30 — working as designed; the interface never said so.** Proven on Koach100's `0x1ca3316E` with `member_ledger.js`. Automatic re-entry and automatic upgrade can only spend the crossing reserve plus earnings held **inside the matrix that is cycling out** (`_executeAdditive` requires `escrow + withdrawable >= nextFee`). Earnings in other tiers, and USDC in the wallet, are invisible to them. So a T1→T2 upgrade does need funds sitting in the T1 matrix that is cycling — which reads to a member as "it wants money in T2". The measured account shows the effect at scale: **$5,540.35 earned lifetime, $2,839.42 raw withdrawable, $9,625.00 locked as crossing reserves, and only $389.92 actually releasable.** Every seated matrix returns `freeWithdrawable $0.00` because `withdrawCore` holds back `entryFee − crossingReserve` while you hold a seat — at T8 that is $1,250 against $1,132.50 held, at T10 it is $5,000 against $750. Nothing is missing and nothing is stuck. **The fix owed here is wording, not logic**, and it is queued with the other copy work.
+
 
 *Kept for the record. Invisible to the reports page by design: only the table
 above is parsed. Do not move these before the marker.*
@@ -709,6 +721,13 @@ T5 upgrade check failed — try again in a moment (RPC may be busy).
 ---
 
 ## Mainnet-Prep Design Questions
+
+
+### [2026-07-30] Automation reserve at the top tier can exceed everything a member holds
+- **Found:** while diagnosing June's report, on Koach100's `0x1ca3316E`.
+- **Observation:** `TierRouter.reservedFor` returns **$20,000.00** for this member — auto re-entry + auto-upgrade + double seat priced at T10 — against a raw `withdrawable` of **$2,839.42** across all matrices. The reserve is roughly seven times the entire balance, so it can never be satisfied and nothing is released while automation stays on.
+- **The sharper question:** the member is at T10, the top tier. There is no T11 to upgrade into, yet the additive reserve still includes an auto-upgrade fee. `reservedFor` is additive (`TierRouter:1494`: `if(reentry) +=curFee; if(autoUpgrade) +=nextFee; if(double) +=curFee`) and appears not to test whether a next tier exists.
+- **STATUS 2026-07-30 — OPEN DESIGN QUESTION, not yet a confirmed bug.** Two things to settle before mainnet: (1) should the auto-upgrade component be dropped once a member is at the highest deployed tier; (2) at high tiers, is reserving three fees at once the right default, given it can lock a member out of withdrawing entirely. Neither is urgent on testnet — members can disable automation — but at mainnet fees this becomes the difference between accessible and inaccessible earnings.
 
 *Not bugs. Decide before mainnet.*
 

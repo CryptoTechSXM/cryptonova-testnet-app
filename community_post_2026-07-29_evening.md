@@ -8,9 +8,9 @@ what closed today · bounties · no deploy date promised.*
 
 🌙 **End of day — and one thing you need to know before you upgrade**
 
-Long day. Every open ticket is now closed — **zero open, zero pending** — and
-we'll get to that list. But one item goes first, because it affects what you do
-next.
+Long day. We went through every ticket in the tracker — **44 now closed, 9 still
+open** — and I have listed the open ones by name further down. But one item goes
+first, because it affects what you do next.
 
 ---
 
@@ -75,16 +75,16 @@ there. If I upgrade into Tier 8 tomorrow, $605.34 disappears. Tier 9 takes
 $1,750.00. Tier 10 takes $3,000.00.
 
 I am not the biggest downline in this community. If you sponsor people who have
-gone higher than you, check your tiers and take the money out first. 🙏
+gone higher than you, check your tiers and take the money out first.
 
-I would rather tell you about this tonight and have you ask hard questions than
-have one person lose a balance tomorrow that we already knew about. 🙏
+I would rather tell you this tonight and take hard questions than have one person
+lose a balance tomorrow that we already knew about. 🙏
 
 ---
 
-✅ **43 reports closed — and 10 still open**
+✅ **44 reports closed — and 9 still open**
 
-We went through the whole tracker tonight. **43 closed, 10 still open**, and I am
+We went through the whole tracker tonight. **44 closed, 9 still open**, and I am
 listing the open ones further down rather than rounding them away. Here is the
 honest breakdown of the closed ones, because "closed" does not always mean "we
 fixed a bug".
@@ -167,7 +167,7 @@ should be shown together was fair, and that part is fixed.
 
 ---
 
-📋 **Still open — 10 items, named**
+📋 **Still open — 9 items, named**
 
 Not everything is fixed and I would rather you see the list than wonder.
 
@@ -182,11 +182,12 @@ sitting in the very same tier. A one-line change makes a withdrawal settle it.
 
 **Still being diagnosed** — I am not going to pretend I know the cause yet:
 
-• **"Auto-upgrade did not fire even though I had earned enough."** Reported on the
-call for June's account — $0.25 available against $88.98 earned. Those are two
-different measurements sitting next to each other and I suspect that is the whole
-story, but I need the wallet address to prove it. **June, please send it.**
-• **A T2 upgrade behaving as if it needs funds already in T2.**
+• **"Auto-upgrade did not fire even though I had earned enough."** June's account —
+$0.25 available against $88.98 earned. **We found the mechanism tonight on another
+of her accounts and it is almost certainly not a fault, but I will not close it on
+a lookalike.** June, send me the wallet and I will confirm it properly. What we
+measured on the sibling account: **$5,540.35 earned, and $389.92 actually
+withdrawable.** The gap is not missing money — see the note below.
 • **Accounts with several tiers enabled graduating when they should re-enter**, and
 others cycling over and over without graduating.
 • **Double re-entry appearing to block graduation entirely.**
@@ -202,6 +203,36 @@ Kira also suggested raising the Tier 1 entry numbers to 400–500 in that same
 report — **that part is done**, and it is why T1 stopped stalling.
 • **A completed rescue vanishes instead of confirming.** The panel just disappears,
 which looks identical to a button that never worked. *(CryptoJan22)*
+
+---
+
+💡 **"Available" vs "Total earned" — why they differ, properly explained**
+
+This came up twice tonight and it deserves a straight answer, because the numbers
+look alarming and nothing is actually wrong.
+
+**Total Earned** is everything you have ever earned, across every tier, for all
+time. **Available** is what the contract will hand you *this second*. Two things
+sit between them:
+
+1. **Your crossing reserve.** Half of each tier's entry fee is pre-funded and held
+toward your next crossing. While you hold a seat, the contract will not release
+earnings until you have covered the *other* half — so a seat you have just taken
+shows nothing available even with money in it.
+2. **Your automation reserve.** If you have auto re-entry, auto-upgrade or double
+entry switched on, the fees for those are held back so they can pay themselves.
+
+A real account, measured tonight: **$5,540.35 earned. $9,625.00 sitting in crossing
+reserves. $389.92 available.** Every one of those figures is correct and none of
+that money has gone anywhere — it is committed to seats she already holds.
+
+If you want more of it liquid, turn off the automation toggles you are not using.
+That is the switch that frees the reserve.
+
+**And a related one we are looking at:** on a Tier 10 account the automation reserve
+came to **$20,000** — including a fee to upgrade to a tier that does not exist,
+since T10 is the top. That looks wrong to us and we are checking it. Nobody has
+lost anything; it just holds back more than it should.
 
 ---
 
