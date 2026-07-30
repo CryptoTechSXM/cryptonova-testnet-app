@@ -37,6 +37,20 @@
 
 ## Open Issues
 
+### [2026-07-30] Dashboard (index.html) — This acct is at T10 however under the Re Entry Queue T4.1 Ma…
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5f3f81525655ec12659bc1ef7d74e0d1b99d9a74
+- **Frequency:** Consistent
+- **What happened:** This acct is at T10 however under the Re Entry Queue T4.1 Matrix A is showing BLOCKED
+Re-entry $100.00 = reserve $0.00 + earned $68.00 · short $32.00
+You still hold the other half of this pair — re-entering would seat you twice. Clears itself when that seat cycles out. Nothing owed.
+- **What was expected:** Action Required — Re-Entry Queue
+- **Notes:** Please Advise. Thanks
+- **Submitted:** Thu, 30 Jul 2026 08:38:11 GMT
+
+
 ### [2026-07-30] Other — This acct is at T10, however under the Re Enrty Queue T4.1 M…
 - **Reporter:** bugbounty
 - **Page:** Other
