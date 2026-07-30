@@ -37,6 +37,20 @@
 
 ## Open Issues
 
+### [2026-07-30] Other — This acct is at T10, however under the Re Enrty Queue T4.1 M…
+- **Reporter:** bugbounty
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x4cf7f43a4a2df2e86fd68d35562eb96bbe5ea5cd
+- **Frequency:** Consistent
+- **What happened:** This acct is at T10, however under the Re Enrty Queue T4.1 Matrix A is showing BLOCKED
+Re-entry $100.00 = reserve $50.00 + earned $28.00 · short $22.00
+You still hold the other half of this pair — re-entering would seat you twice. Clears itself when that seat cycles out. Nothing owed.
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Notes:** Please advise. Thanks
+- **Submitted:** Thu, 30 Jul 2026 08:26:43 GMT
+
+
 ### [2026-07-29] FUND LOSS — entering a tier where you already hold commission DESTROYS the balance
 - **Reporter:** Owner (0xe8Ad7bbA), spotted as "withdrew $1k twice but Total Withdrawn is wrong"
 - **Page:** Contract — `MatrixLogicLib._register` (:313-345). Not a frontend bug.
