@@ -59,6 +59,24 @@ anything. We are building a scan to find every account currently holding
 commission in a tier they have not joined, so we can tell you individually rather
 than leaving you to guess.
 
+**How much this can be — my own account, measured tonight.** I am Tier 3. Sitting
+in tiers I have never entered:
+
+| Tier | At risk |
+|---|---|
+| T10 | **$3,000.00** |
+| T9 | **$1,750.00** |
+| T8 | **$605.34** |
+| T1 pair 2 | $6.50 |
+| | **$5,361.84** |
+
+All of it withdrawable right now — no lock, no reserve, because I hold no seat
+there. If I upgrade into Tier 8 tomorrow, $605.34 disappears. Tier 9 takes
+$1,750.00. Tier 10 takes $3,000.00.
+
+I am not the biggest downline in this community. If you sponsor people who have
+gone higher than you, check your tiers and take the money out first. 🙏
+
 I would rather tell you about this tonight and have you ask hard questions than
 have one person lose a balance tomorrow that we already knew about. 🙏
 
@@ -93,6 +111,25 @@ new money.
 26th and called it cosmetic. It was — the link pointed at the site root instead of
 the dashboard tab. Fixed tonight. Small things get fixed too, and they still count
 as finds.
+
+• **The MAX button offered an amount the site then refused.** 🔢 Click MAX, get
+"Amount exceeds available" — and taking 1.5% off by hand would go through, which
+made it look like the fee was missing. It was not: MAX **rounded the balance up**
+to the nearest cent, so on a $5,213.085 balance it typed $5,213.09, one cent more
+than existed. Now it rounds down, and any tiny drift while the page is open is
+absorbed instead of rejected. *(found on my own account tonight)*
+
+• **The rescue-loan banner was telling people something untrue.** ⚡ It said an SF
+rescue loan "will be repaid automatically when you cycle out" and suggested
+inviting members to speed it up. True only while you are still sitting in the
+matrix that holds the loan — otherwise nothing can repay it, and inviting people
+does nothing. It also only ever looked at Tier 1, so loans in other tiers were
+invisible. It now lists every loan and states honestly which will clear itself.
+
+• **"$$50.00" in the Protocol Reserve box.** 💲 Two dollar signs. Small, ugly,
+fixed. Also **Tier Cycles** showed **0** directly above a row reading "T1: 9
+T2: 9" — the headline was counting only your current tier while the breakdown
+counted them all. It is now the total, so the parts add up to the number above.
 
 • Plus the withdrawal lock, the missing Upgrade button, the invisible Self Rescue
 button, the gas message and the matrix tier selector — all covered in this
