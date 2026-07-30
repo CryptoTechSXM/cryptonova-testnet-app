@@ -5296,15 +5296,15 @@ async function loadDashboardData() {
         if (autoUpgrade || reentry) {
           if (reentry) {
             reserved += curFeeRaw;
-            details.push(`Auto re-entry: $${fmt6(curFeeRaw)}`);
+            details.push(`Auto re-entry: ${fmt6(curFeeRaw)}`);
           }
           if (autoUpgrade && nextFeeRaw > 0n) {
             reserved += nextFeeRaw;
-            details.push(`Auto-upgrade to next tier: $${fmt6(nextFeeRaw)}`);
+            details.push(`Auto-upgrade to next tier: ${fmt6(nextFeeRaw)}`);
           }
           if (doubleE) {
             reserved += curFeeRaw;
-            details.push(`Double entry · second seat: $${fmt6(curFeeRaw)}`);
+            details.push(`Double entry · second seat: ${fmt6(curFeeRaw)}`);
           }
         }
 
@@ -5361,6 +5361,19 @@ async function loadDashboardData() {
       );
       const hasAnyCycles = cycArr.some(c => c > 0n);
       const breakdownEl  = document.getElementById('dash-cycles-breakdown');
+
+      // 2026-07-29: the "Tier Cycles" headline was set at :4921 from
+      // `activeCycles` — the HIGHEST tier's `member.cyclesCompleted`, read off that
+      // one matrix. The breakdown directly beneath it comes from the ROUTER's
+      // `tierCycles` for every tier. Two sources, one label: a member who had
+      // cycled 9 times in T1 and 9 in T2 but not yet in T3 saw "Tier Cycles 0"
+      // sitting on top of "T1: 9  T2: 9  T3: 0". The headline was not wrong so much
+      // as unanswerable — nothing said it meant "in your current tier only".
+      // Now it is the TOTAL, from the same source as the breakdown, so the parts
+      // add up to the figure above them. Same fix as Total Withdrawn earlier today.
+      const _cycTotal = cycArr.reduce((a, c) => a + BigInt(c), 0n);
+      setText('dash-cycles', _cycTotal.toString());
+
       if (breakdownEl && hasAnyCycles) {
         breakdownEl.innerHTML = cycArr.map((c, i) =>
           `<span style="color:var(--text3)">T${i+1}:</span> <strong style="color:${c>0n?'var(--green)':'var(--text2)'};margin-right:8px">${c}</strong>`
