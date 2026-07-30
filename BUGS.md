@@ -48,6 +48,7 @@
 - **Notes:** Here's the message that popped up.
  This upgrade is currently too large for the network to process (needs ~15.8M gas, the chain's limit is ~17.8M). Nothing was sent and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations — it clears on its own as those settle. Please try again shortly, and let us know if it persists.
 - **Submitted:** Thu, 30 Jul 2026 18:23:02 GMT
+- **STATUS 2026-07-30 — DUPLICATE of the gas ticket below ("upgrade too large for the network", 4 reports consolidated).** Same bimodal cascade gas: a T1→T2 upgrade that lands on the entry filling a MatA triggers a long rotation chain (~15.8M) against the ~17.8M ceiling; a quiet entry is ~13M. The frontend behaved correctly — it refused the doomed tx and told him nothing was sent/charged (gas guard working on buy.html too). **Workaround = retry** (T2 turns over constantly, so a second attempt usually lands in the cheaper mode). **Permanent fix = V8.46 item 3 (cascade depth cap, BUILT, GREEN)** — closes on deploy. No new work.
 
 
 ### [2026-07-30] Dashboard (index.html) — this account is upgraded all the way to T10.
