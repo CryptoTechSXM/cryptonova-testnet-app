@@ -53,6 +53,7 @@ this account has 4 direct referrals and 4 second level referrals.
 i am supprised about the quantity of reserve.
 to be able to have some withdrawable assets.
 - **Submitted:** Thu, 30 Jul 2026 16:07:01 GMT
+- **DIAGNOSIS 2026-07-30 (on-chain, wallet 0x79470c63) — NOT A BUG; working as designed, wording owed.** Read live off V8.45: highestTier **T10**, `reservedFor` **$20,000.00**, T10 fee $10,000, autoUpgrade **OFF**, autoReentry **ON**, doubleReentry **ON**. The reserve is exactly re-entry ($10,000) + double ($10,000); auto-upgrade contributes $0. **The "phantom fee to upgrade past T10" suspicion from the 29th is DISPROVEN** — `reservedFor` (TierRouter:1667) sets `nextFee = (nextIdx < MAX_TIERS) ? tierEntryFees[nextIdx] : 0`, so the top tier reserves nothing for a non-existent next tier (guard added V8.19, commit 36cde38 — live in V8.45). His "no withdrawable" is earnings committed to those two seats, not lost. **Member fix:** turn OFF double re-entry to free $10,000 (keeps single re-entry); turn OFF auto re-entry to free the other $10,000 (then parks at cycle-out). "T2 hasn't re-entered" is separate — the graduate-vs-re-enter item below, not the reserve. **Frontend owed:** itemise the reserve box ("Auto re-entry $10,000 · Double re-entry $10,000 — turn a toggle off to free it") instead of a bare $20,000. No contract change.
 
 
 ### [2026-07-30] Dashboard (index.html) — "upgrade too large for the network" / "gas limit too high" (4 reports consolidated)
