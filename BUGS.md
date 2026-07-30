@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-07-30] Dashboard (index.html) — The T2 upgrade is currently too large for the network to pro…
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7010ad1e57da7e7c07c30ce1c2413eee2a613bac
+- **Frequency:** Consistent
+- **What happened:** The T2 upgrade is currently too large for the network to process (needs ~15.3M gas; the chain's limit is ~17.8M). Nothing was sent, and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations; it settles on its own. Please try again shortly.
+- **What was expected:** Whale Gate Open — Bulk Upgrade
+- **Notes:** Can't go forward
+- **Submitted:** Thu, 30 Jul 2026 11:40:51 GMT
+
+
 ### [2026-07-30] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
 - **Reporter:** Maximum_71
 - **Page:** Dashboard (index.html)
