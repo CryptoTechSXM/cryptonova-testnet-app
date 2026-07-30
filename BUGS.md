@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-07-30] Buy CNOVA (buy.html) — I tried upgrading from T1 to T2 but was unable to do so.
+- **Reporter:** @Koach100
+- **Page:** Buy CNOVA (buy.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x56a832cc5f2617c08e6484c2b04d971edc1ec57f
+- **Frequency:** Consistent
+- **What happened:** I tried upgrading from T1 to T2 but was unable to do so.
+- **What was expected:** I should have been able to upgrade.
+- **Notes:** Here's the message that popped up.
+ This upgrade is currently too large for the network to process (needs ~15.8M gas, the chain's limit is ~17.8M). Nothing was sent and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations — it clears on its own as those settle. Please try again shortly, and let us know if it persists.
+- **Submitted:** Thu, 30 Jul 2026 18:23:02 GMT
+
+
 ### [2026-07-30] Dashboard (index.html) — this account is upgraded all the way to T10.
 T2 has graduate…
 - **Reporter:** CryptoJan22
