@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-07-30] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xde580069839f42108064a0fce2a3a9a802f072d6
+- **Frequency:** Consistent
+- **What happened:** Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** Action Required — Re-Entry Queue
+- **Submitted:** Thu, 30 Jul 2026 11:20:02 GMT
+
+
 ### [2026-07-30] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
 - **Reporter:** Maximum_71
 - **Page:** Dashboard (index.html)
