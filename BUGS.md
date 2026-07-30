@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-07-30] Dashboard (index.html) — This upgrade is currently too large for the network to proce…
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x99b52ee99d518687a092b250123db256f1b7cee3
+- **Frequency:** Consistent
+- **What happened:** This upgrade is currently too large for the network to process (needs ~16.9M gas; the chain's limit is ~17.8M). Nothing was sent, and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations — it clears on its own as those settle. Please try again shortly, and let us know if it persists.
+- **What was expected:** Tier Upgrade Available
+- **Notes:** This happens on several accts so I'm unable to go forward.
+- **Submitted:** Thu, 30 Jul 2026 11:47:10 GMT
+
+
 ### [2026-07-30] Dashboard (index.html) — The T2 upgrade is currently too large for the network to pro…
 - **Reporter:** Maximum_71
 - **Page:** Dashboard (index.html)
