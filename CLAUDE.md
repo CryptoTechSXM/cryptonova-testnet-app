@@ -158,6 +158,16 @@ Live Stats on index.html require wallet connection. Spinners without a connected
 
 ---
 
+## BUGS.md is API-owned — edit rules (added 2026-07-30)
+
+**`api/submit-bug.js` commits member reports DIRECTLY to `admin` BUGS.md on GitHub, autonomously.** `api/get-reports.js` + `reports.html` read that same file. So BUGS.md has TWO authors: you (triage) and the API (member reports). Rules:
+
+- **NEVER do a large local rewrite of BUGS.md while the form is live.** A big restructure merged against the API's report-commits can DROP member reports (a condense/merge did exactly this on 2026-07-30 — recovered from history). Do structural edits in a maintenance window with the form paused, or not at all.
+- **Small triage edits only:** `git pull` immediately before, edit, commit, `git push` immediately after — minimize the race window.
+- **Format is parser-critical:** open reports = `### [date] ...` blocks ABOVE the Resolved heading (one ticket each); resolved = 5-cell table rows BELOW it. `submit-bug.js` inserts at the Open-Issues heading and takes the FIRST match — keep that heading unique, unrenamed, first.
+
+**STALE-CACHE TRAP (cost an hour on 2026-07-30):** the Cowork upload cache (`/mnt/user-data/uploads/...`) can serve an OLD copy of a file even after re-staging — it served a 76KB pre-condense BUGS.md while the real device file was the 25KB current one, leading to a false "reports were lost / API diverged" conclusion. **Verify file state with `device_bash` (`wc -c`, `grep`, `git show HEAD:file`) — the direct filesystem — NOT the upload cache, before drawing conclusions or editing.**
+
 ## File editing rules (mount sync lag)
 
 The bash sandbox may serve stale/truncated content from the Windows mount for files it has already seen.

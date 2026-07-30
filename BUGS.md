@@ -37,79 +37,12 @@
 
 ## Open Issues
 
-### [2026-07-30] Dashboard (index.html) — This upgrade is currently too large for the network to proce…
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x99b52ee99d518687a092b250123db256f1b7cee3
-- **Frequency:** Consistent
-- **What happened:** This upgrade is currently too large for the network to process (needs ~16.9M gas; the chain's limit is ~17.8M). Nothing was sent, and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations — it clears on its own as those settle. Please try again shortly, and let us know if it persists.
-- **What was expected:** Tier Upgrade Available
-- **Notes:** This happens on several accts so I'm unable to go forward.
-- **Submitted:** Thu, 30 Jul 2026 11:47:10 GMT
-
-
-### [2026-07-30] Dashboard (index.html) — The T2 upgrade is currently too large for the network to pro…
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7010ad1e57da7e7c07c30ce1c2413eee2a613bac
-- **Frequency:** Consistent
-- **What happened:** The T2 upgrade is currently too large for the network to process (needs ~15.3M gas; the chain's limit is ~17.8M). Nothing was sent, and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations; it settles on its own. Please try again shortly.
-- **What was expected:** Whale Gate Open — Bulk Upgrade
-- **Notes:** Can't go forward
-- **Submitted:** Thu, 30 Jul 2026 11:40:51 GMT
-
-
-### [2026-07-30] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xde580069839f42108064a0fce2a3a9a802f072d6
-- **Frequency:** Consistent
-- **What happened:** Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** Action Required — Re-Entry Queue
-- **Submitted:** Thu, 30 Jul 2026 11:20:02 GMT
-
-
-### [2026-07-30] Dashboard (index.html) — "[From https://sepolia.base.org] gas limit too high"
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x18750a2cb86e7d2c5dfc47175bca1f3f19f2c290
-- **Frequency:** Consistent
-- **What happened:** "[From https://sepolia.base.org] gas limit too high"
-- **What was expected:** Action Required — Re-Entry Queue
-- **Submitted:** Thu, 30 Jul 2026 09:31:03 GMT
-
-
-### [2026-07-30] Dashboard (index.html) — This acct is at T10 however under the Re Entry Queue T4.1 Ma…
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x5f3f81525655ec12659bc1ef7d74e0d1b99d9a74
-- **Frequency:** Consistent
-- **What happened:** This acct is at T10 however under the Re Entry Queue T4.1 Matrix A is showing BLOCKED
-Re-entry $100.00 = reserve $0.00 + earned $68.00 · short $32.00
-You still hold the other half of this pair — re-entering would seat you twice. Clears itself when that seat cycles out. Nothing owed.
-- **What was expected:** Action Required — Re-Entry Queue
-- **Notes:** Please Advise. Thanks
-- **Submitted:** Thu, 30 Jul 2026 08:38:11 GMT
-
-
-### [2026-07-30] Other — This acct is at T10, however under the Re Enrty Queue T4.1 M…
-- **Reporter:** bugbounty
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x4cf7f43a4a2df2e86fd68d35562eb96bbe5ea5cd
-- **Frequency:** Consistent
-- **What happened:** This acct is at T10, however under the Re Enrty Queue T4.1 Matrix A is showing BLOCKED
-Re-entry $100.00 = reserve $50.00 + earned $28.00 · short $22.00
-You still hold the other half of this pair — re-entering would seat you twice. Clears itself when that seat cycles out. Nothing owed.
-- **What was expected:** ⏳ Action Required — Re-Entry Queue
-- **Notes:** Please advise. Thanks
-- **Submitted:** Thu, 30 Jul 2026 08:26:43 GMT
-
+### [2026-07-30] Dashboard (index.html) — "upgrade too large for the network" / "gas limit too high" (4 reports consolidated)
+- **Reporter:** Maximum_71 (wallets 0x99b52ee9, 0x7010ad1e, 0xde580069, 0x18750a2c)
+- **Page:** Dashboard (index.html) — upgrade / re-entry
+- **What happened:** Upgrades quote ~15-17M gas against the chain's ~17.8M ceiling and refuse ("too large for the network" / "gas limit too high" / "transaction failed").
+- **Diagnosis:** Bimodal upgrade gas — an entry that triggers a long rotation cascade costs ~18M, a quiet one ~13M; which you get depends on the second you press. **Retrying usually lands in the cheaper mode and succeeds.**
+- **STATUS 2026-07-30 — KNOWN, workaround = retry.** Permanent fix is the cascade depth cap, **V8.46 item 3 (BUILT, GREEN)** — closes on the V8.46 deploy. (Consolidated from 4 separate Maximum_71 reports the same morning.)
 
 ### [2026-07-29] FUND LOSS — entering a tier where you already hold commission DESTROYS the balance
 - **Reporter:** Owner (0xe8Ad7bbA), spotted as "withdrew $1k twice but Total Withdrawn is wrong"
@@ -224,6 +157,8 @@ You still hold the other half of this pair — re-entering would seat you twice.
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-30 | 2026-07-30 | Dashboard (index.html) | T4.1 re-entry BLOCKED at T10 — working as designed: holds both halves, clears on cycle-out, nothing owed · Maximum_71 | working-as-designed |
+| 2026-07-30 | 2026-07-30 | Other | T4.1 re-entry BLOCKED at T10 — working as designed: holds both halves, clears on cycle-out, nothing owed · bugbounty | working-as-designed |
 | 2026-07-29 | 2026-07-30 | Dashboard (index.html) | Auto-upgrade appeared to need funds in the destination tier - working as designed, wording owed · Community call | `member_ledger` |
 | 2026-07-25 | 2026-07-26 | Dashboard (index.html) | Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an · @Lavern_Gay | — |
 | 2026-07-25 | 2026-07-26 | Dashboard (index.html) | The self-rescue fails. · @Lavern_Gay | — |
