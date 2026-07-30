@@ -41,125 +41,6 @@ _No open reports. New submissions land here automatically._
 
 ## Pending — Responded (12h auto-close)
 
-### [2026-07-29] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Still getting this on self rescue..
-- **What was expected:** To be rescued...
-- **Notes:** Just a follow up and tried this before but was hoping it was a testnet thing...lol
-- **Submitted:** Wed, 29 Jul 2026 00:24:31 GMT
-**RESPONDED 2026-07-29:** Not a fault — a funding shortfall the UI never named. `ticket_triage.js`: parked T2.1 MatA, re-entry $25.00 = $12.50 crossing reserve + $0.63 earned = $13.13, **short $11.88**. Wallet holds $9.61 and $11.88 is already approved, so they need **$2.26 more USDC** and then Self Rescue. Two frontend causes of the useless message are fixed: `SELF_RESCUE_ABI` was one line with no error definitions so the OZ ERC20 custom errors could not decode (`2337401`), and the shortfall is now stated in dollars with the exact action. Awaiting member top-up.
-
-### [2026-07-28] Dashboard (index.html) — cant self rescue. it says already in matrix.
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x3289a65c0ee26fd369a6bbd45d214209832db8f0
-- **Frequency:** Consistent
-- **What happened:** cant self rescue. it says already in matrix.
-- **What was expected:** pay fee and move on.
-- **Submitted:** Tue, 28 Jul 2026 21:10:41 GMT
-**RESPONDED 2026-07-29:** Parked in BOTH halves of T3.1. **T3.1 MatA can be rescued right now** — short $23.75, already approved $23.75, `selfRescue` estimates 9,982,980 gas and will succeed. T3.1 MatB is short $7.68 and needs an approval to that matrix. Also fixed today: the dashboard used to show only ONE parked position, so the second was invisible — every position now has its own numbers and buttons (`d71254a`). Awaiting member action.
-
-### [2026-07-28] Other — Rescue would fail: F8V8: already in matrix
-- **Reporter:** Maximum - 71
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x5f3f81525655ec12659bc1ef7d74e0d1b99d9a74
-- **Frequency:** Consistent
-- **What happened:** Rescue would fail: F8V8: already in matrix
-- **What was expected:** ⏳ Action Required — Re-Entry Queue
-- **Submitted:** Tue, 28 Jul 2026 20:20:19 GMT
-**RESPONDED 2026-07-29:** Parked in FIVE positions — T2.1 MatB, T3.1 MatA, T4.1 MatA, T8.1 MatA, T9.1 MatA — totalling **$1,408.73** of shortfall against a **$0.00** wallet. T4.1 MatA is additionally blocked by holding the pair's other half (self-clearing). The "already in matrix" message was correct; what was missing was any way to see the other four positions, now fixed (`d71254a`). Needs a testnet top-up before any of them can complete.
-
-### [2026-07-28] Dashboard (index.html) — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
-- **Reporter:** Cynthia Brown
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xb9e6aed964ad17f2a9779f99dbc009f872e32919
-- **Frequency:** Intermittent
-- **What happened:** Rescue would fail: ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To be able to self rescue
-- **Submitted:** Tue, 28 Jul 2026 19:42:27 GMT
-**RESPONDED 2026-07-29:** Parked T2.1 MatB, short **$7.93**, wallet holds $27.20 — enough. They need to approve $7.93 **to that matrix** (not TierRouter) and press Self Rescue. The rescue panel now names the amount and targets the right contract instead of failing with "Transaction failed on-chain". Awaiting member action.
-
-### [2026-07-28] Dashboard (index.html) — I tried to self rescue from T2.1 Matrix A and it kept failin…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
-- **Frequency:** Consistent
-- **What happened:** I tried to self rescue from T2.1 Matrix A and it kept failing even though I did several hard refreshes.
-- **What was expected:** I should have been able to cycle.
-- **Notes:** here's the pop up message.    
-Rescue would fail: ❌ Transaction failed on-chain
-- **Submitted:** Tue, 28 Jul 2026 17:59:18 GMT
-**RESPONDED 2026-07-29:** Parked in T2.1 / T3.1 / T4.1 MatA, short $3.48 / $7.51 / $15.99, wallet holds **$2.02** — needs roughly **$21 more** to clear all three. The failure was genuine but it was a shortfall, not a bug; the panel now states each amount separately (`d71254a`). Awaiting top-up.
-
-### [2026-07-28] Dashboard (index.html) — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x4cf7f43a4a2df2e86fd68d35562eb96bbe5ea5cd
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** rescue
-- **Submitted:** Tue, 28 Jul 2026 02:55:14 GMT
-**RESPONDED 2026-07-29:** Parked in T4.1 MatA (blocked by holding the pair's other half — self-clearing), T8.1 MatA short $288.37 and T9.1 MatA short $1,006.97, against a **$0.00** wallet. Needs a top-up; nothing is owed and the positions are intact.
-
-### [2026-07-26] Dashboard (index.html) — I manually entered my account 2 and placed it under account …
-- **Reporter:** @queensonnie
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x70569791ab42304adde5a34c412ec6e411ae0b0b
-- **Frequency:** Intermittent
-- **What happened:** I manually entered my account 2 and placed it under account 1 then, I copied the referral  link and placed it in the browser to place account 3 under account 1,  but it did not show that account 1 has 2 direct referrals.
-- **What was expected:** Account 1 should have two Direct referrals
-- **Submitted:** Sun, 26 Jul 2026 15:37:52 GMT
-**RESPONDED 2026-07-29:** `ticket_triage.js` shows this wallet seated in T1.1 MatB and healthy. The referral-count fix shipped today (`a873e8d`) is the most likely explanation for the original discrepancy — the old lookup only counted directs currently seated in the lowest tiers. Asked the member to hard-refresh and confirm the number now reads correctly; if the placement itself still looks wrong we will trace it per-wallet.
-
-### [2026-07-26] Dashboard (index.html) — All day today on a more than ususl occurrence  my accounts h…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** All day today on a more than ususl occurrence  my accounts have been sent to self rescue.
-Some being charged as much as $41.00 and some as little as $0.60.
-Sometimes when i take action and pay another self rescue immediately comes up with a smaller charge and when it is done it clears.
-However the c nova tokens and earnings increase everytime.
-- **What was expected:** All charged should be asked for at the same time. Not sure how frequently account should be parked though.
-- **Submitted:** Sun, 26 Jul 2026 23:18:35 GMT
-- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
-
-### [2026-07-26] Dashboard (index.html) — Auto Self-rescue failed.
- Transaction failed on-chain — hard…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** Auto Self-rescue failed.
- Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To re-enter the queue.
-- **Submitted:** Sun, 26 Jul 2026 12:15:16 GMT
-- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
-
-### [2026-07-26] Dashboard (index.html) — Self=rescue failed. Transaction failed on-chain — hard-refre…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** Self=rescue failed. Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To re-enter the Queque.
-- **Submitted:** Sun, 26 Jul 2026 12:10:39 GMT
-- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
-
-
 ## Fix In Progress — closes when the fix ships
 
 ### [2026-07-29] FUND LOSS — entering a tier where you already hold commission DESTROYS the balance
@@ -402,6 +283,133 @@ T5 upgrade check failed — try again in a moment (RPC may be busy).
 
 ## Resolved Issues
 
+### [2026-07-29] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Still getting this on self rescue..
+- **What was expected:** To be rescued...
+- **Notes:** Just a follow up and tried this before but was hoping it was a testnet thing...lol
+- **Submitted:** Wed, 29 Jul 2026 00:24:31 GMT
+**RESPONDED 2026-07-29:** Not a fault — a funding shortfall the UI never named. `ticket_triage.js`: parked T2.1 MatA, re-entry $25.00 = $12.50 crossing reserve + $0.63 earned = $13.13, **short $11.88**. Wallet holds $9.61 and $11.88 is already approved, so they need **$2.26 more USDC** and then Self Rescue. Two frontend causes of the useless message are fixed: `SELF_RESCUE_ABI` was one line with no error definitions so the OZ ERC20 custom errors could not decode (`2337401`), and the shortfall is now stated in dollars with the exact action. Awaiting member top-up.
+**RESOLVED 2026-07-29 — the bug is fixed; the remaining step is a top-up, not a fix.** The misleading message had two real causes and both shipped today: `SELF_RESCUE_ABI` carried no error definitions so the OpenZeppelin ERC20 custom errors could not decode, and the panel never named the shortfall or the contract to approve. The rescue itself is short **$2.26** of wallet USDC ($11.88 needed, $11.88 already approved, $9.61 held). Nothing is owed and the position is intact. Reported three times before it was traced — that persistence is what got it found.
+
+### [2026-07-28] Dashboard (index.html) — cant self rescue. it says already in matrix.
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3289a65c0ee26fd369a6bbd45d214209832db8f0
+- **Frequency:** Consistent
+- **What happened:** cant self rescue. it says already in matrix.
+- **What was expected:** pay fee and move on.
+- **Submitted:** Tue, 28 Jul 2026 21:10:41 GMT
+**RESPONDED 2026-07-29:** Parked in BOTH halves of T3.1. **T3.1 MatA can be rescued right now** — short $23.75, already approved $23.75, `selfRescue` estimates 9,982,980 gas and will succeed. T3.1 MatB is short $7.68 and needs an approval to that matrix. Also fixed today: the dashboard used to show only ONE parked position, so the second was invisible — every position now has its own numbers and buttons (`d71254a`). Awaiting member action.
+**RESOLVED 2026-07-29.** "Already in matrix" was accurate, not a fault: parked in BOTH halves of T3.1. T3.1 MatA can be rescued now (short $23.75, already approved). T3.1 MatB is short $7.68 and needs an approval to that matrix. The actual defect was that the dashboard only ever showed ONE parked position, so the second was invisible — every position now has its own figures and buttons (`d71254a`).
+
+### [2026-07-28] Other — Rescue would fail: F8V8: already in matrix
+- **Reporter:** Maximum - 71
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5f3f81525655ec12659bc1ef7d74e0d1b99d9a74
+- **Frequency:** Consistent
+- **What happened:** Rescue would fail: F8V8: already in matrix
+- **What was expected:** ⏳ Action Required — Re-Entry Queue
+- **Submitted:** Tue, 28 Jul 2026 20:20:19 GMT
+**RESPONDED 2026-07-29:** Parked in FIVE positions — T2.1 MatB, T3.1 MatA, T4.1 MatA, T8.1 MatA, T9.1 MatA — totalling **$1,408.73** of shortfall against a **$0.00** wallet. T4.1 MatA is additionally blocked by holding the pair's other half (self-clearing). The "already in matrix" message was correct; what was missing was any way to see the other four positions, now fixed (`d71254a`). Needs a testnet top-up before any of them can complete.
+**RESOLVED 2026-07-29.** Five parked positions — T2.1 MatB, T3.1 MatA, T4.1 MatA, T8.1 MatA, T9.1 MatA — totalling **$1,408.73** of shortfall against a $0.00 wallet. The message was correct; the defect was having no way to see the other four, now fixed (`d71254a`). T4.1 MatA is additionally blocked by holding the pair's other half, which self-clears. Needs a testnet top-up.
+
+### [2026-07-28] Dashboard (index.html) — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
+- **Reporter:** Cynthia Brown
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xb9e6aed964ad17f2a9779f99dbc009f872e32919
+- **Frequency:** Intermittent
+- **What happened:** Rescue would fail: ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To be able to self rescue
+- **Submitted:** Tue, 28 Jul 2026 19:42:27 GMT
+**RESPONDED 2026-07-29:** Parked T2.1 MatB, short **$7.93**, wallet holds $27.20 — enough. They need to approve $7.93 **to that matrix** (not TierRouter) and press Self Rescue. The rescue panel now names the amount and targets the right contract instead of failing with "Transaction failed on-chain". Awaiting member action.
+**RESOLVED 2026-07-29.** Short **$7.93** with $27.20 in the wallet — enough. The approval has to go to **that matrix**, not TierRouter, which the panel never said. It now names the amount and targets the right contract instead of failing with "Transaction failed on-chain".
+
+### [2026-07-28] Dashboard (index.html) — I tried to self rescue from T2.1 Matrix A and it kept failin…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
+- **Frequency:** Consistent
+- **What happened:** I tried to self rescue from T2.1 Matrix A and it kept failing even though I did several hard refreshes.
+- **What was expected:** I should have been able to cycle.
+- **Notes:** here's the pop up message.    
+Rescue would fail: ❌ Transaction failed on-chain
+- **Submitted:** Tue, 28 Jul 2026 17:59:18 GMT
+**RESPONDED 2026-07-29:** Parked in T2.1 / T3.1 / T4.1 MatA, short $3.48 / $7.51 / $15.99, wallet holds **$2.02** — needs roughly **$21 more** to clear all three. The failure was genuine but it was a shortfall, not a bug; the panel now states each amount separately (`d71254a`). Awaiting top-up.
+**RESOLVED 2026-07-29.** Three parked positions — T2.1 / T3.1 / T4.1 MatA, short $3.48 / $7.51 / $15.99 — against $2.02 in the wallet, so roughly **$21 more** clears all three. The hard refreshes could never have helped; it was a funding shortfall the UI declined to name. Each amount is now shown separately (`d71254a`).
+
+### [2026-07-28] Dashboard (index.html) — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x4cf7f43a4a2df2e86fd68d35562eb96bbe5ea5cd
+- **Frequency:** Consistent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** rescue
+- **Submitted:** Tue, 28 Jul 2026 02:55:14 GMT
+**RESPONDED 2026-07-29:** Parked in T4.1 MatA (blocked by holding the pair's other half — self-clearing), T8.1 MatA short $288.37 and T9.1 MatA short $1,006.97, against a **$0.00** wallet. Needs a top-up; nothing is owed and the positions are intact.
+**RESOLVED 2026-07-29.** T8.1 MatA short $288.37, T9.1 MatA short $1,006.97, wallet $0.00. T4.1 MatA is blocked by holding the pair's other half and self-clears on the next rotation. Nothing is owed, all positions intact, needs a top-up.
+
+### [2026-07-26] Dashboard (index.html) — I manually entered my account 2 and placed it under account …
+- **Reporter:** @queensonnie
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x70569791ab42304adde5a34c412ec6e411ae0b0b
+- **Frequency:** Intermittent
+- **What happened:** I manually entered my account 2 and placed it under account 1 then, I copied the referral  link and placed it in the browser to place account 3 under account 1,  but it did not show that account 1 has 2 direct referrals.
+- **What was expected:** Account 1 should have two Direct referrals
+- **Submitted:** Sun, 26 Jul 2026 15:37:52 GMT
+**RESPONDED 2026-07-29:** `ticket_triage.js` shows this wallet seated in T1.1 MatB and healthy. The referral-count fix shipped today (`a873e8d`) is the most likely explanation for the original discrepancy — the old lookup only counted directs currently seated in the lowest tiers. Asked the member to hard-refresh and confirm the number now reads correctly; if the placement itself still looks wrong we will trace it per-wallet.
+**RESOLVED 2026-07-29 — this was a real bug and the reporter was right.** The contract has indexed `referrer` on `MemberRegistered` since V8.34 specifically so uplines could be queried by topic, but the frontend ABI still declared it un-indexed. Decoding failed silently, so every direct-referral lookup fell through to a positional scan that only counts directs **currently seated** in T1's pairs plus T2/T3 pair 1 — anyone who upgraded past T3, cycled out, parked, or landed in pair 2 was invisible. Fixed by filtering server-side on the topic (`a873e8d`); the fallback now always reports itself as incomplete, because it is a floor and never a total.
+
+### [2026-07-26] Dashboard (index.html) — All day today on a more than ususl occurrence  my accounts h…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** All day today on a more than ususl occurrence  my accounts have been sent to self rescue.
+Some being charged as much as $41.00 and some as little as $0.60.
+Sometimes when i take action and pay another self rescue immediately comes up with a smaller charge and when it is done it clears.
+However the c nova tokens and earnings increase everytime.
+- **What was expected:** All charged should be asked for at the same time. Not sure how frequently account should be parked though.
+- **Submitted:** Sun, 26 Jul 2026 23:18:35 GMT
+- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
+**RESOLVED 2026-07-29 — working as designed, plus one genuine fix.** The varying amounts ($0.60 to $41.00) are the funding rule, not a fault: the crossing reserve pre-funds exactly **50%** of the next entry fee and the other half must come from earnings, so the shortfall is whatever has not yet been earned at that moment. A member with no referral income parks repeatedly by design. The reporter's actual ask — "all charges should be asked for at the same time" — was legitimate and is now met: every parked position is listed together with its own amount (`d71254a`). CNOVA and earnings rising each cycle is correct behaviour.
+
+### [2026-07-26] Dashboard (index.html) — Auto Self-rescue failed.
+ Transaction failed on-chain — hard…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
+- **Frequency:** Consistent
+- **What happened:** Auto Self-rescue failed.
+ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To re-enter the queue.
+- **Submitted:** Sun, 26 Jul 2026 12:15:16 GMT
+- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
+**RESOLVED 2026-07-29.** Same cluster as the other self-rescue failures: the ABI could not decode the ERC20 custom errors, so an allowance or balance problem surfaced as "Transaction failed on-chain". Fixed today, along with a pre-check that states the shortfall in dollars and approves to the matrix rather than TierRouter. Please hard-refresh and retry — if anything still blocks it, the panel will now say what and why.
+
+### [2026-07-26] Dashboard (index.html) — Self=rescue failed. Transaction failed on-chain — hard-refre…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
+- **Frequency:** Consistent
+- **What happened:** Self=rescue failed. Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** To re-enter the Queque.
+- **Submitted:** Sun, 26 Jul 2026 12:10:39 GMT
+- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
+**RESOLVED 2026-07-29.** Second wallet, same cause and same fix as above. Hard-refresh and retry; any remaining blocker will now be named in plain figures rather than hidden behind a generic on-chain failure.
 ### [2026-07-29] Dashboard (index.html) — the self rescue button took some time but it eventually came…
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
