@@ -642,27 +642,31 @@
   });
 
   // ── Config ────────────────────────────────────────────────
-  // RPC fallback list — tries each in order until one responds within 6s
+  // RPC list — dead Alchemy key removed 2026-07-31 (monthly cap exhausted).
+  // Reads go through a FallbackProvider (quorum 1): the primary serves each call,
+  // and a throttled / slow / failed RPC falls over to the next instead of the
+  // caller's .catch(()=>0n) silently painting 0 (the "T1 Fill 0/127" bug).
   const RPC_LIST = [
-    'https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy',
     'https://base-sepolia.public.blastapi.io',
     'https://sepolia.base.org',
     'https://base-sepolia-rpc.publicnode.com',
     'https://base-sepolia.blockpi.network/v1/rpc/public',
   ];
+  const _CHAIN_ID = 84532; // Base Sepolia
+  let _providerCache = null;
   async function _getProvider() {
-    for (const url of RPC_LIST) {
-      try {
-        const p = new ethers.JsonRpcProvider(url);
-        await Promise.race([
-          p.getBlockNumber(),
-          new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 6000))
-        ]);
-        return p;
-      } catch { /* try next */ }
+    if (_providerCache) return _providerCache;
+    try {
+      const configs = RPC_LIST.map((url, i) => ({
+        provider: new ethers.JsonRpcProvider(url, _CHAIN_ID, { staticNetwork: true }),
+        priority: i + 1, weight: 1, stallTimeout: 2500,
+      }));
+      _providerCache = new ethers.FallbackProvider(configs, _CHAIN_ID, { quorum: 1 });
+    } catch (e) {
+      // Older ethers / FallbackProvider unavailable — single-provider fallback.
+      _providerCache = new ethers.JsonRpcProvider(RPC_LIST[0], _CHAIN_ID, { staticNetwork: true });
     }
-    // All failed — return primary anyway so callers get clean RPC errors
-    return new ethers.JsonRpcProvider(RPC_LIST[0]);
+    return _providerCache;
   }
   const RPC = RPC_LIST[0]; // kept for any direct references
   const MATRIX_SIZE = 127n;
