@@ -2018,7 +2018,7 @@ const CHAIN_ID = 84532;
 
 
 const RPC_URL      = 'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/';
-const RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
+const RPC_FALLBACK = 'https://sepolia.base.org';
 
 // ── V8.45: Default-sponsor rotation pool ─────────────────────────────────
 // Members who register WITHOUT a referral link are shared across these
@@ -2047,7 +2047,7 @@ function pickDefaultSponsor(memberAddr) {
   } catch(_) {}
   return DEFAULT_SPONSOR_POOL[Math.floor(Math.random() * DEFAULT_SPONSOR_POOL.length)];
 }
-const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
+const RPC_EXTRA    = 'https://sepolia.base.org';
 
 // eth_getLogs on range-capped providers (QuickNode caps at 10k blocks): walk
 // backward in <=9000-block windows instead of one whole-chain query that gets
@@ -2563,7 +2563,7 @@ async function connectWallet(silent=false) {
         // Attempt addEthereumChain for any error EXCEPT explicit user rejection (4001).
         if (swErr.code !== 4001) {
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org', 'https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
@@ -2632,7 +2632,7 @@ async function switchToBaseSepolia() {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
           nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},
-          rpcUrls:['https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com'],
+          rpcUrls:['https://sepolia.base.org'],
           blockExplorerUrls:['https://sepolia.basescan.org']
         }] });
         hideNetworkBanner(); if (!userAddr) await connectWallet();
@@ -5510,7 +5510,7 @@ async function loadUserBurnHistory(cnova, user) {
     setText('dash-cnova-burned', '…');
     const provider  = cnova.runner?.provider ?? cnova.provider;
     const latest    = await provider.getBlockNumber();
-    const fromBlock = Math.max(0, latest - 20_000); // ~40 min on Base Sepolia
+    const fromBlock = Math.max(0, latest - 9_000);  // <=9k: under QuickNode 10k getLogs cap (no 413 on first try)
     const filter    = cnova.filters.Transfer(user, ethers.ZeroAddress);
     let events;
     try {
