@@ -2049,6 +2049,24 @@ function pickDefaultSponsor(memberAddr) {
 }
 const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
 
+// eth_getLogs on range-capped providers (QuickNode caps at 10k blocks): walk
+// backward in <=9000-block windows instead of one whole-chain query that gets
+// rejected. Sequential, so it never bursts the per-second rate limit.
+async function safeGetLogs(contract, filter, opts) {
+  opts = opts || {};
+  const rp = contract.runner && (contract.runner.provider || contract.runner);
+  const WINDOW = 9000;
+  const latest = await rp.getBlockNumber();
+  const floor = Math.max(0, latest - (opts.maxBack || 100000));
+  const out = [];
+  for (let to = latest; to >= floor; to -= WINDOW) {
+    const from = Math.max(floor, to - WINDOW + 1);
+    try { out.push(...await contract.queryFilter(filter, from, to)); } catch (_) {}
+    if (from <= floor) break;
+  }
+  return out;
+}
+
 const ADDRS = {
   // V8.46 — deployed 2026-07-31 — fresh redeploy (reused MockUSDC); all 9 V8.46 fixes live
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
@@ -2831,7 +2849,7 @@ async function loadCWData(userAddr, signer, rp) {
     // Try to get specific enrollment number from events (best-effort)
     try {
       const filter = cw.filters.MemberEnrolled(userAddr);
-      const events  = await cw.queryFilter(filter, -200000);
+      const events  = await safeGetLogs(cw, filter, {maxBack: 20000});
       if (events.length > 0) {
         const num = Number(events[0].args.enrollmentNumber);
         setText('cw-founder-id', `Member #${num.toLocaleString()} of 1,000`);
@@ -4761,7 +4779,7 @@ async function loadDashboardData() {
               let _wasReclaimed = false;
               try {
                 const _rcLogs = await raceTimeout(
-                  mc.queryFilter(mc.filters.SlotReclaimed(userAddr)).catch(() => null), 8000
+                  safeGetLogs(mc, mc.filters.SlotReclaimed(userAddr), {maxBack: 20000}).catch(() => null), 8000
                 ).then(v => v ?? null);
                 _wasReclaimed = Array.isArray(_rcLogs) && _rcLogs.length > 0;
               } catch (_) { _wasReclaimed = false; }
@@ -5587,7 +5605,7 @@ async function _getGlobalJoinOrder(addr, rp) {
   if (cached > 0) return cached;
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const events = await tr.queryFilter(tr.filters.MemberEnrolled(addr));
+    const events = await safeGetLogs(tr, tr.filters.MemberEnrolled(addr));
     if (events.length > 0) {
       const order = Number(events[0].args.joinedCount);
       if (order > 0) { localStorage.setItem(cacheKey, String(order)); return order; }
@@ -5915,7 +5933,7 @@ async function renderCnovaDetail(el, rp) {
   // surviving trace, so read it back and show the permanent ledger.
   let historyRows = '';
   try {
-    const evs = await cnova.queryFilter(cnova.filters.EarlyUnlock(userAddr), 0, 'latest');
+    const evs = await safeGetLogs(cnova, cnova.filters.EarlyUnlock(userAddr));
     if (evs.length) {
       const blks = await Promise.all(evs.map(e => rp.getBlock(e.blockNumber).catch(() => null)));
       let totRel = 0n, totPen = 0n;
@@ -6111,7 +6129,7 @@ async function renderBurnedDetail(el, rp) {
   el.innerHTML = '<span class="detail-loading"><span class="spinner"></span> Scanning redemption history…</span>';
   const cnova = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   try {
-    const events = await cnova.queryFilter(cnova.filters.Transfer(userAddr, ethers.ZeroAddress), 0, 'latest');
+    const events = await safeGetLogs(cnova, cnova.filters.Transfer(userAddr, ethers.ZeroAddress));
     const total  = events.reduce((a, e) => a + BigInt(e.args.value), 0n);
     const totalFmt = Number(ethers.formatEther(total)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -6786,7 +6804,7 @@ async function _getDirectReferrals(addr, rp) {
     let events;
     try {
       events = await Promise.race([
-        tr.queryFilter(filter),                                // whole chain
+        safeGetLogs(tr, filter, {maxBack: 50000}),             // capped+chunked (QuickNode 10k getLogs limit)
         new Promise((_, r) => setTimeout(() => r(new Error('evt_timeout')), 30000)),
       ]);
     } catch (wideErr) {
