@@ -69,6 +69,20 @@ Stage 3: git push origin admin:main --force      ← STOP — wait for leader si
 
 If Vercel ignores force-push: `git commit --allow-empty -m "trigger deploy"` then push again.
 
+## Timed launch-gate sequence (redeploy / relaunch)
+
+The maintenance gate in `index.html` (~:502) is **host-based**: `admin.*` is always open (so testing is never gated); `early.*` counts down to `EARLY_MS` then shows the coupon bypass; main counts down to `MAIN_MS` then opens. One `index.html` serves all three — set both epoch-ms constants + the two pill labels and it's ready.
+
+**Sequence (proven 2026-07-31 V8.46 redeploy):**
+1. Push the cutover to **admin** → verify + register test accounts on the new contracts (admin bypasses the gate, so you test the real build ungated).
+2. Take the live site offline at **midnight EDT**.
+3. Gate **PREVIEW (early.)** to open **9:00 AM EDT** — set `EARLY_MS`.
+4. Gate **MAIN** to open **10:00 AM EDT** — set `MAIN_MS`.
+5. **Prep the gate in admin's index.html now, but do NOT push to preview/main until midnight.** At midnight: `git push origin admin:preview --force` then `git push origin admin:main --force`.
+
+EDT = UTC-4 → 9 AM EDT = 13:00 UTC, 10 AM EDT = 14:00 UTC. Compute epoch-ms accordingly (e.g. Fri Jul 31 2026: EARLY_MS=1785502800000, MAIN_MS=1785506400000).
+
+
 ---
 
 ## PHASE 2 — Pre-Launch Day (July 18 evening)
