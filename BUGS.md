@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-07-31] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Jacob Banji-Ajala
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x95ebde6a7c0a91699eac972c8cd3284f45d5e1e5
+- **Frequency:** Intermittent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** Should be smooth alignment
+- **Notes:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **Submitted:** Fri, 31 Jul 2026 22:18:48 GMT
+
+
 ### [2026-07-31] Dashboard (index.html) — i am not able to refresh on any of my accounts.I have to res…
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
