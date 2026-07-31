@@ -773,7 +773,7 @@
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
     if (localStorage.getItem('cnova_st_ver') !== 'v8.46') {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_loans_v8_32']
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_loans_v8_32']
         .forEach(function(k){ localStorage.removeItem(k); });
       localStorage.setItem('cnova_st_ver','v8.46');
     }
@@ -786,6 +786,10 @@
     if (_cp) { _lastParkedHTML = _cp; const w = document.getElementById('parked-list-wrap'); if (w) w.innerHTML = _cp; }
     const _cr = localStorage.getItem('cnova_st_rescue');
     if (_cr) _lastRescueCount = JSON.parse(_cr);
+    const _cm = localStorage.getItem('cnova_st_matrix');
+    if (_cm) { _lastMatrixFill = JSON.parse(_cm);
+      if (_lastMatrixFill && _lastMatrixFill.occA != null) setText('pill-matrix-val', `${_lastMatrixFill.occA}/127 · ${_lastMatrixFill.occB}/127`);
+    }
     const _cps = localStorage.getItem('cnova_st_parked_stats');
     if (_cps) {
       _lastParkedStats = JSON.parse(_cps);
@@ -1404,7 +1408,8 @@
       if (Number(mOccA) === 0 && Number(mOccB) === 0 && _lastMatrixFill) {
         mOccA = _lastMatrixFill.occA; mOccB = _lastMatrixFill.occB; activeTiers = _lastMatrixFill.activeTiers;
       } else if (Number(mOccA) > 0 || Number(mOccB) > 0) {
-        _lastMatrixFill = { occA: mOccA, occB: mOccB, activeTiers };
+        _lastMatrixFill = { occA: mOccA.toString(), occB: mOccB.toString(), activeTiers };
+        try { localStorage.setItem('cnova_st_matrix', JSON.stringify(_lastMatrixFill)); } catch(e) {}
       }
       const pctA = Math.round(Number(mOccA) * 100 / Number(MATRIX_SIZE));
       const pctB = Math.round(Number(mOccB) * 100 / Number(MATRIX_SIZE));
