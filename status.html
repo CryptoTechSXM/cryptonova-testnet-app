@@ -769,6 +769,7 @@
   let _lastRescueCount = null; // { count, lastTime }
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
   let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
+  let _lastT1Tier     = null; // hold last-good T1 tier data so summary + row stay consistent
   // V8.46 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
@@ -1396,6 +1397,12 @@
         const hasActivity = pairs.some(p => Number(p.occA) > 0 || Number(p.occB) > 0);
         return { ...m, pairs, hasActivity, gateOpen: Boolean(gates[i]) };
       }));
+
+      // Anti-flicker (T1 row + summary consistency): T1 is the active tier. If this poll's
+      // read blipped empty, reuse the last good T1 data so the summary count and the T1 row
+      // can't disagree (same last-known-good pattern as the Parked/Loans cards).
+      if (tierData[0] && tierData[0].hasActivity) _lastT1Tier = tierData[0];
+      else if (tierData[0] && _lastT1Tier) tierData[0] = _lastT1Tier;
 
       // Summary pill — T1 routing-target pair
       const t1d = tierData[0];
