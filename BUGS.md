@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-07-31] Dashboard (index.html) — i am not able to refresh on any of my accounts.I have to res…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** i am not able to refresh on any of my accounts.I have to restart everytime.
+- **What was expected:** to be able to refresh without always having to restsrt my pjone.
+- **Submitted:** Fri, 31 Jul 2026 14:59:50 GMT
+
+
 ### [2026-07-30] Other — When I trying to register an account:
 
 after clicking Approv…
