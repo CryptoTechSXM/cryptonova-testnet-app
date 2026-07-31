@@ -645,7 +645,6 @@
   // RPC fallback list — tries each in order until one responds within 6s.
   // Dead Alchemy key removed 2026-07-31 (monthly cap exhausted).
   const RPC_LIST = [
-    'https://base-sepolia.g.alchemy.com/v2/alch_YTt95pWyd0eqS4P0aDmB7',
     'https://base-sepolia.public.blastapi.io',
     'https://sepolia.base.org',
     'https://base-sepolia-rpc.publicnode.com',
@@ -1324,7 +1323,7 @@
   async function loadMatrix(provider) {
     try {
       const TIER_META = [
-        { label:'T1',  name:'Nova Seed',        fee:'$10',     color:'#00e5a0', matAKey:null,      matBKey:null      },
+        { label:'T1',  name:'Nova Seed',        fee:'$10',     color:'#00e5a0', matAKey:'T1matA',  matBKey:'T1matB'      },
         { label:'T2',  name:'Nova Rise',        fee:'$25',     color:'#3b82f6', matAKey:'T2matA',  matBKey:'T2matB'  },
         { label:'T3',  name:'Nova Star',        fee:'$50',     color:'#3b82f6', matAKey:'T3matA',  matBKey:'T3matB'  },
         { label:'T4',  name:'Nova Core',        fee:'$100',    color:'#94a3b8', matAKey:'T4matA',  matBKey:'T4matB'  },

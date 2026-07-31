@@ -2017,7 +2017,7 @@ const CHAIN_ID = 84532;
 
 
 
-const RPC_URL      = 'https://base-sepolia.g.alchemy.com/v2/alch_YTt95pWyd0eqS4P0aDmB7';
+const RPC_URL      = 'https://sepolia.base.org';
 const RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
 
 // ── V8.45: Default-sponsor rotation pool ─────────────────────────────────
@@ -2545,7 +2545,7 @@ async function connectWallet(silent=false) {
         // Attempt addEthereumChain for any error EXCEPT explicit user rejection (4001).
         if (swErr.code !== 4001) {
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/alch_YTt95pWyd0eqS4P0aDmB7', 'https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org', 'https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
@@ -2614,7 +2614,7 @@ async function switchToBaseSepolia() {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
           nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},
-          rpcUrls:['https://base-sepolia.g.alchemy.com/v2/alch_YTt95pWyd0eqS4P0aDmB7','https://base-sepolia.public.blastapi.io','https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com'],
+          rpcUrls:['https://sepolia.base.org','https://base-sepolia.public.blastapi.io','https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com'],
           blockExplorerUrls:['https://sepolia.basescan.org']
         }] });
         hideNetworkBanner(); if (!userAddr) await connectWallet();
