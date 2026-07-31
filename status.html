@@ -771,6 +771,7 @@
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
   let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
   let _lastT1Tier     = null; // hold last-good T1 tier data so summary + row stay consistent
+  let _lastTotals     = null; // { cycles, totalJoined } — hold last-good System Totals
   // V8.46 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
@@ -1346,10 +1347,17 @@
       // Velocity gates + global stats
       let gates = Array(10).fill(true);
       try { gates = await tr.getVelocityGates(); } catch(_) {}
-      const [cycles, totalJoined] = await Promise.all([
+      let [cycles, totalJoined] = await Promise.all([
         tr.totalSystemCycles().catch(()=>0n),
         tr.globalJoinedCount().catch(()=>0n),
       ]);
+      // Anti-flicker: hold last-good System Totals so "members joined" can't flash 0
+      // when globalJoinedCount() blips. (cycles is legitimately 0 before the first cross.)
+      if (Number(totalJoined) === 0 && _lastTotals) {
+        cycles = _lastTotals.cycles; totalJoined = _lastTotals.totalJoined;
+      } else if (Number(totalJoined) > 0) {
+        _lastTotals = { cycles, totalJoined };
+      }
 
       // Discover PM addresses via TierRouter.tierPairManagers[] for T2–T10
       const pmAddrs = Array(10).fill(null);

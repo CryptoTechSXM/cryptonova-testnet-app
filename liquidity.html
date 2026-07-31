@@ -835,7 +835,7 @@ async function loadPublicStats() {
     set('stat-total-dist',   cp.totalDist);
   }
   try {
-    const roProvider = new ethers.JsonRpcProvider('https://sepolia.base.org');
+    const roProvider = new ethers.JsonRpcProvider('https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/');
     const roPool = new ethers.Contract(POOL_ADDR, POOL_ABI, roProvider);
     const [totalStaked, totalDist] = await Promise.all([
       roPool.totalStaked(),
@@ -1458,7 +1458,7 @@ window.addEventListener('load', async () => {
   }
   // Load public pool stats even without wallet
   try {
-    const rp = new ethers.JsonRpcProvider('https://sepolia.base.org');
+    const rp = new ethers.JsonRpcProvider('https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/');
     const poolR = new ethers.Contract(POOL_ADDR, POOL_ABI, rp);
     const [ts, td] = await Promise.all([poolR.totalStaked(), poolR.totalRewardDistributed()]);
     set('stat-total-staked', fmtUSD(ts));
