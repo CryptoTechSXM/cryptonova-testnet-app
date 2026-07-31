@@ -768,6 +768,15 @@
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
   let _lastRescueCount = null; // { count, lastTime }
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
+  // V8.46 redeploy: discard any Status cache left over from a prior deployment,
+  // so old accumulated loan totals / rescue capacity can't paint over live data.
+  try {
+    if (localStorage.getItem('cnova_st_ver') !== 'v8.46') {
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_loans_v8_32']
+        .forEach(function(k){ localStorage.removeItem(k); });
+      localStorage.setItem('cnova_st_ver','v8.46');
+    }
+  } catch(e) {}
   // Restore cached display state immediately (survives page reload)
   try {
     const _cl = localStorage.getItem('cnova_st_loans');
@@ -1519,7 +1528,7 @@
       // Scans MAX 3 chunks (6000 blocks ~1.5hrs) per poll to avoid rate limits.
       // History builds up gradually across polls. localStorage preserves totals.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_32'; // bump suffix to reset on logic change
+        const LOAN_KEY        = 'cnova_loans_v8_46'; // bump suffix to reset on logic change
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
 
