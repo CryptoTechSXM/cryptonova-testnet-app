@@ -106,6 +106,15 @@ Stage 3: git push origin admin:main --force      ← STOP, wait for leader sign-
 
 ---
 
+## After a CONTRACT deploy — verify on-chain + de-flag the domain (added 2026-07-31)
+
+Every time new contracts are deployed:
+
+1. **Verify EVERY contract on BaseScan** (`hardhat verify`; matrices need the `MatrixLogicLib` link). An unverified contract requesting token spending-caps from a fresh domain is the textbook shape of a drainer — Blockaid (the security engine behind MetaMask, Coinbase Wallet, Rainbow) auto-flags it and members get a full-screen "you will probably lose your assets to a scammer" warning and bail.
+2. **Submit the domain + new contract addresses to Blockaid** at report.blockaid.io/mistake — AFTER verifying, so the re-scan sees clean contracts and the de-list sticks. One de-list clears the warning across every Blockaid-powered wallet.
+
+Confirmed live 2026-07-30: `early.crypto-nova.app` + the CNOVA contract were flagged "Malicious site/address"; CNOVA was unverified on Basescan (the trigger). Aggressive ROI/MLM copy ("56% ROI", "refer 5 earn $2.50", "matrix") compounds it.
+
 ## CRITICAL: Post-push checklist — run EVERY TIME after git push
 
 ### Step 1 — Truncation check (ALWAYS FIRST, before anything else)

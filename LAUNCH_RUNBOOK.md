@@ -46,7 +46,8 @@
 - [ ] Run `seed_w1.js` to place W1 at matrix position 1
 - [ ] Set parked grace: `node scripts/set_parked_grace.js 172800` (mainnet = 48h)
 - [ ] Register Chainlink Automation upkeep on mainnet registry and fund with LINK
-- [ ] Verify BaseScan contract verification passes
+- [ ] **Verify EVERY deployed contract on BaseScan** (`hardhat verify`; matrices need the `MatrixLogicLib` link) — an unverified contract is a top trigger for Blockaid's "malicious address/site" warning
+- [ ] **Submit the domain + new contract addresses to Blockaid** at report.blockaid.io/mistake (verify contracts FIRST, then appeal) — clears the "you'll lose your assets to a scammer" banner across every Blockaid-powered wallet (MetaMask, Coinbase, Rainbow)
 
 ### Frontend update (post-deploy)
 
@@ -217,6 +218,7 @@ tail -5 index.html   # verify
 - **NEVER delete a Vercel project** — no undo, permanent data loss
 - **ALWAYS `npx hardhat run scripts/deploy_v8.js --network base`** — NEVER `node`
 - **ALWAYS commit addresses JSON immediately after deploy** — V8.29 was lost by skipping this
+- **ALWAYS verify contracts on BaseScan AND submit the domain to Blockaid (report.blockaid.io/mistake) after every deploy** — unverified contracts + fresh domains get flagged "malicious/scam" by MetaMask/Coinbase/Rainbow (all Blockaid) and members bail on the warning. Verify FIRST, then appeal.
 
 ## Git Lock Recovery
 
