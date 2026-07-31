@@ -665,6 +665,17 @@
     return new ethers.JsonRpcProvider(RPC_LIST[0]);
   }
   const RPC = RPC_LIST[0]; // kept for any direct references
+  // Under a poll's read burst QuickNode sheds ~45% of concurrent eth_calls as
+  // "missing revert data" (measured). One retry recovers them (12/12 vs ~6/12),
+  // so a dropped allPairsStatus no longer collapses a live tier to 0/Inactive.
+  async function _retry(fn, n = 3, ms = 250) {
+    let e;
+    for (let i = 0; i < n; i++) {
+      try { return await fn(); }
+      catch (err) { e = err; if (i < n - 1) await new Promise(r => setTimeout(r, ms * (i + 1))); }
+    }
+    throw e;
+  }
   const MATRIX_SIZE = 127n;
   const T1_FEE   = 10_000_000n; // $10 USDC
 
@@ -1364,7 +1375,7 @@
       pmAddrs[0] = ADDRS.T1pm;
       await Promise.all(Array.from({length:9}, async (_, i) => {
         try {
-          const pm = await tr.tierPairManagers(i + 1);
+          const pm = await _retry(() => tr.tierPairManagers(i + 1));
           if (pm && pm !== ethers.ZeroAddress) pmAddrs[i + 1] = pm;
         } catch(_) {}
       }));
@@ -1376,7 +1387,7 @@
         if (pmAddr) {
           try {
             const pm = new ethers.Contract(pmAddr, PM_ABI, provider);
-            const [_matAs, _matBs, _occAs, _occBs, , _actives] = await pm.allPairsStatus();
+            const [_matAs, _matBs, _occAs, _occBs, , _actives] = await _retry(() => pm.allPairsStatus());
             const fetches = Array.from({length: _matAs.length}, (_, pi) => {
               const mcA = new ethers.Contract(_matAs[pi], MATRIX_ABI, provider);
               const mcB = new ethers.Contract(_matBs[pi], MATRIX_ABI, provider);
