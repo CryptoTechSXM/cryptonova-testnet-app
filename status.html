@@ -645,10 +645,10 @@
   // RPC fallback list — tries each in order until one responds within 6s.
   // Dead Alchemy key removed 2026-07-31 (monthly cap exhausted).
   const RPC_LIST = [
-    'https://base-sepolia.public.blastapi.io',
+    // 2026-07-31: blastapi (403 Forbidden) and blockpi (521 down) removed — both
+    // dead and blastapi being first wasted a 6s probe every load. Confirmed-working only.
     'https://sepolia.base.org',
     'https://base-sepolia-rpc.publicnode.com',
-    'https://base-sepolia.blockpi.network/v1/rpc/public',
   ];
   async function _getProvider() {
     for (const url of RPC_LIST) {
