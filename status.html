@@ -768,6 +768,7 @@
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
   let _lastRescueCount = null; // { count, lastTime }
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
+  let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
   // V8.46 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
@@ -1395,13 +1396,22 @@
       // Summary pill — T1 routing-target pair
       const t1d = tierData[0];
       const t1route = t1d.pairs.find(p => p.active) || t1d.pairs[0] || {occA:0n, occB:0n};
-      const pctA = Math.round(Number(t1route.occA) * 100 / Number(MATRIX_SIZE));
-      const pctB = Math.round(Number(t1route.occB) * 100 / Number(MATRIX_SIZE));
+      let mOccA = t1route.occA, mOccB = t1route.occB;
+      let activeTiers = tierData.filter(d => d.hasActivity).length;
+      // Anti-flicker: a heavy matrix read can blip empty on the free RPC. Rather than
+      // paint 0/127 over a known-good value, hold the last good reading (same pattern as
+      // the Parked/Loans cards). A legitimately empty T1 stays 0 until its first real read.
+      if (Number(mOccA) === 0 && Number(mOccB) === 0 && _lastMatrixFill) {
+        mOccA = _lastMatrixFill.occA; mOccB = _lastMatrixFill.occB; activeTiers = _lastMatrixFill.activeTiers;
+      } else if (Number(mOccA) > 0 || Number(mOccB) > 0) {
+        _lastMatrixFill = { occA: mOccA, occB: mOccB, activeTiers };
+      }
+      const pctA = Math.round(Number(mOccA) * 100 / Number(MATRIX_SIZE));
+      const pctB = Math.round(Number(mOccB) * 100 / Number(MATRIX_SIZE));
       const pillInd = document.getElementById('pill-matrix');
       pillInd.className = (pctA >= 95 && pctB >= 95) ? 'pill-indicator yellow' : 'pill-indicator green';
-      setText('pill-matrix-val', `${t1route.occA}/${MATRIX_SIZE} · ${t1route.occB}/${MATRIX_SIZE}`);
+      setText('pill-matrix-val', `${mOccA}/${MATRIX_SIZE} · ${mOccB}/${MATRIX_SIZE}`);
       setText('pill-matrix-sub', `MatA ${pctA}% · MatB ${pctB}%`);
-      const activeTiers = tierData.filter(d => d.hasActivity).length;
       document.getElementById('badge-matrix').className = 'card-badge badge-blue';
       setText('badge-matrix', `${activeTiers} TIERS · ${Number(cycles)} CYCLES`);
       setText('summary-matrix', `${activeTiers} active tiers · ${Number(cycles)} total cycles`);
