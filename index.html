@@ -2132,6 +2132,7 @@ const T10_FEE = 10_000_000_000n;   // $10,000 USDC
 
 // ── ABIs ─────────────────────────────────────────────────────────────
 const TIER_ROUTER_ABI = [
+  'function bulkWithdraw() external', // V8.44 G2: sweep every tier's free balance in ONE tx
   'function register(address referrer) external',
   'function globalJoined(address) external view returns (bool)',
   'function memberReferrer(address) external view returns (address)',
@@ -6365,22 +6366,42 @@ async function doWithdraw() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Withdrawing…';
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
+    const recipient = getWithdrawRecipient();
+    // Read first (no signature): does the member hold anything withdrawable anywhere?
     const _matObjs = await _buildAllMatrixObjects(rp);
-    const matrices = _matObjs.map(m => m.addr);
-    let withdrawn = false;
-    for (const addr of matrices) {
-      const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
+    let anything = false;
+    for (const m of _matObjs) {
+      const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
       const member = await mc.getMember(userAddr).catch(()=>null);
-      if (member && BigInt(member.withdrawable) > 0n) {
-        const mcW = new ethers.Contract(addr, MATRIX_ABI, signer);
-        const recipient = getWithdrawRecipient();
-        const tx = recipient ? await mcW.withdrawTo(recipient) : await mcW.withdraw();
-        await tx.wait();
-        withdrawn = true;
-      }
+      if (member && BigInt(member.withdrawable) > 0n) { anything = true; break; }
     }
-    setStatus('withdraw-status', withdrawn ? '✅ Earnings withdrawn!' : 'Nothing to withdraw.', withdrawn ? 'ok' : 'info');
-    if (withdrawn) await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
+    if (!anything) { setStatus('withdraw-status', 'Nothing to withdraw.', 'info'); return; }
+
+    if (recipient) {
+      // Custom recipient: bulkWithdraw pays only the member, so loop withdrawTo per matrix.
+      let withdrawn = false;
+      for (const m of _matObjs) {
+        const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
+        const member = await mc.getMember(userAddr).catch(()=>null);
+        if (member && BigInt(member.withdrawable) > 0n) {
+          const mcW = new ethers.Contract(m.addr, MATRIX_ABI, signer);
+          const tx = await mcW.withdrawTo(recipient);
+          await tx.wait();
+          withdrawn = true;
+        }
+      }
+      setStatus('withdraw-status', withdrawn ? '✅ Earnings withdrawn to your chosen address!' : 'Nothing to withdraw.', withdrawn ? 'ok' : 'info');
+    } else {
+      // ONE signature: TierRouter.bulkWithdraw() sweeps every tier's free balance in a single tx.
+      const trR = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+      let gl = 6000000n;
+      try { const est = await trR.bulkWithdraw.estimateGas({ from: userAddr }); gl = est + est / 4n; } catch(_) {}
+      const trW = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      const tx = await trW.bulkWithdraw({ gasLimit: gl });
+      await tx.wait();
+      setStatus('withdraw-status', '✅ Earnings withdrawn — every tier in a single transaction!', 'ok');
+    }
+    await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
     await loadDashboardData();
   } catch(e) {
     setStatus('withdraw-status', friendlyError(e), 'err');
