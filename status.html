@@ -644,12 +644,18 @@
   // ── Config ────────────────────────────────────────────────
   // RPC fallback list — tries each in order until one responds within 6s.
   // Dead Alchemy key removed 2026-07-31 (monthly cap exhausted).
-  const RPC_LIST = [
-    // 2026-07-31: QuickNode (keyed, handles the read burst) primary; public RPCs fallback.
-    // blastapi (403) and blockpi (521) removed earlier — both dead.
-    'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/',
-    'https://sepolia.base.org',
-  ];
+  // All 5 QuickNode endpoints, shuffled per load so status users spread across them; sepolia last.
+  const RPC_LIST = (() => {
+    const _qn = [
+      'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/',
+      'https://wiser-proportionate-forest.base-sepolia.quiknode.pro/8383659a7c5f035faa091659780d5ba26c50fcf8/',
+      'https://cosmopolitan-still-fire.base-sepolia.quiknode.pro/3835d77b733a07e6109ec27774ab3231fbb86c6a/',
+      'https://newest-cold-isle.base-sepolia.quiknode.pro/d1082ae239ca62f4fc938014273539074f377e02/',
+      'https://side-silent-sheet.base-sepolia.quiknode.pro/4ce4b5665baf27920cda0759814efef5c3172510/',
+    ];
+    for (let i = _qn.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_qn[i], _qn[j]] = [_qn[j], _qn[i]]; }
+    return [..._qn, 'https://sepolia.base.org'];
+  })();
   async function _getProvider() {
     for (const url of RPC_LIST) {
       try {

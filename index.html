@@ -2018,7 +2018,7 @@ const CHAIN_ID = 84532;
 
 
 const RPC_URL      = 'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/';
-const RPC_FALLBACK = 'https://wiser-proportionate-forest.base-sepolia.quiknode.pro/8383659a7c5f035faa091659780d5ba26c50fcf8/'; // cnova-site-2 (EP5): getLogs-capable overflow lane for EP1
+const RPC_FALLBACK = 'https://sepolia.base.org';
 
 // ── V8.45: Default-sponsor rotation pool ─────────────────────────────────
 // Members who register WITHOUT a referral link are shared across these
@@ -2452,11 +2452,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   const _net84532 = ethers.Network.from(84532);
   const _mkRpc = url => new ethers.JsonRpcProvider(url, _net84532, { staticNetwork: _net84532 });
   try {
-    readProvider = new ethers.FallbackProvider([
-      { provider: _mkRpc(RPC_URL),      priority: 1, weight: 1 },
-      { provider: _mkRpc(RPC_FALLBACK), priority: 2, weight: 1 },
-      { provider: _mkRpc(RPC_EXTRA),    priority: 3, weight: 1 },
-    ], _net84532, { quorum: 1 });
+    // cnova-site pool: all 5 QuickNode endpoints (~250 req/s aggregate) shuffled per page load
+    // so users spread evenly, each with 4 overflow lanes; sepolia last resort. Alchemy-comparable.
+    const _QN_POOL = [
+      RPC_URL,       // cnova-site   EP1
+      RPC_FALLBACK,  // cnova-site-2 EP5
+      'https://cosmopolitan-still-fire.base-sepolia.quiknode.pro/3835d77b733a07e6109ec27774ab3231fbb86c6a/', // EP2
+      'https://newest-cold-isle.base-sepolia.quiknode.pro/d1082ae239ca62f4fc938014273539074f377e02/', // EP3
+      'https://side-silent-sheet.base-sepolia.quiknode.pro/4ce4b5665baf27920cda0759814efef5c3172510/', // EP4
+    ];
+    for (let _i = _QN_POOL.length - 1; _i > 0; _i--) { const _j = Math.floor(Math.random() * (_i + 1)); [_QN_POOL[_i], _QN_POOL[_j]] = [_QN_POOL[_j], _QN_POOL[_i]]; }
+    readProvider = new ethers.FallbackProvider(
+      _QN_POOL.map((u, i) => ({ provider: _mkRpc(u), priority: i + 1, weight: 1 }))
+        .concat([{ provider: _mkRpc(RPC_EXTRA), priority: _QN_POOL.length + 1, weight: 1 }]),
+      _net84532, { quorum: 1 });
   } catch(_) {
     // ethers FallbackProvider constructor may vary — fall back to single provider
     readProvider = _mkRpc(RPC_URL);
@@ -2849,7 +2858,7 @@ async function loadCWData(userAddr, signer, rp) {
     // Try to get specific enrollment number from events (best-effort)
     try {
       const filter = cw.filters.MemberEnrolled(userAddr);
-      const events  = await safeGetLogs(cw, filter, {maxBack: 50000});
+      const events  = await safeGetLogs(cw, filter, {maxBack: 20000});
       if (events.length > 0) {
         const num = Number(events[0].args.enrollmentNumber);
         setText('cw-founder-id', `Member #${num.toLocaleString()} of 1,000`);
