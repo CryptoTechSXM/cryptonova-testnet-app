@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-01] Dashboard (index.html) — I was graduated from tier 1 even though I have auto re-entry…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** I was graduated from tier 1 even though I have auto re-entry and double re-entry enabled.
+- **What was expected:** I expect to still be in tier one until I disable the automation.
+- **Submitted:** Sat, 01 Aug 2026 16:42:54 GMT
+
+
 ### [2026-07-31] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
 - **Reporter:** Jacob Banji-Ajala
 - **Page:** Other
