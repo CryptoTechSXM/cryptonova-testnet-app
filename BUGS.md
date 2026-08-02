@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-02] Other — Every Refresh of the system gives me different info for the …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Every Refresh of the system gives me different info for the account, mainly the total earned area and the members ID section.  Needs to refresh about 6 or so times in order to get accurate info... most times the member section doesn't show any directs in the account  and is saying that I have graduated from Tiers without even a single crossing or rotation.. the RPC seems to be very slow in getting and displaying accurate info, or may be it's my computer...lol. Self rescue is another issue.. one refresh says I'm in the matrix and another refresh says that I must self rescue..
+- **What was expected:** Not to have to do so many refresh to get accurate info.. Sorry for the long post...
+- **Notes:** Happening to all my accounts.. I'm not able to keep track of what is really happening to each account because everytime I do a refresh new info is displayed. and every refresh takes you back to the home page and then you have to select dashboard which may be another refresh.... Can it be done that when a refresh is done, the page which invoked the refresh you come back to that page instead of going to home page?
+- **Submitted:** Sun, 02 Aug 2026 19:08:27 GMT
+
+
 ### [2026-08-02] Dashboard (index.html) — i am still not able to refresh my accounts.
 i have to either…
 - **Reporter:** CryptoJan22
