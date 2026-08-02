@@ -37,6 +37,21 @@
 
 ## Open Issues
 
+### [2026-08-02] Dashboard (index.html) — i am still not able to refresh my accounts.
+i have to either…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** i am still not able to refresh my accounts.
+i have to either restart my phone or playing around clicking from home to register to dashboard then it refreshes.
+Also most times the  account shows the wrong total earned until i get page to refresh 2 or 3 times.
+when i do a self rescus and the dashboard is updated it sometimes come back with everything showing zero until i am able to refresh.
+- **What was expected:** honestly i dont know.
+- **Submitted:** Sun, 02 Aug 2026 14:45:55 GMT
+
+
 ### [2026-08-02] Onboarding / Registration — I keep getting and error when I tap on the 'approve $10' tab…
 - **Reporter:** E2theb
 - **Page:** Onboarding / Registration
