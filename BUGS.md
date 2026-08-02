@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-02] Onboarding / Registration — I keep getting and error when I tap on the 'approve $10' tab…
+- **Reporter:** E2theb
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x878660b77ddea5884709d2cd2e9453931cc528a0
+- **Frequency:** Consistent
+- **What happened:** I keep getting and error when I tap on the 'approve $10' tab.
+- **What was expected:** The system should have approved my $10 and then register
+- **Notes:** Step 2: Register ($10 USDC)
+❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below
+- **Submitted:** Sun, 02 Aug 2026 14:22:27 GMT
+
+
 ### [2026-08-01] Dashboard (index.html) — I was graduated from tier 1 even though I have auto re-entry…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
