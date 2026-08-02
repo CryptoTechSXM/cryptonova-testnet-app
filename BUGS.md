@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-02] Dashboard (index.html) — I'm currently upgraded to tier 3. i have all three automatio…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x9133213faa78ef4ea6651a2d492a20a19d301c34
+- **Frequency:** Consistent
+- **What happened:** I'm currently upgraded to tier 3. i have all three automation enabled but I was still graduated from tiers 1&2.
+- **What was expected:** i should have remained in tiers 1 and 2 until i disable the automation.
+- **Notes:** Before displaying the graduated status , there was a no active status. After a few hard refreshes the self rescue screen popped up but I was unable to self rescue even though I clicked on the button. The screen subsequently disappeared and the graduated status appeared.
+- **Submitted:** Sun, 02 Aug 2026 19:58:55 GMT
+
+
 ### [2026-08-02] Other — Every Refresh of the system gives me different info for the …
 - **Reporter:** Sherwyn
 - **Page:** Other
