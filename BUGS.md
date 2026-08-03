@@ -37,6 +37,151 @@
 
 ## Open Issues
 
+### [2026-08-03] Other — The matrix tree view is not loading.
+- **Reporter:** @Koach100
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
+- **Frequency:** Intermittent
+- **What happened:** The matrix tree view is not loading.
+- **What was expected:** I expected it to load.
+- **Notes:** This message popped up.
+Error: missing revert data (action="call", data=null, reason=null, transaction={ "data": "0xb0482fd9", "to": "0xA2a749173fE3307
+- **Submitted:** Mon, 03 Aug 2026 14:40:52 GMT
+
+
+### [2026-08-03] Dashboard (index.html) — I disabled auto upgrade and my income lessened by about $200…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Intermittent
+- **What happened:** I disabled auto upgrade and my income lessened by about $200 and 4 tiers graduated even the ones that has not even made a complete cycle.
+- **What was expected:** I expect the opposite to happen.
+- **Submitted:** Mon, 03 Aug 2026 14:26:13 GMT
+
+
+### [2026-08-03] Dashboard (index.html) — There is more than enough USDC in my wallet however I am get…
+- **Reporter:** Barbara
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xf657a95268f395f855eae0f8f57741c080a1cf25
+- **Frequency:** Consistent
+- **What happened:** There is more than enough USDC in my wallet however I am getting an error message when I do self rescue that I do not have enough. Does the self rescue have to come from matrix earnings?
+- **What was expected:** I do not know.
+- **Submitted:** Mon, 03 Aug 2026 13:17:04 GMT
+
+
+### [2026-08-03] Dashboard (index.html) — this morning all of my 8 accounts are saying no active posit…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** this morning all of my 8 accounts are saying no active positions and there is no self rescue option.
+- **What was expected:** to be able to self rescue and get back in.
+- **Submitted:** Mon, 03 Aug 2026 11:39:29 GMT
+
+
+### [2026-08-03] Dashboard (index.html) — I have upgraded this account to tier 5. It's showing tiers t…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
+- **Frequency:** Intermittent
+- **What happened:** I have upgraded this account to tier 5. It's showing tiers that have not completed a cycle as graduated. Tiers 3 - 5 sometimes 4 and 5.
+Sometimes it says no active position.
+When the self rescue window pops up and I click to do so It does not execute the rescue and the window disappears.
+- **What was expected:** I expect the info to be consistent. I expect to cycle on all tiers until I disable the automation.
+- **Submitted:** Mon, 03 Aug 2026 02:02:23 GMT
+
+
+### [2026-08-03] Dashboard (index.html) — After a refresh, the CNova Balance is not showing.... 000 Ba…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
+- **Frequency:** Consistent
+- **What happened:** After a refresh, the CNova Balance is not showing.... 000 Balance.
+- **What was expected:** To see my CNova Balance.
+- **Submitted:** Mon, 03 Aug 2026 01:48:46 GMT
+
+
+### [2026-08-03] Other — It looks like every refresh displays the amount you have in …
+- **Reporter:** sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
+- **Frequency:** Consistent
+- **What happened:** It looks like every refresh displays the amount you have in each tier so depending on how many tiers you're in you need to refresh that number of times until you get to the end and then your total amount earned will show.. so self rescue if you need to may not show up until you refresh and get to that tier..
+- **What was expected:** One refresh and all info is displayed...
+- **Notes:** This is what I am seeing which can be a bit confusing and annoying since you're not sure of the status..
+- **Submitted:** Mon, 03 Aug 2026 01:36:49 GMT
+
+
+### [2026-08-02] Dashboard (index.html) — I'm currently upgraded to tier 3. i have all three automatio…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x9133213faa78ef4ea6651a2d492a20a19d301c34
+- **Frequency:** Consistent
+- **What happened:** I'm currently upgraded to tier 3. i have all three automation enabled but I was still graduated from tiers 1&2.
+- **What was expected:** i should have remained in tiers 1 and 2 until i disable the automation.
+- **Notes:** Before displaying the graduated status , there was a no active status. After a few hard refreshes the self rescue screen popped up but I was unable to self rescue even though I clicked on the button. The screen subsequently disappeared and the graduated status appeared.
+- **Submitted:** Sun, 02 Aug 2026 19:58:55 GMT
+
+
+### [2026-08-02] Other — Every Refresh of the system gives me different info for the …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Every Refresh of the system gives me different info for the account, mainly the total earned area and the members ID section.  Needs to refresh about 6 or so times in order to get accurate info... most times the member section doesn't show any directs in the account  and is saying that I have graduated from Tiers without even a single crossing or rotation.. the RPC seems to be very slow in getting and displaying accurate info, or may be it's my computer...lol. Self rescue is another issue.. one refresh says I'm in the matrix and another refresh says that I must self rescue..
+- **What was expected:** Not to have to do so many refresh to get accurate info.. Sorry for the long post...
+- **Notes:** Happening to all my accounts.. I'm not able to keep track of what is really happening to each account because everytime I do a refresh new info is displayed. and every refresh takes you back to the home page and then you have to select dashboard which may be another refresh.... Can it be done that when a refresh is done, the page which invoked the refresh you come back to that page instead of going to home page?
+- **Submitted:** Sun, 02 Aug 2026 19:08:27 GMT
+
+
+### [2026-08-02] Dashboard (index.html) — i am still not able to refresh my accounts.
+i have to either…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** i am still not able to refresh my accounts.
+i have to either restart my phone or playing around clicking from home to register to dashboard then it refreshes.
+Also most times the  account shows the wrong total earned until i get page to refresh 2 or 3 times.
+when i do a self rescus and the dashboard is updated it sometimes come back with everything showing zero until i am able to refresh.
+- **What was expected:** honestly i dont know.
+- **Submitted:** Sun, 02 Aug 2026 14:45:55 GMT
+
+
+### [2026-08-02] Onboarding / Registration — I keep getting and error when I tap on the 'approve $10' tab…
+- **Reporter:** E2theb
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x878660b77ddea5884709d2cd2e9453931cc528a0
+- **Frequency:** Consistent
+- **What happened:** I keep getting and error when I tap on the 'approve $10' tab.
+- **What was expected:** The system should have approved my $10 and then register
+- **Notes:** Step 2: Register ($10 USDC)
+❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below
+- **Submitted:** Sun, 02 Aug 2026 14:22:27 GMT
+
+
+### [2026-08-01] Dashboard (index.html) — I was graduated from tier 1 even though I have auto re-entry…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** I was graduated from tier 1 even though I have auto re-entry and double re-entry enabled.
+- **What was expected:** I expect to still be in tier one until I disable the automation.
+- **Submitted:** Sat, 01 Aug 2026 16:42:54 GMT
+
+
 ### [2026-07-31] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
 - **Reporter:** Jacob Banji-Ajala
 - **Page:** Other
