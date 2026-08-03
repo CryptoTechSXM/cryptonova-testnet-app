@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-03] Other — The matrix tree view is not loading.
+- **Reporter:** @Koach100
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
+- **Frequency:** Intermittent
+- **What happened:** The matrix tree view is not loading.
+- **What was expected:** I expected it to load.
+- **Notes:** This message popped up.
+Error: missing revert data (action="call", data=null, reason=null, transaction={ "data": "0xb0482fd9", "to": "0xA2a749173fE3307
+- **Submitted:** Mon, 03 Aug 2026 14:40:52 GMT
+
+
 ### [2026-08-03] Dashboard (index.html) — I disabled auto upgrade and my income lessened by about $200…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
