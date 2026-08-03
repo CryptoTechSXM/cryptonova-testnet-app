@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-03] Dashboard (index.html) — There is more than enough USDC in my wallet however I am get…
+- **Reporter:** Barbara
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xf657a95268f395f855eae0f8f57741c080a1cf25
+- **Frequency:** Consistent
+- **What happened:** There is more than enough USDC in my wallet however I am getting an error message when I do self rescue that I do not have enough. Does the self rescue have to come from matrix earnings?
+- **What was expected:** I do not know.
+- **Submitted:** Mon, 03 Aug 2026 13:17:04 GMT
+
+
 ### [2026-08-03] Dashboard (index.html) — this morning all of my 8 accounts are saying no active posit…
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
