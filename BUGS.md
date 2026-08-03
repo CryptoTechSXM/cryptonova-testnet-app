@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-03] Dashboard (index.html) — I disabled auto upgrade and my income lessened by about $200…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Intermittent
+- **What happened:** I disabled auto upgrade and my income lessened by about $200 and 4 tiers graduated even the ones that has not even made a complete cycle.
+- **What was expected:** I expect the opposite to happen.
+- **Submitted:** Mon, 03 Aug 2026 14:26:13 GMT
+
+
 ### [2026-08-03] Dashboard (index.html) — There is more than enough USDC in my wallet however I am get…
 - **Reporter:** Barbara
 - **Page:** Dashboard (index.html)
