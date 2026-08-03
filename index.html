@@ -6873,33 +6873,34 @@ async function _getDirectReferrals(addr, rp) {
     // Use Alchemy directly -- bypass FallbackProvider quorum issues with eth_getLogs
     const logRp = new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, logRp);
-    // FILTER BY TOPIC, NOT IN JAVASCRIPT. referrer is indexed, so the node can
-    // return only this member's directs instead of every registration ever, which
-    // is both far smaller and immune to the client-side decode that was failing.
-    // Args are the INDEXED ones in order: (member, referrer) — `tier` is not
-    // indexed and is skipped.
-    const filter = tr.filters.MemberRegistered(null, addr);
-    let events;
-    try {
-      events = await Promise.race([
-        safeGetLogs(tr, filter, {maxBack: 50000}),             // capped+chunked (QuickNode 10k getLogs limit)
-        new Promise((_, r) => setTimeout(() => r(new Error('evt_timeout')), 30000)),
-      ]);
-    } catch (wideErr) {
-      // Providers cap eth_getLogs block ranges. Walk backwards in windows rather
-      // than giving up — falling through to the scan silently is what produced a
-      // confidently wrong count.
-      const latest = await logRp.getBlockNumber();
-      const WINDOW = 9000, FLOOR = Math.max(0, latest - 400000); // ~9 days at 2s blocks
-      events = [];
-      for (let to = latest; to > FLOOR; to -= WINDOW) {
-        const from = Math.max(FLOOR, to - WINDOW + 1);
-        const part = await tr.queryFilter(filter, from, to);
-        events.push(...part);
+    // ethers v6: filter args are POSITIONAL over ALL event params (member, tier, referrer),
+    // and NON-indexed params must be null. The old (null, addr) shoved the referrer address
+    // into the non-indexed `tier` slot, which THROWS ("cannot filter non-indexed parameters")
+    // — that throw dropped every lookup to the slow matrix scan and produced the wrong 0 /
+    // ⚠ retry count. Correct order: (member=null, tier=null, referrer=addr).
+    const filter = tr.filters.MemberRegistered(null, null, addr);
+    // Walk from the TierRouter deploy block (every registration is at/after it) in
+    // <=9000-block windows (QuickNode getLogs range cap). Flooring at the deploy block keeps
+    // the count COMPLETE regardless of launch age and bounds the scan to this deployment's
+    // history. TR_DEPLOY_BLOCK = v8_46 first-registration floor; on a redeploy, lower it to
+    // the new deploy block — a stale-low value only scans a few extra empty windows, it
+    // never misses events. Each window retries 3x so a dropped read doesn't silently undercount.
+    const TR_DEPLOY_BLOCK = 44840000;
+    const latest = await logRp.getBlockNumber();
+    const WINDOW = 9000, FLOOR = Math.max(0, TR_DEPLOY_BLOCK);
+    let events = [], incomplete = false;
+    for (let to = latest; to >= FLOOR; to -= WINDOW) {
+      const from = Math.max(FLOOR, to - WINDOW + 1);
+      let got = false;
+      for (let a = 0; a < 3 && !got; a++) {
+        try { events.push(...await tr.queryFilter(filter, from, to)); got = true; }
+        catch (_) { await new Promise(r => setTimeout(r, 250 * (a + 1))); }
       }
+      if (!got) incomplete = true;
+      if (from <= FLOOR) break;
     }
     const addrs = events.map(e => e.args.member);
-    const result = { addrs, count: addrs.length, incomplete: false, fromCache: false };
+    const result = { addrs, count: addrs.length, incomplete, fromCache: false };
     _cache.set(cacheKey, result);
     return result;
   } catch(evtErr) {
