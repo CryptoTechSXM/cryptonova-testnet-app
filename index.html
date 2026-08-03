@@ -2992,7 +2992,7 @@ async function doCWClaimAll() {
     // Clear CW cache so next load shows fresh claimable balance
     _cache.del('cw_' + userAddr.toLowerCase());
     // Refresh the panel after 2 seconds
-    setTimeout(() => loadCWData(userAddr, signer, readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true })), 2000);
+    setTimeout(() => loadCWData(userAddr, signer, readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) })), 2000);
   } catch(e) {
     console.error('doCWClaimAll:', e.message);
     const reason = e?.reason || e?.data?.message || e.message || 'Claim failed';
@@ -3003,7 +3003,7 @@ async function doCWClaimAll() {
 
 async function loadHomeStats() {
   // Try primary RPC, fall back to blast if it hangs or errors
-  let rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  let rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   const _net = ethers.Network.from(84532);
 
   const STAT_IDS = ['stat-members','stat-minted','stat-burned','stat-reserve','stat-cw-balance',
@@ -3263,7 +3263,7 @@ async function loadHomeStats() {
 // ═══════════════════════════════════════════════════════════════════════
 async function loadDaoWidget() {
   if (!ADDRS.v8Governance) return;
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const GOV_MIN_ABI = [
       'function proposalCount() view returns (uint256)',
@@ -3576,7 +3576,7 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
 // TIERS TAB DATA
 // ═══════════════════════════════════════════════════════════════════════
 async function loadTiersStats() {
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const TK = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
 
@@ -3725,7 +3725,7 @@ async function loadTiersStats() {
 // ═══════════════════════════════════════════════════════════════════════
 async function loadUserData() {
   if (!userAddr) return;
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     // v8.19 fix (2026-06-20): a non-retried globalJoined() that silently defaults to
@@ -3780,7 +3780,7 @@ async function loadUserData() {
 // ═══════════════════════════════════════════════════════════════════════
 async function loadRegisterTab() {
   if (!userAddr) return;
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
 
   try {
     const tr   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
@@ -3995,7 +3995,7 @@ async function validateCouponCode() {
   }
   if (statusEl) statusEl.innerHTML = '<span class="spinner"></span> Checking coupon…';
   try {
-    const rp        = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const rp        = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
     const couponReg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
     const codeHash  = ethers.keccak256(ethers.toUtf8Bytes(code));
     const [valid, couponAmt, couponData] = await Promise.all([
@@ -4157,7 +4157,7 @@ async function doRegister() {
   const btn = document.getElementById('btn-register');
   // Guard: check on-chain before wasting a TX
   try {
-    const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
     // USDC balance pre-check: approve() succeeds with 0 balance, but transferFrom() will revert.
     // Catch this client-side to give a clear error instead of a raw wallet rejection.
     const usdcPre = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
@@ -4195,7 +4195,7 @@ async function doRegister() {
     // If this fails → contract revert (show clear error, skip wallet popup).
     // If this succeeds but wallet later rejects → pure wallet-layer issue.
     try {
-      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
       const _trSim = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp2);
       if (c) {
         await _trSim.registerWithCoupon.staticCall(referrer, c.codeHash, { from: userAddr });
@@ -4224,7 +4224,7 @@ async function doRegister() {
     // fallback — unused gas is always refunded, so a high limit costs nothing.
     let _gasLimit = 16_000_000; // fallback covers worst-case cascade
     try {
-      const _rp3 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _rp3 = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
       const _trEst = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, _rp3);
       const _est = c
         ? await _trEst.registerWithCoupon.estimateGas(referrer, c.codeHash, { from: userAddr })
@@ -4359,7 +4359,7 @@ async function loadMyCoupons() {
   }
   el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px"><span class="spinner"></span> Loading...</div>';
   try {
-    const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const rp  = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
     const reg = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, rp);
     const now = Math.floor(Date.now() / 1000);
     let rows = '';
@@ -4468,7 +4468,7 @@ async function doIssueCoupon() {
     setTimeout(() => _shareCoupon(code, userAddr), 800);
     // Save to localStorage so loadMyCoupons can read it without event queries
     try {
-      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _rp2 = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
       const _reg2 = new ethers.Contract(ADDRS.couponRegistry, COUPON_REGISTRY_ABI, _rp2);
       const _cAmt = await _reg2.couponAmount();
       const _cD   = await _reg2.coupons(codeHash);
@@ -5338,7 +5338,12 @@ async function loadDashboardData() {
           if (_re)  _re.checked  = Boolean(_co.enableReentry);
         }
       } catch(_) {}
-      const info = await tr.getMemberInfo(userAddr);
+      // retryRead: a single flaky call here was blanking the toggles to "—" on
+      // high-latency (mobile) connections. Retry, and if it still fails keep the
+      // localStorage-cached values pre-populated above rather than showing nothing.
+      const _infoRead = await retryRead(() => tr.getMemberInfo(userAddr));
+      if (!_infoRead.ok) throw new Error('getMemberInfo unavailable');
+      const info = _infoRead.value;
       window._memberOptions = {
         disableUpgrade: !Boolean(info.autoUpgradeEnabled),
         enableReentry:  Boolean(info.autoReentryEnabled),
@@ -5656,7 +5661,7 @@ async function openDashDetail(type, cardEl) {
   setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
   bodyEl.innerHTML = '<span class="detail-loading"><span class="spinner"></span> Loading…</span>';
 
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     if      (type === 'withdrawable') { titleEl.textContent = window.t ? window.t('modal.withdrawable_title','💰 Withdrawable — Balance Breakdown')   : '💰 Withdrawable — Balance Breakdown';    await renderWithdrawableDetail(bodyEl, rp); }
     else if (type === 'earned')       { titleEl.textContent = window.t ? window.t('modal.earned_title','📈 Total Earned — Tier Breakdown')             : '📈 Total Earned — Tier Breakdown';        await renderEarnedDetail(bodyEl, rp); }
@@ -6126,7 +6131,7 @@ async function cnovaEarlyUnlock(btn) {
   const wantAmt    = BigInt(btn.dataset.amt);
   const wantUnlock = Number(btn.dataset.unlock);
 
-  const rp    = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp    = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   const cnovaR = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
 
   let batches;
@@ -6380,7 +6385,7 @@ async function doWithdrawPartial() {
   const btnA = document.getElementById('btn-withdraw');
   if (btnP) { btnP.disabled = true; btnP.innerHTML = '<span class="spinner"></span>Withdrawing…'; }
   if (btnA) btnA.disabled = true;
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const _matObjs = await _buildAllMatrixObjects(rp);
     const matrices = _matObjs.map(m => m.addr);
@@ -6451,7 +6456,7 @@ async function doWithdraw() {
   }
   const btn = document.getElementById('btn-withdraw');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Withdrawing…';
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const recipient = getWithdrawRecipient();
     // Read first (no signature): does the member hold anything withdrawable anywhere?
@@ -6542,7 +6547,7 @@ async function getMatrixForTier() {
   // Resolve active pair via PairManager (handles T1.2, T2.2, etc. after factory expansion)
   if (tier.pm) {
     try {
-      const _rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+      const _rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
       const _pm = new ethers.Contract(tier.pm, PM_ABI, _rp);
       const _activeAddr = side === 'matB' ? await _pm.currentMatB() : await _pm.currentMatA();
       if (_activeAddr && _activeAddr !== ethers.ZeroAddress) return _activeAddr;
@@ -6722,7 +6727,7 @@ async function setAutoReentryOption(enabled) {
 }
 
 async function loadQueueView() {
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   const addrToLoad = await getMatrixForTier();
   const loadingEl = document.getElementById('matrix-loading');
   const treeEl    = document.getElementById('matrix-tree');
@@ -6750,7 +6755,7 @@ async function loadQueueView() {
 
 async function loadMyTree() {
   if (!userAddr) { toast('Connect wallet first','error'); return; }
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   const loadingEl = document.getElementById('matrix-loading');
   const treeEl    = document.getElementById('matrix-tree');
   if (loadingEl) { loadingEl.style.display='block'; loadingEl.textContent='Finding your position…'; }
@@ -6866,7 +6871,7 @@ async function _getDirectReferrals(addr, rp) {
   // ── Try event log approach (fast — 1 call) ────────────────────────────────
   try {
     // Use Alchemy directly -- bypass FallbackProvider quorum issues with eth_getLogs
-    const logRp = new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+    const logRp = new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, logRp);
     // FILTER BY TOPIC, NOT IN JAVASCRIPT. referrer is indexed, so the node can
     // return only this member's directs instead of every registration ever, which
@@ -7043,7 +7048,7 @@ async function _enrichDirectsWithParkedStatus(addrs, rp) {
 
 async function loadMyDirects() {
   if (!userAddr) { toast('Connect wallet first','error'); return; }
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
 
   const card      = document.getElementById('my-directs-card');
   const loadingEl = document.getElementById('my-directs-loading');
@@ -7142,7 +7147,7 @@ let _redeemFloor = 0n, _redeemBal = 0n, _redeemPenaltyBps = 5000n, _redeemLocked
 
 async function loadRedeemData() {
   if (!userAddr) return;
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const cnova    = new ethers.Contract(ADDRS.cnova,    CNOVA_ABI,    rp);
     const treasury = new ethers.Contract(ADDRS.treasury, TREASURY_ABI, rp);
@@ -7281,7 +7286,7 @@ async function doRedeemAtFloor() {
 async function doUnlockAll() {
   if (!signer) { toast('Connect wallet first','error'); return; }
   const btn = document.getElementById('btn-unlock-all');
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const cnovaR = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
     const locked = await cnovaR.lockedBalanceOf(userAddr).catch(()=>0n);
