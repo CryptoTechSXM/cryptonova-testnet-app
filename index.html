@@ -2195,6 +2195,13 @@ const TIER_ROUTER_ABI = [
   // our own code. Undeclared, these looked like an RPC fault.
   'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
   'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
+  // ── V8.46-B (verified live on-chain 2026-08-03: maxCascadeDepth()==4). The cascade
+  // depth cap: when an upgrade's rotation chain reaches the cap the contract PARKS the
+  // member on purpose and emits CascadeDepthCapped — this is NOT a gas failure. The UI
+  // must read it as "you've been placed; self-rescue to continue", never "try again".
+  'function maxCascadeDepth() external view returns (uint256)',
+  'event CascadeDepthCapped(address indexed member, uint8 tierIndex)',
+  'event MemberParked(address indexed member, uint8 tier, string reason)',
 ];
 
 const COUPON_REGISTRY_ABI = [
@@ -2253,6 +2260,14 @@ const MATRIX_ABI = [
   'error F8V8_BadConfig()',
   'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
   'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
+  // ── V8.46 (verified live on-chain 2026-08-03: MatrixLogicLib bytecode-matches the
+  // build). item 7 rescue-repay settles debt on withdraw and emits RescueDebtRepaid;
+  // CycleOutFailed is the item-C signal that replaced the SILENT graduation (the empty
+  // catch), so "graduated with no crossing" is now observable; MemberEvicted logs the
+  // keeper parked-queue drain.
+  'event RescueDebtRepaid(address indexed member, uint256 repaid, uint256 remaining)',
+  'event CycleOutFailed(address indexed member, uint8 tierIndex)',
+  'event MemberEvicted(address indexed member, uint256 totalWithdrawn)',
 ];
 
 const CNOVA_ABI = [
@@ -2462,6 +2477,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       'https://side-silent-sheet.base-sepolia.quiknode.pro/4ce4b5665baf27920cda0759814efef5c3172510/', // EP4
     ];
     for (let _i = _QN_POOL.length - 1; _i > 0; _i--) { const _j = Math.floor(Math.random() * (_i + 1)); [_QN_POOL[_i], _QN_POOL[_j]] = [_QN_POOL[_j], _QN_POOL[_i]]; }
+    window._QN_POOL = _QN_POOL.slice();   // reused by makeSnapshotProvider() for consistent dashboard reads
     readProvider = new ethers.FallbackProvider(
       _QN_POOL.map((u, i) => ({ provider: _mkRpc(u), priority: i + 1, weight: 1 }))
         .concat([{ provider: _mkRpc(RPC_EXTRA), priority: _QN_POOL.length + 1, weight: 1 }]),
@@ -4539,6 +4555,44 @@ async function _buildAllMatrixObjects(rp) {
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
+// ---- Pinned-snapshot reader (fixes "every refresh shows different info", BUGS #1-7,11) ----
+// The dashboard makes ~30 reads per refresh. Over the shuffled quorum=1 FallbackProvider each
+// read independently lands on whichever of the 5 QuickNode backends answers first, and those
+// backends sit at slightly different block heights — so ONE refresh is not a consistent snapshot:
+// tiers flip between "active" and "graduated", balances read 000, and the self-rescue panel
+// appears then vanishes. This pins an entire refresh to ONE block on ONE backend, so every read
+// reflects the same chain state. Verified on ethers 6.7.1: Contract view calls route through
+// runner.call(), so wrapping the provider injects the blockTag with zero call-site changes.
+function _pinnedProvider(base, blockTag) {
+  return new Proxy(base, { get(t, p, r) {
+    if (p === 'call') return (tx) => t.call({ ...tx, blockTag: tx.blockTag ?? blockTag });
+    const v = Reflect.get(t, p, r); return typeof v === 'function' ? v.bind(t) : v;
+  }});
+}
+async function makeSnapshotProvider() {
+  const _net = ethers.Network.from(84532);
+  const pool = (window._QN_POOL && window._QN_POOL.length) ? window._QN_POOL : [RPC_URL, RPC_FALLBACK];
+  for (const url of pool) {
+    try {
+      const base = new ethers.JsonRpcProvider(url, _net, { staticNetwork: _net });
+      const tip = await base.getBlockNumber();
+      return _pinnedProvider(base, Math.max(0, tip - 3)); // 3-block margin so the pinned block exists on this backend
+    } catch (_) { /* backend down/slow — try the next */ }
+  }
+  return null; // fall back to the unpinned readProvider below
+}
+// ---- Multicall3 batching (Base Sepolia, 0xcA11…CA11): collapse the ~20 per-refresh
+// matrix getMember() reads into ONE eth_call. Wrapped at the call site so any failure
+// falls back to the original per-call path — it can only speed refreshes up. ----
+const MULTICALL3_ADDR = '0xcA11bde05977b3631167028862bE2a173976CA11';
+const MULTICALL3_ABI = ['function aggregate3((address target, bool allowFailure, bytes callData)[] calls) view returns (tuple(bool success, bytes returnData)[] returnData)'];
+async function mcGetMember(rp, addrs, user) {
+  const mc = new ethers.Contract(MULTICALL3_ADDR, MULTICALL3_ABI, rp);
+  const iface = new ethers.Interface(MATRIX_ABI);
+  const data = iface.encodeFunctionData('getMember', [user]);
+  const res = await mc.aggregate3(addrs.map(t => ({ target: t, allowFailure: true, callData: data })));
+  return res.map(r => { if (!r.success) return null; try { return iface.decodeFunctionResult('getMember', r.returnData)[0]; } catch { return null; } });
+}
 async function loadDashboardData() {
   if (window._dashLoadInFlight) return;   // prevent concurrent double-loads
   window._dashLoadInFlight = true;
@@ -4546,7 +4600,8 @@ async function loadDashboardData() {
     window._dashLoadInFlight = false; // reset guard before early return
     showEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
   }
-  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
+  // Consistent snapshot for the whole refresh (see _pinnedProvider note above).
+  const rp = (await makeSnapshotProvider()) || readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: ethers.Network.from(84532) });
 
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
@@ -4621,9 +4676,18 @@ async function loadDashboardData() {
       Promise.race([p, new Promise(res => setTimeout(() => res(null), ms))]);
 
     const matContracts = matrices.map(m => new ethers.Contract(m.addr, MATRIX_ABI, rp));
-    const matResults = await Promise.all(
-      matContracts.map(mc => raceTimeout(mc.getMember(userAddr).catch(() => null)))
-    );
+    // Multicall3: one eth_call for every matrix's getMember (was ~20 separate calls).
+    // Falls back to the per-call path on any failure, so behavior is identical when
+    // Multicall is unavailable — this can only make the refresh faster, never break it.
+    let matResults;
+    try {
+      matResults = await raceTimeout(mcGetMember(rp, matrices.map(m => m.addr), userAddr), 8000);
+      if (!matResults || matResults.length !== matrices.length) throw new Error('multicall unavailable');
+    } catch (_mcErr) {
+      matResults = await Promise.all(
+        matContracts.map(mc => raceTimeout(mc.getMember(userAddr).catch(() => null)))
+      );
+    }
 
     // Process results; only follow-up calls on matrices where user exists
     const followUps = [];
@@ -8019,19 +8083,42 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
       return;
     }
     if (_exGas > 15_000_000) {
-      _setS(`⚠️ This upgrade is currently too large for the network to process ` +
-            `(needs ~${(_exGas / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
-            `Nothing was sent and nothing was charged. This happens when entering a tier ` +
-            `sets off a long chain of matrix rotations — it clears on its own as those ` +
-            `settle. Please try again shortly, and let us know if it persists.`);
+      // With the V8.46-B cascade depth cap live on-chain (maxCascadeDepth==4), a
+      // legitimate upgrade should no longer quote this much gas — the chain caps the
+      // rotation chain and parks instead of running it to the ceiling. If we still see
+      // it, something unusual is happening: refuse the doomed tx and ask them to report.
+      _setS(`⚠️ This upgrade is quoting an unusually large amount of gas ` +
+            `(~${(_exGas / 1e6).toFixed(1)}M vs the chain's ~17.8M limit), so nothing was sent ` +
+            `and nothing was charged. This should be rare now that the network depth cap is live — ` +
+            `please try once more, and use the bug report link if it persists.`);
       if (btn) btn.disabled = false;
       return;
     }
     const tx = await tr.manualUpgrade(tierIdx, { gasLimit: _exGas });
     _setS('Waiting for confirmation…');
-    await tx.wait();
-    if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
-    toast('Tier upgraded successfully!', 'success');
+    const _rcpt = await tx.wait();
+    // V8.46-B (cap verified live on-chain 2026-08-03): if the rotation chain hit
+    // maxCascadeDepth, the contract seated this member as far as the cap allows and
+    // PARKED the remainder, emitting CascadeDepthCapped(member). That is a SUCCESS, not
+    // a gas failure — guide them to Self Rescue instead of the old "too large" error.
+    let _cappedMe = false;
+    try {
+      const _capTopic = tr.interface.getEvent('CascadeDepthCapped').topicHash;
+      const _me = (userAddr || '').toLowerCase();
+      for (const _l of (_rcpt.logs || [])) {
+        if (_l.topics && _l.topics[0] === _capTopic) {
+          const _p = tr.interface.parseLog({ topics: [..._l.topics], data: _l.data });
+          if (_p && _p.args.member && _p.args.member.toLowerCase() === _me) { _cappedMe = true; break; }
+        }
+      }
+    } catch(_) {}
+    if (_cappedMe) {
+      if (status) status.innerHTML = '<span style="color:var(--green)">✅ Upgraded to T' + (tierIdx + 1) + '.</span> The network capped this round’s rotation chain, so your new tier position is <b>parked</b> rather than seated — open <b>Self Rescue</b> on your Dashboard to seat it and keep going. Nothing was lost or overcharged.';
+      toast('Upgraded — parked at the network cap. Self-rescue to continue.', 'success');
+    } else {
+      if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
+      toast('Tier upgraded successfully!', 'success');
+    }
     setTimeout(() => loadDashboardData(), 2000);
   } catch(e) {
     const msg  = (e.message || '').toLowerCase();
