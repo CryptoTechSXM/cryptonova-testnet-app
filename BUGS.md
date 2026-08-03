@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-03] Dashboard (index.html) — I have upgraded this account to tier 5. It's showing tiers t…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
+- **Frequency:** Intermittent
+- **What happened:** I have upgraded this account to tier 5. It's showing tiers that have not completed a cycle as graduated. Tiers 3 - 5 sometimes 4 and 5.
+Sometimes it says no active position.
+When the self rescue window pops up and I click to do so It does not execute the rescue and the window disappears.
+- **What was expected:** I expect the info to be consistent. I expect to cycle on all tiers until I disable the automation.
+- **Submitted:** Mon, 03 Aug 2026 02:02:23 GMT
+
+
 ### [2026-08-03] Dashboard (index.html) — After a refresh, the CNova Balance is not showing.... 000 Ba…
 - **Reporter:** @Lavern_Gay
 - **Page:** Dashboard (index.html)
