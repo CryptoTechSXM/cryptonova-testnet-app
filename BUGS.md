@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-03] Dashboard (index.html) — this morning all of my 8 accounts are saying no active posit…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** this morning all of my 8 accounts are saying no active positions and there is no self rescue option.
+- **What was expected:** to be able to self rescue and get back in.
+- **Submitted:** Mon, 03 Aug 2026 11:39:29 GMT
+
+
 ### [2026-08-03] Dashboard (index.html) — I have upgraded this account to tier 5. It's showing tiers t…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
