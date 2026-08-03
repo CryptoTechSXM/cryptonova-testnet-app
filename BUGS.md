@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-03] Other — It looks like every refresh displays the amount you have in …
+- **Reporter:** sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
+- **Frequency:** Consistent
+- **What happened:** It looks like every refresh displays the amount you have in each tier so depending on how many tiers you're in you need to refresh that number of times until you get to the end and then your total amount earned will show.. so self rescue if you need to may not show up until you refresh and get to that tier..
+- **What was expected:** One refresh and all info is displayed...
+- **Notes:** This is what I am seeing which can be a bit confusing and annoying since you're not sure of the status..
+- **Submitted:** Mon, 03 Aug 2026 01:36:49 GMT
+
+
 ### [2026-08-02] Dashboard (index.html) — I'm currently upgraded to tier 3. i have all three automatio…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
