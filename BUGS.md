@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-03] Dashboard (index.html) — After a refresh, the CNova Balance is not showing.... 000 Ba…
+- **Reporter:** @Lavern_Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
+- **Frequency:** Consistent
+- **What happened:** After a refresh, the CNova Balance is not showing.... 000 Balance.
+- **What was expected:** To see my CNova Balance.
+- **Submitted:** Mon, 03 Aug 2026 01:48:46 GMT
+
+
 ### [2026-08-03] Other — It looks like every refresh displays the amount you have in …
 - **Reporter:** sherwyn
 - **Page:** Other
