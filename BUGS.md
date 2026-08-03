@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-03] Other — Active position doesn't show a number and under my position …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
+- **Frequency:** Consistent
+- **What happened:** Active position doesn't show a number and under my position on the Matrix tab it is saying I'm not in the matrix.. There is no prompt that appears on the screen to self rescue, approve funds or anything. Hard refresh didn't solve the issue.. still not giving me away back into the matrix...
+- **What was expected:** Some sort of message or prompt to get back into the matrix or let you know that you've been put out of the matrix..
+- **Notes:** Happening on 2 of my accounts...
+- **Submitted:** Mon, 03 Aug 2026 22:11:28 GMT
+
+
 ### [2026-08-03] Other — The matrix tree view is not loading.
 - **Reporter:** @Koach100
 - **Page:** Other
