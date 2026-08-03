@@ -642,14 +642,20 @@
   });
 
   // ── Config ────────────────────────────────────────────────
-  // RPC fallback list — tries each in order until one responds within 6s
-  const RPC_LIST = [
-    'https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy',
-    'https://base-sepolia.public.blastapi.io',
-    'https://sepolia.base.org',
-    'https://base-sepolia-rpc.publicnode.com',
-    'https://base-sepolia.blockpi.network/v1/rpc/public',
-  ];
+  // RPC fallback list — tries each in order until one responds within 6s.
+  // Dead Alchemy key removed 2026-07-31 (monthly cap exhausted).
+  // All 5 QuickNode endpoints, shuffled per load so status users spread across them; sepolia last.
+  const RPC_LIST = (() => {
+    const _qn = [
+      'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/',
+      'https://wiser-proportionate-forest.base-sepolia.quiknode.pro/8383659a7c5f035faa091659780d5ba26c50fcf8/',
+      'https://cosmopolitan-still-fire.base-sepolia.quiknode.pro/3835d77b733a07e6109ec27774ab3231fbb86c6a/',
+      'https://newest-cold-isle.base-sepolia.quiknode.pro/d1082ae239ca62f4fc938014273539074f377e02/',
+      'https://side-silent-sheet.base-sepolia.quiknode.pro/4ce4b5665baf27920cda0759814efef5c3172510/',
+    ];
+    for (let i = _qn.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_qn[i], _qn[j]] = [_qn[j], _qn[i]]; }
+    return [..._qn, 'https://sepolia.base.org'];
+  })();
   async function _getProvider() {
     for (const url of RPC_LIST) {
       try {
@@ -665,40 +671,51 @@
     return new ethers.JsonRpcProvider(RPC_LIST[0]);
   }
   const RPC = RPC_LIST[0]; // kept for any direct references
+  // Under a poll's read burst QuickNode sheds ~45% of concurrent eth_calls as
+  // "missing revert data" (measured). One retry recovers them (12/12 vs ~6/12),
+  // so a dropped allPairsStatus no longer collapses a live tier to 0/Inactive.
+  async function _retry(fn, n = 3, ms = 250) {
+    let e;
+    for (let i = 0; i < n; i++) {
+      try { return await fn(); }
+      catch (err) { e = err; if (i < n - 1) await new Promise(r => setTimeout(r, ms * (i + 1))); }
+    }
+    throw e;
+  }
   const MATRIX_SIZE = 127n;
   const T1_FEE   = 10_000_000n; // $10 USDC
 
   const ADDRS = {
     // V8.45 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
     usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-    cnova:         '0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC',
-    treasury:      '0x1b63EdF6C12D498162e091c328b33e7389CF3231',
-    stabilityFund: '0x65883479c581A98B5047205C5a50Db282F3eD4f6',
-    buybackReserve:'0x7D94F2c27a42a74c6daDBdBe75138aa01a0019A6',
+    cnova:         '0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8',
+    treasury:      '0x66adadd761D43591589f891bE63006359B8E6156',
+    stabilityFund: '0x7Dd7BA796392D897ED12B647897e069896d4edf0',
+    buybackReserve:'0x352761B9503bdE02eD52Aa36423bDe3742F98073',
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-    tierRouter:    '0xC44c1A511DFAebE58D9BB719D087aB540224686A',
-    matrixKeeper:  '0x603db2d933F3B24Ce1aB23BFc2495622D5600C84',
-    T1pm:    '0x680F94476789386f43878103f8a9b2750cD91F68',
-    T1matA:  '0x85bCd925b224a4B1fA8769630dd5204d75499c01',
-    T1matB:  '0x7Ff794Bbbd9A41a9cF9a3E01A84EE9aEa96DABbE',
-    T2matA:  '0x0cA22E3BE70c87898C66C6c9BF4BF8322A9F1076',
-    T2matB:  '0x16518a1D3e1Ad356892922be41C212A7e7411917',
-    T3matA:  '0x827B8f8D316919aAC3BB1f5D75A7351D1fA32828',
-    T3matB:  '0x8b587B1731d6ecb97c62256c14722C8E4A2e0512',
-    T4matA:  '0xfB1ef5473a7044417ef800B4A737fF1973c09f91',
-    T4matB:  '0x337ca739b9728A3d224515cF18B289b1b26e37d9',
-    T5matA:  '0xafB139ba5d11d0549c7f2cC85Bd4011861Faf6C8',
-    T5matB:  '0x70BCc0e573836d209Ba73328F0E87a79EfaCb30D',
-    T6matA:  '0x5B85A26Fd4F8bEc033b4eF54651579DB16574B98',
-    T6matB:  '0x02c8BF5a5b31E8d722D062711F124Ff0eE0ca987',
-    T7matA:  '0xB18503C93f1a37283ee1Db04aE80f6B3271D538b',
-    T7matB:  '0xC50893a30e66b34E00cFBae0ab289e400B9ecD22',
-    T8matA:  '0xd2Bd96684D52585DC51C07c9d001075025744627',
-    T8matB:  '0x44B40FaB2D39F4A7BE7dcc0079e919b1Da621f02',
-    T9matA:  '0xa53034A3b7d62cf26716Fb9E8e41aC2F6809a7e9',
-    T9matB:  '0xd23Fb100d4d641E8A4A788A916E1272f7E194c6E',
-    T10matA: '0x5e63A3aC72fD393dedEA4Fad8fb2154515fcdc76',
-    T10matB: '0x2E2c0c1dfe4a6C7B4A562c95c0A166B7E333e5E7',
+    tierRouter:    '0xFB6928d9C50401633041b41b016Cf7ffCAB0492E',
+    matrixKeeper:  '0xf87956a9d7705bC604FD47a614598a4829426FF6',
+    T1pm:    '0x699f724DD2DFa0452Abad4A6F2BAe82FE57Cc916',
+    T1matA:  '0x015d85E979966779357D5fde66B03Ef976aD7F6d',
+    T1matB:  '0x0344518B86c85E8142e0E430F65DBF1388ba218f',
+    T2matA:  '0xB40c997B9EE1eB1F223dFc8926a123935D468b32',
+    T2matB:  '0xCe861d0eE57B792Daf2bd1233F044A63B93a0CE8',
+    T3matA:  '0x25D786a6E75f3DeC0602F7eD3755BA01834B8DbA',
+    T3matB:  '0x6ae9B35F7D2efaAeB80e7784BbC6A4C8Ac1b91D8',
+    T4matA:  '0x36CEe31D41A418520613850E1036E26231e1F812',
+    T4matB:  '0x9Cdc49333E41AeBcE953f1841e4849C798D62923',
+    T5matA:  '0x27Dfe96AEFd6A5A417976bD7f1122efC2866dDD2',
+    T5matB:  '0xDeE91D5fb28D5B371a5a692DA423049b5FCd7324',
+    T6matA:  '0xbc1E654318D3af0B5B9b35A402af3E73D4fdD3D6',
+    T6matB:  '0xA839b635eE7147716dD525419bC62Bf71FB6f350',
+    T7matA:  '0xd15BC3698287Dc25961134AB7080751087377887',
+    T7matB:  '0x928CeFf14F7a73b55359c16436831670a3174eB3',
+    T8matA:  '0xE77D2B35700aD358AF4541aAe8969eeF1c01D6fa',
+    T8matB:  '0x5082d08802C6De63d4643e052F2B37C4D5DBDf86',
+    T9matA:  '0x0F09500af8231E2Dd42a16C1B8212Cf6acf19861',
+    T9matB:  '0x3684E2f7c31754c4a9D635473f68c78b64696a9F',
+    T10matA: '0x0e4b459d0EaE0ED029b1Bb34F0442D2B69F53D78',
+    T10matB: '0x66b43CF4b0f7D06c86FD68314e7B37Ec10fBfE6D',
   };
 
   const MATRIX_ABI = [
@@ -768,6 +785,19 @@
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
   let _lastRescueCount = null; // { count, lastTime }
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
+  let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
+  let _lastTierData    = null; // full per-tier last-good — hold ALL tiers (not just T1) on a blipped read
+  let _lastT1Tier     = null; // hold last-good T1 tier data so summary + row stay consistent
+  let _lastTotals     = null; // { cycles, totalJoined } — hold last-good System Totals
+  // V8.46 redeploy: discard any Status cache left over from a prior deployment,
+  // so old accumulated loan totals / rescue capacity can't paint over live data.
+  try {
+    if (localStorage.getItem('cnova_st_ver') !== 'v8.46') {
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_loans_v8_32']
+        .forEach(function(k){ localStorage.removeItem(k); });
+      localStorage.setItem('cnova_st_ver','v8.46');
+    }
+  } catch(e) {}
   // Restore cached display state immediately (survives page reload)
   try {
     const _cl = localStorage.getItem('cnova_st_loans');
@@ -776,6 +806,10 @@
     if (_cp) { _lastParkedHTML = _cp; const w = document.getElementById('parked-list-wrap'); if (w) w.innerHTML = _cp; }
     const _cr = localStorage.getItem('cnova_st_rescue');
     if (_cr) _lastRescueCount = JSON.parse(_cr);
+    const _cm = localStorage.getItem('cnova_st_matrix');
+    if (_cm) { _lastMatrixFill = JSON.parse(_cm);
+      if (_lastMatrixFill && _lastMatrixFill.occA != null) setText('pill-matrix-val', `${_lastMatrixFill.occA}/127 · ${_lastMatrixFill.occB}/127`);
+    }
     const _cps = localStorage.getItem('cnova_st_parked_stats');
     if (_cps) {
       _lastParkedStats = JSON.parse(_cps);
@@ -848,7 +882,7 @@
       // Recent rescues: RescueLoanIssued is in MATRIX_ABI — emitted by MatrixLogicLib (library)
       // which runs in the context of FigureEightMatrixV8, so the event originates from matA/matB.
       // Works with manual_rescue.js (ParkedRescued on MatrixKeeper is never emitted on that path).
-      const fromBlock = Math.max(0, blk - 100000); // ~56h on Base Sepolia (2s/block)
+      const fromBlock = Math.max(0, blk - 9000);   // ~5h; under QuickNode's 10k eth_getLogs cap (was 100k → every call rejected)
 
       // V8.46: scan EVERY tier, not just T1. The previous version queried only
       // T1 pairs, so the displayed count excluded every loan issued in T2–T10 —
@@ -1314,7 +1348,7 @@
   async function loadMatrix(provider) {
     try {
       const TIER_META = [
-        { label:'T1',  name:'Nova Seed',        fee:'$10',     color:'#00e5a0', matAKey:null,      matBKey:null      },
+        { label:'T1',  name:'Nova Seed',        fee:'$10',     color:'#00e5a0', matAKey:'T1matA',  matBKey:'T1matB'      },
         { label:'T2',  name:'Nova Rise',        fee:'$25',     color:'#3b82f6', matAKey:'T2matA',  matBKey:'T2matB'  },
         { label:'T3',  name:'Nova Star',        fee:'$50',     color:'#3b82f6', matAKey:'T3matA',  matBKey:'T3matB'  },
         { label:'T4',  name:'Nova Core',        fee:'$100',    color:'#94a3b8', matAKey:'T4matA',  matBKey:'T4matB'  },
@@ -1330,17 +1364,24 @@
       // Velocity gates + global stats
       let gates = Array(10).fill(true);
       try { gates = await tr.getVelocityGates(); } catch(_) {}
-      const [cycles, totalJoined] = await Promise.all([
+      let [cycles, totalJoined] = await Promise.all([
         tr.totalSystemCycles().catch(()=>0n),
         tr.globalJoinedCount().catch(()=>0n),
       ]);
+      // Anti-flicker: hold last-good System Totals so "members joined" can't flash 0
+      // when globalJoinedCount() blips. (cycles is legitimately 0 before the first cross.)
+      if (Number(totalJoined) === 0 && _lastTotals) {
+        cycles = _lastTotals.cycles; totalJoined = _lastTotals.totalJoined;
+      } else if (Number(totalJoined) > 0) {
+        _lastTotals = { cycles, totalJoined };
+      }
 
       // Discover PM addresses via TierRouter.tierPairManagers[] for T2–T10
       const pmAddrs = Array(10).fill(null);
       pmAddrs[0] = ADDRS.T1pm;
       await Promise.all(Array.from({length:9}, async (_, i) => {
         try {
-          const pm = await tr.tierPairManagers(i + 1);
+          const pm = await _retry(() => tr.tierPairManagers(i + 1));
           if (pm && pm !== ethers.ZeroAddress) pmAddrs[i + 1] = pm;
         } catch(_) {}
       }));
@@ -1352,7 +1393,7 @@
         if (pmAddr) {
           try {
             const pm = new ethers.Contract(pmAddr, PM_ABI, provider);
-            const [_matAs, _matBs, _occAs, _occBs, , _actives] = await pm.allPairsStatus();
+            const [_matAs, _matBs, _occAs, _occBs, , _actives] = await _retry(() => pm.allPairsStatus());
             const fetches = Array.from({length: _matAs.length}, (_, pi) => {
               const mcA = new ethers.Contract(_matAs[pi], MATRIX_ABI, provider);
               const mcB = new ethers.Contract(_matBs[pi], MATRIX_ABI, provider);
@@ -1383,16 +1424,43 @@
         return { ...m, pairs, hasActivity, gateOpen: Boolean(gates[i]) };
       }));
 
+      // Anti-flicker (T1 row + summary consistency): T1 is the active tier. If this poll's
+      // read blipped empty, reuse the last good T1 data so the summary count and the T1 row
+      // can't disagree (same last-known-good pattern as the Parked/Loans cards).
+      // Anti-flicker (ALL tiers): a heavy matrix read can blip empty under RPC load, wiping
+      // active tiers to "Inactive" while the header still counts them — rows and header then
+      // disagree ("2 TIERS" over 10 Inactive rows). Hold last-good per tier so a blipped poll
+      // reuses the previous reading for BOTH the row render and the activeTiers count.
+      if (_lastTierData) {
+        for (let _i = 0; _i < tierData.length; _i++) {
+          if (tierData[_i] && !tierData[_i].hasActivity && _lastTierData[_i] && _lastTierData[_i].hasActivity) {
+            tierData[_i] = _lastTierData[_i];
+          }
+        }
+      }
+      _lastTierData = tierData;
+      _lastT1Tier = tierData[0];
+
       // Summary pill — T1 routing-target pair
       const t1d = tierData[0];
       const t1route = t1d.pairs.find(p => p.active) || t1d.pairs[0] || {occA:0n, occB:0n};
-      const pctA = Math.round(Number(t1route.occA) * 100 / Number(MATRIX_SIZE));
-      const pctB = Math.round(Number(t1route.occB) * 100 / Number(MATRIX_SIZE));
+      let mOccA = t1route.occA, mOccB = t1route.occB;
+      let activeTiers = tierData.filter(d => d.hasActivity).length;
+      // Anti-flicker: a heavy matrix read can blip empty on the free RPC. Rather than
+      // paint 0/127 over a known-good value, hold the last good reading (same pattern as
+      // the Parked/Loans cards). A legitimately empty T1 stays 0 until its first real read.
+      if (Number(mOccA) === 0 && Number(mOccB) === 0 && _lastMatrixFill) {
+        mOccA = _lastMatrixFill.occA; mOccB = _lastMatrixFill.occB; activeTiers = _lastMatrixFill.activeTiers;
+      } else if (Number(mOccA) > 0 || Number(mOccB) > 0) {
+        _lastMatrixFill = { occA: mOccA.toString(), occB: mOccB.toString(), activeTiers };
+        try { localStorage.setItem('cnova_st_matrix', JSON.stringify(_lastMatrixFill)); } catch(e) {}
+      }
+      const pctA = Math.round(Number(mOccA) * 100 / Number(MATRIX_SIZE));
+      const pctB = Math.round(Number(mOccB) * 100 / Number(MATRIX_SIZE));
       const pillInd = document.getElementById('pill-matrix');
       pillInd.className = (pctA >= 95 && pctB >= 95) ? 'pill-indicator yellow' : 'pill-indicator green';
-      setText('pill-matrix-val', `${t1route.occA}/${MATRIX_SIZE} · ${t1route.occB}/${MATRIX_SIZE}`);
+      setText('pill-matrix-val', `${mOccA}/${MATRIX_SIZE} · ${mOccB}/${MATRIX_SIZE}`);
       setText('pill-matrix-sub', `MatA ${pctA}% · MatB ${pctB}%`);
-      const activeTiers = tierData.filter(d => d.hasActivity).length;
       document.getElementById('badge-matrix').className = 'card-badge badge-blue';
       setText('badge-matrix', `${activeTiers} TIERS · ${Number(cycles)} CYCLES`);
       setText('summary-matrix', `${activeTiers} active tiers · ${Number(cycles)} total cycles`);
@@ -1519,7 +1587,7 @@
       // Scans MAX 3 chunks (6000 blocks ~1.5hrs) per poll to avoid rate limits.
       // History builds up gradually across polls. localStorage preserves totals.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_32'; // bump suffix to reset on logic change
+        const LOAN_KEY        = 'cnova_loans_v8_46'; // bump suffix to reset on logic change
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
 

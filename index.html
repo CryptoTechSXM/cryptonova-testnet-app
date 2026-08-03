@@ -467,7 +467,7 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.45 — Emergency Fix in Progress</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.46 — Fresh Matrix Relaunch</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
       We're seeding the new matrix for a clean start. Back online in:
     </p>
@@ -507,10 +507,10 @@
       var isEarly = h.indexOf('early.') !== -1;
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1785037500000; // V8.45 preview
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.45 Early Access - Opening 11:45 PM EDT';
+        var EARLY_MS = 1785502800000; // V8.46 preview — Fri Jul 31 2026 9:00 AM EDT
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.46 Early Access — Opening 9:00 AM EDT';
         // Override countdown block text for early domain
-        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.45 — Emergency Fix in Progress';
+        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.46 — Fresh Matrix Relaunch';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'Leaders &amp; testers — we\'re seeding the new matrix. Back online in:';
         var openEarlyCoupon = function() {
           // localStorage only bypasses gate AFTER the countdown has expired
@@ -532,8 +532,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.45 Testnet - Opening 12:00 AM EDT';
-        var MAIN_MS  = 1785038400000; // V8.45 go-live
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.46 — Opening 10:00 AM EDT';
+        var MAIN_MS  = 1785506400000; // V8.46 go-live — Fri Jul 31 2026 10:00 AM EDT
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
@@ -622,7 +622,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.45</span><span class="vb-m">V8.45</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.46</span><span class="vb-m">V8.46</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -717,8 +717,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">Earned on every registration. 50 CNOVA minted per T1 join. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
         </div>
       </div>
@@ -1813,7 +1813,7 @@
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">V8.45 live on testnet — additive automation + open whale gate, fresh reset July 23</div>
+            <div class="phase-subtitle">V8.46 live on testnet — additive automation + open whale gate, fresh reset July 31</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
@@ -2017,8 +2017,8 @@ const CHAIN_ID = 84532;
 
 
 
-const RPC_URL      = 'https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy';
-const RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
+const RPC_URL      = 'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/';
+const RPC_FALLBACK = 'https://wiser-proportionate-forest.base-sepolia.quiknode.pro/8383659a7c5f035faa091659780d5ba26c50fcf8/'; // cnova-site-2 EP5
 
 // ── V8.45: Default-sponsor rotation pool ─────────────────────────────────
 // Members who register WITHOUT a referral link are shared across these
@@ -2027,6 +2027,7 @@ const RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
 // (support traceability). To change the pool, edit this list and push —
 // every address must already be a REGISTERED member before receiving orphans.
 const DEFAULT_SPONSOR_POOL = [
+  // V8.46 relaunch — first 8 leaders; add more in batches as they register
   '0x6512e9B5FE1690F2570AFEE5E7b904EF106C9435',
   '0x19a59fbD6d2c1289668795D41453e1505B7B8102',
   '0x1D3E33aAFFDb694E5a45d793B6946120467e93AB',
@@ -2035,10 +2036,6 @@ const DEFAULT_SPONSOR_POOL = [
   '0x8fb7ca44D27c67b0cFED5153aeEE4F70F4aed6c2',
   '0xdFD9e186b8D8A9000cBeE47BE14310a43Bdf602e',
   '0x141a5B0d42B0ba2AF1BE4eC771B96Db460896a50',
-  '0x30196CD21fb0DF32cbA9e71D197A788d2a3739eB',
-  '0x0f50998163F3DeE028a3D72153659D08aede45F3',
-  '0x26388a81eb9448DF02144cc765Bb448444e61f9B',
-  '0x391ab9edC83960e6ec468bDb7e6abE5858656F68',
 ];
 
 function pickDefaultSponsor(memberAddr) {
@@ -2050,72 +2047,89 @@ function pickDefaultSponsor(memberAddr) {
   } catch(_) {}
   return DEFAULT_SPONSOR_POOL[Math.floor(Math.random() * DEFAULT_SPONSOR_POOL.length)];
 }
-const RPC_EXTRA    = 'https://base-sepolia-rpc.publicnode.com';
+const RPC_EXTRA    = 'https://sepolia.base.org';
+
+// eth_getLogs on range-capped providers (QuickNode caps at 10k blocks): walk
+// backward in <=9000-block windows instead of one whole-chain query that gets
+// rejected. Sequential, so it never bursts the per-second rate limit.
+async function safeGetLogs(contract, filter, opts) {
+  opts = opts || {};
+  const rp = contract.runner && (contract.runner.provider || contract.runner);
+  const WINDOW = 9000;
+  const latest = await rp.getBlockNumber();
+  const floor = Math.max(0, latest - (opts.maxBack || 100000));
+  const out = [];
+  for (let to = latest; to >= floor; to -= WINDOW) {
+    const from = Math.max(floor, to - WINDOW + 1);
+    try { out.push(...await contract.queryFilter(filter, from, to)); } catch (_) {}
+    if (from <= floor) break;
+  }
+  return out;
+}
 
 const ADDRS = {
-  // V8.45 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
+  // V8.46 — deployed 2026-07-31 — fresh redeploy (reused MockUSDC); all 9 V8.46 fixes live
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0x5E018AF58206efFA1c967739d8B34d83D0C9a1FC',
-  treasury:      '0x1b63EdF6C12D498162e091c328b33e7389CF3231',
-  stabilityFund: '0x65883479c581A98B5047205C5a50Db282F3eD4f6',
-  buybackReserve:'0x7D94F2c27a42a74c6daDBdBe75138aa01a0019A6',
-  tierRouter:    '0xC44c1A511DFAebE58D9BB719D087aB540224686A',
-  matrixKeeper:  '0x603db2d933F3B24Ce1aB23BFc2495622D5600C84',
-  v8Governance:  '0xF03456B1716AeCb0fb4c4D08cDfe438B3CeA6a6c',
-  communityWallet:'0x14B1dBd0B7DD0d253A2453b59DA816Bdb3F77032',
+  cnova:         '0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8',
+  treasury:      '0x66adadd761D43591589f891bE63006359B8E6156',
+  stabilityFund: '0x7Dd7BA796392D897ED12B647897e069896d4edf0',
+  buybackReserve:'0x352761B9503bdE02eD52Aa36423bDe3742F98073',
+  tierRouter:    '0xFB6928d9C50401633041b41b016Cf7ffCAB0492E',
+  matrixKeeper:  '0xf87956a9d7705bC604FD47a614598a4829426FF6',
+  v8Governance:  '0x79f134c0239aDCf679768CFFFbf5ca7579f739aF',
+  communityWallet:'0x22Ae7cC22c315F6625bF1C69eb75698966983E16',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x3ee2FB4835520FE650C2a04B4c7a69eb0C822523',
-  couponRegistry:'0xE5af3088C37e9d1268f35656231A1674b7C32F72',
-  // V8.30 tier pairs — deployed 2026-06-29
+  directSale:    '0x8b9be7b84fD71D7134D14C45bd3811fF3aED88cc',
+  couponRegistry:'0x326eE93718607dDf058cEF9B6fC8115E3B8Fb1c0',
   T1: {
-    pm:   '0x680F94476789386f43878103f8a9b2750cD91F68',
-    matA: '0x85bCd925b224a4B1fA8769630dd5204d75499c01',
-    matB: '0x7Ff794Bbbd9A41a9cF9a3E01A84EE9aEa96DABbE',
+    pm:   '0x699f724DD2DFa0452Abad4A6F2BAe82FE57Cc916',
+    matA: '0x015d85E979966779357D5fde66B03Ef976aD7F6d',
+    matB: '0x0344518B86c85E8142e0E430F65DBF1388ba218f',
   },
   T2: {
-    pm:   '0xa4Df15CD10861845B9ad982C6540a9A3F35a4188',
-    matA: '0x0cA22E3BE70c87898C66C6c9BF4BF8322A9F1076',
-    matB: '0x16518a1D3e1Ad356892922be41C212A7e7411917',
+    pm:   '0x8Dae8e04c29C8298CA37a714545e96F8E619D3b6',
+    matA: '0xB40c997B9EE1eB1F223dFc8926a123935D468b32',
+    matB: '0xCe861d0eE57B792Daf2bd1233F044A63B93a0CE8',
   },
   T3: {
-    pm:   '0xd34787406d8D3A2Cbb0E346A82Cf3707C10c56F9',
-    matA: '0x827B8f8D316919aAC3BB1f5D75A7351D1fA32828',
-    matB: '0x8b587B1731d6ecb97c62256c14722C8E4A2e0512',
+    pm:   '0x1F8fA1F5eb5531078e5884921C3FA70d9D8d90de',
+    matA: '0x25D786a6E75f3DeC0602F7eD3755BA01834B8DbA',
+    matB: '0x6ae9B35F7D2efaAeB80e7784BbC6A4C8Ac1b91D8',
   },
   T4: {
-    pm:   '0xD6df6ec0F17996564FBc1Fce6326a6D214f03A1C',
-    matA: '0xfB1ef5473a7044417ef800B4A737fF1973c09f91',
-    matB: '0x337ca739b9728A3d224515cF18B289b1b26e37d9',
+    pm:   '0xa076b3569AE3078fb3A9bE391302C6175519CE77',
+    matA: '0x36CEe31D41A418520613850E1036E26231e1F812',
+    matB: '0x9Cdc49333E41AeBcE953f1841e4849C798D62923',
   },
   T5: {
-    pm:   '0x74a2CB742Ad500D1203ee10F58A6770E791fDEAB',
-    matA: '0xafB139ba5d11d0549c7f2cC85Bd4011861Faf6C8',
-    matB: '0x70BCc0e573836d209Ba73328F0E87a79EfaCb30D',
+    pm:   '0x5F1De1d2615bC4801B27e9C58a617869d8981a61',
+    matA: '0x27Dfe96AEFd6A5A417976bD7f1122efC2866dDD2',
+    matB: '0xDeE91D5fb28D5B371a5a692DA423049b5FCd7324',
   },
   T6: {
-    pm:   '0xe1bF07f2f9ac124abaD4cF6c01d798b5E0e63D58',
-    matA: '0x5B85A26Fd4F8bEc033b4eF54651579DB16574B98',
-    matB: '0x02c8BF5a5b31E8d722D062711F124Ff0eE0ca987',
+    pm:   '0x4B4789162fC7404507C6eBce3e1B51E90489BcE1',
+    matA: '0xbc1E654318D3af0B5B9b35A402af3E73D4fdD3D6',
+    matB: '0xA839b635eE7147716dD525419bC62Bf71FB6f350',
   },
   T7: {
-    pm:   '0x660A9118CB2709AEe183A3cBBb500e93E3AA7E64',
-    matA: '0xB18503C93f1a37283ee1Db04aE80f6B3271D538b',
-    matB: '0xC50893a30e66b34E00cFBae0ab289e400B9ecD22',
+    pm:   '0xBBB8FF517eEAb6dd4003a762fCADcedc8B305A83',
+    matA: '0xd15BC3698287Dc25961134AB7080751087377887',
+    matB: '0x928CeFf14F7a73b55359c16436831670a3174eB3',
   },
   T8: {
-    pm:   '0x38E82118De5261bd26B02b7A8b17ec64690aF59b',
-    matA: '0xd2Bd96684D52585DC51C07c9d001075025744627',
-    matB: '0x44B40FaB2D39F4A7BE7dcc0079e919b1Da621f02',
+    pm:   '0x9ffd41230257039c623EA822aA24eE7b1D1a85E8',
+    matA: '0xE77D2B35700aD358AF4541aAe8969eeF1c01D6fa',
+    matB: '0x5082d08802C6De63d4643e052F2B37C4D5DBDf86',
   },
   T9: {
-    pm:   '0xC3913Fb905342b4e4B1e9050e5c5A9Ee442835BC',
-    matA: '0xa53034A3b7d62cf26716Fb9E8e41aC2F6809a7e9',
-    matB: '0xd23Fb100d4d641E8A4A788A916E1272f7E194c6E',
+    pm:   '0x4FA5646Ad2c4A583B0CF916678522070d990AAdc',
+    matA: '0x0F09500af8231E2Dd42a16C1B8212Cf6acf19861',
+    matB: '0x3684E2f7c31754c4a9D635473f68c78b64696a9F',
   },
   T10: {
-    pm:   '0x8aE62F2cD26Bf5cac108CAB9fB30CC4c14063f22',
-    matA: '0x5e63A3aC72fD393dedEA4Fad8fb2154515fcdc76',
-    matB: '0x2E2c0c1dfe4a6C7B4A562c95c0A166B7E333e5E7',
+    pm:   '0xFBf4F3C1CEAAc90f9d214ad4D8cb8F6c6Ad0a0F1',
+    matA: '0x0e4b459d0EaE0ED029b1Bb34F0442D2B69F53D78',
+    matB: '0x66b43CF4b0f7D06c86FD68314e7B37Ec10fBfE6D',
   },
 };
 
@@ -2132,6 +2146,7 @@ const T10_FEE = 10_000_000_000n;   // $10,000 USDC
 
 // ── ABIs ─────────────────────────────────────────────────────────────
 const TIER_ROUTER_ABI = [
+  'function bulkWithdraw() external', // V8.44 G2: sweep every tier's free balance in ONE tx
   'function register(address referrer) external',
   'function globalJoined(address) external view returns (bool)',
   'function memberReferrer(address) external view returns (address)',
@@ -2437,11 +2452,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   const _net84532 = ethers.Network.from(84532);
   const _mkRpc = url => new ethers.JsonRpcProvider(url, _net84532, { staticNetwork: _net84532 });
   try {
-    readProvider = new ethers.FallbackProvider([
-      { provider: _mkRpc(RPC_URL),      priority: 1, weight: 1 },
-      { provider: _mkRpc(RPC_FALLBACK), priority: 2, weight: 1 },
-      { provider: _mkRpc(RPC_EXTRA),    priority: 3, weight: 1 },
-    ], _net84532, { quorum: 1 });
+    // cnova-site pool: all 5 QuickNode endpoints (~250 req/s aggregate) shuffled per page load
+    // so users spread evenly, each with 4 overflow lanes; sepolia last resort. Alchemy-comparable.
+    const _QN_POOL = [
+      RPC_URL,       // cnova-site   EP1
+      RPC_FALLBACK,  // cnova-site-2 EP5
+      'https://cosmopolitan-still-fire.base-sepolia.quiknode.pro/3835d77b733a07e6109ec27774ab3231fbb86c6a/', // EP2
+      'https://newest-cold-isle.base-sepolia.quiknode.pro/d1082ae239ca62f4fc938014273539074f377e02/', // EP3
+      'https://side-silent-sheet.base-sepolia.quiknode.pro/4ce4b5665baf27920cda0759814efef5c3172510/', // EP4
+    ];
+    for (let _i = _QN_POOL.length - 1; _i > 0; _i--) { const _j = Math.floor(Math.random() * (_i + 1)); [_QN_POOL[_i], _QN_POOL[_j]] = [_QN_POOL[_j], _QN_POOL[_i]]; }
+    readProvider = new ethers.FallbackProvider(
+      _QN_POOL.map((u, i) => ({ provider: _mkRpc(u), priority: i + 1, weight: 1 }))
+        .concat([{ provider: _mkRpc(RPC_EXTRA), priority: _QN_POOL.length + 1, weight: 1 }]),
+      _net84532, { quorum: 1 });
   } catch(_) {
     // ethers FallbackProvider constructor may vary — fall back to single provider
     readProvider = _mkRpc(RPC_URL);
@@ -2548,7 +2572,7 @@ async function connectWallet(silent=false) {
         // Attempt addEthereumChain for any error EXCEPT explicit user rejection (4001).
         if (swErr.code !== 4001) {
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy', 'https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
@@ -2617,7 +2641,7 @@ async function switchToBaseSepolia() {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
           nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},
-          rpcUrls:['https://base-sepolia.g.alchemy.com/v2/JR2WFAmOMRcX9O4vR-wyy','https://base-sepolia.public.blastapi.io','https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com'],
+          rpcUrls:['https://sepolia.base.org'],
           blockExplorerUrls:['https://sepolia.basescan.org']
         }] });
         hideNetworkBanner(); if (!userAddr) await connectWallet();
@@ -2834,7 +2858,7 @@ async function loadCWData(userAddr, signer, rp) {
     // Try to get specific enrollment number from events (best-effort)
     try {
       const filter = cw.filters.MemberEnrolled(userAddr);
-      const events  = await cw.queryFilter(filter, -200000);
+      const events  = await safeGetLogs(cw, filter, {maxBack: 20000});
       if (events.length > 0) {
         const num = Number(events[0].args.enrollmentNumber);
         setText('cw-founder-id', `Member #${num.toLocaleString()} of 1,000`);
@@ -4764,7 +4788,7 @@ async function loadDashboardData() {
               let _wasReclaimed = false;
               try {
                 const _rcLogs = await raceTimeout(
-                  mc.queryFilter(mc.filters.SlotReclaimed(userAddr)).catch(() => null), 8000
+                  safeGetLogs(mc, mc.filters.SlotReclaimed(userAddr), {maxBack: 20000}).catch(() => null), 8000
                 ).then(v => v ?? null);
                 _wasReclaimed = Array.isArray(_rcLogs) && _rcLogs.length > 0;
               } catch (_) { _wasReclaimed = false; }
@@ -5495,7 +5519,7 @@ async function loadUserBurnHistory(cnova, user) {
     setText('dash-cnova-burned', '…');
     const provider  = cnova.runner?.provider ?? cnova.provider;
     const latest    = await provider.getBlockNumber();
-    const fromBlock = Math.max(0, latest - 20_000); // ~40 min on Base Sepolia
+    const fromBlock = Math.max(0, latest - 9_000);  // <=9k: under QuickNode 10k getLogs cap (no 413 on first try)
     const filter    = cnova.filters.Transfer(user, ethers.ZeroAddress);
     let events;
     try {
@@ -5590,7 +5614,7 @@ async function _getGlobalJoinOrder(addr, rp) {
   if (cached > 0) return cached;
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const events = await tr.queryFilter(tr.filters.MemberEnrolled(addr));
+    const events = await safeGetLogs(tr, tr.filters.MemberEnrolled(addr));
     if (events.length > 0) {
       const order = Number(events[0].args.joinedCount);
       if (order > 0) { localStorage.setItem(cacheKey, String(order)); return order; }
@@ -5918,7 +5942,7 @@ async function renderCnovaDetail(el, rp) {
   // surviving trace, so read it back and show the permanent ledger.
   let historyRows = '';
   try {
-    const evs = await cnova.queryFilter(cnova.filters.EarlyUnlock(userAddr), 0, 'latest');
+    const evs = await safeGetLogs(cnova, cnova.filters.EarlyUnlock(userAddr));
     if (evs.length) {
       const blks = await Promise.all(evs.map(e => rp.getBlock(e.blockNumber).catch(() => null)));
       let totRel = 0n, totPen = 0n;
@@ -6114,7 +6138,7 @@ async function renderBurnedDetail(el, rp) {
   el.innerHTML = '<span class="detail-loading"><span class="spinner"></span> Scanning redemption history…</span>';
   const cnova = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   try {
-    const events = await cnova.queryFilter(cnova.filters.Transfer(userAddr, ethers.ZeroAddress), 0, 'latest');
+    const events = await safeGetLogs(cnova, cnova.filters.Transfer(userAddr, ethers.ZeroAddress));
     const total  = events.reduce((a, e) => a + BigInt(e.args.value), 0n);
     const totalFmt = Number(ethers.formatEther(total)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -6365,22 +6389,42 @@ async function doWithdraw() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Withdrawing…';
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, 84532, { staticNetwork: true });
   try {
+    const recipient = getWithdrawRecipient();
+    // Read first (no signature): does the member hold anything withdrawable anywhere?
     const _matObjs = await _buildAllMatrixObjects(rp);
-    const matrices = _matObjs.map(m => m.addr);
-    let withdrawn = false;
-    for (const addr of matrices) {
-      const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
+    let anything = false;
+    for (const m of _matObjs) {
+      const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
       const member = await mc.getMember(userAddr).catch(()=>null);
-      if (member && BigInt(member.withdrawable) > 0n) {
-        const mcW = new ethers.Contract(addr, MATRIX_ABI, signer);
-        const recipient = getWithdrawRecipient();
-        const tx = recipient ? await mcW.withdrawTo(recipient) : await mcW.withdraw();
-        await tx.wait();
-        withdrawn = true;
-      }
+      if (member && BigInt(member.withdrawable) > 0n) { anything = true; break; }
     }
-    setStatus('withdraw-status', withdrawn ? '✅ Earnings withdrawn!' : 'Nothing to withdraw.', withdrawn ? 'ok' : 'info');
-    if (withdrawn) await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
+    if (!anything) { setStatus('withdraw-status', 'Nothing to withdraw.', 'info'); return; }
+
+    if (recipient) {
+      // Custom recipient: bulkWithdraw pays only the member, so loop withdrawTo per matrix.
+      let withdrawn = false;
+      for (const m of _matObjs) {
+        const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
+        const member = await mc.getMember(userAddr).catch(()=>null);
+        if (member && BigInt(member.withdrawable) > 0n) {
+          const mcW = new ethers.Contract(m.addr, MATRIX_ABI, signer);
+          const tx = await mcW.withdrawTo(recipient);
+          await tx.wait();
+          withdrawn = true;
+        }
+      }
+      setStatus('withdraw-status', withdrawn ? '✅ Earnings withdrawn to your chosen address!' : 'Nothing to withdraw.', withdrawn ? 'ok' : 'info');
+    } else {
+      // ONE signature: TierRouter.bulkWithdraw() sweeps every tier's free balance in a single tx.
+      const trR = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+      let gl = 6000000n;
+      try { const est = await trR.bulkWithdraw.estimateGas({ from: userAddr }); gl = est + est / 4n; } catch(_) {}
+      const trW = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      const tx = await trW.bulkWithdraw({ gasLimit: gl });
+      await tx.wait();
+      setStatus('withdraw-status', '✅ Earnings withdrawn — every tier in a single transaction!', 'ok');
+    }
+    await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
     await loadDashboardData();
   } catch(e) {
     setStatus('withdraw-status', friendlyError(e), 'err');
@@ -6769,7 +6813,7 @@ async function _getDirectReferrals(addr, rp) {
     let events;
     try {
       events = await Promise.race([
-        tr.queryFilter(filter),                                // whole chain
+        safeGetLogs(tr, filter, {maxBack: 50000}),             // capped+chunked (QuickNode 10k getLogs limit)
         new Promise((_, r) => setTimeout(() => r(new Error('evt_timeout')), 30000)),
       ]);
     } catch (wideErr) {

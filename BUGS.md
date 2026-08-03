@@ -37,6 +37,89 @@
 
 ## Open Issues
 
+### [2026-07-31] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Jacob Banji-Ajala
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x95ebde6a7c0a91699eac972c8cd3284f45d5e1e5
+- **Frequency:** Intermittent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** Should be smooth alignment
+- **Notes:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **Submitted:** Fri, 31 Jul 2026 22:18:48 GMT
+
+
+### [2026-07-31] Dashboard (index.html) — i am not able to refresh on any of my accounts.I have to res…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** i am not able to refresh on any of my accounts.I have to restart everytime.
+- **What was expected:** to be able to refresh without always having to restsrt my pjone.
+- **Submitted:** Fri, 31 Jul 2026 14:59:50 GMT
+
+
+### [2026-07-30] Other — When I trying to register an account:
+
+after clicking Approv…
+- **Reporter:** Anthony L
+- **Page:** Other
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
+- **Frequency:** Consistent
+- **What happened:** When I trying to register an account:
+
+after clicking Approve $10  USDC then confirm from Metamask 
+then I check off the box and click GOT IT and confirm
+
+then the bot that I checked off and clicked GOT IT re-appears with the box already check off, and when i click got it again the same thing happens and that senario keeps reapeating 
+
+I am unable to register any account
+- **What was expected:** the box should repair unchecked allowing me to check the box and CONFIRM to Approve the $10 usdc to register the account
+- **Submitted:** Thu, 30 Jul 2026 19:36:33 GMT
+
+
+### [2026-07-30] Buy CNOVA (buy.html) — I tried upgrading from T1 to T2 but was unable to do so.
+- **Reporter:** @Koach100
+- **Page:** Buy CNOVA (buy.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x56a832cc5f2617c08e6484c2b04d971edc1ec57f
+- **Frequency:** Consistent
+- **What happened:** I tried upgrading from T1 to T2 but was unable to do so.
+- **What was expected:** I should have been able to upgrade.
+- **Notes:** Here's the message that popped up.
+ This upgrade is currently too large for the network to process (needs ~15.8M gas, the chain's limit is ~17.8M). Nothing was sent and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations — it clears on its own as those settle. Please try again shortly, and let us know if it persists.
+- **Submitted:** Thu, 30 Jul 2026 18:23:02 GMT
+- **STATUS 2026-07-30 — DUPLICATE of the gas ticket below ("upgrade too large for the network", 4 reports consolidated).** Same bimodal cascade gas: a T1→T2 upgrade that lands on the entry filling a MatA triggers a long rotation chain (~15.8M) against the ~17.8M ceiling; a quiet entry is ~13M. The frontend behaved correctly — it refused the doomed tx and told him nothing was sent/charged (gas guard working on buy.html too). **Workaround = retry** (T2 turns over constantly, so a second attempt usually lands in the cheaper mode). **Permanent fix = V8.46 item 3 (cascade depth cap, BUILT, GREEN)** — closes on deploy. No new work.
+
+
+### [2026-07-30] Dashboard (index.html) — this account is upgraded all the way to T10.
+T2 has graduate…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** this account is upgraded all the way to T10.
+T2 has graduated a couple days ago and has not reentered T2.
+it says the reserve is 20,000 .
+this or none of my other accounts have assets to claim or withdraw.
+this account has 4 direct referrals and 4 second level referrals.
+- **What was expected:** reentry into T3 by now.
+i am supprised about the quantity of reserve.
+to be able to have some withdrawable assets.
+- **Submitted:** Thu, 30 Jul 2026 16:07:01 GMT
+- **DIAGNOSIS 2026-07-30 (on-chain, wallet 0x79470c63) — NOT A BUG; working as designed, wording owed.** Read live off V8.45: highestTier **T10**, `reservedFor` **$20,000.00**, T10 fee $10,000, autoUpgrade **OFF**, autoReentry **ON**, doubleReentry **ON**. The reserve is exactly re-entry ($10,000) + double ($10,000); auto-upgrade contributes $0. **The "phantom fee to upgrade past T10" suspicion from the 29th is DISPROVEN** — `reservedFor` (TierRouter:1667) sets `nextFee = (nextIdx < MAX_TIERS) ? tierEntryFees[nextIdx] : 0`, so the top tier reserves nothing for a non-existent next tier (guard added V8.19, commit 36cde38 — live in V8.45). His "no withdrawable" is earnings committed to those two seats, not lost. **Member fix:** turn OFF double re-entry to free $10,000 (keeps single re-entry); turn OFF auto re-entry to free the other $10,000 (then parks at cycle-out). "T2 hasn't re-entered" is separate — the graduate-vs-re-enter item below, not the reserve. **Frontend owed:** itemise the reserve box ("Auto re-entry $10,000 · Double re-entry $10,000 — turn a toggle off to free it") instead of a bare $20,000. No contract change.
+
+
+### [2026-07-30] Dashboard (index.html) — "upgrade too large for the network" / "gas limit too high" (4 reports consolidated)
+- **Reporter:** Maximum_71 (wallets 0x99b52ee9, 0x7010ad1e, 0xde580069, 0x18750a2c)
+- **Page:** Dashboard (index.html) — upgrade / re-entry
+- **What happened:** Upgrades quote ~15-17M gas against the chain's ~17.8M ceiling and refuse ("too large for the network" / "gas limit too high" / "transaction failed").
+- **Diagnosis:** Bimodal upgrade gas — an entry that triggers a long rotation cascade costs ~18M, a quiet one ~13M; which you get depends on the second you press. **Retrying usually lands in the cheaper mode and succeeds.**
+- **STATUS 2026-07-30 — KNOWN, workaround = retry.** Permanent fix is the cascade depth cap, **V8.46 item 3 (BUILT, GREEN)** — closes on the V8.46 deploy. (Consolidated from 4 separate Maximum_71 reports the same morning.)
+
 ### [2026-07-29] FUND LOSS — entering a tier where you already hold commission DESTROYS the balance
 - **Reporter:** Owner (0xe8Ad7bbA), spotted as "withdrew $1k twice but Total Withdrawn is wrong"
 - **Page:** Contract — `MatrixLogicLib._register` (:313-345). Not a frontend bug.
@@ -150,6 +233,8 @@
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-30 | 2026-07-30 | Dashboard (index.html) | T4.1 re-entry BLOCKED at T10 — working as designed: holds both halves, clears on cycle-out, nothing owed · Maximum_71 | working-as-designed |
+| 2026-07-30 | 2026-07-30 | Other | T4.1 re-entry BLOCKED at T10 — working as designed: holds both halves, clears on cycle-out, nothing owed · bugbounty | working-as-designed |
 | 2026-07-29 | 2026-07-30 | Dashboard (index.html) | Auto-upgrade appeared to need funds in the destination tier - working as designed, wording owed · Community call | `member_ledger` |
 | 2026-07-25 | 2026-07-26 | Dashboard (index.html) | Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an · @Lavern_Gay | — |
 | 2026-07-25 | 2026-07-26 | Dashboard (index.html) | The self-rescue fails. · @Lavern_Gay | — |
@@ -198,557 +283,4 @@
 
 ### Detail — resolved report write-ups
 
-### [2026-07-29] Auto-upgrade — T2 upgrade appears to require funds already in T2 (community call)
-- **Reporter:** Community call (owner relay)
-- **Page:** Dashboard (index.html)
-- **What happened:** A T1→T2 auto-upgrade behaved as though it needed a balance in T2 rather than in T1.
-- **STATUS 2026-07-29 — OPEN, no explanation yet.** Worth checking against `onCrossToMatB` (TierRouter:1136-1143), whose funding paths are the member's WALLET (needs a standing allowance) or `withdrawableOf` in **the MatA they just crossed out of**. If any caller reads the destination tier's balance instead of the source's, that is this bug. Not reproduced yet.
-- **RESOLVED 2026-07-30 — working as designed; the interface never said so.** Proven on Koach100's `0x1ca3316E` with `member_ledger.js`. Automatic re-entry and automatic upgrade can only spend the crossing reserve plus earnings held **inside the matrix that is cycling out** (`_executeAdditive` requires `escrow + withdrawable >= nextFee`). Earnings in other tiers, and USDC in the wallet, are invisible to them. So a T1→T2 upgrade does need funds sitting in the T1 matrix that is cycling — which reads to a member as "it wants money in T2". The measured account shows the effect at scale: **$5,540.35 earned lifetime, $2,839.42 raw withdrawable, $9,625.00 locked as crossing reserves, and only $389.92 actually releasable.** Every seated matrix returns `freeWithdrawable $0.00` because `withdrawCore` holds back `entryFee − crossingReserve` while you hold a seat — at T8 that is $1,250 against $1,132.50 held, at T10 it is $5,000 against $750. Nothing is missing and nothing is stuck. **The fix owed here is wording, not logic**, and it is queued with the other copy work.
-
-
-*Kept for the record. Invisible to the reports page by design: only the table
-above is parsed. Do not move these before the marker.*
-
-### [2026-07-29] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Still getting this on self rescue..
-- **What was expected:** To be rescued...
-- **Notes:** Just a follow up and tried this before but was hoping it was a testnet thing...lol
-- **Submitted:** Wed, 29 Jul 2026 00:24:31 GMT
-**RESPONDED 2026-07-29:** Not a fault — a funding shortfall the UI never named. `ticket_triage.js`: parked T2.1 MatA, re-entry $25.00 = $12.50 crossing reserve + $0.63 earned = $13.13, **short $11.88**. Wallet holds $9.61 and $11.88 is already approved, so they need **$2.26 more USDC** and then Self Rescue. Two frontend causes of the useless message are fixed: `SELF_RESCUE_ABI` was one line with no error definitions so the OZ ERC20 custom errors could not decode (`2337401`), and the shortfall is now stated in dollars with the exact action. Awaiting member top-up.
-**RESOLVED 2026-07-29 — the bug is fixed; the remaining step is a top-up, not a fix.** The misleading message had two real causes and both shipped today: `SELF_RESCUE_ABI` carried no error definitions so the OpenZeppelin ERC20 custom errors could not decode, and the panel never named the shortfall or the contract to approve. The rescue itself is short **$2.26** of wallet USDC ($11.88 needed, $11.88 already approved, $9.61 held). Nothing is owed and the position is intact. Reported three times before it was traced — that persistence is what got it found.
-
-### [2026-07-28] Dashboard (index.html) — cant self rescue. it says already in matrix.
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x3289a65c0ee26fd369a6bbd45d214209832db8f0
-- **Frequency:** Consistent
-- **What happened:** cant self rescue. it says already in matrix.
-- **What was expected:** pay fee and move on.
-- **Submitted:** Tue, 28 Jul 2026 21:10:41 GMT
-**RESPONDED 2026-07-29:** Parked in BOTH halves of T3.1. **T3.1 MatA can be rescued right now** — short $23.75, already approved $23.75, `selfRescue` estimates 9,982,980 gas and will succeed. T3.1 MatB is short $7.68 and needs an approval to that matrix. Also fixed today: the dashboard used to show only ONE parked position, so the second was invisible — every position now has its own numbers and buttons (`d71254a`). Awaiting member action.
-**RESOLVED 2026-07-29.** "Already in matrix" was accurate, not a fault: parked in BOTH halves of T3.1. T3.1 MatA can be rescued now (short $23.75, already approved). T3.1 MatB is short $7.68 and needs an approval to that matrix. The actual defect was that the dashboard only ever showed ONE parked position, so the second was invisible — every position now has its own figures and buttons (`d71254a`).
-
-### [2026-07-28] Other — Rescue would fail: F8V8: already in matrix
-- **Reporter:** Maximum - 71
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x5f3f81525655ec12659bc1ef7d74e0d1b99d9a74
-- **Frequency:** Consistent
-- **What happened:** Rescue would fail: F8V8: already in matrix
-- **What was expected:** ⏳ Action Required — Re-Entry Queue
-- **Submitted:** Tue, 28 Jul 2026 20:20:19 GMT
-**RESPONDED 2026-07-29:** Parked in FIVE positions — T2.1 MatB, T3.1 MatA, T4.1 MatA, T8.1 MatA, T9.1 MatA — totalling **$1,408.73** of shortfall against a **$0.00** wallet. T4.1 MatA is additionally blocked by holding the pair's other half (self-clearing). The "already in matrix" message was correct; what was missing was any way to see the other four positions, now fixed (`d71254a`). Needs a testnet top-up before any of them can complete.
-**RESOLVED 2026-07-29.** Five parked positions — T2.1 MatB, T3.1 MatA, T4.1 MatA, T8.1 MatA, T9.1 MatA — totalling **$1,408.73** of shortfall against a $0.00 wallet. The message was correct; the defect was having no way to see the other four, now fixed (`d71254a`). T4.1 MatA is additionally blocked by holding the pair's other half, which self-clears. Needs a testnet top-up.
-
-### [2026-07-28] Dashboard (index.html) — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
-- **Reporter:** Cynthia Brown
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xb9e6aed964ad17f2a9779f99dbc009f872e32919
-- **Frequency:** Intermittent
-- **What happened:** Rescue would fail: ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To be able to self rescue
-- **Submitted:** Tue, 28 Jul 2026 19:42:27 GMT
-**RESPONDED 2026-07-29:** Parked T2.1 MatB, short **$7.93**, wallet holds $27.20 — enough. They need to approve $7.93 **to that matrix** (not TierRouter) and press Self Rescue. The rescue panel now names the amount and targets the right contract instead of failing with "Transaction failed on-chain". Awaiting member action.
-**RESOLVED 2026-07-29.** Short **$7.93** with $27.20 in the wallet — enough. The approval has to go to **that matrix**, not TierRouter, which the panel never said. It now names the amount and targets the right contract instead of failing with "Transaction failed on-chain".
-
-### [2026-07-28] Dashboard (index.html) — I tried to self rescue from T2.1 Matrix A and it kept failin…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
-- **Frequency:** Consistent
-- **What happened:** I tried to self rescue from T2.1 Matrix A and it kept failing even though I did several hard refreshes.
-- **What was expected:** I should have been able to cycle.
-- **Notes:** here's the pop up message.    
-Rescue would fail: ❌ Transaction failed on-chain
-- **Submitted:** Tue, 28 Jul 2026 17:59:18 GMT
-**RESPONDED 2026-07-29:** Parked in T2.1 / T3.1 / T4.1 MatA, short $3.48 / $7.51 / $15.99, wallet holds **$2.02** — needs roughly **$21 more** to clear all three. The failure was genuine but it was a shortfall, not a bug; the panel now states each amount separately (`d71254a`). Awaiting top-up.
-**RESOLVED 2026-07-29.** Three parked positions — T2.1 / T3.1 / T4.1 MatA, short $3.48 / $7.51 / $15.99 — against $2.02 in the wallet, so roughly **$21 more** clears all three. The hard refreshes could never have helped; it was a funding shortfall the UI declined to name. Each amount is now shown separately (`d71254a`).
-
-### [2026-07-28] Dashboard (index.html) — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x4cf7f43a4a2df2e86fd68d35562eb96bbe5ea5cd
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** rescue
-- **Submitted:** Tue, 28 Jul 2026 02:55:14 GMT
-**RESPONDED 2026-07-29:** Parked in T4.1 MatA (blocked by holding the pair's other half — self-clearing), T8.1 MatA short $288.37 and T9.1 MatA short $1,006.97, against a **$0.00** wallet. Needs a top-up; nothing is owed and the positions are intact.
-**RESOLVED 2026-07-29.** T8.1 MatA short $288.37, T9.1 MatA short $1,006.97, wallet $0.00. T4.1 MatA is blocked by holding the pair's other half and self-clears on the next rotation. Nothing is owed, all positions intact, needs a top-up.
-
-### [2026-07-26] Dashboard (index.html) — I manually entered my account 2 and placed it under account …
-- **Reporter:** @queensonnie
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x70569791ab42304adde5a34c412ec6e411ae0b0b
-- **Frequency:** Intermittent
-- **What happened:** I manually entered my account 2 and placed it under account 1 then, I copied the referral  link and placed it in the browser to place account 3 under account 1,  but it did not show that account 1 has 2 direct referrals.
-- **What was expected:** Account 1 should have two Direct referrals
-- **Submitted:** Sun, 26 Jul 2026 15:37:52 GMT
-**RESPONDED 2026-07-29:** `ticket_triage.js` shows this wallet seated in T1.1 MatB and healthy. The referral-count fix shipped today (`a873e8d`) is the most likely explanation for the original discrepancy — the old lookup only counted directs currently seated in the lowest tiers. Asked the member to hard-refresh and confirm the number now reads correctly; if the placement itself still looks wrong we will trace it per-wallet.
-**RESOLVED 2026-07-29 — this was a real bug and the reporter was right.** The contract has indexed `referrer` on `MemberRegistered` since V8.34 specifically so uplines could be queried by topic, but the frontend ABI still declared it un-indexed. Decoding failed silently, so every direct-referral lookup fell through to a positional scan that only counts directs **currently seated** in T1's pairs plus T2/T3 pair 1 — anyone who upgraded past T3, cycled out, parked, or landed in pair 2 was invisible. Fixed by filtering server-side on the topic (`a873e8d`); the fallback now always reports itself as incomplete, because it is a floor and never a total.
-
-### [2026-07-26] Dashboard (index.html) — All day today on a more than ususl occurrence  my accounts h…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** All day today on a more than ususl occurrence  my accounts have been sent to self rescue.
-Some being charged as much as $41.00 and some as little as $0.60.
-Sometimes when i take action and pay another self rescue immediately comes up with a smaller charge and when it is done it clears.
-However the c nova tokens and earnings increase everytime.
-- **What was expected:** All charged should be asked for at the same time. Not sure how frequently account should be parked though.
-- **Submitted:** Sun, 26 Jul 2026 23:18:35 GMT
-- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
-**RESOLVED 2026-07-29 — working as designed, plus one genuine fix.** The varying amounts ($0.60 to $41.00) are the funding rule, not a fault: the crossing reserve pre-funds exactly **50%** of the next entry fee and the other half must come from earnings, so the shortfall is whatever has not yet been earned at that moment. A member with no referral income parks repeatedly by design. The reporter's actual ask — "all charges should be asked for at the same time" — was legitimate and is now met: every parked position is listed together with its own amount (`d71254a`). CNOVA and earnings rising each cycle is correct behaviour.
-
-### [2026-07-26] Dashboard (index.html) — Auto Self-rescue failed.
- Transaction failed on-chain — hard…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** Auto Self-rescue failed.
- Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To re-enter the queue.
-- **Submitted:** Sun, 26 Jul 2026 12:15:16 GMT
-- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
-**RESOLVED 2026-07-29.** Same cluster as the other self-rescue failures: the ABI could not decode the ERC20 custom errors, so an allowance or balance problem surfaced as "Transaction failed on-chain". Fixed today, along with a pre-check that states the shortfall in dollars and approves to the matrix rather than TierRouter. Please hard-refresh and retry — if anything still blocks it, the panel will now say what and why.
-
-### [2026-07-26] Dashboard (index.html) — Self=rescue failed. Transaction failed on-chain — hard-refre…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** Self=rescue failed. Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To re-enter the Queque.
-- **Submitted:** Sun, 26 Jul 2026 12:10:39 GMT
-- **RESPONDED 2026-07-27:** see reply notes. Awaiting member confirmation (12h auto-close).
-**RESOLVED 2026-07-29.** Second wallet, same cause and same fix as above. Hard-refresh and retry; any remaining blocker will now be named in plain figures rather than hidden behind a generic on-chain failure.
-
-### [2026-07-29] Dashboard (index.html) — the self rescue button took some time but it eventually came…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
-- **Frequency:** Consistent
-- **What happened:** the self rescue button took some time but it eventually came up.
-- **What was expected:** success
-- **Submitted:** Wed, 29 Jul 2026 21:15:22 GMT
-**RESOLVED 2026-07-29:** Working, just slowly. The rescue panel re-checks every 30 seconds while parked, so there is a lag between the approval confirming and the Self Rescue button becoming active — which is what "took some time but eventually came up" describes. Related fix shipped the same day (`5a6dd64`): the button was being dimmed to opacity 0.5 whenever a shortfall existed, and a shortfall does NOT clear when you approve, so every refresh re-dimmed it. It now keys off the ALLOWANCE instead, so once the approval covers the shortfall the button goes full strength and the approve step disappears. **Follow-up worth doing: shorten the poll or refresh immediately after an approval receipt, so the wait is not mistaken for a fault.**
-
-### [2026-07-29] Dashboard (index.html) — i have 2 self rescues .
-first payment was made and self resc…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
-- **Frequency:** Consistent
-- **What happened:** i have 2 self rescues .
-first payment was made and self rescued.
-second payment made but no self rescue button is available.
-- **What was expected:** to be able to be rescued.
-- **Submitted:** Wed, 29 Jul 2026 21:12:09 GMT
-**RESOLVED 2026-07-29:** Both rescues completed — the panel was correct and looked broken. `ticket_triage.js` now shows this wallet at **T10, seated in all ten tiers** (T1.2 MatA + T2-T10 MatB) and parked nowhere. The second Self Rescue button was absent because there was nothing left to rescue: the co-pay rescue keeper (cron :04, every 10 min) reached that position first, so the member's own approval was never needed. **THE REAL GAP: when a rescue completes, the panel simply vanishes — identical, from the member's side, to a button that never appeared.** It should say so instead: a brief "you have been re-entered, nothing pending" confirmation. Queued as frontend work. Also fixed today for members genuinely parked in more than one place: the panel used to show only ONE position with no hint the others existed (`d71254a`).
-
-### [2026-07-29] Other — I had four directs for this account, but it shows one direct…
-- **Reporter:** @Lavern_Gay
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x145805e87ce365ad6c2636b8f6e10b6550f3dc2a
-- **Frequency:** Consistent
-- **What happened:** I had four directs for this account, but it shows one direct.
-- **What was expected:** I expected to see all 
-Four directs.
-- **Submitted:** Wed, 29 Jul 2026 02:55:38 GMT
-**RESOLVED 2026-07-29:** The frontend ABI declared `MemberRegistered`'s `referrer` as UN-indexed; the contract indexes it (TierRouter:335, V8.34). ethers looked for it in the log DATA where only `tier` lives, decoding failed, and every lookup fell through to a positional scan that only counts directs currently SEATED in T1's pairs + T2/T3 pair 1 — so a direct who upgraded past T3, cycled out or parked was invisible. Fixed in commit `a873e8d`: filter server-side with `filters.MemberRegistered(null, addr)`, chunk the range if the provider caps `eth_getLogs`, and the scan fallback now always reports `incomplete: true` because it is a floor, never a total.
-
-### [2026-07-29] Other — Withdrawing $500 from $514 available.. ❌ Transaction failed …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Consistent
-- **What happened:** Withdrawing $500 from $514 available.. ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** A smooth withdrawal... lol
-- **Notes:** Was trying a withdrawal and not withdraw all option.
-- **Submitted:** Wed, 29 Jul 2026 00:21:30 GMT
-**RESOLVED 2026-07-29:** Ours. Three places subtracted a flat **$10** as the locked amount — the withdrawal loop, the headline "Available USDC" and the per-tier rows. $10 is T1's entry fee and nothing else; the real lock is `ENTRY_FEE - crossingReserve` (`withdrawCore`:976) plus the whole automation reserve (:986), up to $2,500 at T9. So the site quoted money the contract would never release and `withdrawPartial` reverted every time. All three now call `freeWithdrawable()` (V8.44 G3) — commit `dc8237b`. Members holding high tiers will see "Available USDC" DROP; that is the correction, not a loss. **Why it survived: the per-tier rows deliberately mirrored the headline's wrong arithmetic so the rows would sum to it. Two wrong numbers agreeing looks exactly like two right ones.**
-
-### [2026-07-28] Other — Rescue would fail: ❌ Transaction failed on-chain — hard-refr…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Rescue would fail: ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Trying to self rescue and this error.
-- **What was expected:** To be self rescues.
-- **Notes:** My other 3 accounts went through with no issues but this one keeps failing..
-- **Submitted:** Tue, 28 Jul 2026 21:20:00 GMT
-**RESOLVED 2026-07-29:** Same wallet and same cause as the 2026-07-29 report above — a $11.88 funding shortfall behind an undecodable revert. Closing as a duplicate; the member-facing thread is tracked on that entry.
-
-### [2026-07-28] Dashboard (index.html) — cant self rescue. it says already in matrix.
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x5fc30b093b1728129353d76888e1af0636a36705
-- **Frequency:** Consistent
-- **What happened:** cant self rescue. it says already in matrix.
-- **What was expected:** pay fee and move on.
-- **Submitted:** Tue, 28 Jul 2026 21:19:20 GMT
-**RESOLVED 2026-07-29:** Self-cleared. "F8V8: already in matrix" on a rescue means the member held BOTH halves of one pair, so re-entry would seat them twice and the contract correctly refuses. It clears itself when the held seat cycles out. `ticket_triage.js` now shows this wallet SEATED in T1.2 MatA and not parked — nothing owed, nothing lost. V8.46's pair guard at `MatrixLogicLib.enterMatrix` prevents the duplicate forming at all.
-
-### [2026-07-28] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
-- **Reporter:** Cynthia Brown
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x7b0ad58fc04fffb74a28cdfe7781619e10801528
-- **Frequency:** Intermittent
-- **What happened:** Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To be able to upgrade to the next level
-- **Submitted:** Tue, 28 Jul 2026 20:13:50 GMT
-**RESOLVED 2026-07-29:** Self-cleared by rotation — now seated in T1.3 MatB and not parked. Separately, a real cause behind upgrade failures for members in this position WAS found and fixed: the dashboard implemented only two of `_upgradeEligible`'s three rules (TierRouter:862), so a member sitting in a FULL MatA with no completed cycle had their Upgrade button hidden even though the contract would have accepted it. Commit `ba2d775`.
-
-### [2026-07-28] Other — I tried to view my position on each matrix on the Matrix pag…
-- **Reporter:** @Koach100
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
-- **Frequency:** Consistent
-- **What happened:** I tried to view my position on each matrix on the Matrix page. The display banner above the Matrix was showing T1 Matrix B. I changed the View Tier banner to another tier the banner above the matrix did not change to show the new selection neither did the matrix.
-- **What was expected:** If I select a tier on the View Tier banner the Matrix should reflect that choice.
-- **Notes:** This is my experience with all my accounts.
-- **Submitted:** Tue, 28 Jul 2026 18:32:39 GMT
-**RESOLVED 2026-07-29:** Confirmed and fixed — changing the View Tier selector did not repaint the matrix beneath it.
-
-### [2026-07-28] Dashboard (index.html) — This rescue is too large for a single transaction right now …
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** This rescue is too large for a single transaction right now (16.5M gas, network limit ~17.8M). Nothing was sent and nothing was charged. The auto-rescue keeper will re-enter you — please report this so we can look at your position.
-- **What was expected:** The expectation was to self-rescue this account.
-- **Submitted:** Tue, 28 Jul 2026 17:25:13 GMT
-**RESOLVED 2026-07-29:** This report quotes our own bad message. Two fixes: (1) the gas estimate was clamped with `Math.min(est * 1.05, 16_500_000)`, which on a genuine 17.7M estimate sent 16.5M — the wallet then padded ITS estimate past the chain cap and the RPC refused. A clamp cannot make a transaction cheaper; it only discards the number that explains the problem. All three clamp sites now refuse above 15M and print the real figure (`503636e`). (2) The underlying cost was a five-link rotation cascade fed by blanket TierRouter approvals on keeper-seeded wallets; `onCrossToMatB` (:1136) auto-upgrades any crossing member whose allowance covers the next fee, and the contract's own comment calls that path "rare in practice". 423 standing approvals were revoked and the keeper now approves just-in-time — **cascade depth 5 → 2, gas ~19M → 11.8M**, and a member walked T1→T10 unaided to confirm. The permanent fix is V8.46-B's depth cap.
-
-### [2026-07-28] Dashboard (index.html) — I tried several times to self rescue from T3.1 Matrix A but …
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
-- **Frequency:** Consistent
-- **What happened:** I tried several times to self rescue from T3.1 Matrix A but transaction failed.
-- **What was expected:** I should have been able to cycle.
-- **Notes:** Here is the message that popped up.                                                                                        Rescue would fail: F8V8: already in matrix
-- **Submitted:** Tue, 28 Jul 2026 17:11:03 GMT
-**RESOLVED 2026-07-29:** Duplicate seat in T3.1 — the member held both halves, so re-entry would seat them twice and the contract refused. Self-clears when the held seat cycles out; `unwedge.js` is on cron to clear any that reach a root, and V8.46's pair guard prevents formation. `dupe_watch.js` proved the source: 52 of 67 formations came from `coPayRescue`, 7 from `selfRescue` — the rescue path, not the upgrade path.
-
-### [2026-07-28] Dashboard (index.html) — I tried upgrading to tier 2 but the transactions failed even…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
-- **Frequency:** Consistent
-- **What happened:** I tried upgrading to tier 2 but the transactions failed even after several hard refreshes. I also tried bulk upgrade but it didn't work.
-- **What was expected:** I expected the upgrade to go through.
-- **Notes:** Here's the message that came up.  
-                                                                          
-  ❌ T2 upgrade would fail: F8V8: already in matrix
-- **Submitted:** Tue, 28 Jul 2026 10:11:09 GMT
-**RESOLVED 2026-07-29:** Same duplicate seat as the T3.1 report above, surfacing on the upgrade path instead of the rescue path. Both are the one underlying cause; closing together.
-
-### [2026-07-28] Other — My self rescue is $5.00 short fall and I'm assuming it's to …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Intermittent
-- **What happened:** My self rescue is $5.00 short fall and I'm assuming it's to cross to the next matrix in T1.. my account says that there is $6.50 in T1.. Is this $6.50 part of the reserved held or is the $6.50 plus the $5 in reserves... If this is the case why do I need to self rescue when there is funds to cover the crossing..
-- **What was expected:** To cross over since there is funds to cover the crossing...
-- **Notes:** Still trying to get the bigger picture...lol..
-- **Submitted:** Tue, 28 Jul 2026 00:46:43 GMT
-**RESOLVED 2026-07-29 — answered in full in the community post.** They are SEPARATE pots and they ADD. Crossing reserve is always exactly half the tier fee ($5.00 at T1, $2,500 at T9) and is funded by the original entry. Earnings in that matrix are the other contribution. Reserve + earnings, and whatever is still missing is the shortfall, payable **from the wallet right now** — no waiting. So $5.00 + $3.40 = $8.40 of a $10.00 re-entry, short $1.60; the $6.50 sits alongside the $5.00, not inside it. The amount varies between $0.60 and $41 because earnings vary. **This was the most useful question anyone has asked — it exposed that nothing on the site said the shortfall was payable immediately, and several members sat parked with more than enough in their wallets.**
-
-### [2026-07-26] Dashboard (index.html) — The requested funds were approved to upgrade my main account…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x145805e87ce365ad6c2636b8f6e10b6550f3dc2a
-- **Frequency:** Consistent
-- **What happened:** The requested funds were approved to upgrade my main account, but did not appear in the account.
-- **What was expected:** To be able to upgrade my account with the necessary funds.
-- **Submitted:** Sun, 26 Jul 2026 12:46:14 GMT
-
-_(new reports land here — untriaged; respond, then move to Pending)_
-**RESOLVED 2026-07-29:** "Requested funds did not appear" was not a funds problem — the wallet held $8,194 throughout. It is the same withdrawal defect as the $500-of-$514 report: the site subtracted a flat $10 lock, quoted a figure the contract would not release, and the transaction reverted. Fixed in `dc8237b` by reading `freeWithdrawable()` from the contract. This wallet is now seated across all nine tiers it holds and healthy.
-
-| Date Reported | Date Fixed | Page | Summary | Commit |
-|---------------|------------|------|---------|--------|
-| _V8.43 and earlier_ | 2026-07-25 | — | Full history through the V8.44 baseline reset — see `BUGS_PRE_V8_44_ARCHIVE.md` | V8.44 |
-
-### Closed 2026-07-27 — crossing stall + V8.44 rescue wedge
-
-### [2026-07-26] Other — Think I can safely say that this account and all downlines a…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Think I can safely say that this account and all downlines attached to this account haven't crossed even once and are stuck in T1.1 Matrix A... Now I'm seeing that I can upgrade to T5 and never had a self rescue on option to upgrade to T2...
-- **What was expected:** More movement at tier 1..
-- **Notes:** Seem like I have this issue of not crossing to other matrices from the last 2 upgraded versions... not sure if it's the wallet or bug...
-- **Submitted:** Sun, 26 Jul 2026 18:19:50 GMT
-- **RESOLVED 2026-07-27:** MatA rotation had stopped on every saturated pair. `TierRouter._sameTierTarget` and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold their comments describe as capacity, so a pair was excluded permanently once past it and its MatA lost all entry sources. Fixed live without a redeploy: pairExpansionThreshold 381->1000000 (8:25 PM EDT) and T1 route threshold + round-robin keeper (8:50 PM). T1.0 MatA verified climbing 254->263 at ~26 rotations/hr. Reporter was correct across three consecutive versions.
-
-### [2026-07-26] Other — Account haven't crossed from T1.1 matrix A to B. Not even a …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
-- **Frequency:** Consistent
-- **What happened:** Account haven't crossed from T1.1 matrix A to B. Not even a self rescue display.. Think the account has been stuck at this level for a while... now I'm seeing to approve for T5 and haven't even gotten to T2..
-- **What was expected:** To see crossing and rotations which aren't happening...
-- **Notes:** None of the other accounts has crossed as well
-- **Submitted:** Sun, 26 Jul 2026 18:11:58 GMT
-- **RESOLVED 2026-07-27:** MatA rotation had stopped on every saturated pair. `TierRouter._sameTierTarget` and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold their comments describe as capacity, so a pair was excluded permanently once past it and its MatA lost all entry sources. Fixed live without a redeploy: pairExpansionThreshold 381->1000000 (8:25 PM EDT) and T1 route threshold + round-robin keeper (8:50 PM). T1.0 MatA verified climbing 254->263 at ~26 rotations/hr. Reporter was correct across three consecutive versions.
-
-### [2026-07-26] Dashboard (index.html) — Crossing seems to have slowed as I'm been in T1.1 for some t…
-- **Reporter:** Sherwyn
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Crossing seems to have slowed as I'm been in T1.1 for some time and have noticed that T1.3 is opened. and still haven't crossed as yet...
-- **What was expected:** To have moved to matrix B..
-- **Notes:** May be I'm not understanding the crossing and opening of new tiers fully...
-- **Submitted:** Sun, 26 Jul 2026 13:21:13 GMT
-- **RESOLVED 2026-07-27:** MatA rotation had stopped on every saturated pair. `TierRouter._sameTierTarget` and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold their comments describe as capacity, so a pair was excluded permanently once past it and its MatA lost all entry sources. Fixed live without a redeploy: pairExpansionThreshold 381->1000000 (8:25 PM EDT) and T1 route threshold + round-robin keeper (8:50 PM). T1.0 MatA verified climbing 254->263 at ~26 rotations/hr. Reporter was correct across three consecutive versions.
-
-### [2026-07-26] Dashboard (index.html) — Just checking, it doesn't look like crossing over from one m…
-- **Reporter:** Sherwyn
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Just checking, it doesn't look like crossing over from one matrix to the other is working as ( for me), none of my 4 other accounts have crossed as yet and I've monitor it from since registering...
-- **What was expected:** To have moved to matrix B by now...
-- **Notes:** Not sure if it is that for the last 2 versions I did register late (after the 250 mark) but normally I'm within the first 100 - 150 and crossing is usually fast but these last few times it's been real long and nothing...
-- **Submitted:** Sun, 26 Jul 2026 13:15:03 GMT
-- **RESOLVED 2026-07-27:** MatA rotation had stopped on every saturated pair. `TierRouter._sameTierTarget` and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold their comments describe as capacity, so a pair was excluded permanently once past it and its MatA lost all entry sources. Fixed live without a redeploy: pairExpansionThreshold 381->1000000 (8:25 PM EDT) and T1 route threshold + round-robin keeper (8:50 PM). T1.0 MatA verified climbing 254->263 at ~26 rotations/hr. Reporter was correct across three consecutive versions.
-
-### [2026-07-26] Dashboard (index.html) — Self-recue failure. Transaction failed on-chain — hard-refre…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** Self-recue failure. Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To rescue this account.
-- **Submitted:** Sun, 26 Jul 2026 01:53:12 GMT
-- **RESOLVED 2026-07-26:** V8.44 nested-entry BFS corruption wedged the matrix (phantom seat 128, occupancy drift +44, position 1 emptied -> `F8V8: no root`). Self-rescue reverted for every affected member. Fixed by the V8.45 emergency redeploy at ~02:45 UTC; regression covered by `V8_45_NestedEntry.test.js` (N1/N2).
-
-### [2026-07-26] Dashboard (index.html) — Haven't crossed over from T1 .1 Matrix A to B as yet, not ev…
-- **Reporter:** Sherwyn
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Haven't crossed over from T1 .1 Matrix A to B as yet, not even once and neither has my other accounts as well. Seems like they have stuck and have been in this position from since registrations were at 398 or so.
-- **What was expected:** To have at least moved to matrix B and rotated..
-- **Notes:** Never saw any of the other versions take this long to move through the matrix.
-- **Submitted:** Sun, 26 Jul 2026 01:35:36 GMT
-- **RESOLVED 2026-07-27:** MatA rotation had stopped on every saturated pair. `TierRouter._sameTierTarget` and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold their comments describe as capacity, so a pair was excluded permanently once past it and its MatA lost all entry sources. Fixed live without a redeploy: pairExpansionThreshold 381->1000000 (8:25 PM EDT) and T1 route threshold + round-robin keeper (8:50 PM). T1.0 MatA verified climbing 254->263 at ~26 rotations/hr. Reporter was correct across three consecutive versions.
-
-### [2026-07-26] Dashboard (index.html) — i am not able to self rescue.
-there is usdc and eth in walle…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
-- **Frequency:** Consistent
-- **What happened:** i am not able to self rescue.
-there is usdc and eth in wallet.
-usdc is approved but when self rescue is clicked it says hard refresh and try again. it is happening on all wslleys beside the main.
-Also not able to refresh so restarted phone but same result.
-- **What was expected:** to be able to self rescue on all although i dont want to upgrade except on main account.
-- **Submitted:** Sun, 26 Jul 2026 00:34:57 GMT
-- **RESOLVED 2026-07-26:** V8.44 nested-entry BFS corruption wedged the matrix (phantom seat 128, occupancy drift +44, position 1 emptied -> `F8V8: no root`). Self-rescue reverted for every affected member. Fixed by the V8.45 emergency redeploy at ~02:45 UTC; regression covered by `V8_45_NestedEntry.test.js` (N1/N2).
-
-### [2026-07-25] Dashboard (index.html) — Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) an…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** To self-rescue this account.
-- **Submitted:** Sat, 25 Jul 2026 23:59:47 GMT
-- **RESOLVED 2026-07-26:** V8.44 nested-entry BFS corruption wedged the matrix (phantom seat 128, occupancy drift +44, position 1 emptied -> `F8V8: no root`). Self-rescue reverted for every affected member. Fixed by the V8.45 emergency redeploy at ~02:45 UTC; regression covered by `V8_45_NestedEntry.test.js` (N1/N2).
-
-### [2026-07-25] Dashboard (index.html) — The self-rescue fails.
- Transaction failed on-chain — hard-r…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x145805e87ce365ad6c2636b8f6e10b6550f3dc2a
-- **Frequency:** Consistent
-- **What happened:** The self-rescue fails.
- Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** Re-entry for this account.
-- **Submitted:** Sat, 25 Jul 2026 23:54:45 GMT
-- **RESOLVED 2026-07-26:** V8.44 nested-entry BFS corruption wedged the matrix (phantom seat 128, occupancy drift +44, position 1 emptied -> `F8V8: no root`). Self-rescue reverted for every affected member. Fixed by the V8.45 emergency redeploy at ~02:45 UTC; regression covered by `V8_45_NestedEntry.test.js` (N1/N2).
-
-### [2026-07-29] Total Withdrawn under-reported — matrices counted by balance instead of history
-- **Reporter:** Owner, mid-call
-- **Page:** Dashboard (index.html:4613 and :5546)
-- **What happened:** Withdrew ~$1,000 and "Total Withdrawn" barely moved.
-- **Root cause:** `totalWithdrawn` and `totalEarned` are **per-matrix** fields, so the headline is a SUM over an enumerated set — and the filter admitted a commission-only matrix only while `withdrawable > 0`. A tier drained to zero then fails both limbs (never joined, no balance), so **the act of claiming the money removed the record of the claim.** Measured on 0xe8Ad7bbA: ten such matrices held $1,651.00 of history; dashboard showed $296.50 against a true $1,947.50.
-- **STATUS 2026-07-29 — FIXED, commit ce6c734, live on admin.** Filter now tests history: `withdrawable > 0 || totalWithdrawn > 0 || totalEarned > 0`, at BOTH sites (the dashboard loop and the breakdown modal — the in-code comment already warned they must match, which is the only reason the second was found). Members will see Total Withdrawn and Total Earned INCREASE.
-- **Note:** this fix is why the $52.50 above became visible. The remaining $52.50 gap is the contract bug, not this one.
-
-### [2026-07-27] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below. Using bug report because none of the above worked...
-- **What was expected:** To be reentered..
-- **Notes:** Not sure why re-enter matrix and not self rescue...
-- **Submitted:** Mon, 27 Jul 2026 20:01:59 GMT
-- **FIXED 2026-07-27 (commit c7916c8, live on all branches):** the **Re-Enter Matrix** button carried a static `gasLimit: 800_000`. `register()` into a full MatA triggers a rotation cascade — measured at production size the same day at **5,127,660 gas** for a peak entry during rotation — so the transaction ran out of gas and reverted. Out-of-gas carries no custom error, so the custom-error decoding shipped earlier that day had nothing to decode and fell through to the generic "Transaction failed on-chain" message he quoted. **Same class as his own 2026-07-24 find** (Upgrade Tier hardcoded at 2M). Now on the estimateGas ladder used by self-rescue (est +30%, capped at 15M). Swept the rest of index.html: every other static gas limit is on a cheap non-cascading call.
-- **SECOND FINDING — his auto re-entry is OFF.** `member_history.js` on this wallet shows two cycle-outs recorded as `PARKED (autoReentry disabled)`. He expected automatic re-entry; the contract was following his settings. This is exactly @Koach100's report — the toggle silently changes every future cycle-out — and the confirmation dialog shipped 2026-07-27 (38605d7) exists to prevent it. It bit Sherwyn before that warning existed. **He should be told directly**, or he will keep cycling out and stopping.
-- **THIRD FINDING — a tenth orphaned cycle-out.** Tx `0x462bf842b1b63afba13b4cbfef96b71d81d3639b786ded4ef311b3e72f7c4294`, block 44700243, T1.1 MatA cycle #2: `MemberCycledOut` with **no park, no cross, no event of any kind**. His four other cycle-outs all emitted something, including one from the same MatA under the same settings — so disabled auto re-entry does not explain it. Matches the silent-graduation signature (MatrixLogicLib:513 empty catch; V8.46-C fixes it, not yet deployed). **First graduation instance with a specific replayable tx hash** — forking Base Sepolia at that block and replaying with tracing would reveal what actually reverted, unknown since the first eight. That answer decides whether V8.46-B's depth guard is needed.
-
-### [2026-07-27] Dashboard (index.html) — Incomplete information. withdrawable card shows 1507.xx whil…
-- **Reporter:** Kira
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
-- **Frequency:** Consistent
-- **What happened:** Incomplete information. withdrawable card shows 1507.xx while the withdrawable breakdown does not reflect that.
-- **What was expected:** More details including referral income. without that it looks incomplete.
-- **Notes:** Add more details, income per tier, income from direct referrals, what is available for crossing each tier. that would help members understand better the balance that can be used per tier.
-- **Submitted:** Mon, 27 Jul 2026 17:15:10 GMT
-- **FIXED 2026-07-27 (commit 81a5793, on admin):** real bug, and the second half of Sherwyn's 2026-07-24 find. L1 upgrade commissions credit a sponsor's `withdrawable` in tier matrices they never joined, so `hasEverJoined` stays false there while a genuinely claimable balance accrues (allowed by the contract since V8.36). The dashboard CARD was fixed on the 24th to count those matrices; `_getAllMatrixMembers`, which feeds the breakdown modal, was not — it still filtered on `hasEverJoined` alone and silently dropped every commission-only tier. A heavy sponsor therefore saw a headline over $1,300 against a breakdown of $25 listing only the two tiers she personally joined. Both loops now apply the same filter, with a note on each that they must stay in step. Reproduced independently in the owner's own screenshots before fixing.
-- **STILL OPEN (feature, not defect):** her second request — referral income, income per tier, and what is available for crossing at each tier — is a larger addition to the breakdown modal and is tracked separately below.
-
-### [2026-07-27] Dashboard (index.html) — I am parked and but continue collected from directs, eventua…
-- **Reporter:** Kira
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
-- **Frequency:** Consistent
-- **What happened:** I am parked and but continue collected from directs, eventually I have enough to self rescue. I need to refresh the page to get the button active.
-- **What was expected:** It should be active like so no need to refresh page. It is easy to click refresh on desktop but mobile might be tricky.
-- **Notes:** Maybe add a refresh button next to the self rescue earning covers it button...
-- **Submitted:** Mon, 27 Jul 2026 14:16:04 GMT
-- **FIXED 2026-07-27 (commit 38605d7, on admin):** correct report — earnings arrive continuously while parked but the shortfall was only recalculated on a full page load, so the button stayed disabled until reload. Added a **Refresh balance** button plus a 30s auto-poll that runs only while the rescue panel is visible and stops once you are no longer parked. The status line now states whether earnings cover the fee or how much is still short. Her suggestion of a button beside the rescue control was adopted as-is.
-
-### [2026-07-27] Other — Enough funds in wallet to re-enter and upgrade hence I'm get…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Consistent
-- **What happened:** Enough funds in wallet to re-enter and upgrade hence I'm getting a popup saying to self rescue( T1.1) and also option to upgrade to T2..
-- **What was expected:** To be automatically re-entered and upgraded since enough funds are in the account and the auto buttons are enabled...
-- **Notes:** Will hold on self rescue for a while, so you can check the wallet to see what is happening before doing the rescue if you can't fix the issue without a complete system restart.
-- **Submitted:** Mon, 27 Jul 2026 13:43:54 GMT
-- **DIAGNOSED 2026-07-27 — working as designed, interface was misleading.** On-chain this wallet is SEATED in T1.1 MatA with **reserve $5.00 + withdrawable $3.85 = $8.85** against a $10 fee: short **$1.15 in-matrix**. Automatic re-entry and automatic upgrade can ONLY spend the crossing reserve plus earnings held inside the matrix. Wallet USDC is invisible to them and is only spent by a manual Self Rescue or Upgrade — so a funded wallet does not prevent parking. Options were all correct (autoReentry true, upgrade enabled). **UI fix (38605d7):** the rescue panel now shows *In-matrix total* and *Your wallet USDC* as separate rows, colours the in-matrix figure by whether it covers the fee, and explains that the two are different pots. Nothing to fix in the contract.
-
-### [2026-07-26] Dashboard (index.html) — T5 upgrade check failed — try again in a moment (RPC may be …
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
-- **Frequency:** Consistent
-- **What happened:** T5 upgrade check failed — try again in a moment (RPC may be busy
-- **What was expected:** To upgrade to tier 5.
-- **Submitted:** Sun, 26 Jul 2026 20:48:40 GMT
-- **DIAGNOSED 2026-07-27 -> Fix In Progress:** not an RPC fault. `bulkUpgrade` collects the TOTAL fee for every remaining tier in one `safeTransferFrom`; this wallet did not hold it. The real revert was OpenZeppelin `ERC20InsufficientBalance`, a custom error absent from the frontend ABI, so ethers returned reason=null and the UI fell back to "RPC may be busy". Fix `7b3c327` declares all 8 contract custom errors + the 2 ERC20 ones, decodes them with real figures, and checks balance/allowance before blaming the network. Closes when pushed.
-
-### [2026-07-26] Dashboard (index.html) — Could not upgrade bulk tiers.
-5 upgrade check failed — try a…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** Could not upgrade bulk tiers.
-5 upgrade check failed — try again in a moment (RPC may be busy).
-- **What was expected:** To upgrade to tier 5.
-- **Submitted:** Sun, 26 Jul 2026 19:40:25 GMT
-- **DIAGNOSED 2026-07-27 -> Fix In Progress:** not an RPC fault. `bulkUpgrade` collects the TOTAL fee for every remaining tier in one `safeTransferFrom`; this wallet did not hold it. The real revert was OpenZeppelin `ERC20InsufficientBalance`, a custom error absent from the frontend ABI, so ethers returned reason=null and the UI fell back to "RPC may be busy". Fix `7b3c327` declares all 8 contract custom errors + the 2 ERC20 ones, decodes them with real figures, and checks balance/allowance before blaming the network. Closes when pushed.
-
-### [2026-07-26] Dashboard (index.html) — System not upgrading bulk tiers.
-T5 upgrade check failed — t…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x185b19c7d3872692981568985b21ae6f7f6be2a4
-- **Frequency:** Consistent
-- **What happened:** System not upgrading bulk tiers.
-T5 upgrade check failed — try again in a moment (RPC may be busy).
-- **What was expected:** Upgrading to tier 5.
-- **Submitted:** Sun, 26 Jul 2026 19:34:46 GMT
-- **DIAGNOSED 2026-07-27 -> Fix In Progress:** not an RPC fault. `bulkUpgrade` collects the TOTAL fee for every remaining tier in one `safeTransferFrom`; this wallet did not hold it. The real revert was OpenZeppelin `ERC20InsufficientBalance`, a custom error absent from the frontend ABI, so ethers returned reason=null and the UI fell back to "RPC may be busy". Fix `7b3c327` declares all 8 contract custom errors + the 2 ERC20 ones, decodes them with real figures, and checks balance/allowance before blaming the network. Closes when pushed.
-
-### [2026-07-26] Bug Report Page — Back to dash board after submitting report takes you to home…
-- **Reporter:** Sherwyn
-- **Page:** Bug Report Page
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
-- **Frequency:** Consistent
-- **What happened:** Back to dash board after submitting report takes you to home page and not the dash board..
-- **What was expected:** Back to dash board as link states..
-- **Notes:** Know it may just be cosmetics and not a bug but just reporting..
-- **Submitted:** Sun, 26 Jul 2026 13:33:58 GMT
-- **FIX IN PROGRESS:** accepted, not yet shipped.
-
----
-
-## Mainnet-Prep Design Questions
-
-
-### [2026-07-30] Automation reserve at the top tier can exceed everything a member holds
-- **Found:** while diagnosing June's report, on Koach100's `0x1ca3316E`.
-- **Observation:** `TierRouter.reservedFor` returns **$20,000.00** for this member — auto re-entry + auto-upgrade + double seat priced at T10 — against a raw `withdrawable` of **$2,839.42** across all matrices. The reserve is roughly seven times the entire balance, so it can never be satisfied and nothing is released while automation stays on.
-- **The sharper question:** the member is at T10, the top tier. There is no T11 to upgrade into, yet the additive reserve still includes an auto-upgrade fee. `reservedFor` is additive (`TierRouter:1494`: `if(reentry) +=curFee; if(autoUpgrade) +=nextFee; if(double) +=curFee`) and appears not to test whether a next tier exists.
-- **STATUS 2026-07-30 — OPEN DESIGN QUESTION, not yet a confirmed bug.** Two things to settle before mainnet: (1) should the auto-upgrade component be dropped once a member is at the highest deployed tier; (2) at high tiers, is reserving three fees at once the right default, given it can lock a member out of withdrawing entirely. Neither is urgent on testnet — members can disable automation — but at mainnet fees this becomes the difference between accessible and inaccessible earnings.
-
-*Not bugs. Decide before mainnet.*
-
-### [2026-07-29] Pay-it-forward voucher gifting (community idea — Sherwyn)
-- **Proposal:** A new member gifts their initial $10 entry onward to the next joiner, chaining entries.
-- **STATUS 2026-07-29:** Owner agreed to test. Design questions before it can be built: does the gift create a referral relationship (and therefore an L1 commission path), or an unattributed entry? `register(address referrer)` requires a referrer, and `_credit` pays commission into the matrix where the entry lands — so a gifted entry with no sponsor needs an explicit rule. Coupon machinery already exists (`registerWithCoupon`, `routerCouponEntry`) and is the likely vehicle.
-
-### [2026-07-29] Syndicate / group account (community idea)
-- **Proposal:** A shared account funded by several members.
-- **STATUS 2026-07-29:** Discussed, not specified. Blocking question: the contract enforces one position per member per tier (`_requireNotSeated` / the V8.46 pair guard), and earnings credit a single address. A syndicate therefore needs off-chain custody or a wrapper contract, and the payout split is not something the matrix can express. Decide before mainnet — retro-fitting it would touch the entry path.
-
-### Exit penalty rate — confirm before mainnet
-- `exitSeat()` ships with **20%** of the released crossing reserve as the penalty
-  (DAO menu: 0 / 10 / 20 / 30 / 50%). Owner confirmed 20% for V8.44 testnet.
-- Revisit once members actually use it: too high reads as punitive, too low weakens the
-  crossing loop that funds everyone's payouts.
-
-### Deployer wallet for mainnet
-- V8.44 testnet deploys from `0xCd0Af6…`, which is EIP-7702 delegated (MetaMask stateless
-  delegator) — accepted on testnet for MockUSDC minting convenience.
-- **Mainnet requires a fresh, never-delegated deployer.** Do not carry the exception over.
-
----
-
+Moved to `archive/BUGS_RESOLVED_DETAIL.md` on 2026-07-30. The summary table above stays current; full per-report write-ups live there.

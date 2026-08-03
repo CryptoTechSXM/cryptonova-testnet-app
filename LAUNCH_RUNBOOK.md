@@ -46,7 +46,8 @@
 - [ ] Run `seed_w1.js` to place W1 at matrix position 1
 - [ ] Set parked grace: `node scripts/set_parked_grace.js 172800` (mainnet = 48h)
 - [ ] Register Chainlink Automation upkeep on mainnet registry and fund with LINK
-- [ ] Verify BaseScan contract verification passes
+- [ ] **Verify EVERY deployed contract on BaseScan** (`hardhat verify`; matrices need the `MatrixLogicLib` link) — an unverified contract is a top trigger for Blockaid's "malicious address/site" warning
+- [ ] **Submit the domain + new contract addresses to Blockaid** at report.blockaid.io/mistake (verify contracts FIRST, then appeal) — clears the "you'll lose your assets to a scammer" banner across every Blockaid-powered wallet (MetaMask, Coinbase, Rainbow)
 
 ### Frontend update (post-deploy)
 
@@ -67,6 +68,20 @@ Stage 3: git push origin admin:main --force      ← STOP — wait for leader si
 **NEVER push to `main` before `preview`. NEVER skip stages. NEVER push without explicit approval.**
 
 If Vercel ignores force-push: `git commit --allow-empty -m "trigger deploy"` then push again.
+
+## Timed launch-gate sequence (redeploy / relaunch)
+
+The maintenance gate in `index.html` (~:502) is **host-based**: `admin.*` is always open (so testing is never gated); `early.*` counts down to `EARLY_MS` then shows the coupon bypass; main counts down to `MAIN_MS` then opens. One `index.html` serves all three — set both epoch-ms constants + the two pill labels and it's ready.
+
+**Sequence (proven 2026-07-31 V8.46 redeploy):**
+1. Push the cutover to **admin** → verify + register test accounts on the new contracts (admin bypasses the gate, so you test the real build ungated).
+2. Take the live site offline at **midnight EDT**.
+3. Gate **PREVIEW (early.)** to open **9:00 AM EDT** — set `EARLY_MS`.
+4. Gate **MAIN** to open **10:00 AM EDT** — set `MAIN_MS`.
+5. **Prep the gate in admin's index.html now, but do NOT push to preview/main until midnight.** At midnight: `git push origin admin:preview --force` then `git push origin admin:main --force`.
+
+EDT = UTC-4 → 9 AM EDT = 13:00 UTC, 10 AM EDT = 14:00 UTC. Compute epoch-ms accordingly (e.g. Fri Jul 31 2026: EARLY_MS=1785502800000, MAIN_MS=1785506400000).
+
 
 ---
 
@@ -217,6 +232,7 @@ tail -5 index.html   # verify
 - **NEVER delete a Vercel project** — no undo, permanent data loss
 - **ALWAYS `npx hardhat run scripts/deploy_v8.js --network base`** — NEVER `node`
 - **ALWAYS commit addresses JSON immediately after deploy** — V8.29 was lost by skipping this
+- **ALWAYS verify contracts on BaseScan AND submit the domain to Blockaid (report.blockaid.io/mistake) after every deploy** — unverified contracts + fresh domains get flagged "malicious/scam" by MetaMask/Coinbase/Rainbow (all Blockaid) and members bail on the warning. Verify FIRST, then appeal.
 
 ## Git Lock Recovery
 
