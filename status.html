@@ -785,6 +785,7 @@
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
   let _lastRescueCount = null; // { count, lastTime }
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
+  let _lastParkedCount  = null; // hold last-good TOTAL parked count so a dropped read can't flash "all clear"
   let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
   let _lastTierData    = null; // full per-tier last-good — hold ALL tiers (not just T1) on a blipped read
   let _lastT1Tier     = null; // hold last-good T1 tier data so summary + row stay consistent
@@ -816,6 +817,8 @@
       if (_lastParkedStats.shortfall) setText('pk-shortfall', _lastParkedStats.shortfall);
       if (_lastParkedStats.capacity)  setText('pk-capacity',  _lastParkedStats.capacity);
     }
+    const _cpc = localStorage.getItem('cnova_st_parked_count');
+    if (_cpc !== null && _cpc !== '') _lastParkedCount = Number(_cpc);
   } catch(e) {}
 
   async function loadAll() {
@@ -934,11 +937,11 @@
       const [loanArrays, repayArrays] = await Promise.all([
         Promise.all(allMatAddrs.map(addr => {
           const c = new ethers.Contract(addr, MATRIX_ABI, provider);
-          return c.queryFilter(c.filters.RescueLoanIssued(), fromBlock, blk).catch(()=>[]);
+          return _retry(() => c.queryFilter(c.filters.RescueLoanIssued(), fromBlock, blk)).catch(()=>[]);
         })),
         Promise.all(allMatAddrs.map(addr => {
           const c = new ethers.Contract(addr, MATRIX_ABI, provider);
-          return c.queryFilter(c.filters.RescueDebtRepaid(), fromBlock, blk).catch(()=>[]);
+          return _retry(() => c.queryFilter(c.filters.RescueDebtRepaid(), fromBlock, blk)).catch(()=>[]);
         })),
       ]);
       const keeperRescueLogs = loanArrays.flat();
@@ -1069,9 +1072,16 @@
       const matA = allT1Pairs[0];   // active pair's MatA (for ENTRY_FEE lookup)
       const matB = allT1Pairs[1];   // active pair's MatB
 
-      // Keeper checks all parked members across all pairs — T1 + T2–T10
+      // Keeper checks all parked members across all pairs — T1 + T2–T10.
+      // Each getParkedCount is RETRIED. A single dropped read used to be caught to 0n, which
+      // silently undercounted the total — enough drops and this card falsely read "0 — all
+      // clear" while the keeper saw hundreds parked. A read that still fails after retries
+      // flips _parkedReadFail (it is NOT counted as a real 0); below we hold the last-good
+      // total rather than flash a false clear.
+      let _parkedReadFail = false;
+      const _pkRead = async (c) => { try { return await _retry(() => c.getParkedCount()); } catch (_) { _parkedReadFail = true; return 0n; } };
       const [parkedCounts, gracePeriod] = await Promise.all([
-        Promise.all(allT1Pairs.map(m => m.getParkedCount().catch(()=>0n))),
+        Promise.all(allT1Pairs.map(_pkRead)),
         keeper.parkedGracePeriod().catch(()=>0n),
       ]);
       const parkedCountA = parkedCounts[0] || 0n;
@@ -1095,14 +1105,18 @@
         if (!ADDRS[tk.matAKey]) return;
         const mcA = new ethers.Contract(ADDRS[tk.matAKey], MATRIX_ABI, provider);
         const mcB = new ethers.Contract(ADDRS[tk.matBKey], MATRIX_ABI, provider);
-        const [pkA, pkB] = await Promise.all([
-          mcA.getParkedCount().catch(()=>0n),
-          mcB.getParkedCount().catch(()=>0n),
-        ]);
+        const [pkA, pkB] = await Promise.all([ _pkRead(mcA), _pkRead(mcB) ]);
         const n = Number(pkA || 0n) + Number(pkB || 0n);
         if (n > 0) higherTierParked.push({ label: tk.label, n });
         count += n;
       }));
+
+      // Never show a falsely-low total off a partial read: if any read failed, hold the max
+      // of the live (undercounted) total and the last-good total. Only a live 0 with EVERY
+      // read succeeding is trusted as a genuine drain.
+      let _parkedHeld = false;
+      if (_parkedReadFail && _lastParkedCount !== null && _lastParkedCount > count) { count = _lastParkedCount; _parkedHeld = true; }
+      else if (!_parkedReadFail) { _lastParkedCount = count; try { localStorage.setItem('cnova_st_parked_count', String(count)); } catch(e){} }
 
       // Tier breakdown text
       const t1Count = parkedCounts.reduce((s,c)=>s+Number(c||0n),0);
@@ -1110,7 +1124,7 @@
       if (t1Count > 0) breakdownParts.push(`T1: ${t1Count}`);
       for (const ht of higherTierParked) breakdownParts.push(`${ht.label}: ${ht.n}`);
       const breakdownEl = document.getElementById('pk-tier-breakdown');
-      if (breakdownEl) breakdownEl.textContent = breakdownParts.length ? breakdownParts.join(' · ') : 'All clear';
+      if (breakdownEl) breakdownEl.textContent = breakdownParts.length ? breakdownParts.join(' · ') : (_parkedHeld ? 'Reads dropped — showing last-known total' : 'All clear');
       const graceSecs  = Number(gracePeriod);
       const nowSecs    = Math.floor(Date.now() / 1000);
 
