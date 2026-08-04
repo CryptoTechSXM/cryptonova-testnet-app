@@ -4664,6 +4664,12 @@ async function loadDashboardData() {
     // longer regress this value.
     const _reliableHighestTier = await retryRead(() => tr.memberHighestTier(userAddr));
     if (_reliableHighestTier.ok) highestTier = Number(_reliableHighestTier.value);
+    // Member option flags — read here so the "Cycled" rows below reflect the member's REAL
+    // doubleEntry setting instead of a hardcoded "Auto re-entry via Double Re-entry" claim.
+    // Verified on-chain 2026-08-03: auto-upgrade ON + doubleEntry OFF = advance-and-drop-old-seat.
+    let _memberDouble = false;
+    const _optRead = await retryRead(() => tr.getMemberInfo(userAddr));
+    if (_optRead.ok) { _memberDouble = Boolean(_optRead.value.doubleEntry); window._memberInfoCache = _optRead.value; }
 
     // Show loading placeholders while fetching
     ['dash-withdrawable','dash-total-earned','dash-cnova','dash-cnova-val','dash-cw-pool'].forEach(id => {
@@ -4997,9 +5003,16 @@ async function loadDashboardData() {
         posList.innerHTML = '<div class="info-row"><span class="info-key">Active Positions</span><span class="info-val" style="color:var(--text3)">—</span></div>';
       } else {
         // Graduated tiers — show a subtle row for each tier the member has left
-        const _gradRows = _graduatedTierNums.map(tNum =>
-          `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x2713; Graduated</span></span><span class="info-val" style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">Re-entry via Double Re-entry setting ↑</span></span></div>`
-        ).join('');
+        const _gradRows = _graduatedTierNums.map(tNum => {
+          // Truth, not a hardcoded claim: a tier shows "Cycled" only when the member holds NO
+          // seat there. With auto-upgrade on + doubleEntry off (the default) that is the CORRECT
+          // outcome — you advanced and did not keep the old seat. doubleEntry is the only flag
+          // that holds a lower tier while upgrading (verified on-chain 2026-08-03).
+          const _sub = _memberDouble
+            ? 'Double Reentry on — this tier isn\'t currently held'
+            : 'Advanced to your next tier · turn on Double Reentry to hold a tier while upgrading';
+          return `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x21BB; Cycled</span></span><span class="info-val" style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">${_sub}</span></span></div>`;
+        }).join('');
         posList.innerHTML = activePositions.map(p => {
           const bfsStr = p.bfsUnknown
             ? unknownBadge('Could not read matrix position — try refreshing.')
@@ -5512,12 +5525,21 @@ async function loadDashboardData() {
             const d  = await mc.rescueDebtOf(userAddr).catch(() => 0n);
             if (BigInt(d) === 0n) continue;
             const seated = await mc.isActiveInMatrix(userAddr).catch(() => null);
+            // For a matrix the member has LEFT, whether the stranded loan can still
+            // settle depends on any withdrawable remaining HERE (withdrawCore requires
+            // available > 0). Read it so the banner tells the truth in both cases.
+            let leftover = null;
+            if (seated === false) {
+              const _fw = await mc.freeWithdrawable(userAddr).catch(() => null);
+              leftover = _fw === null ? null : BigInt(_fw);
+            }
             totalDebt += BigInt(d);
             debts.push({
               label: `${t}.${i + 1} ${half}`,
               debt: BigInt(d),
               // null = the read failed; say so rather than guessing either way.
               seated,
+              leftover,
             });
           }
         }
@@ -5533,11 +5555,14 @@ async function loadDashboardData() {
                 <strong>repays itself</strong> when you cycle out. Filling spots faster brings that forward.</div>`;
             }
             if (d.seated === false) {
+              const _tail = d.leftover === null
+                ? `We couldn't read your leftover balance here — refresh to see whether it can settle.`
+                : d.leftover > 0n
+                  ? `Because you still hold <strong>${fmt6(d.leftover)}</strong> here, your next withdrawal settles it automatically from that balance — use <strong>Withdraw All</strong> to sweep every matrix at once.`
+                  : `There's no balance left here to draw from, so the Stability Fund currently carries it.`;
               return `<div style="margin-top:4px">• ${d.label} — ${amt}. <strong>You have moved on from this
-                matrix</strong>, so it cannot clear on its own: the loan only repays from earnings inside the
-                matrix that holds it. Rotating in other tiers will not touch it. A contract update is coming
-                that settles it from your next withdrawal. Nothing is owed by you in the meantime and no
-                position is affected.</div>`;
+                matrix</strong>, so it won't clear from new earnings. ${_tail} Nothing is owed by you — it's a
+                Stability-Fund advance, not a personal debt — and no position is affected.</div>`;
             }
             return `<div style="margin-top:4px">• ${d.label} — ${amt}. Could not read your seat status here,
               so we cannot say whether it will clear automatically. Try a refresh.</div>`;
@@ -6556,19 +6581,42 @@ async function getMatrixForTier() {
   return tier[side] || tier.matA; // fall back to hardcoded if PM call fails
 }
 
-// Fetch posToMember in chunks to avoid RPC in-flight limit
+// Fetch posToMember for all n seats. The old version fired 127 individual reads in
+// chunks of 20 and caught EVERY failure to ethers.ZeroAddress — which renderF8Tree then
+// drew as an EMPTY seat. Under RPC burst, ~40 reads got shed, so a FULL 127/127 matrix
+// showed dozens of "#NN" holes. Fix: batch them through Multicall3 (one call, nothing to
+// shed), retry any stragglers, and return `undefined` (not ZeroAddress) for a seat we
+// genuinely could not read — so the tree can distinguish "empty" from "couldn't load".
 async function fetchNodes(mc, n) {
-  const CHUNK = 20;
-  const results = [];
-  for (let i = 0; i < n; i += CHUNK) {
-    const end = Math.min(i + CHUNK, n);
-    const chunk = await Promise.all(
-      Array.from({length: end - i}, (_, j) => mc.posToMember(i + j + 1).catch(() => ethers.ZeroAddress))
-    );
-    results.push(...chunk);
-    if (end < n) await new Promise(r => setTimeout(r, 150));
+  const rp     = mc.runner;
+  const iface  = mc.interface;
+  const target = mc.target;
+  const out    = new Array(n).fill(undefined);
+  // Pass 1 — Multicall3 aggregate3, chunked so calldata stays modest.
+  try {
+    const m3 = new ethers.Contract(MULTICALL3_ADDR, MULTICALL3_ABI, rp);
+    const MC_CHUNK = 100;
+    for (let i = 0; i < n; i += MC_CHUNK) {
+      const end = Math.min(i + MC_CHUNK, n);
+      const calls = [];
+      for (let s = i; s < end; s++) calls.push({ target, allowFailure: true, callData: iface.encodeFunctionData('posToMember', [s + 1]) });
+      const rr = await retryRead(() => m3.aggregate3(calls));
+      if (!rr.ok) continue; // leave this chunk unknown; pass 2 fills it
+      rr.value.forEach((r, k) => {
+        if (r.success && r.returnData && r.returnData !== '0x') {
+          try { out[i + k] = iface.decodeFunctionResult('posToMember', r.returnData)[0]; } catch (_) { /* leave undefined */ }
+        }
+      });
+    }
+  } catch (_) { /* fall through to pass 2 */ }
+  // Pass 2 — any seat still unknown gets a direct retry. Only a truly unreadable seat
+  // stays `undefined`; renderF8Tree draws those as "loading", never as empty.
+  for (let i = 0; i < n; i++) {
+    if (out[i] !== undefined) continue;
+    const rr = await retryRead(() => mc.posToMember(i + 1));
+    if (rr.ok) out[i] = rr.value;
   }
-  return results;
+  return out;
 }
 
 // Graduated tier re-entry — calls manualUpgrade(tierIdx) for a tier the member
