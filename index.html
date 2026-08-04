@@ -4664,6 +4664,12 @@ async function loadDashboardData() {
     // longer regress this value.
     const _reliableHighestTier = await retryRead(() => tr.memberHighestTier(userAddr));
     if (_reliableHighestTier.ok) highestTier = Number(_reliableHighestTier.value);
+    // Member option flags — read here so the "Cycled" rows below reflect the member's REAL
+    // doubleEntry setting instead of a hardcoded "Auto re-entry via Double Re-entry" claim.
+    // Verified on-chain 2026-08-03: auto-upgrade ON + doubleEntry OFF = advance-and-drop-old-seat.
+    let _memberDouble = false;
+    const _optRead = await retryRead(() => tr.getMemberInfo(userAddr));
+    if (_optRead.ok) { _memberDouble = Boolean(_optRead.value.doubleEntry); window._memberInfoCache = _optRead.value; }
 
     // Show loading placeholders while fetching
     ['dash-withdrawable','dash-total-earned','dash-cnova','dash-cnova-val','dash-cw-pool'].forEach(id => {
@@ -4997,9 +5003,16 @@ async function loadDashboardData() {
         posList.innerHTML = '<div class="info-row"><span class="info-key">Active Positions</span><span class="info-val" style="color:var(--text3)">—</span></div>';
       } else {
         // Graduated tiers — show a subtle row for each tier the member has left
-        const _gradRows = _graduatedTierNums.map(tNum =>
-          `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x21BB; Cycled</span></span><span class="info-val" style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">Auto re-entry via Double Re-entry setting ↑</span></span></div>`
-        ).join('');
+        const _gradRows = _graduatedTierNums.map(tNum => {
+          // Truth, not a hardcoded claim: a tier shows "Cycled" only when the member holds NO
+          // seat there. With auto-upgrade on + doubleEntry off (the default) that is the CORRECT
+          // outcome — you advanced and did not keep the old seat. doubleEntry is the only flag
+          // that holds a lower tier while upgrading (verified on-chain 2026-08-03).
+          const _sub = _memberDouble
+            ? 'Double Reentry on — this tier isn\'t currently held'
+            : 'Advanced to your next tier · turn on Double Reentry to hold a tier while upgrading';
+          return `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x21BB; Cycled</span></span><span class="info-val" style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">${_sub}</span></span></div>`;
+        }).join('');
         posList.innerHTML = activePositions.map(p => {
           const bfsStr = p.bfsUnknown
             ? unknownBadge('Could not read matrix position — try refreshing.')
