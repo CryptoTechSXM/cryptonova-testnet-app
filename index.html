@@ -5004,14 +5004,15 @@ async function loadDashboardData() {
       } else {
         // Graduated tiers — show a subtle row for each tier the member has left
         const _gradRows = _graduatedTierNums.map(tNum => {
-          // Truth, not a hardcoded claim: a tier shows "Cycled" only when the member holds NO
-          // seat there. With auto-upgrade on + doubleEntry off (the default) that is the CORRECT
-          // outcome — you advanced and did not keep the old seat. doubleEntry is the only flag
-          // that holds a lower tier while upgrading (verified on-chain 2026-08-03).
-          const _sub = _memberDouble
-            ? 'Double Reentry on — this tier isn\'t currently held'
-            : 'Advanced to your next tier · turn on Double Reentry to hold a tier while upgrading';
-          return `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle">&#x21BB; Cycled</span></span><span class="info-val" style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">${_sub}</span></span></div>`;
+          // Short visible label + ⓘ tooltip so the row stays one line like the others (a long
+          // sentence here wrapped and broke the layout). doubleEntry is the only flag that holds a
+          // lower tier while upgrading; with it off (default) a "Cycled" tier is correct — you
+          // advanced and did not keep the old seat (verified on-chain 2026-08-03).
+          const _sub = _memberDouble ? 'Not currently held' : 'Advanced to next tier';
+          const _tip = _memberDouble
+            ? 'Double Reentry is on, but this tier is not currently held.'
+            : 'You advanced to your next tier. Turn on Double Reentry to hold a tier while upgrading.';
+          return `<div class="info-row" style="margin-top:2px"><span class="info-key" style="color:var(--text3)">T${tNum} Matrix <span style="font-size:10px;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle;white-space:nowrap">&#x21BB; Cycled</span></span><span class="info-val" style="display:flex;align-items:center;gap:4px"><span title="${_tip}" style="font-size:11px;color:var(--text3);cursor:help;white-space:nowrap">${_sub} &#9432;</span></span></div>`;
         }).join('');
         posList.innerHTML = activePositions.map(p => {
           const bfsStr = p.bfsUnknown
@@ -5556,13 +5557,13 @@ async function loadDashboardData() {
             }
             if (d.seated === false) {
               const _tail = d.leftover === null
-                ? `We couldn't read your leftover balance here — refresh to see whether it can settle.`
+                ? `We couldn't read your leftover balance here — refresh to check whether it settles now.`
                 : d.leftover > 0n
-                  ? `Because you still hold <strong>${fmt6(d.leftover)}</strong> here, your next withdrawal settles it automatically from that balance — use <strong>Withdraw All</strong> to sweep every matrix at once.`
-                  : `There's no balance left here to draw from, so the Stability Fund currently carries it.`;
+                  ? `You still hold <strong>${fmt6(d.leftover)}</strong> here, so your next withdrawal clears it from that balance — use <strong>Withdraw All</strong> to sweep every matrix at once.`
+                  : `There's no balance left here to auto-settle it yet, so the Stability Fund is covering it for now — the advance stays recorded against your account and will be recovered from your future earnings until it's repaid.`;
               return `<div style="margin-top:4px">• ${d.label} — ${amt}. <strong>You have moved on from this
-                matrix</strong>, so it won't clear from new earnings. ${_tail} Nothing is owed by you — it's a
-                Stability-Fund advance, not a personal debt — and no position is affected.</div>`;
+                matrix</strong>, so it won't clear from new earnings. ${_tail} This is a Stability-Fund advance
+                you're expected to repay — no position is affected in the meantime.</div>`;
             }
             return `<div style="margin-top:4px">• ${d.label} — ${amt}. Could not read your seat status here,
               so we cannot say whether it will clear automatically. Try a refresh.</div>`;
