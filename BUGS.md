@@ -49,18 +49,6 @@
 - **Submitted:** Mon, 03 Aug 2026 22:11:28 GMT
 
 
-### [2026-08-03] Other — The matrix tree view is not loading.
-- **Reporter:** @Koach100
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x2444f367f023872804d99d6f5dae906d19d5977f
-- **Frequency:** Intermittent
-- **What happened:** The matrix tree view is not loading.
-- **What was expected:** I expected it to load.
-- **Notes:** This message popped up.
-Error: missing revert data (action="call", data=null, reason=null, transaction={ "data": "0xb0482fd9", "to": "0xA2a749173fE3307
-- **Submitted:** Mon, 03 Aug 2026 14:40:52 GMT
-
 
 ### [2026-08-03] Dashboard (index.html) — I disabled auto upgrade and my income lessened by about $200…
 - **Reporter:** @Koach100
@@ -72,16 +60,6 @@ Error: missing revert data (action="call", data=null, reason=null, transaction={
 - **What was expected:** I expect the opposite to happen.
 - **Submitted:** Mon, 03 Aug 2026 14:26:13 GMT
 
-
-### [2026-08-03] Dashboard (index.html) — There is more than enough USDC in my wallet however I am get…
-- **Reporter:** Barbara
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xf657a95268f395f855eae0f8f57741c080a1cf25
-- **Frequency:** Consistent
-- **What happened:** There is more than enough USDC in my wallet however I am getting an error message when I do self rescue that I do not have enough. Does the self rescue have to come from matrix earnings?
-- **What was expected:** I do not know.
-- **Submitted:** Mon, 03 Aug 2026 13:17:04 GMT
 
 
 ### [2026-08-03] Dashboard (index.html) — this morning all of my 8 accounts are saying no active posit…
@@ -118,17 +96,6 @@ When the self rescue window pops up and I click to do so It does not execute the
 - **What was expected:** To see my CNova Balance.
 - **Submitted:** Mon, 03 Aug 2026 01:48:46 GMT
 
-
-### [2026-08-03] Other — It looks like every refresh displays the amount you have in …
-- **Reporter:** sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
-- **Frequency:** Consistent
-- **What happened:** It looks like every refresh displays the amount you have in each tier so depending on how many tiers you're in you need to refresh that number of times until you get to the end and then your total amount earned will show.. so self rescue if you need to may not show up until you refresh and get to that tier..
-- **What was expected:** One refresh and all info is displayed...
-- **Notes:** This is what I am seeing which can be a bit confusing and annoying since you're not sure of the status..
-- **Submitted:** Mon, 03 Aug 2026 01:36:49 GMT
 
 
 ### [2026-08-02] Dashboard (index.html) — I'm currently upgraded to tier 3. i have all three automatio…
@@ -237,59 +204,8 @@ I am unable to register any account
 - **Submitted:** Thu, 30 Jul 2026 19:36:33 GMT
 
 
-### [2026-07-30] Buy CNOVA (buy.html) — I tried upgrading from T1 to T2 but was unable to do so.
-- **Reporter:** @Koach100
-- **Page:** Buy CNOVA (buy.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x56a832cc5f2617c08e6484c2b04d971edc1ec57f
-- **Frequency:** Consistent
-- **What happened:** I tried upgrading from T1 to T2 but was unable to do so.
-- **What was expected:** I should have been able to upgrade.
-- **Notes:** Here's the message that popped up.
- This upgrade is currently too large for the network to process (needs ~15.8M gas, the chain's limit is ~17.8M). Nothing was sent and nothing was charged. This happens when entering a tier sets off a long chain of matrix rotations — it clears on its own as those settle. Please try again shortly, and let us know if it persists.
-- **Submitted:** Thu, 30 Jul 2026 18:23:02 GMT
-- **STATUS 2026-07-30 — DUPLICATE of the gas ticket below ("upgrade too large for the network", 4 reports consolidated).** Same bimodal cascade gas: a T1→T2 upgrade that lands on the entry filling a MatA triggers a long rotation chain (~15.8M) against the ~17.8M ceiling; a quiet entry is ~13M. The frontend behaved correctly — it refused the doomed tx and told him nothing was sent/charged (gas guard working on buy.html too). **Workaround = retry** (T2 turns over constantly, so a second attempt usually lands in the cheaper mode). **Permanent fix = V8.46 item 3 (cascade depth cap, BUILT, GREEN)** — closes on deploy. No new work.
 
 
-### [2026-07-30] Dashboard (index.html) — this account is upgraded all the way to T10.
-T2 has graduate…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** this account is upgraded all the way to T10.
-T2 has graduated a couple days ago and has not reentered T2.
-it says the reserve is 20,000 .
-this or none of my other accounts have assets to claim or withdraw.
-this account has 4 direct referrals and 4 second level referrals.
-- **What was expected:** reentry into T3 by now.
-i am supprised about the quantity of reserve.
-to be able to have some withdrawable assets.
-- **Submitted:** Thu, 30 Jul 2026 16:07:01 GMT
-- **DIAGNOSIS 2026-07-30 (on-chain, wallet 0x79470c63) — NOT A BUG; working as designed, wording owed.** Read live off V8.45: highestTier **T10**, `reservedFor` **$20,000.00**, T10 fee $10,000, autoUpgrade **OFF**, autoReentry **ON**, doubleReentry **ON**. The reserve is exactly re-entry ($10,000) + double ($10,000); auto-upgrade contributes $0. **The "phantom fee to upgrade past T10" suspicion from the 29th is DISPROVEN** — `reservedFor` (TierRouter:1667) sets `nextFee = (nextIdx < MAX_TIERS) ? tierEntryFees[nextIdx] : 0`, so the top tier reserves nothing for a non-existent next tier (guard added V8.19, commit 36cde38 — live in V8.45). His "no withdrawable" is earnings committed to those two seats, not lost. **Member fix:** turn OFF double re-entry to free $10,000 (keeps single re-entry); turn OFF auto re-entry to free the other $10,000 (then parks at cycle-out). "T2 hasn't re-entered" is separate — the graduate-vs-re-enter item below, not the reserve. **Frontend owed:** itemise the reserve box ("Auto re-entry $10,000 · Double re-entry $10,000 — turn a toggle off to free it") instead of a bare $20,000. No contract change.
-
-
-### [2026-07-30] Dashboard (index.html) — "upgrade too large for the network" / "gas limit too high" (4 reports consolidated)
-- **Reporter:** Maximum_71 (wallets 0x99b52ee9, 0x7010ad1e, 0xde580069, 0x18750a2c)
-- **Page:** Dashboard (index.html) — upgrade / re-entry
-- **What happened:** Upgrades quote ~15-17M gas against the chain's ~17.8M ceiling and refuse ("too large for the network" / "gas limit too high" / "transaction failed").
-- **Diagnosis:** Bimodal upgrade gas — an entry that triggers a long rotation cascade costs ~18M, a quiet one ~13M; which you get depends on the second you press. **Retrying usually lands in the cheaper mode and succeeds.**
-- **STATUS 2026-07-30 — KNOWN, workaround = retry.** Permanent fix is the cascade depth cap, **V8.46 item 3 (BUILT, GREEN)** — closes on the V8.46 deploy. (Consolidated from 4 separate Maximum_71 reports the same morning.)
-
-### [2026-07-29] FUND LOSS — entering a tier where you already hold commission DESTROYS the balance
-- **Reporter:** Owner (0xe8Ad7bbA), spotted as "withdrew $1k twice but Total Withdrawn is wrong"
-- **Page:** Contract — `MatrixLogicLib._register` (:313-345). Not a frontend bug.
-- **Severity:** HIGHEST open item. **This is the only known bug that can delete money a member already owns.** V8.46 item 8; ship before Thursday/Friday's funded push.
-- **What happened:** Two $1,000 withdrawals. The wallet received **$1,970.00** (= $2,000 x 0.985 after the 1.5% fee), but the dashboard totalled **$1,947.50** — short exactly **$52.50**.
-- **Diagnosis (proven, not inferred):** Sixteen USDC payouts reconciled against the per-matrix ledgers (`wallet_inflow.js`); fifteen matched to the cent. T3.1 MatA paid $51.71 net with `totalWithdrawn` reading $0.00. The receipt (`tx_decode.js` on `0xb11eee58`) shows `withdrawPartial(uint256)` with arg **$52.50**, and BOTH `WithdrawalFeeCharged $0.79` and `EarningsWithdrawn $51.71`, status SUCCESS — so the counter WAS incremented at `withdrawCore:996`. It was zeroed afterwards: withdrawal at block 44796516 (~21:40 UTC), **`joinedAt` now 23:30:02 UTC, nearly two hours later.**
-- **Root cause:** `_register` treats `!hasEverJoined` as "no record exists" and builds a **fresh struct** (`withdrawable: 0, totalEarned: 0, totalWithdrawn: 0, crossingReserve: 0`). But the flag really means "never took a seat here", and two paths write real values without setting it: `_credit` (:928) credits referral commission into the matrix where **your DOWNLINE** entered, and `withdrawCore` gates on `withdrawable > 0` rather than membership, so a commission-only holder can withdraw too. Entering that tier later therefore overwrites live balances and history with zero. The USDC stays in the matrix as unattributed surplus with no claim against it.
-- **Why only one of sixteen:** T3.1 MatA is the only commission-only matrix this member subsequently entered for real.
-- **The owner escaped fund loss by ordering alone** — he had already withdrawn, so `withdrawable` was $0 when the reset landed. Entering first would have DELETED the $52.50 rather than merely unrecording it.
-- **Exposure:** anyone with `hasEverJoined == false && withdrawable > 0` in any matrix. Since `_credit` targets uplines, that is "every member whose direct went higher than they did" — most leaders. Detector to build: `credit_at_risk.js`.
-- **Interim mitigation if V8.46 slips: withdraw BEFORE upgrading.** A withdrawn balance cannot be erased; only the (log-reconstructible) history is lost.
-- **STATUS 2026-07-29 — DIAGNOSED, fix + 5 tests specified in `V8_46_PLAN.md` item 8.** Fix is a field-wise update instead of a struct construction; lives in `MatrixLogicLib`, which is LINKED not embedded, so it costs the factory no bytecode.
-- **Already-destroyed values are not recoverable from state.** They can be rebuilt from logs (`EarningsWithdrawn` for `totalWithdrawn`). No member is owed USDC from this instance — the money was paid out before the reset.
 
 
 ### [2026-07-29] Auto-upgrade — fails despite sufficient earnings (community call)
@@ -312,11 +228,6 @@ to be able to have some withdrawable assets.
 - **What happened:** With Double Re-entry enabled, accounts never graduate — they stay in continuous cycles.
 - **STATUS 2026-07-29 — OPEN, mechanism plausible from source.** `_executeAdditive` step 3 (`doubleOn && anySeat && escrow + withdrawable >= curFee`) spends a SECOND `curFee` in the current tier after the re-entry has already taken one. A member with double enabled therefore consumes on two same-tier seats the funds that would otherwise have covered `nextFee` and moved them up. If that is the whole story it is working as designed and mis-explained to members — but it needs confirming against a real wallet before we say so.
 
-
-### [2026-07-29] Rescue loan cannot repay once the member leaves that matrix — V8.46 item 7
-- **Reporter:** Community call (Sherwyn's $1.68) + owner (0xe8Ad7bbA)
-- **What happened:** A rescue loan stays outstanding through many Tier 1 rotations.
-- **STATUS 2026-07-29 — DIAGNOSED, fix specified in `V8_46_PLAN.md` item 7.** `rescueDebt` is per-matrix and clears only from a pool share in that matrix (`_settlePool:450`, gated by `if (share == 0) return;`) or a cycle-out from it (`_cycleOutRoot:548`, needs `withdrawable > 0`). A member who has moved on triggers neither, so rotating elsewhere cannot touch it. `rescueRepayBps` is 10,000 (100%) — not a rate problem. Measured on 0xe8Ad7bbA: T1.1 MatA $2.07 and T2.1 MatA $2.75 outstanding, with **$35.00 withdrawable sitting in that same T2.1 MatA** and `withdrawCore` never reading `rescueDebt`. One deduction in `withdrawCore` fixes it.
 
 
 ### [2026-07-29] Rescue panel vanishes silently when a rescue completes
@@ -390,6 +301,14 @@ to be able to have some withdrawable assets.
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-03 | 2026-08-04 | Other | Matrix tree view not loading — seat reads batched via Multicall3 + retry, no more dropped/empty · @Koach100 | multicall3 |
+| 2026-08-03 | 2026-08-04 | Other | Refresh showed one tier at a time — dashboard now reads one consistent snapshot · sherwyn | 8bd752e |
+| 2026-08-03 | 2026-08-04 | Dashboard (index.html) | Self-rescue 'not enough' with funded wallet — by design: reserve+earnings then wallet shortfall (needs Approve first); dashboard names the exact shortfall · Barbara | working-as-designed |
+| 2026-07-30 | 2026-08-04 | Buy CNOVA (buy.html) | Upgrade T1->T2 'too large for the network' — V8.46 cascade-depth cap · @Koach100 | V8.46 |
+| 2026-07-30 | 2026-08-04 | Dashboard (index.html) | 'Upgrade too large / gas limit too high' (4 consolidated) — V8.46 cascade-depth cap · Maximum_71 | V8.46 |
+| 2026-07-30 | 2026-08-04 | Dashboard (index.html) | T10 reserve $20k / no withdrawable — by design: re-entry $10k + double $10k · CryptoJan22 | working-as-designed |
+| 2026-07-29 | 2026-08-04 | Dashboard (index.html) | Rescue loan couldn't repay after leaving a matrix — V8.46 item 7 settles on withdraw (verified on-chain) · Sherwyn/owner | V8.46 |
+| 2026-07-29 | 2026-08-04 | Contract — MatrixLogicLib | FUND LOSS: balance overwrite on re-entry — V8.46 item 8 (verified live) · owner | V8.46 |
 | 2026-07-30 | 2026-07-30 | Dashboard (index.html) | T4.1 re-entry BLOCKED at T10 — working as designed: holds both halves, clears on cycle-out, nothing owed · Maximum_71 | working-as-designed |
 | 2026-07-30 | 2026-07-30 | Other | T4.1 re-entry BLOCKED at T10 — working as designed: holds both halves, clears on cycle-out, nothing owed · bugbounty | working-as-designed |
 | 2026-07-29 | 2026-07-30 | Dashboard (index.html) | Auto-upgrade appeared to need funds in the destination tier - working as designed, wording owed · Community call | `member_ledger` |
