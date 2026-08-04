@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-04] Other — Still not in matrix, hard refresh didn't bring up any prompt…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
+- **Frequency:** Consistent
+- **What happened:** Still not in matrix, hard refresh didn't bring up any prompt to allow me back into the matrix.. I'm still at T1...
+- **What was expected:** To see some sort of prompt or option to be allowed back into T1...
+- **Notes:** May be I should upgrade to the next tier?
+- **Submitted:** Tue, 04 Aug 2026 10:00:17 GMT
+
+
 ### [2026-08-03] Other — Active position doesn't show a number and under my position …
 - **Reporter:** Sherwyn
 - **Page:** Other
