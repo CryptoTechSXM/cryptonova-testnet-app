@@ -5560,7 +5560,7 @@ async function loadDashboardData() {
                 ? `We couldn't read your leftover balance here — refresh to check whether it settles now.`
                 : d.leftover > 0n
                   ? `You still hold <strong>${fmt6(d.leftover)}</strong> here, so your next withdrawal clears it from that balance — use <strong>Withdraw All</strong> to sweep every matrix at once.`
-                  : `There's no balance left here to auto-settle it yet, so the Stability Fund is covering it for now — the advance stays recorded against your account and will be recovered from your future earnings until it's repaid.`;
+                  : `There's no balance left here to auto-settle it yet, so the Stability Fund is covering it for now — the advance stays recorded against your account and will be recovered from your future earnings until it's repaid. <span style="font-size:10px;background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.35);padding:1px 6px;border-radius:10px;white-space:nowrap">🔧 Fix coming in V8.47</span>`;
               return `<div style="margin-top:4px">• ${d.label} — ${amt}. <strong>You have moved on from this
                 matrix</strong>, so it won't clear from new earnings. ${_tail} This is a Stability-Fund advance
                 you're expected to repay — no position is affected in the meantime.</div>`;
