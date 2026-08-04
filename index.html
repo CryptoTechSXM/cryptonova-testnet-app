@@ -2404,6 +2404,26 @@ function unknownBadge(tooltip) {
   return `<span title="${tooltip}" style="color:var(--yellow);cursor:help">⚠ retry</span>`;
 }
 
+// Paint the member-option toggles (Auto Upgrade / Auto Reentry / Double Reentry) from a
+// getMemberInfo result. Called EARLY from the cached read so the panel populates on first
+// paint instead of sitting blank ("—") until the main read lands (the "needs a refresh to
+// populate" issue), and again authoritatively when the main read resolves.
+function _paintMemberToggles(info) {
+  if (!info) return;
+  window._memberOptions = {
+    disableUpgrade: !Boolean(info.autoUpgradeEnabled),
+    enableReentry:  Boolean(info.autoReentryEnabled),
+    enableDouble:   Boolean(info.doubleEntry),
+  };
+  const _set = (chkId, lblId, on) => {
+    const chk = document.getElementById(chkId); if (chk) chk.checked = Boolean(on);
+    const lbl = document.getElementById(lblId); if (lbl) lbl.textContent = on ? 'Enabled' : 'Disabled';
+  };
+  _set('chk-double-reentry', 'lbl-double-reentry', info.doubleEntry);
+  _set('chk-auto-upgrade',   'lbl-auto-upgrade',   info.autoUpgradeEnabled);
+  _set('chk-auto-reentry',   'lbl-auto-reentry',   info.autoReentryEnabled);
+}
+
 function fmt6(raw) {
   // Format a raw 6-decimal USDC value (BigInt or number) as a dollar string
   const n = Number(typeof raw === 'bigint' ? raw : BigInt(raw || 0)) / 1e6;
@@ -4669,7 +4689,7 @@ async function loadDashboardData() {
     // Verified on-chain 2026-08-03: auto-upgrade ON + doubleEntry OFF = advance-and-drop-old-seat.
     let _memberDouble = false;
     const _optRead = await retryRead(() => tr.getMemberInfo(userAddr));
-    if (_optRead.ok) { _memberDouble = Boolean(_optRead.value.doubleEntry); window._memberInfoCache = _optRead.value; }
+    if (_optRead.ok) { _memberDouble = Boolean(_optRead.value.doubleEntry); window._memberInfoCache = _optRead.value; _paintMemberToggles(_optRead.value); }
 
     // Show loading placeholders while fetching
     ['dash-withdrawable','dash-total-earned','dash-cnova','dash-cnova-val','dash-cw-pool'].forEach(id => {
