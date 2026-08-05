@@ -504,10 +504,10 @@
       if (h === 'admin.cryptonova.ai' || h === 'admin.crypto-nova.app' || h.startsWith('admin.')) {
         document.getElementById('maintenance-gate').remove(); return;
       }
-      var isEarly = h.indexOf('early.') !== -1;
+      var isEarly = h.indexOf('early.') !== -1 || h.indexOf('preview.') !== -1; // preview QA rides the coupon gate (V8.47)
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1785502800000; // V8.47 preview — Fri Jul 31 2026 9:00 AM EDT
+        var EARLY_MS = 1785934800000; // V8.47 preview — Wed Aug 5 2026 9:00 AM EDT
         var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.47 Early Access — Opening 9:00 AM EDT';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.47 — Fresh Matrix Relaunch';
@@ -533,7 +533,7 @@
       } else {
         // Main site countdown
         var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.47 — Opening 10:00 AM EDT';
-        var MAIN_MS  = 1785506400000; // V8.47 go-live — Fri Jul 31 2026 10:00 AM EDT
+        var MAIN_MS  = 1785938400000; // V8.47 go-live — Wed Aug 5 2026 10:00 AM EDT
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
@@ -6708,6 +6708,8 @@ async function setDoubleReentryOption(enabled) {
       : 'Disabled';
     toast(enabled ? '✅ Double reentry enabled' : 'Double reentry disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
+    setTimeout(function(){ try { loadDashboardData(); } catch(_) {} }, 4000);  // pool nodes can lag the tx block — re-read so reserve/withdrawable settle without a manual refresh
+    setTimeout(function(){ try { loadDashboardData(); } catch(_) {} }, 12000);
   } catch(e) {
     window._optsPinnedUntil = 0; // tx failed/declined - let live state repaint
     if (chk) chk.checked = !enabled;
@@ -6741,6 +6743,8 @@ async function setAutoUpgradeOption(enabled) {
     if (lbl) lbl.textContent = enabled ? 'Enabled' : 'Disabled';
     toast(enabled ? '✅ Auto-upgrade enabled' : 'Auto-upgrade disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
+    setTimeout(function(){ try { loadDashboardData(); } catch(_) {} }, 4000);  // pool nodes can lag the tx block — re-read so reserve/withdrawable settle without a manual refresh
+    setTimeout(function(){ try { loadDashboardData(); } catch(_) {} }, 12000);
   } catch(e) {
     window._optsPinnedUntil = 0; // tx failed/declined - let live state repaint
     if (chk) chk.checked = !enabled;
@@ -6792,6 +6796,8 @@ async function setAutoReentryOption(enabled) {
     if (lbl) lbl.textContent = enabled ? 'Enabled' : 'Disabled';
     toast(enabled ? '✅ Auto-reentry enabled' : 'Auto-reentry disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
+    setTimeout(function(){ try { loadDashboardData(); } catch(_) {} }, 4000);  // pool nodes can lag the tx block — re-read so reserve/withdrawable settle without a manual refresh
+    setTimeout(function(){ try { loadDashboardData(); } catch(_) {} }, 12000);
   } catch(e) {
     window._optsPinnedUntil = 0; // tx failed/declined - let live state repaint
     if (chk) chk.checked = !enabled;
