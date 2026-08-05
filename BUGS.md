@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Withdrew all my CNova tokens but was testing the unlock button after I withdrew and got the error of fail on chain error and hard reset...
+- **What was expected:** A message that states that all CNova tokens had already been withdrawn or no CNova token found or some thing to that effect and not a fail error message...
+- **Notes:** May be a rewording of the message so it doesn't look like a system failure ...
+- **Submitted:** Wed, 05 Aug 2026 02:14:00 GMT
+
+
 ### [2026-08-05] Other — When disabling the auto reentry, upgrade or double re entry …
 - **Reporter:** Sherwyn
 - **Page:** Other
