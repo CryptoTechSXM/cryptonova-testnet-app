@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-05] Comp Plan (compensation.html) — Have one level 2 person already signed up and commissions no…
+- **Reporter:** Sherwyn
+- **Page:** Comp Plan (compensation.html)
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Have one level 2 person already signed up and commissions not showing in this account under Total earned...
+- **What was expected:** Have 3 directs and one of them have one direct. Expected to at least see $2.02 in the Total Earned area of this account, only $1.75 showing.
+- **Notes:** 3 Directs and my self = 3 x.5 + .25, .27 for level 2 not added..
+- **Submitted:** Wed, 05 Aug 2026 14:27:41 GMT
+
+
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
