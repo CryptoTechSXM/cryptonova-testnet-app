@@ -2431,6 +2431,7 @@ function _paintMemberToggles(info) {
     enableReentry:  Boolean(info.autoReentryEnabled),
     enableDouble:   Boolean(info.doubleEntry),
   };
+  try { if (typeof userAddr !== 'undefined' && userAddr) localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
   _set('chk-double-reentry', 'lbl-double-reentry', info.doubleEntry);
   _set('chk-auto-upgrade',   'lbl-auto-upgrade',   info.autoUpgradeEnabled);
   _set('chk-auto-reentry',   'lbl-auto-reentry',   info.autoReentryEnabled);
@@ -5390,28 +5391,11 @@ async function loadDashboardData() {
       const _infoRead = await retryRead(() => tr.getMemberInfo(userAddr));
       if (!_infoRead.ok) throw new Error('getMemberInfo unavailable');
       const info = _infoRead.value;
-      window._memberOptions = {
-        disableUpgrade: !Boolean(info.autoUpgradeEnabled),
-        enableReentry:  Boolean(info.autoReentryEnabled),
-        enableDouble:   Boolean(info.doubleEntry),
-      };
-      // Persist authoritative on-chain values to localStorage
-      try { localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
-      // Double reentry
-      const chkDbl = document.getElementById('chk-double-reentry');
-      const lblDbl = document.getElementById('lbl-double-reentry');
-      if (chkDbl) chkDbl.checked = Boolean(info.doubleEntry);
-      if (lblDbl) lblDbl.textContent = info.doubleEntry ? 'Enabled' : 'Disabled';
-      // Auto-upgrade
-      const chkUp = document.getElementById('chk-auto-upgrade');
-      const lblUp = document.getElementById('lbl-auto-upgrade');
-      if (chkUp) chkUp.checked = Boolean(info.autoUpgradeEnabled);
-      if (lblUp) lblUp.textContent = info.autoUpgradeEnabled ? 'Enabled' : 'Disabled';
-      // Auto-reentry
-      const chkRe = document.getElementById('chk-auto-reentry');
-      const lblRe = document.getElementById('lbl-auto-reentry');
-      if (chkRe) chkRe.checked = Boolean(info.autoReentryEnabled);
-      if (lblRe) lblRe.textContent = info.autoReentryEnabled ? 'Enabled' : 'Disabled';
+      // V8.47 two-click bug: ALL toggle painting goes through _paintMemberToggles,
+      // which honors the post-tx pin — this block used to set the checkboxes (and
+      // localStorage) directly, so a lagging pool read repainted stale state right
+      // after a member's toggle tx and forced a second (paid) click.
+      _paintMemberToggles(info);
     } catch(_) {}
 
     // ── Protocol Reserve — lock automation fees so members aren't surprised ──
@@ -6710,6 +6694,7 @@ async function setDoubleReentryOption(enabled) {
   }
   const prevLabel = lbl ? lbl.textContent : '';
   if (lbl) lbl.textContent = 'Saving…';
+  window._optsPinnedUntil = Date.now() + 120000; // pin from click: a refresh already in flight must not repaint stale state
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
     const tx = await tr.setDoubleEntry(enabled, { gasLimit: 120_000 });
@@ -6724,6 +6709,7 @@ async function setDoubleReentryOption(enabled) {
     toast(enabled ? '✅ Double reentry enabled' : 'Double reentry disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
   } catch(e) {
+    window._optsPinnedUntil = 0; // tx failed/declined - let live state repaint
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled — second entry fires when surplus covers fee');
     toast(friendlyError(e), 'error');
@@ -6740,6 +6726,7 @@ async function setAutoUpgradeOption(enabled) {
   }
   const prevLabel = lbl ? lbl.textContent : '';
   if (lbl) lbl.textContent = 'Saving…';
+  window._optsPinnedUntil = Date.now() + 120000; // pin from click: a refresh already in flight must not repaint stale state
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
     const opts = window._memberOptions || { disableUpgrade: false, enableReentry: false, enableDouble: false };
@@ -6755,6 +6742,7 @@ async function setAutoUpgradeOption(enabled) {
     toast(enabled ? '✅ Auto-upgrade enabled' : 'Auto-upgrade disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
   } catch(e) {
+    window._optsPinnedUntil = 0; // tx failed/declined - let live state repaint
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
     toast(friendlyError(e), 'error');
@@ -6790,6 +6778,7 @@ async function setAutoReentryOption(enabled) {
   }
   const prevLabel = lbl ? lbl.textContent : '';
   if (lbl) lbl.textContent = 'Saving…';
+  window._optsPinnedUntil = Date.now() + 120000; // pin from click: a refresh already in flight must not repaint stale state
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
     const opts = window._memberOptions || { disableUpgrade: false, enableReentry: false, enableDouble: false };
@@ -6804,6 +6793,7 @@ async function setAutoReentryOption(enabled) {
     toast(enabled ? '✅ Auto-reentry enabled' : 'Auto-reentry disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
   } catch(e) {
+    window._optsPinnedUntil = 0; // tx failed/declined - let live state repaint
     if (chk) chk.checked = !enabled;
     if (lbl) lbl.textContent = prevLabel || (enabled ? 'Disabled' : 'Enabled');
     toast(friendlyError(e), 'error');
