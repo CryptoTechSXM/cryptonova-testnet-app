@@ -1,0 +1,4 @@
+
+# device-VM cannot delete files - parked-for-deletion folders + scratch snapshots stay out of git
+_to_delete*/
+_bugs_snapshot*.md

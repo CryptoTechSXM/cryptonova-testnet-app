@@ -9,9 +9,9 @@ import { ethers } from 'ethers';
 
 const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const TIER_ROUTER       = '0xFB6928d9C50401633041b41b016Cf7ffCAB0492E'; // V8.41
-const CNOVA_TOKEN       = '0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8'; // V8.41
-const CNOVA_TREASURY    = '0x66adadd761D43591589f891bE63006359B8E6156'; // V8.41 — floorPrice() lives here
+const TIER_ROUTER       = '0xE93A931b6C01f120962169a533614d1cC7b0AC9e'; // V8.41
+const CNOVA_TOKEN       = '0x7c2D4F0eeF81D708baB8Ba283326C4e370dc96fC'; // V8.41
+const CNOVA_TREASURY    = '0x40AA5502da96a83697053861D7D4Bd6425fEf2dD'; // V8.41 — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -41,7 +41,7 @@ Decentralized matrix platform on Base blockchain. Members pay USDC to join a bin
 
 <b>LAUNCH DATE POLICY (updated 2026-07-23):</b> The mainnet soft launch date is <b>to be determined</b> — it opens when testing proves the system ready, not on a calendar date. No more moving target dates. The <b>official flagship launch is June 19, 2027 (Juneteenth)</b> at cryptonova.ai — that date stands. Meanwhile the FULL experience is live today on testnet at crypto-nova.app (zero risk, every mainnet mechanic). If members ask "when is mainnet?": soft launch = when it's ready (announced in advance); flagship = June 19, 2027.
 
-## The Matrix System (verified from contract, V8.46)
+## The Matrix System (verified from contract, V8.47)
 Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)</b> — each a 127-seat, 7-level BFS queue. They form a figure-eight: MatA is phase 1, MatB is phase 2 of one full journey.
 
 1. You join a tier and take the next open seat in <b>MatA</b>. You hold <b>one seat</b> per registration — MatA or MatB, never both.
@@ -55,7 +55,7 @@ Key nuances:
 - Do not promise upgrade after exactly one fill or after MatA alone.
 - <b>Exception — Double Entry (see below):</b> a member with Double Entry enabled holds two simultaneous registrations, each progressing independently through MatA→MatB.
 
-## Compensation Plan (verified from contract, V8.46)
+## Compensation Plan (verified from contract, V8.47)
 Every entry fee, at every tier, splits identically:
 - <b>50% crossing reserve</b> — held for the member; pre-funds HALF of their MatA→MatB crossing (the crossing costs the full entry fee; earnings cover the rest).
 - <b>2.5% instant earn</b> — credited to withdrawable the moment they register.
@@ -155,7 +155,7 @@ Withdrawable, Total Earned, CNOVA Balance, CNOVA Value, CNOVA Burned, Community 
 ## Withdrawals
 1.5% fee deducted. Instant to Base Sepolia wallet. Can also redeem CNOVA for USDC.
 
-## Upgrades, Re-entry & Rescue (verified from contract, V8.46)
+## Upgrades, Re-entry & Rescue (verified from contract, V8.47)
 At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out funds in priority order: <b>re-entry → next-tier upgrade → double seat</b>. Each step fires only if the remaining funds cover its fee; otherwise it is silently skipped.
 - Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles, double OFF. Change anytime via Dashboard toggles (Member Options). Each enabled toggle holds back its fee from withdrawals so your automation stays funded.
 - Fees come from your in-contract funds (crossing reserve + withdrawable) — NOT from your external wallet. Not free — it comes from earnings.
@@ -166,7 +166,7 @@ At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out fund
   3. <b>coPayRescue</b> — keeper-driven StabilityFund co-pay for eligible cases; any SF loan portion is repaid gradually from future pool shares.
 - Long-idle parked seats can be cleared by the keeper (slot cleared): tier status and earnings preserved; rejoin by paying the re-entry fee.
 - Saturated pairs (381+ cumulative entries) automatically route ALL overflow — new entries, re-entries, self-rescues — into the next pair's MatA.
-- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy EARLY as a standby buffer — the factory fires when the previous pair reaches 375 cumulative entries OR its MatB hits 90% occupancy, whichever comes first. The new pair then stays empty until the previous pair fully saturates at 381 cumulative entries — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.46 anti-freeze buffer).
+- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy EARLY as a standby buffer — the factory fires when the previous pair reaches 375 cumulative entries OR its MatB hits 90% occupancy, whichever comes first. The new pair then stays empty until the previous pair fully saturates at 381 cumulative entries — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.47 anti-freeze buffer).
 - Do NOT say upgrade is free. Do NOT describe rescue as a loan by default — self-rescue is debt-free.
 
 ## Network Setup (Base Sepolia)
@@ -190,10 +190,10 @@ The referral system is fully live in the smart contracts.
 - On mainnet, members who use a referral link will show the referrer's wallet address. Members who register directly will always show "Direct" — permanently.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
-## Contracts (Base Sepolia — V8.46)
-TierRouter: <code>0xFB6928d9C50401633041b41b016Cf7ffCAB0492E</code>
-MatrixKeeper: <code>0xf87956a9d7705bC604FD47a614598a4829426FF6</code>
-CNOVA Token: <code>0x4Cd94e8Bce8E3154A1c75758bC4bA505397ff5d8</code>
+## Contracts (Base Sepolia — V8.47)
+TierRouter: <code>0xE93A931b6C01f120962169a533614d1cC7b0AC9e</code>
+MatrixKeeper: <code>0x07DCaDDEB71a130764e477B29f1401ACC73aCa19</code>
+CNOVA Token: <code>0x7c2D4F0eeF81D708baB8Ba283326C4e370dc96fC</code>
 USDC: <code>0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
 
 ## Links
