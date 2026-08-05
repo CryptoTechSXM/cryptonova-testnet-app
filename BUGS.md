@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-05] Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance on t…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Intermittent
+- **What happened:** In prep to withdraw my earnings , i checked the balance on the dashboard. In the available for withdrawal  section it $287.83. When clicked withdraw all the amount that populated the space was $152.23
+The amount deposited into my wallet was $302.63 the withdrawn amount on the dashboard was a few dollars more.
+- **What was expected:** I expect for their to be less disparity in the numbers.
+- **Submitted:** Wed, 05 Aug 2026 01:23:20 GMT
+
+
 ### [2026-08-04] Other — Still not in matrix, hard refresh didn't bring up any prompt…
 - **Reporter:** Sherwyn
 - **Page:** Other
