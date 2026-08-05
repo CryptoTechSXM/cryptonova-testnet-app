@@ -2410,14 +2410,26 @@ function unknownBadge(tooltip) {
 // populate" issue), and again authoritatively when the main read resolves.
 function _paintMemberToggles(info) {
   if (!info) return;
+  const _set = (chkId, lblId, on) => {
+    const chk = document.getElementById(chkId); if (chk) chk.checked = Boolean(on);
+    const lbl = document.getElementById(lblId); if (lbl) lbl.textContent = on ? 'Enabled' : 'Disabled';
+  };
+  // V8.47 (bug: "toggles need two clicks"): right after a member's own toggle tx,
+  // a read served by a pool node one block behind repaints the OLD state — the tick
+  // reverts, the member clicks again and pays gas for a no-op. After a confirmed
+  // toggle tx we PIN the locally-known state for 45s and ignore chain reads for
+  // these three fields; the normal refresh takes over once the pool has caught up.
+  if (window._optsPinnedUntil && Date.now() < window._optsPinnedUntil && window._memberOptions) {
+    const po = window._memberOptions;
+    _set('chk-double-reentry', 'lbl-double-reentry', po.enableDouble);
+    _set('chk-auto-upgrade',   'lbl-auto-upgrade',   !po.disableUpgrade);
+    _set('chk-auto-reentry',   'lbl-auto-reentry',   po.enableReentry);
+    return;
+  }
   window._memberOptions = {
     disableUpgrade: !Boolean(info.autoUpgradeEnabled),
     enableReentry:  Boolean(info.autoReentryEnabled),
     enableDouble:   Boolean(info.doubleEntry),
-  };
-  const _set = (chkId, lblId, on) => {
-    const chk = document.getElementById(chkId); if (chk) chk.checked = Boolean(on);
-    const lbl = document.getElementById(lblId); if (lbl) lbl.textContent = on ? 'Enabled' : 'Disabled';
   };
   _set('chk-double-reentry', 'lbl-double-reentry', info.doubleEntry);
   _set('chk-auto-upgrade',   'lbl-auto-upgrade',   info.autoUpgradeEnabled);
@@ -6705,6 +6717,7 @@ async function setDoubleReentryOption(enabled) {
     await tx.wait();
     if (window._memberOptions) window._memberOptions.enableDouble = enabled;
     try { if (userAddr) localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
+    window._optsPinnedUntil = Date.now() + 45000; // pin vs stale pool reads (two-click bug)
     if (lbl) lbl.textContent = enabled
       ? 'Enabled — second entry fires when surplus covers fee'
       : 'Disabled';
@@ -6737,6 +6750,7 @@ async function setAutoUpgradeOption(enabled) {
     opts.disableUpgrade = !enabled;
     window._memberOptions = opts;
     try { if (userAddr) localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
+    window._optsPinnedUntil = Date.now() + 45000; // pin vs stale pool reads (two-click bug)
     if (lbl) lbl.textContent = enabled ? 'Enabled' : 'Disabled';
     toast(enabled ? '✅ Auto-upgrade enabled' : 'Auto-upgrade disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state
@@ -6785,6 +6799,7 @@ async function setAutoReentryOption(enabled) {
     await tx.wait();
     window._memberOptions = opts;
     try { if (userAddr) localStorage.setItem('cnova_opts_' + userAddr, JSON.stringify(window._memberOptions)); } catch(_) {}
+    window._optsPinnedUntil = Date.now() + 45000; // pin vs stale pool reads (two-click bug)
     if (lbl) lbl.textContent = enabled ? 'Enabled' : 'Disabled';
     toast(enabled ? '✅ Auto-reentry enabled' : 'Auto-reentry disabled', 'success');
     try { loadDashboardData(); } catch(_) {} // recompute reserved amount for new toggle state

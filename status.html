@@ -215,9 +215,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.34 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.47 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.34 is live — reentrancy fix, 100% rescue repayment &amp; proposal fee.<br>Opening in:
+      V8.47 is live — rescue debt now follows the member (repayable advance) + community share doubled.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -241,7 +241,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.34 Testnet</span>
+    <span id="gate-pill-label">V8.47 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -259,13 +259,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.34 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.47 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.34 Testnet — Opens 2PM EDT';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.47 Testnet — Opens 10 AM EDT';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -535,7 +535,7 @@
           <span class="detail-key" data-i18n="statusPage.row_rescue_capacity_est">Rescue capacity (est.)</span>
           <span class="detail-val" id="sf-rescue-cap">—</span>
         </div>
-        <div class="detail-section">SF Rescue Activity (V8.34)</div>
+        <div class="detail-section">SF Rescue Activity (V8.47)</div>
         <div class="detail-row">
           <span class="detail-key">Total loans issued</span>
           <span class="detail-val" id="sf-loans-issued">—</span>
@@ -794,7 +794,7 @@
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
     if (localStorage.getItem('cnova_st_ver') !== 'v8.47') {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_loans_v8_32']
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_loans_v8_32','cnova_loans_v8_46']
         .forEach(function(k){ localStorage.removeItem(k); });
       localStorage.setItem('cnova_st_ver','v8.47');
     }
@@ -1601,7 +1601,7 @@
       // Scans MAX 3 chunks (6000 blocks ~1.5hrs) per poll to avoid rate limits.
       // History builds up gradually across polls. localStorage preserves totals.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_46'; // bump suffix to reset on logic change
+        const LOAN_KEY        = 'cnova_loans_v8_47'; // bump suffix on EVERY redeploy + add the old key to the cache-buster list above
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
 
