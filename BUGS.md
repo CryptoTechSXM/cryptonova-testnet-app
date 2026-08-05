@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-05] Other — When disabling the auto reentry, upgrade or double re entry …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** When disabling the auto reentry, upgrade or double re entry buttons, I'm being force to do it 2 times as on the first attempt the green tick goes away but comes back immediately causing me to do it a second time... happens on every button and every account...
+- **What was expected:** To do it once as I believe every interaction with the smart contract requires fees... I know the fees are small but should this action be required to be performed twice?
+- **Notes:** Happened on all the accounts..
+- **Submitted:** Wed, 05 Aug 2026 02:06:56 GMT
+
+
 ### [2026-08-05] Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance on t…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
