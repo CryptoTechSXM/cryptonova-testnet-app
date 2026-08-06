@@ -37,6 +37,33 @@
 
 ## Open Issues
 
+### [2026-08-06] Dashboard (index.html) — 1. Dash Board Page Incorrect information
+⚙ Protocol Reserve …
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xfd01b470e1c4035e672b2b96d23e6cca1c748dd7
+- **Frequency:** Consistent
+- **What happened:** 1. Dash Board Page Incorrect information
+⚙ Protocol Reserve Active
+• Auto re-entry: $10.00
+• Auto-upgrade to next tier: $25.00
+• Double entry · second seat: $10.00
+Total reserved: $45.00 — held for your automation settings
+
+2. 🎉 Upgraded to T2! Refreshing your dashboard…
+- this is displayed after upgrade but the page just hangs.
+
+3. The same hanging occurs when the self rescue occurs and I needed to do a manual refresh.
+- **What was expected:** 1. Auto Upgrade should either show 50$ or 50$ plus 25$ to reflect the tiers to auto upgrade.
+2. In previous versions the page would auto refresh after the upgrade.
+3. In previous versions the page would auto refresh after self rescue.
+- **Notes:** Changed my wallet so reporting from this new wallet.
+
+Kira!
+- **Submitted:** Thu, 06 Aug 2026 01:26:22 GMT
+
+
 ### [2026-08-05] Comp Plan (compensation.html) — Have one level 2 person already signed up and commissions no…
 - **Reporter:** Sherwyn
 - **Page:** Comp Plan (compensation.html)
