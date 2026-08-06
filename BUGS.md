@@ -37,57 +37,6 @@
 
 ## Open Issues
 
-### [2026-08-06] Other — "Incorrect amount displayed" - Just upgraded to T2 and notic…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** "Incorrect amount displayed" - Just upgraded to T2 and notice that while the withdrawable tab shows the correct amount held in reserves by the system, the below tab which shows the breakdown, has the "auto-upgrade" amount as $25.00 which should be showing $50.00 as that's the amount to T3, the total amount displayed in the tab is also correct but not adding up because the auto-upgrade amount is not correct...
-- **What was expected:** Correct breakdown calculation...
-- **Notes:** Haven't upgraded to any other tiers so don't know if this is just for T2 or if the other tiers will show the correct amount... I know this may not be a bug but just cosmetics...
-- **Submitted:** Thu, 06 Aug 2026 10:53:31 GMT
-
-
-### [2026-08-06] Dashboard (index.html) — 1. Dash Board Page Incorrect information
-⚙ Protocol Reserve …
-- **Reporter:** Kira
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xfd01b470e1c4035e672b2b96d23e6cca1c748dd7
-- **Frequency:** Consistent
-- **What happened:** 1. Dash Board Page Incorrect information
-⚙ Protocol Reserve Active
-• Auto re-entry: $10.00
-• Auto-upgrade to next tier: $25.00
-• Double entry · second seat: $10.00
-Total reserved: $45.00 — held for your automation settings
-
-2. 🎉 Upgraded to T2! Refreshing your dashboard…
-- this is displayed after upgrade but the page just hangs.
-
-3. The same hanging occurs when the self rescue occurs and I needed to do a manual refresh.
-- **What was expected:** 1. Auto Upgrade should either show 50$ or 50$ plus 25$ to reflect the tiers to auto upgrade.
-2. In previous versions the page would auto refresh after the upgrade.
-3. In previous versions the page would auto refresh after self rescue.
-- **Notes:** Changed my wallet so reporting from this new wallet.
-
-Kira!
-- **Submitted:** Thu, 06 Aug 2026 01:26:22 GMT
-
-
-### [2026-08-05] Comp Plan (compensation.html) — Have one level 2 person already signed up and commissions no…
-- **Reporter:** Sherwyn
-- **Page:** Comp Plan (compensation.html)
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Have one level 2 person already signed up and commissions not showing in this account under Total earned...
-- **What was expected:** Have 3 directs and one of them have one direct. Expected to at least see $2.02 in the Total Earned area of this account, only $1.75 showing.
-- **Notes:** 3 Directs and my self = 3 x.5 + .25, .27 for level 2 not added..
-- **Submitted:** Wed, 05 Aug 2026 14:27:41 GMT
-
-
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
@@ -100,18 +49,6 @@ Kira!
 - **Submitted:** Wed, 05 Aug 2026 02:14:00 GMT
 
 
-### [2026-08-05] Other — When disabling the auto reentry, upgrade or double re entry …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** When disabling the auto reentry, upgrade or double re entry buttons, I'm being force to do it 2 times as on the first attempt the green tick goes away but comes back immediately causing me to do it a second time... happens on every button and every account...
-- **What was expected:** To do it once as I believe every interaction with the smart contract requires fees... I know the fees are small but should this action be required to be performed twice?
-- **Notes:** Happened on all the accounts..
-- **Submitted:** Wed, 05 Aug 2026 02:06:56 GMT
-
-
 ### [2026-08-05] Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance on t…
 - **Reporter:** @Koach100
 - **Page:** Dashboard (index.html)
@@ -122,211 +59,6 @@ Kira!
 The amount deposited into my wallet was $302.63 the withdrawn amount on the dashboard was a few dollars more.
 - **What was expected:** I expect for their to be less disparity in the numbers.
 - **Submitted:** Wed, 05 Aug 2026 01:23:20 GMT
-
-
-### [2026-08-04] Other — Still not in matrix, hard refresh didn't bring up any prompt…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x50c8426e34c14859dcbf361f80e9b5d3412780e0
-- **Frequency:** Consistent
-- **What happened:** Still not in matrix, hard refresh didn't bring up any prompt to allow me back into the matrix.. I'm still at T1...
-- **What was expected:** To see some sort of prompt or option to be allowed back into T1...
-- **Notes:** May be I should upgrade to the next tier?
-- **Submitted:** Tue, 04 Aug 2026 10:00:17 GMT
-
-
-### [2026-08-03] Other — Active position doesn't show a number and under my position …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x774481dac8584cfafb5b6b6fad883787b343c573
-- **Frequency:** Consistent
-- **What happened:** Active position doesn't show a number and under my position on the Matrix tab it is saying I'm not in the matrix.. There is no prompt that appears on the screen to self rescue, approve funds or anything. Hard refresh didn't solve the issue.. still not giving me away back into the matrix...
-- **What was expected:** Some sort of message or prompt to get back into the matrix or let you know that you've been put out of the matrix..
-- **Notes:** Happening on 2 of my accounts...
-- **Submitted:** Mon, 03 Aug 2026 22:11:28 GMT
-
-
-
-### [2026-08-03] Dashboard (index.html) — I disabled auto upgrade and my income lessened by about $200…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
-- **Frequency:** Intermittent
-- **What happened:** I disabled auto upgrade and my income lessened by about $200 and 4 tiers graduated even the ones that has not even made a complete cycle.
-- **What was expected:** I expect the opposite to happen.
-- **Submitted:** Mon, 03 Aug 2026 14:26:13 GMT
-
-
-
-### [2026-08-03] Dashboard (index.html) — this morning all of my 8 accounts are saying no active posit…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** this morning all of my 8 accounts are saying no active positions and there is no self rescue option.
-- **What was expected:** to be able to self rescue and get back in.
-- **Submitted:** Mon, 03 Aug 2026 11:39:29 GMT
-
-
-### [2026-08-03] Dashboard (index.html) — I have upgraded this account to tier 5. It's showing tiers t…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x5d6ca88ac287579c8d8660c881302bad6bf0d2f2
-- **Frequency:** Intermittent
-- **What happened:** I have upgraded this account to tier 5. It's showing tiers that have not completed a cycle as graduated. Tiers 3 - 5 sometimes 4 and 5.
-Sometimes it says no active position.
-When the self rescue window pops up and I click to do so It does not execute the rescue and the window disappears.
-- **What was expected:** I expect the info to be consistent. I expect to cycle on all tiers until I disable the automation.
-- **Submitted:** Mon, 03 Aug 2026 02:02:23 GMT
-
-
-### [2026-08-03] Dashboard (index.html) — After a refresh, the CNova Balance is not showing.... 000 Ba…
-- **Reporter:** @Lavern_Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x46cc052b2eb70f869b8ceae6f217d475a4e0c6d5
-- **Frequency:** Consistent
-- **What happened:** After a refresh, the CNova Balance is not showing.... 000 Balance.
-- **What was expected:** To see my CNova Balance.
-- **Submitted:** Mon, 03 Aug 2026 01:48:46 GMT
-
-
-
-### [2026-08-02] Dashboard (index.html) — I'm currently upgraded to tier 3. i have all three automatio…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x9133213faa78ef4ea6651a2d492a20a19d301c34
-- **Frequency:** Consistent
-- **What happened:** I'm currently upgraded to tier 3. i have all three automation enabled but I was still graduated from tiers 1&2.
-- **What was expected:** i should have remained in tiers 1 and 2 until i disable the automation.
-- **Notes:** Before displaying the graduated status , there was a no active status. After a few hard refreshes the self rescue screen popped up but I was unable to self rescue even though I clicked on the button. The screen subsequently disappeared and the graduated status appeared.
-- **Submitted:** Sun, 02 Aug 2026 19:58:55 GMT
-
-
-### [2026-08-02] Other — Every Refresh of the system gives me different info for the …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Every Refresh of the system gives me different info for the account, mainly the total earned area and the members ID section.  Needs to refresh about 6 or so times in order to get accurate info... most times the member section doesn't show any directs in the account  and is saying that I have graduated from Tiers without even a single crossing or rotation.. the RPC seems to be very slow in getting and displaying accurate info, or may be it's my computer...lol. Self rescue is another issue.. one refresh says I'm in the matrix and another refresh says that I must self rescue..
-- **What was expected:** Not to have to do so many refresh to get accurate info.. Sorry for the long post...
-- **Notes:** Happening to all my accounts.. I'm not able to keep track of what is really happening to each account because everytime I do a refresh new info is displayed. and every refresh takes you back to the home page and then you have to select dashboard which may be another refresh.... Can it be done that when a refresh is done, the page which invoked the refresh you come back to that page instead of going to home page?
-- **Submitted:** Sun, 02 Aug 2026 19:08:27 GMT
-
-
-### [2026-08-02] Dashboard (index.html) — i am still not able to refresh my accounts.
-i have to either…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** i am still not able to refresh my accounts.
-i have to either restart my phone or playing around clicking from home to register to dashboard then it refreshes.
-Also most times the  account shows the wrong total earned until i get page to refresh 2 or 3 times.
-when i do a self rescus and the dashboard is updated it sometimes come back with everything showing zero until i am able to refresh.
-- **What was expected:** honestly i dont know.
-- **Submitted:** Sun, 02 Aug 2026 14:45:55 GMT
-
-
-### [2026-08-02] Onboarding / Registration — I keep getting and error when I tap on the 'approve $10' tab…
-- **Reporter:** E2theb
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x878660b77ddea5884709d2cd2e9453931cc528a0
-- **Frequency:** Consistent
-- **What happened:** I keep getting and error when I tap on the 'approve $10' tab.
-- **What was expected:** The system should have approved my $10 and then register
-- **Notes:** Step 2: Register ($10 USDC)
-❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below
-- **Submitted:** Sun, 02 Aug 2026 14:22:27 GMT
-
-
-### [2026-08-01] Dashboard (index.html) — I was graduated from tier 1 even though I have auto re-entry…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
-- **Frequency:** Consistent
-- **What happened:** I was graduated from tier 1 even though I have auto re-entry and double re-entry enabled.
-- **What was expected:** I expect to still be in tier one until I disable the automation.
-- **Submitted:** Sat, 01 Aug 2026 16:42:54 GMT
-
-
-### [2026-07-31] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Jacob Banji-Ajala
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x95ebde6a7c0a91699eac972c8cd3284f45d5e1e5
-- **Frequency:** Intermittent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** Should be smooth alignment
-- **Notes:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **Submitted:** Fri, 31 Jul 2026 22:18:48 GMT
-
-
-### [2026-07-31] Dashboard (index.html) — i am not able to refresh on any of my accounts.I have to res…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** i am not able to refresh on any of my accounts.I have to restart everytime.
-- **What was expected:** to be able to refresh without always having to restsrt my pjone.
-- **Submitted:** Fri, 31 Jul 2026 14:59:50 GMT
-
-
-### [2026-07-30] Other — When I trying to register an account:
-
-after clicking Approv…
-- **Reporter:** Anthony L
-- **Page:** Other
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
-- **Frequency:** Consistent
-- **What happened:** When I trying to register an account:
-
-after clicking Approve $10  USDC then confirm from Metamask 
-then I check off the box and click GOT IT and confirm
-
-then the bot that I checked off and clicked GOT IT re-appears with the box already check off, and when i click got it again the same thing happens and that senario keeps reapeating 
-
-I am unable to register any account
-- **What was expected:** the box should repair unchecked allowing me to check the box and CONFIRM to Approve the $10 usdc to register the account
-- **Submitted:** Thu, 30 Jul 2026 19:36:33 GMT
-
-
-
-
-
-
-### [2026-07-29] Auto-upgrade — fails despite sufficient earnings (community call)
-- **Reporter:** Community call (owner relay) — June's account cited
-- **Page:** Dashboard (index.html)
-- **Frequency:** Consistent on affected accounts
-- **What happened:** Account showed only **$0.25 available** against **$88.98 total earned**, and auto-upgrade did not fire.
-- **What was expected:** Auto-upgrade to trigger from accumulated earnings.
-- **STATUS 2026-07-29 — NOT YET DIAGNOSED, address needed.** Leading hypothesis, testable in one run of `member_ledger.js`: `$0.25` is `freeWithdrawable` (after the crossing reserve AND the whole automation reserve are withheld) while `$88.98` is lifetime `totalEarned` across every matrix. Those are different quantities and the screen puts them side by side. If confirmed it is a WORDING bug, not an engine bug — but `_executeAdditive` spends `escrow + withdrawable` in the cycling matrix only, so a genuine funding gap is also possible. **Need June's wallet address to settle it.**
-- **DIAGNOSIS 2026-07-30 — mechanism confirmed on a SIBLING account, not yet on hers.** June is Koach100, who runs several test accounts; neither wallet on file matches the reported $88.98, so the exact account is still unidentified. But the pattern is reproduced exactly on `0x1ca3316E`: **$5,540.35 total earned against $389.92 releasable**, because lifetime `totalEarned` spans every tier while "available" is `freeWithdrawable` after the crossing lock and the automation reserve. Her `$0.25 vs $88.98` is the same ratio at a smaller scale. **Almost certainly a labelling problem rather than an engine fault — but I will not close it on a sibling account.** Need her wallet address to confirm, then this closes as wording.
-
-### [2026-07-29] Cycle-out — accounts with several tiers enabled graduate incorrectly; others cycle indefinitely (community call)
-- **Reporter:** Community call (owner relay)
-- **What happened:** Accounts with multiple tier enablements graduate when they should re-enter; other accounts cycle repeatedly without ever graduating.
-- **STATUS 2026-07-29 — OPEN.** Both symptoms point at the additive engine's priority order (`_executeAdditive`, TierRouter:1274-1360): re-entry consumes `curFee` FIRST, then upgrade needs `nextFee` from the remainder, then double needs `curFee` again. Which branch fires is decided purely by how much the cycle-out carried, so the same settings produce different outcomes at different balances. Related and already recorded: **V8.46-C** (silent graduation — the empty catch at `MatrixLogicLib:513` drops a member with no seat, no park and no event; a live instance was confirmed today on `0x473C629A`, which had 15 consecutive re-entries and then simply stopped).
-
-
-### [2026-07-29] Double re-entry blocks graduation entirely (community call)
-- **Reporter:** Community call (owner relay)
-- **What happened:** With Double Re-entry enabled, accounts never graduate — they stay in continuous cycles.
-- **STATUS 2026-07-29 — OPEN, mechanism plausible from source.** `_executeAdditive` step 3 (`doubleOn && anySeat && escrow + withdrawable >= curFee`) spends a SECOND `curFee` in the current tier after the re-entry has already taken one. A member with double enabled therefore consumes on two same-tier seats the funds that would otherwise have covered `nextFee` and moved them up. If that is the whole story it is working as designed and mis-explained to members — but it needs confirming against a real wallet before we say so.
-
 
 
 ### [2026-07-29] Rescue panel vanishes silently when a rescue completes
@@ -400,6 +132,27 @@ I am unable to register any account
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-06 | 2026-08-06 | Other | "Incorrect amount displayed" - Just upgraded to T2 and notic — fixed — reserve breakdown now reads the real next-tier fee · Sherwyn | 66ecdff |
+| 2026-08-06 | 2026-08-06 | Dashboard (index.html) | 1. Dash Board Page Incorrect information — fixed — next-tier fee + staggered post-action refresh (upgrade/rescue no longer hang) · Kira | 66ecdff |
+| 2026-08-05 | 2026-08-06 | Comp Plan (compensation.html) | Have one level 2 person already signed up and commissions no — by design — Chain Pay L2-L6 follows MATRIX seat ancestors, not the referral tree; explainer posted 2026-08-06 · Sherwyn | working-as-designed |
+| 2026-08-05 | 2026-08-06 | Other | When disabling the auto reentry, upgrade or double re entry — fixed — all toggle painting via pin-aware painter; one click, one tx · Sherwyn | pinned-paint |
+| 2026-08-04 | 2026-08-06 | Other | Still not in matrix, hard refresh didn't bring up any prompt — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Sherwyn | reset-v8.47 |
+| 2026-08-03 | 2026-08-06 | Other | Active position doesn't show a number and under my position — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Sherwyn | reset-v8.47 |
+| 2026-08-03 | 2026-08-06 | Dashboard (index.html) | I disabled auto upgrade and my income lessened by about $200 — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · @Koach100 | reset-v8.47 |
+| 2026-08-03 | 2026-08-06 | Dashboard (index.html) | this morning all of my 8 accounts are saying no active posit — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · CryptoJan22 | reset-v8.47 |
+| 2026-08-03 | 2026-08-06 | Dashboard (index.html) | I have upgraded this account to tier 5. It's showing tiers t — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · @Koach100 | reset-v8.47 |
+| 2026-08-03 | 2026-08-06 | Dashboard (index.html) | After a refresh, the CNova Balance is not showing.... 000 Ba — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · @Lavern_Gay | reset-v8.47 |
+| 2026-08-02 | 2026-08-06 | Dashboard (index.html) | I'm currently upgraded to tier 3. i have all three automatio — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · @Koach100 | reset-v8.47 |
+| 2026-08-02 | 2026-08-06 | Other | Every Refresh of the system gives me different info for the — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Sherwyn | reset-v8.47 |
+| 2026-08-02 | 2026-08-06 | Dashboard (index.html) | i am still not able to refresh my accounts — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · CryptoJan22 | reset-v8.47 |
+| 2026-08-02 | 2026-08-06 | Onboarding / Registration | I keep getting and error when I tap on the 'approve $10' tab — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · E2theb | reset-v8.47 |
+| 2026-08-01 | 2026-08-06 | Dashboard (index.html) | I was graduated from tier 1 even though I have auto re-entry — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · @Koach100 | reset-v8.47 |
+| 2026-07-31 | 2026-08-06 | Other | ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Jacob Banji-Ajala | reset-v8.47 |
+| 2026-07-31 | 2026-08-06 | Dashboard (index.html) | i am not able to refresh on any of my accounts.I have to res — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · CryptoJan22 | reset-v8.47 |
+| 2026-07-30 | 2026-08-06 | Other | When I trying to register an account: — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Anthony L | reset-v8.47 |
+| 2026-07-29 | 2026-08-06 | Auto-upgrade | fails despite sufficient earnings (community call) — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Community call (owner relay) — June's account cited | reset-v8.47 |
+| 2026-07-29 | 2026-08-06 | Cycle-out | accounts with several tiers enabled graduate incorrectly; others cycle — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Community call (owner relay) | reset-v8.47 |
+| 2026-07-29 | 2026-08-06 | Double re-entry blocks graduation entirely (community call) | Double re-entry blocks graduation entirely (community call) — V8.47 fresh redeploy: positions/state reset; underlying causes addressed in V8.46/V8.47; re-report if it recurs on V8.47 · Community call (owner relay) | reset-v8.47 |
 | 2026-08-03 | 2026-08-04 | Other | Matrix tree view not loading — seat reads batched via Multicall3 + retry, no more dropped/empty · @Koach100 | multicall3 |
 | 2026-08-03 | 2026-08-04 | Other | Refresh showed one tier at a time — dashboard now reads one consistent snapshot · sherwyn | 8bd752e |
 | 2026-08-03 | 2026-08-04 | Dashboard (index.html) | Self-rescue 'not enough' with funded wallet — by design: reserve+earnings then wallet shortfall (needs Approve first); dashboard names the exact shortfall · Barbara | working-as-designed |
