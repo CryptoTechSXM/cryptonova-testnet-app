@@ -145,7 +145,7 @@
   "split": {
     "title": "Entry Fee Split — per $10 at T1",
     "equalization": "🌀 Equalization Pool",
-    "chain_pay": "⛓️ Chain Pay (6 upline levels)",
+    "chain_pay": "⛓️ Chain Pay L2–L6 (5 uplines)",
     "referrer": "🤝 L1 Direct Referrer",
     "treasury_sub": "(floor backing)",
     "stability_sub": "(rescue reserve)",

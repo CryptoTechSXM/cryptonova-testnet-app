@@ -145,7 +145,7 @@
   "split": {
     "title": "Gebührenaufteilung — pro $10 bei T1",
     "equalization": "🌀 Ausgleichspool",
-    "chain_pay": "⛓️ Kettenzahlung (6 Ebenen)",
+    "chain_pay": "⛓️ Kettenzahlung L2–L6 (5 Ebenen)",
     "referrer": "🤝 L1 Direktempfehlender",
     "treasury_sub": "(Preisbodendeckung)",
     "stability_sub": "(Rettungsreserve)",
