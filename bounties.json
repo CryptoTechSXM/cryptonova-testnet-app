@@ -1,5 +1,5 @@
 {
-  "program": "CryptoNova Bug Bounty \u2014 $1 per accepted find (owner-confirmed real bugs; test artifacts and duplicates at owner's discretion)",
+  "program": "CryptoNova Bug Bounty — $1 per accepted find (owner-confirmed real bugs; test artifacts and duplicates at owner's discretion)",
   "rate_usd": 1,
   "updated": "2026-08-06",
   "reporters": [
@@ -18,7 +18,7 @@
         },
         {
           "date": "2026-07-24",
-          "summary": "Upgrade Tier button hardcoded 2M gas limit \u2014 upgrades into full matrices failed",
+          "summary": "Upgrade Tier button hardcoded 2M gas limit — upgrades into full matrices failed",
           "status": "accepted"
         },
         {
@@ -33,7 +33,7 @@
         },
         {
           "date": "2026-07-26",
-          "summary": "MAJOR: reported 'haven't crossed from Matrix A to B, not even once' across 4 wallets and 3 consecutive versions, and pinpointed being stuck in T1.1 while T1.3 was already open. Root cause found 2026-07-27: TierRouter._sameTierTarget and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold documented as capacity, so a pair is excluded permanently once past it and its MatA loses every entry source \u2014 rotation stops dead and seats 2..127 freeze forever. Verified live: 5 MatAs unchanged over a 10-minute sample. Fixed without redeploy; T1.0 MatA resumed at ~26 rotations/hr. Reporter was correct on V8.43, V8.44 and V8.45.",
+          "summary": "MAJOR: reported 'haven't crossed from Matrix A to B, not even once' across 4 wallets and 3 consecutive versions, and pinpointed being stuck in T1.1 while T1.3 was already open. Root cause found 2026-07-27: TierRouter._sameTierTarget and PairManagerV8's oldest-first scan both compare a CUMULATIVE lifetime counter against a threshold documented as capacity, so a pair is excluded permanently once past it and its MatA loses every entry source — rotation stops dead and seats 2..127 freeze forever. Verified live: 5 MatAs unchanged over a 10-minute sample. Fixed without redeploy; T1.0 MatA resumed at ~26 rotations/hr. Reporter was correct on V8.43, V8.44 and V8.45.",
           "status": "accepted"
         },
         {
@@ -44,12 +44,12 @@
         {
           "date": "2026-07-27",
           "status": "accepted",
-          "summary": "Reported expecting automatic re-entry/upgrade while holding wallet funds. Correct as a UX defect: auto re-entry can only spend the IN-MATRIX pot (reserve + earnings) \u2014 his was $8.85 against a $10 fee \u2014 while wallet USDC is usable only via manual rescue. The panel showed both figures without ever distinguishing them. Fixed by splitting the two balances and explaining the difference (38605d7). Also held off self-rescuing so the wallet could be inspected live."
+          "summary": "Reported expecting automatic re-entry/upgrade while holding wallet funds. Correct as a UX defect: auto re-entry can only spend the IN-MATRIX pot (reserve + earnings) — his was $8.85 against a $10 fee — while wallet USDC is usable only via manual rescue. The panel showed both figures without ever distinguishing them. Fixed by splitting the two balances and explaining the difference (38605d7). Also held off self-rescuing so the wallet could be inspected live."
         },
         {
           "date": "2026-07-27",
           "status": "accepted",
-          "summary": "\"Transaction failed on-chain\" on Re-Enter Matrix, plus the sharp observation \"not sure why re-enter matrix and not self rescue\". Three findings from one report. (1) The Re-Enter button carried a static 800,000 gas limit while a rotation cascade needs up to 5,127,660 \u2014 the same class as his own 2026-07-24 Upgrade Tier find, in a different control; fixed c7916c8. (2) His own trail showed auto re-entry switched OFF, which is why nothing re-entered him \u2014 the exact hazard @Koach100 reported and the new confirmation dialog now prevents. (3) His question about the limbo panel led to a TENTH orphaned cycle-out, tx 0x462bf842\u2026 block 44700243 \u2014 the first silent graduation with a specific replayable transaction hash, which is the route to the cause that has been unknown since the first eight."
+          "summary": "\"Transaction failed on-chain\" on Re-Enter Matrix, plus the sharp observation \"not sure why re-enter matrix and not self rescue\". Three findings from one report. (1) The Re-Enter button carried a static 800,000 gas limit while a rotation cascade needs up to 5,127,660 — the same class as his own 2026-07-24 Upgrade Tier find, in a different control; fixed c7916c8. (2) His own trail showed auto re-entry switched OFF, which is why nothing re-entered him — the exact hazard @Koach100 reported and the new confirmation dialog now prevents. (3) His question about the limbo panel led to a TENTH orphaned cycle-out, tx 0x462bf842… block 44700243 — the first silent graduation with a specific replayable transaction hash, which is the route to the cause that has been unknown since the first eight."
         },
         {
           "date": "2026-08-05",
@@ -73,28 +73,28 @@
       "finds": [
         {
           "date": "2026-07-26",
-          "summary": "Independent catch of the T1 slowdown ('the slow down on T1 is very noticeable'), corroborating the MatA starvation finding from a second reporter \u2014 and suggested raising the pair capacity numbers, which pointed at the expansion threshold where the bug actually lived.",
+          "summary": "Independent catch of the T1 slowdown ('the slow down on T1 is very noticeable'), corroborating the MatA starvation finding from a second reporter — and suggested raising the pair capacity numbers, which pointed at the expansion threshold where the bug actually lived.",
           "status": "accepted"
         },
         {
           "date": "2026-07-26",
-          "summary": "Upgrade option non-functional on the Onboarding/Registration page once registered \u2014 only available from the dashboard",
+          "summary": "Upgrade option non-functional on the Onboarding/Registration page once registered — only available from the dashboard",
           "status": "accepted"
         },
         {
           "date": "2026-07-26",
-          "summary": "Tiers page ambiguous \u2014 newly opened pairs (T1.1/T2.1) should show their member count",
+          "summary": "Tiers page ambiguous — newly opened pairs (T1.1/T2.1) should show their member count",
           "status": "accepted"
         },
         {
           "date": "2026-07-27",
           "status": "accepted",
-          "summary": "Parked members' self-rescue button stayed disabled until a full page reload, even after earnings from directs had covered the shortfall \u2014 awkward on mobile. Suggested a refresh control beside the button; adopted exactly, plus a 30s auto-poll while parked (38605d7)."
+          "summary": "Parked members' self-rescue button stayed disabled until a full page reload, even after earnings from directs had covered the shortfall — awkward on mobile. Suggested a refresh control beside the button; adopted exactly, plus a 30s auto-poll while parked (38605d7)."
         },
         {
           "date": "2026-07-27",
           "status": "accepted",
-          "summary": "Withdrawable card and its breakdown modal disagreed ($1,507 vs a breakdown listing only two tiers). Real bug and the missing half of Sherwyn's 2026-07-24 find: L1 upgrade commissions credit a sponsor's withdrawable in tier matrices they never joined, so hasEverJoined stays false while a claimable balance accrues. The card was fixed for this on the 24th; the breakdown's _getAllMatrixMembers was not, and silently dropped every commission-only tier \u2014 worst for the heaviest sponsors. Fixed 81a5793. Her follow-up ask (referral income, per-tier income, per-tier crossing availability) logged as a separate feature."
+          "summary": "Withdrawable card and its breakdown modal disagreed ($1,507 vs a breakdown listing only two tiers). Real bug and the missing half of Sherwyn's 2026-07-24 find: L1 upgrade commissions credit a sponsor's withdrawable in tier matrices they never joined, so hasEverJoined stays false while a claimable balance accrues. The card was fixed for this on the 24th; the breakdown's _getAllMatrixMembers was not, and silently dropped every commission-only tier — worst for the heaviest sponsors. Fixed 81a5793. Her follow-up ask (referral income, per-tier income, per-tier crossing availability) logged as a separate feature."
         },
         {
           "date": "2026-08-06",
@@ -118,7 +118,7 @@
         },
         {
           "date": "2026-07-26",
-          "summary": "V8.45 CRITICAL: self-rescue failed on-chain \u2014 nested entry during rotation corrupted the BFS seat map (phantom seat 128, occupancy drift +44, position 1 emptied -> matrix wedged with 'F8V8: no root'). Forced emergency V8.45 redeploy.",
+          "summary": "V8.45 CRITICAL: self-rescue failed on-chain — nested entry during rotation corrupted the BFS seat map (phantom seat 128, occupancy drift +44, position 1 emptied -> matrix wedged with 'F8V8: no root'). Forced emergency V8.45 redeploy.",
           "status": "accepted"
         }
       ],
@@ -133,12 +133,12 @@
       "finds": [
         {
           "date": "2026-07-23",
-          "summary": "Registration failures \u2014 led to cascade-gas fix in register flow",
+          "summary": "Registration failures — led to cascade-gas fix in register flow",
           "status": "accepted"
         },
         {
           "date": "2026-07-26",
-          "summary": "V8.45 CRITICAL: self-rescue failed on-chain \u2014 nested entry during rotation corrupted the BFS seat map (phantom seat 128, occupancy drift +44, position 1 emptied -> matrix wedged with 'F8V8: no root'). Forced emergency V8.45 redeploy.",
+          "summary": "V8.45 CRITICAL: self-rescue failed on-chain — nested entry during rotation corrupted the BFS seat map (phantom seat 128, occupancy drift +44, position 1 emptied -> matrix wedged with 'F8V8: no root'). Forced emergency V8.45 redeploy.",
           "status": "accepted"
         }
       ],
@@ -152,7 +152,7 @@
       "finds": [
         {
           "date": "2026-07-23",
-          "summary": "Extra directs \u2014 test artifact (stress wallets), not a protocol bug",
+          "summary": "Extra directs — test artifact (stress wallets), not a protocol bug",
           "status": "test-artifact"
         },
         {
@@ -162,6 +162,20 @@
         }
       ],
       "paid_usd": 0
+    },
+    {
+      "name": "Anthony L",
+      "wallets": [
+        "0x3c17556855cfBd29b6F7a41eBfdbe8e914B7bbDD"
+      ],
+      "paid_usd": 0,
+      "finds": [
+        {
+          "date": "2026-08-06",
+          "summary": "Page refresh dumped members back to Home/Dashboard instead of staying on the current tab (fixed via URL-hash tab persistence, 8480d20)",
+          "status": "accepted"
+        }
+      ]
     }
   ]
 }
