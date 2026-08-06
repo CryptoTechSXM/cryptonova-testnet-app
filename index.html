@@ -692,6 +692,21 @@
     <div class="hero">
       <h1 data-i18n="idx.hero_h1">CryptoNova Matrix<br><span>on Base Chain</span></h1>
       <p data-i18n="idx.hero_sub">Join the CryptoNova Matrix. Start at T1 ($10 USDC) and auto-upgrade through 10 tiers. Earn referral bonuses, chain pay, and CNOVA tokens — all on Base Chain.</p>
+
+      <!-- What is CryptoNova? — at-a-glance (owner request 2026-08-06; claims code-verified) -->
+      <div style="max-width:760px;margin:18px auto 6px;text-align:left;background:rgba(15,23,42,.55);border:1px solid rgba(51,65,85,.5);border-radius:12px;padding:18px 22px">
+        <div style="font-weight:800;font-size:17px;margin-bottom:10px;text-align:center">What is CryptoNova?</div>
+        <div style="color:var(--text2,#94a3b8);font-size:14px;line-height:1.55;margin-bottom:12px;text-align:center">A complete Web3 ecosystem on Base Chain, run entirely by smart contracts — no middlemen, every payment on-chain and verifiable.</div>
+        <div style="display:grid;gap:9px;font-size:13.5px;line-height:1.55">
+          <div>🔗 <strong>Matrix rewards engine</strong> — a 127-seat figure-8 matrix at every tier. Earn 5% on every direct referral plus automatic chain pay from anyone who lands under your seat — referred by you or not.</div>
+          <div>🪙 <strong>CNOVA token with a rising floor</strong> — every entry sends 5% into a USDC treasury that backs the token. The floor formula is on-chain: treasury ÷ supply. More members = higher floor — it can only move up.</div>
+          <div>💧 <strong>Staking &amp; liquidity yield</strong> — stake USDC to earn a share of on-ramp partner fee revenue, or provide CNOVA/USDC liquidity and earn 0.30% on every swap.</div>
+          <div>🏛️ <strong>DAO governance</strong> — token holders co-govern the protocol through on-chain proposals.</div>
+          <div>🤝 <strong>Community Wallet</strong> — 1% of every entry pools for the first 1,000 founding members, distributed monthly.</div>
+          <div>🛡️ <strong>Stability Fund</strong> — an automated rescue system that keeps every member's position moving; advances are repayable from your future earnings, so nobody gets left behind.</div>
+          <div>💵 <strong>Start with $10</strong> — fully passive if you want (automation handles re-entry and upgrades for a small reserve), or bring 2–3 active referrals and your earnings can cover your costs from day one.</div>
+        </div>
+      </div>
       <div class="hero-actions">
         <button class="btn-primary" onclick="showTab('register')" data-i18n="idx.hero_join">Join Now — $10 USDC</button>
         <button class="btn-outline" onclick="showTab('dashboard')" data-i18n="idx.hero_dashboard">View Dashboard</button>
@@ -804,7 +819,7 @@
     <!-- Entry split -->
     <div class="card">
       <div class="section-title"><div class="dot"></div> <span data-i18n="split.title">Entry Fee Split — per $10 at T1</span></div>
-      <div class="split-row" style="border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:4px"><span class="split-label">🔐 Crossing Reserve<span class="tip-badge" tabindex="0">?<span class="tip-popup">50% of your $10 entry held by the smart contract. When your 127-seat matrix fills and cycles, this automatically covers your re-entry fee — so your first crossing is free.</span></span> <span style="font-size:10px;color:var(--text3)">(funds your first re-entry)</span></span><span><span class="split-amount">50%</span> <span class="split-pct">$5.00</span></span></div>
+      <div class="split-row" style="border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:4px"><span class="split-label">🔐 Crossing Reserve<span class="tip-badge" tabindex="0">?<span class="tip-popup">50% of your $10 entry is held by the smart contract as your crossing reserve. When you cycle out, the full $10 re-entry is paid from this reserve first, with the remainder drawn from your accumulated earnings — by the time your matrix cycles, pool earnings are designed to cover it. If they don't yet, the rescue system steps in with a repayable advance so you never lose your place.</span></span> <span style="font-size:10px;color:var(--text3)">(funds your first re-entry)</span></span><span><span class="split-amount">50%</span> <span class="split-pct">$5.00</span></span></div>
       <div class="split-row" style="margin-bottom:8px"><span class="split-label">⚡ Instant Earn<span class="tip-badge" tabindex="0">?<span class="tip-popup">2.5% of your entry fee ($0.25 at T1) credited to your withdrawable balance the moment you register. Available to withdraw immediately — no waiting.</span></span> <span style="font-size:10px;color:var(--text3)">(credited to withdrawable on join)</span></span><span><span class="split-amount">2.5%</span> <span class="split-pct">$0.25</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.equalization">🌀 Equalization Pool<span class="tip-badge" tabindex="0">?<span class="tip-popup">18% of each entry pools together. When all 127 seats fill (~$229 at T1), this distributes position-weighted to all 126 members. Later/deeper positions get a larger share to compensate for joining later.</span></span></span><span><span class="split-amount">18%</span> <span class="split-pct">$1.80</span></span></div>
       <div class="split-row"><span class="split-label">⛓️ Chain Pay L1<span class="tip-badge" tabindex="0">?<span class="tip-popup">The L1 referral bonus — 5% of the entry fee goes directly to the person who referred the new joiner (the person whose referral link they used). This is YOUR bonus when you refer someone.</span></span> <span style="font-size:10px;color:var(--text3)">(direct referrer)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
@@ -813,9 +828,9 @@
       <div class="split-row"><span class="split-label">🏦 CNOVA Treasury<span class="tip-badge" tabindex="0">?<span class="tip-popup">5% builds the on-chain CNOVA Treasury. The floor price formula: Treasury USDC ÷ total CNOVA supply. More members joining = more USDC in Treasury = higher floor. The floor only goes up, never down.</span></span> <span style="font-size:10px;color:var(--text3)" data-i18n="split.treasury_sub">(floor backing)</span></span><span><span class="split-amount">5%</span> <span class="split-pct">$0.50</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.dev">⚙️ Dev</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
       <div class="split-row"><span class="split-label" data-i18n="split.ops">⚙️ Ops</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
-      <div class="split-row"><span class="split-label" data-i18n="split.community">🏛️ Community</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
-      <div class="split-row"><span class="split-label">💧 Liquidity Reserve <span style="font-size:10px;color:var(--text3)">(CNOVA/USDC pool)</span></span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
-      <div class="split-row"><span class="split-label" data-i18n="split.buyback">🔥 CNOVA Buyback Reserve</span><span><span class="split-amount">0.5%</span> <span class="split-pct">$0.05</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.community">🏛️ Community</span><span><span class="split-amount">1%</span> <span class="split-pct">$0.10</span></span></div>
+      <div class="split-row"><span class="split-label">💧 Liquidity Reserve <span style="font-size:10px;color:var(--text3)">(CNOVA/USDC pool)</span></span><span><span class="split-amount">0.25%</span> <span class="split-pct">$0.025</span></span></div>
+      <div class="split-row"><span class="split-label" data-i18n="split.buyback">🔥 CNOVA Buyback Reserve</span><span><span class="split-amount">0.25%</span> <span class="split-pct">$0.025</span></span></div>
       <div class="split-row" style="border-top:1px solid var(--green2);margin-top:8px;padding-top:8px"><span class="split-label" style="font-weight:700;color:var(--text)">Total</span><span><span class="split-amount" style="font-weight:700;color:var(--green)">100%</span> <span class="split-pct" style="font-weight:700;color:var(--green)">$10.00</span></span></div>
       <div style="margin-top:14px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green2);border-radius:8px;font-size:13px;color:var(--text2)">
         💡 <strong style="color:var(--green)" data-i18n="split.mechanic_label">CryptoNova Matrix mechanic:</strong> <span data-i18n="split.mechanic_body">Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.</span>
@@ -2914,13 +2929,24 @@ async function loadCWData(userAddr, signer, rp) {
     const isGenesis = cohortNum === 1;
     setText('cw-tranche', isGenesis ? '🌟 Genesis Member' : '🚀 Pioneer Member');
 
-    // Try to get specific enrollment number from events (best-effort)
+    // V8.47 (owner, 2026-08-06): every member saw the generic "(#1-500)" label because
+    // the event scan only looked ~11h back — anyone enrolled earlier fell through.
+    // Deep-scan back to the deployment ONCE, then cache the number per wallet+CW
+    // address (redeploy = new CW address = fresh cache) so it renders instantly after.
     try {
-      const filter = cw.filters.MemberEnrolled(userAddr);
-      const events  = await safeGetLogs(cw, filter, {maxBack: 20000});
-      if (events.length > 0) {
-        const num = Number(events[0].args.enrollmentNumber);
-        setText('cw-founder-id', `Member #${num.toLocaleString()} of 1,000`);
+      const _numKey = 'cnova_cw_num_' + (ADDRS.communityWallet || '') + '_' + userAddr.toLowerCase();
+      let num = null;
+      try { const c = localStorage.getItem(_numKey); if (c) num = Number(c); } catch(_) {}
+      if (!num) {
+        const filter = cw.filters.MemberEnrolled(userAddr);
+        const events  = await safeGetLogs(cw, filter, {maxBack: 200000});
+        if (events.length > 0) {
+          num = Number(events[0].args.enrollmentNumber);
+          try { localStorage.setItem(_numKey, String(num)); } catch(_) {}
+        }
+      }
+      if (num) {
+        setText('cw-founder-id', `Member #${num.toLocaleString()} of 1,000 — ${isGenesis ? 'Genesis cohort (#1–500)' : 'Pioneer cohort (#501–1,000)'}`);
       } else {
         setText('cw-founder-id', isGenesis ? 'Genesis cohort (#1–500)' : 'Pioneer cohort (#501–1,000)');
       }
