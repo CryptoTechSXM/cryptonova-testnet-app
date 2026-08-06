@@ -793,10 +793,10 @@
   // V8.47 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
-    if (localStorage.getItem('cnova_st_ver') !== 'v8.47') {
+    if (localStorage.getItem('cnova_st_ver') !== 'v8.47-0805') {
       ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_loans_v8_32','cnova_loans_v8_46']
         .forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem('cnova_st_ver','v8.47');
+      localStorage.setItem('cnova_st_ver','v8.47-0805');
     }
   } catch(e) {}
   // Restore cached display state immediately (survives page reload)
