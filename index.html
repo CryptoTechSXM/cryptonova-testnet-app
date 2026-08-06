@@ -2546,7 +2546,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     readProvider = _mkRpc(RPC_URL);
   }
   // Auto-navigate to tab if arriving from sub-page link
-  if (window.location.hash === '#dashboard') { setTimeout(function(){ if(typeof showTab==='function') showTab('dashboard'); }, 200); }
+  // V8.47 (member request): restore ANY valid tab from the hash on load — refresh
+  // no longer dumps members back on Home/Dashboard (was #dashboard-only).
+  (function(){
+    var _t = (window.location.hash || '').replace('#', '');
+    if (['register','dashboard','matrix','tiers','roadmap'].indexOf(_t) !== -1) {
+      setTimeout(function(){ if (typeof showTab === 'function') showTab(_t); }, 200);
+    }
+  })();
   loadHomeStats();
   setTimeout(loadDaoWidget, 1200);   // DAO widget — lightweight, stagger after loadHomeStats
   setTimeout(loadTiersStats, 1500);  // stagger after loadHomeStats to avoid RPC rate-limiting
@@ -7487,6 +7494,9 @@ function showTab(name) {
   document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)').forEach(b => b.classList.remove('active'));
   const panel = document.getElementById('tab-' + name);
   if (panel) panel.classList.add('active');
+  // V8.47 (member request): remember the tab in the URL so a refresh stays put
+  // (also makes tabs shareable: index.html#tiers). replaceState = no history spam.
+  try { history.replaceState(null, '', '#' + name); } catch (_) {}
   const idx = ['home','register','dashboard','matrix','tiers','roadmap'].indexOf(name);
   const navBtns = document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)');
   if (navBtns[idx]) navBtns[idx].classList.add('active');
