@@ -2408,6 +2408,16 @@ function unknownBadge(tooltip) {
 // getMemberInfo result. Called EARLY from the cached read so the panel populates on first
 // paint instead of sitting blank ("—") until the main read lands (the "needs a refresh to
 // populate" issue), and again authoritatively when the main read resolves.
+// V8.47 fix (Kira 2026-08-06): post-action dashboard refresh. The old single
+// setTimeout(loadDashboardData, 2s) died silently when the RPC pool lagged the
+// tx block, leaving "Refreshing your dashboard..." hanging until a manual
+// reload. Stagger three attempts; one failure never stops the next.
+function _staggeredDashRefresh() {
+  [2000, 8000, 20000].forEach(ms => setTimeout(() => {
+    try { const p = loadDashboardData(); if (p && p.catch) p.catch(() => {}); } catch (_) {}
+  }, ms));
+}
+
 function _paintMemberToggles(info) {
   if (!info) return;
   const _set = (chkId, lblId, on) => {
@@ -5409,7 +5419,11 @@ async function loadDashboardData() {
 
       if (autoUpgrade || reentry) {
         const curFeeRaw  = await tr.tierEntryFees(Math.max(highestTier - 1, 0)).catch(() => 10_000_000n);
-        const nextFeeRaw = window._dashUpgradeFee || 25_000_000n;
+        // V8.47 fix (Sherwyn+Kira 2026-08-06): read the next-tier fee directly.
+        // window._dashUpgradeFee is only set when the upgrade panel renders, so a
+        // freshly-upgraded member's reserve breakdown fell back to a hardcoded $25.
+        const nextFeeRaw = highestTier >= 10 ? 0n
+          : await tr.tierEntryFees(highestTier).catch(() => (window._dashUpgradeFee || 25_000_000n));
 
         let reserved = 0n;
         const details = [];
@@ -6677,7 +6691,7 @@ async function doGraduatedReenter(tNum) {
     await (await tr.manualUpgrade(tierIdx, { gasLimit: _upGas })).wait();
     _s('✅ Re-entered!');
     toast(`T${tNum} re-entry successful!`, 'success');
-    setTimeout(() => loadDashboardData(), 2000);
+    _staggeredDashRefresh();
   } catch(e) {
     _s(friendlyError(e));
     if (btn) btn.disabled = false;
@@ -8017,7 +8031,7 @@ async function doBulkUpgrade() {
     }
     if (status) status.innerHTML = '<span style="color:var(--green)">🎉 All upgrades complete — you\'re now in T' + highest + '! Refreshing…</span>';
     toast('Bulk upgrade successful!', 'success');
-    setTimeout(() => loadDashboardData(), 2500);
+    _staggeredDashRefresh();
   } catch(e) {
     const msg = (e.message || '').toLowerCase();
     const friendly = (e.code === 'ACTION_REJECTED' || msg.includes('user rejected') || msg.includes('user denied'))
@@ -8205,7 +8219,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
       if (status) status.innerHTML = '<span style="color:var(--green)">🎉 Upgraded to T' + (tierIdx + 1) + '! Refreshing your dashboard…</span>';
       toast('Tier upgraded successfully!', 'success');
     }
-    setTimeout(() => loadDashboardData(), 2000);
+    _staggeredDashRefresh();
   } catch(e) {
     const msg  = (e.message || '').toLowerCase();
     const data = (e.data || '').toString();
@@ -8606,7 +8620,7 @@ async function doSelfRescue() {
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You're back in! Refreshing your dashboard…"; }
     toast('Self Rescue successful! You\'re back in the matrix.', 'success');
-    setTimeout(() => loadDashboardData(), 3000);
+    _staggeredDashRefresh();
   } catch (e) {
     console.error('selfRescue error:', e);
     const msg = e.message || '';
@@ -8679,7 +8693,7 @@ async function doCoPayRescue() {
     await tx.wait();
     if (status) { status.style.color = 'var(--green)'; status.textContent = "🎉 You've been re-entered! Refreshing your dashboard…"; }
     toast('Co-Pay Rescue successful!', 'success');
-    setTimeout(() => loadDashboardData(), 3000);
+    _staggeredDashRefresh();
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
     if (status) { status.style.color = 'var(--red)'; status.textContent = friendlyError(e); }
