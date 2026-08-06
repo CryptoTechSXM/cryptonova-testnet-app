@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-06] Other — "Incorrect amount displayed" - Just upgraded to T2 and notic…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** "Incorrect amount displayed" - Just upgraded to T2 and notice that while the withdrawable tab shows the correct amount held in reserves by the system, the below tab which shows the breakdown, has the "auto-upgrade" amount as $25.00 which should be showing $50.00 as that's the amount to T3, the total amount displayed in the tab is also correct but not adding up because the auto-upgrade amount is not correct...
+- **What was expected:** Correct breakdown calculation...
+- **Notes:** Haven't upgraded to any other tiers so don't know if this is just for T2 or if the other tiers will show the correct amount... I know this may not be a bug but just cosmetics...
+- **Submitted:** Thu, 06 Aug 2026 10:53:31 GMT
+
+
 ### [2026-08-06] Dashboard (index.html) — 1. Dash Board Page Incorrect information
 ⚙ Protocol Reserve …
 - **Reporter:** Kira
