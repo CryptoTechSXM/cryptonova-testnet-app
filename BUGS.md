@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-07] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
+- **Reporter:** Jacob
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x3fd5936a01d89d465570e4f601d6378365fb6a01
+- **Frequency:** Intermittent
+- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
+- **What was expected:** No X in red
+- **Submitted:** Fri, 07 Aug 2026 05:22:45 GMT
+
+
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
