@@ -36,39 +36,64 @@
   }
 
   /* ── Apply translations to DOM ───────────────────────────── */
+  // AUDIT 2026-08-07: applyAll() used to run unconditionally, and get() was
+  // called with NO fallback — so if the locale fetch failed, every translated
+  // element was overwritten with its own dotted key ("termsPage.s3_li1_b").
+  // Terms became 62 lines of keys, index 134. Two guards now: bail out entirely
+  // on an empty table, and fall back to the element's EXISTING text (the HTML
+  // already carries a sensible English default) rather than the key.
+  function _hasTable() {
+    return _t && typeof _t === 'object' && Object.keys(_t).length > 0;
+  }
   function applyAll() {
+    if (!_hasTable()) return;
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
-      el.innerHTML = get(el.getAttribute('data-i18n'));
+      var v = get(el.getAttribute('data-i18n'), null);
+      if (v !== null && v !== undefined) el.innerHTML = v;
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
-      el.placeholder = get(el.getAttribute('data-i18n-placeholder'));
+      var v = get(el.getAttribute('data-i18n-placeholder'), null);
+      if (v !== null && v !== undefined) el.placeholder = v;
     });
     // Meta description
     var descEl = document.querySelector('meta[name="description"][data-i18n-content]');
-    if (descEl) descEl.content = get(descEl.getAttribute('data-i18n-content'));
+    if (descEl) { var dv = get(descEl.getAttribute('data-i18n-content'), null); if (dv !== null) descEl.content = dv; }
     // Page title
     var titleEl = document.querySelector('title[data-i18n]');
-    if (titleEl) document.title = get(titleEl.getAttribute('data-i18n'));
+    if (titleEl) { var tv = get(titleEl.getAttribute('data-i18n'), null); if (tv !== null) document.title = tv; }
     // HTML lang attribute
     document.documentElement.lang = getLang();
   }
 
   /* ── Fetch and apply a locale file ──────────────────────── */
   async function load(lang) {
+    // AUDIT 2026-08-07: the old fallback was gated on `lang !== 'en'`, so the ONE
+    // locale with no second chance was the default one — an English user whose
+    // en.json 404'd got nothing at all. English is now always attempted, and a
+    // non-English locale is MERGED OVER the English base so a partially
+    // translated file shows English for its missing keys instead of raw keys.
+    var base = null, want = null;
     try {
-      var r = await fetch('/locales/' + lang + '.json?v=811');
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      _t = await r.json();
-    } catch (_) {
-      // Fallback to English
-      if (lang !== 'en') {
-        try {
-          var r2 = await fetch('/locales/en.json?v=811');
-          _t = await r2.json();
-        } catch (_2) {}
-      }
+      var rEn = await fetch('/locales/en.json?v=811');
+      if (rEn.ok) base = await rEn.json();
+    } catch (_) {}
+    if (lang !== 'en') {
+      try {
+        var r = await fetch('/locales/' + lang + '.json?v=811');
+        if (r.ok) want = await r.json();
+      } catch (_2) {}
     }
-    applyAll();
+    function deepMerge(a, b) {
+      if (!b || typeof b !== 'object') return a;
+      var out = Object.assign({}, a || {});
+      Object.keys(b).forEach(function (k) {
+        out[k] = (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]))
+          ? deepMerge(out[k], b[k]) : b[k];
+      });
+      return out;
+    }
+    _t = want ? deepMerge(base, want) : (base || {});
+    applyAll();   // no-ops when the table is empty — the HTML defaults stand
   }
 
   /* ── Language switcher widget (custom dropdown with flag images) ── */

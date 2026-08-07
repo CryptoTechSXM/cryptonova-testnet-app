@@ -751,6 +751,12 @@
     // proves conserves (Σ memberDebt == loaned − repaid). Read these instead of
     // reconstructing lifetime totals from event scans (owner report 2026-08-07:
     // the card showed repaid > issued and a confident $0.00 outstanding).
+    // AUDIT 2026-08-07: health was graded against a hard-coded $200. sfTarget()
+    // AUTO-SCALES with the highest organically-opened tier (T2 -> $500, T3 ->
+    // $1,000), so the page could paint "HEALTHY 100%" green while healthBps()
+    // on-chain read ~44%. Grade against the fund's own definition.
+    'function sfTarget() external view returns (uint256)',
+    'function healthBps() external view returns (uint256)',
     'function totalRescueLoaned() external view returns (uint256)',
     'function totalRescueRepaid() external view returns (uint256)',
     // Authoritative loan/repay events: ONE contract, every path (keeper rescue,
@@ -789,6 +795,14 @@
   }
 
   // ── Main loader ───────────────────────────────────────────
+  // AUDIT 2026-08-07: this page called the bare global `t()` from /i18n.js — and
+  // the very first statement of loadAll() is such a call, OUTSIDE its try block.
+  // If i18n.js 404s after a deploy, is blocked, or throws, `t` is undefined, the
+  // ReferenceError escapes the DOMContentLoaded handler BEFORE the 30s retry
+  // timer is installed, and every card sits on "Loading…" forever with no error
+  // and no recovery. terms.html already guarded this; status.html did not.
+  const t = (k, f) => (window.t ? window.t(k, f) : (f !== undefined ? f : k));
+
   let _timer, _countdown = 30;
 
   // ── Last-known-good caches (prevent flicker on poll error) ──
@@ -1151,12 +1165,16 @@
 
       // ── Check for recent keeper failures (WorkItemFailed events) ──────────
       const fromBlock = Math.max(0, blk - 5000); // ~2.5hr window
-      let keeperFailCount = 0;
+      // AUDIT 2026-08-07: a dropped eth_getLogs returned [] -> failCount 0 ->
+      // the green "Keeper healthy" branch. An unreadable keeper is not a healthy
+      // one, so track the read itself.
+      let keeperFailCount = 0, keeperFailRead = true;
       try {
         const failFilter = keeper.filters.WorkItemFailed();
-        const failLogs   = await keeper.queryFilter(failFilter, fromBlock, blk).catch(()=>[]);
+        const failLogs   = await keeper.queryFilter(failFilter, fromBlock, blk)
+          .catch(() => { keeperFailRead = false; return []; });
         keeperFailCount  = failLogs.length;
-      } catch {}
+      } catch { keeperFailRead = false; }
 
       // ── Build live parked list directly from on-chain queue ───────────────
       // Keeper scans all pairs — fetch from all discovered T1 pairs and merge.
@@ -1279,9 +1297,13 @@
           keeperBanner = `<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:8px 10px;font-size:12px;color:#ef4444;margin-bottom:10px">
             ⚠️ <strong>${keeperFailCount} keeper work item(s) failed</strong> in the last ~2.5hrs — rescue may be delayed. Check keeper.log for details.
           </div>`;
+        } else if (!keeperFailRead) {
+          keeperBanner = `<div style="background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.3);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text2);margin-bottom:10px">
+            Keeper status unavailable this poll — retrying. ${graceLabel}
+          </div>`;
         } else if (count > 0) {
           keeperBanner = `<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--green);margin-bottom:10px">
-            ✅ Keeper healthy — rescue runs every 2 min. ${graceLabel}
+            ✅ No failed keeper work items in the last ~2.5h. ${graceLabel}
           </div>`;
         }
 
@@ -1621,12 +1643,16 @@
 
       const sfNum = Number(BigInt(sfBal)) / 1e6;
 
-      // Health: V8.26 sfTarget = $200 (20x * $10 T1 fee).
-      // >=$200 = green (healthy), >=$100 = yellow (low), <$100 = red (critical)
-      const SF_TARGET = 200;
-      const health = sfNum >= SF_TARGET ? 'green' : sfNum >= 100 ? 'yellow' : 'red';
-      const healthLabel = sfNum >= SF_TARGET ? t('statusPage.js.healthy','Healthy') : sfNum >= 100 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
-      const pct = Math.min(100, Math.round(sfNum / SF_TARGET * 100)); // 100% at $200 target
+      // Grade against the CONTRACT's target (auto-scales with the highest open
+      // tier: 20x that tier's entry fee). Falls back to the old $200 constant
+      // only if the read fails, so a blip cannot flip the badge.
+      let _target = null;
+      try { _target = Number(BigInt(await sf.sfTarget())) / 1e6; } catch (_) {}
+      const SF_TARGET = (_target && _target > 0) ? _target : 200;
+      const _pctRaw   = SF_TARGET > 0 ? (sfNum / SF_TARGET) * 100 : 0;
+      const health = _pctRaw >= 100 ? 'green' : _pctRaw >= 50 ? 'yellow' : 'red';
+      const healthLabel = _pctRaw >= 100 ? t('statusPage.js.healthy','Healthy') : _pctRaw >= 50 ? t('statusPage.js.low','Low') : t('statusPage.js.critical','Critical');
+      const pct = Math.min(100, Math.round(_pctRaw));
 
       const pillInd = document.getElementById('pill-sf');
       pillInd.className = `pill-indicator ${health}`;
