@@ -37,18 +37,6 @@
 
 ## Open Issues
 
-### [2026-08-07] Other — With all check boxes disabled, the amount of funds shown in …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** With all check boxes disabled, the amount of funds shown in the "withdrawal - breakdown" area (available to claim) is different from what is displayed in the "Withdrawal" area section..
-- **What was expected:** For them to be the same figure...
-- **Notes:** Not sure if I miss understood something..
-- **Submitted:** Fri, 07 Aug 2026 01:36:01 GMT
-
-
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
@@ -144,6 +132,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-07 | 2026-08-07 | Other | With all check boxes disabled, breakdown 'available to claim' differed from the Withdrawal section — fixed — card, MAX and breakdown unified on a withdrawCore mirror (_claimableAll); root-caused double reserve subtraction + stale freeWithdrawable view (contract fix logged V8_48_BACKLOG) · Sherwyn · bounty +1 | 427beb5 |
 | 2026-08-06 | 2026-08-06 | Other | "Incorrect amount displayed" - Just upgraded to T2 and notic — fixed — reserve breakdown now reads the real next-tier fee · Sherwyn | 66ecdff |
 | 2026-08-06 | 2026-08-06 | Dashboard (index.html) | 1. Dash Board Page Incorrect information — fixed — next-tier fee + staggered post-action refresh (upgrade/rescue no longer hang) · Kira | 66ecdff |
 | 2026-08-05 | 2026-08-06 | Comp Plan (compensation.html) | Have one level 2 person already signed up and commissions no — by design — Chain Pay L2-L6 follows MATRIX seat ancestors, not the referral tree; explainer posted 2026-08-06 · Sherwyn | working-as-designed |
