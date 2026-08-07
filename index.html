@@ -2345,6 +2345,12 @@ const PM_ABI = [
 ];
 
 const TREASURY_ABI = [
+  // AUDIT 2026-08-07: the redeem preview was quoting CNOVAToken.maxPenaltyBps()
+  // — the flat 5000bps cap on the VESTING early-unlock — while redeemAtFloor()
+  // actually charges THIS: a step function of days since T1 registration
+  // (45% <=30d, 30% <=60d, 15% <=90d, 5% <=120d, 0% after). Two unrelated
+  // mechanisms; "You Receive" was wrong for essentially every member.
+  'function earlyExitPenaltyBps(address member) external view returns (uint256)',
   'function usdcReserve() external view returns (uint256)',
   'function floorPrice() external view returns (uint256)',
   'function usdcValueAtFloor(uint256 cnovaAmount) external view returns (uint256)',
@@ -3002,28 +3008,24 @@ async function loadCWData(userAddr, signer, rp) {
       }
     }
 
-    // Gate: 500 total system members AND day-of-month ≥ 25
-    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const totalMembers = Number(await tr.globalJoinedCount().catch(() => 0n));
-    const dayOfMonth   = new Date().getDate();
-    const has500Members = totalMembers >= 500;
-    const is25thOrLater = dayOfMonth >= 25;
-
-    // Claim button state
+    // AUDIT 2026-08-07 — TWO GATES REMOVED, NEITHER EXISTS ON THE CONTRACT.
+    // This block required (a) 500 total system members and (b) day-of-month >= 25
+    // before enabling Claim. CommunityWallet.claim() requires NEITHER: its only
+    // condition is that the caller has a cohort. The 25-day interval belongs to
+    // distribute(), not claim().
+    //
+    // This was not merely cosmetic: distribute() stamps each share with
+    // expiresAt = now + distributeInterval (30 days) and _sweepExpired() returns
+    // unclaimed amounts to the pool. Disabling the button for ~24 days of every
+    // month could make a founder permanently FORFEIT a share they were owed.
+    // The button now follows the contract: claimable > 0 is the whole test.
     const claimBtn = document.getElementById('btn-cw-claim');
     if (claimBtn) {
-      if (claimUsd > 0 && has500Members && is25thOrLater) {
+      if (claimUsd > 0) {
         claimBtn.disabled    = false;
         claimBtn.textContent = `Claim $${claimUsd.toFixed(4)} USDC`;
         claimBtn.className   = 'btn btn-green full-w';
-      } else if (claimUsd > 0 && !has500Members) {
-        claimBtn.disabled    = true;
-        claimBtn.textContent = `Claim unlocks at 500 members (${totalMembers}/500)`;
-        claimBtn.className   = 'btn btn-ghost full-w';
-      } else if (claimUsd > 0 && !is25thOrLater) {
-        claimBtn.disabled    = true;
-        claimBtn.textContent = `Claim opens on the 25th of each month`;
-        claimBtn.className   = 'btn btn-ghost full-w';
+        claimBtn.title       = 'Unclaimed distributions expire after each distribution window — claim promptly.';
       } else {
         claimBtn.disabled    = true;
         claimBtn.textContent = 'Nothing to claim yet';
@@ -5564,7 +5566,9 @@ async function loadDashboardData() {
     // V8.47 (owner 2026-08-07): repaint the headline from the withdrawCore
     // mirror once it lands — same fast-paint/refine pattern as the MAX button.
     _claimableAll(rp).then(res => {
-      if (!res) return;
+      // res.ok === false means a reserve/tier/debt read failed — the figure would
+      // be inflated by the skipped holds, so leave the last good value in place.
+      if (!res || !res.ok) return;
       window._maxWithdrawable = res.net;
       setText('dash-withdrawable',    fmt6(res.net));
       setText('dash-withdraw-amount', fmt6(res.net));
@@ -5986,7 +5990,8 @@ async function renderWithdrawableDetail(el, rp) {
   // (crossing hold only where the automation reserve applies, reserve once on
   // the highest tier, rescue debt repaid first). The card and the MAX button
   // read the same helper, so all three areas agree by construction.
-  const _res = await _claimableAll(rp).catch(() => null);
+  let _res = await _claimableAll(rp).catch(() => null);
+  if (_res && !_res.ok) _res = null;   // unverified → fall back, don't over-promise
   const grossClaim   = _res ? _res.total : totalWithdrawable;
   const availToClaim = _res ? _res.net   : totalWithdrawable;
   const debtRepay    = _res ? _res.debt  : 0n;
@@ -6447,15 +6452,24 @@ async function renderCommunityDetail(el, rp) {
 async function _claimableAll(rp, blockTag) {
   const o = blockTag !== undefined ? { blockTag } : {};
   const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+  // AUDIT 2026-08-07 (my own failure-as-zero, shipped yesterday): these three
+  // defaulted to 0 on failure, which SKIPS the crossing-hold + automation-reserve
+  // block entirely and returns an INFLATED claimable — painted as the headline,
+  // filled into MAX, and shown in the modal, with the reserve badge hidden
+  // because reserved===0n. The withdrawal then reverts "balance fully reserved
+  // for automation". Unknown must propagate, never default.
   const [highest, reserved] = await Promise.all([
-    tr.memberHighestTier(userAddr, o).then(Number).catch(() => 0),
-    tr.reservedFor(userAddr, o).then(v => BigInt(v)).catch(() => 0n),
+    tr.memberHighestTier(userAddr, o).then(Number).catch(() => null),
+    tr.reservedFor(userAddr, o).then(v => BigInt(v)).catch(() => null),
   ]);
-  let debt = 0n;
+  let debt = null;
   try {
     debt = BigInt(await new ethers.Contract(ADDRS.stabilityFund,
       ['function memberDebtOf(address) view returns (uint256)'], rp).memberDebtOf(userAddr, o));
   } catch (_) {}
+  if (highest === null || reserved === null || debt === null) {
+    return { ok: false, total: 0n, net: 0n, debt: 0n, reserved: 0n, highest: 0, byTier: {}, heldNow: 0n };
+  }
   const mats = await _buildAllMatrixObjects(rp);
   let total = 0n;
   let heldNow = 0n;   // what crossing hold + reserve ACTUALLY withhold right now (highest tier only)
@@ -6493,7 +6507,7 @@ async function _claimableAll(rp, blockTag) {
     byTier[tNum] += bal;
   }));
   const net = total > debt ? total - debt : 0n;
-  return { total, net, debt, reserved, highest, byTier, heldNow };
+  return { ok: true, total, net, debt, reserved, highest, byTier, heldNow };
 }
 
 async function _freshMaxWithdrawable() {
@@ -6501,6 +6515,9 @@ async function _freshMaxWithdrawable() {
   // Koach100 pinned-block rule stands: one block for every read in the batch.
   const tag = await rp.getBlockNumber();
   const res = await _claimableAll(rp, tag);
+  // Unverified → keep whatever the card already had rather than filling MAX with
+  // a figure computed without the automation-reserve hold.
+  if (!res.ok) return window._maxWithdrawable || 0n;
   return res.net;
 }
 
@@ -7469,14 +7486,21 @@ async function loadRedeemData() {
       cnova.balanceOf(userAddr).catch(()=>0n),
       treasury.floorPrice().catch(()=>0n),   // (usdcReserve * 1e18) / cnovaSupply — 6-dec result
       cnova.vestDuration().catch(()=>BigInt(180*86400)),
-      cnova.maxPenaltyBps().catch(()=>5000n),
+      // The REDEMPTION penalty, from the treasury — not the vesting cap.
+      treasury.earlyExitPenaltyBps(userAddr).catch(()=>null),
       cnova.lockedBalanceOf(userAddr).catch(()=>0n),
     ]);
+    // A failed read must not silently quote 0% (or 50%) — both mislead about money.
+    if (penaltyBps === null) {
+      const _pe = document.getElementById('redeem-penalty-note');
+      if (_pe) _pe.textContent = 'Could not read your early-exit penalty — refresh before redeeming.';
+    }
     _redeemBal        = bal;
     _redeemLocked     = lockedBal;
     setText('redeem-locked-bal', Number(ethers.formatEther(lockedBal)).toFixed(2) + ' CNOVA');
     _redeemFloor      = floorRaw;  // usdcOut = cnovaWei * floorRaw / 1e18
-    _redeemPenaltyBps = penaltyBps;
+    _redeemPenaltyBps = penaltyBps;   // null = unknown; preview must show "—"
+
 
     // Floor display: floorRaw is already in 6-dec USDC units (e.g. 30000 = $0.03)
     const floorUsd = Number(floorRaw) / 1e6;
@@ -7524,6 +7548,8 @@ function updateRedeemPreview() {
   if (!input || !outEl) return;
   const raw = parseFloat(input.value);
   if (!raw || raw <= 0 || _redeemFloor === 0n) { blank(); return; }
+  // AUDIT 2026-08-07: with the penalty unknown, every figure below is a guess.
+  if (_redeemPenaltyBps === null || _redeemPenaltyBps === undefined) { blank(); return; }
   const cnovaWei = BigInt(Math.floor(raw * 1e18));
   // gross USDC before penalty: cnovaWei * floorPrice / 1e18
   const gross    = cnovaWei * _redeemFloor / BigInt(1e18);
@@ -8100,18 +8126,30 @@ async function updateWhaleGateUI(highestTier, rp, canUpgrade = false) {
     const showBulk = (showBulkLow || showBulkHigh) && _bulkSpan >= 2;
     bulkSection.style.display = showBulk ? 'block' : 'none';
     if (showBulk) {
-      const TIER_FEES = [0n,10_000_000n,25_000_000n,50_000_000n,100_000_000n,200_000_000n,
-                         500_000_000n,1_000_000_000n,2_000_000_000n,5_000_000_000n,10_000_000_000n];
+      // AUDIT 2026-08-07: a hard-coded fee table used to live here and had
+      // DRIFTED from the other two copies in this file — T5 listed $200 against
+      // $250, T8 $2,000 against $2,500. On a failed tierEntryFees() read the card
+      // approved the short amount, guaranteeing a revert. The chain is now the
+      // only source; an unreadable fee aborts the quote instead of guessing.
       const TIER_NAMES = ['','Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime',
                           'Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
       const targetTierNum = _bulkTarget;
       let totalFee = 0n;
       const feeLines = [];
+      let feeReadFailed = false;
       for (let t = highestTier + 1; t <= targetTierNum; t++) {
-        let fee = TIER_FEES[t] || 0n;
-        try { fee = await tr.tierEntryFees(t - 1); } catch(_) {}
+        let fee = null;
+        try { fee = BigInt(await tr.tierEntryFees(t - 1)); } catch(_) { feeReadFailed = true; break; }
         totalFee += fee;
         feeLines.push('T' + t + ': ' + fmt6(fee));
+      }
+      if (feeReadFailed) {
+        window._bulkUpgradeFee = 0n;
+        const _bd = document.getElementById('bulk-upgrade-breakdown');
+        if (_bd) _bd.textContent = 'Could not read tier fees — refresh before upgrading.';
+        const _ba = document.getElementById('btn-bulk-approve');
+        if (_ba) _ba.disabled = true;
+        return;
       }
       const targetTierIndex = targetTierNum - 1; // 0-based index for bulkUpgrade()
       window._bulkUpgradeFee       = totalFee;
@@ -8276,7 +8314,13 @@ async function _upgradeDebtDue(rp) {
   try {
     return BigInt(await new ethers.Contract(ADDRS.stabilityFund,
       ['function memberDebtOf(address) view returns (uint256)'], rp).memberDebtOf(userAddr));
-  } catch (_) { return 0n; }
+  } catch (_) {
+    // AUDIT 2026-08-07: this returned 0n, so a failed read meant the member
+    // approved the FEE ONLY, and manualUpgrade then reverted on allowance while
+    // _walletFold tried to pull the loan — precisely the failure this helper was
+    // added to prevent. null = unknown; callers must refuse to approve.
+    return null;
+  }
 }
 
 async function approveUSDCForUpgrade() {
@@ -8292,7 +8336,13 @@ async function approveUSDCForUpgrade() {
   const fee = window._upgradeCardFee || window._dashUpgradeFee || 25_000_000n;
   // V8.47 gate (Jacob, d212b87): approve fee + outstanding rescue loan — the
   // fold's extra pull is what reverted when only the fee was approved.
-  const debtDue  = await _upgradeDebtDue(readProvider || (signer && signer.provider)).catch(() => 0n);
+  const debtDue  = await _upgradeDebtDue(readProvider || (signer && signer.provider)).catch(() => null);
+  if (debtDue === null) {
+    _setS('⚠️ Could not confirm whether you have an outstanding rescue loan, and the upgrade charges fee + loan together. Nothing was sent — please retry in a moment.');
+    if (btnReg)  btnReg.disabled  = false;
+    if (btnDash) btnDash.disabled = false;
+    return;
+  }
   const totalDue = fee + debtDue;
   try {
     if (btnReg)  btnReg.disabled  = true;
@@ -8381,6 +8431,11 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
       trR.memberHighestTier(userAddr).catch(() => 0),
       _upgradeDebtDue(rp),
     ]);
+    if (_updDebt === null) {
+      _setS('⚠️ Could not confirm your outstanding rescue loan balance. The upgrade charges fee + loan in one transaction, so nothing was sent — please retry.');
+      if (btn) btn.disabled = false;
+      return;
+    }
     // V8.47 gate (Jacob, d212b87): the router pulls fee + outstanding rescue
     // loan in one transaction — both checks must use the combined figure.
     const _required = BigInt(fee) + _updDebt;
