@@ -6453,24 +6453,60 @@ async function renderCommunityDetail(el, rp) {
   const isEligible = isGenesis || isPioneer;
 
   const groupLabel    = isGenesis ? 'Genesis (members #1–500)' : isPioneer ? 'Pioneer (members #501–1,000)' : 'Not eligible (above #1,000)';
-  const groupShare    = isGenesis ? 0.65 : isPioneer ? 0.35 : 0;
-  const groupMax      = 500n; // max per group
-  const distributable = cwBal / 2n;
-  const groupPool     = BigInt(Math.floor(Number(distributable) * groupShare));
-  const estShare      = groupMax > 0n ? groupPool / groupMax : 0n;
+  // AUDIT 2026-08-07: this modal hard-coded a 65/35 cohort split. The deployed
+  // CommunityWallet uses genesisBps 6000 / pioneerBps 4000 (60/40) — and the
+  // app's OWN Community Wallet panel already said 60/40, so the two disagreed.
+  // It also divided by a fixed 500 and treated the whole balance as
+  // distributable, while distribute() works from availablePool() (balance MINUS
+  // already-allocated unclaimed distributions) and divides by the LIVE cohort
+  // count. All of it is readable on-chain; only fall back to the documented
+  // defaults when a read fails.
+  let _gBps = 6000n, _pBps = 4000n, _ratio = 5000n, _gCount = 0n, _pCount = 0n, _avail = null;
+  try {
+    const _cwRo = new ethers.Contract(ADDRS.communityWallet, [
+      'function genesisBps() view returns (uint256)',
+      'function pioneerBps() view returns (uint256)',
+      'function distributeRatioBps() view returns (uint256)',
+      'function genesisCount() view returns (uint256)',
+      'function pioneerCount() view returns (uint256)',
+      'function availablePool() view returns (uint256)',
+    ], rp);
+    const [gb, pb, dr, gc, pc, av] = await Promise.all([
+      _cwRo.genesisBps().catch(()=>null), _cwRo.pioneerBps().catch(()=>null),
+      _cwRo.distributeRatioBps().catch(()=>null), _cwRo.genesisCount().catch(()=>null),
+      _cwRo.pioneerCount().catch(()=>null), _cwRo.availablePool().catch(()=>null),
+    ]);
+    if (gb !== null) _gBps = BigInt(gb);
+    if (pb !== null) _pBps = BigInt(pb);
+    if (dr !== null) _ratio = BigInt(dr);
+    if (gc !== null) _gCount = BigInt(gc);
+    if (pc !== null) _pCount = BigInt(pc);
+    if (av !== null) _avail = BigInt(av);
+  } catch (_) {}
+
+  const _poolBase     = _avail !== null ? _avail : cwBal;   // excludes pending when readable
+  const distributable = _poolBase * _ratio / 10000n;
+  const groupShareBps = isGenesis ? _gBps : isPioneer ? _pBps : 0n;
+  const groupPool     = distributable * groupShareBps / 10000n;
+  // Divide by the live cohort count, exactly as distribute() does. Until a cohort
+  // fills, the per-member share is LARGER than the at-capacity figure — showing
+  // the /500 number understated it by up to 25x early on.
+  const cohortCount   = isGenesis ? _gCount : isPioneer ? _pCount : 0n;
+  const estShare      = cohortCount > 0n ? groupPool / cohortCount : 0n;
+  const atCapacity    = 500n > 0n ? groupPool / 500n : 0n;
   const eligIcon      = isGenesis ? '🟢' : isPioneer ? '🟡' : '🔴';
 
   el.innerHTML = `
     <div class="detail-section">Pool Balance</div>
     <div class="detail-row"><span class="detail-key">Total Pool</span><span class="detail-val purple">${fmt6(cwBal)}</span></div>
-    <div class="detail-row"><span class="detail-key">Monthly Distributable (50%)</span><span class="detail-val">${fmt6(distributable)}</span></div>
-    <div class="detail-row"><span class="detail-key">Rolls Over (50%)</span><span class="detail-val">${fmt6(cwBal - distributable)}</span></div>
+    <div class="detail-row"><span class="detail-key">Distributable this cycle (${Number(_ratio)/100}%)</span><span class="detail-val">${fmt6(distributable)}</span></div>
+    <div class="detail-row"><span class="detail-key">Rolls over</span><span class="detail-val">${fmt6(_poolBase > distributable ? _poolBase - distributable : 0n)}</span></div>
     <div class="detail-section">Your Eligibility</div>
     <div class="detail-row"><span class="detail-key">Your Member ID</span><span class="detail-val">${_joinId ? '#' + _joinId : '—'}</span></div>
     <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">${eligIcon} ${_joinId ? groupLabel : 'Loading…'}</span></div>
     ${isEligible ? `
-    <div class="detail-row"><span class="detail-key">Your Group's Share</span><span class="detail-val">${(groupShare*100).toFixed(0)}% of distributable = ${fmt6(groupPool)}</span></div>
-    <div class="detail-row total"><span class="detail-key">Est. Your Share / Month</span><span class="detail-val green">${fmt6(estShare)} <span style="color:var(--text3);font-size:11px;font-weight:400">÷ max ${groupMax} members</span></span></div>
+    <div class="detail-row"><span class="detail-key">Your Group's Share</span><span class="detail-val">${Number(groupShareBps)/100}% of distributable = ${fmt6(groupPool)}</span></div>
+    <div class="detail-row total"><span class="detail-key">Est. Your Share / Cycle</span><span class="detail-val green">${cohortCount > 0n ? fmt6(estShare) : '—'} <span style="color:var(--text3);font-size:11px;font-weight:400">÷ ${cohortCount} enrolled${cohortCount > 0n && cohortCount < 500n ? ` · ${fmt6(atCapacity)} once the cohort fills` : ''}</span></span></div>
     ` : `
     <div class="detail-row"><span class="detail-key">Eligible</span><span class="detail-val red">No — first 1,000 members only</span></div>
     `}
