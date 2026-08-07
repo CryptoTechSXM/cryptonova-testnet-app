@@ -2163,6 +2163,11 @@ const T10_FEE = 10_000_000_000n;   // $10,000 USDC
 
 // ── ABIs ─────────────────────────────────────────────────────────────
 const TIER_ROUTER_ABI = [
+  // V8.47 (Jacob, bug d212b87): _walletFold pulls the member's outstanding
+  // rescue loan via safeTransferFrom — without these error defs an allowance
+  // shortfall decodes to reason=null and the member sees the generic red X.
+  'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
+  'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
   'function bulkWithdraw() external', // V8.44 G2: sweep every tier's free balance in ONE tx
   'function register(address referrer) external',
   'function globalJoined(address) external view returns (bool)',
@@ -8249,6 +8254,16 @@ async function doBulkUpgrade() {
   }
 }
 
+// V8.47 upgrade gate: manualUpgrade pulls fee + the member's OUTSTANDING
+// RESCUE LOAN from the wallet (_walletFold → SF.receiveDebtRepayment). Every
+// balance/allowance check and the approve amount must use fee + this figure.
+async function _upgradeDebtDue(rp) {
+  try {
+    return BigInt(await new ethers.Contract(ADDRS.stabilityFund,
+      ['function memberDebtOf(address) view returns (uint256)'], rp).memberDebtOf(userAddr));
+  } catch (_) { return 0n; }
+}
+
 async function approveUSDCForUpgrade() {
   if (!signer) { toast('Connect your wallet first.', 'error'); return; }
   const btnReg  = document.getElementById('btn-upgrade-approve');
@@ -8260,6 +8275,10 @@ async function approveUSDCForUpgrade() {
     if (stDash) stDash.textContent = msg;
   };
   const fee = window._upgradeCardFee || window._dashUpgradeFee || 25_000_000n;
+  // V8.47 gate (Jacob, d212b87): approve fee + outstanding rescue loan — the
+  // fold's extra pull is what reverted when only the fee was approved.
+  const debtDue  = await _upgradeDebtDue(readProvider || (signer && signer.provider)).catch(() => 0n);
+  const totalDue = fee + debtDue;
   try {
     if (btnReg)  btnReg.disabled  = true;
     if (btnDash) btnDash.disabled = true;
@@ -8286,17 +8305,19 @@ async function approveUSDCForUpgrade() {
       if (btnDash) btnDash.disabled = false;
       return;
     }
-    if (usdcBal !== null && usdcBal < fee) {
-      const needed = (Number(fee) / 1e6).toFixed(2);
+    if (usdcBal !== null && usdcBal < totalDue) {
+      const needed = (Number(totalDue) / 1e6).toFixed(2);
       const has    = (Number(usdcBal) / 1e6).toFixed(2);
-      _setS(`💳 You need $${needed} USDC for this upgrade but your wallet only has $${has}. Visit the faucet to top up!`);
+      _setS(debtDue > 0n
+        ? `💳 This upgrade needs $${needed} USDC — the $${(Number(fee)/1e6).toFixed(2)} entry fee plus your outstanding rescue loan of $${(Number(debtDue)/1e6).toFixed(2)} (settled automatically as part of the upgrade). Your wallet has $${has}.`
+        : `💳 You need $${needed} USDC for this upgrade but your wallet only has $${has}. Visit the faucet to top up!`);
       if (btnReg)  btnReg.disabled  = false;
       if (btnDash) btnDash.disabled = false;
       return;
     }
 
-    _setS('Approving USDC…');
-    const tx = await usdc.approve(ADDRS.tierRouter, fee);
+    _setS(debtDue > 0n ? `Approving ${'$' + (Number(totalDue)/1e6).toFixed(2)} USDC (fee + rescue-loan settlement)…` : 'Approving USDC…');
+    const tx = await usdc.approve(ADDRS.tierRouter, totalDue);
     _setS('Waiting for confirmation…');
     // Timeout guard: RPC sometimes hangs on receipt events — proceed after 10s regardless
     await Promise.race([
@@ -8338,26 +8359,34 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     const rp    = provider || readProvider;
     const usdcC = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
     const trR   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    const [fee, bal, uAllowance, highestTier] = await Promise.all([
+    const [fee, bal, uAllowance, highestTier, _updDebt] = await Promise.all([
       trR.tierEntryFees(tierIdx).catch(() => 0n),
       usdcC.balanceOf(userAddr).catch(() => 0n),
       usdcC.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
       trR.memberHighestTier(userAddr).catch(() => 0),
+      _upgradeDebtDue(rp),
     ]);
+    // V8.47 gate (Jacob, d212b87): the router pulls fee + outstanding rescue
+    // loan in one transaction — both checks must use the combined figure.
+    const _required = BigInt(fee) + _updDebt;
     if (Number(highestTier) >= tierIdx + 1) {
       _setS(`✅ You are already in T${tierIdx + 1} — no upgrade needed! Open your Dashboard to see your current position.`);
       if (btn) btn.disabled = false;
       return;
     }
-    if (bal < fee) {
-      const needed = (Number(fee) / 1e6).toFixed(2);
+    if (bal < _required) {
+      const needed = (Number(_required) / 1e6).toFixed(2);
       const has    = (Number(bal)  / 1e6).toFixed(2);
-      _setS(`💳 You need $${needed} USDC to upgrade to T${tierIdx + 1} but your wallet only has $${has}. Visit the faucet to top up!`);
+      _setS(_updDebt > 0n
+        ? `💳 Upgrading to T${tierIdx + 1} needs $${needed} USDC — the $${(Number(fee)/1e6).toFixed(2)} entry fee plus your outstanding rescue loan of $${(Number(_updDebt)/1e6).toFixed(2)}, settled automatically as part of the upgrade. Your wallet has $${has}.`
+        : `💳 You need $${needed} USDC to upgrade to T${tierIdx + 1} but your wallet only has $${has}. Visit the faucet to top up!`);
       if (btn) btn.disabled = false;
       return;
     }
-    if (uAllowance < fee) {
-      _setS('🔒 Please complete Step 1 (Approve USDC) before upgrading.');
+    if (uAllowance < _required) {
+      _setS(_updDebt > 0n && uAllowance >= BigInt(fee)
+        ? `🔒 One more approval needed: this upgrade also settles your outstanding rescue loan of $${(Number(_updDebt)/1e6).toFixed(2)}, so the total to approve is $${(Number(_required)/1e6).toFixed(2)}. Click Step 1 (Approve USDC) again.`
+        : '🔒 Please complete Step 1 (Approve USDC) before upgrading.');
       if (btn) btn.disabled = false;
       return;
     }
