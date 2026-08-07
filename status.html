@@ -1194,14 +1194,30 @@
           for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
           const addrs = await Promise.all(batch.map(idx => mat.getParkedMember(idx).catch(()=>null)));
           const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
+            // V8.47: retry each read (rate limits); a FAILED read stays null — it is
+            // NEVER treated as $0, so we don't print a confidently wrong shortfall.
+            const rNull = async (fn, tries) => {
+              for (let a = 1; a <= tries; a++) {
+                try { return await fn(); }
+                catch(e) { if (a === tries) return null; await new Promise(r=>setTimeout(r, 300*a)); }
+              }
+              return null;
+            };
             const [parkedTs, withdrawable, crossingReserve] = await Promise.all([
-              mat.parkedAt(addr).catch(()=>0n),
-              mat.withdrawableOf(addr).catch(()=>0n),
-              mat.crossingReserveOf(addr).catch(()=>0n),  // V8.31
+              rNull(() => mat.parkedAt(addr), 3),
+              rNull(() => mat.withdrawableOf(addr), 3),
+              rNull(() => mat.crossingReserveOf(addr), 3),  // V8.31
             ]);
-            return { addr, parkedTs: Number(parkedTs), withdrawable: BigInt(withdrawable), crossingReserve: BigInt(crossingReserve) };
+            return {
+              addr,
+              parkedTs: parkedTs === null ? null : Number(parkedTs),
+              withdrawable: withdrawable === null ? null : BigInt(withdrawable),
+              crossingReserve: crossingReserve === null ? null : BigInt(crossingReserve),
+              readFailed: (withdrawable === null || crossingReserve === null)
+            };
           }));
           stillParked.push(...details);
+          await new Promise(r=>setTimeout(r, 150)); // pace batches — stay under RPC rate limit
         }
       }
 
@@ -1209,24 +1225,28 @@
       let entryFee = 10_000_000n;
       try { entryFee = await matA.ENTRY_FEE(); } catch {}
 
+      let shortfallKnown = 0;
       for (const p of stillParked) {
         // V8.31: effectiveContrib = crossingReserve + withdrawable
         // crossingReserve is consumed first toward the re-entry fee, so it reduces the SF shortfall.
+        // V8.47: if a read failed, the shortfall is UNKNOWN — render "…", never compute from $0.
+        if (p.readFailed) { p.shortfall = null; continue; }
         const effectiveContrib = p.withdrawable + (p.crossingReserve || 0n);
         const shortfall = entryFee > effectiveContrib ? entryFee - effectiveContrib : 0n;
         p.shortfall = shortfall;
         totalShortfall += shortfall;
+        shortfallKnown++;
       }
 
       // Sort: longest-waiting first (these are next to be rescued)
-      stillParked.sort((a, b) => a.parkedTs - b.parkedTs);
+      stillParked.sort((a, b) => (a.parkedTs ?? Infinity) - (b.parkedTs ?? Infinity));
       const RESCUE_DISPLAY_LIMIT = 10;
       const displayParked = stillParked.slice(0, RESCUE_DISPLAY_LIMIT);
       const hiddenCount   = stillParked.length - displayParked.length;
 
       // Avg shortfall
-      const avgShortfall = stillParked.length > 0 ? totalShortfall / BigInt(stillParked.length) : 0n;
-      const shortfallTxt = stillParked.length > 0 ? fmt6(avgShortfall) : (_lastParkedStats ? _lastParkedStats.shortfall : '—');
+      const avgShortfall = shortfallKnown > 0 ? totalShortfall / BigInt(shortfallKnown) : 0n;
+      const shortfallTxt = shortfallKnown > 0 ? fmt6(avgShortfall) : (_lastParkedStats ? _lastParkedStats.shortfall : '—');
       setText('pk-shortfall', shortfallTxt);
 
       // SF rescue capacity
@@ -1290,11 +1310,14 @@
         }
 
         const rows = displayParked.map(p => {
-          const eligibleAt   = p.parkedTs + graceSecs;
+          const eligibleAt   = (p.parkedTs ?? 0) + graceSecs;
           const isEligible   = nowSecs >= eligibleAt;
           const secsLeft     = eligibleAt - nowSecs;
           let rescueStatus, rescueColor;
-          if (graceSecs === 0 || isEligible) {
+          if (p.parkedTs === null) {
+            rescueStatus = '…';
+            rescueColor  = 'var(--text3)';
+          } else if (graceSecs === 0 || isEligible) {
             rescueStatus = '⏳ In rescue queue';
             rescueColor  = 'var(--yellow)';
           } else if (secsLeft < 3600) {
@@ -1313,9 +1336,9 @@
                 <span class="addr-short">${shortAddr(p.addr)}</span>
                 <button class="copy-btn" onclick="navigator.clipboard.writeText('${p.addr}')" title="Copy address">⧉</button>
               </td>
-              <td class="amount">${fmt6(p.withdrawable)}</td>
-              <td class="amount" style="color:#10b981">${p.crossingReserve > 0n ? fmt6(p.crossingReserve) : '—'}</td>
-              <td class="amount" style="color:#f97316">${p.shortfall > 0n ? fmt6(p.shortfall) : '—'}</td>
+              <td class="amount">${p.withdrawable === null ? '<span title="read failed — retrying" style="color:var(--text3)">…</span>' : fmt6(p.withdrawable)}</td>
+              <td class="amount" style="color:#10b981">${p.crossingReserve === null ? '<span title="read failed — retrying" style="color:var(--text3)">…</span>' : (p.crossingReserve > 0n ? fmt6(p.crossingReserve) : '—')}</td>
+              <td class="amount" style="color:#f97316">${p.shortfall === null ? '<span title="read failed — retrying" style="color:var(--text3)">…</span>' : (p.shortfall > 0n ? fmt6(p.shortfall) : '—')}</td>
               <td class="time">${p.parkedTs ? elapsed(p.parkedTs) : '—'}</td>
               <td style="font-size:11px;color:${rescueColor}">${rescueStatus}</td>
             </tr>
