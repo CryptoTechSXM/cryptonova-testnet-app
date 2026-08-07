@@ -665,6 +665,15 @@ function toggleTheme() {
     <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">50% funds your crossing reserve (held for you). 2.5% is your instant earn. The remaining 47.5% goes to the pool (18%), chain pay (18.5%), treasury (5%), and protocol reserves. All rates are identical across all 10 tiers.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Immutable.</strong> <span data-i18n="compPage.split_footer_post">(Percentages shown are of the total entry fee. Pool and chain pay rates are flat at every tier — cycle payouts scale with the tier entry fee, not the pool percentage.)</span></p>
   </div>
 
+  <!-- Rescue-advance disclosure. AUDIT 2026-08-07: this page showed the 3%
+       Stability Rescue Fund split but never explained what the fund DOES, and
+       never used the words debt, loan or repay — while V8.47 books every rescue
+       as a repayable member-level debt. -->
+  <div style="margin-top:20px;padding:14px 18px;border-radius:10px;border:1px solid rgba(56,189,248,.28);background:rgba(56,189,248,.07);font-size:13px;color:var(--text2);line-height:1.7">
+    <strong style="color:#38bdf8">About the Stability Rescue Fund</strong><br>
+    <span data-i18n="compPage.sf_advance_note">If your earnings can&rsquo;t cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings &mdash; 60% to 90% of each payout depending on which tier issued it &mdash; across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet.</span>
+  </div>
+
   <!-- ── Disclaimer ── -->
   <div class="risk-box">
     <strong data-i18n="compPage.risk_title">⚠️ Important — Read Before Participating</strong><br>

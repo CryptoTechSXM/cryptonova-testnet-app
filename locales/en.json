@@ -969,7 +969,8 @@
   "risk_body": "CryptoNova Matrix is a high-risk DeFi protocol. Earnings depend entirely on continued network growth — if growth slows, matrix cycles slow and chain pay volume decreases. The cycle payouts shown above assume a fully-filled matrix, which is not guaranteed. CNOVA tokens are not a stablecoin and have no guaranteed market value above the floor price. Only participate with funds you can afford to lose entirely. This is not financial advice.",
   "join_btn": "Join CryptoNova &rarr;",
   "split_reserve": "🔐 Your Crossing Reserve (held for you)",
-  "split_instant": "⚡ Your Instant Earn (to your balance)"
+  "split_instant": "⚡ Your Instant Earn (to your balance)",
+  "sf_advance_note": "If your earnings can't cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings — 60% to 90% of each payout depending on which tier issued it — across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet."
  },
  "faqPage": {
   "browser_title": "FAQ &amp; Glossary — CryptoNova",
@@ -987,7 +988,7 @@
   "g3_full": "CNOVA Floor Price Reserve",
   "g3_def": "5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.",
   "g14_full": "Member Rescue Reserve",
-  "g14_def": "3% of every entry fee flows into the Stability Rescue Fund. It backstops partial rescue contributions for &ldquo;parked&rdquo; members &mdash; those who completed a matrix cycle but didn't have enough withdrawable balance to self-fund re-entry. This is separate from the CNOVA Treasury, which backs the token's floor price.",
+  "g14_def": "3% of every entry fee flows into the Stability Rescue Fund. If your earnings can't cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings — 60% to 90% of each payout depending on which tier issued it — across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet. This fund is separate from the CNOVA Treasury, which backs the token's floor price.",
   "g4_full": "Development Reserve",
   "g4_def": "1.5% of each entry fee (from the 47.5% payout base) flows to Dev + Ops &mdash; it funds ongoing smart contract development, audits, and protocol engineering. It is not used for CNOVA redemption and is not accessible to individual members.",
   "g5_full": "USD Coin",

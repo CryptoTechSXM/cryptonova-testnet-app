@@ -963,7 +963,6 @@
   "g3_full": "Reserva de Precio Piso de CNOVA",
   "g3_def": "5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.",
   "g14_full": "Reserva de Rescate de Miembros",
-  "g14_def": "3% of every entry fee flows into the Stability Rescue Fund. It backstops partial rescue contributions for &ldquo;parked&rdquo; members &mdash; those who completed a matrix cycle but didn't have enough withdrawable balance to self-fund re-entry. This is separate from the CNOVA Treasury, which backs the token's floor price.",
   "g4_full": "Reserva de Desarrollo",
   "g4_def": "1.5% of each entry fee (from the 47.5% payout base) flows to Dev + Ops &mdash; it funds ongoing smart contract development, audits, and protocol engineering. It is not used for CNOVA redemption and is not accessible to individual members.",
   "g5_full": "USD Coin",
