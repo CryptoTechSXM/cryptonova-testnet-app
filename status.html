@@ -556,12 +556,15 @@
              belongs in the SF Fund vs the Parked members") — these are fund outflows,
              not member state.
 
-             The three rows above come from the SF contract's own lifetime counters.
-             The rows below are rebuilt from RescueLoanIssued / RescueDebtRepaid events
-             over a ~56h window, which is why the totals are much smaller. Labels say
-             so explicitly — the two sets were easy to confuse when the figures sat in
-             different cards. -->
-        <div class="detail-section">Loan Book — last 100k blocks (~56h)</div>
+             The three rows above come from the SF contract's own lifetime counters
+             (V8.47: totalRescueLoaned / totalRescueRepaid — exact, single read).
+             The rows below are rebuilt from the fund's MemberDebtIncreased /
+             MemberDebtRepaid events over a ~5h window, which is why the totals are
+             much smaller. The heading said "last 100k blocks (~56h)" until
+             2026-08-07, but the scan was cut to 9,000 blocks when QuickNode began
+             rejecting eth_getLogs over its 10k cap — so the label had been
+             overstating the window by 10x. Labels and code now agree. -->
+        <div class="detail-section">Loan Book — recent window (~5h)</div>
         <div class="detail-row">
           <span class="detail-key">Loaned in window</span>
           <span class="detail-val" id="kp-loaned">—</span>
@@ -802,11 +805,16 @@
   let _lastTierData    = null; // full per-tier last-good — hold ALL tiers (not just T1) on a blipped read
   let _lastT1Tier     = null; // hold last-good T1 tier data so summary + row stay consistent
   let _lastTotals     = null; // { cycles, totalJoined } — hold last-good System Totals
+  // AUDIT 2026-08-07: sf.totalBalance() fell back to 0 on any read failure, and that
+  // single value drives the health badge — so one blipped RPC call painted
+  // "STABILITY FUND · CRITICAL · $0.00 · ~0 members can be rescued" in red to the
+  // whole community. Hold last-good; with no cache at all, show "—", never $0.00.
+  let _lastSFVals     = null; // { sfBal, treaBal, bbBal, cnovaSup } as decimal strings
   // V8.47 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
     if (localStorage.getItem('cnova_st_ver') !== 'v8.47-0807b') {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47']
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47']
         .forEach(function(k){ localStorage.removeItem(k); });
       localStorage.setItem('cnova_st_ver','v8.47-0807b');
     }
@@ -831,6 +839,8 @@
     }
     const _cpc = localStorage.getItem('cnova_st_parked_count');
     if (_cpc !== null && _cpc !== '') _lastParkedCount = Number(_cpc);
+    const _csf = localStorage.getItem('cnova_st_sf');
+    if (_csf) _lastSFVals = JSON.parse(_csf);
   } catch(e) {}
 
   async function loadAll() {
@@ -869,7 +879,10 @@
       const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
 
       // checkUpkeep — any work pending right now?
-      let upkeepNeeded = false, workType = 'None';
+      // AUDIT 2026-08-07: a failed call left upkeepNeeded=false and the card
+      // reported "Up to Date · OK" in green — i.e. an unreadable keeper looked
+      // like a healthy one. Track the read separately from its result.
+      let upkeepNeeded = false, workType = 'None', upkeepRead = true;
       try {
         const [needed, perfData] = await keeper.checkUpkeep('0x');
         upkeepNeeded = needed;
@@ -892,7 +905,7 @@
             workType = 'Pending';
           }
         }
-      } catch(e) {}
+      } catch(e) { upkeepRead = false; }
 
       // Recent rescues: RescueLoanIssued is in MATRIX_ABI — emitted by MatrixLogicLib (library)
       // which runs in the context of FigureEightMatrixV8, so the event originates from matA/matB.
@@ -932,9 +945,10 @@
       // routinely tripped the RPC rate cap, and each silent .catch(()=>[])
       // dropped real history. Two queries now, and the tier comes from the
       // event itself rather than an address→tier map.
+      let bookRead = true;
       const [loanLogsRaw, repayLogsRaw] = await Promise.all([
-        _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk)).catch(()=>[]),
-        _retry(() => sf.queryFilter(sf.filters.MemberDebtRepaid(),    fromBlock, blk)).catch(()=>[]),
+        _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk)).catch(() => { bookRead = false; return []; }),
+        _retry(() => sf.queryFilter(sf.filters.MemberDebtRepaid(),    fromBlock, blk)).catch(() => { bookRead = false; return []; }),
       ]);
       const keeperRescueLogs = loanLogsRaw;
       const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
@@ -965,11 +979,13 @@
       const _totRepaid = [..._book.values()].reduce((s, r) => s + r.repaid, 0n);
       const _repeat    = [..._book.values()].filter(r => r.loans >= 5).length;
 
-      setText('kp-loaned', _usd(_totLoaned));
-      setText('kp-repaid', _usd(_totRepaid));
-      setText('kp-outstanding', _usd(_totLoaned > _totRepaid ? _totLoaned - _totRepaid : 0n));
-      setText('kp-borrowers', _book.size.toString());
-      setText('kp-repeat', _repeat + ' of ' + _book.size);
+      // A failed window query is UNKNOWN, not zero — the same trap that made the
+      // lifetime rows print a confident $0.00 (owner report 2026-08-07).
+      setText('kp-loaned',      bookRead ? _usd(_totLoaned) : '—');
+      setText('kp-repaid',      bookRead ? _usd(_totRepaid) : '—');
+      setText('kp-outstanding', bookRead ? _usd(_totLoaned > _totRepaid ? _totLoaned - _totRepaid : 0n) : '—');
+      setText('kp-borrowers',   bookRead ? _book.size.toString() : '—');
+      setText('kp-repeat',      bookRead ? (_repeat + ' of ' + _book.size) : '—');
       setText('kp-loans-by-tier', [..._byTier.entries()]
         .sort((a,b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
         .map(([t, v]) => t + ': ' + v.loans + ' (' + _usd(v.loaned) + ')').join(' · ') || '—');
@@ -980,7 +996,9 @@
         .slice(0, 15);
       const _wrap = document.getElementById('kp-borrower-list');
       if (_wrap) {
-        _wrap.innerHTML = _rows.length === 0
+        _wrap.innerHTML = !bookRead
+          ? '<div class="loading-row">Loan book temporarily unavailable — retrying next poll</div>'
+          : _rows.length === 0
           ? '<div class="loading-row">No rescue loans in this window</div>'
           : _rows.map(r => {
               const net = r.loaned - r.repaid;
@@ -1002,7 +1020,14 @@
 
       // Update UI
       const pillInd = document.getElementById('pill-keeper');
-      if (upkeepNeeded) {
+      if (!upkeepRead) {
+        // Unknown, not healthy.
+        pillInd.className = 'pill-indicator yellow';
+        setText('pill-keeper-val', t('statusPage.js.checking','Checking…'));
+        setText('pill-keeper-sub', t('statusPage.js.keeper_unread','Could not read keeper this poll'));
+        document.getElementById('badge-keeper').className = 'card-badge badge-yellow';
+        setText('badge-keeper', 'CHECKING');
+      } else if (upkeepNeeded) {
         pillInd.className = 'pill-indicator yellow';
         setText('pill-keeper-val', t('statusPage.js.work_pending', 'Work Pending'));
         setText('pill-keeper-sub', workType + ' ' + t('statusPage.js.queued_suffix', 'queued'));
@@ -1017,9 +1042,9 @@
         setText('badge-keeper', t('statusPage.js.badge_ok', 'OK'));
       }
 
-      setText('kp-work-needed', upkeepNeeded ? t('statusPage.js.yes', 'YES') : t('statusPage.js.no', 'No'));
-      setClass('kp-work-needed', upkeepNeeded ? 'yellow' : 'green');
-      setText('kp-work-type', upkeepNeeded ? workType : '—');
+      setText('kp-work-needed', !upkeepRead ? '—' : upkeepNeeded ? t('statusPage.js.yes', 'YES') : t('statusPage.js.no', 'No'));
+      setClass('kp-work-needed', !upkeepRead ? 'yellow' : upkeepNeeded ? 'yellow' : 'green');
+      setText('kp-work-type', !upkeepRead ? '—' : upkeepNeeded ? workType : '—');
       setText('kp-addr', ADDRS.matrixKeeper.slice(0,6) + '…' + ADDRS.matrixKeeper.slice(-4));
       const lastRescueStr = lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—';
       setText('kp-last-rescue', lastRescueStr);
@@ -1078,7 +1103,10 @@
       const _pkRead = async (c) => { try { return await _retry(() => c.getParkedCount()); } catch (_) { _parkedReadFail = true; return 0n; } };
       const [parkedCounts, gracePeriod] = await Promise.all([
         Promise.all(allT1Pairs.map(_pkRead)),
-        keeper.parkedGracePeriod().catch(()=>0n),
+        // A failed read used to yield 0, which reads as "grace over, everyone is
+        // in the rescue queue now" — wrong and member-facing. Fall back to the
+        // deployed default (24h) instead of an implied zero.
+        keeper.parkedGracePeriod().catch(()=>86400n),
       ]);
       const parkedCountA = parkedCounts[0] || 0n;
       const parkedCountB = parkedCounts[1] || 0n;
@@ -1398,16 +1426,21 @@
       let gates = Array(10).fill(true);
       try { gates = await tr.getVelocityGates(); } catch(_) {}
       let [cycles, totalJoined] = await Promise.all([
-        tr.totalSystemCycles().catch(()=>0n),
-        tr.globalJoinedCount().catch(()=>0n),
+        tr.totalSystemCycles().catch(()=>null),
+        tr.globalJoinedCount().catch(()=>null),
       ]);
-      // Anti-flicker: hold last-good System Totals so "members joined" can't flash 0
-      // when globalJoinedCount() blips. (cycles is legitimately 0 before the first cross.)
-      if (Number(totalJoined) === 0 && _lastTotals) {
-        cycles = _lastTotals.cycles; totalJoined = _lastTotals.totalJoined;
-      } else if (Number(totalJoined) > 0) {
-        _lastTotals = { cycles, totalJoined };
+      // Anti-flicker, PER FIELD (audit 2026-08-07): the old guard keyed only on
+      // totalJoined, so a blip on cycles ALONE displayed 0 — and then cached that
+      // 0 alongside the good join count, poisoning the next poll too. Each value
+      // now holds its own last-good, and a value that has ever been non-zero is
+      // never allowed to regress to 0 (neither can legitimately count down).
+      if (cycles === null || (Number(cycles) === 0 && _lastTotals && Number(_lastTotals.cycles) > 0)) {
+        cycles = _lastTotals ? _lastTotals.cycles : 0n;
       }
+      if (totalJoined === null || (Number(totalJoined) === 0 && _lastTotals && Number(_lastTotals.totalJoined) > 0)) {
+        totalJoined = _lastTotals ? _lastTotals.totalJoined : 0n;
+      }
+      if (Number(totalJoined) > 0 || Number(cycles) > 0) _lastTotals = { cycles, totalJoined };
 
       // Discover PM addresses via TierRouter.tierPairManagers[] for T2–T10
       const pmAddrs = Array(10).fill(null);
@@ -1576,13 +1609,48 @@
       const usdcCtr  = new ethers.Contract(ADDRS.usdc, USDC_ABI, provider);
       const cnova    = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, provider);
 
-      // Query USDC contract for each wallet's balance (treasury/buyback are plain wallets)
-      const [sfBal, treaBal, bbBal, cnovaSup] = await Promise.all([
-        sf.totalBalance().catch(()=>0n),
-        usdcCtr.balanceOf(ADDRS.treasury).catch(()=>0n),
-        usdcCtr.balanceOf(ADDRS.buybackReserve).catch(()=>0n),
-        cnova.totalSupply().catch(()=>0n),
+      // Query USDC contract for each wallet's balance (treasury/buyback are plain wallets).
+      // A FAILED read is null — never 0. See _lastSFVals note above: treating a
+      // dropped call as a zero balance flipped this card to a red CRITICAL alert.
+      const _rd = pr => pr.then(v => BigInt(v)).catch(() => null);
+      let [sfBal, treaBal, bbBal, cnovaSup] = await Promise.all([
+        _rd(sf.totalBalance()),
+        _rd(usdcCtr.balanceOf(ADDRS.treasury)),
+        _rd(usdcCtr.balanceOf(ADDRS.buybackReserve)),
+        _rd(cnova.totalSupply()),
       ]);
+      const _held = _lastSFVals || {};
+      if (sfBal    === null && _held.sfBal    != null) sfBal    = BigInt(_held.sfBal);
+      if (treaBal  === null && _held.treaBal  != null) treaBal  = BigInt(_held.treaBal);
+      if (bbBal    === null && _held.bbBal    != null) bbBal    = BigInt(_held.bbBal);
+      if (cnovaSup === null && _held.cnovaSup != null) cnovaSup = BigInt(_held.cnovaSup);
+      if (sfBal !== null) {
+        _lastSFVals = {
+          sfBal: sfBal.toString(),
+          treaBal:  treaBal  === null ? _held.treaBal  : treaBal.toString(),
+          bbBal:    bbBal    === null ? _held.bbBal    : bbBal.toString(),
+          cnovaSup: cnovaSup === null ? _held.cnovaSup : cnovaSup.toString(),
+        };
+        try { localStorage.setItem('cnova_st_sf', JSON.stringify(_lastSFVals)); } catch(e) {}
+      }
+
+      // No live read AND no cache: say we don't know. Do NOT claim $0.00/CRITICAL.
+      if (sfBal === null) {
+        setText('pill-sf-val', '—');
+        setText('pill-sf-sub', t('statusPage.js.checking','Checking…'));
+        const _pi = document.getElementById('pill-sf');
+        if (_pi) _pi.className = 'pill-indicator yellow';
+        const _bs = document.getElementById('badge-sf');
+        if (_bs) { _bs.className = 'card-badge badge-yellow'; _bs.textContent = 'CHECKING'; }
+        setText('sf-bal', '—');
+        setText('sf-rescue-cap', '—');
+        setText('sf-status', t('statusPage.js.checking','Checking…'));
+        setText('summary-sf', t('statusPage.js.sf_unavailable','Balance temporarily unavailable — retrying'));
+        if (treaBal  !== null) setText('sf-treasury', fmt6(treaBal));
+        if (bbBal    !== null) setText('sf-buyback',  fmt6(bbBal));
+        if (cnovaSup !== null) setText('sf-cnova',    fmt18(cnovaSup) + ' CNOVA');
+        return;
+      }
 
       const sfNum = Number(BigInt(sfBal)) / 1e6;
 
@@ -1611,9 +1679,9 @@
       if (bar) { bar.style.width = pct + '%'; bar.className = `prog-fill ${health}`; }
       setText('sf-status', healthLabel);
       setClass('sf-status', health);
-      setText('sf-treasury', fmt6(treaBal));
-      setText('sf-buyback', fmt6(bbBal));
-      setText('sf-cnova', fmt18(cnovaSup) + ' CNOVA');
+      setText('sf-treasury', treaBal  === null ? '—' : fmt6(treaBal));
+      setText('sf-buyback',  bbBal    === null ? '—' : fmt6(bbBal));
+      setText('sf-cnova',    cnovaSup === null ? '—' : fmt18(cnovaSup) + ' CNOVA');
       setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
 
       // ── Rescue loan tracking ─────────────────────────────────────────────────
