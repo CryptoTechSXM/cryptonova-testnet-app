@@ -1391,16 +1391,12 @@
         <div style="flex:1">
           <div style="font-weight:700;color:var(--yellow);font-size:14px;margin-bottom:4px">SF Rescue Loan Outstanding</div>
           <div style="font-size:13px;color:var(--text2)">
-            The Stability Fund covered <strong id="rescue-debt-amount" style="color:var(--yellow)">$—</strong> in total to rescue you when a matrix was full.
+            The Stability Fund has advanced <strong id="rescue-debt-amount" style="color:var(--yellow)">$—</strong> to keep your position moving.
           </div>
-          <!-- Per-matrix breakdown. 2026-07-29: this used to be one flat sentence
-               claiming the loan "will be repaid automatically when you cycle out".
-               That is only true while the member is STILL SEATED in the matrix that
-               holds the debt — rescueDebt is per-matrix and clears only from a pool
-               share there (_settlePool:450) or a cycle-out from there
-               (_cycleOutRoot:548). A member who has moved on triggers neither, so
-               the promise was false and the "invite more members" tip was useless
-               advice. Now each debt states its own truth. -->
+          <!-- V8.47: debt is MEMBER-LEVEL on the SF ledger (memberDebt) — one
+               number that follows the member across every tier and pair. The old
+               per-matrix breakdown (and its seated/stranded caveats) is obsolete:
+               repayment now comes from ANY tier's earnings + the upgrade fold. -->
           <div id="rescue-debt-list" style="margin-top:8px;font-size:13px;color:var(--text2)"></div>
         </div>
       </div>
@@ -5571,76 +5567,36 @@ async function loadDashboardData() {
     } catch(_) {}
 
     // ── SF Rescue Loan banner ─────────────────────────────────────────────
-    // 2026-07-29: rewritten. It previously read ONLY `ADDRS.T1.matA` — pair 1 of
-    // Tier 1 — so a debt in any other tier, or in T1's pairs 2-4, was invisible.
-    // It then told the member the loan "will be repaid automatically when you
-    // cycle out", which is false for anyone no longer seated in the matrix that
-    // holds the debt. Measured on 0xe8Ad7bbA: $2.07 stranded in T1.1 MatA and
-    // $2.75 in T2.1 MatA, neither repayable, while the banner promised both would
-    // clear themselves and suggested inviting more members to speed it up.
+    // V8.47 REWRITE: rescue debt no longer lives per-matrix — rescueDebtOf() is
+    // FROZEN at 0 (that is the point of V8.47), which is why this banner went
+    // dark after the redeploy while loans booked correctly. The single source
+    // of truth is the StabilityFund MEMBER LEDGER: memberDebt(addr) follows the
+    // member across every tier and pair, so ONE read replaces the old sweep of
+    // every matrix and the banner can never miss a loan again.
     try {
       const banner = document.getElementById('rescue-debt-banner');
       const list   = document.getElementById('rescue-debt-list');
-      const debts  = [];
-      let totalDebt = 0n;
-
-      for (const t of Object.keys(ADDRS).filter(k => /^T\d+$/.test(k))) {
-        if (!ADDRS[t] || !ADDRS[t].pm) continue;
-        // allPairsStatus returns every pair in ONE call, so this covers pairs 2+
-        // as well — the same one-sided-lookup mistake that hid parked positions.
-        const st = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp)
-          .allPairsStatus().catch(() => null);
-        if (!st) continue;
-        const [matAs, matBs] = st;
-        for (let i = 0; i < matAs.length; i++) {
-          for (const [half, addr] of [['Matrix A', matAs[i]], ['Matrix B', matBs[i]]]) {
-            if (!addr || addr === ethers.ZeroAddress) continue;
-            const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
-            const d  = await mc.rescueDebtOf(userAddr).catch(() => 0n);
-            if (BigInt(d) === 0n) continue;
-            const seated = await mc.isActiveInMatrix(userAddr).catch(() => null);
-            // For a matrix the member has LEFT, whether the stranded loan can still
-            // settle depends on any withdrawable remaining HERE (withdrawCore requires
-            // available > 0). Read it so the banner tells the truth in both cases.
-            let leftover = null;
-            if (seated === false) {
-              const _fw = await mc.freeWithdrawable(userAddr).catch(() => null);
-              leftover = _fw === null ? null : BigInt(_fw);
-            }
-            totalDebt += BigInt(d);
-            debts.push({
-              label: `${t}.${i + 1} ${half}`,
-              debt: BigInt(d),
-              // null = the read failed; say so rather than guessing either way.
-              seated,
-              leftover,
-            });
-          }
-        }
-      }
-
       if (banner) {
-        if (totalDebt > 0n && list) {
-          document.getElementById('rescue-debt-amount').textContent = fmt6(totalDebt);
-          list.innerHTML = debts.map(d => {
-            const amt = `<strong style="color:var(--yellow)">${fmt6(d.debt)}</strong>`;
-            if (d.seated === true) {
-              return `<div style="margin-top:4px">• ${d.label} — ${amt}. You are still seated here, so this
-                <strong>repays itself</strong> when you cycle out. Filling spots faster brings that forward.</div>`;
-            }
-            if (d.seated === false) {
-              const _tail = d.leftover === null
-                ? `We couldn't read your leftover balance here — refresh to check whether it settles now.`
-                : d.leftover > 0n
-                  ? `You still hold <strong>${fmt6(d.leftover)}</strong> here, so your next withdrawal clears it from that balance — use <strong>Withdraw All</strong> to sweep every matrix at once.`
-                  : `There's no balance left here to auto-settle it yet, so the Stability Fund is covering it for now — the advance stays recorded against your account and will be recovered from your future earnings until it's repaid. <span style="font-size:10px;background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.35);padding:1px 6px;border-radius:10px;white-space:nowrap">🔧 Fix coming in V8.47</span>`;
-              return `<div style="margin-top:4px">• ${d.label} — ${amt}. <strong>You have moved on from this
-                matrix</strong>, so it won't clear from new earnings. ${_tail} This is a Stability-Fund advance
-                you're expected to repay — no position is affected in the meantime.</div>`;
-            }
-            return `<div style="margin-top:4px">• ${d.label} — ${amt}. Could not read your seat status here,
-              so we cannot say whether it will clear automatically. Try a refresh.</div>`;
-          }).join('');
+        const sf = new ethers.Contract(ADDRS.stabilityFund, [
+          'function memberDebt(address) view returns (uint256)',
+          'function clawbackBpsFor(address) view returns (uint256)',
+        ], rp);
+        // A FAILED read is null, not $0 — hiding a real loan behind an RPC
+        // hiccup is the same failure-as-zero trap fixed on the status page.
+        let debt = null;
+        try { debt = BigInt(await sf.memberDebt(userAddr)); } catch (_) {}
+        if (debt === null) {
+          // keep whatever the banner showed last — retried on the next refresh
+        } else if (debt > 0n) {
+          let pct = 0;
+          try { pct = Number(await sf.clawbackBpsFor(userAddr)) / 100; } catch (_) {}
+          document.getElementById('rescue-debt-amount').textContent = fmt6(debt);
+          if (list) list.innerHTML =
+            `<div style="margin-top:4px">This is a <strong>repayable advance</strong> that stays on your ` +
+            `account until cleared — no action needed. It repays itself automatically: ` +
+            `${pct > 0 ? `<strong>${pct}%</strong> of each matrix payout` : 'a share of each matrix payout'} ` +
+            `is applied to the loan, from any tier you earn in, and a tier upgrade settles the remainder ` +
+            `as part of the upgrade cost. Your seats and earnings keep working normally in the meantime.</div>`;
           banner.style.display = 'flex';
         } else {
           banner.style.display = 'none';
