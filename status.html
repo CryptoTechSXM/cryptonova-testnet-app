@@ -748,6 +748,18 @@
   ];
   const SF_ABI    = [
     'function totalBalance() external view returns (uint256)',
+    // V8.47 member ledger — the SAME state the hourly sf_invariant_check.js
+    // proves conserves (Σ memberDebt == loaned − repaid). Read these instead of
+    // reconstructing lifetime totals from event scans (owner report 2026-08-07:
+    // the card showed repaid > issued and a confident $0.00 outstanding).
+    'function totalRescueLoaned() external view returns (uint256)',
+    'function totalRescueRepaid() external view returns (uint256)',
+    // Authoritative loan/repay events: ONE contract, every path (keeper rescue,
+    // copay, cycle-out redirect, withdrawal sweep, TierRouter upgrade fold).
+    // The matrix-level RescueLoanIssued/RescueDebtRepaid pair misses the router
+    // fold entirely and costs 20 queries per chunk instead of 1.
+    'event MemberDebtIncreased(address indexed member, uint8 tier, uint256 amount, uint256 newTotal)',
+    'event MemberDebtRepaid(address indexed member, uint256 amount, uint256 newTotal)',
     'event DebtRepaymentReceived(address indexed matrix, uint256 amount)',
   ];
   const USDC_ABI  = ['function balanceOf(address) external view returns (uint256)'];
@@ -793,10 +805,10 @@
   // V8.47 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
-    if (localStorage.getItem('cnova_st_ver') !== 'v8.47-0805') {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_loans_v8_32','cnova_loans_v8_46']
+    if (localStorage.getItem('cnova_st_ver') !== 'v8.47-0807b') {
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47']
         .forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem('cnova_st_ver','v8.47-0805');
+      localStorage.setItem('cnova_st_ver','v8.47-0807b');
     }
   } catch(e) {}
   // Restore cached display state immediately (survives page reload)
@@ -902,49 +914,29 @@
       //
       // That reading was false. The keeper log showed T2 and T3 rescues running
       // the whole time. Cost of the silent catch: a real diagnosis was built on a
-      // display artifact. Use getAllTiers() — one call, no per-index guessing, and
-      // it fails loudly if the ABI is ever wrong again.
-      const trForKeeper = new ethers.Contract(ADDRS.tierRouter,
-        ['function getAllTiers() external view returns (address[10], uint256[10])'], provider);
-      const keeperPmAddrs = [ADDRS.T1pm];
-      try {
-        const [pmList] = await trForKeeper.getAllTiers();
-        pmList.forEach((pmA, i) => {
-          if (pmA && pmA !== ethers.ZeroAddress) keeperPmAddrs[i] = pmA;
-        });
-      } catch (e) {
-        console.warn('[status] getAllTiers failed — loan book will show T1 only:', e.message);
-      }
+      // display artifact.
+      //
+      // 2026-08-07 EPILOGUE: the whole address→tier apparatus is now GONE, and
+      // with it that entire class of bug. MemberDebtIncreased(member, tier,
+      // amount, newTotal) carries the tier in the event, so tier attribution
+      // needs no getAllTiers() call, no allPairsStatus() per tier, and no
+      // address map that can silently come back empty. Removed here: the
+      // trForKeeper contract, keeperPmAddrs and the matTier map — all of them
+      // had become dead code feeding calls nothing consumed.
 
-      // matrix address -> tier label, so each loan can be attributed to a tier
-      const matTier = new Map();
-      await Promise.all(keeperPmAddrs.map(async (pmAddr, tierIdx) => {
-        if (!pmAddr) return;
-        try {
-          const c = new ethers.Contract(pmAddr, PM_ABI, provider);
-          const [matAs, matBs] = await c.allPairsStatus();
-          [...matAs, ...matBs].forEach(m => {
-            if (m && m !== ethers.ZeroAddress) matTier.set(m.toLowerCase(), 'T' + (tierIdx + 1));
-          });
-        } catch(_) {}
-      }));
-      if (matTier.size === 0) {
-        matTier.set(ADDRS.T1matA.toLowerCase(), 'T1');
-        matTier.set(ADDRS.T1matB.toLowerCase(), 'T1');
-      }
-
-      const allMatAddrs = [...matTier.keys()];
-      const [loanArrays, repayArrays] = await Promise.all([
-        Promise.all(allMatAddrs.map(addr => {
-          const c = new ethers.Contract(addr, MATRIX_ABI, provider);
-          return _retry(() => c.queryFilter(c.filters.RescueLoanIssued(), fromBlock, blk)).catch(()=>[]);
-        })),
-        Promise.all(allMatAddrs.map(addr => {
-          const c = new ethers.Contract(addr, MATRIX_ABI, provider);
-          return _retry(() => c.queryFilter(c.filters.RescueDebtRepaid(), fromBlock, blk)).catch(()=>[]);
-        })),
+      // V8.47 (owner report 2026-08-07): read the FUND's member-ledger events,
+      // not per-matrix ones. Two reasons this was wrong: (1) repayments made
+      // through the TierRouter upgrade-fold never touch a matrix, so they were
+      // invisible — that is the "$0.00 repaid in window" against real loans;
+      // (2) 20 matrices x 2 events = 40 parallel queryFilter calls per refresh
+      // routinely tripped the RPC rate cap, and each silent .catch(()=>[])
+      // dropped real history. Two queries now, and the tier comes from the
+      // event itself rather than an address→tier map.
+      const [loanLogsRaw, repayLogsRaw] = await Promise.all([
+        _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk)).catch(()=>[]),
+        _retry(() => sf.queryFilter(sf.filters.MemberDebtRepaid(),    fromBlock, blk)).catch(()=>[]),
       ]);
-      const keeperRescueLogs = loanArrays.flat();
+      const keeperRescueLogs = loanLogsRaw;
       const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
 
       // ── per-wallet loan book ────────────────────────────────────────────────
@@ -955,14 +947,18 @@
         if (!_book.has(k)) _book.set(k, { loans: 0, loaned: 0n, repaid: 0n, tiers: new Set() });
         return _book.get(k);
       };
+      // MemberDebtIncreased(member, tier, amount, newTotal) — tier is the
+      // 0-based tier INDEX, so display tier+1.
       keeperRescueLogs.forEach(lg => {
-        const tier = matTier.get(lg.address.toLowerCase()) || '?';
+        const tier = 'T' + (Number(lg.args[1]) + 1);
+        const amt  = BigInt(lg.args[2]);
         const rec  = _bump(lg.args[0]);
-        rec.loans++; rec.loaned += lg.args[1]; rec.tiers.add(tier);
+        rec.loans++; rec.loaned += amt; rec.tiers.add(tier);
         const tt = _byTier.get(tier) || { loans: 0, loaned: 0n };
-        tt.loans++; tt.loaned += lg.args[1]; _byTier.set(tier, tt);
+        tt.loans++; tt.loaned += amt; _byTier.set(tier, tt);
       });
-      repayArrays.flat().forEach(lg => { _bump(lg.args[0]).repaid += lg.args[1]; });
+      // MemberDebtRepaid(member, amount, newTotal)
+      repayLogsRaw.forEach(lg => { _bump(lg.args[0]).repaid += BigInt(lg.args[1]); });
 
       const _usd = v => '$' + (Number(v) / 1e6).toFixed(2);
       const _totLoaned = [..._book.values()].reduce((s, r) => s + r.loaned, 0n);
@@ -971,7 +967,7 @@
 
       setText('kp-loaned', _usd(_totLoaned));
       setText('kp-repaid', _usd(_totRepaid));
-      setText('kp-outstanding', _usd(_totLoaned - _totRepaid));
+      setText('kp-outstanding', _usd(_totLoaned > _totRepaid ? _totLoaned - _totRepaid : 0n));
       setText('kp-borrowers', _book.size.toString());
       setText('kp-repeat', _repeat + ' of ' + _book.size);
       setText('kp-loans-by-tier', [..._byTier.entries()]
@@ -1620,11 +1616,15 @@
       setText('sf-cnova', fmt18(cnovaSup) + ' CNOVA');
       setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
 
-      // ── Rescue loan tracking — incremental accumulator (rate-limit safe) ──────
-      // Scans MAX 3 chunks (6000 blocks ~1.5hrs) per poll to avoid rate limits.
-      // History builds up gradually across polls. localStorage preserves totals.
+      // ── Rescue loan tracking ─────────────────────────────────────────────────
+      // MONEY comes from SF contract state (totalRescueLoaned/Repaid) — exact,
+      // one block, no drift. The incremental event scan below only supplies the
+      // COUNTS (how many loans / repayments), which no state variable tracks.
+      // Owner report 2026-08-07: this card previously derived the money from the
+      // scan too, so dropped chunks made "repaid" exceed "issued" and outstanding
+      // clamped to a confident $0.00 while the chain held $11.03.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_47'; // bump suffix on EVERY redeploy + add the old key to the cache-buster list above
+        const LOAN_KEY        = 'cnova_loans_v8_47b'; // bump suffix on EVERY redeploy + add the old key to the cache-buster list above
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
 
@@ -1642,51 +1642,53 @@
         const scanTo   = Math.min(scanFrom + CHUNK * MAX_CHUNKS_POLL - 1, currentBlk);
 
         if (scanTo >= scanFrom) {
-          let newIssued = 0n, newLoans = 0;
-          let newRepaid = 0n, newRepays = 0;
+          let newLoans = 0, newRepays = 0;
+          let donePast = scanFrom - 1;   // last block whose scan actually SUCCEEDED
 
-          const matrixKeys = [
-            'T1matA','T1matB','T2matA','T2matB','T3matA','T3matB',
-            'T4matA','T4matB','T5matA','T5matB','T6matA','T6matB',
-            'T7matA','T7matB','T8matA','T8matB','T9matA','T9matB',
-            'T10matA','T10matB',
-          ].filter(k => ADDRS[k] && ADDRS[k] !== '0x0000000000000000000000000000000000000000');
-          const allMatrices = matrixKeys.map(k => new ethers.Contract(ADDRS[k], MATRIX_ABI, provider));
-
+          // Two queries per chunk against the FUND (was 21 across every matrix).
+          // A failed chunk stops the cursor there so the next poll retries it —
+          // the old code advanced regardless and lost that history permanently.
           for (let from = scanFrom; from <= scanTo; from += CHUNK) {
             const to = Math.min(from + CHUNK - 1, scanTo);
-            await Promise.all(allMatrices.map(async mat => {
-              const logs = await mat.queryFilter(mat.filters.RescueLoanIssued(), from, to).catch(()=>[]);
-              for (const log of logs) {
-                try { newIssued += BigInt(log.args[1] ?? log.args.totalLoan ?? log.args.loanAmount ?? 0n); newLoans++; } catch {}
-              }
-            }));
-            const repayLogs = await sf.queryFilter(sf.filters.DebtRepaymentReceived(), from, to).catch(()=>[]);
-            for (const log of repayLogs) {
-              try { newRepaid += BigInt(log.args.amount ?? log.args[0] ?? 0n); newRepays++; } catch {}
-            }
+            let okChunk = true;
+            const [lLogs, rLogs] = await Promise.all([
+              sf.queryFilter(sf.filters.MemberDebtIncreased(), from, to).catch(() => { okChunk = false; return null; }),
+              sf.queryFilter(sf.filters.MemberDebtRepaid(),    from, to).catch(() => { okChunk = false; return null; }),
+            ]);
+            if (!okChunk || lLogs === null || rLogs === null) break;   // retry this chunk next poll
+            newLoans  += lLogs.length;
+            newRepays += rLogs.length;
+            donePast   = to;
+            await new Promise(r => setTimeout(r, 120));   // pace under the RPC cap
           }
 
-          acc.totalIssued = (BigInt(acc.totalIssued) + newIssued).toString();
-          acc.loanCount  += newLoans;
-          acc.totalRepaid = (BigInt(acc.totalRepaid) + newRepaid).toString();
-          acc.repayCount += newRepays;
-          acc.nextBlock   = scanTo + 1;
-          acc.catching    = acc.nextBlock <= currentBlk;
-          try { localStorage.setItem(LOAN_KEY, JSON.stringify(acc)); } catch(e) {}
+          if (donePast >= scanFrom) {
+            acc.loanCount  += newLoans;
+            acc.repayCount += newRepays;
+            acc.nextBlock   = donePast + 1;
+            acc.catching    = acc.nextBlock <= currentBlk;
+            try { localStorage.setItem(LOAN_KEY, JSON.stringify(acc)); } catch(e) {}
+          }
         }
 
-        const totalIssued    = BigInt(acc.totalIssued);
-        const totalRepaid    = BigInt(acc.totalRepaid);
+        // AUTHORITATIVE lifetime figures — contract state, not reconstruction.
+        // A failed read is unknown, never $0.00: hold the last good values.
+        let totalIssued = null, totalRepaid = null;
+        try {
+          const [_l, _r] = await Promise.all([sf.totalRescueLoaned(), sf.totalRescueRepaid()]);
+          totalIssued = BigInt(_l); totalRepaid = BigInt(_r);
+        } catch (_) {}
+        if (totalIssued === null || totalRepaid === null) throw new Error('SF ledger read failed');
+
         const outstanding    = totalIssued > totalRepaid ? totalIssued - totalRepaid : 0n;
         const catchingUp     = acc.catching ? ' ⟳' : '';
         const issuedTxt      = acc.loanCount > 0
-          ? `${fmt6(totalIssued)} (${acc.loanCount} loan${acc.loanCount!==1?'s':''})${catchingUp}`
-          : `$0.00${catchingUp}`;
+          ? `${fmt6(totalIssued)} (${acc.loanCount} loan${acc.loanCount!==1?'s':''} seen)${catchingUp}`
+          : `${fmt6(totalIssued)}${catchingUp}`;
         const repaidTxt      = acc.repayCount > 0
-          ? `${fmt6(totalRepaid)} (${acc.repayCount} repayment${acc.repayCount!==1?'s':''})`
-          : '$0.00';
-        const outstandingTxt = outstanding > 0n ? fmt6(outstanding) : '$0.00';
+          ? `${fmt6(totalRepaid)} (${acc.repayCount} repayment${acc.repayCount!==1?'s':''} seen)`
+          : fmt6(totalRepaid);
+        const outstandingTxt = fmt6(outstanding);
         const outstandingCls = outstanding > 0n ? 'yellow' : 'green';
         setText('sf-loans-issued',      issuedTxt);
         setText('sf-loans-repaid',      repaidTxt);
