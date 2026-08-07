@@ -477,7 +477,7 @@
           <span class="detail-val" id="pk-shortfall">—</span>
         </div>
         <div class="detail-row">
-          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (last 100k blocks)</span>
+          <span class="detail-key" data-i18n="statusPage.row_total_rescues">Total rescues (recent window ~5h)</span>
           <span class="detail-val blue" id="kp-rescue-count">—</span>
         </div>
         <div class="detail-row">
@@ -877,6 +877,12 @@
     if (cardKeeper) cardKeeper.className = 'status-card';
     try {
       const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
+      // The loan book below reads the StabilityFund's member-ledger events. This
+      // card previously used per-matrix contracts, so no `sf` existed here —
+      // 2026-08-07: moving the queries to the fund without declaring it made every
+      // call throw ReferenceError straight into the new failure path, which is why
+      // the whole section rendered "temporarily unavailable" on every poll.
+      const sf = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
 
       // checkUpkeep — any work pending right now?
       // AUDIT 2026-08-07: a failed call left upkeepNeeded=false and the card
@@ -1046,15 +1052,28 @@
       setClass('kp-work-needed', !upkeepRead ? 'yellow' : upkeepNeeded ? 'yellow' : 'green');
       setText('kp-work-type', !upkeepRead ? '—' : upkeepNeeded ? workType : '—');
       setText('kp-addr', ADDRS.matrixKeeper.slice(0,6) + '…' + ADDRS.matrixKeeper.slice(-4));
-      const lastRescueStr = lastRescueTime ? elapsed(lastRescueTime) : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—';
+      // AUDIT follow-up 2026-08-07: on a failed window read this printed "0" and
+      // "No rescues yet" — the same failure-as-zero lie, and a conspicuous one
+      // with 49 loans on the ledger. Unknown → hold last-good, else "—". Only a
+      // SUCCESSFUL read may claim zero.
+      let lastRescueStr, rescueCountStr;
+      if (!bookRead) {
+        rescueCountStr = _lastRescueCount ? String(_lastRescueCount.count) : '—';
+        lastRescueStr  = _lastRescueCount && _lastRescueCount.lastTime
+          ? elapsed(_lastRescueCount.lastTime) : '—';
+      } else {
+        rescueCountStr = rescueCount.toString();
+        lastRescueStr  = lastRescueTime ? elapsed(lastRescueTime)
+          : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—';
+        _lastRescueCount = { count: rescueCount, lastTime: lastRescueTime };
+        try { localStorage.setItem('cnova_st_rescue', JSON.stringify(_lastRescueCount)); } catch(e) {}
+      }
       setText('kp-last-rescue', lastRescueStr);
-      setText('kp-rescue-count', rescueCount.toString());
-      _lastRescueCount = { count: rescueCount, lastTime: lastRescueTime };
-      try { localStorage.setItem('cnova_st_rescue', JSON.stringify(_lastRescueCount)); } catch(e) {}
+      setText('kp-rescue-count', rescueCountStr);
 
       // Rescue pill card removed — counts live in the Parked Members dropdown above
       // Update keeper card summary to show last rescue inline
-      if (lastRescueTime) {
+      if (bookRead && lastRescueTime) {
         setText('summary-keeper', rescueCount + ' rescue(s) · last ' + lastRescueStr);
       }
 
@@ -1509,15 +1528,19 @@
 
       // Summary pill — T1 routing-target pair
       const t1d = tierData[0];
-      const t1route = t1d.pairs.find(p => p.active) || t1d.pairs[0] || {occA:0n, occB:0n};
+      const _t1Known = Array.isArray(t1d.pairs) && t1d.pairs.length > 0;
+      const _t1Idx   = _t1Known ? Math.max(0, t1d.pairs.findIndex(p => p.active)) : 0;
+      const t1route  = _t1Known ? (t1d.pairs[_t1Idx] || t1d.pairs[0]) : {occA:0n, occB:0n};
       let mOccA = t1route.occA, mOccB = t1route.occB;
       let activeTiers = tierData.filter(d => d.hasActivity).length;
-      // Anti-flicker: a heavy matrix read can blip empty on the free RPC. Rather than
-      // paint 0/127 over a known-good value, hold the last good reading (same pattern as
-      // the Parked/Loans cards). A legitimately empty T1 stays 0 until its first real read.
-      if (Number(mOccA) === 0 && Number(mOccB) === 0 && _lastMatrixFill) {
+      // Anti-flicker, CORRECTED 2026-08-07: this held last-good whenever occupancy
+      // read 0/0 — right when T1 had one pair, wrong now that the factory spawns
+      // T1.2, T1.3…: a freshly spawned pair legitimately reads 0/127, and holding
+      // would paint the PREVIOUS pair's 127/119 over it. Hold only when the pair
+      // list itself failed to load (a genuine blip).
+      if (!_t1Known && _lastMatrixFill) {
         mOccA = _lastMatrixFill.occA; mOccB = _lastMatrixFill.occB; activeTiers = _lastMatrixFill.activeTiers;
-      } else if (Number(mOccA) > 0 || Number(mOccB) > 0) {
+      } else if (_t1Known) {
         _lastMatrixFill = { occA: mOccA.toString(), occB: mOccB.toString(), activeTiers };
         try { localStorage.setItem('cnova_st_matrix', JSON.stringify(_lastMatrixFill)); } catch(e) {}
       }
@@ -1526,7 +1549,12 @@
       const pillInd = document.getElementById('pill-matrix');
       pillInd.className = (pctA >= 95 && pctB >= 95) ? 'pill-indicator yellow' : 'pill-indicator green';
       setText('pill-matrix-val', `${mOccA}/${MATRIX_SIZE} · ${mOccB}/${MATRIX_SIZE}`);
-      setText('pill-matrix-sub', `MatA ${pctA}% · MatB ${pctB}%`);
+      // Name the pair, so "0%" reads as "the newest pair is filling" rather than
+      // "the matrix is empty" — the earlier pairs are full and still earning.
+      const _t1PairTot = _t1Known ? t1d.pairs.length : 0;
+      setText('pill-matrix-sub', _t1PairTot > 1
+        ? `Pair ${_t1Idx + 1} of ${_t1PairTot} · MatA ${pctA}% · MatB ${pctB}%`
+        : `MatA ${pctA}% · MatB ${pctB}%`);
       document.getElementById('badge-matrix').className = 'card-badge badge-blue';
       setText('badge-matrix', `${activeTiers} TIERS · ${Number(cycles)} CYCLES`);
       setText('summary-matrix', `${activeTiers} active tiers · ${Number(cycles)} total cycles`);
