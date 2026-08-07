@@ -2242,6 +2242,9 @@ const MATRIX_ABI = [
   // ledger figure and is NOT the same thing — showing that one is how a member
   // gets quoted a total no single transaction can satisfy.
   'function freeWithdrawable(address) external view returns (uint256)',
+  // V8.47 withdrawCore mirror (_claimableAll) needs the raw pieces: un-settled
+  // pool accrual is added to the balance the moment a withdrawal settles it.
+  'function pendingPoolOf(address) external view returns (uint256)',
   // The ONLY proof that a slot was actually reclaimed. Emitted by the keeper
   // path (MatrixLogicLib:1038 — delegatecall, so the log address is the matrix).
   // Without it, "joined but not seated" is indistinguishable from a member who
@@ -5497,7 +5500,11 @@ async function loadDashboardData() {
         } catch(_) {}
 
         if (reserved > 0n) {
-          const free = realW > reserved ? realW - reserved : 0n;
+          // V8.47: freeWithdrawable() already nets the reserve on the highest
+          // tier — subtracting it again here is what turned $9.50 into $0.00.
+          // This is the fast interim paint; the withdrawCore mirror just below
+          // repaints with the exact figure.
+          const free = realW;
           window._maxWithdrawable  = free;   // cap partial withdraw to free amount
           window._protocolReserved = reserved;
 
@@ -5533,6 +5540,27 @@ async function loadDashboardData() {
         }
       }
     } catch(e) { console.warn('reserve calc:', e.message); }
+
+    // V8.47 (owner 2026-08-07): repaint the headline from the withdrawCore
+    // mirror once it lands — same fast-paint/refine pattern as the MAX button.
+    _claimableAll(rp).then(res => {
+      if (!res) return;
+      window._maxWithdrawable = res.net;
+      setText('dash-withdrawable',    fmt6(res.net));
+      setText('dash-withdraw-amount', fmt6(res.net));
+      const lbl = document.getElementById('dash-ready-label');
+      if (lbl) lbl.textContent = res.reserved > 0n
+        ? `${fmt6(res.net)} free to claim`
+        : (window.t ? window.t('dash.ready_to_claim','Ready to claim') : 'Ready to claim');
+      try {
+        const feeBps = window._withdrawFeeBps || 150n;
+        const feeAmt = res.net * feeBps / 10000n;
+        const g = document.getElementById('wfee-gross'), f = document.getElementById('wfee-fee'), n = document.getElementById('wfee-net');
+        if (g) g.textContent = fmt6(res.net);
+        if (f) f.textContent = '−' + fmt6(feeAmt);
+        if (n) n.textContent = fmt6(res.net - feeAmt);
+      } catch(_) {}
+    }).catch(e => console.warn('[claimable refine]', e.message));
 
     // Tier cycles breakdown — use on-chain memberHighestTier (authoritative)
     try {
@@ -5802,32 +5830,18 @@ async function renderWithdrawableDetail(el, rp) {
   // ("the member should click to get the information") — it lives behind this
   // expandable row only.
   const _reserveByTier = {};
-  // V8.47 (Sherwyn 2026-08-07): also read freeWithdrawable per matrix — the
-  // figure the contract will actually RELEASE — so this modal's total can use
-  // the SAME source as the dashboard headline and the withdraw panel.
-  let totalFree = 0n, _freeOk = true;
-  const _freeByTier = {};
-  await Promise.all(_allMatObjs.map(mo => {
-    const mc = new ethers.Contract(mo.addr, MATRIX_ABI, rp);
-    return Promise.all([
-      mc.crossingReserveOf(userAddr).catch(() => 0n),
-      mc.freeWithdrawable(userAddr).catch(() => null),
-    ]).then(([r, f]) => {
+  await Promise.all(_allMatObjs.map(mo =>
+    new ethers.Contract(mo.addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
       const v = BigInt(r);
-      const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
       totalCrossingReserve += v;
       if (v > 0n) {
+        const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
         const slot = _reserveByTier[tNum] || (_reserveByTier[tNum] = { total: 0n, seats: [] });
         slot.total += v;
         slot.seats.push({ label: mo.label || `T${tNum}`, amount: v });
       }
-      if (f === null) { _freeOk = false; }
-      else {
-        totalFree += BigInt(f);
-        _freeByTier[tNum] = (_freeByTier[tNum] || 0n) + BigInt(f);
-      }
-    });
-  }));
+    })
+  ));
 
   const autoDeducted    = totalEarned > (totalWithdrawn + totalWithdrawable)
     ? totalEarned - totalWithdrawn - totalWithdrawable : 0n;
@@ -5931,16 +5945,17 @@ async function renderWithdrawableDetail(el, rp) {
     console.warn('[withdrawable] automation reserve unavailable:', e.message);
   }
 
-  // V8.47 fix (Sherwyn 2026-08-07): "Available to Claim" is what the contract
-  // will actually RELEASE — freeWithdrawable, the same source as the dashboard
-  // headline and the withdraw panel — never the raw withdrawable sum.
-  // withdrawCore keeps back ENTRY_FEE − crossingReserve for every SEATED member
-  // (:976) plus the whole automation reserve (:986); the raw sum includes both,
-  // which is exactly why the two areas disagreed for a seated member even with
-  // every automation toggle off.
-  const availToClaim = _freeOk ? totalFree : totalWithdrawable;
-  let seatHold = totalWithdrawable - availToClaim - _onchainReserved;
-  if (seatHold < 0n) seatHold = 0n;
+  // V8.47 (Sherwyn ea89ba8 + owner screenshots 2026-08-07): "Available to
+  // Claim" comes from _claimableAll — the line-for-line withdrawCore mirror
+  // (crossing hold only where the automation reserve applies, reserve once on
+  // the highest tier, rescue debt repaid first). The card and the MAX button
+  // read the same helper, so all three areas agree by construction.
+  const _res = await _claimableAll(rp).catch(() => null);
+  const grossClaim   = _res ? _res.total : totalWithdrawable;
+  const availToClaim = _res ? _res.net   : totalWithdrawable;
+  const debtRepay    = _res ? _res.debt  : 0n;
+  const seatHold     = totalWithdrawable > grossClaim ? totalWithdrawable - grossClaim : 0n;
+  const accrualExtra = grossClaim > totalWithdrawable ? grossClaim - totalWithdrawable : 0n;
   const feeAmt = availToClaim * feeBps / 10000n;
   const netAmt = availToClaim - feeAmt;
 
@@ -5951,14 +5966,16 @@ async function renderWithdrawableDetail(el, rp) {
     ${autoReserveBlock}
     ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
     ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
-    ${seatHold > 0n ? `<div class="detail-row"><span class="detail-key" title="While you hold a seat, the contract keeps back the entry fee minus your crossing reserve so the seat can finish its cycle — released automatically when you cycle out">${_t('modal.seat_hold','Held for active seats (releases at cycle-out)')}</span><span class="detail-val" style="color:#a855f7">− ${fmt6(seatHold)}</span></div>` : ''}
+    ${accrualExtra > 0n ? `<div class="detail-row"><span class="detail-key" title="Pool earnings accrued to your seats — settled automatically the moment you withdraw">${_t('modal.pending_accrual','+ Pending pool accrual (settles on withdrawal)')}</span><span class="detail-val green">+ ${fmt6(accrualExtra)}</span></div>` : ''}
+    ${seatHold > 0n ? `<div class="detail-row"><span class="detail-key" title="While automation is reserving funds, the contract keeps back what your seats need to finish their cycles — released at cycle-out, or turn automation off to release it">${_t('modal.seat_hold','Held for active seats (releases at cycle-out)')}</span><span class="detail-val" style="color:#a855f7">− ${fmt6(seatHold)}</span></div>` : ''}
+    ${debtRepay > 0n ? `<div class="detail-row"><span class="detail-key" title="V8.47: any withdrawal first repays your outstanding rescue loan — see the loan banner on your dashboard">${_t('modal.loan_repay','Rescue loan repayment (repaid first)')}</span><span class="detail-val" style="color:var(--yellow)">− ${fmt6(debtRepay)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(availToClaim)}</span></div>
     ${(() => {
       const tiers = Object.keys(byTier || {}).map(Number).sort((a,b) => a-b);
       if (tiers.length < 2) return '';
       return `<div class="detail-section">${_t('modal.by_tier','Balance by Tier')}</div>` + tiers.map(t => {
         const tb = byTier[t];
-        const _tv = (_freeOk && _freeByTier[t] !== undefined) ? _freeByTier[t] : tb.withdrawable;
+        const _tv = (_res && _res.byTier[t] !== undefined) ? _res.byTier[t] : tb.withdrawable;
         return `<div class="detail-row"><span class="detail-key">T${t}${tb.active > 1 ? ' · ' + tb.active + ' seats' : ''}</span><span class="detail-val green">${fmt6(_tv)}</span></div>`;
       }).join('');
     })()}
@@ -6377,18 +6394,75 @@ async function renderCommunityDetail(el, rp) {
 // node serving an OLDER block (withdrawable grows as rotations settle accrual), so
 // Withdraw All filled an outdated figure while the card showed a newer one and the
 // wallet received a third. Recompute at ONE pinned block at click time.
+// ── V8.47 single source of truth: "what can I actually withdraw?" ────────────
+// Line-for-line mirror of MatrixLogicLib.withdrawCore (:992), the only truth:
+//   1. per matrix: balance = raw withdrawable + pendingPoolOf (settled on withdraw)
+//   2. the automation reserve applies ONLY on the member's highest tier
+//      ((highest-1) == tierIndex), and the seated crossing hold is enforced ONLY
+//      where that reserve is active (V8.32 opt-out: automation off = free exit)
+//   3. V8.47: outstanding rescue debt is repaid FIRST out of any withdrawal
+// freeWithdrawable() pre-dates rule 2's opt-out (it still holds the crossing
+// cost on every seated matrix), and the old UI then subtracted the reserve a
+// SECOND time on top of the view — three formulas for one number (owner's
+// Nova Rise screenshots, 2026-08-07: card $0.00, modal $9.50, truth ~$14.50).
+// The card, the MAX button and the breakdown modal must all read THIS.
+// Contract backlog for next redeploy: make the freeWithdrawable VIEW mirror
+// withdrawCore so the chain agrees with itself.
+async function _claimableAll(rp, blockTag) {
+  const o = blockTag !== undefined ? { blockTag } : {};
+  const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+  const [highest, reserved] = await Promise.all([
+    tr.memberHighestTier(userAddr, o).then(Number).catch(() => 0),
+    tr.reservedFor(userAddr, o).then(v => BigInt(v)).catch(() => 0n),
+  ]);
+  let debt = 0n;
+  try {
+    debt = BigInt(await new ethers.Contract(ADDRS.stabilityFund,
+      ['function memberDebtOf(address) view returns (uint256)'], rp).memberDebtOf(userAddr, o));
+  } catch (_) {}
+  const mats = await _buildAllMatrixObjects(rp);
+  let total = 0n;
+  const byTier = {};
+  await Promise.all(mats.map(async mo => {
+    const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
+    const mc = new ethers.Contract(mo.addr, MATRIX_ABI, rp);
+    const m = await mc.getMember(userAddr, o).catch(() => null);
+    if (!m) return;
+    let bal = BigInt(m.withdrawable);
+    const hasCredit = m.hasEverJoined || bal > 0n ||
+      BigInt(m.totalWithdrawn ?? 0n) > 0n || BigInt(m.totalEarned ?? 0n) > 0n;
+    if (!hasCredit) return;
+    if (byTier[tNum] === undefined) byTier[tNum] = 0n;   // tier visible even at $0
+    bal += BigInt(await mc.pendingPoolOf(userAddr, o).catch(() => 0n));
+    if (bal === 0n) return;
+    if (reserved > 0n && highest > 0 && (highest - 1) === (tNum - 1)) {
+      if (m.isInMatrix) {
+        const [fee, cr] = await Promise.all([
+          mc.ENTRY_FEE(o).then(v => BigInt(v)).catch(() => 0n),
+          mc.crossingReserveOf(userAddr, o).then(v => BigInt(v)).catch(() => 0n),
+        ]);
+        const crossNeeded = fee > cr ? fee - cr : 0n;
+        if (crossNeeded > 0n) {
+          if (bal <= crossNeeded) return;   // withdrawCore: require available > crossNeeded
+          bal -= crossNeeded;
+        }
+      }
+      if (reserved >= bal) return;          // withdrawCore: require reserve < available
+      bal -= reserved;
+    }
+    total += bal;
+    byTier[tNum] += bal;
+  }));
+  const net = total > debt ? total - debt : 0n;
+  return { total, net, debt, reserved, highest, byTier };
+}
+
 async function _freshMaxWithdrawable() {
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
-  const tag = { blockTag: await rp.getBlockNumber() };
-  const mats = await _buildAllMatrixObjects(rp);
-  let sum = 0n;
-  await Promise.all(mats.map(async m => {
-    const v = await new ethers.Contract(m.addr, MATRIX_ABI, rp).freeWithdrawable(userAddr, tag).catch(() => null);
-    if (v !== null && v !== undefined) sum += BigInt(v);
-  }));
-  let reserved = 0n;
-  try { reserved = BigInt(await new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp).reservedFor(userAddr, tag)); } catch (_) {}
-  return (reserved > 0n && sum > reserved) ? sum - reserved : (reserved > 0n ? 0n : sum);
+  // Koach100 pinned-block rule stands: one block for every read in the batch.
+  const tag = await rp.getBlockNumber();
+  const res = await _claimableAll(rp, tag);
+  return res.net;
 }
 
 function setWithdrawMax() {
