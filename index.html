@@ -1330,11 +1330,14 @@
           Self Rescue or Upgrade yourself. So a full wallet does not stop you being parked.
         </div>
         <div id="rescue-auto-hint" style="margin-top:12px;margin-bottom:4px;padding:10px 14px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);font-size:12px;color:var(--text2);line-height:1.6">
-          <strong style="color:var(--green)">&#9203; Auto-rescue active</strong> &#8212; if your <em>in-matrix</em> balance covers the entry fee, the keeper will re-enter you automatically within 24&#8239;hours. No out-of-pocket action needed unless you want to re-enter sooner.
+          <strong style="color:var(--green)">&#9203; Auto-rescue active</strong> &#8212; if your <em>in-matrix</em> balance covers the entry fee, the system re-enters you <strong>free within minutes</strong> &#8212; no loan, no action needed. If it falls short, you can act now (Self Rescue or Copay below), or simply wait: after the 24&#8209;hour grace period the system re-enters you automatically with a loan for the gap.
         </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <strong>Self Rescue (No Debt):</strong> Pay only the shortfall from your wallet. Your withdrawable covers the rest. No SF loan — nothing is owed back.
+          </div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <strong>Copay Rescue (Instant Loan):</strong> No wallet funds needed. Your reserve and earnings go in first — the Stability Fund lends only the remaining gap. The loan is a repayable advance that stays on your account until cleared, repaying automatically from your future earnings.
           </div>
 
           <!-- ── ALL parked positions, not just one ──────────────────────────
@@ -1349,6 +1352,8 @@
           <div id="parked-list" style="display:none;flex-direction:column;gap:8px"></div>
           <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0.00</span> USDC</button>
           <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
+          <button class="btn full-w" id="btn-copay-rescue" onclick="doCopayRescue()" style="display:none;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none">🤝 Copay Rescue — borrow <span id="copay-loan-display">$0.00</span></button>
+          <div id="copay-note" style="display:none;font-size:11px;color:var(--text3);text-align:center"></div>
           <!-- Kira, 2026-07-27: "I am parked but continue collecting from directs,
                eventually I have enough to self rescue. I need to refresh the page to
                get the button active." Earnings arrive continuously while parked, but
@@ -5320,6 +5325,10 @@ async function loadDashboardData() {
         // Self rescue shortfall tracking
         window._selfRescueShortfall = parkedInfo.shortfall;
 
+        // V8.47 member options: Copay Rescue — instant, the SF lends only the gap.
+        // Not awaited: reads SF capacity and must not hold up the dashboard paint.
+        _paintCopayOption(parkedInfo, rp).catch(e => console.warn('[copay-opt]', e.message));
+
         // Two-pot display (Sherwyn 2026-07-27). The in-matrix total is what auto
         // re-entry can actually spend; the wallet balance is what a MANUAL self
         // rescue can spend. Showing them side by side is the whole point — a
@@ -8476,7 +8485,7 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       btns  = '';
     } else if (c.shortfall > 0n && bal < c.shortfall) {
       state = 'NEEDS USDC';
-      note  = `Add ${fmt6(c.shortfall - bal)} to your wallet — the shortfall is paid from your wallet, not your earnings.`;
+      note  = `Add ${fmt6(c.shortfall - bal)} to your wallet — or use Copay: the fund lends the gap, repaid automatically from your future earnings.`;
       btns  = '';
     } else if (c.shortfall > 0n && (alw === null || alw < c.shortfall)) {
       state = 'APPROVE FIRST';
@@ -8486,6 +8495,11 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       state = 'READY';
       note  = c.shortfall > 0n ? 'Approved — press Self Rescue.' : 'Your earnings cover it in full.';
       btns  = `<button class="btn" style="flex:1;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;font-size:12px;padding:6px" onclick="selectParked(${i},'rescue')">🔑 Self Rescue</button>`;
+    }
+    // V8.47: Copay is offered on any non-blocked row with a real gap — even with
+    // an EMPTY wallet (that is its whole point: the SF lends the gap as a loan).
+    if (state !== 'BLOCKED' && c.shortfall > 0n) {
+      btns += `<button class="btn" style="flex:1;background:rgba(245,158,11,.12);border:1px solid #f59e0b;color:#f59e0b;font-size:12px;padding:6px" onclick="selectParked(${i},'copay')">🤝 Copay — borrow ${fmt6(c.shortfall)}</button>`;
     }
     const colour = state === 'READY' ? 'var(--green)' : state === 'BLOCKED' ? 'var(--yellow)' : 'var(--text2)';
     rows.push(
@@ -8515,7 +8529,7 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
 
   // The single-position buttons above would act on whichever position the picker
   // chose, which is ambiguous once the list is showing. Hide them.
-  for (const id of ['btn-self-approve', 'btn-self-rescue']) {
+  for (const id of ['btn-self-approve', 'btn-self-rescue', 'btn-copay-rescue', 'copay-note']) {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   }
@@ -8535,7 +8549,89 @@ function selectParked(i, action) {
   window._selfRescueShortfall = p.shortfall;
   const st = document.getElementById('self-rescue-status');
   if (st) { st.style.color = 'var(--text2)'; st.textContent = `${p.label}: working…`; }
-  if (action === 'approve') approveSelfRescue(); else doSelfRescue();
+  if (action === 'approve') approveSelfRescue(); else if (action === 'copay') doCopayRescue(); else doSelfRescue();
+}
+
+// ── V8.47 Copay Rescue (member-facing) ───────────────────────────────────────
+// coPayRescue(member) is PERMISSIONLESS on the contract (MatrixLogicLib:1207):
+// reserve + withdrawable are consumed first, the SF pays ONLY the shortfall and
+// books it on the member ledger as a repayable advance. Zero shortfall = zero
+// debt. The same call the fastlane/copay keepers make — here the member opts in
+// instead of waiting out the grace period.
+async function _paintCopayOption(p, rp) {
+  const btn  = document.getElementById('btn-copay-rescue');
+  const note = document.getElementById('copay-note');
+  if (!btn || !note) return;
+  const loan = p.shortfall || 0n;
+  if (!(loan > 0n) || p.blockedByPartner) {
+    btn.style.display = 'none'; note.style.display = 'none'; return;
+  }
+  // payCoRescue reverts "SF: below floor" unless totalBalance >= loan + floor
+  // (StabilityFund:577). Pre-check so the member never presses a dead button.
+  let ok = true;
+  try {
+    const sf = new ethers.Contract(ADDRS.stabilityFund, [
+      'function totalBalance() view returns (uint256)',
+      'function stabilityFloor() view returns (uint256)',
+    ], rp);
+    const [bal, floor] = await Promise.all([sf.totalBalance(), sf.stabilityFloor()]);
+    ok = bal >= loan + floor;
+  } catch (_) { /* leave enabled — the staticCall at press time still protects */ }
+  const disp = document.getElementById('copay-loan-display');
+  if (disp) disp.textContent = fmt6(loan);
+  btn.style.display = ''; note.style.display = '';
+  btn.disabled = !ok;
+  note.textContent = ok
+    ? `Instant re-entry — the fund lends ${fmt6(loan)}, repaid automatically from your future earnings.`
+    : 'The fund is at its protective floor — copay loans are paused while it rebuilds. Use Self Rescue, or wait for the automatic rescue after the grace period.';
+}
+
+async function doCopayRescue() {
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const btn    = document.getElementById('btn-copay-rescue');
+  const status = document.getElementById('self-rescue-status');
+  if (btn) btn.disabled = true;
+  if (status) { status.style.color = 'var(--text2)'; status.textContent = 'Submitting copay rescue…'; }
+  try {
+    const matrixAddr = window._parkedMatrixAddr;
+    if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
+    const me = await signer.getAddress();
+    const mr = new ethers.Contract(matrixAddr, [
+      'function coPayRescue(address member) external',
+      'function ENTRY_FEE() view returns (uint256)',
+      'function crossingReserveOf(address) view returns (uint256)',
+      'function withdrawableOf(address) view returns (uint256)',
+    ], signer);
+    // Fresh numbers at press time — earnings arrive continuously while parked,
+    // so the loan the member confirms is the loan that actually books.
+    let loanTxt = '';
+    try {
+      const [fee, res, wd] = await Promise.all([
+        mr.ENTRY_FEE(), mr.crossingReserveOf(me), mr.withdrawableOf(me),
+      ]);
+      const have = res + wd;
+      loanTxt = fmt6(fee > have ? fee - have : 0n);
+    } catch (_) {}
+    await mr.coPayRescue.staticCall(me);   // prove it before spending gas
+    let gas; try { gas = await mr.coPayRescue.estimateGas(me); gas = gas + gas / 5n; } catch { gas = 6_000_000n; }
+    const tx = await mr.coPayRescue(me, { gasLimit: gas });
+    if (status) status.textContent = 'Waiting for confirmation…';
+    await tx.wait();
+    if (status) {
+      status.style.color = 'var(--green)';
+      status.textContent = `✅ Copay rescue complete — you're back in the matrix.${loanTxt ? ` Loan of ${loanTxt} booked; it repays automatically from your earnings.` : ''}`;
+    }
+    toast('Copay rescue complete — you\'re back in!', 'success');
+    _staggeredDashRefresh();
+  } catch (e) {
+    let msg = (typeof friendlyError === 'function') ? friendlyError(e) : (e.reason || e.message || String(e));
+    if (/below floor/i.test(String(e.reason || e.message || ''))) {
+      msg = 'The Stability Fund is at its protective floor — copay loans are paused while it rebuilds. Use Self Rescue, or wait for the automatic rescue. Nothing was sent and nothing was charged.';
+    }
+    if (status) { status.style.color = '#ef4444'; status.textContent = '❌ ' + msg; }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function doSelfRescue() {
