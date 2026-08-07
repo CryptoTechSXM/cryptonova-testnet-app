@@ -715,7 +715,16 @@ async function refreshWalletState() {
   if (!signer || !userAddr) return;
   try {
     const usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, provider);
-    const bal  = await usdc.balanceOf(userAddr);
+    // AUDIT 2026-08-07: on failure usdcBalance stayed 0 and renderActionArea
+    // disabled the button with "Insufficient USDC Balance" — telling a funded
+    // buyer they have no money. null = unknown; the gate below skips a null.
+    const bal  = await usdc.balanceOf(userAddr).catch(() => null);
+    if (bal === null) {
+      usdcBalance = null;
+      const _h = document.getElementById('wallet-bal-hint');
+      if (_h) _h.textContent = 'Wallet balance unavailable — retrying';
+      return;
+    }
     usdcBalance = Number(bal) / 1e6;
     document.getElementById('wallet-bal-hint').textContent =
       `${t('buyPage.js.wallet_balance_prefix', 'Wallet balance: $')}${usdcBalance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${t('buyPage.js.usdc_suffix', 'USDC')}`;
@@ -775,11 +784,20 @@ async function loadPriceData() {
     if (DIRECT_SALE_ADDR) {
       try {
         const ds = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, ro);
+        // AUDIT 2026-08-07: this block was wrapped in `catch {}`, so a failed
+        // read left maxTxBps/maxWalletBps at 0n — which the render path treats
+        // as "caps disabled" and prints "No limit". The live caps are 1% of
+        // supply per tx and 5% cumulative per wallet, and in bootstrap phase
+        // that is the tightest constraint on the page: a dropped call told the
+        // buyer the exact opposite. null = unknown, 0n = genuinely disabled.
         const [sfB, lqB, txBps, walletBps] = await Promise.all([
-          ds.sfBalance(), ds.lqBalance(), ds.maxTxBps(), ds.maxWalletBps(),
+          ds.sfBalance().catch(() => null),
+          ds.lqBalance().catch(() => null),
+          ds.maxTxBps().catch(() => null),
+          ds.maxWalletBps().catch(() => null),
         ]);
-        sfBalUSD = Number(sfB) / 1e6;
-        lqBalUSD = Number(lqB) / 1e6;
+        sfBalUSD = sfB === null ? null : Number(sfB) / 1e6;
+        lqBalUSD = lqB === null ? null : Number(lqB) / 1e6;
         maxTxBpsVal     = txBps;
         maxWalletBpsVal = walletBps;
       } catch {}
@@ -831,6 +849,7 @@ function _approxWalletCapTokens() {
   // Used only when no wallet is connected -- estimates what a fresh wallet's
   // cap would be. Once connected we use the contract's own remainingAllowance()
   // instead, which is exact and already accounts for past purchases.
+  if (maxWalletBpsVal === null || maxWalletBpsVal === undefined) return null;  // unread
   if (maxWalletBpsVal === 0n) return null;
   return (totalSupplyRaw * maxWalletBpsVal) / 10000n;
 }
@@ -858,8 +877,15 @@ async function refreshPurchaseLimits() {
       capTokens = await ds.remainingAllowance(userAddr);
       usingWalletCap = true;
     } else {
-      const txCap     = maxTxBpsVal > 0n ? (totalSupplyRaw * maxTxBpsVal) / 10000n : null;
+      const _capsUnread = (maxTxBpsVal === null || maxTxBpsVal === undefined);
+      const txCap     = (!_capsUnread && maxTxBpsVal > 0n) ? (totalSupplyRaw * maxTxBpsVal) / 10000n : null;
       const walletCap = _approxWalletCapTokens();
+      if (_capsUnread) {
+        // Say we don't know rather than advertising "No limit" over a live cap.
+        maxEl.textContent = '—';
+        subEl.textContent = 'Purchase limits unavailable — retrying.';
+        return;
+      }
       if (txCap === null && walletCap === null) capTokens = null;
       else if (txCap === null) capTokens = walletCap;
       else if (walletCap === null) capTokens = txCap;
@@ -1003,7 +1029,7 @@ function renderActionArea() {
     area.innerHTML = `<button class="btn-primary" disabled>${t('buyPage.btn_enter_amount','Enter USDC Amount')}</button>`;
     return;
   }
-  if (amount > usdcBalance) {
+  if (usdcBalance !== null && amount > usdcBalance) {
     area.innerHTML = `<button class="btn-primary" disabled>${t('buyPage.btn_insufficient','Insufficient USDC Balance')}</button>`;
     return;
   }
