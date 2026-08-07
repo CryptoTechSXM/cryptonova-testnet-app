@@ -5802,18 +5802,32 @@ async function renderWithdrawableDetail(el, rp) {
   // ("the member should click to get the information") — it lives behind this
   // expandable row only.
   const _reserveByTier = {};
-  await Promise.all(_allMatObjs.map(mo =>
-    new ethers.Contract(mo.addr, MATRIX_ABI, rp).crossingReserveOf(userAddr).catch(() => 0n).then(r => {
+  // V8.47 (Sherwyn 2026-08-07): also read freeWithdrawable per matrix — the
+  // figure the contract will actually RELEASE — so this modal's total can use
+  // the SAME source as the dashboard headline and the withdraw panel.
+  let totalFree = 0n, _freeOk = true;
+  const _freeByTier = {};
+  await Promise.all(_allMatObjs.map(mo => {
+    const mc = new ethers.Contract(mo.addr, MATRIX_ABI, rp);
+    return Promise.all([
+      mc.crossingReserveOf(userAddr).catch(() => 0n),
+      mc.freeWithdrawable(userAddr).catch(() => null),
+    ]).then(([r, f]) => {
       const v = BigInt(r);
+      const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
       totalCrossingReserve += v;
       if (v > 0n) {
-        const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
         const slot = _reserveByTier[tNum] || (_reserveByTier[tNum] = { total: 0n, seats: [] });
         slot.total += v;
         slot.seats.push({ label: mo.label || `T${tNum}`, amount: v });
       }
-    })
-  ));
+      if (f === null) { _freeOk = false; }
+      else {
+        totalFree += BigInt(f);
+        _freeByTier[tNum] = (_freeByTier[tNum] || 0n) + BigInt(f);
+      }
+    });
+  }));
 
   const autoDeducted    = totalEarned > (totalWithdrawn + totalWithdrawable)
     ? totalEarned - totalWithdrawn - totalWithdrawable : 0n;
@@ -5822,8 +5836,6 @@ async function renderWithdrawableDetail(el, rp) {
 
   const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
   const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
-  const feeAmt = totalWithdrawable * feeBps / 10000n;
-  const netAmt = totalWithdrawable - feeAmt;
   const feePct = (Number(feeBps) / 100).toFixed(1);
 
   const joinDate   = joinedAt > 0n ? new Date(Number(joinedAt) * 1000).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
@@ -5862,9 +5874,11 @@ async function renderWithdrawableDetail(el, rp) {
   // Shown with its components so the figure is checkable rather than asserted, and
   // flagged when the on-chain total disagrees with what the settings imply.
   let autoReserveBlock = '';
+  let _onchainReserved = 0n;
   try {
     const _tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     const onchainReserved = BigInt(await _tr.reservedFor(userAddr).catch(() => 0n));
+    _onchainReserved = onchainReserved;
     if (onchainReserved > 0n) {
       const opts        = window._memberOptions || {};
       const autoUpgrade = !opts.disableUpgrade;
@@ -5917,6 +5931,19 @@ async function renderWithdrawableDetail(el, rp) {
     console.warn('[withdrawable] automation reserve unavailable:', e.message);
   }
 
+  // V8.47 fix (Sherwyn 2026-08-07): "Available to Claim" is what the contract
+  // will actually RELEASE — freeWithdrawable, the same source as the dashboard
+  // headline and the withdraw panel — never the raw withdrawable sum.
+  // withdrawCore keeps back ENTRY_FEE − crossingReserve for every SEATED member
+  // (:976) plus the whole automation reserve (:986); the raw sum includes both,
+  // which is exactly why the two areas disagreed for a seated member even with
+  // every automation toggle off.
+  const availToClaim = _freeOk ? totalFree : totalWithdrawable;
+  let seatHold = totalWithdrawable - availToClaim - _onchainReserved;
+  if (seatHold < 0n) seatHold = 0n;
+  const feeAmt = availToClaim * feeBps / 10000n;
+  const netAmt = availToClaim - feeAmt;
+
   el.innerHTML = `
     <div class="detail-row"><span class="detail-key">${_t('modal.total_earned','Total Ever Earned')}</span><span class="detail-val green">${fmt6(totalEarned)}</span></div>
     <div class="detail-row"><span class="detail-key">${_t('modal.prev_withdrawn','Previously Withdrawn')}</span><span class="detail-val">− ${fmt6(totalWithdrawn)}</span></div>
@@ -5924,16 +5951,18 @@ async function renderWithdrawableDetail(el, rp) {
     ${autoReserveBlock}
     ${upgradeDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings — separate from the crossing reserve above">${_t('modal.upgrade_fees','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(upgradeDeducted)}</span></div>` : ''}
     ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
-    <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(totalWithdrawable)}</span></div>
+    ${seatHold > 0n ? `<div class="detail-row"><span class="detail-key" title="While you hold a seat, the contract keeps back the entry fee minus your crossing reserve so the seat can finish its cycle — released automatically when you cycle out">${_t('modal.seat_hold','Held for active seats (releases at cycle-out)')}</span><span class="detail-val" style="color:#a855f7">− ${fmt6(seatHold)}</span></div>` : ''}
+    <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(availToClaim)}</span></div>
     ${(() => {
       const tiers = Object.keys(byTier || {}).map(Number).sort((a,b) => a-b);
       if (tiers.length < 2) return '';
       return `<div class="detail-section">${_t('modal.by_tier','Balance by Tier')}</div>` + tiers.map(t => {
         const tb = byTier[t];
-        return `<div class="detail-row"><span class="detail-key">T${t}${tb.active > 1 ? ' · ' + tb.active + ' seats' : ''}</span><span class="detail-val green">${fmt6(tb.withdrawable)}</span></div>`;
+        const _tv = (_freeOk && _freeByTier[t] !== undefined) ? _freeByTier[t] : tb.withdrawable;
+        return `<div class="detail-row"><span class="detail-key">T${t}${tb.active > 1 ? ' · ' + tb.active + ' seats' : ''}</span><span class="detail-val green">${fmt6(_tv)}</span></div>`;
       }).join('');
     })()}
-    ${totalWithdrawable > 0n ? `
+    ${availToClaim > 0n ? `
     <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
     <div class="detail-row"><span class="detail-key">${_t('modal.fee_deducted','Fee Deducted')}</span><span class="detail-val red">− ${fmt6(feeAmt)}</span></div>
     <div class="detail-row total"><span class="detail-key">${_t('modal.you_receive','You Receive')}</span><span class="detail-val green">${fmt6(netAmt)}</span></div>
