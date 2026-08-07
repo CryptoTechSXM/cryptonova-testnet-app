@@ -6593,6 +6593,15 @@ async function doWithdrawPartial() {
     toast(`Amount exceeds available — max is $${floorUsd2(maxUsd)}`, 'error');
     return;
   }
+  // V8.47 (owner 2026-08-08): a FULL-amount request takes the ONE-TRANSACTION
+  // sweep (TierRouter.bulkWithdraw) — the same path as Withdraw All — instead
+  // of one signature per matrix. Seven approvals for MAX was the whole
+  // complaint. True partial amounts still need per-matrix transactions until
+  // the router gains bulkWithdraw(amount) — logged in V8_48_BACKLOG.md.
+  if (amtMicro === maxUsd && maxUsd > 0n) {
+    setStatus('withdraw-status', 'Full amount requested — using the single-transaction sweep (one signature)…', 'info');
+    return doWithdraw();
+  }
 
   const btnP = document.getElementById('btn-withdraw-partial');
   const btnA = document.getElementById('btn-withdraw');
@@ -6601,31 +6610,63 @@ async function doWithdrawPartial() {
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const _matObjs = await _buildAllMatrixObjects(rp);
-    const matrices = _matObjs.map(m => m.addr);
+    // V8.47 (owner 2026-08-08): per-matrix caps come from the withdrawCore
+    // MIRROR — freeWithdrawable() under-caps seated matrices (the V8.32 opt-out
+    // lives only in withdrawCore), which left $49.04 of a $168.04 request
+    // "unsourced" while Withdraw All took everything. Same source of truth as
+    // the card, MAX and the breakdown (_claimableAll rules, applied per draw).
+    const _ptr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    const [_pHighest, _pReserved] = await Promise.all([
+      _ptr.memberHighestTier(userAddr).then(Number).catch(() => 0),
+      _ptr.reservedFor(userAddr).then(v => BigInt(v)).catch(() => 0n),
+    ]);
+    let _debtLeft = 0n;
+    try {
+      _debtLeft = BigInt(await new ethers.Contract(ADDRS.stabilityFund,
+        ['function memberDebtOf(address) view returns (uint256)'], rp).memberDebtOf(userAddr));
+    } catch (_) {}
     let remaining = amtMicro;
     let withdrawn = false;
-    for (const addr of matrices) {
+    for (const _mo of _matObjs) {
+      const addr = _mo.addr;
       if (remaining === 0n) break;
       const mc = new ethers.Contract(addr, MATRIX_ABI, rp);
       const member = await mc.getMember(userAddr).catch(() => null);
       if (!member || BigInt(member.withdrawable) === 0n) continue;
       const mcW = new ethers.Contract(addr, MATRIX_ABI, signer);
-      // ASK THE CONTRACT WHAT IT WILL RELEASE — DO NOT RE-DERIVE IT.
-      // This used to be `avail = withdrawable - 10_000_000n` with a comment
-      // calling $10 "the entry fee". It is the entry fee of T1 ONLY. The real
-      // lock is ENTRY_FEE - crossingReserve for a seated member (withdrawCore:976)
-      // plus the automation reserve (:986) — up to $2,500 in T9, not $10. So this
-      // asked for hundreds more than the matrix would ever release, withdrawPartial
-      // reverted, and the member was told "Transaction failed on-chain".
-      // That is Sherwyn's "$500 from $514 available" (2026-07-29), and the same
-      // wrong constant is why the headline figure over-promised.
-      // freeWithdrawable() (V8.44 G3) returns exactly what is releasable now,
-      // including un-settled pool accrual. One call, no arithmetic, no guessing.
-      let avail = await mc.freeWithdrawable(userAddr).catch(() => null);
-      if (avail === null) {
-        // A failed read is NOT zero and NOT the raw balance — skip and say so,
-        // rather than sending a transaction built on a number we do not have.
-        console.warn('[withdraw] freeWithdrawable failed on', addr, '— skipping this matrix');
+      // WITHDRAWCORE MIRROR, per matrix — history of this block:
+      //   v1 `withdrawable - $10` (wrong constant, over-asked, reverted);
+      //   v2 freeWithdrawable() (right instinct 2026-07-29, but the VIEW misses
+      //      the V8.32 opt-out, so it UNDER-caps seated matrices — $49.04 of a
+      //      $168.04 request went unsourced on 2026-08-08);
+      //   v3 (now) mirror withdrawCore exactly: raw + pending accrual, debt
+      //      repaid from the first matrices drawn, crossing hold + automation
+      //      reserve ONLY on the highest tier while the reserve is active.
+      let avail;
+      try {
+        avail = BigInt(member.withdrawable)
+              + BigInt(await mc.pendingPoolOf(userAddr).catch(() => 0n));
+        if (avail > 0n && _debtLeft > 0n) {
+          // withdrawCore repays debt from `available` BEFORE the holds
+          const _eat = avail < _debtLeft ? avail : _debtLeft;
+          avail -= _eat; _debtLeft -= _eat;
+        }
+        const _tNum = parseInt((_mo.label || '').match(/^T(\d+)/)?.[1] || '1');
+        if (avail > 0n && _pReserved > 0n && _pHighest > 0 && (_pHighest - 1) === (_tNum - 1)) {
+          if (member.isInMatrix) {
+            const [_fee, _cr] = await Promise.all([
+              mc.ENTRY_FEE().then(v => BigInt(v)).catch(() => 0n),
+              mc.crossingReserveOf(userAddr).then(v => BigInt(v)).catch(() => 0n),
+            ]);
+            const _cn = _fee > _cr ? _fee - _cr : 0n;
+            if (_cn > 0n) avail = avail > _cn ? avail - _cn : 0n;
+          }
+          if (avail > 0n) avail = _pReserved < avail ? avail - _pReserved : 0n;
+        }
+      } catch (e) {
+        // A failed read is NOT zero — skip this matrix rather than sending a
+        // transaction built on a number we do not have.
+        console.warn('[withdraw] balance reads failed on', addr, '— skipping this matrix');
         continue;
       }
       if (avail === 0n) continue;
@@ -6639,7 +6680,7 @@ async function doWithdrawPartial() {
       withdrawn = true;
     }
     const actualWithdrawn = amtMicro - remaining;
-    const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} of the $${val.toFixed(2)} requested could not be sourced — in-matrix position may have a $10 reserve lock)` : '';
+    const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} of the $${val.toFixed(2)} requested could not be sourced right now — balances settle continuously; refresh and press MAX to pick up the remainder)` : '';
     setStatus('withdraw-status', withdrawn ? `✅ Withdrew $${(Number(actualWithdrawn)/1e6).toFixed(2)}!${leftOver}` : 'Nothing withdrawn.', withdrawn ? 'ok' : 'info');
     if (inp) inp.value = '';
     onWithdrawAmountInput();
