@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-07] Other — With all check boxes disabled, the amount of funds shown in …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** With all check boxes disabled, the amount of funds shown in the "withdrawal - breakdown" area (available to claim) is different from what is displayed in the "Withdrawal" area section..
+- **What was expected:** For them to be the same figure...
+- **Notes:** Not sure if I miss understood something..
+- **Submitted:** Fri, 07 Aug 2026 01:36:01 GMT
+
+
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
