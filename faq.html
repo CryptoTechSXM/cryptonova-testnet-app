@@ -589,30 +589,30 @@ function toggleTheme() {
       </div></div>
     </div>
 
-    <div class="faq-item" data-terms="pause 90 days inactive account paused stopped payments activity">
+    <div class="faq-item" data-terms="inactive idle 7 days seat vacated parked queue activity">
       <button class="faq-question" onclick="toggleFaq(this)">
-        <span data-i18n="faqPage.q18">What happens if I'm inactive for 90 days?</span>
+        <span data-i18n="faqPage.q18">What happens if I go inactive?</span>
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q18_a1">If your account has had no on-chain activity for <strong>90 days</strong>, the smart contract flags your position as <strong>paused</strong>. While paused:</p>
+        <p data-i18n="faqPage.q18_a1">After <strong>7 days</strong> with no activity (a governance-adjustable setting), an automated keeper may vacate your matrix seat and move you to the parked queue. What this means:</p>
         <ul>
-          <li data-i18n="faqPage.q18_li1">Chain pay to your position stops accumulating</li>
-          <li data-i18n="faqPage.q18_li2">Your pool will not auto-trigger even if it reaches the re-entry threshold</li>
-          <li data-i18n="faqPage.q18_li3">Your existing earnings balance is <strong>fully preserved</strong> &mdash; pausing never confiscates funds</li>
+          <li data-i18n="faqPage.q18_li1">What you lose is the <strong>seat itself</strong> and the chain-pay position that came with it &mdash; chain pay stops because the position is no longer yours</li>
+          <li data-i18n="faqPage.q18_li2">Your USDC balance and crossing reserve are <strong>never confiscated</strong> &mdash; they stay yours and remain withdrawable</li>
+          <li data-i18n="faqPage.q18_li3">Your CNOVA and your referral history are untouched</li>
         </ul>
         <p data-i18n="faqPage.q18_a2">This protects matrix health &mdash; abandoned wallets do not block active members from earning.</p>
       </div></div>
     </div>
 
-    <div class="faq-item" data-terms="reactivate unpause come back return account fee">
+    <div class="faq-item" data-terms="reactivate re-enter come back return parked rescue fee">
       <button class="faq-question" onclick="toggleFaq(this)">
-        <span data-i18n="faqPage.q19">How do I reactivate a paused account?</span>
+        <span data-i18n="faqPage.q19">How do I get back in after being parked?</span>
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q19_a1">Reactivation costs a small re-entry fee. Connect your wallet, go to the Dashboard, and click <strong>Reactivate</strong>. The contract will place you back into the current active matrix at the next available BFS slot, reset your 90-day activity clock, and resume chain pay to your position.</p>
-        <p data-i18n="faqPage.q19_a2">All your previous USDC earnings and CNOVA are untouched &mdash; reactivation only re-enters you into the live matrix queue.</p>
+        <p data-i18n="faqPage.q19_a1">Getting back in costs a <strong>full entry fee</strong> for that tier. Your returned crossing reserve covers about half of it, and accumulated earnings usually cover the rest. Connect your wallet, open the Dashboard, and use <strong>Self Rescue</strong> &mdash; the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.</p>
+        <p data-i18n="faqPage.q19_a2">All your previous USDC earnings and CNOVA are untouched &mdash; re-entry only places you back into the live matrix queue.</p>
       </div></div>
     </div>
 
