@@ -564,6 +564,10 @@
           <option value="33" data-i18n="govPage.params.p33_option">Epoch Time Limit</option>
           <option value="34" data-i18n="govPage.params.p34_option">Vest Duration</option>
           <option value="35" data-i18n="govPage.params.p35_option">Max Early-Exit Penalty (BPS)</option>
+          <!-- AUDIT 2026-08-07: moved out of "Array-Valued (Advanced)". Since
+               V8.21 the SF rescue ladder is a scalar preset index (0-3), not an
+               11-row table; proposals built as arrays reverted. -->
+          <option value="14" data-i18n="govPage.params.p14_option">SF Rescue Ladder (preset 0-3)</option>
         </optgroup>
         <optgroup label="Community Wallet">
           <option value="37" data-i18n="govPage.params.p37_option">Genesis Split (BPS)</option>
@@ -571,7 +575,6 @@
           <option value="39" data-i18n="govPage.params.p39_option">Distribute Interval (seconds)</option>
         </optgroup>
         <optgroup label="Array-Valued (Advanced)">
-          <option value="14" data-i18n="govPage.params.p14_option">SF Rescue Ladder</option>
           <option value="36" data-i18n="govPage.params.p36_option">CNOVA Boost Table</option>
         </optgroup>
       </select>
@@ -626,7 +629,7 @@
     <!-- V8.34: proposal fee notice -->
     <div style="display:flex;align-items:center;gap:8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);">
       <span style="font-size:16px;">🔥</span>
-      <span><strong style="color:#a855f7">100 CNOVA will be permanently burned</strong> when you submit this proposal. Voting is always free. You will be asked to approve the burn first, then confirm the proposal — two wallet clicks total.</span>
+      <span>Submitting a proposal costs only gas — there is <strong style="color:#a855f7">no CNOVA fee and no burn</strong>. Voting is always free. One wallet confirmation.</span>
     </div>
     <button class="btn-propose" id="btn-propose" disabled onclick="createProposal()" data-i18n="govPage.submit_btn">Submit Proposal</button>
     <div id="prop-status"></div>
@@ -644,7 +647,7 @@
       <div class="how-step">
         <div class="how-num">2</div>
         <h4 data-i18n="govPage.how2_h">Propose</h4>
-        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of CNOVA supply can submit a param-change proposal. A <strong>100 CNOVA fee is permanently burned</strong> on submission to prevent spam. Only allowlisted values are accepted. Voting is always free.</p>
+        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of CNOVA supply can submit a param-change proposal. Only allowlisted values are accepted. Voting is always free.</p>
       </div>
       <div class="how-step">
         <div class="how-num">3</div>
@@ -743,7 +746,13 @@ const PARAM_TARGETS = {
   40: SF_ADDR, 41: SF_ADDR, 42: SF_ADDR, 43: SF_ADDR, 44: SF_ADDR,
   45: SF_ADDR, 46: SF_ADDR, 47: SF_ADDR, 48: SF_ADDR, 49: SF_ADDR,
 };
-const PARAM_ARRAY_KIND = { 14: 'ladder', 36: 'boostTable' };
+// AUDIT 2026-08-07: 14 (SF rescue ladder) removed. V8Governance deleted
+// proposeLadder() in V8.21 — the ladder is a SCALAR preset index now (allowed
+// values 0-3, applied via MatrixKeeper.setSfRescueLadderPreset). Building an
+// 11-row ladder here produced a proposal that ALWAYS reverted: no such function
+// selector exists on the governance contract. It now takes the normal chip path,
+// where the allowed values come from the chain.
+const PARAM_ARRAY_KIND = { 36: 'boostTable' };
 // Fixed tier index per param id (0-based) -- used only to pass an argument
 // to the shared sfTargetMultiplier(uint8) getter; there is no UI tier picker
 // for these since each param id already IS a specific tier.
@@ -925,11 +934,9 @@ const GOV_ABI = [
   'function hasVoted(uint256,address) external view returns (bool)',
   'function getAllowedValues(uint8) external view returns (uint256[])',
   'function quorumBps() external view returns (uint256)',
-  'function proposalFee() external view returns (uint256)', // V8.34: 100 CNOVA burned per proposal
   'function votingPeriod() external view returns (uint256)',
   'function timelockPeriod() external view returns (uint256)',
   'function propose(uint8,address,uint256,string) external returns (uint256)',
-  'function proposeLadder(address,uint256[],uint256[],string) external returns (uint256)',
   'function proposeBoostTable(address,uint256[],uint256[],string) external returns (uint256)',
   'function castVote(uint256,bool) external',
   'function finalizeVote(uint256) external',
@@ -1095,6 +1102,9 @@ async function refreshHasVoted() {
   if (!userAddr || !allProposals.length) return;
   const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, ro || new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC }));
   await Promise.all(allProposals.map(async p => {
+    // AUDIT 2026-08-07: a failed read meant "not voted", so the page offered
+    // Vote For / Against to someone who had already voted — guaranteed revert,
+    // member pays gas. null = unknown.
     try { p._voted = await gov.hasVoted(p.id, userAddr); }
     catch { p._voted = false; }
   }));
@@ -1474,9 +1484,10 @@ async function onParamChange() {
   document.getElementById('target-row').style.display   = 'block';
 
   if (meta.isArray) {
-    // Ladder / boost-table params use proposeLadder()/proposeBoostTable(), not
-    // propose() -- no on-chain allowed-values list exists for these, so skip
-    // the chip fetch entirely and show the row builder instead.
+    // Boost-table params use proposeBoostTable(), not propose() -- no on-chain
+    // allowed-values list exists for it, so skip the chip fetch entirely and show
+    // the row builder instead. (The SF rescue ladder used to live here too; it is
+    // a scalar preset since V8.21 and now takes the normal chip path.)
     document.getElementById('target-input').value            = meta.target;
     document.getElementById('current-value-row').style.display = 'none';
     document.getElementById('matrix-instance-row').style.display = 'none';
@@ -1675,7 +1686,7 @@ function validateArrayRows() {
   const meta    = PARAM_META[paramId];
   const errEl   = document.getElementById('array-error');
   if (!meta || !meta.isArray) { errEl.textContent = ''; updateProposeGate(); return; }
-  const err = meta.arrayKind === 'ladder' ? _ladderRowsValid(arrayRows) : _boostTableRowsValid(arrayRows);
+  const err = _boostTableRowsValid(arrayRows);
   errEl.textContent = err || '';
   updateProposeGate();
 }
@@ -1705,7 +1716,7 @@ function updateProposeGate() {
     btn.disabled = true; return;
   }
   if (meta && meta.isArray) {
-    const err = meta.arrayKind === 'ladder' ? _ladderRowsValid(arrayRows) : _boostTableRowsValid(arrayRows);
+    const err = _boostTableRowsValid(arrayRows);
     if (err) {
       gate.textContent = err;
       btn.disabled = true; return;
@@ -1732,31 +1743,21 @@ async function createProposal() {
   if (!meta.isArray && selectedParamValue === null) return;
 
   try {
-    // V8.34: approve 100 CNOVA burn before proposing (two-step)
-    const govRo   = new ethers.Contract(GOV_ADDR, GOV_ABI, getRo());
-    const fee     = await govRo.proposalFee().catch(() => 100n * (10n ** 18n));
-    if (fee > 0n) {
-      const cnova      = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, signer);
-      const allowance  = await cnova.allowance(userAddr, GOV_ADDR).catch(() => 0n);
-      if (allowance < fee) {
-        setPropStatus('Step 1/2: Approve 100 CNOVA burn — confirm in MetaMask…', 'info');
-        const approveTx = await cnova.approve(GOV_ADDR, fee, { gasLimit: 80_000 });
-        await Promise.race([approveTx.wait(), new Promise((_,r) => setTimeout(() => r(new Error('approve_timeout')), 30000))]);
-      }
-      setPropStatus('Step 2/2: Submitting proposal — confirm in MetaMask…', 'info');
-    } else {
-      setPropStatus(t('govPage.js.submitting_proposal', 'Submitting proposal… please confirm in wallet.'), 'info');
-    }
+    // AUDIT 2026-08-07 — PROPOSAL FEE REMOVED. V8Governance.propose() has no fee,
+    // no burn and no transferFrom, and `proposalFee()` does not exist on the
+    // contract at all — so the read ALWAYS reverted and the .catch substituted
+    // 100e18 out of thin air. Every proposer was made to sign a pointless approve
+    // (real gas), told 100 CNOVA had been burned when nothing was, and left with a
+    // standing allowance to the governance contract.
+    setPropStatus(t('govPage.js.submitting_proposal', 'Submitting proposal… please confirm in wallet.'), 'info');
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     let tx;
     if (meta.isArray) {
-      const err = meta.arrayKind === 'ladder' ? _ladderRowsValid(arrayRows) : _boostTableRowsValid(arrayRows);
+      const err = _boostTableRowsValid(arrayRows);
       if (err) { setPropStatus(err, 'error'); return; }
       const col1 = arrayRows.map(r => BigInt(r[0]));
       const col2 = arrayRows.map(r => BigInt(r[1]));
-      tx = meta.arrayKind === 'ladder'
-        ? await gov.proposeLadder(target, col1, col2, description, { gasLimit: 500_000 })
-        : await gov.proposeBoostTable(target, col1, col2, description, { gasLimit: 500_000 });
+      tx = await gov.proposeBoostTable(target, col1, col2, description, { gasLimit: 500_000 });
     } else {
       tx = await gov.propose(paramId, target, selectedParamValue, description, { gasLimit: 400_000 });
     }
