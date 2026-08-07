@@ -1503,8 +1503,14 @@
           </div>`;
           continue;
         }
-        const gateTag = d.gateOpen
-          ? `<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(0,229,160,0.12);color:#00e5a0;border:0.5px solid rgba(0,229,160,0.35);margin-left:6px">Open</span>`
+        // T1 is the ENTRY tier and is never gated — see the matching note in
+        // index.html. TierRouter reads tierVelocityGreen only for the tier being
+        // UPGRADED INTO (:1132, :1319); _register(), the only way into T1, never
+        // reads it. Showing T1 as gated advertised a restriction that does not
+        // exist, whichever label was on the badge.
+        const _isEntryTier = d.label === 'T1';
+        const gateTag = (_isEntryTier || d.gateOpen)
+          ? `<span title="${_isEntryTier ? 'Entry tier — registration is always open' : ''}" style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(0,229,160,0.12);color:#00e5a0;border:0.5px solid rgba(0,229,160,0.35);margin-left:6px">Open</span>`
           : `<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(245,158,11,0.12);color:#f59e0b;border:0.5px solid rgba(245,158,11,0.35);margin-left:6px">Whale Gate</span>`;
         const totalPool = d.pairs.reduce((s, p) => s + p.poolA + p.poolB, 0n);
         const poolTxt = totalPool > 0n ? `<span style="font-size:10px;color:var(--text3);margin-left:auto;padding-left:6px">Pool: <span style="color:var(--green)">$${(Number(totalPool)/1e6).toFixed(2)}</span></span>` : '';

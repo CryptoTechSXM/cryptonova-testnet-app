@@ -3777,7 +3777,22 @@ async function loadTiersStats() {
 
         const pill = document.getElementById('tier-t'+n+'-gate');
         if (pill) {
-          if (isGreen) {
+          // T1 IS THE FRONT DOOR — never show it as paused (owner, 2026-08-07).
+          // Verified against the contract before changing this: the velocity gate
+          // is only ever read for `nextIndex`, the tier a member is UPGRADING INTO
+          // (TierRouter:1132 and :1319). `_register()` — the sole path into T1 —
+          // never reads tierVelocityGreen at all; its only guards are "already
+          // joined" and "T1 pair manager unset". So tierVelocityGreen[0] cannot
+          // stop anyone joining, and rendering "Auto-Paused" there advertised a
+          // restriction that does not exist. Nobody upgrades INTO T1, so the flag
+          // is meaningless for this row.
+          if (n === 1) {
+            pill.className = 'pill pill-green';
+            pill.style.cssText = 'font-size:10px';
+            pill.textContent = 'Open';
+            pill.title = 'Tier 1 is the entry tier — registration is always open. '
+                       + 'The velocity gate only throttles automatic upgrades INTO higher tiers.';
+          } else if (isGreen) {
             pill.className = 'pill pill-green';
             pill.style.cssText = 'font-size:10px';
             pill.textContent = 'Open';
