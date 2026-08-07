@@ -5513,7 +5513,7 @@ async function loadDashboardData() {
           setText('dash-withdraw-amount', fmt6(free));
           const badge = document.getElementById('dash-reserved-badge');
           const lbl   = document.getElementById('dash-ready-label');
-          if (badge) { badge.textContent = `⚙ ${fmt6(reserved)} reserved`; badge.style.display = 'block'; }
+          if (badge) { badge.textContent = `⚙ up to ${fmt6(reserved)} reserved`; badge.style.display = 'block'; }
           if (lbl)   lbl.textContent = `${fmt6(free)} free to claim`;
 
           // Reserve notice banner in withdraw panel
@@ -5522,7 +5522,7 @@ async function loadDashboardData() {
           const totEl  = document.getElementById('reserve-total-text');
           if (notice) notice.style.display = 'block';
           if (detEl)  detEl.innerHTML = details.map(d => `• ${d}`).join('<br>');
-          if (totEl)  totEl.textContent = `Total reserved: ${fmt6(reserved)} — held for your automation settings`;
+          if (totEl)  totEl.textContent = `Reserve target: ${fmt6(reserved)} — enforced against your highest-tier earnings`;
 
           // Re-render fee breakdown against the free amount
           try {
@@ -5552,6 +5552,22 @@ async function loadDashboardData() {
       if (lbl) lbl.textContent = res.reserved > 0n
         ? `${fmt6(res.net)} free to claim`
         : (window.t ? window.t('dash.ready_to_claim','Ready to claim') : 'Ready to claim');
+      // Reserve badge tells the truth: the target, and what is actually held today.
+      // The target fences FUTURE highest-tier earnings — it is not carved out of
+      // the current balance (that reading implied more money than ever earned).
+      const bdg = document.getElementById('dash-reserved-badge');
+      if (bdg) {
+        if (res.reserved > 0n) {
+          bdg.textContent = `⚙ Reserve target ${fmt6(res.reserved)} · ${fmt6(res.heldNow)} held from current earnings`;
+          bdg.style.display = 'block';
+        } else {
+          bdg.style.display = 'none';
+        }
+      }
+      const tot = document.getElementById('reserve-total-text');
+      if (tot && res.reserved > 0n) {
+        tot.textContent = `Reserve target ${fmt6(res.reserved)} · currently holding ${fmt6(res.heldNow)} from your highest-tier earnings — the rest is guarded from future earnings as they arrive`;
+      }
       try {
         const feeBps = window._withdrawFeeBps || 150n;
         const feeAmt = res.net * feeBps / 10000n;
@@ -6422,6 +6438,7 @@ async function _claimableAll(rp, blockTag) {
   } catch (_) {}
   const mats = await _buildAllMatrixObjects(rp);
   let total = 0n;
+  let heldNow = 0n;   // what crossing hold + reserve ACTUALLY withhold right now (highest tier only)
   const byTier = {};
   await Promise.all(mats.map(async mo => {
     const tNum = parseInt((mo.label || '').match(/^T(\d+)/)?.[1] || '1');
@@ -6436,6 +6453,7 @@ async function _claimableAll(rp, blockTag) {
     bal += BigInt(await mc.pendingPoolOf(userAddr, o).catch(() => 0n));
     if (bal === 0n) return;
     if (reserved > 0n && highest > 0 && (highest - 1) === (tNum - 1)) {
+      const beforeHolds = bal;
       if (m.isInMatrix) {
         const [fee, cr] = await Promise.all([
           mc.ENTRY_FEE(o).then(v => BigInt(v)).catch(() => 0n),
@@ -6443,18 +6461,19 @@ async function _claimableAll(rp, blockTag) {
         ]);
         const crossNeeded = fee > cr ? fee - cr : 0n;
         if (crossNeeded > 0n) {
-          if (bal <= crossNeeded) return;   // withdrawCore: require available > crossNeeded
+          if (bal <= crossNeeded) { heldNow += beforeHolds; return; }   // withdrawCore: require available > crossNeeded
           bal -= crossNeeded;
         }
       }
-      if (reserved >= bal) return;          // withdrawCore: require reserve < available
+      if (reserved >= bal) { heldNow += beforeHolds; return; }          // withdrawCore: require reserve < available
       bal -= reserved;
+      heldNow += beforeHolds - bal;
     }
     total += bal;
     byTier[tNum] += bal;
   }));
   const net = total > debt ? total - debt : 0n;
-  return { total, net, debt, reserved, highest, byTier };
+  return { total, net, debt, reserved, highest, byTier, heldNow };
 }
 
 async function _freshMaxWithdrawable() {
