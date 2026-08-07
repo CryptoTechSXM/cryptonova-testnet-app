@@ -3177,21 +3177,25 @@ async function loadHomeStats() {
       rpc(matA1.rotationCount()).catch(()=>0n),
       rpc(matB1.occupancy()).catch(()=>0n),
       rpc(matB1.poolAccumulator()).catch(()=>0n),
-      rpc(tr.globalJoinedCount()).catch(()=>0n),
+      // AUDIT 2026-08-07: the headline figures below used .catch(()=>0n) with no
+      // hold-last-good, so one slow node (rpc() rejects after 8s) painted
+      // "Stability Rescue Fund $0.00", "Total Registered 0", "Community Wallet
+      // $0.00". These five now propagate null and are skipped at the paint site.
+      rpc(tr.globalJoinedCount()).catch(()=>null),
       rpc(matA2.occupancy()).catch(()=>0n),
       rpc(matA2.rotationCount()).catch(()=>0n),
       rpc(matB2.occupancy()).catch(()=>0n),
       rpc(matB2.poolAccumulator()).catch(()=>0n),
-      rpc(tr.totalSystemCycles()).catch(()=>0n),
+      rpc(tr.totalSystemCycles()).catch(()=>null),
       rpc(cnova.totalSupply()).catch(()=>0n),
       rpc(cnova.currentEpochNumber()).catch(()=>1n),
-      rpc(sf.totalBalance()).catch(()=>0n),
-      rpc(usdc.balanceOf(ADDRS.treasury)).catch(()=>0n),
+      rpc(sf.totalBalance()).catch(()=>null),
+      rpc(usdc.balanceOf(ADDRS.treasury)).catch(()=>null),
       rpc(matA3.occupancy()).catch(()=>0n),
       rpc(matA3.rotationCount()).catch(()=>0n),
       rpc(matB3.occupancy()).catch(()=>0n),
       rpc(matB3.poolAccumulator()).catch(()=>0n),
-      rpc(usdc.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress)).catch(()=>0n),
+      rpc(usdc.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress)).catch(()=>null),
       rpc(cnova.totalMinted()).catch(()=>0n),
       rpc(cnova.totalBurned()).catch(()=>0n),
       rpc(usdc.balanceOf(ADDRS.buybackReserve || ethers.ZeroAddress)).catch(()=>0n),
@@ -3199,14 +3203,16 @@ async function loadHomeStats() {
     ]);
 
     // Stat cards
-    setText('stat-members',  totalJoined.toString());
+    // null = the read failed; leave whatever the card already shows rather than
+    // asserting a zero that is indistinguishable from real data.
+    if (totalJoined !== null) setText('stat-members',  totalJoined.toString());
     setText('stat-minted',   Number(ethers.formatEther(allTimeMinted)).toLocaleString(undefined,{maximumFractionDigits:0})); // all-time, never decreases
     setText('stat-burned',   Number(ethers.formatEther(allTimeBurned)).toLocaleString(undefined,{maximumFractionDigits:0})); // V8.9 totalBurned()
-    setText('stat-reserve',  fmt6(sfBal));
-    setText('stat-cw-balance', fmt6(cwPoolBal));
+    if (sfBal !== null)      setText('stat-reserve',  fmt6(sfBal));
+    if (cwPoolBal !== null)  setText('stat-cw-balance', fmt6(cwPoolBal));
     setText('stat-buyback',  fmt6(buybackBal));
     setText('stat-lq-reserve', fmt6(lqBal));
-    setText('stat-cycles',   sysCycles.toString());
+    if (sysCycles !== null)  setText('stat-cycles',   sysCycles.toString());
 
     // T1A progress — prefer the occupancy from allPairsStatus (window._t1PairInfo),
     // which came in one reliable call; the separate occupancy() read can be
@@ -3277,10 +3283,15 @@ async function loadHomeStats() {
     setText('stat-epoch', epochLabel);
     setText('cw-epoch', epochLabel);
     setText('stat-supply', Number(ethers.formatEther(supply)).toLocaleString(undefined,{maximumFractionDigits:0})+' CNOVA'); // current circulating (decreases on redeem/burn)
-    setText('stat-treasury-usdc', fmt6(treasUsdc));
+    if (treasUsdc !== null)  setText('stat-treasury-usdc', fmt6(treasUsdc));
 
-    // CNOVA floor price: treasury USDC ÷ total CNOVA supply
-    if (supply > 0n) {
+    // CNOVA floor price: treasury USDC ÷ total CNOVA supply.
+    // AUDIT 2026-08-07: treasUsdc used to default to 0n on failure, so a dropped
+    // read rendered "$0.000000" AND pushed a {p:0} point into a 60-sample
+    // localStorage series — leaving a permanent fabricated crash to zero on the
+    // sparkline for every future visit, for a value CNOVATreasury documents as
+    // never decreasing. Only sample when the treasury read genuinely succeeded.
+    if (supply > 0n && treasUsdc !== null) {
       const floorRaw = (treasUsdc * BigInt(1000000000000000000)) / supply; // 6-dec USDC per CNOVA
       const floorUsd = Number(floorRaw) / 1e6;
       const floorStr = floorUsd === 0     ? '$0.000000'
@@ -5403,6 +5414,41 @@ async function loadDashboardData() {
           if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
           if (_selfRescueBtn)  { _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
         }
+
+        // ── SURPLUS WARNING (interim guard for a CONTRACT bug, found 2026-08-07)
+        // MatrixLogicLib.selfRescue AND coPayRescue both zero crossingReserve and
+        // withdrawable unconditionally, then _finalizeCrossing forwards exactly
+        // ENTRY_FEE. So when reserve + withdrawable EXCEEDS the fee, the surplus is
+        // erased from the member's ledger, is not forwarded, and is stranded in the
+        // matrix contract — the member simply loses it. Worst of all, the button
+        // above reads "Free — Earnings Cover It" precisely when a surplus exists,
+        // which invites the loss. V8.48 credits the excess back; until it ships,
+        // say so plainly so nobody clicks blind.
+        try {
+          const _rsv  = parkedInfo.crossingReserve || 0n;
+          const _wd   = parkedInfo.withdrawable   || 0n;
+          const _fee  = parkedInfo.fee            || 0n;
+          const _surp = (_rsv + _wd) > _fee ? (_rsv + _wd) - _fee : 0n;
+          let _sw = document.getElementById('rescue-surplus-warn');
+          if (_surp > 0n) {
+            if (!_sw) {
+              _sw = document.createElement('div');
+              _sw.id = 'rescue-surplus-warn';
+              _sw.style.cssText = 'margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35);font-size:12px;color:var(--text2);line-height:1.6';
+              const _hint = document.getElementById('rescue-auto-hint');
+              if (_hint && _hint.parentNode) _hint.parentNode.insertBefore(_sw, _hint.nextSibling);
+            }
+            _sw.innerHTML = '<strong style="color:#ef4444">Wait before rescuing manually.</strong> '
+              + 'Your reserve plus earnings (' + fmt6(_rsv + _wd) + ') exceed the '
+              + fmt6(_fee) + ' re-entry fee. On the current contract a manual rescue '
+              + 'consumes the whole balance, so the extra <strong>' + fmt6(_surp)
+              + '</strong> would not be returned to you. Withdraw the surplus first, '
+              + 'or let the automatic rescue re-enter you — this is fixed in the next release.';
+            _sw.style.display = '';
+          } else if (_sw) {
+            _sw.style.display = 'none';
+          }
+        } catch (_) {}
         window._coPayMemberShare = _memberShare;
         const cpRow = document.getElementById('copay-you-pay-row');
         const cpApprove = document.getElementById('btn-copay-approve');
