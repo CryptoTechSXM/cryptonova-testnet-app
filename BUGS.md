@@ -37,17 +37,6 @@
 
 ## Open Issues
 
-### [2026-08-07] Other — ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) …
-- **Reporter:** Jacob
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x3fd5936a01d89d465570e4f601d6378365fb6a01
-- **Frequency:** Intermittent
-- **What happened:** ❌ Transaction failed on-chain — hard-refresh (Ctrl+Shift+R) and try again. If it persists, use the bug report link below.
-- **What was expected:** No X in red
-- **Submitted:** Fri, 07 Aug 2026 05:22:45 GMT
-
-
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
@@ -143,6 +132,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-07 | 2026-08-08 | Dashboard (upgrade) | Generic red-X on tier upgrade — V8.47 gate pulls fee + outstanding rescue loan from the wallet, UI approved/checked fee only; approve/checks now fee+debt with loan-aware copy, ERC20 errors decode — verified live on two debted wallets (loan settled via upgrade, banner cleared) · Jacob · bounty +1 (first find) | 50c59b1 |
 | 2026-08-07 | 2026-08-07 | Other | With all check boxes disabled, breakdown 'available to claim' differed from the Withdrawal section — fixed — card, MAX and breakdown unified on a withdrawCore mirror (_claimableAll); root-caused double reserve subtraction + stale freeWithdrawable view (contract fix logged V8_48_BACKLOG) · Sherwyn · bounty +1 | 427beb5 |
 | 2026-08-06 | 2026-08-06 | Other | "Incorrect amount displayed" - Just upgraded to T2 and notic — fixed — reserve breakdown now reads the real next-tier fee · Sherwyn | 66ecdff |
 | 2026-08-06 | 2026-08-06 | Dashboard (index.html) | 1. Dash Board Page Incorrect information — fixed — next-tier fee + staggered post-action refresh (upgrade/rescue no longer hang) · Kira | 66ecdff |

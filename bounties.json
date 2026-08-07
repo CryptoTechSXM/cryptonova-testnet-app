@@ -1,7 +1,7 @@
 {
  "program": "CryptoNova Bug Bounty — $1 per accepted find (owner-confirmed real bugs; test artifacts and duplicates at owner's discretion)",
  "rate_usd": 1,
- "updated": "2026-08-07",
+ "updated": "2026-08-08",
  "reporters": [
   {
    "name": "Sherwyn",
@@ -178,6 +178,19 @@
     {
      "date": "2026-08-06",
      "summary": "Page refresh dumped members back to Home/Dashboard instead of staying on the current tab (fixed via URL-hash tab persistence, 8480d20)",
+     "status": "accepted"
+    }
+   ]
+  },
+  {
+   "name": "Jacob",
+   "wallets": [
+    "0x3fd5936a01d89d465570e4f601d6378365fb6a01"
+   ],
+   "finds": [
+    {
+     "date": "2026-08-07",
+     "summary": "Generic 'Transaction failed on-chain' on tier upgrade — V8.47 gate pulls fee + rescue loan from wallet but UI approved/checked the fee only",
      "status": "accepted"
     }
    ]
