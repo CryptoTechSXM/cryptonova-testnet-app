@@ -564,19 +564,15 @@
              2026-08-07, but the scan was cut to 9,000 blocks when QuickNode began
              rejecting eth_getLogs over its 10k cap — so the label had been
              overstating the window by 10x. Labels and code now agree. -->
-        <div class="detail-section">Loan Book — recent window (~5h)</div>
-        <div class="detail-row">
-          <span class="detail-key">Loaned in window</span>
-          <span class="detail-val" id="kp-loaned">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Repaid in window</span>
-          <span class="detail-val green" id="kp-repaid">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Net advanced in window</span>
-          <span class="detail-val" id="kp-outstanding">—</span>
-        </div>
+        <!-- 2026-08-07: the three "in window" aggregate rows that used to sit here
+             (loaned / repaid / net advanced) were deleted. They duplicated the three
+             lifetime rows above — which now come from contract state and are exact —
+             while being scoped to whatever block window the RPC would tolerate. The
+             rows that remain are per-WALLET, and those only mean anything over a
+             member's whole history: "a wallet climbing this list without repaying"
+             is invisible in a 5-hour slice. They are now built by the incremental
+             accumulator, which walks the full chain history and persists. -->
+        <div class="detail-section">Loan Book — lifetime <span id="kp-book-progress" style="color:var(--text3);font-weight:400;font-size:11px"></span></div>
         <div class="detail-row">
           <span class="detail-key">Loans by tier</span>
           <span class="detail-val" id="kp-loans-by-tier" style="font-size:11px;color:var(--text3)">—</span>
@@ -589,7 +585,7 @@
           <span class="detail-key">Repeat borrowers (5+ loans)</span>
           <span class="detail-val" id="kp-repeat">—</span>
         </div>
-        <div class="detail-section">Top Borrowers — loans per wallet</div>
+        <div class="detail-section">Top Borrowers — top 10 by amount advanced</div>
         <div id="kp-borrower-list">
           <div class="loading-row">Loading…</div>
         </div>
@@ -813,10 +809,10 @@
   // V8.47 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
-    if (localStorage.getItem('cnova_st_ver') !== 'v8.47-0807b') {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47']
+    if (localStorage.getItem('cnova_st_ver') !== 'v8.47-0807c') {
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47','cnova_loans_v8_47b']
         .forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem('cnova_st_ver','v8.47-0807b');
+      localStorage.setItem('cnova_st_ver','v8.47-0807c');
     }
   } catch(e) {}
   // Restore cached display state immediately (survives page reload)
@@ -943,79 +939,16 @@
       // trForKeeper contract, keeperPmAddrs and the matTier map — all of them
       // had become dead code feeding calls nothing consumed.
 
-      // V8.47 (owner report 2026-08-07): read the FUND's member-ledger events,
-      // not per-matrix ones. Two reasons this was wrong: (1) repayments made
-      // through the TierRouter upgrade-fold never touch a matrix, so they were
-      // invisible — that is the "$0.00 repaid in window" against real loans;
-      // (2) 20 matrices x 2 events = 40 parallel queryFilter calls per refresh
-      // routinely tripped the RPC rate cap, and each silent .catch(()=>[])
-      // dropped real history. Two queries now, and the tier comes from the
-      // event itself rather than an address→tier map.
+      // Recency signal only. The per-wallet loan book used to be built here from
+      // this same short window; it now lives in the lifetime accumulator in
+      // loadSF(), because "who is being carried by the fund" is a question about
+      // a member's whole history, not the last few hours. All this needs is the
+      // most recent loan, so one query is enough.
       let bookRead = true;
-      const [loanLogsRaw, repayLogsRaw] = await Promise.all([
-        _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk)).catch(() => { bookRead = false; return []; }),
-        _retry(() => sf.queryFilter(sf.filters.MemberDebtRepaid(),    fromBlock, blk)).catch(() => { bookRead = false; return []; }),
-      ]);
-      const keeperRescueLogs = loanLogsRaw;
-      const allRescueLogs = [...keeperRescueLogs].sort((a,b) => a.blockNumber - b.blockNumber);
+      const loanLogsRaw = await _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk))
+        .catch(() => { bookRead = false; return []; });
+      const allRescueLogs = [...loanLogsRaw].sort((a,b) => a.blockNumber - b.blockNumber);
 
-      // ── per-wallet loan book ────────────────────────────────────────────────
-      const _book = new Map();     // wallet -> { loans, loaned, repaid, tiers:Set }
-      const _byTier = new Map();   // tier   -> { loans, loaned }
-      const _bump = w => {
-        const k = w.toLowerCase();
-        if (!_book.has(k)) _book.set(k, { loans: 0, loaned: 0n, repaid: 0n, tiers: new Set() });
-        return _book.get(k);
-      };
-      // MemberDebtIncreased(member, tier, amount, newTotal) — tier is the
-      // 0-based tier INDEX, so display tier+1.
-      keeperRescueLogs.forEach(lg => {
-        const tier = 'T' + (Number(lg.args[1]) + 1);
-        const amt  = BigInt(lg.args[2]);
-        const rec  = _bump(lg.args[0]);
-        rec.loans++; rec.loaned += amt; rec.tiers.add(tier);
-        const tt = _byTier.get(tier) || { loans: 0, loaned: 0n };
-        tt.loans++; tt.loaned += amt; _byTier.set(tier, tt);
-      });
-      // MemberDebtRepaid(member, amount, newTotal)
-      repayLogsRaw.forEach(lg => { _bump(lg.args[0]).repaid += BigInt(lg.args[1]); });
-
-      const _usd = v => '$' + (Number(v) / 1e6).toFixed(2);
-      const _totLoaned = [..._book.values()].reduce((s, r) => s + r.loaned, 0n);
-      const _totRepaid = [..._book.values()].reduce((s, r) => s + r.repaid, 0n);
-      const _repeat    = [..._book.values()].filter(r => r.loans >= 5).length;
-
-      // A failed window query is UNKNOWN, not zero — the same trap that made the
-      // lifetime rows print a confident $0.00 (owner report 2026-08-07).
-      setText('kp-loaned',      bookRead ? _usd(_totLoaned) : '—');
-      setText('kp-repaid',      bookRead ? _usd(_totRepaid) : '—');
-      setText('kp-outstanding', bookRead ? _usd(_totLoaned > _totRepaid ? _totLoaned - _totRepaid : 0n) : '—');
-      setText('kp-borrowers',   bookRead ? _book.size.toString() : '—');
-      setText('kp-repeat',      bookRead ? (_repeat + ' of ' + _book.size) : '—');
-      setText('kp-loans-by-tier', [..._byTier.entries()]
-        .sort((a,b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
-        .map(([t, v]) => t + ': ' + v.loans + ' (' + _usd(v.loaned) + ')').join(' · ') || '—');
-
-      const _rows = [..._book.entries()]
-        .map(([w, r]) => ({ w, ...r }))
-        .sort((a, b) => (b.loaned > a.loaned ? 1 : b.loaned < a.loaned ? -1 : 0))
-        .slice(0, 15);
-      const _wrap = document.getElementById('kp-borrower-list');
-      if (_wrap) {
-        _wrap.innerHTML = !bookRead
-          ? '<div class="loading-row">Loan book temporarily unavailable — retrying next poll</div>'
-          : _rows.length === 0
-          ? '<div class="loading-row">No rescue loans in this window</div>'
-          : _rows.map(r => {
-              const net = r.loaned - r.repaid;
-              const hot = r.loans >= 10 ? ' style="color:var(--yellow)"' : '';
-              return '<div class="detail-row"><span class="detail-key" style="font-family:monospace;font-size:11px">' +
-                r.w.slice(0,8) + '…' + r.w.slice(-6) +
-                ' <span style="color:var(--text3)">[' + [...r.tiers].join(',') + ']</span></span>' +
-                '<span class="detail-val"' + hot + '>' + r.loans + ' loans · ' + _usd(r.loaned) +
-                ' · owes ' + _usd(net) + '</span></div>';
-            }).join('');
-      }
       const rescueCount = allRescueLogs.length;
       let lastRescueTime = null;
       if (rescueCount > 0) {
@@ -1720,19 +1653,29 @@
       // scan too, so dropped chunks made "repaid" exceed "issued" and outstanding
       // clamped to a confident $0.00 while the chain held $11.03.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_47b'; // bump suffix on EVERY redeploy + add the old key to the cache-buster list above
+        const LOAN_KEY        = 'cnova_loans_v8_47c'; // bump suffix on EVERY redeploy + add the old key to the cache-buster list above
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
+        // V8.47 deploy block — the same anchor sf_invariant_check.js uses, so the
+        // book covers the whole life of this deployment rather than a rolling
+        // window. Bounded fallback in case the constant is ever stale.
+        const SEED_BLOCK      = 45060000;
 
-        // Load accumulated state
-        let acc = { nextBlock: 0, totalIssued: '0', loanCount: 0, totalRepaid: '0', repayCount: 0, catching: true };
-        try { const s = localStorage.getItem(LOAN_KEY); if (s) acc = JSON.parse(s); } catch(e) {}
+        // Accumulated state. `book`/`byTier` make this a LIFETIME per-wallet loan
+        // book (2026-08-07): it walks history a few chunks per poll, persists, and
+        // retries any chunk that fails, so it converges and then stays current.
+        let acc = { nextBlock: 0, loanCount: 0, repayCount: 0, catching: true, book: {}, byTier: {} };
+        try { const s = localStorage.getItem(LOAN_KEY); if (s) acc = Object.assign(acc, JSON.parse(s)); } catch(e) {}
+        if (!acc.book)   acc.book   = {};
+        if (!acc.byTier) acc.byTier = {};
 
         const currentBlk = await provider.getBlockNumber();
 
-        // On first load seed from ~140k blocks ago (~3.5 days = V8.30 deploy window).
-        // Scans 3 chunks (6k blocks) forward per poll — full history in ~24 polls (~12 min).
-        if (acc.nextBlock === 0 || acc.nextBlock > currentBlk) acc.nextBlock = Math.max(0, currentBlk - 140000);
+        if (acc.nextBlock === 0 || acc.nextBlock > currentBlk) {
+          acc.nextBlock = (currentBlk - SEED_BLOCK) > 0 && (currentBlk - SEED_BLOCK) < 400000
+            ? SEED_BLOCK
+            : Math.max(0, currentBlk - 200000);
+        }
 
         const scanFrom = acc.nextBlock;
         const scanTo   = Math.min(scanFrom + CHUNK * MAX_CHUNKS_POLL - 1, currentBlk);
@@ -1754,6 +1697,25 @@
             if (!okChunk || lLogs === null || rLogs === null) break;   // retry this chunk next poll
             newLoans  += lLogs.length;
             newRepays += rLogs.length;
+            // MemberDebtIncreased(member, tier, amount, newTotal) — tier is 0-based
+            for (const lg of lLogs) {
+              const w = String(lg.args[0]).toLowerCase();
+              const tierLbl = 'T' + (Number(lg.args[1]) + 1);
+              const amt = BigInt(lg.args[2]);
+              const rec = acc.book[w] || (acc.book[w] = { l: 0, ld: '0', rp: '0', t: [] });
+              rec.l += 1;
+              rec.ld = (BigInt(rec.ld) + amt).toString();
+              if (!rec.t.includes(tierLbl)) rec.t.push(tierLbl);
+              const tt = acc.byTier[tierLbl] || (acc.byTier[tierLbl] = { l: 0, ld: '0' });
+              tt.l += 1;
+              tt.ld = (BigInt(tt.ld) + amt).toString();
+            }
+            // MemberDebtRepaid(member, amount, newTotal)
+            for (const lg of rLogs) {
+              const w = String(lg.args[0]).toLowerCase();
+              const rec = acc.book[w] || (acc.book[w] = { l: 0, ld: '0', rp: '0', t: [] });
+              rec.rp = (BigInt(rec.rp) + BigInt(lg.args[1])).toString();
+            }
             donePast   = to;
             await new Promise(r => setTimeout(r, 120));   // pace under the RPC cap
           }
@@ -1792,6 +1754,56 @@
         setClass('sf-loans-outstanding', outstandingCls);
         _lastLoansState = { issuedTxt, repaidTxt, outstandingTxt, outstandingCls };
         try { localStorage.setItem('cnova_st_loans', JSON.stringify(_lastLoansState)); } catch(e) {}
+
+        // ── Lifetime per-wallet loan book ─────────────────────────────────────
+        // Rendered from the accumulator above, so it covers this deployment's
+        // whole history instead of a rolling ~5h window. While it is still
+        // walking backfill the header says so, rather than implying the partial
+        // picture is the whole one.
+        {
+          const _usd = v => '$' + (Number(BigInt(v)) / 1e6).toFixed(2);
+          const entries = Object.entries(acc.book);
+          const repeat  = entries.filter(([, r]) => r.l >= 5).length;
+
+          const prog = document.getElementById('kp-book-progress');
+          if (prog) {
+            if (acc.catching) {
+              const span = Math.max(1, currentBlk - SEED_BLOCK);
+              const done = Math.min(100, Math.max(0, Math.round((acc.nextBlock - SEED_BLOCK) * 100 / span)));
+              prog.textContent = ` · building ${done}%`;
+            } else {
+              prog.textContent = '';
+            }
+          }
+
+          setText('kp-borrowers', entries.length.toString());
+          setText('kp-repeat', repeat + ' of ' + entries.length);
+          setText('kp-loans-by-tier', Object.entries(acc.byTier)
+            .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
+            .map(([tl, v]) => tl + ': ' + v.l + ' (' + _usd(v.ld) + ')').join(' · ') || '—');
+
+          const rows = entries
+            .map(([w, r]) => ({ w, l: r.l, ld: BigInt(r.ld), rp: BigInt(r.rp), t: r.t || [] }))
+            .sort((a, b) => (b.ld > a.ld ? 1 : b.ld < a.ld ? -1 : 0))
+            .slice(0, 10);   // owner 2026-08-07: 10, not 15 — readable at a glance
+          const wrap = document.getElementById('kp-borrower-list');
+          if (wrap) {
+            wrap.innerHTML = rows.length === 0
+              ? `<div class="loading-row">${acc.catching ? 'Building loan book…' : 'No rescue loans yet'}</div>`
+              : rows.map(r => {
+                  const owed = r.ld > r.rp ? r.ld - r.rp : 0n;
+                  const hot  = r.l >= 10 ? ' style="color:var(--yellow)"' : '';
+                  return '<div class="detail-row"><span class="detail-key" style="font-family:monospace;font-size:11px">' +
+                    r.w.slice(0,8) + '…' + r.w.slice(-6) +
+                    ' <span style="color:var(--text3)">[' + r.t.join(',') + ']</span></span>' +
+                    '<span class="detail-val"' + hot + '>' + r.l + ' loan' + (r.l !== 1 ? 's' : '') +
+                    ' · ' + _usd(r.ld) + ' · owes ' + _usd(owed) + '</span></div>';
+                }).join('') +
+                (entries.length > rows.length
+                  ? `<div style="font-size:11px;color:var(--text3);margin-top:6px">Showing top 10 of ${entries.length} borrowing wallets</div>`
+                  : '');
+          }
+        }
       } catch(e) {
         console.warn('Loan tracking error:', e);
         if (_lastLoansState) {
