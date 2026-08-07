@@ -1036,7 +1036,6 @@
   "q12_li4": "<strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.",
   "q12_a2": "剩余分配流向协议储备和计划（CNOVA Treasury、Stability Rescue Fund、开发、运营、Liquidity Reserve、Buyback Reserve）— 这些支撑协议的长期健康，个人会员不能直接提取。例外是社区钱包：如果您是前 1,000 名注册会员之一，您的该奖池份额可每月从仪表板领取 — 详见补偿计划页面。",
   "q13": "如何提取收益？",
-  "q13_a1": "USDC 收益（链路收益、推荐奖励、循环收益）在您的链上余额中积累。前往<strong>仪表板标签页</strong>，点击<strong>提款至钱包</strong>。智能合约在一笔交易中将您的全部可提取余额直接发送至您的连接钱包。",
   "q13_a2": "CNOVA 代币在每次注册时直接分配至您的钱包，无需单独提款步骤。您可以使用仪表板上的<strong>赎回 CNOVA</strong>部分按底价将 CNOVA 兑换为 USDC。",
   "q14": "收益有保证吗？",
   "q14_a1": "<strong>没有。</strong>收益取决于持续的网络参与。如果增长放缓，循环完成减慢，链路收益量减少。任何矩阵结构的过往结果均不保证未来结果。",

@@ -1040,7 +1040,6 @@
   "q12_li4": "<strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.",
   "q12_a2": "Kalan dağılım protokol rezervlerine ve programlarına gider (CNOVA Hazinesi, Stabilite Kurtarma Fonu, Geliştirme, Operasyonlar, Likidite Rezervi, Geri Alım Rezervi) — bu fonlar protokolün uzun vadeli sağlığını destekler ve bireysel üyeler tarafından doğrudan çekilemez. İstisna Topluluk Cüzdanıdır: kayıt olan ilk 1.000 üyeden biriyseniz, bu havuzdaki payınız Panelden aylık olarak talep edilebilir &mdash; ayrıntılar için Tazminat Planı sayfasına bakın.",
   "q13": "Kazançlarımı nasıl çekerim?",
-  "q13_a1": "USDC kazançları (zincir ödemesi, yönlendirme bonusları, döngü ödemeleri) zincir üstü bakiyenizde birikir. <strong>Panel sekmesine</strong> gidin ve <strong>Cüzdana Çek</strong>'e tıklayın. Akıllı sözleşme, tam çekilebilir bakiyenizi bir işlemde doğrudan bağlı cüzdanınıza gönderir.",
   "q13_a2": "CNOVA tokenleri her kayıtta doğrudan cüzdanınıza dağıtılır ve ayrı bir çekim adımı gerektirmez. Panelin <strong>CNOVA İtfa Et</strong> bölümünü kullanarak CNOVA'yı taban fiyattan USDC karşılığında itfa edebilirsiniz.",
   "q14": "Kazançlar garanti mi?",
   "q14_a1": "<strong>Hayır.</strong> Kazançlar sürekli ağ katılımına bağlıdır. Büyüme yavaşlarsa, döngü tamamlamaları yavaşlar ve zincir ödemesi hacmi düşer. Herhangi bir matris yapısının geçmiş performansı gelecekteki sonuçları garanti etmez.",

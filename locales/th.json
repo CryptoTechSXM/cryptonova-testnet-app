@@ -1036,7 +1036,6 @@
   "q12_li4": "<strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.",
   "q12_a2": "การแบ่งที่เหลือไปยังสำรองโปรโตคอลและโปรแกรม (CNOVA Treasury, Stability Rescue Fund, Dev, Ops, Liquidity Reserve, Buyback Reserve) &mdash; สิ่งเหล่านี้หนุนหลังสุขภาพระยะยาวของโปรโตคอลและไม่สามารถถอนได้โดยตรงโดยสมาชิกแต่ละคน ข้อยกเว้นคือ Community Wallet: หากคุณเป็น 1 ใน 1,000 สมาชิกแรก ส่วนแบ่งของคุณจาก pool นั้นสามารถเรียกร้องได้รายเดือนจากแดชบอร์ด — ดูหน้าแผนผลตอบแทนสำหรับรายละเอียด",
   "q13": "ฉันถอนรายได้ได้อย่างไร?",
-  "q13_a1": "รายได้ USDC (chain pay โบนัสแนะนำ การจ่ายรอบ) สะสมในยอดบนบล็อกเชนของคุณ ไปที่ <strong>แท็บ Dashboard</strong> และคลิก <strong>Withdraw to Wallet</strong> สัญญาอัจฉริยะส่งยอดถอนทั้งหมดของคุณตรงไปยังกระเป๋าที่เชื่อมต่อในธุรกรรมเดียว",
   "q13_a2": "โทเคน CNOVA แจกจ่ายตรงไปยังกระเป๋าของคุณทุกการลงทะเบียนและไม่ต้องมีขั้นตอนถอนแยกต่างหาก คุณสามารถแลกคืน CNOVA เป็น USDC ที่ราคา floor โดยใช้ส่วน <strong>Redeem CNOVA</strong> บนแดชบอร์ด",
   "q14": "รายได้มีการรับประกันหรือไม่?",
   "q14_a1": "<strong>ไม่</strong> รายได้ขึ้นอยู่กับการมีส่วนร่วมเครือข่ายต่อเนื่อง หากการเติบโตชะลอตัว การเติมรอบจะชะลอและปริมาณ chain pay จะลดลง ผลลัพธ์ที่ผ่านมาจากโครงสร้างเมทริกซ์ใดไม่รับประกันผลลัพธ์ในอนาคต",

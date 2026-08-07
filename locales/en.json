@@ -1064,7 +1064,7 @@
   "q12_li4": "<strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.",
   "q12_a2": "The remaining split goes to protocol reserves and programs (CNOVA Treasury, Stability Rescue Fund, Dev, Ops, Liquidity Reserve, Buyback Reserve) — these back the protocol's long-term health and are not directly withdrawable by individual members. The exception is the Community Wallet: if you're one of the first 1,000 members to register, your share of that pool is claimable monthly from the Dashboard — see the Compensation Plan page for details.",
   "q13": "How do I withdraw my earnings?",
-  "q13_a1": "USDC earnings (chain pay, referral bonuses, cycle payouts) accumulate in your on-chain balance. Go to the <strong>Dashboard tab</strong> and click <strong>Withdraw to Wallet</strong>. The smart contract sends your full withdrawable balance directly to your connected wallet in one transaction.",
+  "q13_a1": "USDC earnings (chain pay, referral bonuses, cycle payouts) accumulate in your on-chain balance. Go to the <strong>Dashboard tab</strong> and click <strong>Withdraw to Wallet</strong> — it sweeps every tier in a single transaction.",
   "q13_a2": "CNOVA tokens are distributed directly to your wallet on every registration and do not require a separate withdrawal step. You can redeem CNOVA for USDC at the floor price using the <strong>Redeem CNOVA</strong> section on the Dashboard.",
   "q14": "Are earnings guaranteed?",
   "q14_a1": "<strong>No.</strong> Earnings depend on continued network participation. If growth slows, cycle completions slow down and chain pay volume decreases. Past results from any matrix structure do not guarantee future results.",
@@ -1135,6 +1135,7 @@
   "g17_full": "Soft-Park",
   "g17_def": "An idle state your account enters after a period of inactivity. Your seat is reserved, chain pay continues, but you are not counted toward velocity gates. Reactivate any time by making a transaction.",
   "g18_full": "Instant Earn",
-  "g18_def": "2.5% of the entry fee credited directly to your withdrawable balance the moment you register at any tier. Available to withdraw immediately."
+  "g18_def": "2.5% of the entry fee credited directly to your withdrawable balance the moment you register at any tier. Available to withdraw immediately.",
+  "q13_fee": "Withdrawals carry a <strong>1.5% fee</strong> (governance-adjustable between 0.5% and 2.5%) which goes to the Stability Rescue Fund — the same fund that rescues parked members. If you have an outstanding rescue advance it is repaid first. And if you have automation enabled, the fee for your next automated seat is reserved at your highest tier and can't be withdrawn; earnings in lower tiers stay fully withdrawable. Everything else goes to your wallet."
  }
 }

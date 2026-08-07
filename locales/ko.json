@@ -1036,7 +1036,6 @@
   "q12_li4": "<strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.",
   "q12_a2": "나머지 분할은 프로토콜 준비금과 프로그램 (CNOVA Treasury, Stability Rescue Fund, 개발, 운영, Liquidity Reserve, Buyback Reserve)으로 이동합니다 &mdash; 이것들은 프로토콜의 장기 건강을 지원하며 개별 멤버가 직접 출금할 수 없습니다. 커뮤니티 지갑은 예외입니다: 처음 1,000명 멤버 중 하나라면 대시보드에서 매월 해당 풀의 몫을 청구할 수 있습니다 &mdash; 자세한 내용은 보상 플랜 페이지를 참조하세요.",
   "q13": "수익을 어떻게 출금하나요?",
-  "q13_a1": "USDC 수익 (체인 페이, 추천 보너스, 사이클 지급)은 온체인 잔액에 누적됩니다. <strong>대시보드 탭</strong>으로 이동하여 <strong>지갑으로 출금</strong>을 클릭하세요. 스마트 컨트랙트가 하나의 트랜잭션으로 연결된 지갑에 전체 출금 가능 잔액을 직접 전송합니다.",
   "q13_a2": "CNOVA 토큰은 모든 등록 시 지갑으로 직접 배분되며 별도의 출금 단계가 필요하지 않습니다. 대시보드의 <strong>CNOVA 환매</strong> 섹션을 사용하여 최저가로 CNOVA를 USDC로 환매할 수 있습니다.",
   "q14": "수익이 보장되나요?",
   "q14_a1": "<strong>아니요.</strong> 수익은 지속적인 네트워크 참여에 달려 있습니다. 성장이 둔화되면 사이클 완료가 느려지고 체인 페이 볼륨이 감소합니다. 어떤 매트릭스 구조에서의 과거 결과도 미래 결과를 보장하지 않습니다.",
