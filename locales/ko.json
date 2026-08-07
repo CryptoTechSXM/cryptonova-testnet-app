@@ -1019,7 +1019,6 @@
   "q10_a2": "<strong>다운라인</strong> &mdash; 귀하 이후에 참여하여 더 깊은 위치에 배치된 멤버. 그들이나 그들의 다운라인이 만드는 각 참여는 BFS 깊이에 따라 귀하에게 흐르는 체인 페이를 생성합니다.",
   "q10_a3": "귀하의 <strong>원래 추천인</strong> (귀하를 추천한 지갑)은 BFS 위치와 별개의 특별한 영구 온체인 관계입니다 &mdash; 귀하가 하는 모든 것에 대해 L1 추천 보너스를 받습니다.",
   "q11": "티어 업그레이드는 어떻게 작동하나요?",
-  "q11_a1": "CryptoNova V8.43 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles; adjust anytime with the Dashboard toggles (Member Options). Your original referrer is preserved across all tier upgrades.",
   "q12": "CryptoNova Matrix에서 어떻게 수익을 올리나요?",
   "q12_a1": "모든 $10 T1 참여는 4개 스트림에서 수익을 창출합니다:",
   "q12_li1": "<strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-funds half of your crossing fee when your 127-seat matrix fills (your earnings cover the rest).",

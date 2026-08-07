@@ -1023,7 +1023,6 @@
   "q10_a2": "<strong>Downline</strong> &mdash; sizden sonra katılan ve daha derin pozisyonlara yerleştirilen üyeler. Onların veya downline'larının yaptığı her giriş, BFS derinliğine göre size yükselen zincir ödemesi üretir.",
   "q10_a3": "<strong>Orijinal yönlendiriciniz</strong> (sizi yönlendiren cüzdan), BFS pozisyonunuzdan ayrı, özel bir kalıcı zincir üstü ilişkidir &mdash; yaptığınız her şey için L1 yönlendirme bonuslarını kazanırlar.",
   "q11": "Seviye yükseltmeleri nasıl çalışır?",
-  "q11_a1": "CryptoNova V8.43 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles; adjust anytime with the Dashboard toggles (Member Options). Your original referrer is preserved across all tier upgrades.",
   "q12": "CryptoNova Matrix ile nasıl para kazanılır?",
   "q12_a1": "Her 10 $'lık T1 girişi dört akış üzerinden gelir üretir:",
   "q12_li1": "<strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-funds half of your crossing fee when your 127-seat matrix fills (your earnings cover the rest).",

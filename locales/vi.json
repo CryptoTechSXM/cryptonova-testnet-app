@@ -1019,7 +1019,6 @@
   "q10_a2": "<strong>Downline</strong> &mdash; thành viên tham gia sau bạn và được đặt ở các vị trí sâu hơn. Mỗi lượt tham gia của họ hoặc downline của họ tạo ra chain pay chảy lên đến bạn dựa trên độ sâu BFS.",
   "q10_a3": "<strong>Người giới thiệu gốc</strong> của bạn (ví đã giới thiệu bạn) là một mối quan hệ on-chain vĩnh viễn đặc biệt tách biệt với vị trí BFS của bạn &mdash; họ kiếm thưởng giới thiệu L1 trên mọi thứ bạn làm.",
   "q11": "Nâng cấp cấp hoạt động như thế nào?",
-  "q11_a1": "CryptoNova V8.43 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles; adjust anytime with the Dashboard toggles (Member Options). Your original referrer is preserved across all tier upgrades.",
   "q12": "Làm thế nào để kiếm với CryptoNova Matrix?",
   "q12_a1": "Mỗi $10 tham gia T1 tạo ra thu nhập qua bốn luồng:",
   "q12_li1": "<strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-funds half of your crossing fee when your 127-seat matrix fills (your earnings cover the rest).",

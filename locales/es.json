@@ -1023,7 +1023,6 @@
   "q10_a2": "<strong>Downline</strong> &mdash; miembros que se unieron después de ti y están colocados en posiciones más profundas. Cada entrada que ellos hagan o sus downlines hagan genera chain pay que sube hacia ti según la profundidad BFS.",
   "q10_a3": "Tu <strong>referidor original</strong> (la billetera que te refirió) es una relación on-chain permanente especial, separada de tu posición BFS &mdash; ganan bonos de referido L1 por todo lo que hagas.",
   "q11": "¿Cómo funcionan las subidas de nivel?",
-  "q11_a1": "CryptoNova V8.43 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles; adjust anytime with the Dashboard toggles (Member Options). Your original referrer is preserved across all tier upgrades.",
   "q12": "¿Cómo se gana con CryptoNova Matrix?",
   "q12_a1": "Cada entrada T1 de 10 $ genera ingresos a través de cuatro flujos:",
   "q12_li1": "<strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-funds half of your crossing fee when your 127-seat matrix fills (your earnings cover the rest).",
