@@ -406,7 +406,7 @@
     <div class="testnet-badge">🧪 Testnet Preview</div>
     <div class="hero-badge">💧 Liquidity Pool</div>
     <h1>Earn yield from<br><span>on-ramp partner fees</span></h1>
-    <p>Deposit USDC to earn a share of CryptoNova's Transak/Ramp partner fee revenue. The more on-ramp volume, the more you earn — distributed automatically throughout the day.</p>
+    <p>Deposit USDC to earn a share of CryptoNova's Transak/Ramp partner fee revenue. The more on-ramp volume, the more you earn &mdash; your share grows each time CryptoNova pushes a distribution into the pool, which we target at roughly every 15 minutes.</p>
   </div>
 
   <!-- Pending reward banner (shown when wallet connected + pending > 0) -->
@@ -452,8 +452,8 @@
       </div>
       <div class="stat-box">
         <div class="stat-label">Distribution Cycle</div>
-        <div class="stat-value" style="font-size:15px">Every 15 min</div>
-        <div class="stat-sub">Auto via keeper</div>
+        <div class="stat-value" style="font-size:15px">~15 min target</div>
+        <div class="stat-sub">Distributor wallet &middot; not enforced on-chain</div>
       </div>
     </div>
   </div>
@@ -542,7 +542,7 @@
       <div class="how-step">
         <div class="how-num">02</div>
         <div class="how-title">Fees flow in</div>
-        <div class="how-desc">When a new member uses Transak or Ramp to fund their wallet, a small partner fee is routed to the pool automatically twice every hour.</div>
+        <div class="how-desc">When a new member uses Transak or Ramp to fund their wallet, a small partner fee is collected and pushed into the pool by CryptoNova&rsquo;s distributor wallet, which we target at roughly every 15 minutes. Timing and amounts follow actual on-ramp volume &mdash; the contract does not enforce a schedule.</div>
       </div>
       <div class="how-step">
         <div class="how-num">03</div>
@@ -552,7 +552,7 @@
       <div class="how-step">
         <div class="how-num">04</div>
         <div class="how-title">Harvest anytime</div>
-        <div class="how-desc">Rewards accumulate in real time. Click Harvest to claim your USDC earnings — or they auto-harvest when you deposit or withdraw.</div>
+        <div class="how-desc">Your share updates each time a distribution transaction lands. Click Harvest to claim your USDC earnings — or they auto-harvest when you deposit or withdraw.</div>
       </div>
     </div>
   </div>
@@ -723,11 +723,11 @@
     </div>
     <div class="info-row">
       <span class="info-key">Distribution Frequency</span>
-      <span class="info-val">Every 15 min (automated keeper)</span>
+      <span class="info-val">~15 min target &mdash; manual push, not guaranteed</span>
     </div>
     <div class="info-row">
       <span class="info-key">Emergency Exit</span>
-      <span class="info-val">emergencyWithdraw() available on-chain</span>
+      <span class="info-val"><code>emergencyWithdraw()</code> returns your principal but <strong>forfeits all unclaimed rewards</strong>, and forfeited rewards cannot be recovered by anyone &mdash; harvest first unless normal withdrawal is broken</span>
     </div>
   </div>
 
