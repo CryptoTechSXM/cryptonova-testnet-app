@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-08] Other — This account which is my main account seems to be stuck in a…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** This account which is my main account seems to be stuck in a very slow T1 cycle as it has only cycle once since registering.. T2 seems to be cycling quicker..
+- **What was expected:** More cycles by now given that all new registrations start at T1..
+- **Notes:** Not sure if this is a bug or not but just checking ...
+- **Submitted:** Sat, 08 Aug 2026 02:34:36 GMT
+
+
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
