@@ -3291,8 +3291,18 @@ async function loadHomeStats() {
     // localStorage series — leaving a permanent fabricated crash to zero on the
     // sparkline for every future visit, for a value CNOVATreasury documents as
     // never decreasing. Only sample when the treasury read genuinely succeeded.
-    if (supply > 0n && treasUsdc !== null) {
-      const floorRaw = (treasUsdc * BigInt(1000000000000000000)) / supply; // 6-dec USDC per CNOVA
+    // AUDIT 2026-08-08: this computed the floor from usdc.balanceOf(treasury), but
+    // redemption pays CNOVATreasury.floorPrice() = usdcReserve / totalSupply.
+    // usdcReserve is an accumulator fed only by depositReserve(), so any USDC that
+    // reaches the treasury address by another route makes the DISPLAYED floor drift
+    // above the one a member is actually paid. Read the contract's own number; fall
+    // back to the balance-derived estimate only if that read fails.
+    let chainFloor = null;
+    try { chainFloor = await rpc(new ethers.Contract(ADDRS.treasury, TREASURY_ABI, usdc.runner).floorPrice()); } catch (_) {}
+    if (supply > 0n && (chainFloor !== null || treasUsdc !== null)) {
+      const floorRaw = chainFloor !== null
+        ? chainFloor
+        : (treasUsdc * BigInt(1000000000000000000)) / supply; // 6-dec USDC per CNOVA
       const floorUsd = Number(floorRaw) / 1e6;
       const floorStr = floorUsd === 0     ? '$0.000000'
                      : floorUsd < 0.0001  ? '$' + floorUsd.toFixed(8)
@@ -5044,14 +5054,21 @@ async function loadDashboardData() {
     // v8.7: floor is backed by Treasury USDC (10% BPS), not SF
     const cnova = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
     const usdcT = new ethers.Contract(ADDRS.usdc,  USDC_ABI,  rp);
-    const [cnovabal, treasuryUsdc, cnovaSupply, cwPoolDash] = await Promise.all([
+    const treasuryC = new ethers.Contract(ADDRS.treasury, TREASURY_ABI, rp);
+    const [cnovabal, treasuryUsdc, cnovaSupply, cwPoolDash, chainFloorDash] = await Promise.all([
       raceTimeout(cnova.balanceOf(userAddr).catch(()=>0n), 8000).then(v => v ?? 0n),
       raceTimeout(usdcT.balanceOf(ADDRS.treasury).catch(()=>0n), 8000).then(v => v ?? 0n),
       raceTimeout(cnova.totalSupply().catch(()=>0n), 8000).then(v => v ?? 0n),
       raceTimeout(usdcT.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress).catch(()=>0n), 8000).then(v => v ?? 0n),
+      raceTimeout(treasuryC.floorPrice().catch(()=>null), 8000).then(v => v ?? null),
     ]);
-    // cnovabal=18dec, treasuryUsdc=6dec, cnovaSupply=18dec → result is 6dec USDC
-    const cnovaValRaw = cnovaSupply > 0n ? (cnovabal * treasuryUsdc) / cnovaSupply : 0n;
+    // AUDIT 2026-08-08: value CNOVA at the floor the contract will actually pay
+    // (floorPrice() = usdcReserve/totalSupply), matching the Redeem panel, instead
+    // of balanceOf(treasury)/supply which can drift above it.
+    // cnovabal=18dec, floor=6dec per 1e18 units → result is 6dec USDC.
+    const cnovaValRaw = chainFloorDash !== null
+      ? (cnovabal * chainFloorDash) / BigInt(1000000000000000000)
+      : (cnovaSupply > 0n ? (cnovabal * treasuryUsdc) / cnovaSupply : 0n);
 
     const TIER_NAMES = ['—','Nova Seed','Nova Rise','Nova Star','Nova Core','Nova Prime','Nova Apex','Nova Pinnacle','SuperNova Titan','SuperNova Legend','SuperNova Apex'];
 
@@ -6136,7 +6153,7 @@ async function renderCnovaDetail(el, rp) {
   const cnova  = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   const usdcC  = new ethers.Contract(ADDRS.usdc,  USDC_ABI,  rp);
 
-  const [cnovabal, supply, treasuryUsdc, epochNum, lockedBal, unlockedBal, vestBatches, vestDur] = await Promise.all([
+  const [cnovabal, supply, treasuryUsdc, epochNum, lockedBal, unlockedBal, vestBatches, vestDur, chainFloorDetail] = await Promise.all([
     cnova.balanceOf(userAddr).catch(() => 0n),
     cnova.totalSupply().catch(() => 0n),
     usdcC.balanceOf(ADDRS.treasury).catch(() => 0n),
@@ -6145,16 +6162,23 @@ async function renderCnovaDetail(el, rp) {
     cnova.unlockedBalanceOf(userAddr).catch(() => null),
     cnova.vestBatchesOf(userAddr).catch(() => []),
     cnova.vestDuration().catch(() => 15552000n),   // 180 days
+    new ethers.Contract(ADDRS.treasury, TREASURY_ABI, rp).floorPrice().catch(() => null),
   ]);
   const [maxPenBps, penDest] = await Promise.all([
     cnova.maxPenaltyBps().catch(() => 0n),
     cnova.penaltyDestination().catch(() => ethers.ZeroAddress),
   ]);
 
-  const cnovaValRaw = supply > 0n ? (cnovabal * treasuryUsdc) / supply : 0n;
-  const floorPerToken = supply > 0n
-    ? '$' + (Number(treasuryUsdc) / Number(supply) * 1e12).toFixed(6)
-    : '$0.000000';
+  // AUDIT 2026-08-08: third site computing the floor from balanceOf(treasury).
+  // Use CNOVATreasury.floorPrice() — the value redemption actually pays — so the
+  // "Floor Price" row here, the home tile and the Redeem panel cannot disagree.
+  // floorPrice() is 6-dec USDC per 1e18 CNOVA units.
+  const cnovaValRaw = chainFloorDetail !== null
+    ? (cnovabal * chainFloorDetail) / BigInt(1000000000000000000)
+    : (supply > 0n ? (cnovabal * treasuryUsdc) / supply : 0n);
+  const floorPerToken = chainFloorDetail !== null
+    ? '$' + (Number(chainFloorDetail) / 1e6).toFixed(6)
+    : (supply > 0n ? '$' + (Number(treasuryUsdc) / Number(supply) * 1e12).toFixed(6) : '—');
   const balFmt = Number(ethers.formatEther(cnovabal)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
   // Vesting breakdown rows
