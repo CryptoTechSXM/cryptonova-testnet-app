@@ -2908,7 +2908,7 @@ async function loadCWData(userAddr, signer, rp) {
     const cw = new ethers.Contract(cwAddr, CW_ABI, rp);
     const [cohortVal, claimableVal, totalEnrolled, lastDist, interval] = await Promise.all([
       cw.cohort(userAddr).catch(() => null),          // null = RPC fail; 0n = confirmed not enrolled
-      cw.claimable(userAddr).catch(() => 0n),
+      cw.claimable(userAddr).catch(() => null),   // null = unknown; never render a fabricated $0.00
       cw.totalEnrolled().catch(() => 0n),
       cw.lastDistributionTime().catch(() => 0n),
       cw.distributeInterval().catch(() => 2592000n),  // 30 days default
@@ -2978,8 +2978,10 @@ async function loadCWData(userAddr, signer, rp) {
     }
 
     // Claimable USDC
-    const claimUsd = Number(claimableVal) / 1e6;
-    setText('cw-claimable', claimUsd > 0 ? '$' + claimUsd.toFixed(4) : '$0.00');
+    const claimUsd = claimableVal === null ? null : Number(claimableVal) / 1e6;
+    // null = read failed. Matches the cached-render branch above, which already
+    // used an em dash rather than asserting $0.00 on a number we do not have.
+    setText('cw-claimable', claimUsd === null ? '\u2014' : (claimUsd > 0 ? '$' + claimUsd.toFixed(4) : '$0.00'));
 
     // Pool balance
     const usdc2  = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
@@ -6759,15 +6761,27 @@ async function doWithdrawPartial() {
     // "unsourced" while Withdraw All took everything. Same source of truth as
     // the card, MAX and the breakdown (_claimableAll rules, applied per draw).
     const _ptr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    // AUDIT 2026-08-08: these three defaulted to 0 on a failed read, and every
+    // one of them makes the withdrawal look LARGER than it is — highest/reserved
+    // at 0 skips the crossing hold and automation reserve on every matrix, and
+    // debt at 0 skips the repayment withdrawCore takes first. The per-matrix
+    // guard below already refuses to build a transaction on a number we do not
+    // have; these catches were defeating it. _claimableAll returns ok:false for
+    // exactly this reason (fixed 2026-08-07) — this path never consulted it.
     const [_pHighest, _pReserved] = await Promise.all([
-      _ptr.memberHighestTier(userAddr).then(Number).catch(() => 0),
-      _ptr.reservedFor(userAddr).then(v => BigInt(v)).catch(() => 0n),
+      _ptr.memberHighestTier(userAddr).then(Number).catch(() => null),
+      _ptr.reservedFor(userAddr).then(v => BigInt(v)).catch(() => null),
     ]);
-    let _debtLeft = 0n;
+    let _debtLeft = null;
     try {
       _debtLeft = BigInt(await new ethers.Contract(ADDRS.stabilityFund,
         ['function memberDebtOf(address) view returns (uint256)'], rp).memberDebtOf(userAddr));
     } catch (_) {}
+    if (_pHighest === null || _pReserved === null || _debtLeft === null) {
+      setStatus('withdraw-status',
+        'Could not read your reserve or loan position — nothing was withdrawn. Refresh and try again.', 'err');
+      return;   // finally{} re-enables the buttons
+    }
     let remaining = amtMicro;
     let withdrawn = false;
     for (const _mo of _matObjs) {
@@ -6788,7 +6802,7 @@ async function doWithdrawPartial() {
       let avail;
       try {
         avail = BigInt(member.withdrawable)
-              + BigInt(await mc.pendingPoolOf(userAddr).catch(() => 0n));
+              + BigInt(await mc.pendingPoolOf(userAddr));   // no catch: let the guard below skip this matrix
         if (avail > 0n && _debtLeft > 0n) {
           // withdrawCore repays debt from `available` BEFORE the holds
           const _eat = avail < _debtLeft ? avail : _debtLeft;
@@ -6798,8 +6812,8 @@ async function doWithdrawPartial() {
         if (avail > 0n && _pReserved > 0n && _pHighest > 0 && (_pHighest - 1) === (_tNum - 1)) {
           if (member.isInMatrix) {
             const [_fee, _cr] = await Promise.all([
-              mc.ENTRY_FEE().then(v => BigInt(v)).catch(() => 0n),
-              mc.crossingReserveOf(userAddr).then(v => BigInt(v)).catch(() => 0n),
+              mc.ENTRY_FEE().then(v => BigInt(v)),                 // no catch: ENTRY_FEE at 0
+              mc.crossingReserveOf(userAddr).then(v => BigInt(v)), // would DROP the crossing hold
             ]);
             const _cn = _fee > _cr ? _fee - _cr : 0n;
             if (_cn > 0n) avail = avail > _cn ? avail - _cn : 0n;
@@ -7006,10 +7020,18 @@ async function doGraduatedReenter(tNum) {
     const usdcR = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
     const trR   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     const [fee, bal, allowance] = await Promise.all([
-      trR.tierEntryFees(tierIdx).catch(() => 0n),
-      usdcR.balanceOf(userAddr).catch(() => 0n),
-      usdcR.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
+      trR.tierEntryFees(tierIdx).catch(() => null),
+      usdcR.balanceOf(userAddr).catch(() => null),
+      usdcR.allowance(userAddr, ADDRS.tierRouter).catch(() => null),
     ]);
+    // AUDIT 2026-08-08: fee defaulting to 0n made "bal < fee" false, so a failed
+    // fee read walked straight past the affordability check; bal at 0n reported
+    // an empty wallet that isn't empty. Neither is a number we may guess at.
+    if (fee === null || bal === null || allowance === null) {
+      _s('❌ Could not read the entry fee or your USDC balance — nothing was sent. Refresh and try again.');
+      if (btn) btn.disabled = false;
+      return;
+    }
     const feeNum = Number(fee) / 1e6;
     const balNum = Number(bal)  / 1e6;
     if (bal < fee) {
@@ -8539,12 +8561,19 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     const usdcC = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
     const trR   = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
     const [fee, bal, uAllowance, highestTier, _updDebt] = await Promise.all([
-      trR.tierEntryFees(tierIdx).catch(() => 0n),
-      usdcC.balanceOf(userAddr).catch(() => 0n),
-      usdcC.allowance(userAddr, ADDRS.tierRouter).catch(() => 0n),
-      trR.memberHighestTier(userAddr).catch(() => 0),
+      trR.tierEntryFees(tierIdx).catch(() => null),
+      usdcC.balanceOf(userAddr).catch(() => null),
+      usdcC.allowance(userAddr, ADDRS.tierRouter).catch(() => null),
+      trR.memberHighestTier(userAddr).catch(() => null),
       _upgradeDebtDue(rp),
     ]);
+    // AUDIT 2026-08-08: same failure-as-zero as the graduated re-entry path —
+    // _updDebt was already null-strict below; the other four were not.
+    if (fee === null || bal === null || uAllowance === null || highestTier === null) {
+      _setS('⚠️ Could not read the tier fee or your USDC balance — nothing was sent. Refresh and try again.');
+      if (btn) btn.disabled = false;
+      return;
+    }
     if (_updDebt === null) {
       _setS('⚠️ Could not confirm your outstanding rescue loan balance. The upgrade charges fee + loan in one transaction, so nothing was sent — please retry.');
       if (btn) btn.disabled = false;
