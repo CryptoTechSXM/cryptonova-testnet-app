@@ -7657,7 +7657,12 @@ async function loadRedeemData() {
           '<span style="color:var(--text3);font-size:11px">80% of the penalty returns to the CNOVA Treasury, supporting the floor for everyone still holding; 20% goes to the Community Wallet. Separately, matrix-minted CNOVA is cliff-vested for ' + vestDays + ' days before it can be transferred or redeemed.</span>';
         penaltyEl.style.display = 'block';
       } else {
-        penaltyEl.innerHTML = '<span style="color:var(--green)">✅ No early-exit penalty — you have passed 120 days of membership.</span>';
+        penaltyEl.innerHTML = '<span style="color:var(--green)">✅ No early-exit penalty on this redemption.</span>'
+          + (lockedBal > 0n
+              ? '<br><span style="color:var(--text3);font-size:11px">'
+                + Number(ethers.formatEther(lockedBal)).toFixed(2)
+                + ' CNOVA is still vesting and cannot be redeemed until it unlocks.</span>'
+              : '');
         penaltyEl.style.display = 'block';
       }
     }
