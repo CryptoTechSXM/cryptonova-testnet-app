@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
+- **Reporter:** @ronnienic197
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x75784fe21f201f8b1f909cf9b055ef5e19fb7385
+- **Frequency:** Consistent
+- **What happened:** The self rescue transaction is taking an extremely long time to complete
+Takes  forever for USDC approval and theneven more time spent trying to complete self rescue.
+- **What was expected:** Should be a seamless process but this process is taking up a lot of time. 
+May not be a bug but could this just be my mm. Is anyone else having this issue?
+- **Submitted:** Sat, 08 Aug 2026 10:42:44 GMT
+
+
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
