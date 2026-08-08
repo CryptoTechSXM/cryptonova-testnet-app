@@ -74,12 +74,19 @@
     // translated file shows English for its missing keys instead of raw keys.
     var base = null, want = null;
     try {
-      var rEn = await fetch('/locales/en.json?v=811');
+  // ── locale cache version ───────────────────────────────────────────────
+  // BUMP THE ?v= STRING ON EVERY locales/*.json EDIT. It is the ONLY cache
+  // buster for the translation files. Vercel revalidates the HTML on each
+  // load, but these fetches are query-cached — so a stale JSON silently
+  // overwrites correct HTML at runtime and the fix appears not to ship.
+  // 2026-08-08: sat at v=811 through a full day of copy corrections.
+
+      var rEn = await fetch('/locales/en.json?v=20260808a');
       if (rEn.ok) base = await rEn.json();
     } catch (_) {}
     if (lang !== 'en') {
       try {
-        var r = await fetch('/locales/' + lang + '.json?v=811');
+        var r = await fetch('/locales/' + lang + '.json?v=20260808a');
         if (r.ok) want = await r.json();
       } catch (_2) {}
     }
