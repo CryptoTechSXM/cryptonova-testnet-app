@@ -641,8 +641,9 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q21_a1">5% of every entry fee ($0.50 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.totalBalance() / CNOVA.totalSupply()</code>.</p>
-        <p data-i18n="faqPage.q21_a2">At launch with 50 CNOVA minted per $10 entry and $0.50 going to the CNOVA Treasury: $0.50 / 50 = <strong>$0.01 starting floor</strong>. The floor only rises as more members join and more USDC flows into the Treasury.</p>
+        <p data-i18n="faqPage.q21_a1">5% of every entry fee ($0.50 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.reserveBalance() / CNOVA.totalSupply()</code>.</p>
+        <p data-i18n="faqPage.q21_a2">At launch, 50 CNOVA minted per $10 entry with $0.50 going to the CNOVA Treasury: $0.50 / 50 = <strong>$0.01 starting floor</strong>. That equation is not just a starting condition &mdash; the protocol enforces it on every entry, never minting more CNOVA than that entry&rsquo;s own $0.50 backs at the live floor. A new entry can raise the floor or leave it unchanged; it can never lower it.</p>
+        <p data-i18n="faqPage.q21_a2b">The Treasury&rsquo;s USDC is protected the same way: any transaction that would reduce the floor price is rejected by the contract &mdash; including transactions signed by the protocol owner.</p>
         <p data-i18n="faqPage.q21_a3">You can redeem CNOVA for USDC at the exact floor price at any time using the <strong>Redeem CNOVA</strong> section on the Dashboard &mdash; no admin approval, fully on-chain.</p>
       </div></div>
     </div>
