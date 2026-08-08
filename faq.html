@@ -292,7 +292,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="cnova treasury floor price backing usdc reserve">
       <div class="acronym">CNOVA Treasury</div>
       <div class="full-name" data-i18n="faqPage.g3_full">CNOVA Floor Price Reserve</div>
-      <div class="definition" data-i18n="faqPage.g3_def">5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury balance / CNOVA total supply. Token holders can redeem CNOVA at the floor price at any time &mdash; no admin approval required. The floor only rises as more members join.</div>
+      <div class="definition" data-i18n="faqPage.g3_def">5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury reserve / CNOVA total supply. Token holders can redeem CNOVA at the floor price with no admin approval required. Matrix-minted CNOVA is cliff-vested for 180 days first, and redemption carries an early-exit penalty that falls to zero after 120 days of membership.</div>
     </div>
 
     <div class="glossary-card" data-terms="stability rescue fund parked member rescue sf">
@@ -644,7 +644,7 @@ function toggleTheme() {
         <p data-i18n="faqPage.q21_a1">5% of every entry fee ($0.50 per $10 at T1) flows into the on-chain <strong>CNOVA Treasury</strong> contract. The floor price is calculated automatically: <code>floor = Treasury.reserveBalance() / CNOVA.totalSupply()</code>.</p>
         <p data-i18n="faqPage.q21_a2">At launch, 50 CNOVA minted per $10 entry with $0.50 going to the CNOVA Treasury: $0.50 / 50 = <strong>$0.01 starting floor</strong>. That equation is not just a starting condition &mdash; the protocol enforces it on every entry, never minting more CNOVA than that entry&rsquo;s own $0.50 backs at the live floor. A new entry can raise the floor or leave it unchanged; it can never lower it.</p>
         <p data-i18n="faqPage.q21_a2b">The Treasury&rsquo;s USDC is protected the same way: any transaction that would reduce the floor price is rejected by the contract &mdash; including transactions signed by the protocol owner.</p>
-        <p data-i18n="faqPage.q21_a3">You can redeem CNOVA for USDC at the exact floor price at any time using the <strong>Redeem CNOVA</strong> section on the Dashboard &mdash; no admin approval, fully on-chain.</p>
+        <p data-i18n="faqPage.q21_a3">You can redeem CNOVA for USDC at the floor price using the <strong>Redeem CNOVA</strong> section on the Dashboard &mdash; no admin approval, fully on-chain. Two conditions apply. Matrix-minted CNOVA is cliff-vested for <strong>180 days</strong> before it can be transferred or redeemed; you can unlock early for a fee of up to 50% of the tokens, sliding to zero as the cliff approaches. And redemption applies an early-exit penalty based on how long you have been a member: <strong>45%</strong> in your first 30 days, then 30% to day 60, 15% to day 90, 5% to day 120, and <strong>0% after 120 days</strong>. 80% of the penalty recycles into the Treasury, supporting the floor for everyone still holding; the other 20% goes to the Community Wallet. Both schedules are governance-adjustable.</p>
       </div></div>
     </div>
 
@@ -705,8 +705,8 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q26_a1"><strong>No.</strong> The core matrix logic, fee splits, and reserve-fund mechanics are immutable once deployed. No party can alter entry fee distributions, redirect USDC, or access participant funds in the matrix contracts.</p>
-        <p data-i18n="faqPage.q26_a2">The governance contract handles protocol-level settings and is subject to timelock delays and community approval. The team cannot unilaterally drain the Stability Rescue Fund or the CNOVA Treasury.</p>
+        <p data-i18n="faqPage.q26_a1"><strong>Mostly &mdash; and here is exactly where the line is.</strong> Each matrix's fee split is fixed in its constructor and has no setter, so no party, including the owner, can change how a live matrix divides an entry fee. There is no upgrade proxy over any deployed contract. What is deliberately adjustable is reserve-fund settings &mdash; Stability Fund rescue rates, targets and thresholds &mdash; and those move only through governance.</p>
+        <p data-i18n="faqPage.q26_a2">Protocol-level settings change only through the governance contract, subject to a 72-hour vote and a 48-hour timelock. The Stability Rescue Fund has no withdrawal, sweep or emergency function at all &mdash; the team cannot drain it, and rescue spending is capped by an on-chain floor. The CNOVA Treasury does expose an owner-only emergency withdrawal, but it reverts if the withdrawal would lower the CNOVA floor price. Verify the current owner on BaseScan before participating.</p>
       </div></div>
     </div>
 
