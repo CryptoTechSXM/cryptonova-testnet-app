@@ -762,7 +762,7 @@
     <div class="grid-4" id="stats-grid">
       <div class="card-sm"><div class="stat-label" data-i18n="stats.total_registered">Total Registered</div><div class="stat-value" id="stat-members"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub" data-i18n="stats.all_time_joins">all-time joins</div></div>
       <div class="card-sm"><div class="stat-label" data-i18n="stats.cnova_minted">CNOVA Minted</div><div class="stat-value green" id="stat-minted"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.per_join">50 per T1 join</div></div>
-      <div class="card-sm" title="CNOVA Treasury holds 5% of all entry fees — it backs the CNOVA floor price. Floor price = Treasury USDC ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.cnova_treasury">CNOVA USDC Treasury 🏦</div><div class="stat-value green" id="stat-treasury-usdc"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.backing_cnova">backing the CNOVA value</div></div>
+      <div class="card-sm" title="CNOVA Treasury holds 5% of all entry fees — it backs the CNOVA floor price. Floor price = Treasury reserve ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.cnova_treasury">CNOVA USDC Treasury 🏦</div><div class="stat-value green" id="stat-treasury-usdc"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.backing_cnova">backing the CNOVA value</div></div>
       <div class="card-sm" title="Guaranteed minimum redemption price — Treasury USDC ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.floor_price">CNOVA Floor Price</div><div class="stat-value green" id="stat-floor-price"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.per_cnova">per CNOVA token</div></div>
       <div class="card-sm"><div class="stat-label" data-i18n="stats.total_supply">CNOVA Total Supply</div><div class="stat-value" id="stat-supply"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub" data-i18n="stats.circulating">circulating CNOVA</div></div>
       <div class="card-sm" style="border-color:rgba(239,68,68,.4)"><div class="stat-label" data-i18n="stats.cnova_burnt">🔥 Total CNOVA Burnt</div><div class="stat-value" id="stat-burned" style="color:var(--red)"><span class="spinner" style="color:var(--red)"></span></div><div class="stat-sub" data-i18n="stats.burnt_sub">all-time redeemed &amp; burned</div></div><div class="card-sm" style="border-color:rgba(245,158,11,.4)"><div class="stat-label" data-i18n="stats.system_cycles">System Cycles</div><div class="stat-value" id="stat-cycles" style="color:var(--yellow)"><span class="spinner" style="color:var(--yellow)"></span></div></div>
@@ -6296,7 +6296,7 @@ async function renderCnovaDetail(el, rp) {
     ${historyRows}
     <div class="detail-section">Mining Schedule</div>
     ${epochRows || '<div class="detail-row"><span class="detail-key" style="color:var(--text3)">Epoch data unavailable</span></div>'}
-    <div class="detail-note" data-i18n="dash.cnova_detail_note">◈ CNOVA is minted to you each time you enter a matrix &mdash; your first entry and every re-entry after a cycle, not only on cycle completion. The scheduled reward halves each epoch, and the amount minted is also limited by what your entry&rsquo;s Treasury deposit backs at the live floor. Floor price = CNOVA Treasury USDC &divide; total supply &mdash; your guaranteed minimum redemption value.</div>
+    <div class="detail-note" data-i18n="dash.cnova_detail_note">◈ CNOVA is minted to you each time you enter a matrix &mdash; your first entry and every re-entry after a cycle, not only on cycle completion. The scheduled reward halves each epoch, and the amount minted is also limited by what your entry&rsquo;s Treasury deposit backs at the live floor. Floor price = CNOVA Treasury reserve &divide; total supply &mdash; your guaranteed minimum redemption value.</div>
     <div class="detail-note" style="color:var(--yellow);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2)">🔒 Matrix-minted CNOVA vests over ${vestDays} days from the moment each batch is minted — it cannot be transferred or sold until that batch's lock expires. CNOVA purchased via the Buy CNOVA page is immediately transferable.</div>`;
 }
 
@@ -7566,7 +7566,9 @@ async function loadRedeemData() {
     const treasury = new ethers.Contract(ADDRS.treasury, TREASURY_ABI, rp);
     const [bal, floorRaw, vestDur, penaltyBps, lockedBal] = await Promise.all([
       cnova.balanceOf(userAddr).catch(()=>0n),
-      treasury.floorPrice().catch(()=>0n),   // (usdcReserve * 1e18) / cnovaSupply — 6-dec result
+      treasury.floorPrice().catch(()=>null), // (usdcReserve * 1e18) / cnovaSupply — 6-dec result.
+      // null on failure, NEVER 0n: this value multiplies the payout, and a
+      // fabricated 0 quotes a $0.0000 floor as if it were real.
       cnova.vestDuration().catch(()=>BigInt(180*86400)),
       // The REDEMPTION penalty, from the treasury — not the vesting cap.
       treasury.earlyExitPenaltyBps(userAddr).catch(()=>null),
@@ -7585,25 +7587,31 @@ async function loadRedeemData() {
 
 
     // Floor display: floorRaw is already in 6-dec USDC units (e.g. 30000 = $0.03)
-    const floorUsd = Number(floorRaw) / 1e6;
+    const floorUsd = floorRaw === null ? null : Number(floorRaw) / 1e6;
     setText('redeem-cnova-bal', Number(ethers.formatEther(bal)).toFixed(2) + ' CNOVA');
-    setText('redeem-floor', '$' + floorUsd.toFixed(4) + ' / CNOVA');
+    setText('redeem-floor', floorUsd === null ? '\u2014' : '$' + floorUsd.toFixed(4) + ' / CNOVA');
+    if (floorRaw === null) {
+      const _fe = document.getElementById('redeem-penalty-note');
+      if (_fe) _fe.textContent = 'Could not read the floor price — refresh before redeeming.';
+    }
 
     // Early redemption penalty warning
-    const penaltyPct  = Number(penaltyBps) / 100;
+    const penaltyPct  = penaltyBps === null ? null : Number(penaltyBps) / 100;
     const vestDays    = Math.round(Number(vestDur) / 86400);
     const penaltyEl   = document.getElementById('redeem-penalty-info');
     if (penaltyEl) {
-      if (penaltyBps > 0n) {
+      if (penaltyBps === null) {
+        penaltyEl.innerHTML = '<span style="color:var(--yellow)">Could not read your early-exit penalty — refresh before redeeming.</span>';
+        penaltyEl.style.display = 'block';
+      } else if (penaltyBps > 0n) {
         penaltyEl.innerHTML =
-          '<strong style="color:var(--yellow)">⚠️ Early Redemption Penalty</strong><br>' +
-          'Your CNOVA is cliff-vested for <strong>' + vestDays + ' days</strong> from mint. ' +
-          'If you unlock early, you forfeit up to <strong style="color:var(--yellow)">' + penaltyPct + '%</strong> of your tokens — ' +
-          'penalty decreases linearly to <strong>0%</strong> at the unlock date.<br>' +
-          '<span style="color:var(--text3);font-size:11px">Penalty tokens are burned, which raises the floor price for everyone.</span>';
+          '<strong style="color:var(--yellow)">⚠️ Early Exit Penalty</strong><br>' +
+          'Redeeming now costs <strong style="color:var(--yellow)">' + penaltyPct + '%</strong> of your USDC payout, based on how long you have been a member. ' +
+          'It steps down to <strong>0% after 120 days</strong> from your first registration.<br>' +
+          '<span style="color:var(--text3);font-size:11px">80% of the penalty returns to the CNOVA Treasury, supporting the floor for everyone still holding; 20% goes to the Community Wallet. Separately, matrix-minted CNOVA is cliff-vested for ' + vestDays + ' days before it can be transferred or redeemed.</span>';
         penaltyEl.style.display = 'block';
       } else {
-        penaltyEl.innerHTML = '<span style="color:var(--green)">✅ No early redemption penalty — tokens are fully unlocked.</span>';
+        penaltyEl.innerHTML = '<span style="color:var(--green)">✅ No early-exit penalty — you have passed 120 days of membership.</span>';
         penaltyEl.style.display = 'block';
       }
     }
@@ -7629,7 +7637,7 @@ function updateRedeemPreview() {
   };
   if (!input || !outEl) return;
   const raw = parseFloat(input.value);
-  if (!raw || raw <= 0 || _redeemFloor === 0n) { blank(); return; }
+  if (!raw || raw <= 0 || !_redeemFloor) { blank(); return; }  // !null and !0n both blank
   // AUDIT 2026-08-07: with the penalty unknown, every figure below is a guess.
   if (_redeemPenaltyBps === null || _redeemPenaltyBps === undefined) { blank(); return; }
   const cnovaWei = BigInt(Math.floor(raw * 1e18));
