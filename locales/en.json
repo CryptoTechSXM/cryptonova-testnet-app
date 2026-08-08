@@ -156,7 +156,7 @@
     "mechanic_label": "CryptoNova Matrix mechanic:",
     "mechanic_body": "Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.",
     "equalization_tip": "18% of each entry pools together. When all 127 seats fill (~$229 at T1), this distributes position-weighted to all 126 members. Later/deeper positions get a larger share to compensate for joining later.",
-    "chain_pay_tip": "2.7% per level goes to each of the 5 matrix position ancestors above the new member (levels L2-L6). These are automatically determined by the BFS tree structure — not by referral links. You earn from ANYONE below you in the matrix, not just your referrals.",
+    "chain_pay_tip": "2.7% per level goes to each of the 5 matrix positions above the new member's seat (levels L2-L6). These are determined by the BFS tree structure, not by referral links. You earn from every new member seated within five levels below you — but a seat six or more levels beneath you pays you nothing.",
     "chain_pay_note": "(per level, flat rate)"
   },
   "dash": {
