@@ -37,29 +37,6 @@
 
 ## Open Issues
 
-### [2026-08-08] Other — This account has cycled 6 times compare to my main account w…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
-- **Frequency:** Consistent
-- **What happened:** This account has cycled 6 times compare to my main account which has 1 cycle...
-- **What was expected:** Not certain, playing with different settings on accounts..
-- **Submitted:** Sat, 08 Aug 2026 02:38:56 GMT
-
-
-### [2026-08-08] Other — This account which is my main account seems to be stuck in a…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** This account which is my main account seems to be stuck in a very slow T1 cycle as it has only cycle once since registering.. T2 seems to be cycling quicker..
-- **What was expected:** More cycles by now given that all new registrations start at T1..
-- **Notes:** Not sure if this is a bug or not but just checking ...
-- **Submitted:** Sat, 08 Aug 2026 02:34:36 GMT
-
-
 ### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
 - **Reporter:** Sherwyn
 - **Page:** Other
@@ -155,6 +132,8 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-08 | 2026-08-08 | Other | Two accounts, 6 cycles vs 1 — NOT A BUG. Cycling is by SEAT, not tier traffic: _cycleOutRoot cycles position 1 and each rotation advances everyone one seat. Both wallets sit in T1.1 but different halves — MatB had 1,786 rotations vs MatA 315. MatB is draining a parked-member backlog (115/115 of its entrants had cycled out of MatA earlier, 111 previously parked, median lag 37.6h), so it runs ~24x faster. Verified with scripts/diag_cycle_rate.js + diag_matb_inflow.js + diag_matb_source.js. | (diagnosis only — no code change) |
+| 2026-08-08 | 2026-08-08 | Other | Main account "stuck" in slow T1 while T2 cycles faster — NOT A BUG, same cause. Seat 12 of 127 in T1.1 MatA, which rotates at real registration throughput (~1 per 33 min) rather than backlog-drain speed; ~11 rotations from cycling. T2 appears faster because it has fewer matrices, so upgrade traffic concentrates. | (diagnosis only — no code change) |
 | 2026-08-07 | 2026-08-08 | Dashboard (upgrade) | Generic red-X on tier upgrade — V8.47 gate pulls fee + outstanding rescue loan from the wallet, UI approved/checked fee only; approve/checks now fee+debt with loan-aware copy, ERC20 errors decode — verified live on two debted wallets (loan settled via upgrade, banner cleared) · Jacob · bounty +1 (first find) | 50c59b1 |
 | 2026-08-07 | 2026-08-07 | Other | With all check boxes disabled, breakdown 'available to claim' differed from the Withdrawal section — fixed — card, MAX and breakdown unified on a withdrawCore mirror (_claimableAll); root-caused double reserve subtraction + stale freeWithdrawable view (contract fix logged V8_48_BACKLOG) · Sherwyn · bounty +1 | 427beb5 |
 | 2026-08-06 | 2026-08-06 | Other | "Incorrect amount displayed" - Just upgraded to T2 and notic — fixed — reserve breakdown now reads the real next-tier fee · Sherwyn | 66ecdff |
