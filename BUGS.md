@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-08] Dashboard (index.html) — i got 2 self rescue alerts at the same time.
+t 1 cleared nor…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
+- **Frequency:** Consistent
+- **What happened:** i got 2 self rescue alerts at the same time.
+t 1 cleared normally but although T 2 usdc was approved the self rescue button is not showing.
+- **What was expected:** to click self rescue.and update dashboard.
+- **Submitted:** Sat, 08 Aug 2026 11:41:38 GMT
+
+
 ### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
 - **Reporter:** @ronnienic197
 - **Page:** Dashboard (index.html)
