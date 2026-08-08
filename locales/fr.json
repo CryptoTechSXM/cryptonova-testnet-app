@@ -135,7 +135,6 @@
     "circulating": "CNOVA en circulation",
     "system_cycles": "Cycles Système",
     "current_epoch": "Époque Actuelle",
-    "reward_per_entry": "Récompense CNOVA / Entrée",
     "stability_fund": "Fonds de Secours Stabilité",
     "community_wallet": "Portefeuille Communautaire",
     "buyback_reserve": "Réserve de Rachat",
@@ -145,7 +144,6 @@
   "split": {
     "title": "Répartition des Frais — par 10 $ au T1",
     "equalization": "🌀 Pool d'Égalisation",
-    "chain_pay": "⛓️ Paiement en Chaîne L2–L6 (5 niveaux)",
     "referrer": "🤝 Parrain Direct L1",
     "treasury_sub": "(soutien plancher)",
     "stability_sub": "(réserve de secours)",
@@ -239,7 +237,6 @@
     "referrer_locked": "🔒 Verrouillé — identique au Niveau 1",
     "upgrade_step1": "Étape 1 : Approuver USDC 🔒",
     "upgrade_step2": "Étape 2 : Monter de Niveau",
-    "earn_title": "💡 Potentiel de Gains T1 (par cycle de 127 sièges)",
     "earn_passive": "Passif (0 parrainage) : <strong style=\"color:var(--text)\">$3.05</strong> paiement chaîne + égalisation par cycle (~31 % ROI)",
     "earn_active": "Actif (2 parrainages) : <strong style=\"color:var(--text)\">$4.05</strong> par cycle (~41 % ROI)",
     "earn_power": "Puissant (5 parrainages) : <strong style=\"color:var(--text)\">$5.55</strong> par cycle (~56 % ROI)",

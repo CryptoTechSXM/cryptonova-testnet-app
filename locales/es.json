@@ -135,7 +135,6 @@
     "circulating": "CNOVA en circulación",
     "system_cycles": "Ciclos del Sistema",
     "current_epoch": "Época Actual",
-    "reward_per_entry": "Recompensa CNOVA / Entrada",
     "stability_fund": "Fondo de Rescate de Estabilidad",
     "community_wallet": "Cartera Comunitaria",
     "buyback_reserve": "Reserva de Recompra",
@@ -145,7 +144,6 @@
   "split": {
     "title": "Distribución de Tarifas — por $10 en T1",
     "equalization": "🌀 Pool de Equalización",
-    "chain_pay": "⛓️ Pago en Cadena L2–L6 (5 niveles)",
     "referrer": "🤝 Referidor Directo L1",
     "treasury_sub": "(respaldo del piso)",
     "stability_sub": "(reserva de rescate)",
@@ -239,7 +237,6 @@
     "referrer_locked": "🔒 Bloqueado — igual que en el Nivel 1",
     "upgrade_step1": "Paso 1: Aprobar USDC 🔒",
     "upgrade_step2": "Paso 2: Subir de Nivel",
-    "earn_title": "💡 Potencial de Ganancias T1 (por ciclo de 127 asientos)",
     "earn_passive": "Pasivo (0 referidos): <strong style=\"color:var(--text)\">$3.05</strong> pago en cadena + igualación por ciclo (~31% ROI)",
     "earn_active": "Activo (2 referidos): <strong style=\"color:var(--text)\">$4.05</strong> por ciclo (~41% ROI)",
     "earn_power": "Potencia (5 referidos): <strong style=\"color:var(--text)\">$5.55</strong> por ciclo (~56% ROI)",

@@ -135,7 +135,6 @@
     "circulating": "流通中的 CNOVA",
     "system_cycles": "系统循环次数",
     "current_epoch": "当前纪元",
-    "reward_per_entry": "CNOVA 奖励 / 次入场",
     "stability_fund": "Stability Rescue Fund",
     "community_wallet": "社区钱包",
     "buyback_reserve": "Buyback Reserve",
@@ -145,7 +144,6 @@
   "split": {
     "title": "入场费分配 — T1 每 $10",
     "equalization": "🌀 均等化奖池",
-    "chain_pay": "⛓️ 链路收益 L2–L6（5 层上线）",
     "referrer": "🤝 L1 直推推荐人",
     "treasury_sub": "（底价支撑）",
     "stability_sub": "（救援储备）",
@@ -239,7 +237,6 @@
     "referrer_locked": "🔒 已锁定 — 与 Tier 1 相同",
     "upgrade_step1": "第一步：授权 USDC 🔒",
     "upgrade_step2": "第二步：升级层级",
-    "earn_title": "💡 Tier 1 收益潜力（每 127 席位循环）",
     "earn_passive": "被动（0 推荐）：<strong style=\"color:var(--text)\">$3.05</strong> 链路收益 + 均等化（约 31% ROI）",
     "earn_active": "活跃（2 推荐）：<strong style=\"color:var(--text)\">$4.05</strong>（约 41% ROI）",
     "earn_power": "高效（5 推荐）：<strong style=\"color:var(--text)\">$5.55</strong>（约 56% ROI）",

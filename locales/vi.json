@@ -135,7 +135,6 @@
     "circulating": "CNOVA lưu thông",
     "system_cycles": "Chu Kỳ Hệ Thống",
     "current_epoch": "Epoch Hiện Tại",
-    "reward_per_entry": "Phần Thưởng CNOVA / Lượt Tham Gia",
     "stability_fund": "Stability Rescue Fund",
     "community_wallet": "Ví Cộng Đồng",
     "buyback_reserve": "Buyback Reserve",
@@ -145,7 +144,6 @@
   "split": {
     "title": "Phân Chia Phí Tham Gia — mỗi $10 tại T1",
     "equalization": "🌀 Equalization Pool",
-    "chain_pay": "⛓️ Chain Pay L2–L6 (5 cấp upline)",
     "referrer": "🤝 Người Giới Thiệu Trực Tiếp L1",
     "treasury_sub": "(bảo đảm giá sàn)",
     "stability_sub": "(quỹ cứu trợ)",
@@ -239,7 +237,6 @@
     "referrer_locked": "🔒 Đã Khóa — giống như Cấp 1",
     "upgrade_step1": "Bước 1: Phê Duyệt USDC 🔒",
     "upgrade_step2": "Bước 2: Nâng Cấp Cấp",
-    "earn_title": "💡 Tiềm Năng Thu Nhập Cấp 1 (mỗi chu kỳ 127 ghế)",
     "earn_passive": "Thụ động (0 giới thiệu): <strong style=\"color:var(--text)\">$3.05</strong> chain pay + equalization mỗi chu kỳ (~31% ROI)",
     "earn_active": "Năng động (2 giới thiệu): <strong style=\"color:var(--text)\">$4.05</strong> mỗi chu kỳ (~41% ROI)",
     "earn_power": "Mạnh mẽ (5 giới thiệu): <strong style=\"color:var(--text)\">$5.55</strong> mỗi chu kỳ (~56% ROI)",

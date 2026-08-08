@@ -135,7 +135,7 @@
     "circulating": "circulating CNOVA",
     "system_cycles": "System Cycles",
     "current_epoch": "Current Epoch",
-    "reward_per_entry": "CNOVA Reward / Entry",
+    "reward_per_entry": "Scheduled CNOVA / Entry",
     "stability_fund": "Stability Rescue Fund",
     "community_wallet": "Community Wallet",
     "buyback_reserve": "Buyback Reserve",
@@ -145,7 +145,7 @@
   "split": {
     "title": "Entry Fee Split — per $10 at T1",
     "equalization": "🌀 Equalization Pool",
-    "chain_pay": "⛓️ Chain Pay L2–L6 (5 uplines)",
+    "chain_pay": "⛓️ Chain Pay L2–L6",
     "referrer": "🤝 L1 Direct Referrer",
     "treasury_sub": "(floor backing)",
     "stability_sub": "(rescue reserve)",
@@ -154,7 +154,10 @@
     "community": "🏛️ Community",
     "buyback": "🔥 CNOVA Buyback Reserve",
     "mechanic_label": "CryptoNova Matrix mechanic:",
-    "mechanic_body": "Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier."
+    "mechanic_body": "Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.",
+    "equalization_tip": "18% of each entry pools together. When all 127 seats fill (~$229 at T1), this distributes position-weighted to all 126 members. Later/deeper positions get a larger share to compensate for joining later.",
+    "chain_pay_tip": "2.7% per level goes to each of the 5 matrix position ancestors above the new member (levels L2-L6). These are automatically determined by the BFS tree structure — not by referral links. You earn from ANYONE below you in the matrix, not just your referrals.",
+    "chain_pay_note": "(per level, flat rate)"
   },
   "dash": {
     "title": "My Dashboard",
@@ -196,7 +199,11 @@
     "bfs_position": "BFS Position",
     "tier_cycles": "Tier Cycles",
     "referrer": "Referrer",
-    "direct_referrals": "Direct Referrals"
+    "direct_referrals": "Direct Referrals",
+    "withdrawable_tip": "USDC you can withdraw to your wallet right now. Includes your instant earn, L1 referral bonuses you've earned, and chain pay from members who joined below you in the matrix.",
+    "cnova_balance_tip": "Protocol tokens minted to you each time YOU register — your first entry and every re-entry after a cycle. At the $0.01 launch floor that is 50 CNOVA per T1 entry, and fewer as the floor rises, because the amount minted is always backed by your entry’s $0.50 Treasury deposit. Redeem at the floor price anytime — or hold for appreciation.",
+    "cnova_wallet_note": "Earned on every registration you make — your first entry and every re-entry after a cycle. At the $0.01 launch floor that is 50 CNOVA per T1 entry; the protocol never mints more than your entry’s $0.50 Treasury deposit backs, so the token count falls as the floor rises. Add to your wallet to track your balance during testing. <span style=\"color:var(--yellow)\">🔒 Matrix-minted CNOVA vests for 180 days</span> — use the Buy CNOVA page to acquire immediately transferable CNOVA.",
+    "cnova_detail_note": "◈ CNOVA is minted to you each time you enter a matrix — your first entry and every re-entry after a cycle, not only on cycle completion. The scheduled reward halves each epoch, and the amount minted is also limited by what your entry’s Treasury deposit backs at the live floor. Floor price = CNOVA Treasury USDC ÷ total supply — your guaranteed minimum redemption value."
   },
   "tiers": {
     "title": "10-Tier CryptoNova Matrix — Live Stats",
@@ -239,11 +246,12 @@
     "referrer_locked": "🔒 Locked — same as Tier 1",
     "upgrade_step1": "Step 1: Approve USDC 🔒",
     "upgrade_step2": "Step 2: Upgrade Tier",
-    "earn_title": "💡 Tier 1 Earnings Potential (per 127-seat cycle) <span style=\"font-size:11px;font-weight:400;color:var(--text3)\">— what you earn as new members join after you</span>",
+    "earn_title": "💡 Tier 1 Earnings Potential (per 127-seat cycle)",
     "earn_passive": "Passive (0 referrals): <strong style=\"color:var(--text)\">~$3.05</strong> in chain pay + pool share per cycle (~31% ROI) <span style=\"font-size:11px;color:var(--text3)\">— you earn automatically as others join below you</span>",
     "earn_active": "Active (2 referrals): <strong style=\"color:var(--text)\">~$4.05</strong> per cycle (~41% ROI) <span style=\"font-size:11px;color:var(--text3)\">— +$0.50 referral bonus per person you bring in</span>",
     "earn_power": "Power (5 referrals): <strong style=\"color:var(--text)\">~$5.55</strong> per cycle (~56% ROI) <span style=\"font-size:11px;color:var(--text3)\">— refer 5 people and earn $2.50 extra on top of passive</span>",
-    "earn_disclaimer": "Your $10 entry fee splits automatically: $5.00 held as your crossing reserve (covers your next entry when the matrix cycles), $0.25 instant to your balance, $0.50 to your referral sponsor (L1 bonus), up to $1.35 in chain pay to your 5 matrix ancestors (L2–L6, $0.27 each), $1.80 into the shared equalization pool (~$229 total at cycle completion). Pool distributes position-weighted to all 126 members. Upgrade tiers = proportionally larger amounts at every level."
+    "earn_disclaimer": "Your $10 entry fee splits automatically: $5.00 held as your crossing reserve (covers your next entry when the matrix cycles), $0.25 instant to your balance, $0.50 to your referral sponsor (L1 bonus), up to $1.35 in chain pay to your 5 matrix ancestors (L2–L6, $0.27 each), $1.80 into the shared equalization pool (~$229 total at cycle completion). Pool distributes position-weighted to all 126 members. Upgrade tiers = proportionally larger amounts at every level.",
+    "earn_title_tip": "A \"cycle\" = all 127 seats in your matrix filled by new members. Each seat filled sends chain pay upward. When all 127 fill, the pool pays out and the matrix resets."
   },
   "chart": {
     "low": "Low",

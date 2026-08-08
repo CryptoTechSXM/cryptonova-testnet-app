@@ -135,7 +135,6 @@
     "circulating": "유통 CNOVA",
     "system_cycles": "시스템 사이클",
     "current_epoch": "현재 에포크",
-    "reward_per_entry": "CNOVA 보상 / 참여",
     "stability_fund": "Stability Rescue Fund",
     "community_wallet": "커뮤니티 지갑",
     "buyback_reserve": "Buyback Reserve",
@@ -145,7 +144,6 @@
   "split": {
     "title": "T1 $10 입장료 분배",
     "equalization": "🌀 균등화 풀",
-    "chain_pay": "⛓️ 체인 페이 L2–L6 (5개 상위 레벨)",
     "referrer": "🤝 L1 직접 추천인",
     "treasury_sub": "(최저가 지원)",
     "stability_sub": "(구조 준비금)",
@@ -239,7 +237,6 @@
     "referrer_locked": "🔒 잠금 — 티어 1과 동일",
     "upgrade_step1": "1단계: USDC 승인 🔒",
     "upgrade_step2": "2단계: 티어 업그레이드",
-    "earn_title": "💡 티어 1 수익 잠재력 (127석 사이클당)",
     "earn_passive": "수동적 (0 추천): <strong style=\"color:var(--text)\">$3.05</strong> 체인 페이 + 균등화 사이클당 (~31% ROI)",
     "earn_active": "활성 (2 추천): <strong style=\"color:var(--text)\">$4.05</strong> 사이클당 (~41% ROI)",
     "earn_power": "파워 (5 추천): <strong style=\"color:var(--text)\">$5.55</strong> 사이클당 (~56% ROI)",

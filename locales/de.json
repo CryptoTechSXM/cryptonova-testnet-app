@@ -135,7 +135,6 @@
     "circulating": "CNOVA im Umlauf",
     "system_cycles": "Systemzyklen",
     "current_epoch": "Aktuelle Epoche",
-    "reward_per_entry": "CNOVA-Belohnung / Beitritt",
     "stability_fund": "Stabilitäts-Rettungsfonds",
     "community_wallet": "Community-Wallet",
     "buyback_reserve": "Rückkaufreserve",
@@ -145,7 +144,6 @@
   "split": {
     "title": "Gebührenaufteilung — pro $10 bei T1",
     "equalization": "🌀 Ausgleichspool",
-    "chain_pay": "⛓️ Kettenzahlung L2–L6 (5 Ebenen)",
     "referrer": "🤝 L1 Direktempfehlender",
     "treasury_sub": "(Preisbodendeckung)",
     "stability_sub": "(Rettungsreserve)",
@@ -239,7 +237,6 @@
     "referrer_locked": "🔒 Gesperrt — identisch mit Level 1",
     "upgrade_step1": "Schritt 1: USDC genehmigen 🔒",
     "upgrade_step2": "Schritt 2: Level aufsteigen",
-    "earn_title": "💡 T1 Einnahmenpotenzial (pro 127-Sitz-Zyklus)",
     "earn_passive": "Passiv (0 Empfehlungen): <strong style=\"color:var(--text)\">$3.05</strong> Kettenzahlung + Ausgleich pro Zyklus (~31% ROI)",
     "earn_active": "Aktiv (2 Empfehlungen): <strong style=\"color:var(--text)\">$4.05</strong> pro Zyklus (~41% ROI)",
     "earn_power": "Power (5 Empfehlungen): <strong style=\"color:var(--text)\">$5.55</strong> pro Zyklus (~56% ROI)",
