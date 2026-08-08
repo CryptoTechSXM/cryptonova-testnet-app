@@ -328,7 +328,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="defi decentralized finance">
       <div class="acronym">DeFi</div>
       <div class="full-name" data-i18n="faqPage.g8_full">Decentralized Finance</div>
-      <div class="definition" data-i18n="faqPage.g8_def">Financial systems that operate on blockchains without a central authority, bank, or intermediary. CryptoNova Matrix is a DeFi protocol &mdash; smart contracts execute all logic automatically, with no admin able to redirect funds.</div>
+      <div class="definition" data-i18n="faqPage.g8_def">Financial systems that operate on blockchains without a central authority, bank, or intermediary. CryptoNova Matrix is a DeFi protocol &mdash; smart contracts execute all logic automatically. No admin can change a deployed matrix's fee split or block you from withdrawing your balance.</div>
     </div>
 
     <div class="glossary-card" data-terms="evm ethereum virtual machine">
@@ -375,7 +375,7 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q1_a1">CryptoNova Matrix is a decentralized, autonomous smart contract protocol deployed on the Base blockchain. It runs a 10-tier BFS (breadth-first search) matrix compensation structure where participants pay an entry fee in USDC and receive payments from subsequent participants according to predefined on-chain rules.</p>
-        <p data-i18n="faqPage.q1_a2">CryptoNova uses a dual-matrix architecture (Matrix A + B per tier), a CNOVA Treasury that backs the CNOVA token floor price, and a unified smart contract entry point that handles all tiers seamlessly. The protocol is fully autonomous &mdash; no admin can pause, modify, or redirect funds.</p>
+        <p data-i18n="faqPage.q1_a2">CryptoNova uses a dual-matrix architecture (Matrix A + B per tier), a CNOVA Treasury that backs the CNOVA token floor price, and a unified smart contract entry point that handles all tiers seamlessly. Deployed logic cannot be altered &mdash; there is no upgrade proxy, and each matrix's fee split is fixed in its constructor with no setter. An owner key does hold an emergency backstop: it can halt new entries and upgrades, and the protocol halts them automatically after 30 days with no network activity. Withdrawals stay open either way. More than 50 further parameters are adjustable only by DAO vote, with a 72-hour vote and a 48-hour timelock.</p>
       </div></div>
     </div>
 
