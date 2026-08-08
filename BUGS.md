@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-08] Other — This account has cycled 6 times compare to my main account w…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x001d82fb20dc3b947f7023f198eee009533538a3
+- **Frequency:** Consistent
+- **What happened:** This account has cycled 6 times compare to my main account which has 1 cycle...
+- **What was expected:** Not certain, playing with different settings on accounts..
+- **Submitted:** Sat, 08 Aug 2026 02:38:56 GMT
+
+
 ### [2026-08-08] Other — This account which is my main account seems to be stuck in a…
 - **Reporter:** Sherwyn
 - **Page:** Other
