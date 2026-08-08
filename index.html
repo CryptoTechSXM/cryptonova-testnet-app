@@ -1490,7 +1490,7 @@
               <button class="btn btn-ghost full-w" id="btn-redeem" onclick="doRedeemAtFloor()" disabled data-i18n="dash.step2_redeem">Step 2: Redeem for USDC</button>
             </div>
             <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
-              <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Convert ALL still-vesting CNOVA to unlocked (redeemable) in one transaction. An early-exit penalty applies to whatever is still vesting; fully-vested batches unlock free.</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Vesting CNOVA can already be redeemed at floor. Unlocking is what makes it <strong>transferable</strong> &mdash; so you can hold it or sell it above floor instead of redeeming. This converts ALL still-vesting CNOVA in one transaction; an early-exit penalty of up to 50% applies to whatever is still vesting, sliding to zero as each batch nears its unlock date. Fully-vested batches unlock free.</div>
               <button class="btn btn-ghost full-w" id="btn-unlock-all" onclick="doUnlockAll()" style="color:var(--yellow)">Max Unlock (early-exit vesting)</button>
             </div>
             <div id="redeem-status" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
@@ -7654,14 +7654,14 @@ async function loadRedeemData() {
           '<strong style="color:var(--yellow)">⚠️ Early Exit Penalty</strong><br>' +
           'Redeeming now costs <strong style="color:var(--yellow)">' + penaltyPct + '%</strong> of your USDC payout, based on how long you have been a member. ' +
           'It steps down to <strong>0% after 120 days</strong> from your first registration.<br>' +
-          '<span style="color:var(--text3);font-size:11px">80% of the penalty returns to the CNOVA Treasury, supporting the floor for everyone still holding; 20% goes to the Community Wallet. Separately, matrix-minted CNOVA is cliff-vested for ' + vestDays + ' days before it can be transferred or redeemed.</span>';
+          '<span style="color:var(--text3);font-size:11px">80% of the penalty returns to the CNOVA Treasury, supporting the floor for everyone still holding; 20% goes to the Community Wallet. Separately, matrix-minted CNOVA is cliff-vested for ' + vestDays + ' days, which blocks transferring or selling it \u2014 not redeeming.</span>';
         penaltyEl.style.display = 'block';
       } else {
         penaltyEl.innerHTML = '<span style="color:var(--green)">✅ No early-exit penalty on this redemption.</span>'
           + (lockedBal > 0n
               ? '<br><span style="color:var(--text3);font-size:11px">'
                 + Number(ethers.formatEther(lockedBal)).toFixed(2)
-                + ' CNOVA is still vesting and cannot be redeemed until it unlocks.</span>'
+                + ' CNOVA is still vesting: it can be redeemed at floor right now, but cannot be transferred or sold until it unlocks.</span>'
               : '');
         penaltyEl.style.display = 'block';
       }
