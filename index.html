@@ -2069,18 +2069,45 @@ const RPC_EXTRA    = 'https://sepolia.base.org';
 // eth_getLogs on range-capped providers (QuickNode caps at 10k blocks): walk
 // backward in <=9000-block windows instead of one whole-chain query that gets
 // rejected. Sequential, so it never bursts the per-second rate limit.
+// Floor for every lifetime-history log scan. Same value _getDirectReferrals uses
+// (TR_DEPLOY_BLOCK). A stale-LOW floor only scans a few extra EMPTY windows -- it can
+// never miss an event -- so on redeploy this may be raised but never needs to be.
+const LOGS_DEPLOY_FLOOR = 44840000;
+
 async function safeGetLogs(contract, filter, opts) {
   opts = opts || {};
   const rp = contract.runner && (contract.runner.provider || contract.runner);
   const WINDOW = 9000;
   const latest = await rp.getBlockNumber();
-  const floor = Math.max(0, latest - (opts.maxBack || 100000));
+  // AUDIT 2026-08-09: the default was a FIXED 100k-block lookback (~2.3 days at 2s
+  // blocks). Every caller rendering LIFETIME history silently truncated to that window
+  // and printed the truncated total as fact -- "Total Burned Lifetime 0.00 CNOVA /
+  // No redemptions yet." for a member who redeemed three days ago. Floor at the
+  // deployment instead. opts.maxBack still overrides, for callers that deliberately
+  // want a bounded recent-only scan.
+  // opts.fromBlock lets an append-only caller resume from what it already has, so a
+  // deep history is paid for ONCE per wallet instead of on every page load.
+  const floor = opts.fromBlock != null ? Math.max(0, opts.fromBlock)
+              : opts.maxBack          ? Math.max(0, latest - opts.maxBack)
+              :                         LOGS_DEPLOY_FLOOR;
   const out = [];
+  let incomplete = false;
   for (let to = latest; to >= floor; to -= WINDOW) {
     const from = Math.max(floor, to - WINDOW + 1);
-    try { out.push(...await contract.queryFilter(filter, from, to)); } catch (_) {}
+    // AUDIT 2026-08-09: this was `catch (_) {}` -- a dropped window silently shrank the
+    // result and the caller rendered it with full confidence. Retry, then FLAG. Callers
+    // that display a total MUST check .incomplete and badge it rather than print a lie.
+    let got = false;
+    for (let a = 0; a < 3 && !got; a++) {
+      try { out.push(...await contract.queryFilter(filter, from, to)); got = true; }
+      catch (_) { await new Promise(r => setTimeout(r, 250 * (a + 1))); }
+    }
+    if (!got) incomplete = true;
     if (from <= floor) break;
   }
+  out.incomplete = incomplete;   // array properties: existing callers are unaffected
+  out.scannedTo  = latest;
+  out.scannedFrom = floor;
   return out;
 }
 
@@ -2962,7 +2989,7 @@ async function loadCWData(userAddr, signer, rp) {
       try { const c = localStorage.getItem(_numKey); if (c) num = Number(c); } catch(_) {}
       if (!num) {
         const filter = cw.filters.MemberEnrolled(userAddr);
-        const events  = await safeGetLogs(cw, filter, {maxBack: 200000});
+        const events  = await safeGetLogs(cw, filter);   // AUDIT 2026-08-09: was maxBack 200000 (~4.6d). The comment above says "deep-scan back to the deployment" but 200k is a FIXED window -- it floored at block 45,061,516 today with real events at 45,064,626, ~1.7h of margin. Within hours it would have re-broken the exact bug fixed on 2026-08-06.
         if (events.length > 0) {
           num = Number(events[0].args.enrollmentNumber);
           try { localStorage.setItem(_numKey, String(num)); } catch(_) {}
@@ -5792,24 +5819,33 @@ async function updateBountyScore(addr) {
 async function loadUserBurnHistory(cnova, user) {
   try {
     setText('dash-cnova-burned', '…');
-    const provider  = cnova.runner?.provider ?? cnova.provider;
-    const latest    = await provider.getBlockNumber();
-    const fromBlock = Math.max(0, latest - 9_000);  // <=9k: under QuickNode 10k getLogs cap (no 413 on first try)
-    const filter    = cnova.filters.Transfer(user, ethers.ZeroAddress);
-    let events;
-    try {
-      events = await cnova.queryFilter(filter, fromBlock, 'latest');
-    } catch {
-      events = [];
-      const CHUNK = 2_000;
-      for (let f = fromBlock; f <= latest; f += CHUNK) {
-        try {
-          const chunk = await cnova.queryFilter(filter, f, Math.min(f + CHUNK - 1, latest));
-          events = events.concat(chunk);
-        } catch {}
+    // AUDIT 2026-08-09: this scanned a FIXED 9,000-block window -- about five hours at
+    // 2s blocks -- and rendered the sum as the member's burn total. Anyone who redeemed
+    // yesterday saw a confident "0.00". safeGetLogs now floors at the deployment and
+    // reports .incomplete instead of swallowing dropped windows, so a partial read shows
+    // "—" rather than an undercount presented as fact.
+    const filter = cnova.filters.Transfer(user, ethers.ZeroAddress);
+    // Burns are append-only: a Transfer(user -> 0x0) already counted can never be
+    // un-counted. So the deep scan is paid ONCE per wallet and every later load
+    // resumes from the last block already covered. Keyed by CNOVA address so a token
+    // redeploy starts a fresh ledger rather than inheriting a stale total.
+    const ckey  = 'burn_' + (ADDRS.cnova || '').toLowerCase() + '_' + user.toLowerCase();
+    const prior = _cache.get(ckey, 365 * 24 * 60 * 60 * 1000);   // append-only: no real expiry
+    const events = await safeGetLogs(cnova, filter,
+      prior && prior.upTo ? { fromBlock: prior.upTo + 1 } : {});
+    // A partial read must not be cached, and must not be shown as a total.
+    if (events.incomplete) {
+      if (prior && prior.total != null) {
+        setText('dash-cnova-burned', Number(ethers.formatEther(BigInt(prior.total))).toLocaleString(
+          undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      } else {
+        setText('dash-cnova-burned', '—');
       }
+      return;
     }
-    const total = events.reduce((acc, e) => acc + BigInt(e.args.value), 0n);
+    const total = events.reduce((acc, e) => acc + BigInt(e.args.value),
+                                prior && prior.total != null ? BigInt(prior.total) : 0n);
+    _cache.set(ckey, { upTo: events.scannedTo, total: total.toString() });
     setText('dash-cnova-burned', Number(ethers.formatEther(total)).toLocaleString(
       undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }
     ));
@@ -6244,7 +6280,15 @@ async function renderCnovaDetail(el, rp) {
   let historyRows = '';
   try {
     const evs = await safeGetLogs(cnova, cnova.filters.EarlyUnlock(userAddr));
-    if (evs.length) {
+    // AUDIT 2026-08-09: earlyUnlock swap-and-pops the batch out of storage, so this
+    // event is the ONLY surviving record (see note above). Rendering an empty history
+    // after a partial read would present "you have never early-unlocked" as fact and
+    // erase the member's only ledger. Say the read failed instead.
+    if (evs.incomplete && !evs.length) {
+      historyRows = `
+        <div class="detail-section">Early Unlock History</div>
+        <div class="detail-note">Could not read your early-unlock history just now &mdash; some blocks did not respond. This is a display issue only; nothing about your vesting has changed. Reopen this panel to retry.</div>`;
+    } else if (evs.length) {
       const blks = await Promise.all(evs.map(e => rp.getBlock(e.blockNumber).catch(() => null)));
       let totRel = 0n, totPen = 0n;
       const rows = evs.map((e, i) => {
@@ -6452,6 +6496,16 @@ async function renderBurnedDetail(el, rp) {
   const cnova = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
   try {
     const events = await safeGetLogs(cnova, cnova.filters.Transfer(userAddr, ethers.ZeroAddress));
+    // AUDIT 2026-08-09: on a partial read this panel used to print "Total Burned
+    // Lifetime 0.00 CNOVA / No redemptions yet." -- telling a member who HAS redeemed
+    // that they never have. A scan that could not complete says so and offers a retry;
+    // it does not get to make a lifetime claim.
+    if (events.incomplete) {
+      el.innerHTML = `
+        <div class="detail-row"><span class="detail-key">Total Burned Lifetime</span><span class="detail-val">&mdash;</span></div>
+        <div class="detail-note">Could not read your full redemption history just now &mdash; some blocks did not respond. This is a display issue only; your balance and any redemptions are unaffected. Close and reopen this panel to retry.</div>`;
+      return;
+    }
     const total  = events.reduce((a, e) => a + BigInt(e.args.value), 0n);
     const totalFmt = Number(ethers.formatEther(total)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -7361,7 +7415,7 @@ async function _getDirectReferrals(addr, rp) {
     // history. TR_DEPLOY_BLOCK = v8_46 first-registration floor; on a redeploy, lower it to
     // the new deploy block — a stale-low value only scans a few extra empty windows, it
     // never misses events. Each window retries 3x so a dropped read doesn't silently undercount.
-    const TR_DEPLOY_BLOCK = 44840000;
+    const TR_DEPLOY_BLOCK = LOGS_DEPLOY_FLOOR;   // AUDIT 2026-08-09: was a second literal 44840000. Two copies of a deploy-block floor is a drift bug waiting for the next redeploy -- one value now.
     const latest = await logRp.getBlockNumber();
     const WINDOW = 9000, FLOOR = Math.max(0, TR_DEPLOY_BLOCK);
     let events = [], incomplete = false;
