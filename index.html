@@ -3689,9 +3689,25 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   const activeReg = (registered && registered[activeIdx] !== undefined) ? Number(registered[activeIdx]) : null;
   const dep = (deployThreshold !== null && deployThreshold !== undefined && Number(deployThreshold) > 0)
     ? Number(deployThreshold) : null;
+  // AUDIT 2026-08-09: routeEntryThreshold is deliberately set far above any reachable
+  // entry count on T1/T2/T3 (1,000,000) as the live mitigation for the
+  // _findExternalPair cumulative-counter bug. Printing it raw told members
+  // "T1.2 starts receiving at 1,000,000 entries" — accurate, and read by a member as
+  // "never", stated as though it were a design parameter rather than a temporary
+  // routing state. V8.48's round-robin removes the concept of a saturation threshold
+  // altogether, so there will be no number to print at all. Above this bound, describe
+  // what is actually happening instead. Real configs are 375/400; nothing legitimate
+  // comes near 100,000.
+  const THR_UNBOUNDED = 100000;
+  const thrOff = thr >= THR_UNBOUNDED;
   if (activeReg !== null && thr > 0) {
     tail = ' ' + TU + '.' + routing + ' is taking new entries (now ' + activeReg.toLocaleString() + ').';
-    if (standby) {
+    if (thrOff) {
+      // No usable number — say where entries are going and leave it there.
+      tail += standby
+        ? ' ' + TU + '.' + standby + ' is built and on standby; new entries are all going to ' + TU + '.' + routing + ' for now.'
+        : ' New entries stay in ' + TU + '.' + routing + ' for now.';
+    } else if (standby) {
       tail += ' ' + TU + '.' + standby + ' is already built and starts receiving at <b style="color:#fcd34d">' +
               thr.toLocaleString() + ' entries</b>.';
     } else if (dep) {
