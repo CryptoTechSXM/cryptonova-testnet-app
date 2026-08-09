@@ -2367,8 +2367,6 @@ const PM_ABI = [
   'function currentMatA() external view returns (address)',
   'function currentMatB() external view returns (address)',
   'function pairs(uint256) external view returns (address matrixA, address matrixB, uint256 deployedAt, uint256 totalRegistered)',
-  'function routeEntryThreshold() external view returns (uint256)',
-  'function deployEntryThreshold() external view returns (uint256)',
 ];
 
 const TREASURY_ABI = [
@@ -3148,10 +3146,11 @@ async function loadHomeStats() {
       // frontend copy of that logic goes stale the moment the keeper moves it.
       // allPairsStatus()'s `active[]` is the CONTRACT's own flag for the routing
       // pair (V8.40) — one source of truth, and it drops N pairs(i) calls.
-      const [_status, _thr] = await Promise.all([
-        pm1.allPairsStatus(),
-        pm1.routeEntryThreshold().catch(() => 381n),
-      ]);
+      // V8.48 item 30: routeEntryThreshold is DELETED from the contract. It used to be
+      // read here behind `.catch(() => 381n)` — after the cutover that call reverts, the
+      // catch swallows it, and the card would quietly report a threshold of 381 that no
+      // longer exists anywhere. A swallowed read impersonating a value, aimed at members.
+      const _status = await pm1.allPairsStatus();
       const _matAs = _status[0], _matBs = _status[1], _occAs = _status[2],
             _occBs = _status[3], _regs = _status[4], _actives = _status[5];
       const _n = _matAs.length;
@@ -3163,7 +3162,6 @@ async function loadHomeStats() {
         routingPair: _routing + 1,
         pairCount:   _n,
         total:       Number(_regs[_routing]),
-        threshold:   Number(_thr),
         standby:     _n > _routing + 1 ? _routing + 2 : 0,
         occA:        Number(_occAs[_routing]),
         occB:        Number(_occBs[_routing]),
@@ -3283,7 +3281,7 @@ async function loadHomeStats() {
     const _pi = window._t1PairInfo;
     if (_pi) {
       renderTierPairHeader('t1', 1, _pi.routingPair - 1, _pi.pairCount,
-                           _pi.regs, _pi.threshold, _pi.occAs, _pi.occBs);
+                           _pi.regs, _pi.occAs, _pi.occBs);
     }
 
     // T2A progress
@@ -3549,7 +3547,7 @@ const TIER_LABELS = ['', 'Nova Seed', 'Nova Rise', 'Nova Star', 'Nova Core', 'No
 //
 // The standby note element is CREATED on demand and inserted after the tier's
 // card grid, so no HTML change is needed per tier.
-function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, threshold, occA, occB, deployThreshold) {
+function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, occA, occB) {
   const TU = 'T' + tierNum;
   const routing = activeIdx + 1;
 
@@ -3589,18 +3587,17 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
   // One row per pair, each with its own fill bar, plus a tier-wide total.
   // The cards can only ever show ONE pair, so the tier's real fill has to live
   // here or it is invisible: T6 holds 253 members and its card reads 0/127.
-  // The bar measures ENTRIES against routeEntryThreshold (127x3 = 381 by
-  // default), NOT seats.
+  // V8.48: SEATS, and only seats. The bar used to measure entries against
+  // routeEntryThreshold — "how close is this pair to opening the next one". That
+  // threshold no longer exists (item 30): expansion is driven by OCCUPANCY, and the
+  // factory opens the next pair automatically well before this one fills. The question
+  // the old bar answered is now answered by the protocol itself, leaving the only
+  // question a member was ever actually asking: is there room for me.
   //
-  // 2026-07-28, owner correction: I first drew it against 127x2 seats per pair
-  // (508 for two pairs). Wrong measure — a pair's seats say how many people are
-  // sitting in it, but the number that actually MATTERS is how close the pair is
-  // to saturating, because that is what opens the next one. That is
-  // totalRegistered vs routeEntryThreshold, and the threshold is read live: it
-  // is owner-settable per tier and the round-robin keeper moves T1's, so any
-  // hardcoded 381 here would go stale the moment either changes.
-  const thr = (threshold !== null && threshold !== undefined && Number(threshold) > 0)
-    ? Number(threshold) : 381;
+  // Keeping the 2026-07-28 correction that got us here — a pair's seats say how many
+  // people are sitting in it, and that is a bounded, meaningful number. Entries are a
+  // lifetime running total with no ceiling; they stay on the row as context, never as a
+  // denominator.
   let sumReg = 0, sumSeats = 0;
   const rows = [];
   for (let p = 0; p < pairCount; p++) {
@@ -3612,8 +3609,9 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     // entries against routeEntryThreshold, which made T1.3 draw 88% while every
     // one of its 253 seats was taken, and made the owner ask why the denominator
     // was 888 when a pair holds 254. Those are different quantities and a single
-    // bar cannot carry both. Seats fill the bar; the entry threshold appears as
-    // words on the one pair it governs.
+    // bar cannot carry both. Seats fill the bar. V8.48: the entry threshold that used
+    // to appear in words underneath is deleted — the strip now closes on seats remaining,
+    // so every number on this row measures the same thing.
     const pctPair = Math.round((a + b) / 254 * 100);
 
     // ORDER MATTERS. 2026-07-28: this tested entries first and labelled T1.3
@@ -3625,7 +3623,6 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
     let state, colour;
     if (p === activeIdx)           { state = 'filling now'; colour = 'var(--green)'; }
     else if (seatsFull)            { state = 'full';        colour = 'var(--text2)'; }
-    else if (reg >= thr)           { state = 'saturated';   colour = 'var(--text2)'; }
     else if (a === 0 && b === 0)   { state = 'standby';     colour = '#fcd34d'; }
     else                           { state = 'open';        colour = 'var(--text2)'; }
 
@@ -3676,50 +3673,28 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, thre
       '<span style="color:var(--green);font-size:11px;min-width:70px;text-align:right">' + pctTier + '% seated</span>' +
     '</div>';
 
-  // Saturation count only when the threshold read succeeded — on T1 it is
-  // live-managed by the round-robin keeper, so an assumed value would lie.
-  // The entry threshold is explained in WORDS, on the one pair it governs.
-  // 2026-07-28: shown as a denominator it read as capacity — "why 888 when a
-  // pair holds 254?" It is neither capacity nor a headcount: it is the entry
-  // count at which routing moves to the next pair. On T1 the round-robin keeper
-  // walks it deliberately (772 -> 888 within the hour) to spread new members
-  // across T1's four pairs, so it is not a fixed number there and should never
-  // be presented as one.
+  // V8.48: seats remaining in the pair that is taking new entries.
+  //
+  // This replaced a paragraph about entry thresholds — "T1.2 is already built and starts
+  // receiving at N entries". Every version of that sentence has been wrong at least once:
+  // it read as capacity ("why 888 when a pair holds 254?"), and while the live mitigation
+  // was in place it told members a standby pair opens at 1,000,000 entries — accurate,
+  // read as "never", and stated as though it were a design parameter rather than a
+  // temporary routing state. The threshold is deleted outright now, so there is no number
+  // left to keep correct.
+  //
+  // What a member wants to know is whether they can get in. Seats answer that, they are
+  // bounded at 254, and they come from the same occupancy figures the bars already draw —
+  // so the sentence and the bar cannot disagree.
   let tail = '';
-  const activeReg = (registered && registered[activeIdx] !== undefined) ? Number(registered[activeIdx]) : null;
-  const dep = (deployThreshold !== null && deployThreshold !== undefined && Number(deployThreshold) > 0)
-    ? Number(deployThreshold) : null;
-  // AUDIT 2026-08-09: routeEntryThreshold is deliberately set far above any reachable
-  // entry count on T1/T2/T3 (1,000,000) as the live mitigation for the
-  // _findExternalPair cumulative-counter bug. Printing it raw told members
-  // "T1.2 starts receiving at 1,000,000 entries" — accurate, and read by a member as
-  // "never", stated as though it were a design parameter rather than a temporary
-  // routing state. V8.48's round-robin removes the concept of a saturation threshold
-  // altogether, so there will be no number to print at all. Above this bound, describe
-  // what is actually happening instead. Real configs are 375/400; nothing legitimate
-  // comes near 100,000.
-  const THR_UNBOUNDED = 100000;
-  const thrOff = thr >= THR_UNBOUNDED;
-  if (activeReg !== null && thr > 0) {
-    tail = ' ' + TU + '.' + routing + ' is taking new entries (now ' + activeReg.toLocaleString() + ').';
-    if (thrOff) {
-      // No usable number — say where entries are going and leave it there.
-      tail += standby
-        ? ' ' + TU + '.' + standby + ' is built and on standby; new entries are all going to ' + TU + '.' + routing + ' for now.'
-        : ' New entries stay in ' + TU + '.' + routing + ' for now.';
-    } else if (standby) {
-      tail += ' ' + TU + '.' + standby + ' is already built and starts receiving at <b style="color:#fcd34d">' +
-              thr.toLocaleString() + ' entries</b>.';
-    } else if (dep) {
-      // Two thresholds, two events. The pair is BUILT first and only RECEIVES
-      // later — the gap is deliberate headroom so the new pair is wired and
-      // ready before anyone is sent to it.
-      tail += ' The next pair is built at <b style="color:#fcd34d">' + dep.toLocaleString() +
-              ' entries</b> and starts receiving at <b style="color:#fcd34d">' + thr.toLocaleString() + '</b>.';
-    } else {
-      tail += ' The next pair opens automatically at <b style="color:#fcd34d">' + thr.toLocaleString() + ' entries</b>.';
-    }
-    tail += ' No action needed.';
+  const _a0 = (occA && occA[activeIdx] !== undefined) ? Number(occA[activeIdx]) : null;
+  const _b0 = (occB && occB[activeIdx] !== undefined) ? Number(occB[activeIdx]) : null;
+  if (_a0 !== null && _b0 !== null) {
+    const taken = _a0 + _b0;
+    const open  = Math.max(0, 254 - taken);
+    tail = ' ' + TU + '.' + routing + ' is taking new entries &#8212; <b style="color:#fcd34d">' +
+           taken.toLocaleString() + ' of 254</b> seats taken, <b style="color:#fcd34d">' +
+           open.toLocaleString() + '</b> still open. No action needed.';
   }
 
   note.innerHTML =
@@ -3751,23 +3726,9 @@ async function loadTiersStats() {
     );
     const statuses = await Promise.all(statusCalls);
 
-    // 2026-07-28: routeEntryThreshold per tier, for the standby-buffer strip.
-    // It is LIVE-MANAGED by the round-robin keeper on T1, so it must be read
-    // every load — never cached, never assumed to be 381.
-    const thresholds = await Promise.all(TK.map(t =>
-      new ethers.Contract(ADDRS[t].pm, PM_ABI, rp)
-        .routeEntryThreshold()
-        .catch(() => null)   // null = unknown; the strip omits the count rather than inventing one
-    ));
-    // deployEntryThreshold too: the next pair is BUILT at this count and only
-    // starts RECEIVING at routeEntryThreshold. Collapsing the two into one
-    // number (as the strip first did) misdescribes the mechanism — the gap
-    // between them is deliberate headroom, widened to 375/400 on 2026-07-28.
-    const deployThresholds = await Promise.all(TK.map(t =>
-      new ethers.Contract(ADDRS[t].pm, PM_ABI, rp)
-        .deployEntryThreshold()
-        .catch(() => null)
-    ));
+    // V8.48 item 30: the two per-tier threshold reads that used to live here are gone
+    // with the knobs themselves. That also removes 20 RPC calls per page load on a public
+    // endpoint we are already rate-limited on.
 
     // Phase 2: secondary detail calls for the active pair's rotationCount + poolAccumulator
     // (staggered after phase 1 to reduce simultaneous call count)
@@ -3821,8 +3782,8 @@ async function loadTiersStats() {
           // 2026-07-28: pair number in the card title + standby strip, for EVERY
           // tier. Both existed for T1 only, so T2-T10 showed "T2 Matrix A" while
           // sitting on pair 2, with no hint that a standby pair even existed.
-          renderTierPairHeader(t, i + 1, activeIdx, matrixAs.length, registered, thresholds[i],
-                               occupancyA, occupancyB, deployThresholds[i]);
+          renderTierPairHeader(t, i + 1, activeIdx, matrixAs.length, registered,
+                               occupancyA, occupancyB);
         }
       }
 
