@@ -5357,7 +5357,25 @@ async function loadDashboardData() {
         // the rest of the dashboard. Failures are logged, never swallowed.
         window._parkedAll = parkedCandidates;
         renderParkedList(userAddr, rp, parkedCandidates, activePositions)
-          .catch(e => console.warn('[parked-list]', e.message));
+          .catch(e => {
+            // AUDIT 2026-08-09 (CryptoJan22 ticket): the comment above claimed
+            // "failures are logged, never swallowed" — but a console.warn IS
+            // swallowed from the member's side. The per-position buttons just
+            // never appeared and nothing said why. He had two parked positions,
+            // cleared T1, and reported the T2 button "not showing"; an allowance
+            // read almost certainly threw on a degraded RPC (same window as
+            // @ronnienic197's approval-timeout ticket). Say it on screen.
+            console.warn('[parked-list]', e.message);
+            const _w = document.getElementById('parked-list');
+            if (_w && parkedCandidates.length > 1) {
+              _w.innerHTML =
+                '<div style="font-size:12px;color:var(--yellow);padding:8px 0">' +
+                '⚠️ Could not load your other parked position' +
+                (parkedCandidates.length > 2 ? 's' : '') +
+                ' just now — the network read failed. They are safe and still parked. ' +
+                'Refresh to try again.</div>';
+            }
+          });
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
         // V8.31: show crossing reserve row if non-zero (reduces shortfall)
