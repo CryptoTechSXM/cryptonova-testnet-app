@@ -3192,6 +3192,23 @@ async function loadHomeStats() {
     return { matA1, matB1, matA2, matB2, matA3, matB3, cnova, sf, tr, usdc };
   }
 
+  // Paint one side of a tier pair. null = read failed = leave the card untouched.
+  // `extra` is rotationCount for an A side (plain number) or poolAccumulator for a
+  // B side (6-dec USDC) — selected by extraIsPool.
+  function _paintMatrixSide(prefix, occ, extra, extraIsPool) {
+    if (occ !== null && occ !== undefined) {
+      const n = Number(occ), pct = Math.round(n / 127 * 100);
+      setText(prefix + '-occ', n.toString());
+      setText(prefix + '-pct', pct + '%');
+      const bar = document.getElementById(prefix + '-bar');
+      if (bar) bar.style.width = pct + '%';
+    }
+    if (extra !== null && extra !== undefined) {
+      if (extraIsPool) setText(prefix + '-pool', fmt6(extra));
+      else             setText(prefix + '-cycles', extra.toString());
+    }
+  }
+
   try {
     let { matA1, matB1, matA2, matB2, matA3, matB3, cnova, sf, tr, usdc } = await _fetchStats(rp);
 
@@ -3202,65 +3219,61 @@ async function loadHomeStats() {
       occA3, cyclesA3, occB3, poolB3,
       cwPoolBal, allTimeMinted, allTimeBurned, buybackBal, lqBal
     ] = await Promise.all([
-      rpc(matA1.occupancy()).catch(()=>0n),
-      rpc(matA1.rotationCount()).catch(()=>0n),
-      rpc(matB1.occupancy()).catch(()=>0n),
-      rpc(matB1.poolAccumulator()).catch(()=>0n),
-      // AUDIT 2026-08-07: the headline figures below used .catch(()=>0n) with no
-      // hold-last-good, so one slow node (rpc() rejects after 8s) painted
-      // "Stability Rescue Fund $0.00", "Total Registered 0", "Community Wallet
-      // $0.00". These five now propagate null and are skipped at the paint site.
+      // AUDIT 2026-08-07 fixed FIVE of these to null (joined / cycles / SF / treasury /
+      // CW) but left the rest on .catch(()=>0n), painting unconditionally.
+      // AUDIT 2026-08-09 finishes the sweep. On this page a zero is never distinguishable
+      // from a failed read: "CNOVA Minted 0" sits under a comment saying the figure never
+      // decreases; a rate-limited occupancy call renders a LIVE tier as "0/127 - 0%" with
+      // an empty bar; buyback and liquidity reserves report "$0.00". Every read below now
+      // returns null on failure and every paint site is guarded, so an unknown value keeps
+      // whatever the card already shows instead of asserting a number that is false.
+      rpc(matA1.occupancy()).catch(()=>null),
+      rpc(matA1.rotationCount()).catch(()=>null),
+      rpc(matB1.occupancy()).catch(()=>null),
+      rpc(matB1.poolAccumulator()).catch(()=>null),
       rpc(tr.globalJoinedCount()).catch(()=>null),
-      rpc(matA2.occupancy()).catch(()=>0n),
-      rpc(matA2.rotationCount()).catch(()=>0n),
-      rpc(matB2.occupancy()).catch(()=>0n),
-      rpc(matB2.poolAccumulator()).catch(()=>0n),
+      rpc(matA2.occupancy()).catch(()=>null),
+      rpc(matA2.rotationCount()).catch(()=>null),
+      rpc(matB2.occupancy()).catch(()=>null),
+      rpc(matB2.poolAccumulator()).catch(()=>null),
       rpc(tr.totalSystemCycles()).catch(()=>null),
-      rpc(cnova.totalSupply()).catch(()=>0n),
-      rpc(cnova.currentEpochNumber()).catch(()=>1n),
+      rpc(cnova.totalSupply()).catch(()=>null),
+      rpc(cnova.currentEpochNumber()).catch(()=>null),
       rpc(sf.totalBalance()).catch(()=>null),
       rpc(usdc.balanceOf(ADDRS.treasury)).catch(()=>null),
-      rpc(matA3.occupancy()).catch(()=>0n),
-      rpc(matA3.rotationCount()).catch(()=>0n),
-      rpc(matB3.occupancy()).catch(()=>0n),
-      rpc(matB3.poolAccumulator()).catch(()=>0n),
+      rpc(matA3.occupancy()).catch(()=>null),
+      rpc(matA3.rotationCount()).catch(()=>null),
+      rpc(matB3.occupancy()).catch(()=>null),
+      rpc(matB3.poolAccumulator()).catch(()=>null),
       rpc(usdc.balanceOf(ADDRS.communityWallet || ethers.ZeroAddress)).catch(()=>null),
-      rpc(cnova.totalMinted()).catch(()=>0n),
-      rpc(cnova.totalBurned()).catch(()=>0n),
-      rpc(usdc.balanceOf(ADDRS.buybackReserve || ethers.ZeroAddress)).catch(()=>0n),
-      rpc(usdc.balanceOf(ADDRS.liquidityReserve || ethers.ZeroAddress)).catch(()=>0n),
+      rpc(cnova.totalMinted()).catch(()=>null),
+      rpc(cnova.totalBurned()).catch(()=>null),
+      rpc(usdc.balanceOf(ADDRS.buybackReserve || ethers.ZeroAddress)).catch(()=>null),
+      rpc(usdc.balanceOf(ADDRS.liquidityReserve || ethers.ZeroAddress)).catch(()=>null),
     ]);
 
     // Stat cards
     // null = the read failed; leave whatever the card already shows rather than
     // asserting a zero that is indistinguishable from real data.
     if (totalJoined !== null) setText('stat-members',  totalJoined.toString());
-    setText('stat-minted',   Number(ethers.formatEther(allTimeMinted)).toLocaleString(undefined,{maximumFractionDigits:0})); // all-time, never decreases
-    setText('stat-burned',   Number(ethers.formatEther(allTimeBurned)).toLocaleString(undefined,{maximumFractionDigits:0})); // V8.9 totalBurned()
+    if (allTimeMinted !== null) setText('stat-minted',   Number(ethers.formatEther(allTimeMinted)).toLocaleString(undefined,{maximumFractionDigits:0})); // all-time, never decreases
+    if (allTimeBurned !== null) setText('stat-burned',   Number(ethers.formatEther(allTimeBurned)).toLocaleString(undefined,{maximumFractionDigits:0})); // V8.9 totalBurned()
     if (sfBal !== null)      setText('stat-reserve',  fmt6(sfBal));
     if (cwPoolBal !== null)  setText('stat-cw-balance', fmt6(cwPoolBal));
-    setText('stat-buyback',  fmt6(buybackBal));
-    setText('stat-lq-reserve', fmt6(lqBal));
+    if (buybackBal !== null) setText('stat-buyback',  fmt6(buybackBal));
+    if (lqBal !== null)      setText('stat-lq-reserve', fmt6(lqBal));
     if (sysCycles !== null)  setText('stat-cycles',   sysCycles.toString());
 
     // T1A progress — prefer the occupancy from allPairsStatus (window._t1PairInfo),
     // which came in one reliable call; the separate occupancy() read can be
     // rate-limited into a silent 0 by the public RPC.
     const _pio = window._t1PairInfo;
-    const occAn = (_pio && _pio.occA >= 0) ? _pio.occA : Number(occA), pctA = Math.round(occAn/127*100);
-    setText('t1a-occ', occAn.toString());
-    setText('t1a-cycles', cyclesA.toString());
-    setText('t1a-pct', pctA+'%');
-    const barA = document.getElementById('t1a-bar');
-    if (barA) barA.style.width = pctA+'%';
+    const _occA1 = (_pio && _pio.occA >= 0) ? _pio.occA : occA;
+    _paintMatrixSide('t1a', _occA1, cyclesA, false);
 
     // T1B progress — same allPairsStatus preference as T1A
-    const occBn = (_pio && _pio.occB >= 0) ? _pio.occB : Number(occB), pctB = Math.round(occBn/127*100);
-    setText('t1b-occ', occBn.toString());
-    setText('t1b-pool', fmt6(poolB));
-    setText('t1b-pct', pctB+'%');
-    const barB = document.getElementById('t1b-bar');
-    if (barB) barB.style.width = pctB+'%';
+    const _occB1 = (_pio && _pio.occB >= 0) ? _pio.occB : occB;
+    _paintMatrixSide('t1b', _occB1, poolB, true);
 
     // Pair label + standby strip on the T1 cards.
     // 2026-07-28: this used to be a SECOND copy of the rendering logic, with its
@@ -3274,44 +3287,30 @@ async function loadHomeStats() {
     }
 
     // T2A progress
-    const occA2n = Number(occA2), pctA2 = Math.round(occA2n/127*100);
-    setText('t2a-occ', occA2n.toString());
-    setText('t2a-cycles', cyclesA2.toString());
-    setText('t2a-pct', pctA2+'%');
-    const barA2 = document.getElementById('t2a-bar');
-    if (barA2) barA2.style.width = pctA2+'%';
+    _paintMatrixSide('t2a', occA2, cyclesA2, false);
 
     // T2B progress
-    const occB2n = Number(occB2), pctB2 = Math.round(occB2n/127*100);
-    setText('t2b-occ', occB2n.toString());
-    setText('t2b-pool', fmt6(poolB2));
-    setText('t2b-pct', pctB2+'%');
-    const barB2 = document.getElementById('t2b-bar');
-    if (barB2) barB2.style.width = pctB2+'%';
+    _paintMatrixSide('t2b', occB2, poolB2, true);
 
     // T3A progress
-    const occA3n = Number(occA3), pctA3 = Math.round(occA3n/127*100);
-    setText('t3a-occ', occA3n.toString());
-    setText('t3a-cycles', cyclesA3.toString());
-    setText('t3a-pct', pctA3+'%');
-    const barA3 = document.getElementById('t3a-bar');
-    if (barA3) barA3.style.width = pctA3+'%';
+    _paintMatrixSide('t3a', occA3, cyclesA3, false);
 
     // T3B progress
-    const occB3n = Number(occB3), pctB3 = Math.round(occB3n/127*100);
-    setText('t3b-occ', occB3n.toString());
-    setText('t3b-pool', fmt6(poolB3));
-    setText('t3b-pct', pctB3+'%');
-    const barB3 = document.getElementById('t3b-bar');
-    if (barB3) barB3.style.width = pctB3+'%';
+    _paintMatrixSide('t3b', occB3, poolB3, true);
 
     // Epoch
     const EPOCH_NAMES = ['Nebula Genesis','Mercury Rise','Lunar Cluster','Aurora Zenith','Solaris Echo','Cosmic Core','Galaxy Grid','Supernova Spark','Final Frontier'];
-    const epochNum = Math.max(1, Number(epoch));
-    const epochLabel = `Epoch ${epochNum} — ${EPOCH_NAMES[epochNum-1] || 'Era '+epochNum}`;
-    setText('stat-epoch', epochLabel);
-    setText('cw-epoch', epochLabel);
-    setText('stat-supply', Number(ethers.formatEther(supply)).toLocaleString(undefined,{maximumFractionDigits:0})+' CNOVA'); // current circulating (decreases on redeem/burn)
+    // AUDIT 2026-08-09: epoch fell back to 1n on a failed read, so a dropped call
+    // asserted "Epoch 1 — Nebula Genesis" even though the first halving has already
+    // moved the protocol to Epoch 2 — Mercury Rise. Wrong era, stated as fact, on the
+    // community page. null = unknown = leave the existing label alone.
+    if (epoch !== null) {
+      const epochNum = Math.max(1, Number(epoch));
+      const epochLabel = `Epoch ${epochNum} — ${EPOCH_NAMES[epochNum-1] || 'Era '+epochNum}`;
+      setText('stat-epoch', epochLabel);
+      setText('cw-epoch', epochLabel);
+    }
+    if (supply !== null) setText('stat-supply', Number(ethers.formatEther(supply)).toLocaleString(undefined,{maximumFractionDigits:0})+' CNOVA'); // current circulating (decreases on redeem/burn)
     if (treasUsdc !== null)  setText('stat-treasury-usdc', fmt6(treasUsdc));
 
     // CNOVA floor price: treasury USDC ÷ total CNOVA supply.
@@ -3368,6 +3367,13 @@ async function loadHomeStats() {
       setText('stat-reward', rewardFormatted + ' CNOVA');
     } catch(_) { setText('stat-reward', '\u2014'); }  // never invent a number on a failed read
 
+    // AUDIT 2026-08-09: a read failure now resolves to null instead of throwing, so the
+    // outer catch — which retires spinners to "—" — no longer runs on a PARTIAL failure.
+    // "Hold what the card shows" is right only when the card has ever shown something:
+    // a card still displaying its initial spinner has no last-good value to keep, so it
+    // must fall to "—" rather than spin forever.
+    STAT_IDS.forEach(id => { const el = document.getElementById(id); if (el && el.querySelector('.spinner')) setText(id, '\u2014'); });
+
   } catch(e) {
     console.error('loadHomeStats:', e.message);
     // Clear any spinners still showing so the page doesn't stay frozen
@@ -3378,17 +3384,19 @@ async function loadHomeStats() {
         const fb = new ethers.JsonRpcProvider(RPC_FALLBACK, _net, { staticNetwork: _net });
         const { matA1:fA1, matB1:fB1, cnova:fC, sf:fSF, tr:fTR, usdc:fU } = await _fetchStats(fb);
         const [s, ep, sf2, tr2] = await Promise.all([
-          rpc(fC.totalSupply()).catch(()=>0n),
-          rpc(fC.currentEpochNumber()).catch(()=>1n),
-          rpc(fSF.totalBalance()).catch(()=>0n),
-          rpc(fTR.totalSystemCycles()).catch(()=>0n),
+          rpc(fC.totalSupply()).catch(()=>null),
+          rpc(fC.currentEpochNumber()).catch(()=>null),
+          rpc(fSF.totalBalance()).catch(()=>null),
+          rpc(fTR.totalSystemCycles()).catch(()=>null),
         ]);
         const EPOCH_NAMES_FB = ['Nebula Genesis','Mercury Rise','Lunar Cluster','Aurora Zenith','Solaris Echo','Cosmic Core','Galaxy Grid','Supernova Spark','Final Frontier'];
-        const epN = Math.max(1, Number(ep));
-        setText('stat-supply', Number(ethers.formatEther(s)).toLocaleString(undefined,{maximumFractionDigits:0})+' CNOVA');
-        setText('stat-epoch', `Epoch ${epN} — ${EPOCH_NAMES_FB[epN-1] || 'Era '+epN}`);
-        setText('stat-reserve', fmt6(sf2));
-        setText('stat-cycles', tr2.toString());
+        // AUDIT 2026-08-09: the fallback RPC is the LAST line of defence, so inventing
+        // zeros here is the most damaging place to do it — it overwrites the dashes the
+        // primary path correctly left behind with confident wrong numbers.
+        if (s   !== null) setText('stat-supply', Number(ethers.formatEther(s)).toLocaleString(undefined,{maximumFractionDigits:0})+' CNOVA');
+        if (ep  !== null) { const epN = Math.max(1, Number(ep)); setText('stat-epoch', `Epoch ${epN} — ${EPOCH_NAMES_FB[epN-1] || 'Era '+epN}`); }
+        if (sf2 !== null) setText('stat-reserve', fmt6(sf2));
+        if (tr2 !== null) setText('stat-cycles', tr2.toString());
         console.log('loadHomeStats: fallback RPC succeeded');
       } catch(_) { /* fallback also failed — dashes already shown */ }
     }
