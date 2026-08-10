@@ -1598,6 +1598,7 @@
               <div class="stat-label">Total Claimable</div>
               <div class="stat-value green" id="cw-claimable">—</div>
               <div class="stat-sub">USDC from open epochs</div>
+              <div class="stat-sub" id="cw-claim-deadline" style="display:none;margin-top:4px;font-weight:700"></div>
             </div>
           </div>
           <div class="info-row"><span class="info-key">Pending Pool</span><span class="info-val" id="cw-pending">—</span></div>
@@ -3018,9 +3019,28 @@ async function loadCWData(userAddr, signer, rp) {
     setText('cw-tranche-a', Math.min(enrolled, 500) + ' / 500');
     setText('cw-tranche-b', Math.max(0, enrolled - 500) + ' / 500');
 
-    // Next distribution countdown
+    // Next distribution countdown — WHICH IS ALSO THE CLAIM DEADLINE.
+    //
+    // V8.48 item 28. CommunityWallet sets expiresAt = now + distributeInterval, and
+    // distribute() cannot run until that same interval has elapsed — so a distribution
+    // expires at the EXACT MOMENT the next one is created, and distribute() sweeps BEFORE
+    // creating it. There is no grace period at all.
+    //
+    // This countdown was already on screen and already correct, but framed purely as good
+    // news arriving. A member reads "~25 days until next distribution" as money coming,
+    // not as "claim within 25 days or this share goes to everyone else". Same number, and
+    // the wrong half of its meaning. Unclaimed value is REDISTRIBUTED to the other members
+    // (_sweepExpired only reduces totalActivePending; the USDC stays and enlarges the next
+    // distribution) — it is not taken by the protocol, but it does stop being yours.
+    //
+    // Owner decision 2026-08-10: keep the 30-day window, surface it loudly. So the deadline
+    // is stated only when the member actually HAS something to lose, and escalates as it
+    // closes. Exposure at the 2026-09-04 distribution is ~$1,865.
     const lastDistN   = Number(lastDist);
     const intervalN   = Number(interval);
+    const deadlineEl  = document.getElementById('cw-claim-deadline');
+    if (deadlineEl) deadlineEl.style.display = 'none';
+
     if (lastDistN === 0) {
       setText('cw-epoch', 'Pending first distribution');
     } else {
@@ -3031,7 +3051,19 @@ async function loadCWData(userAddr, signer, rp) {
       } else {
         const days  = Math.ceil((nextMs - nowMs) / 86400000);
         const hours = Math.ceil((nextMs - nowMs) / 3600000);
-        setText('cw-epoch', days >= 2 ? `~${days} days until next distribution` : `~${hours} hour${hours !== 1 ? 's' : ''} until next distribution`);
+        const left  = days >= 2 ? `~${days} days` : `~${hours} hour${hours !== 1 ? 's' : ''}`;
+        setText('cw-epoch', `${left} until next distribution — and the claim deadline for what you hold now`);
+
+        // Only warn a member who has something at stake. Telling someone with $0.00 that
+        // they are about to lose it is noise, and noise is how real warnings get ignored.
+        if (deadlineEl && typeof claimUsd === 'number' && claimUsd > 0) {
+          const urgent = days <= 7;
+          deadlineEl.style.display = 'block';
+          deadlineEl.style.color   = urgent ? '#f87171' : '#fcd34d';
+          deadlineEl.textContent   = urgent
+            ? `⚠ Claim within ${left} or this returns to the pool`
+            : `Claim within ${left} — unclaimed shares return to the pool`;
+        }
       }
     }
 
