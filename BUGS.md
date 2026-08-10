@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-10] Dashboard (index.html) — Tried withdrawing and it failed,  $50
+- **Reporter:** Deborah
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x0ddb6a96fa15f98e823cd6632f9b14373cd1c74b
+- **Frequency:** Intermittent
+- **What happened:** Tried withdrawing and it failed,  $50
+- **What was expected:** Should go to my wallet
+- **Submitted:** Mon, 10 Aug 2026 23:28:21 GMT
+
+
 ### [2026-08-10] Dashboard (index.html) — this account has 5 directs.
 i stsrted with only auto rentry …
 - **Reporter:** CryptoJan22
