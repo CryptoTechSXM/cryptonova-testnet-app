@@ -3154,8 +3154,29 @@ async function loadHomeStats() {
       const _matAs = _status[0], _matBs = _status[1], _occAs = _status[2],
             _occBs = _status[3], _regs = _status[4], _actives = _status[5];
       const _n = _matAs.length;
-      let _routing = _actives.findIndex(a => a);
-      if (_routing < 0) _routing = _n - 1;
+      // ONE DOOR. The routing pair is pair 0, always — not allPairsStatus()'s active[].
+      //
+      // active[] is computed from the contract's _findRoutingPair(): "the oldest pair
+      // whose MatA still has a free seat, else the newest". New members do NOT go there.
+      // They go through _findExternalPair(), which is pair 0. The two answers agree only
+      // while pair 0's MatA has room — and a FULL pair 0 is the designed steady state,
+      // because concentrating the front door is what holds it at MATRIX_SIZE and keeps it
+      // rotating. So active[] goes wrong precisely when the design is working.
+      //
+      // MEASURED LIVE 2026-08-09/10. T1 entry counts moved [3483, 595, 8] -> [3576, 625, 8]:
+      // T1.1 +93 (new members), T1.2 +30 (members CYCLING, which is how later pairs fill),
+      // T1.3 +0. Both T1.1 and T1.2 have full MatAs, so active[] pointed at T1.3 — the one
+      // pair that had taken nobody — and the card announced "T1.3 is taking new entries,
+      // 246 seats open". It also picked T1.3's empty matrices to draw the home card's seat
+      // bars from, which is the "T1.2 reads 0/127 while the community fills T1.1" bug
+      // recorded below, from the other direction.
+      //
+      // V8.48 item 35 fixes this at source (_findRoutingPair deleted; all three views read
+      // _findExternalPair). Pinning to 0 here is correct against BOTH the current V8.47
+      // contracts under the live threshold mitigation and V8.48, so this does not need
+      // revisiting at cutover. It is not a second copy of contract logic — it is the ONE
+      // DOOR design law, which is now the only routing rule there is.
+      let _routing = 0;
       activeMatA1addr = _matAs[_routing];
       activeMatB1addr = _matBs[_routing];
       window._t1PairInfo = {
@@ -3741,7 +3762,7 @@ async function loadTiersStats() {
         // NOTE: allPairsStatus's active[] flags the ROUTING pair (V8.40 contract-side),
         // so findIndex here is already correct — do not recompute with hardcoded thresholds.
         const [matrixAs,,,,, actives] = status;
-        const activeIdx = actives.findIndex(a => a);
+        const activeIdx = 0;   // ONE DOOR — see the note in _fetchStats
         const matrixBs = status[1];
         const activeMatA = activeIdx >= 0 ? matrixAs[activeIdx] : ADDRS[TK[i]].matA;
         const activeMatB = activeIdx >= 0 ? matrixBs[activeIdx] : ADDRS[TK[i]].matB;
@@ -3763,7 +3784,7 @@ async function loadTiersStats() {
       if (status) {
         const [matrixAs, matrixBs, occupancyA, occupancyB, registered, actives] = status;
         tierHasMembers[i] = occupancyA.some(v => Number(v) > 0) || occupancyB.some(v => Number(v) > 0);
-        const activeIdx = actives.findIndex(a => a); // routing pair (V8.40 contract-side)
+        const activeIdx = 0;   // ONE DOOR — see the note in _fetchStats
         if (activeIdx >= 0) {
           const occAn = Number(occupancyA[activeIdx]);
           const occBn = Number(occupancyB[activeIdx]);
