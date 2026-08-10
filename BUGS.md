@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-10] Dashboard (index.html) — this account has 5 directs.
+i stsrted with only auto rentry …
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** this account has 5 directs.
+i stsrted with only auto rentry after a while added double reentry and today added auto upgrade but this account shows that it cycled only 2 times.
+- **What was expected:** i figured there would have been more cycles.
+- **Submitted:** Mon, 10 Aug 2026 00:20:19 GMT
+
+
 ### [2026-08-08] Dashboard (index.html) — i got 2 self rescue alerts at the same time.
 t 1 cleared nor…
 - **Reporter:** CryptoJan22
