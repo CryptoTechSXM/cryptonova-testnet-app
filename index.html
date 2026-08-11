@@ -1467,6 +1467,20 @@
             <button class="btn btn-ghost" style="flex:1" id="btn-withdraw" onclick="doWithdraw()" disabled>Withdraw All</button>
           </div>
           <div id="withdraw-status" style="margin-top:12px;font-size:13px;color:var(--text2)"></div>
+          <!-- V8.48: withdrawal history, per matrix. A withdrawal walks SEVERAL matrices
+               and each can succeed or fail on its own, so "it failed" is rarely the whole
+               story. This is what the member reads back to an admin, and it is kept in
+               this browser only — no server, no account needed. -->
+          <div id="withdraw-history-wrap" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;font-weight:700;color:var(--text2)">Recent withdrawals</span>
+              <span style="display:flex;gap:10px">
+                <a href="#" onclick="event.preventDefault();copyWithdrawHistory()" style="font-size:11px;color:var(--text3);text-decoration:underline">copy for support</a>
+                <a href="#" onclick="event.preventDefault();clearWithdrawHistory()" style="font-size:11px;color:var(--text3);text-decoration:underline">clear</a>
+              </span>
+            </div>
+            <div id="withdraw-history" style="margin-top:6px;display:flex;flex-direction:column;gap:6px"></div>
+          </div>
 
           <!-- Redeem CNOVA for USDC at floor price -->
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
@@ -5643,6 +5657,10 @@ async function loadDashboardData() {
       // localStorage) directly, so a lagging pool read repainted stale state right
       // after a member's toggle tx and forced a second (paid) click.
       _paintMemberToggles(info);
+      // The history lives in localStorage, so it must be painted on load — not only
+      // after a withdrawal. A member opening the page to check what happened yesterday
+      // is exactly who it is for.
+      renderWithdrawHistory();
     } catch(_) {}
 
     // ── Protocol Reserve — lock automation fees so members aren't surprised ──
@@ -6855,6 +6873,99 @@ function getWithdrawRecipient() {
   return null; // null = use connected wallet (regular withdraw function)
 }
 
+// ── V8.48: withdrawal history (member-visible, admin-readable) ───────────────
+//
+// WHY. A withdrawal is not one action. doWithdrawPartial walks EVERY matrix holding a
+// balance and sends a separate transaction per matrix, so "I tried to withdraw $50 and
+// it failed" can mean three paid and two reverted. Deborah reported exactly that on
+// 2026-08-10 and nothing on screen could tell her — or an admin — which half happened.
+//
+// Kept in localStorage: this is the member's own record on their own device. No server,
+// no account, and it survives the refresh that follows every withdrawal. Capped at 20
+// so it cannot grow without bound.
+const _WD_HIST_KEY = 'cn_withdraw_history_v1';
+
+function _loadWithdrawHistory() {
+  try { return JSON.parse(localStorage.getItem(_WD_HIST_KEY) || '[]'); } catch (_) { return []; }
+}
+
+function _recordWithdrawAttempt(rec) {
+  try {
+    const hist = _loadWithdrawHistory();
+    hist.unshift({
+      t: new Date().toISOString(),
+      mode: rec.mode || 'partial',
+      requested: rec.requested != null ? rec.requested.toString() : null,
+      received:  rec.received  != null ? rec.received.toString()  : null,
+      payee: rec.payee || null,
+      draws: (rec.draws || []).map(d => ({
+        label: d.label, amt: d.amt != null ? d.amt.toString() : null,
+        hash: d.hash || null, block: d.block || null, ok: !!d.ok, why: d.why || null,
+      })),
+    });
+    localStorage.setItem(_WD_HIST_KEY, JSON.stringify(hist.slice(0, 20)));
+  } catch (_) { /* a full or blocked localStorage must never break a withdrawal */ }
+  renderWithdrawHistory();
+}
+
+function renderWithdrawHistory() {
+  const wrap = document.getElementById('withdraw-history-wrap');
+  const box  = document.getElementById('withdraw-history');
+  if (!wrap || !box) return;
+  const hist = _loadWithdrawHistory();
+  if (hist.length === 0) { wrap.style.display = 'none'; return; }
+
+  box.innerHTML = hist.map(h => {
+    const req = h.requested ? fmt6(BigInt(h.requested)) : '—';
+    const got = h.received  ? fmt6(BigInt(h.received))  : '—';
+    const okN = (h.draws || []).filter(d => d.ok).length;
+    const bad = (h.draws || []).filter(d => !d.ok);
+    // The headline is what ARRIVED, not what was asked for. Those differ whenever a
+    // matrix reverts or debt is repaid off the top, and the arriving figure is the one
+    // the member can check against their wallet.
+    const colour = bad.length === 0 ? 'var(--green)' : (okN > 0 ? 'var(--yellow)' : 'var(--red)');
+    const head = bad.length === 0
+      ? `received ${got}`
+      : (okN > 0 ? `received ${got} of ${req} — ${bad.length} matrix failed` : `nothing received (requested ${req})`);
+    const rows = (h.draws || []).map(d =>
+      `<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text3)">
+         <span>${d.ok ? '✓' : '✗'} ${d.label}</span>
+         <span>${d.amt ? fmt6(BigInt(d.amt)) : ''}${d.hash ? ` · <a href="https://sepolia.basescan.org/tx/${d.hash}" target="_blank" rel="noopener" style="color:var(--text3)">tx</a>` : ''}${d.why ? ` · ${d.why}` : ''}</span>
+       </div>`).join('');
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--bg3)">
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text2)">${new Date(h.t).toLocaleString()}</span>
+                <span style="font-weight:700;color:${colour}">${head}</span>
+              </div>
+              ${rows ? `<div style="margin-top:4px;display:flex;flex-direction:column;gap:2px">${rows}</div>` : ''}
+            </div>`;
+  }).join('');
+  wrap.style.display = 'block';
+}
+
+// One click to hand an admin everything they need. Same fields member_ledger.js keys
+// off, so a ticket can be triaged without a screenshot.
+function copyWithdrawHistory() {
+  const hist = _loadWithdrawHistory();
+  const text = `CryptoNova withdrawal history\nwallet: ${userAddr || '(not connected)'}\n\n` +
+    hist.map(h => {
+      const req = h.requested ? fmt6(BigInt(h.requested)) : '—';
+      const got = h.received  ? fmt6(BigInt(h.received))  : '—';
+      const ds = (h.draws || []).map(d =>
+        `    ${d.ok ? 'OK  ' : 'FAIL'} ${d.label} ${d.amt ? fmt6(BigInt(d.amt)) : ''}${d.hash ? ` tx ${d.hash}` : ''}${d.why ? ` — ${d.why}` : ''}`).join('\n');
+      return `${h.t}  [${h.mode}] requested ${req}, received ${got}\n${ds}`;
+    }).join('\n\n');
+  navigator.clipboard.writeText(text)
+    .then(() => toast('Withdrawal history copied — paste it to support.', 'success'))
+    .catch(() => toast('Could not copy. Select the text manually.', 'error'));
+}
+
+function clearWithdrawHistory() {
+  try { localStorage.removeItem(_WD_HIST_KEY); } catch (_) {}
+  renderWithdrawHistory();
+  toast('Withdrawal history cleared from this browser.', 'info');
+}
+
 async function doWithdrawPartial() {
   if (!signer) return;
   const inp = document.getElementById('withdraw-amount-input');
@@ -6919,6 +7030,13 @@ async function doWithdrawPartial() {
     }
     let remaining = amtMicro;
     let withdrawn = false;
+    const _failures = [], _draws = [];
+    // GROUND TRUTH for the receipt. `remaining -= pullAmt` assumes each draw paid
+    // exactly what was asked; withdrawCore can pay less (debt is repaid off the top).
+    // Read the recipient's USDC balance either side and report what ARRIVED.
+    const _payee = getWithdrawRecipient() || userAddr;
+    const _usdcR = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+    const _balBefore = await _usdcR.balanceOf(_payee).catch(() => null);
     for (const _mo of _matObjs) {
       const addr = _mo.addr;
       if (remaining === 0n) break;
@@ -6964,16 +7082,58 @@ async function doWithdrawPartial() {
       if (avail === 0n) continue;
       const pullAmt = remaining < avail ? remaining : avail;
       const recipient = getWithdrawRecipient();
-      const tx = recipient
-        ? await mcW.withdrawPartialTo(recipient, pullAmt, { gasLimit: 200_000 })
-        : await mcW.withdrawPartial(pullAmt, { gasLimit: 200_000 });
-      await tx.wait();
-      remaining -= pullAmt;
-      withdrawn = true;
+      // ONE MATRIX MUST NOT SINK THE WHOLE WITHDRAWAL.
+      //
+      // This transaction had no try/catch, so a revert on the third matrix threw past
+      // the loop into the outer handler and the member saw a plain error — with the
+      // first two draws already paid and sitting in their wallet. Money moved, screen
+      // said it failed. Deborah reported exactly that on 2026-08-10 ("Tried withdrawing
+      // and it failed, $50", intermittent) on an account holding balances in 13
+      // matrices. Record the reason, keep going, report honestly at the end.
+      try {
+        // GAS WAS HARDCODED AT 200_000 with no estimate, while every comparable path in
+        // this file estimates and adds a margin. withdrawCore settles pending pool
+        // accrual BEFORE paying, so the gas needed grows with how much has piled up — a
+        // fixed ceiling fails only on the matrices that have been accruing, which is
+        // what makes it intermittent rather than simply broken.
+        let _gl = 400_000n;
+        try {
+          const _est = recipient
+            ? await mcW.withdrawPartialTo.estimateGas(recipient, pullAmt)
+            : await mcW.withdrawPartial.estimateGas(pullAmt);
+          _gl = _est + _est / 4n;               // same +25% margin as bulkWithdraw
+          if (_gl < 200_000n) _gl = 200_000n;   // never below the old floor
+        } catch (_) { /* estimate unavailable — fall back to the raised ceiling */ }
+        const tx = recipient
+          ? await mcW.withdrawPartialTo(recipient, pullAmt, { gasLimit: _gl })
+          : await mcW.withdrawPartial(pullAmt, { gasLimit: _gl });
+        const _rc = await tx.wait();
+        remaining -= pullAmt;
+        withdrawn = true;
+        _draws.push({ label: _mo.label || addr.slice(0, 10), amt: pullAmt, hash: tx.hash, block: _rc && _rc.blockNumber, ok: true });
+      } catch (e) {
+        const _why = (e && (e.reason || e.shortMessage || e.message)) || 'failed';
+        _failures.push(`${_mo.label || addr.slice(0, 10)}: ${String(_why).slice(0, 80)}`);
+        _draws.push({ label: _mo.label || addr.slice(0, 10), amt: pullAmt, why: String(_why).slice(0, 120), ok: false });
+        continue;
+      }
     }
-    const actualWithdrawn = amtMicro - remaining;
+    // Prefer the MEASURED delta over the arithmetic. Falls back if the read fails.
+    let actualWithdrawn = amtMicro - remaining;
+    if (_balBefore !== null) {
+      const _balAfter = await _usdcR.balanceOf(_payee).catch(() => null);
+      if (_balAfter !== null && _balAfter > _balBefore) actualWithdrawn = _balAfter - _balBefore;
+    }
     const leftOver = remaining > 0n ? ` ($${(Number(remaining)/1e6).toFixed(2)} of the $${val.toFixed(2)} requested could not be sourced right now — balances settle continuously; refresh and press MAX to pick up the remainder)` : '';
-    setStatus('withdraw-status', withdrawn ? `✅ Withdrew $${(Number(actualWithdrawn)/1e6).toFixed(2)}!${leftOver}` : 'Nothing withdrawn.', withdrawn ? 'ok' : 'info');
+    // A partial failure is reported as PARTIAL, and what already reached the wallet is
+    // stated FIRST — it is the member's money and it is already theirs.
+    const _failNote = _failures.length ? ` · ${_failures.length} matri${_failures.length > 1 ? 'ces' : 'x'} could not be drawn: ${_failures.join(' · ')}` : '';
+    setStatus('withdraw-status',
+      withdrawn
+        ? `✅ Withdrew $${(Number(actualWithdrawn)/1e6).toFixed(2)} — it is in your wallet.${leftOver}${_failNote}`
+        : (_failures.length ? `Nothing was withdrawn and nothing was charged.${_failNote}` : 'Nothing withdrawn.'),
+      withdrawn ? (_failures.length ? 'info' : 'ok') : 'err');
+    _recordWithdrawAttempt({ requested: amtMicro, received: actualWithdrawn, draws: _draws, payee: _payee, mode: 'partial' });
     if (inp) inp.value = '';
     onWithdrawAmountInput();
     if (withdrawn) await new Promise(r => setTimeout(r, 3500));
@@ -7036,9 +7196,26 @@ async function doWithdraw() {
       let gl = 6000000n;
       try { const est = await trR.bulkWithdraw.estimateGas({ from: userAddr }); gl = est + est / 4n; } catch(_) {}
       const trW = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      // Measure what ARRIVED rather than announcing success on a mined transaction:
+      // bulkWithdraw sweeps whatever is free, which is not necessarily what the card
+      // last showed.
+      const _usdcR2 = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+      const _before2 = await _usdcR2.balanceOf(userAddr).catch(() => null);
       const tx = await trW.bulkWithdraw({ gasLimit: gl });
-      await tx.wait();
-      setStatus('withdraw-status', '✅ Earnings withdrawn — every tier in a single transaction!', 'ok');
+      const _rc2 = await tx.wait();
+      let _got2 = null;
+      if (_before2 !== null) {
+        const _after2 = await _usdcR2.balanceOf(userAddr).catch(() => null);
+        if (_after2 !== null && _after2 > _before2) _got2 = _after2 - _before2;
+      }
+      setStatus('withdraw-status',
+        _got2 !== null
+          ? `✅ Withdrew ${fmt6(_got2)} — every tier in a single transaction.`
+          : '✅ Earnings withdrawn — every tier in a single transaction!', 'ok');
+      _recordWithdrawAttempt({
+        requested: _got2, received: _got2, payee: userAddr, mode: 'all',
+        draws: [{ label: 'all tiers (bulkWithdraw)', amt: _got2, hash: tx.hash, block: _rc2 && _rc2.blockNumber, ok: true }],
+      });
     }
     await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
     await loadDashboardData();
