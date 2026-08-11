@@ -2470,6 +2470,11 @@ function unknownBadge(tooltip) {
 // tx block, leaving "Refreshing your dashboard..." hanging until a manual
 // reload. Stagger three attempts; one failure never stops the next.
 function _staggeredDashRefresh() {
+  // V8.48 item 40: Clear-all drives doSelfRescue/doCopayRescue in sequence and each of
+  // those calls this on success. Three timers per position would repaint the parked
+  // list mid-run — rows shuffling under the member while their wallet is still asking
+  // them to sign. The sequencer sets this flag and refreshes ONCE at the end.
+  if (window._clearAllRunning) return;
   [2000, 8000, 20000].forEach(ms => setTimeout(() => {
     try { const p = loadDashboardData(); if (p && p.catch) p.catch(() => {}); } catch (_) {}
   }, ms));
@@ -8969,6 +8974,9 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
   const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
   const held = new Set((activePositions || []).map(p => _pairKeyOf(p.label)));
+  // clearAllParked() runs outside this function and needs the same blocked-pair set;
+  // recomputing it there would be a second copy of the rule.
+  window._parkedHeld = held;
 
   const rows = [];
   for (let i = 0; i < cands.length; i++) {
@@ -9014,13 +9022,40 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
     );
   }
 
-  const totalShort = cands.reduce((s, c) => s + c.shortfall, 0n);
+  // Totals over the positions that can actually be acted on. Counting a BLOCKED row
+  // into "clear all" would quote a price for something the button will skip.
+  const actionable  = cands.filter(c => !held.has(_pairKeyOf(c.label)));
+  const totalShort  = cands.reduce((s, c) => s + c.shortfall, 0n);
+  const actionShort = actionable.reduce((s, c) => s + c.shortfall, 0n);
+  const blocked     = cands.length - actionable.length;
+  const canSelfAll  = actionable.length > 0 && bal >= actionShort;
+
+  // V8.48 item 40 — one action for the whole set. The per-row buttons stay: a member
+  // who wants to clear one and leave the other must still be able to.
+  let bulk = '';
+  if (actionable.length > 1) {
+    const selfBtn = `<button class="btn" style="flex:1;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;font-size:12px;padding:8px;${canSelfAll ? '' : 'opacity:.5;cursor:not-allowed'}"
+        ${canSelfAll ? '' : 'disabled'} onclick="clearAllParked('self')">🔑 Clear all (${actionable.length}) — ${fmt6(actionShort)}</button>`;
+    const copayBtn = actionShort > 0n
+      ? `<button class="btn" style="flex:1;background:rgba(245,158,11,.12);border:1px solid #f59e0b;color:#f59e0b;font-size:12px;padding:8px" onclick="clearAllParked('copay')">🤝 Copay all — borrow ${fmt6(actionShort)}</button>`
+      : '';
+    bulk =
+      `<div style="display:flex;gap:8px;margin:6px 0 2px">${selfBtn}${copayBtn}</div>
+       <div style="font-size:11px;color:var(--text3);margin-bottom:6px">
+         ${canSelfAll
+            ? `Signs each position in turn — ${actionable.length} approvals and ${actionable.length} rescues. Your wallet will ask more than once.`
+            : `Wallet holds ${fmt6(bal)}, ${fmt6(actionShort)} needed to clear all ${actionable.length} yourself. Copay borrows the gap instead, repaid from future earnings.`}
+         Each step is checked on-chain before the next; if one fails the rest still run and you are told which.
+       </div>`;
+  }
+
   box.innerHTML =
     `<div style="font-size:12px;color:var(--text2);margin-bottom:2px">
        <strong>${cands.length} parked positions.</strong> Each is re-entered separately, and each
        shortfall is approved to that matrix on its own. Total to clear all of them:
        <strong style="color:var(--text2)">${fmt6(totalShort)}</strong> — your wallet holds ${fmt6(bal)}.
-     </div>` + rows.join('');
+       ${blocked > 0 ? `<br><span style="color:var(--yellow)">${blocked} blocked by the other half of its pair — not included in the clear-all total (${fmt6(actionShort)}).</span>` : ''}
+     </div>` + bulk + rows.join('');
   box.style.display = 'flex';
 
   // The single-position buttons above would act on whichever position the picker
@@ -9046,6 +9081,118 @@ function selectParked(i, action) {
   const st = document.getElementById('self-rescue-status');
   if (st) { st.style.color = 'var(--text2)'; st.textContent = `${p.label}: working…`; }
   if (action === 'approve') approveSelfRescue(); else if (action === 'copay') doCopayRescue(); else doSelfRescue();
+}
+
+// ── V8.48 item 40: clear every parked position in one go ─────────────────────
+//
+// A member parked in two matrices pays FOUR wallet transactions today (approve +
+// rescue, twice). This sequences them behind one button. It cannot become a single
+// transaction: selfRescue() takes no arguments and spends the allowance granted to
+// THAT matrix, so every position has a different spender, and a batch helper cannot
+// stand in because selfRescue derives the member from msg.sender — the helper would
+// rescue itself. selfRescueWithPermit is what halves it, and that needs a deploy;
+// this is the half that ships without one.
+//
+// IT VERIFIES EVERY STEP AGAINST THE CHAIN. doSelfRescue and doCopayRescue catch
+// their own errors to paint the status line, so they return undefined whether they
+// worked or not — a sequencer that trusted them would cheerfully report "cleared 2 of
+// 2" after two failures. That is the bigfill top-up defect exactly: it logged a
+// landed transfer while the balance had not moved (2026-08-10). Ground truth here is
+// getMember().isInMatrix, read AFTER each attempt.
+async function clearAllParked(mode) {
+  if (window._clearAllRunning) return;
+  if (!signer) { toast('Connect your wallet first.', 'error'); return; }
+  const all = (window._parkedAll || []).slice();   // snapshot: a repaint must not reindex the loop
+  if (all.length === 0) return;
+
+  const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
+  const me = userAddr || await signer.getAddress();
+  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+  const status = document.getElementById('self-rescue-status');
+  const say = (t, colour) => { if (status) { status.style.color = colour || 'var(--text2)'; status.textContent = t; } };
+
+  // BLOCKED positions are not failures — the member holds the other half of that pair
+  // and re-entering would seat them twice. Skip and say so, rather than attempting one
+  // and reporting a revert the member cannot act on.
+  const held = window._parkedHeld || new Set();
+  const todo = all.filter(c => !held.has(_pairKeyOf(c.label)));
+  const skipped = all.length - todo.length;
+  if (todo.length === 0) { say('Nothing to clear — every position is blocked by the other half of its pair.', 'var(--yellow)'); return; }
+
+  window._clearAllRunning = true;
+  const done = [], failed = [], blockedMid = [];
+  // A member can be parked in BOTH halves of one pair. Rescuing the first takes a seat
+  // in that pair, which makes the second un-rescuable — re-entering would seat them
+  // twice, and the contract refuses. Without this the second attempt reverts and gets
+  // reported as "still parked after the attempt", which is true and useless: the real
+  // reason is the seat they just took. _pairKeyOf collapses T1.1 MatA and T1.1 MatB to
+  // the same key, so tracking keys catches it.
+  const seatedKeys = new Set();
+  try {
+    for (let i = 0; i < todo.length; i++) {
+      const c = todo[i];
+      const key = _pairKeyOf(c.label);
+      if (seatedKeys.has(key)) {
+        blockedMid.push(`${c.label}: skipped — you just took the other seat in this pair`);
+        continue;
+      }
+      say(`${c.label}: ${i + 1} of ${todo.length}…`);
+
+      // Point the existing, well-tested single-position path at this row. Reused, not
+      // reimplemented: those carry the gas ceiling, the shortfall pre-check and the
+      // ERC20 custom-error decoding, and a second copy would drift out of sync.
+      window._parkedMatrixAddr    = c.addr;
+      window._parkedMatrixLabel   = c.label;
+      window._parkedWithdrawable  = c.withdrawable;
+      window._parkedFee           = c.fee;
+      window._selfRescueShortfall = c.shortfall;
+
+      try {
+        if (mode !== 'copay' && c.shortfall > 0n) {
+          const alw = await usdc.allowance(me, c.addr).catch(() => 0n);
+          if (alw < c.shortfall) {
+            say(`${c.label}: approving ${fmt6(c.shortfall)}…`);
+            await approveSelfRescue();
+            // VERIFY the approval landed before spending gas on a rescue that needs it.
+            const alw2 = await usdc.allowance(me, c.addr).catch(() => 0n);
+            if (alw2 < c.shortfall) {
+              failed.push(`${c.label}: approval did not land (${fmt6(alw2)} < ${fmt6(c.shortfall)})`);
+              continue;
+            }
+          }
+        }
+        say(`${c.label}: rescuing…`);
+        if (mode === 'copay') await doCopayRescue(); else await doSelfRescue();
+      } catch (e) {
+        // Both paths catch internally; this only fires for something that escapes.
+        failed.push(`${c.label}: ${(e && (e.shortMessage || e.message)) || 'failed'}`);
+        continue;
+      }
+
+      // GROUND TRUTH. Not "the call returned" — is the member actually seated?
+      let seated = false;
+      try {
+        const m = await new ethers.Contract(c.addr, MATRIX_ABI, rp).getMember(me);
+        seated = !!m.isInMatrix;
+      } catch (_) { seated = false; }
+      if (seated) { done.push(c.label); seatedKeys.add(key); }
+      else failed.push(`${c.label}: still parked after the attempt`);
+    }
+  } finally {
+    window._clearAllRunning = false;
+  }
+
+  let line = `Cleared ${done.length} of ${todo.length}`;
+  if (skipped > 0) line += ` (${skipped} blocked — you hold the other half of that pair)`;
+  const notes = failed.concat(blockedMid);
+  if (notes.length) {
+    say(`${line}. ${notes.join(' · ')}`, done.length ? 'var(--yellow)' : 'var(--red)');
+    toast(`Cleared ${done.length} of ${todo.length} — the panel says what happened to the rest.`, done.length ? 'info' : 'error');
+  } else {
+    say(`${line}. 🎉 You're back in.`, 'var(--green)');
+    toast(`All ${done.length} positions cleared.`, 'success');
+  }
+  _staggeredDashRefresh();
 }
 
 // ── V8.47 Copay Rescue (member-facing) ───────────────────────────────────────
