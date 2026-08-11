@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-11] Dashboard (index.html) — I had to click both Approval and Self-Rescue several times, …
+- **Reporter:** @Lavern-Gay
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x737c3309c3d6f5702c8f4bb81494568f8d0d1be5
+- **Frequency:** Consistent
+- **What happened:** I had to click both Approval and Self-Rescue several times, even though the transaction was marked as complete.
+- **What was expected:** Once the transaction is marked as completed. I was able to move to the next approval and self-rescue.
+- **Submitted:** Tue, 11 Aug 2026 23:14:42 GMT
+
+
 ### [2026-08-11] Dashboard (index.html) — decided to do a withdrawal.
 It took forever and after clicki…
 - **Reporter:** CryptoJan22
