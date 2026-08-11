@@ -37,6 +37,20 @@
 
 ## Open Issues
 
+### [2026-08-11] Dashboard (index.html) — decided to do a withdrawal.
+It took forever and after clicki…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** decided to do a withdrawal.
+It took forever and after clicking max only 50% went through.
+i tried max again but it did not go through.
+- **What was expected:** at least a reason for the failure.
+- **Submitted:** Tue, 11 Aug 2026 10:46:59 GMT
+
+
 ### [2026-08-10] Dashboard (index.html) — Tried withdrawing and it failed,  $50
 - **Reporter:** Deborah
 - **Page:** Dashboard (index.html)
