@@ -4220,8 +4220,14 @@ async function loadRegisterTab() {
           sel.value = '1';
           onUpgradeTierChange();
         }
-        // Fetch cycles to determine locked / eligible state (hiTier already confirmed < 2 above)
-        const cycles     = Number(await tr.tierCycles(userAddr, 0).catch(() => 0n));
+        // Fetch cycles to determine locked / eligible state (hiTier already confirmed < 2 above).
+        // FAILURE IS NOT ZERO CYCLES (2026-08-12): this read used .catch(() => 0n), so one
+        // dropped RPC call rendered "Locked until your first T1 cycle completes" to a member
+        // who may have cycled — a fabricated lock, same family as items 30/39. Now: retry,
+        // and if the chain still does not answer, SAY SO and leave the door open — the
+        // contract enforces real eligibility on manualUpgrade; this card is advisory.
+        const _cycRead   = await retryRead(() => tr.tierCycles(userAddr, 0));
+        const cycles     = _cycRead.ok ? Number(_cycRead.value) : null;
         // Check ALL T1 MatBs — members in T1.1 MatB (pre-factory) must also qualify
         const _pm1Reg    = new ethers.Contract(ADDRS.T1.pm, PM_ABI, rp);
         let inT1MatB = false;
@@ -4239,13 +4245,22 @@ async function loadRegisterTab() {
         const hint   = document.getElementById('upgrade-tier-hint');
         const btnApp = document.getElementById('btn-upgrade-approve');
         const btnUp  = document.getElementById('btn-upgrade');
-        if (cycles >= 1) {
+        if (cycles !== null && cycles >= 1) {
           if (hint) hint.innerHTML = '<span style="color:var(--green)">&#x2705; ' + cycles + ' cycle' + (cycles !== 1 ? 's' : '') + ' complete &#8212; you qualify for T2 upgrade!</span>';
           if (btnApp) { btnApp.disabled = false; btnApp.textContent = 'Step 1: Approve USDC'; btnApp.className = 'btn btn-green'; btnApp.style.flex = '1'; }
         } else if (inT1MatB) {
           // V8.14: Crossed to MatB — upgrade available NOW (no need to wait for full MatB cycle)
           if (hint) hint.innerHTML = '<span style="color:var(--green)">&#x1F7E2; You\'ve crossed to Matrix B &mdash; T2 upgrade is available now!</span>';
           if (btnApp) { btnApp.disabled = false; btnApp.textContent = 'Step 1: Approve USDC'; btnApp.className = 'btn btn-green'; btnApp.style.flex = '1'; }
+          if (btnUp)  { btnUp.disabled = true; }
+        } else if (cycles === null) {
+          // UNVERIFIED, not locked. The MatB check above may also have failed (its own
+          // reads fall back to false), so "we could not confirm" is the only honest
+          // statement here. Approve stays enabled — an ERC20 approve is harmless, and
+          // the contract is the judge of eligibility, same policy as the debt-unreadable
+          // approve fix from the 2026-08-07 audit (approve what we know, chain decides).
+          if (hint) hint.innerHTML = '<span style="color:var(--yellow)">&#9888; Could not verify your T1 cycle count &#8212; the network did not answer after several tries. This does <strong>not</strong> mean you are locked. Refresh to retry, or proceed &#8212; the contract itself enforces eligibility.</span>';
+          if (btnApp) { btnApp.disabled = false; btnApp.textContent = 'Step 1: Approve USDC (eligibility unverified)'; btnApp.className = 'btn'; btnApp.style.flex = '1'; }
           if (btnUp)  { btnUp.disabled = true; }
         } else {
           if (hint) hint.textContent = 'Locked until your first T1 cycle completes. A full cycle runs in two stages: MatA fills (126 members), then MatB fills (127 members). Once both stages complete for your position, this unlocks automatically.';
@@ -5002,8 +5017,10 @@ async function loadDashboardData() {
 
     hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); showEl('dash-content');
 
-    // Fetch T1 cycles from TierRouter (manual upgrade gate)
-    const t1CyclesTR = await tr.tierCycles(userAddr, 0).catch(() => 0n);
+    // (2026-08-12) A `t1CyclesTR = tierCycles(...).catch(() => 0n)` read lived here,
+    // labeled "manual upgrade gate" — it was DEAD: nothing consumed it (the upgrade
+    // card and the cycles breakdown each do their own honest reads). Removed: one
+    // fewer RPC call per refresh, one fewer value-returning catch in the file.
 
     let totalW = 0n, realW = 0n, totalE = 0n, totalWD = 0n, totalEscrow = 0n;
     const tierBreakdown = {}; // tNum -> { earned, withdrawable, active } for per-tier card breakdowns
@@ -6317,9 +6334,24 @@ async function renderWithdrawableDetail(el, rp) {
       const autoUpgrade = !opts.disableUpgrade;
       const reentry     = Boolean(opts.enableReentry);
       const doubleE     = Boolean(opts.enableDouble);
-      const highest     = Number(await _tr.memberHighestTier(userAddr).catch(() => 1));
-      const curFee      = BigInt(await _tr.tierEntryFees(Math.max(highest - 1, 0)).catch(() => 0n));
-      const nextFee     = highest < 10 ? BigInt(await _tr.tierEntryFees(highest).catch(() => 0n)) : 0n;
+      // FAILURE IS NOT TIER 1 (2026-08-12): memberHighestTier fell back to `1` and the
+      // fee reads fell back to 0n, so one dropped RPC call relabeled every reserve line
+      // "T1", priced the toggles off the wrong tier, and could fire the settings-
+      // mismatch warning with fabricated numbers. The held TOTAL (onchainReserved) is
+      // already in hand and is the contract's own figure — on any failed read below,
+      // show the total and say the BREAKDOWN is unverifiable, never invent one.
+      const _hiRead   = await retryRead(() => _tr.memberHighestTier(userAddr));
+      const highest   = _hiRead.ok ? Number(_hiRead.value) : null;
+      let curFee = null, nextFee = null;
+      if (highest !== null) {
+        const _cfRead = await retryRead(() => _tr.tierEntryFees(Math.max(highest - 1, 0)));
+        curFee = _cfRead.ok ? BigInt(_cfRead.value) : null;
+        if (highest < 10) {
+          const _nfRead = await retryRead(() => _tr.tierEntryFees(highest));
+          nextFee = _nfRead.ok ? BigInt(_nfRead.value) : null;
+        } else nextFee = 0n;
+      }
+      const _bdOk = highest !== null && curFee !== null && nextFee !== null;
 
       // MIRROR OF TierRouter.reservedFor:1494 -- LINE FOR LINE. Do not "simplify"
       // this into seat-based either/or logic: my first version did exactly that
@@ -6329,16 +6361,18 @@ async function renderWithdrawableDetail(el, rp) {
       // them. The contract guard (!autoUpgrade && !reentry -> 0) means `double`
       // only ever adds on top of one of the other two.
       const parts = [];
-      if (!autoUpgrade && !reentry) {
-        // contract returns 0 in this case; anything held is residual
-      } else {
-        if (reentry)                    parts.push(['Auto re-entry to T' + highest, curFee]);
-        if (autoUpgrade && nextFee > 0n) parts.push(['Auto-upgrade to T' + (highest + 1), nextFee]);
-        if (doubleE)                    parts.push(['Double entry · second seat at T' + highest, curFee]);
+      if (_bdOk) {
+        if (!autoUpgrade && !reentry) {
+          // contract returns 0 in this case; anything held is residual
+        } else {
+          if (reentry)                    parts.push(['Auto re-entry to T' + highest, curFee]);
+          if (autoUpgrade && nextFee > 0n) parts.push(['Auto-upgrade to T' + (highest + 1), nextFee]);
+          if (doubleE)                    parts.push(['Double entry · second seat at T' + highest, curFee]);
+        }
       }
 
-      const expected = parts.reduce((a, x) => a + x[1], 0n);
-      const mismatch = parts.length > 0 && expected !== onchainReserved;
+      const expected = _bdOk ? parts.reduce((a, x) => a + x[1], 0n) : 0n;
+      const mismatch = _bdOk && parts.length > 0 && expected !== onchainReserved;
       const tgl = "(function(){var d=document.getElementById('autores-detail'),c=document.getElementById('autores-chev');if(!d)return;var o=d.style.display!=='none';d.style.display=o?'none':'block';if(c)c.textContent=o?'▸':'▾';})()";
 
       autoReserveBlock = `
@@ -6347,7 +6381,8 @@ async function renderWithdrawableDetail(el, rp) {
           <span class="detail-val" style="color:var(--yellow)">− ${fmt6(onchainReserved)}</span>
         </div>
         <div id="autores-detail" style="display:none;padding:2px 0 8px 14px;border-left:2px solid rgba(245,158,11,.35);margin-left:4px">
-          ${parts.length ? parts.map(x => `<div class="detail-row" style="padding:6px 0">
+          ${!_bdOk ? `<div class="detail-row" style="padding:6px 0"><span class="detail-key" style="font-size:12px;color:var(--yellow)">⚠ Could not verify the per-toggle breakdown just now — the network did not answer after several tries. The total above is the contract's own figure and is correct. Refresh to retry the breakdown.</span></div>`
+            : parts.length ? parts.map(x => `<div class="detail-row" style="padding:6px 0">
               <span class="detail-key" style="font-size:12px">${x[0]}</span>
               <span class="detail-val" style="color:var(--yellow);font-size:12px">${fmt6(x[1])}</span>
             </div>`).join('')
