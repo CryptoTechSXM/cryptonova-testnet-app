@@ -790,7 +790,7 @@
 
     <!-- CNOVA Mining Stats -->
     <div class="grid-4" style="margin-bottom:24px">
-      <div class="card-sm"><div class="stat-label" data-i18n="stats.current_epoch">Current Epoch</div><div class="stat-value" id="stat-epoch" style="color:var(--yellow)">—</div></div>
+      <div class="card-sm"><div class="stat-label" data-i18n="stats.current_epoch">Current Epoch</div><div class="stat-value" id="stat-epoch" style="color:var(--yellow)">—</div><div class="stat-sub" id="stat-epoch-next"></div></div>
       <div class="card-sm"><div class="stat-label" data-i18n="stats.reward_per_entry">CNOVA Reward / Entry</div><div class="stat-value green" id="stat-reward">—</div></div>
       <div class="card-sm"><div class="stat-label" data-i18n="stats.stability_fund">Stability Rescue Fund</div><div class="stat-value" id="stat-reserve">—</div></div>
       <div class="card-sm"><div class="stat-label" data-i18n="stats.community_wallet">Community Wallet</div><div class="stat-value" id="stat-cw-balance" style="color:#a855f7">—</div></div>
@@ -2345,6 +2345,15 @@ const CNOVA_ABI = [
   'function currentEpochNumber() external view returns (uint8)',
   'function epochRewards(uint256) external view returns (uint256)',
   'function TOTAL_EPOCHS() external view returns (uint8)',
+  // V8.48 item 42 — distance to the next halving. All three thresholds are
+  // live on-chain; epochLeadingTrigger() decides which one is closest, so the
+  // page cannot disagree with the contract about what will fire first.
+  'function epochMembersRemaining() external view returns (uint256)',
+  'function epochMintRemaining() external view returns (uint256)',
+  'function epochTimeRemaining() external view returns (uint256)',
+  'function epochLeadingTrigger() external view returns (uint8)',
+  'function epochMemberLimit() external view returns (uint256)',
+  'function epochMintLimit() external view returns (uint256)',
   'function approve(address,uint256) external returns (bool)',
   'function transfer(address,uint256) external returns (bool)',
   'function vestDuration() external view returns (uint256)',
@@ -2456,6 +2465,53 @@ function setText(id, val) {
 // data (e.g. BFS Position or Direct Referrals flipping between page loads with no
 // indication anything went wrong). Returns { value, ok } so callers can render an
 // honest "unknown" state instead of a confident-looking but possibly-wrong default.
+// V8.48 item 42 — show the DISTANCE to the next halving, not only the era name.
+//
+// The dashboard has always shown "Epoch 4 — Aurora Zenith" and the current reward,
+// but never how close the next halving is — so a member could not tell whether their
+// next entry mints at this rate or at half of it. Three thresholds can advance an
+// epoch and ANY ONE of them fires first:
+//
+//   MEMBER  epochMemberCount  >= epochMemberLimit   (1,000 new members)
+//   MINT    minted this epoch >= epochMintLimit     (1,000,000 CNOVA)
+//   TIME    elapsed           >= epochTimeLimit     (180 days)
+//
+// Showing only one of the three would be a half-truth — MEMBER has historically been
+// nowhere near firing while MINT fired every time — so this shows whichever is
+// CLOSEST, names it, and puts all three in the tooltip. epochLeadingTrigger() decides
+// that on-chain, so the page and the contract cannot disagree.
+//
+// Every read is retried and ANY failure leaves the line BLANK rather than rendering a
+// zero. "0 members to go" is a specific, wrong and alarming claim; blank is honest.
+async function _paintEpochProgress(cnova, epochNow) {
+  const el = document.getElementById('stat-epoch-next');
+  if (!el) return;
+  // Final Frontier has no next halving to count down to — the reward tracks the floor.
+  if (epochNow !== null && Number(epochNow) >= 9) {
+    el.textContent = 'Final Frontier — reward now tracks the floor price, no further halvings';
+    el.title = '';
+    return;
+  }
+  const reads = await Promise.all([
+    retryRead(() => rpc(cnova.epochMembersRemaining())),
+    retryRead(() => rpc(cnova.epochMintRemaining())),
+    retryRead(() => rpc(cnova.epochTimeRemaining())),
+    retryRead(() => rpc(cnova.epochLeadingTrigger())),
+  ]);
+  if (reads.some(r => !r.ok)) { el.textContent = ''; el.title = ''; return; }
+  const [mem, mintLeft, secs, lead] = reads.map(r => r.value);
+  const days = Number(secs) / 86400;
+  const phrase = {
+    0: Number(ethers.formatEther(mintLeft)).toLocaleString(undefined,{maximumFractionDigits:0}) + ' CNOVA still to mint',
+    1: Number(mem).toLocaleString() + ' more members',
+    2: days >= 1 ? days.toFixed(0) + ' days' : (days * 24).toFixed(0) + ' hours',
+  };
+  const driver = { 0: 'minting', 1: 'new members', 2: 'time' }[Number(lead)] || 'activity';
+  el.textContent = 'Next halving: ' + phrase[Number(lead)] + ' — driven by ' + driver;
+  el.title = 'An epoch advances on whichever comes first: ' + phrase[1] + ', ' + phrase[0]
+           + ', or ' + phrase[2] + '. The reward per entry halves each time.';
+}
+
 async function retryRead(fn, attempts = 3, delayMs = 400) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
@@ -3454,6 +3510,8 @@ async function loadHomeStats() {
       setText('stat-epoch', epochLabel);
       setText('cw-epoch', epochLabel);
     }
+    // Fire and forget: the countdown must never delay or break the stats paint.
+    _paintEpochProgress(cnova, epoch).catch(() => {});
     if (supply !== null) setText('stat-supply', Number(ethers.formatEther(supply)).toLocaleString(undefined,{maximumFractionDigits:0})+' CNOVA'); // current circulating (decreases on redeem/burn)
     if (treasUsdc !== null)  setText('stat-treasury-usdc', fmt6(treasUsdc));
 
@@ -6407,7 +6465,12 @@ async function renderCnovaDetail(el, rp) {
     cnova.balanceOf(userAddr).catch(() => 0n),
     cnova.totalSupply().catch(() => 0n),
     usdcC.balanceOf(ADDRS.treasury).catch(() => 0n),
-    cnova.currentEpochNumber().catch(() => 1),
+    // AUDIT 2026-08-12: this read `.catch(() => 1)`, so a dropped RPC call rendered
+    // Epoch 1 as fact and marked Nebula Genesis ACTIVE in the schedule below — the
+    // same fabricated-fallback defect the note at the stats painter says was fixed
+    // there. Fixed in one place, still live here. null = unknown, and the ACTIVE
+    // badge is simply omitted rather than pinned to the wrong era.
+    cnova.currentEpochNumber().catch(() => null),
     cnova.lockedBalanceOf(userAddr).catch(() => null),
     cnova.unlockedBalanceOf(userAddr).catch(() => null),
     cnova.vestBatchesOf(userAddr).catch(() => []),
@@ -6561,7 +6624,7 @@ async function renderCnovaDetail(el, rp) {
   const epochRows = epochRewards.map((r, i) => {
     if (r === null || r === 0n) return '';
     const amt = Number(ethers.formatEther(r)).toFixed(2);
-    const isCur = (i === Number(epochNum) - 1);
+    const isCur = (epochNum !== null && i === Number(epochNum) - 1);
     return `<div class="detail-row">
       <span class="detail-key">Epoch ${i+1}${isCur ? ' <span style="background:rgba(0,212,170,.15);color:var(--green);font-size:10px;padding:1px 6px;border-radius:4px;font-weight:700">ACTIVE</span>' : ''}</span>
       <span class="detail-val ${isCur ? 'green' : ''}">${amt} CNOVA / cycle</span>
