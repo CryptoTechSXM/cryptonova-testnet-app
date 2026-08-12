@@ -2413,6 +2413,11 @@ const CW_ABI = [
   'function totalEnrolled() external view returns (uint256)',
   'function lastDistributionTime() external view returns (uint256)',
   'function nextDistributionTime() external view returns (uint256)',
+  // V8.47 original — REPLACED by nextDistributionTime() in V8.48, but still the
+  // getter that exists on the DEPLOYED contract (probed 2026-08-12,
+  // scripts/probe_v847_getters.js). Kept for the feature-detect fallback below;
+  // remove it together with that fallback once V8.48 is live.
+  'function distributeInterval() external view returns (uint256)',
   'function distributeReady() external view returns (bool)',
   'event MemberEnrolled(address indexed member, uint8 cohort, uint256 enrollmentNumber)',
 ];
@@ -3061,21 +3066,35 @@ async function loadCWData(userAddr, signer, rp) {
 
   try {
     const cw = new ethers.Contract(cwAddr, CW_ABI, rp);
-    const [cohortVal, claimableVal, totalEnrolled, lastDist, nextDistTime] = await Promise.all([
+    const [cohortVal, claimableVal, totalEnrolled, lastDist] = await Promise.all([
       cw.cohort(userAddr).catch(() => null),          // null = RPC fail; 0n = confirmed not enrolled
       cw.claimable(userAddr).catch(() => null),   // null = unknown; never render a fabricated $0.00
       cw.totalEnrolled().catch(() => 0n),
       cw.lastDistributionTime().catch(() => 0n),
-      // V8.48: read the SCHEDULE ITSELF, not an interval to add to a timestamp.
-      // distributeInterval no longer exists — distribution is a calendar date (the 25th)
-      // and nextDistributionTime() is the contract's own answer for when the next one is
-      // due. The previous line here was `distributeInterval().catch(() => 2592000n)`:
-      // after the V8.48 cutover that call reverts and the catch would have silently
-      // supplied 30 days, rendering a confident, wrong countdown for ever. Same defect as
-      // routeEntryThreshold's `.catch(() => 381n)` on the tier card. null = UNKNOWN, and
-      // unknown is displayed as unknown.
-      cw.nextDistributionTime().catch(() => null),
     ]);
+    // SCHEDULE — FEATURE-DETECTED ACROSS THE V8.47 → V8.48 CUTOVER (2026-08-12).
+    // V8.48 replaces the rolling 30-day distributeInterval with a calendar date and
+    // exposes nextDistributionTime() as the contract's own answer. But the DEPLOYED
+    // V8.47 CommunityWallet has neither getter (probed on-chain 2026-08-12,
+    // scripts/probe_v847_getters.js) — it has distributeInterval(), rolling from
+    // lastDistributionTime. So: try the V8.48 getter first (this code is then already
+    // correct the moment V8.48 goes live), and fall back to the V8.47 arithmetic while
+    // V8.47 is what is on chain. Neither branch invents a value: if both reads fail,
+    // null renders as "schedule unavailable", never as a confident wrong date.
+    // KNOWN, ACCEPTED MISMATCH until the V8.48 deploy: static copy on this page says
+    // distributions happen on the 25th (the V8.48 policy), while this countdown shows
+    // the deployed contract's real rolling date (e.g. Sep 4). The chain wins — a
+    // member acting on the countdown is never early or late; the prose is the policy
+    // they will be on after the cutover.
+    let nextDistTime = await cw.nextDistributionTime().catch(() => null);
+    if (nextDistTime === null) {
+      const _interval = await cw.distributeInterval().catch(() => null);   // V8.47 path
+      if (_interval !== null) {
+        // lastDist 0n = no distribution has ever run; keep the dedicated "pending
+        // first distribution" rendering below instead of fabricating 1970 + 30 days.
+        nextDistTime = BigInt(lastDist) === 0n ? 0n : BigInt(lastDist) + BigInt(_interval);
+      }
+    }
 
     // RPC failure on the cohort call — don't flash "not a founding member" incorrectly
     if (cohortVal === null) {
