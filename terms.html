@@ -251,7 +251,7 @@ function toggleTheme() {
 <main>
 
   <div class="page-title"><span data-i18n="termsPage.page_title_pre">Terms of Use &amp;</span> <span data-i18n="termsPage.page_title_span">Risk Disclaimer</span></div>
-  <div class="last-updated" data-i18n="termsPage.last_updated">Last updated: June 2026 &nbsp;&middot;&nbsp; Base Sepolia Testnet &nbsp;&middot;&nbsp; CryptoNova Matrix V8</div>
+  <div class="last-updated" data-i18n="termsPage.last_updated">Last updated: August 2026 &nbsp;&middot;&nbsp; Base Sepolia Testnet &nbsp;&middot;&nbsp; CryptoNova Matrix V8</div>
 
   <div class="warning-box" id="translation-notice" style="display:none;background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.35);margin-bottom:20px;">
     <p data-i18n="termsPage.translation_notice" style="color:var(--text2);">🌐 This page is a convenience translation. The English version is the only legally authoritative text — if anything here conflicts with the English original, the English original governs.</p>
@@ -271,7 +271,7 @@ function toggleTheme() {
   <div class="section">
     <h2 data-i18n="termsPage.s2_h">2. Nature of the Protocol</h2>
     <p data-i18n="termsPage.s2_p1">CryptoNova Matrix V8 is a <strong>decentralized smart contract system</strong> deployed on the Base blockchain. It operates without a custodian or intermediary, and no party can alter deployed logic &mdash; there is no upgrade proxy, and fee splits are fixed at deployment with no setter. An owner key retains emergency powers, limited to halting new entries and upgrades; it cannot block withdrawals. Other protocol parameters are changeable only through on-chain governance, subject to a 72-hour voting period and a 48-hour timelock.</p>
-    <p data-i18n="termsPage.s2_p2">The protocol implements a BFS matrix compensation structure where participants pay an entry fee in USDC and receive payments from subsequent participants according to predefined, tier-dependent on-chain split rules covering direct referral, chain pay, the equalization pool, the CNOVA Treasury (which backs the CNOVA floor price), the Stability Rescue Fund (which finances rescue contributions for parked members), the Liquidity Reserve, the Community Wallet (first 1,000 members), the CNOVA Buyback Reserve, dev, and ops. The CNOVA token is distributed as an in-protocol reward and is not a security or investment contract.</p>
+    <p data-i18n="termsPage.s2_p2">The protocol implements a BFS matrix compensation structure where participants pay an entry fee in USDC and receive payments from subsequent participants according to a predefined on-chain fee split (identical percentages at every tier; only the entry fees differ by tier) covering direct referral, chain pay, the equalization pool, the CNOVA Treasury (which backs the CNOVA floor price), the Stability Rescue Fund (which finances rescue contributions for parked members), the Liquidity Reserve, the Community Wallet (first 1,000 members), the CNOVA Buyback Reserve, dev, and ops. The CNOVA token is distributed as an in-protocol reward and is not a security or investment contract.</p>
   </div>
 
   <div class="section">
@@ -303,7 +303,7 @@ function toggleTheme() {
 
   <div class="section">
     <h2 data-i18n="termsPage.s6_h">6. No Refunds</h2>
-    <p><span data-i18n="termsPage.s6_p1_pre">All entry fees are processed directly by the smart contract and distributed instantly according to the protocol rules.</span> <strong data-i18n="termsPage.s6_p1_b">There are no refunds under any circumstances.</strong> <span data-i18n="termsPage.s6_p1_post">By submitting an entry transaction you irrevocably authorize the transfer of funds as defined in the smart contract.</span></p>
+    <p><span data-i18n="termsPage.s6_p1_pre">All entry fees are processed directly by the smart contract according to the protocol rules: half of each entry funds the member's own crossing reserve, a portion is credited or paid out immediately (instant earn, referral and chain pay), and the equalization pool portion is distributed to seated members over time as the matrix rotates.</span> <strong data-i18n="termsPage.s6_p1_b">There are no refunds under any circumstances.</strong> <span data-i18n="termsPage.s6_p1_post">By submitting an entry transaction you irrevocably authorize the transfer of funds as defined in the smart contract.</span></p>
   </div>
 
   <div class="section">

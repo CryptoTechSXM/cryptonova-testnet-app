@@ -455,7 +455,7 @@ function toggleTheme() {
   <h2 data-i18n="compPage.s6_h">🏛️ Stream 6 &mdash; Community Wallet (First 1,000 Members)</h2>
   <div class="section-card">
     <h3 data-i18n="compPage.s6_h3">Exclusive lifetime bonus for the first 1,000 wallets — paid monthly, for as long as you hold your spot</h3>
-    <p data-i18n="compPage.s6_p1">The 0.5% "Community Wallet" line in the entry-fee split below isn't just a protocol reserve sitting idle — <strong>every entry, from every member, at every tier, forever</strong> feeds this pool. What makes it special is who gets paid from it: only the first <strong>1,000 wallets</strong> ever to register with CryptoNova are eligible to receive distributions, split into two permanent cohorts by join order.</p>
+    <p data-i18n="compPage.s6_p1">The 1% "Community Wallet" line in the entry-fee split below isn't just a protocol reserve sitting idle — <strong>every entry, from every member, at every tier, forever</strong> feeds this pool. What makes it special is who gets paid from it: only the first <strong>1,000 wallets</strong> ever to register with CryptoNova are eligible to receive distributions, split into two permanent cohorts by join order.</p>
     <div class="nums-row">
       <div><div class="big-num" data-i18n="compPage.s6_n1_val">#1–500</div><div class="num-label"><span data-i18n="compPage.s6_n1_label">Genesis cohort</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n1_sub">60% of each distribution</span></div></div>
       <div><div class="big-num blue" data-i18n="compPage.s6_n2_val">#501–1,000</div><div class="num-label"><span data-i18n="compPage.s6_n2_label">Pioneer cohort</span><span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s6_n2_sub">40% of each distribution</span></div></div>
@@ -496,13 +496,13 @@ function toggleTheme() {
           <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
         </tr>
         <tr>
-          <td class="t-tier t-open">T2</td>
+          <td class="t-tier t-gated">T2</td>
           <td class="t-name" data-i18n="compPage.tier2_name">Nova Rise</td>
           <td>$25</td>
           <td style="color:var(--green)">$1.25</td>
           <td>$0.68</td>
           <td style="color:var(--green)">~$572</td>
-          <td><span style="color:var(--green);font-size:12px;font-weight:700" data-i18n="compPage.access_open">Open</span></td>
+          <td><span style="color:var(--yellow);font-size:11px" data-i18n="compPage.access_gated">Whale Gated</span></td>
         </tr>
         <tr>
           <td class="t-tier t-gated">T3</td>
@@ -641,7 +641,7 @@ function toggleTheme() {
         <div class="split-label" data-i18n="compPage.split_lq">💧 Liquidity Reserve</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:0.25%;background:var(--blue)"></div></div>
         <div class="split-pct">0.25%</div>
-        <div class="split-amt">$0.05</div>
+        <div class="split-amt">$0.025</div>
       </div>
       <div class="split-row">
         <div class="split-label" data-i18n="compPage.split_dev">⚙️ Dev + Ops</div>
@@ -653,13 +653,13 @@ function toggleTheme() {
         <div class="split-label" data-i18n="compPage.split_cw">🏛️ Community Wallet</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:1%;background:var(--purple)"></div></div>
         <div class="split-pct">1%</div>
-        <div class="split-amt">$0.05</div>
+        <div class="split-amt">$0.10</div>
       </div>
       <div class="split-row">
         <div class="split-label" data-i18n="compPage.split_bbr">🔥 CNOVA Buyback Reserve</div>
         <div class="split-bar-wrap"><div class="split-bar" style="width:0.25%;background:var(--red)"></div></div>
         <div class="split-pct">0.25%</div>
-        <div class="split-amt">$0.05</div>
+        <div class="split-amt">$0.025</div>
       </div>
     </div>
     <p style="margin-top:14px;font-size:13px;color:var(--text3)"><span data-i18n="compPage.split_footer_pre">50% funds your crossing reserve (held for you). 2.5% is your instant earn, credited the moment you enter. The remaining 47.5% goes to the equalization pool (18%), chain pay L2–L6 (13.5%), your sponsor's L1 referral (5%), the CNOVA Treasury (5%), and protocol reserves (6%). All rates are identical across all 10 tiers.</span> <strong style="color:var(--text)" data-i18n="compPage.split_footer_b">100% on-chain. Splits fixed at deployment.</strong> <span data-i18n="compPage.split_footer_post">(Percentages shown are of the total entry fee. Pool and chain pay rates are flat at every tier — cycle payouts scale with the tier entry fee, not the pool percentage.)</span></p>
@@ -671,7 +671,7 @@ function toggleTheme() {
        as a repayable member-level debt. -->
   <div style="margin-top:20px;padding:14px 18px;border-radius:10px;border:1px solid rgba(56,189,248,.28);background:rgba(56,189,248,.07);font-size:13px;color:var(--text2);line-height:1.7">
     <strong style="color:#38bdf8">About the Stability Rescue Fund</strong><br>
-    <span data-i18n="compPage.sf_advance_note">If your earnings can&rsquo;t cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings &mdash; 60% to 90% of each payout depending on which tier issued it &mdash; across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet.</span>
+    <span data-i18n="compPage.sf_advance_note">If your earnings can&rsquo;t cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings &mdash; 100% of each pool payout goes to the advance until it is cleared (DAO-adjustable, param 50) &mdash; across every tier you earn in. Any remaining balance is also settled when you withdraw or upgrade a tier. Your seats keep working normally throughout, and the advance itself is never pulled from your wallet &mdash; it repays only from earnings inside the system. (Self&#8209;Rescue is different: there <em>you</em> choose to pay the shortfall from your wallet, and no advance is created.)</span>
   </div>
 
   <!-- ── Disclaimer ── -->

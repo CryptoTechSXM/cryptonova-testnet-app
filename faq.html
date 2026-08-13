@@ -298,7 +298,7 @@ function toggleTheme() {
     <div class="glossary-card" data-terms="stability rescue fund parked member rescue sf">
       <div class="acronym">Stability Rescue Fund</div>
       <div class="full-name" data-i18n="faqPage.g14_full">Member Rescue Reserve</div>
-      <div class="definition" data-i18n="faqPage.g14_def">3% of every entry fee flows into the Stability Rescue Fund. If your earnings can&rsquo;t cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings &mdash; 60% to 90% of each payout depending on which tier issued it &mdash; across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet. This fund is separate from the CNOVA Treasury, which backs the token&rsquo;s floor price.</div>
+      <div class="definition" data-i18n="faqPage.g14_def">3% of every entry fee flows into the Stability Rescue Fund. If your earnings can&rsquo;t cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings &mdash; 100% of each pool payout goes to the advance until it is cleared (DAO-adjustable, param 50) &mdash; across every tier you earn in. Any remaining balance is also settled when you withdraw or upgrade a tier. Your seats keep working normally throughout, and the advance itself is never pulled from your wallet &mdash; it repays only from earnings inside the system. (Self&#8209;Rescue is different: there <em>you</em> choose to pay the shortfall from your wallet, and no advance is created.) This fund is separate from the CNOVA Treasury, which backs the token&rsquo;s floor price.</div>
     </div>
 
     <div class="glossary-card" data-terms="dev wallet protocol development engineering reserve">
@@ -479,7 +479,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q9_a1">An epoch is a CNOVA mining period. Each epoch starts with a set CNOVA reward per entry. When an epoch advances the reward per entry halves &mdash; similar to Bitcoin's halving mechanism. An epoch advances on whichever of three triggers comes first &mdash; CNOVA minted, members joined, or <strong>30 days elapsed</strong> &mdash; so the rate can step down even in a quiet month. All three are governance-adjustable. Early participants receive the highest CNOVA rewards.</p>
+        <p data-i18n="faqPage.q9_a1">An epoch is a CNOVA mining period. Each epoch starts with a set CNOVA reward per entry. When an epoch advances the reward per entry steps down &mdash; 50 &rarr; 40 first, then halving each epoch after (40 &rarr; 20 &rarr; 10 &rarr; 5 &rarr; 2.5), similar to Bitcoin's halving mechanism. An epoch advances on whichever of three triggers comes first &mdash; CNOVA minted, members joined, or <strong>30 days elapsed</strong> &mdash; so the rate can step down even in a quiet month. All three are governance-adjustable. Early participants receive the highest CNOVA rewards.</p>
         <p data-i18n="faqPage.q9_a2">CryptoNova epoch names in order: <em>Nebula Genesis, Mercury Rise, Lunar Cluster, Aurora Zenith, Solaris Echo, Cosmic Core, Galaxy Grid, Supernova Spark, Final Frontier</em>. The current epoch is displayed on the Home and Dashboard tabs.</p>
       </div></div>
     </div>
@@ -587,7 +587,7 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q17_a1">18% of each entry fee ($1.80 at T1) flows into the equalization pool for that matrix. Each rotation, the pool distributes across all seated members weighted by seat depth — deeper seats receive larger shares, which offsets the wait. When you cycle out, re-entry costs the full entry fee: your crossing reserve covers half and your accumulated earnings the rest, applied automatically &mdash; no action required on your part.</p>
-        <p data-i18n="faqPage.q17_a2">If the pool accumulates before the matrix fills (from multiple cycles), the excess funds the root member's re-entry fee automatically. You can also top up your pool balance manually from the Dashboard if you want to accelerate re-entry.</p>
+        <p data-i18n="faqPage.q17_a2">Pool shares are not saved up for one payout event &mdash; they drip continuously. Every rotation of the matrix distributes that rotation's pool across the seated members, weighted by seat depth, and your accumulated share is credited to your in-matrix earnings. Those earnings are what fund your automatic re-entry (together with your crossing reserve) when you cycle out.</p>
       </div></div>
     </div>
 
@@ -613,7 +613,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q19_a1">Getting back in costs a <strong>full entry fee</strong> for that tier. Your returned crossing reserve covers about half of it, and accumulated earnings usually cover the rest. Connect your wallet, open the Dashboard, and use <strong>Self Rescue</strong> &mdash; the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.</p>
+        <p data-i18n="faqPage.q19_a1">Getting back in costs a <strong>full entry fee</strong> for that tier. Your returned crossing reserve covers exactly half of it, and your accumulated earnings go toward the rest. If they still fall short, <strong>Self Rescue</strong> pays the remaining shortfall from your wallet (you approve USDC to the matrix first &mdash; no loan and no debt is created). Connect your wallet, open the Dashboard, and use Self Rescue &mdash; the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.</p>
         <p data-i18n="faqPage.q19_a2">All your previous USDC earnings and CNOVA are untouched &mdash; re-entry only places you back into the live matrix queue.</p>
       </div></div>
     </div>

@@ -58,7 +58,7 @@
     "step1": "<strong>Approve $10 USDC</strong> — one MetaMask click. The contract can only ever pull exactly $10.",
     "step2": "<strong>Register</strong> — you're placed into the T1 Figure-8 matrix at the next available seat.",
     "step3": "<strong>Earn</strong> — as new members join, USDC flows up through the chain. Withdraw anytime.",
-    "step4": "<strong>Auto-upgrade</strong> — once your matrix fills (127 seats), you automatically advance to T2 ($25)."
+    "step4": "<strong>Auto-upgrade</strong> — when you cycle out of your matrix with auto-upgrade on, your earnings fund the next tier's entry automatically (T1 → T2 at $25)."
   },
   "footer": {
     "tierrouter": "TierRouter ↗",
@@ -155,7 +155,7 @@
     "buyback": "🔥 CNOVA Buyback Reserve",
     "mechanic_label": "CryptoNova Matrix mechanic:",
     "mechanic_body": "Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.",
-    "equalization_tip": "18% of each entry pools together. When all 127 seats fill (~$229 at T1), this distributes position-weighted to all 126 members. Later/deeper positions get a larger share to compensate for joining later.",
+    "equalization_tip": "18% of each entry feeds the equalization pool. It distributes continuously — every rotation pays that rotation's pool across the seated members, weighted by seat depth (~$229 flows through a full T1 matrix). Later/deeper positions get a larger share to compensate for joining later.",
     "chain_pay_tip": "2.7% per level goes to each of the 5 matrix positions above the new member's seat (levels L2-L6). These are determined by the BFS tree structure, not by referral links. You earn from every new member seated within five levels below you — but a seat six or more levels beneath you pays you nothing.",
     "chain_pay_note": "(per level, flat rate)"
   },
@@ -238,7 +238,7 @@
     "copy_btn": "Copy",
     "upgrade_title": "⬆️ Upgrade Tier",
     "upgrade_desc": "Complete your cycle requirement, then pay the next tier's fee to earn in a bigger pool.",
-    "whale_gate_pre": "🐋 <strong>Whale Gate</strong> — Tiers 5–7 require sequential progression until",
+    "whale_gate_pre": "🐋 <strong>Whale Gate</strong> — T2–T5 open together once 25 pioneers reach T5; T6–T10 unlock at 15/10/5/5/5 pioneers",
     "whale_gate_suf": "SuperNova Genesis members reached.",
     "target_tier": "Target Tier",
     "select_tier": "Select a tier…",
@@ -250,8 +250,8 @@
     "earn_passive": "Passive (0 referrals): <strong style=\"color:var(--text)\">~$3.05</strong> in chain pay + pool share per cycle (~31% ROI) <span style=\"font-size:11px;color:var(--text3)\">— you earn automatically as others join below you</span>",
     "earn_active": "Active (2 referrals): <strong style=\"color:var(--text)\">~$4.05</strong> per cycle (~41% ROI) <span style=\"font-size:11px;color:var(--text3)\">— +$0.50 referral bonus per person you bring in</span>",
     "earn_power": "Power (5 referrals): <strong style=\"color:var(--text)\">~$5.55</strong> per cycle (~56% ROI) <span style=\"font-size:11px;color:var(--text3)\">— refer 5 people and earn $2.50 extra on top of passive</span>",
-    "earn_disclaimer": "Your $10 entry fee splits automatically: $5.00 held as your crossing reserve (covers your next entry when the matrix cycles), $0.25 instant to your balance, $0.50 to your referral sponsor (L1 bonus), up to $1.35 in chain pay to your 5 matrix ancestors (L2–L6, $0.27 each), $1.80 into the shared equalization pool (~$229 total at cycle completion). Pool distributes position-weighted to all 126 members. Upgrade tiers = proportionally larger amounts at every level.",
-    "earn_title_tip": "A \"cycle\" = all 127 seats in your matrix filled by new members. Each seat filled sends chain pay upward. When all 127 fill, the pool pays out and the matrix resets."
+    "earn_disclaimer": "Your $10 entry fee splits automatically: $5.00 held as your crossing reserve (pre-funds HALF of your next entry when the matrix cycles), $0.25 instant to your balance, $0.50 to your referral sponsor (L1 bonus), up to $1.35 in chain pay to your 5 matrix ancestors (L2–L6, $0.27 each), $1.80 into the shared equalization pool (~$229 flows through a full matrix, distributed each rotation, position-weighted across seated members). Upgrade tiers = proportionally larger amounts at every level.",
+    "earn_title_tip": "A \"cycle\" = your seat advancing to position 1 as the 127-seat matrix rotates. Each entry sends chain pay upward and that rotation's pool share to seated members. When you reach position 1 you cycle out — re-entry/upgrade fire automatically if enabled."
   },
   "chart": {
     "low": "Low",
@@ -344,7 +344,7 @@
     "row_total_cycles": "Total system cycles",
     "row_total_registered": "Total members joined",
     "row_t2_mata_occupancy": "T2 MatA occupancy",
-    "matrix_info_note": "<strong>MatA fills first</strong> (127 members), then force-crosses to MatB. When MatB fills to 127, the pool distributes and members cycle back to MatA. The keeper drives the crossing.",
+    "matrix_info_note": "<strong>MatA fills first</strong> (127 members), then crossings seat members into MatB. The pool distributes every rotation in both halves — there is no single payout event. Members cycling out of MatB re-enter or upgrade per their automation settings. The keeper drives the crossing.",
     "sf_card_title": "Stability Fund",
     "sf_summary_default": "Reserve for rescuing parked members",
     "section_balance": "Balance",
@@ -357,7 +357,7 @@
     "row_treasury_usdc": "Treasury USDC",
     "row_buyback_reserve": "Buyback Reserve",
     "row_cnova_total_supply": "CNOVA total supply",
-    "sf_info_note": "The Stability Fund receives 5% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $200 can rescue 20+ members.",
+    "sf_info_note": "The Stability Fund receives 3% of every entry fee. It funds partial rescue contributions when parked members can't self-fund re-entry. A healthy SF &gt; $200 can rescue 20+ members.",
     "label_t1_mata": "T1 MatA",
     "label_t1_matb": "T1 MatB",
     "js": {
@@ -920,7 +920,7 @@
     "s5_p3": "CNOVA accrued during Genesis epoch at the $0.01 starting floor could be worth significantly more at later epochs as the floor appreciates. There is no market-price ceiling — CNOVA can trade above floor on open markets.",
     "s6_h": "🏛️ Stream 6 &mdash; Community Wallet (First 1,000 Members)",
     "s6_h3": "Exclusive lifetime bonus for the first 1,000 wallets — paid monthly, for as long as you hold your spot",
-    "s6_p1": "The 0.5% \"Community Wallet\" line in the entry-fee split below isn't just a protocol reserve sitting idle — <strong>every entry, from every member, at every tier, forever</strong> feeds this pool. What makes it special is who gets paid from it: only the first <strong>1,000 wallets</strong> ever to register with CryptoNova are eligible to receive distributions, split into two permanent cohorts by join order.",
+    "s6_p1": "The 1% \"Community Wallet\" line in the entry-fee split below isn't just a protocol reserve sitting idle — <strong>every entry, from every member, at every tier, forever</strong> feeds this pool. What makes it special is who gets paid from it: only the first <strong>1,000 wallets</strong> ever to register with CryptoNova are eligible to receive distributions, split into two permanent cohorts by join order.",
     "s6_n1_val": "#1–500",
     "s6_n1_label": "Genesis cohort",
     "s6_n1_sub": "60% of each distribution",
@@ -979,7 +979,7 @@
     "join_btn": "Join CryptoNova &rarr;",
     "split_reserve": "🔐 Your Crossing Reserve (held for you)",
     "split_instant": "⚡ Your Instant Earn (to your balance)",
-    "sf_advance_note": "If your earnings can't cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings — 60% to 90% of each payout depending on which tier issued it — across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet."
+    "sf_advance_note": "If your earnings can't cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings — 100% of each pool payout goes to the advance until it is cleared (DAO-adjustable, param 50) — across every tier you earn in. Any remaining balance is also settled when you withdraw or upgrade a tier. Your seats keep working normally throughout, and the advance itself is never pulled from your wallet — it repays only from earnings inside the system. (Self-Rescue is different: there you choose to pay the shortfall from your wallet, and no advance is created.)"
   },
   "faqPage": {
     "browser_title": "FAQ &amp; Glossary — CryptoNova",
@@ -997,7 +997,7 @@
     "g3_full": "CNOVA Floor Price Reserve",
     "g3_def": "5% of every entry fee flows into the on-chain CNOVA Treasury contract. The floor price = Treasury reserve / CNOVA total supply. Token holders can redeem CNOVA at the floor price with no admin approval and no exit fee, including CNOVA that is still vesting. Matrix-minted CNOVA is cliff-vested for 180 days, which prevents transferring or selling it until it unlocks; unlocking a batch early costs a sliding fee of up to 50%, falling to zero at that batch's unlock date.",
     "g14_full": "Member Rescue Reserve",
-    "g14_def": "3% of every entry fee flows into the Stability Rescue Fund. If your earnings can't cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings — 60% to 90% of each payout depending on which tier issued it — across every tier you earn in. Upgrading a tier settles whatever is left as part of the upgrade. Your seats and earnings keep working normally throughout, and nothing is ever taken from your wallet. This fund is separate from the CNOVA Treasury, which backs the token's floor price.",
+    "g14_def": "3% of every entry fee flows into the Stability Rescue Fund. If your earnings can't cover a re-entry, the Stability Rescue Fund can advance the shortfall so your position keeps moving. <strong>This is a repayable advance, not a gift.</strong> It is recorded against your account and repays itself automatically out of your future earnings — 100% of each pool payout goes to the advance until it is cleared (DAO-adjustable, param 50) — across every tier you earn in. Any remaining balance is also settled when you withdraw or upgrade a tier. Your seats keep working normally throughout, and the advance itself is never pulled from your wallet — it repays only from earnings inside the system. (Self-Rescue is different: there you choose to pay the shortfall from your wallet, and no advance is created.) This fund is separate from the CNOVA Treasury, which backs the token's floor price.",
     "g4_full": "Development Reserve",
     "g4_def": "1.5% of each entry fee (from the 47.5% payout base) flows to Dev + Ops &mdash; it funds ongoing smart contract development, audits, and protocol engineering. It is not used for CNOVA redemption and is not accessible to individual members.",
     "g5_full": "USD Coin",
@@ -1057,7 +1057,7 @@
     "q8_a1": "A cycle completes for a member when they reach <strong>position 1 (root) of a full matrix</strong> and the next entry rotates them out. From MatA, the cycling member crosses into MatB — the crossing costs the full entry fee, funded half by their crossing reserve and half by accumulated earnings. From MatB, the additive engine automatically re-enters and/or upgrades them from their accumulated funds. No manual action required.",
     "q8_a2": "Throughout the cycle, chain pay flows to upline positions as each new member joins &mdash; earnings are continuous, not a single event at cycle completion.",
     "q9": "What is an Epoch?",
-    "q9_a1": "An epoch is a CNOVA mining period. Each epoch starts with a set CNOVA reward per entry. When an epoch advances the reward per entry halves — similar to Bitcoin's halving mechanism. An epoch advances on whichever of three triggers comes first — CNOVA minted, members joined, or 30 days elapsed — so the rate can step down even in a quiet month. All three are governance-adjustable. Early participants receive the highest CNOVA rewards.",
+    "q9_a1": "An epoch is a CNOVA mining period. Each epoch starts with a set CNOVA reward per entry. When an epoch advances the reward per entry steps down — 50 → 40 first, then halving each epoch after (40 → 20 → 10 → 5 → 2.5), similar to Bitcoin's halving mechanism. An epoch advances on whichever of three triggers comes first — CNOVA minted, members joined, or 30 days elapsed — so the rate can step down even in a quiet month. All three are governance-adjustable. Early participants receive the highest CNOVA rewards.",
     "q9_a2": "CryptoNova epoch names in order: <em>Nebula Genesis, Mercury Rise, Lunar Cluster, Aurora Zenith, Solaris Echo, Cosmic Core, Galaxy Grid, Supernova Spark, Final Frontier</em>. The current epoch is displayed on the Home and Dashboard tabs.",
     "q10": "What is an upline and downline?",
     "q10_a1": "<strong>Upline</strong> &mdash; members at shallower BFS positions than you in the matrix. They receive chain pay as new members (including you) fill positions below them.",
@@ -1086,7 +1086,7 @@
     "q16_a2": "Your referrer earns the <strong>5% L1 referral bonus</strong> ($0.50 at T1, $500 at T10) whenever you register or upgrade at any tier. This rewards the person who brought you in for your lifetime participation.",
     "q17": "How does the equalization pool and re-entry work?",
     "q17_a1": "18% of each entry fee ($1.80 at T1) flows into the equalization pool for that matrix. Each rotation, the pool distributes across all seated members weighted by seat depth — deeper seats receive larger shares, which offsets the wait. When you cycle out, re-entry costs the full entry fee: your crossing reserve covers half and your accumulated earnings the rest, applied automatically &mdash; no action required on your part.",
-    "q17_a2": "If the pool accumulates before the matrix fills (from multiple cycles), the excess funds the root member's re-entry fee automatically. You can also top up your pool balance manually from the Dashboard if you want to accelerate re-entry.",
+    "q17_a2": "Pool shares are not saved up for one payout event — they drip continuously. Every rotation of the matrix distributes that rotation's pool across the seated members, weighted by seat depth, and your accumulated share is credited to your in-matrix earnings. Those earnings are what fund your automatic re-entry (together with your crossing reserve) when you cycle out.",
     "q18": "What happens if I go inactive?",
     "q18_a1": "After <strong>7 days</strong> with no activity (a governance-adjustable setting), an automated keeper may vacate your matrix seat and move you to the parked queue. What this means:",
     "q18_li1": "What you lose is the <strong>seat itself</strong> and the chain-pay position that came with it — chain pay stops because the position is no longer yours",
@@ -1094,7 +1094,7 @@
     "q18_li3": "Your CNOVA and your referral history are untouched",
     "q18_a2": "This protects matrix health — abandoned wallets do not block active members from earning.",
     "q19": "How do I get back in after being parked?",
-    "q19_a1": "Getting back in costs a <strong>full entry fee</strong> for that tier. Your returned crossing reserve covers about half of it, and accumulated earnings usually cover the rest. Connect your wallet, open the Dashboard, and use <strong>Self Rescue</strong> — the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.",
+    "q19_a1": "Getting back in costs a <strong>full entry fee</strong> for that tier. Your returned crossing reserve covers exactly half of it, and your accumulated earnings go toward the rest. If they still fall short, <strong>Self Rescue</strong> pays the remaining shortfall from your wallet (you approve USDC to the matrix first — no loan and no debt is created). Connect your wallet, open the Dashboard, and use Self Rescue — the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.",
     "q19_a2": "All your previous USDC earnings and CNOVA are untouched — re-entry only places you back into the live matrix queue.",
     "q20": "What is the CNOVA token?",
     "q20_a1": "CNOVA is the native reward token of CryptoNova Matrix. It is minted and distributed to participants each time a new member joins. It is <strong>not a stablecoin</strong> and not a security &mdash; it is an in-protocol utility token with a rising floor price mechanism.",
@@ -1142,7 +1142,7 @@
     "g15_full": "Whale Gate",
     "g15_def": "A fairness mechanism that limits large wallets from jumping straight to high tiers before enough genuine pioneers have joined. Each tier T5–T10 has its own pioneer threshold (DAO-governed). Once met, the gate opens for that tier.",
     "g16_full": "Crossing Reserve",
-    "g16_def": "50% of your entry fee held by the smart contract specifically to pay for your re-entry when your 127-seat matrix completes a cycle. It means your first crossing costs you nothing extra out of pocket.",
+    "g16_def": "50% of your entry fee held by the smart contract specifically to pay for your re-entry when your 127-seat matrix completes a cycle. It pre-funds exactly half of your crossing fee; your accumulated earnings cover the rest (and Self-Rescue can cover any shortfall from your wallet if needed).",
     "g17_full": "Soft-Park",
     "g17_def": "An idle state your account enters after a period of inactivity. Your seat is reserved, chain pay continues, but you are not counted toward velocity gates. Reactivate any time by making a transaction.",
     "g18_full": "Instant Earn",

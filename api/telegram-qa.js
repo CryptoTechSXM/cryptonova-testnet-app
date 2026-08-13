@@ -62,7 +62,7 @@ Every entry fee, at every tier, splits identically:
 - <b>5% L1 direct referral</b> — paid instantly, on registration AND on every tier upgrade the referred member ever makes. Referrer locked on-chain for life.
 - <b>13.5% chain pay</b> — 2.7% to each of 5 upline matrix positions (L2–L6), fired by every entry below them, referred or not.
 - <b>18% equalization pool</b> — accumulates per matrix. On EVERY rotation the pool splits across seats 2–127, <b>weighted by seat depth</b> — deeper seats receive larger shares; the cycling root receives none that rotation. Pool earnings drip continuously as the matrix rotates. There is NO lump-sum "root wins the whole pool" payout and NO "earn 2x your entry" payout — never claim either.
-- Remaining 11% protocol reserves: CNOVA Treasury 5%, Stability Fund 3%, Dev 1%, Ops 0.5%, Community Wallet 0.5%, Buyback 0.5%, Liquidity 0.5%.
+- Remaining 11% protocol reserves: CNOVA Treasury 5%, Stability Fund 3%, Dev 1%, Ops 0.5%, Community Wallet 1%, Buyback 0.25%, Liquidity 0.25%.
 Total cycle earnings = accumulated chain pay + pool shares + referral bonuses + instant earn — never a fixed multiple of the entry fee.
 
 ## Double Entry (opt-in feature)
@@ -131,7 +131,7 @@ T5 in Epoch 1 = 50x20 = <b>1,000 CNOVA</b>. T10 in Epoch 1 = 50x640 = <b>32,000 
 Mining stops after all 9 epochs (21M hard cap). Do NOT say "after your 8th cycle you stop mining" - epochs are global.
 
 ## Community Pool
-<b>0.5% of every entry fee</b> (50 BPS) plus orphan fees (entries with no valid upline). First 1,000 wallets eligible — enrollment automatic and permanent, closes forever at member 1,000.
+<b>1% of every entry fee</b> (100 BPS) plus orphan fees (entries with no valid upline). First 1,000 wallets eligible — enrollment automatic and permanent, closes forever at member 1,000.
 Genesis (#1-500) = 60%, Pioneer (#501-1000) = 40%, split evenly within each cohort.
 Every 30 days a distribution can be triggered: half the pool pays out, half rolls over and compounds. Payouts begin at mainnet (policy).
 
@@ -159,7 +159,7 @@ Withdrawable, Total Earned, CNOVA Balance, CNOVA Value, CNOVA Burned, Community 
 At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out funds in priority order: <b>re-entry → next-tier upgrade → double seat</b>. Each step fires only if the remaining funds cover its fee; otherwise it is silently skipped.
 - Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles, double OFF. Change anytime via Dashboard toggles (Member Options). Each enabled toggle holds back its fee from withdrawals so your automation stays funded.
 - Fees come from your in-contract funds (crossing reserve + withdrawable) — NOT from your external wallet. Not free — it comes from earnings.
-- <b>Manual upgrade eligibility:</b> complete a cycle at your current tier, or cross into its MatB — or the target tier's Whale Gate is open (T2–T5 open together once 25 pioneers reach T5; T6–T10 each at their own 25-member milestone). Auto-upgrades are never whale-gated.
+- <b>Manual upgrade eligibility:</b> complete a cycle at your current tier, or cross into its MatB — or the target tier's Whale Gate is open (T2–T5 open together once 25 pioneers reach T5; T6–T10 each at their own pioneer milestone — 15 for T6, 10 for T7, and 5 each for T8/T9/T10). Auto-upgrades are never whale-gated.
 - <b>Parked / rescue:</b> if crossing funds come up short, you are parked — earnings, reserve, and CNOVA are never confiscated. Three paths back in:
   1. <b>Auto-rescue</b> — if your balance covers the fee, the keeper re-enters you automatically within ~24 hours, no cost.
   2. <b>Self-rescue</b> — pay only the shortfall from your wallet. NO loan, NO debt, nothing owed back.
