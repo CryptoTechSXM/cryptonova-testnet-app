@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-13] Other — Withdraw all triggers the contract but no reaction in wallet…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Withdraw all triggers the contract but no reaction in wallet for confirmation of the withdrawal.. However, CNova withdrawals went through...
+- **What was expected:** To see a sign and confirmation in wallet to accept.
+- **Notes:** Same on other wallets.. couldn't do withdrawals but CNova worked..
+- **Submitted:** Thu, 13 Aug 2026 02:40:20 GMT
+
+
 ### [2026-08-11] Dashboard (index.html) — I had to click both Approval and Self-Rescue several times, …
 - **Reporter:** @Lavern-Gay
 - **Page:** Dashboard (index.html)
