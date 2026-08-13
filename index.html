@@ -7451,34 +7451,68 @@ async function doWithdraw() {
   try {
     const recipient = getWithdrawRecipient();
     // Read first (no signature): does the member hold anything withdrawable anywhere?
+    //
+    // 2026-08-13 (Sherwyn: "Withdraw all triggers the contract but no reaction in
+    // wallet"): this pre-check used to walk ~34 matrices SERIALLY with every read
+    // behind .catch(() => null). On a busy RPC that either hung here — the member
+    // sees a spinner and no wallet popup, exactly the report — or every read failed
+    // and a member with real money was told "Nothing to withdraw." (a fabricated
+    // read gating an action, the 6ced4f1 class). Now: batched, retried, progress
+    // shown, and an unknown result is reported as UNKNOWN — never as an empty
+    // balance.
+    setStatus('withdraw-status', 'Checking balances across your matrices…', 'info');
     const _matObjs = await _buildAllMatrixObjects(rp);
-    let anything = false;
-    for (const m of _matObjs) {
-      const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
-      const member = await mc.getMember(userAddr).catch(()=>null);
-      if (member && BigInt(member.withdrawable) > 0n) { anything = true; break; }
+    const _scan = []; // { m, wd: bigint | null (null = read failed after retries) }
+    const _BATCH = 6;
+    for (let i = 0; i < _matObjs.length; i += _BATCH) {
+      const part = _matObjs.slice(i, i + _BATCH);
+      const res = await Promise.all(part.map(m => {
+        const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
+        return retryRead(() => mc.getMember(userAddr));
+      }));
+      part.forEach((m, j) => _scan.push({ m, wd: res[j].ok ? BigInt(res[j].value.withdrawable) : null }));
     }
-    if (!anything) { setStatus('withdraw-status', 'Nothing to withdraw.', 'info'); return; }
+    const _anyBalance = _scan.some(s => s.wd !== null && s.wd > 0n);
+    const _anyUnknown = _scan.some(s => s.wd === null);
+    if (!_anyBalance) {
+      if (_anyUnknown) {
+        // Do NOT send a paid transaction on unverified state, and do NOT claim the
+        // member has nothing — say what actually happened.
+        setStatus('withdraw-status', 'Could not verify your balances right now (network busy) — this does NOT mean you have nothing to withdraw. Please try again in a moment.', 'err');
+      } else {
+        setStatus('withdraw-status', 'Nothing to withdraw.', 'info');
+      }
+      return;
+    }
 
     if (recipient) {
-      // Custom recipient: bulkWithdraw pays only the member, so loop withdrawTo per matrix.
-      let withdrawn = false;
-      for (const m of _matObjs) {
-        const mc = new ethers.Contract(m.addr, MATRIX_ABI, rp);
-        const member = await mc.getMember(userAddr).catch(()=>null);
-        if (member && BigInt(member.withdrawable) > 0n) {
-          const mcW = new ethers.Contract(m.addr, MATRIX_ABI, signer);
+      // Custom recipient: bulkWithdraw pays only the member, so loop withdrawTo per
+      // matrix — reusing the scan above. A matrix whose read failed is REPORTED, not
+      // silently skipped: a silent skip leaves money behind with no trace.
+      let withdrawn = false; const _skipped = [];
+      for (const s of _scan) {
+        if (s.wd === null) { _skipped.push(s.m.label); continue; }
+        if (s.wd > 0n) {
+          const mcW = new ethers.Contract(s.m.addr, MATRIX_ABI, signer);
           const tx = await mcW.withdrawTo(recipient);
           await tx.wait();
           withdrawn = true;
         }
       }
-      setStatus('withdraw-status', withdrawn ? '✅ Earnings withdrawn to your chosen address!' : 'Nothing to withdraw.', withdrawn ? 'ok' : 'info');
+      const _skipNote = _skipped.length ? ` (${_skipped.length} matrix could not be checked — run Withdraw again in a moment to catch anything left there)` : '';
+      setStatus('withdraw-status', withdrawn ? `✅ Earnings withdrawn to your chosen address!${_skipNote}` : `Nothing to withdraw.${_skipNote}`, withdrawn ? 'ok' : 'info');
     } else {
       // ONE signature: TierRouter.bulkWithdraw() sweeps every tier's free balance in a single tx.
       const trR = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-      let gl = 6000000n;
-      try { const est = await trR.bulkWithdraw.estimateGas({ from: userAddr }); gl = est + est / 4n; } catch(_) {}
+      // A failing estimate is the contract refusing the call, or a dead RPC — either
+      // way, do not paper over it with a static gas limit: a doomed send costs the
+      // member gas and discards the reason (the standing no-clamp/no-fallback rule).
+      const _estR = await retryRead(() => trR.bulkWithdraw.estimateGas({ from: userAddr }));
+      if (!_estR.ok) {
+        setStatus('withdraw-status', friendlyError(_estR.error), 'err');
+        return;
+      }
+      const gl = _estR.value + _estR.value / 4n;
       const trW = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
       // Measure what ARRIVED rather than announcing success on a mined transaction:
       // bulkWithdraw sweeps whatever is free, which is not necessarily what the card
