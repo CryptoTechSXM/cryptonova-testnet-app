@@ -5675,10 +5675,13 @@ async function loadDashboardData() {
         setText('rescue-fee',          fmt6(parkedInfo.fee));
         setText('rescue-shortfall',    fmt6(parkedInfo.shortfall));
 
-        // Show co-pay option — calculate member wallet share
-        const _sfShare     = parkedInfo.withdrawable / 2n;
-        const _shortfall   = parkedInfo.fee > parkedInfo.withdrawable ? parkedInfo.fee - parkedInfo.withdrawable : 0n;
-        const _memberShare = _shortfall > _sfShare ? _shortfall - _sfShare : 0n;
+        // V8.48 item 15 (2026-08-13): the old block invented its own co-pay math
+        // (`sfShare = withdrawable / 2`, shortfall ignoring the crossing reserve)
+        // and could show a nonzero "You pay" — but coPayRescue NEVER pulls from
+        // the wallet: the SF lends the ENTIRE shortfall (reserve + earnings
+        // counted first, MatrixLogicLib.coPayRescue) or the tx reverts. The
+        // approve step it drove was a pointless allowance + gas. Contract truth:
+        const _memberShare = 0n;
         // Self rescue shortfall tracking
         window._selfRescueShortfall = parkedInfo.shortfall;
 
@@ -7679,17 +7682,29 @@ async function doGraduatedReenter(tNum) {
       if (btn) btn.disabled = false;
       return;
     }
-    const feeNum = Number(fee) / 1e6;
-    const balNum = Number(bal)  / 1e6;
-    if (bal < fee) {
-      _s(`❌ Need $${feeNum.toFixed(2)} USDC — wallet has $${balNum.toFixed(2)}`);
+    // V8.48 item 15 (2026-08-13): manualUpgrade pulls fee + outstanding rescue
+    // debt (_walletFold) — the V8.47 gate. This flow approved FEE ONLY, the exact
+    // allowance-revert Jacob hit on the main upgrade path (fixed there in
+    // 50c59b1, missed here). Charge basis is fee + memberDebtOf; unknown debt
+    // aborts honestly, same policy as approveUSDCForUpgrade.
+    const debtDue = await _upgradeDebtDue(rp).catch(() => null);
+    if (debtDue === null) {
+      _s('⚠️ Could not confirm whether you have an outstanding rescue loan (the re-entry charges fee + loan together). Nothing was sent — please retry in a moment.');
       if (btn) btn.disabled = false;
       return;
     }
-    if (allowance < fee) {
-      _s('⏳ Approving USDC…');
+    const totalDue = fee + debtDue;
+    const feeNum = Number(totalDue) / 1e6;
+    const balNum = Number(bal)  / 1e6;
+    if (bal < totalDue) {
+      _s(`❌ Need $${feeNum.toFixed(2)} USDC${debtDue > 0n ? ' (fee + rescue-loan settlement)' : ''} — wallet has $${balNum.toFixed(2)}`);
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (allowance < totalDue) {
+      _s(debtDue > 0n ? `⏳ Approving $${feeNum.toFixed(2)} USDC (fee + rescue-loan settlement)…` : '⏳ Approving USDC…');
       const usdcW = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-      await (await usdcW.approve(ADDRS.tierRouter, fee, { gasLimit: 100_000 })).wait();
+      await (await usdcW.approve(ADDRS.tierRouter, totalDue, { gasLimit: 100_000 })).wait();
     }
     _s('⏳ Submitting re-entry…');
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
