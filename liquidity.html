@@ -1100,6 +1100,9 @@ const DIRECT_SALE_ADDR = '0xae43bc9578B820cc2a29Ac92dA9806E987aDF8eB'; // V8.31
 const CNOVA_DECIMALS = 18;
 
 const LP_ABI = [
+  // V8.48 parity audit F25 (2026-08-13): Swap event added so the success message
+  // can report the EXECUTED amount from the receipt, not the pre-trade quote.
+  'event Swap(address indexed user, bool usdcIn, uint256 amountIn, uint256 amountOut, uint256 feeCharged)',
   'function swapUSDCForCNOVA(uint256 usdcIn, uint256 minCnovaOut) returns (uint256)',
   'function swapCNOVAForUSDC(uint256 cnovaIn, uint256 minUsdcOut) returns (uint256)',
   'function addLiquidity(uint256 usdcAmount, uint256 cnovaAmount) returns (uint256 lpMinted)',
@@ -1252,6 +1255,21 @@ async function updateSwapQuote() {
 }
 
 // ── Execute swap ─────────────────────────────────────────────────────────────
+// F25: pull the executed amountOut from the receipt's Swap event. Returns a
+// BigInt or null — null means "could not parse", and the caller says so instead
+// of printing the quote as if it executed.
+function _swapAmountOut(rcpt) {
+  try {
+    for (const log of (rcpt && rcpt.logs) || []) {
+      try {
+        const parsed = lpContract.interface.parseLog(log);
+        if (parsed && parsed.name === 'Swap') return parsed.args.amountOut;
+      } catch (_) { /* not an LP event — skip */ }
+    }
+  } catch (_) {}
+  return null;
+}
+
 async function doSwap() {
   if (!lpContract) return;
   const val = parseFloat(document.getElementById('inp-swap-in').value);
@@ -1276,8 +1294,13 @@ async function doSwap() {
 
       showMsg('msg-swap', 'Swapping — confirm in MetaMask…', 'loading');
       const tx = await lpContract.swapUSDCForCNOVA(amt, slippage);
-      await tx.wait();
-      showMsg('msg-swap', `✓ Swapped $${val} USDC for ${(Number(minOut)/1e18).toFixed(4)} CNOVA!`, 'ok');
+      const rcpt = await tx.wait();
+      // F25: report what EXECUTED (Swap event), not the quote — actual out can be
+      // up to 5% below the quote (the slippage floor above).
+      const actualOut = _swapAmountOut(rcpt);
+      showMsg('msg-swap', actualOut !== null
+        ? `✓ Swapped $${val} USDC for ${(Number(actualOut)/1e18).toFixed(4)} CNOVA!`
+        : `✓ Swap confirmed — received at least ${(Number(slippage)/1e18).toFixed(4)} CNOVA (exact amount unavailable, check your wallet)`, 'ok');
 
     } else {
       const amt = BigInt(Math.round(val * 1e18));
@@ -1293,8 +1316,11 @@ async function doSwap() {
 
       showMsg('msg-swap', 'Swapping — confirm in MetaMask…', 'loading');
       const tx = await lpContract.swapCNOVAForUSDC(amt, slippage);
-      await tx.wait();
-      showMsg('msg-swap', `✓ Swapped ${val} CNOVA for $${(Number(minOut)/1e6).toFixed(2)} USDC!`, 'ok');
+      const rcpt = await tx.wait();
+      const actualOut = _swapAmountOut(rcpt);
+      showMsg('msg-swap', actualOut !== null
+        ? `✓ Swapped ${val} CNOVA for $${(Number(actualOut)/1e6).toFixed(2)} USDC!`
+        : `✓ Swap confirmed — received at least $${(Number(slippage)/1e6).toFixed(2)} USDC (exact amount unavailable, check your wallet)`, 'ok');
     }
 
     document.getElementById('inp-swap-in').value = '';

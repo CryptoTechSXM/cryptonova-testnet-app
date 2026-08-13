@@ -974,16 +974,25 @@ function onAmountChange() {
   const floorVal  = cnovaOut * floorPrice;        // what goes to treasury
   const premium   = usdcAmt - floorVal;           // extra above floor value
 
-  // Dynamic SF/LQ split based on deficits
-  const sfDeficit = Math.max(0, SF_TARGET_USD - sfBalUSD);
-  const lqDeficit = Math.max(0, LQ_TARGET_USD - lqBalUSD);
-  const totalDeficit = sfDeficit + lqDeficit;
-  let sfShare, lqShare;
-  if (totalDeficit === 0) {
-    sfShare = lqShare = premium / 2;
-  } else {
-    sfShare = premium * (sfDeficit / totalDeficit);
-    lqShare = premium * (lqDeficit / totalDeficit);
+  // Dynamic SF/LQ split based on deficits — LOCAL ESTIMATE ONLY. The contract's
+  // own previewPurchase() overwrites these cells a moment later (F24, 2026-08-13);
+  // this instant paint just keeps the input responsive.
+  // F24 fix: sfBalUSD/lqBalUSD are null when the balance reads failed. The old
+  // code coerced null to $0 (Math.max(0, 500 - null) = 500) and rendered a
+  // fabricated full-deficit split. null → no local split; the cells show "…"
+  // until the contract answers.
+  const balsKnown = sfBalUSD !== null && lqBalUSD !== null;
+  let sfShare = null, lqShare = null;
+  if (balsKnown) {
+    const sfDeficit = Math.max(0, SF_TARGET_USD - sfBalUSD);
+    const lqDeficit = Math.max(0, LQ_TARGET_USD - lqBalUSD);
+    const totalDeficit = sfDeficit + lqDeficit;
+    if (totalDeficit === 0) {
+      sfShare = lqShare = premium / 2;
+    } else {
+      sfShare = premium * (sfDeficit / totalDeficit);
+      lqShare = premium * (lqDeficit / totalDeficit);
+    }
   }
 
   // Render output
@@ -999,13 +1008,49 @@ function onAmountChange() {
 
   document.getElementById('breakdown').style.display = 'block';
   document.getElementById('bd-treasury').textContent = fmtD(floorVal);
-  document.getElementById('bd-sf').textContent       = fmtD(sfShare);
-  document.getElementById('bd-lq').textContent       = fmtD(lqShare);
+  document.getElementById('bd-sf').textContent       = sfShare === null ? '…' : fmtD(sfShare);
+  document.getElementById('bd-lq').textContent       = lqShare === null ? '…' : fmtD(lqShare);
   document.getElementById('bd-total').textContent    = fmtD(usdcAmt);
+
+  // F24 (2026-08-13): the numbers above are a client-side model. The contract
+  // exposes previewPurchase() — ask IT how this exact purchase would split, and
+  // overwrite the estimate (debounced; stale responses discarded).
+  _refreshBreakdownFromContract(usdcAmt);
 
   // Check approval
   if (signer) refreshWalletState().then(renderActionArea);
   else renderActionArea();
+}
+
+// ── F24: contract-truth breakdown via previewPurchase() ─────────────────────
+let _previewSeq = 0;
+let _previewTimer = null;
+function _refreshBreakdownFromContract(usdcAmt) {
+  if (!DIRECT_SALE_ADDR || !usdcAmt || usdcAmt <= 0) return;
+  const seq = ++_previewSeq;
+  clearTimeout(_previewTimer);
+  _previewTimer = setTimeout(async () => {
+    try {
+      const ro = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID, { staticNetwork: _NET_STATIC });
+      const ds = new ethers.Contract(DIRECT_SALE_ADDR, DIRECT_SALE_ABI, ro);
+      const amt6 = BigInt(Math.round(usdcAmt * 1e6));
+      const [cnovaOut, toTreasury, toSF, toLQ] = await ds.previewPurchase(amt6);
+      if (seq !== _previewSeq) return;   // input changed since — discard
+      const fmtC = n => n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:4 });
+      const fmtD = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+      document.getElementById('cnova-out').textContent   = fmtC(Number(cnovaOut) / 1e18);
+      document.getElementById('bd-treasury').textContent = fmtD(Number(toTreasury) / 1e6);
+      document.getElementById('bd-sf').textContent       = fmtD(Number(toSF) / 1e6);
+      document.getElementById('bd-lq').textContent       = fmtD(Number(toLQ) / 1e6);
+    } catch (_) {
+      // Preview unavailable (RPC drop): if the local split was also unknowable
+      // (null balances), say so honestly instead of leaving "…" forever.
+      if (seq !== _previewSeq) return;
+      const sfEl = document.getElementById('bd-sf'), lqEl = document.getElementById('bd-lq');
+      if (sfEl && sfEl.textContent === '…') sfEl.textContent = '— (could not verify)';
+      if (lqEl && lqEl.textContent === '…') lqEl.textContent = '— (could not verify)';
+    }
+  }, 350);
 }
 
 // ── Action area ───────────────────────────────────────────────────────────────
