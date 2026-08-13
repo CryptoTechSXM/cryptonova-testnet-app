@@ -251,6 +251,18 @@
   .sub-nav a:hover{color:var(--text);}
   .sub-nav a.active{color:var(--green);border-bottom-color:var(--green);font-weight:600;}
   @media(max-width:768px){.sub-nav{display:none;}}
+/* V8.48 member request 2026-08-13: param search + plain-language explanations */
+.param-search-wrap { position: relative; }
+.param-results { border: 1px solid var(--border); border-radius: 10px; margin-top: 6px; max-height: 260px; overflow-y: auto; background: var(--bg2); }
+.param-result { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.param-result:last-child { border-bottom: none; }
+.param-result:hover { background: rgba(168,85,247,0.08); }
+.param-result .pr-label { font-size: 13px; font-weight: 700; color: var(--text1); }
+.param-result .pr-group { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); margin-left: 6px; font-weight: 400; }
+.param-result .pr-plain { font-size: 11.5px; color: var(--text2); margin-top: 2px; }
+.param-no-results { padding: 10px 14px; font-size: 12px; color: var(--text3); }
+.param-plain-box { background: rgba(56,189,248,0.07); border: 1px solid rgba(56,189,248,0.22); border-radius: 8px; padding: 10px 14px; margin: 0 0 12px; font-size: 12.5px; line-height: 1.5; color: var(--text2); }
+.proposal-plain { font-size: 11.5px; color: var(--text3); margin-top: 6px; line-height: 1.45; }
 </style>
 </head>
 <body>
@@ -481,6 +493,15 @@
   <div class="card">
     <div class="card-title"><div class="card-title-left"><span class="dot"></span> <span data-i18n="govPage.create_title">Create Proposal</span></div></div>
 
+    <div class="form-row param-search-wrap">
+      <label class="form-label" data-i18n="govPage.search_label">Find a Parameter</label>
+      <input class="form-input" id="param-search" type="search" autocomplete="off"
+             placeholder="Search by name or keyword — fee, epoch, rescue, quorum…"
+             data-i18n-placeholder="govPage.search_placeholder" oninput="onParamSearch()">
+      <div class="param-results" id="param-search-results" style="display:none;"></div>
+      <div class="form-hint" data-i18n="govPage.search_hint">Type to search all governable parameters, then click a result to load it below.</div>
+    </div>
+
     <div class="form-row">
       <label class="form-label" data-i18n="govPage.param_label">Parameter to Change</label>
       <select class="form-select" id="param-select" onchange="onParamChange()">
@@ -580,6 +601,8 @@
       </select>
     </div>
 
+    <div class="param-plain-box" id="param-plain" style="display:none;"></div>
+
     <div class="form-row" id="matrix-instance-row" style="display:none;">
       <label class="form-label"><span data-i18n="govPage.tier_instance_label">Tier</span> <span style="font-weight:400;color:var(--text3);" data-i18n="govPage.tier_instance_note">(this fee is set per tier, not protocol-wide)</span></label>
       <select class="form-input" id="matrix-instance-select" onchange="onMatrixInstanceChange()">
@@ -626,10 +649,13 @@
     </div>
 
     <div id="propose-gate" style="font-size:13px;color:var(--text3);margin-bottom:10px;"></div>
-    <!-- V8.34: proposal fee notice -->
+    <!-- V8.34 wrote this notice for a fee that never existed on chain; V8.48 item 43
+         made the fee REAL (param 58). The text is populated LIVE from proposalFee() —
+         feature-detected across the V8.47→V8.48 cutover — and the static default is
+         the honest "checking" state, never an asserted number. -->
     <div style="display:flex;align-items:center;gap:8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);">
       <span style="font-size:16px;">🔥</span>
-      <span>Submitting a proposal costs only gas — there is <strong style="color:#a855f7">no CNOVA fee and no burn</strong>. Voting is always free. One wallet confirmation.</span>
+      <span id="fee-notice-text">Checking the current proposal fee… <strong style="color:#a855f7">Voting is always free.</strong></span>
     </div>
     <button class="btn-propose" id="btn-propose" disabled onclick="createProposal()" data-i18n="govPage.submit_btn">Submit Proposal</button>
     <div id="prop-status"></div>
@@ -647,7 +673,7 @@
       <div class="how-step">
         <div class="how-num">2</div>
         <h4 data-i18n="govPage.how2_h">Propose</h4>
-        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of CNOVA supply can submit a param-change proposal. Only allowlisted values are accepted. Voting is always free.</p>
+        <p data-i18n="govPage.how2_p">Any holder of at least 0.01% of CNOVA supply can submit a param-change proposal. Only allowlisted values are accepted. If the DAO has set a proposal fee, it is burned when you submit (the fee itself is DAO-votable, down to 0). Voting is always free.</p>
       </div>
       <div class="how-step">
         <div class="how-num">3</div>
@@ -728,6 +754,7 @@ const PARAM_TARGETS = {
   // Param 10 (Early Exit Penalty BPS) retired entirely -- no target, not proposable.
   9: TIER_ROUTER,
   11: GOV_ADDR, 12: GOV_ADDR, 13: GOV_ADDR,
+  58: GOV_ADDR,   // V8.48 item 43: proposal fee (self param; picker entry installed at runtime iff the deployed governance has proposalFee())
   14: MK_ADDR,
   15: TIER_ROUTER, 16: TIER_ROUTER, 17: TIER_ROUTER, 18: TIER_ROUTER,
   // V8.35: per-tier whale gate thresholds (params 52-57)
@@ -763,84 +790,85 @@ const PARAM_GATE_TIER  = { 52: 5, 53: 6, 54: 7, 55: 8, 56: 9, 57: 10 };
 // English fallback text, used by t() whenever a translation key is missing
 // (including before i18n.js's fetch resolves).
 const PARAM_FALLBACK = {
-  1:  { label:'Auto-Upgrade Cycle Threshold', hint:'Cycles W1 must complete before auto-upgrade triggers.' },
-  2:  { label:'Re-entry Min Cycles', hint:'Minimum cycles a wallet must complete before re-entering.' },
+  1:  { plain:"How many times you must cycle in your current tier before auto-upgrade is allowed to fire. Raising it slows automatic upgrades; lowering it speeds them up.", label:'Auto-Upgrade Cycle Threshold', hint:'Cycles W1 must complete before auto-upgrade triggers.' },
+  2:  { plain:"How many cycles a position must complete before automatic re-entry can seat you again. Higher = slower re-entries.", label:'Re-entry Min Cycles', hint:'Minimum cycles a wallet must complete before re-entering.' },
   // V8.21: param 3 (Escrow Floor Multiplier) retired entirely -- TierRouter's
   // setter was deleted (it gated a guard that could never fire), and propose()
   // now permanently rejects this id. No fallback entry, so it can't render.
-  4:  { label:'Velocity Window (s)', hint:'Time window for velocity checks (seconds). 3600 = 1 hour.' },
-  5:  { label:'Velocity Threshold', hint:'Minimum fills required within the velocity window to keep gate open.' },
-  6:  { label:'Deflation Threshold', hint:'Parked wallet % above which deflation mode activates.' },
-  7:  { label:'Idle Slot Timeout (s)', hint:'Seconds before an idle slot is eligible for reclamation.' },
-  8:  { label:'Max Items Per Upkeep', hint:'Max work items processed per keeper call.' },
-  9:  { label:'Withdrawal Fee BPS', hint:'Fee on withdrawals in BPS (150 = 1.5%). V8.21: targets a tier\'s PairManagerV8, which broadcasts the new fee to every MatA/MatB pair that tier has ever added (not just one matrix instance).' },
+  4:  { plain:"The time window the system watches to judge whether new entries are flowing in fast enough. Shorter = reacts faster to slowdowns.", label:'Velocity Window (s)', hint:'Time window for velocity checks (seconds). 3600 = 1 hour.' },
+  5:  { plain:"How many seats must fill inside that window for growth to count as healthy and keep the gate open.", label:'Velocity Threshold', hint:'Minimum fills required within the velocity window to keep gate open.' },
+  6:  { plain:"If more than this share of members are parked (waiting to re-enter), the system switches to a defensive mode.", label:'Deflation Threshold', hint:'Parked wallet % above which deflation mode activates.' },
+  7:  { plain:"How long a seat can sit inactive before the keeper may reclaim it for the community.", label:'Idle Slot Timeout (s)', hint:'Seconds before an idle slot is eligible for reclamation.' },
+  8:  { plain:"How much work the automated keeper does per run. Higher clears backlogs faster but each run costs more gas.", label:'Max Items Per Upkeep', hint:'Max work items processed per keeper call.' },
+  9:  { plain:"The fee taken out of every USDC withdrawal (150 = 1.5%). This is what funds the Stability Fund that rescues parked members.", label:'Withdrawal Fee BPS', hint:'Fee on withdrawals in BPS (150 = 1.5%). V8.21: targets a tier\'s PairManagerV8, which broadcasts the new fee to every MatA/MatB pair that tier has ever added (not just one matrix instance).' },
   // V8.21: param 10 (Early Exit Penalty BPS) retired entirely -- the
   // field/setter/getter were removed from FigureEightMatrixV8.sol because
   // they were stored/DAO-votable but never consumed by any withdraw/cycle
   // logic. No fallback entry, so it can't render. See V8Governance.sol's
   // retirement note for the real (hardcoded) early-exit penalty mechanism,
   // which lives in CNOVATreasury.redeemAtFloor().
-  11: { label:'Voting Period (s)', hint:'Duration of the voting window in seconds.' },
-  12: { label:'Timelock Period (s)', hint:'Delay between proposal passing and execution in seconds.' },
-  13: { label:'Quorum BPS', hint:'Minimum % of CNOVA supply that must vote (200 = 2%).' },
-  14: { label:'SF Rescue Ladder',
+  11: { plain:"How long the community gets to vote on each proposal before voting closes.", label:'Voting Period (s)', hint:'Duration of the voting window in seconds.' },
+  58: { plain:"What it costs to put a proposal on the ballot. The fee is burned - removed from supply forever - to keep spam proposals out. It only applies to CREATING proposals; voting is always free. 0 makes proposing free.", label:'Proposal Fee (CNOVA)', hint:'CNOVA burned from the proposer on every proposal (normal and boost-table). Your wallet asks for a one-time approval of exactly the fee before the proposal transaction. V8.48 param 58; menu 0-1000 CNOVA; 0 disables the fee.' },
+  12: { plain:"The safety delay between a proposal passing and the change actually taking effect - time for everyone to see it coming.", label:'Timelock Period (s)', hint:'Delay between proposal passing and execution in seconds.' },
+  13: { plain:"How much of all CNOVA must vote for a proposal to count at all (200 = 2%). Higher = harder to pass, safer against low-turnout changes.", label:'Quorum BPS', hint:'Minimum % of CNOVA supply that must vote (200 = 2%).' },
+  14: { plain:"Chooses how generous the Stability Fund is when rescuing parked members, based on how much they have already withdrawn. Presets 0-3, from strictest to most generous.", label:'SF Rescue Ladder',
         hint:'Maps each parked member\'s withdrawal ratio to how much StabilityFund coverage they get on rescue. Lower withdrawal ratio (less already claimed) → higher SF coverage.',
         col1Label: 'Withdrawal % Threshold (desc)', col2Label: 'SF Coverage BPS (asc)',
         col1Hint: 'BPS of total earned already withdrawn. Row 1 is fixed at 10000/0 (full withdrawal = no rescue). Each row after must be strictly lower.',
         col2Hint: 'BPS of the remaining shortfall StabilityFund covers at this threshold. Must strictly increase, capped at 10000 (100%).' },
-  15: { label:'Whale Gate Threshold', hint:'Number of T5-first-entry members that activates the whale gate (extra anti-abuse check).' },
-  16: { label:'Inactivity Days Threshold', hint:'Days of inactivity before the days-based guard pauses a wallet. 0 disables this guard.' },
-  17: { label:'Inactivity Cycles Threshold', hint:'Cycles of inactivity before the cycles-based guard pauses a wallet. 0 disables this guard.' },
-  18: { label:'Inactivity Guard Enabled', hint:'Master on/off switch for the inactivity guard (1 = enabled, 0 = disabled).' },
-  19: { label:'Parked Grace Period', hint:'Seconds a parked member must wait before becoming eligible for rescue or eviction.' },
-  20: { label:'Rescue Ratio BPS', hint:'Withdrawal ratio (BPS of total earned) above which a parked member is evicted instead of rescued.' },
-  21: { label:'SF Target (Manual Fallback)', hint:'StabilityFund health target in USDC, used as a fallback. 100% of withdrawal fees route to the Buyback Reserve once balance reaches this. As of V8.21, the LIVE target usually auto-scales with the highest tier the system has organically opened (current tier entry fee x a per-tier multiplier) — this DAO-voted value only takes effect if that auto-scaling is switched off or not yet wired.' },
-  22: { label:'SF Community Carve-Out BPS', hint:'Share of SF inflow routed to CommunityWallet (BPS). 0 pauses routing without unsetting CommunityWallet.' },
-  23: { label:'SF Stability Floor', hint:'Minimum SF balance reserved before any payouts. Capped at the current effective SF Target (auto-scaled or manual fallback) — can never exceed it.' },
-  24: { label:'Buyback Trigger Threshold', hint:'USDC balance in the Buyback Reserve required to trigger a CNOVA buyback.' },
-  25: { label:'Buyback Max Slippage BPS', hint:'Maximum slippage allowed (BPS) on a buyback swap before it reverts.' },
-  26: { label:'Direct Sale Max Tx BPS', hint:'Per-transaction whale cap on CNOVADirectSale, as a % of CNOVA total supply. 0 disables the cap.' },
-  27: { label:'Direct Sale Max Wallet BPS', hint:'Per-wallet whale cap on CNOVADirectSale, as a % of resulting CNOVA total supply. 0 disables the cap.' },
-  28: { label:'Direct Sale SF Target', hint:'StabilityFund USDC target used to split each purchase\'s premium between SF and the liquidity reserve.' },
-  29: { label:'Direct Sale LQ Target', hint:'Liquidity reserve USDC target used to split each purchase\'s premium between SF and the liquidity reserve.' },
-  30: { label:'CNOVA Reward %', hint:'Final Frontier reward percentage paid out per epoch (range 10–75%).' },
-  31: { label:'Epoch Mint Limit', hint:'CNOVA minted in an epoch that triggers the next halving epoch. Lower = faster halvings.' },
-  32: { label:'Epoch Member Limit', hint:'Unique members joined in an epoch that triggers the next halving epoch.' },
-  33: { label:'Epoch Time Limit', hint:'Maximum time an epoch can run before auto-advancing, even with zero activity.' },
-  34: { label:'Vest Duration', hint:'Cliff vesting duration applied to future mints. Does not affect already-vesting batches.' },
-  35: { label:'Max Early-Exit Penalty BPS', hint:'Penalty applied at day 0 of vesting if a member exits early, sliding to 0 by the cliff date.' },
-  36: { label:'CNOVA Boost Table',
+  15: { plain:"How many members must start directly at T5 before the extra anti-whale checks switch on.", label:'Whale Gate Threshold', hint:'Number of T5-first-entry members that activates the whale gate (extra anti-abuse check).' },
+  16: { plain:"Days a wallet can stay inactive before the guard pauses it. 0 switches this guard off.", label:'Inactivity Days Threshold', hint:'Days of inactivity before the days-based guard pauses a wallet. 0 disables this guard.' },
+  17: { plain:"How many cycles can pass without any activity from a wallet before the guard pauses it. 0 switches this guard off.", label:'Inactivity Cycles Threshold', hint:'Cycles of inactivity before the cycles-based guard pauses a wallet. 0 disables this guard.' },
+  18: { plain:"Master on/off switch for the inactivity protection (1 = on, 0 = off).", label:'Inactivity Guard Enabled', hint:'Master on/off switch for the inactivity guard (1 = enabled, 0 = disabled).' },
+  19: { plain:"How long a parked member waits before the rescue system may step in - and before eviction becomes possible at all.", label:'Parked Grace Period', hint:'Seconds a parked member must wait before becoming eligible for rescue or eviction.' },
+  20: { plain:"Decides who gets rescued vs evicted: a parked member who already withdrew MORE than this share of their earnings is evicted instead of rescued.", label:'Rescue Ratio BPS', hint:'Withdrawal ratio (BPS of total earned) above which a parked member is evicted instead of rescued.' },
+  21: { plain:"The savings goal for the Stability Fund (the pot that rescues parked members). Once it is full, withdrawal fees flow to the buyback reserve instead.", label:'SF Target (Manual Fallback)', hint:'StabilityFund health target in USDC, used as a fallback. 100% of withdrawal fees route to the Buyback Reserve once balance reaches this. As of V8.21, the LIVE target usually auto-scales with the highest tier the system has organically opened (current tier entry fee x a per-tier multiplier) — this DAO-voted value only takes effect if that auto-scaling is switched off or not yet wired.' },
+  22: { plain:"The share of Stability Fund income redirected to the Community Wallet for member distributions. 0 = nothing redirected.", label:'SF Community Carve-Out BPS', hint:'Share of SF inflow routed to CommunityWallet (BPS). 0 pauses routing without unsetting CommunityWallet.' },
+  23: { plain:"The minimum the Stability Fund always keeps in reserve before paying anything out.", label:'SF Stability Floor', hint:'Minimum SF balance reserved before any payouts. Capped at the current effective SF Target (auto-scaled or manual fallback) — can never exceed it.' },
+  24: { plain:"How much USDC must collect in the buyback reserve before it automatically buys CNOVA (supporting the token's price).", label:'Buyback Trigger Threshold', hint:'USDC balance in the Buyback Reserve required to trigger a CNOVA buyback.' },
+  25: { plain:"How much price movement a buyback will tolerate before cancelling itself rather than overpaying.", label:'Buyback Max Slippage BPS', hint:'Maximum slippage allowed (BPS) on a buyback swap before it reverts.' },
+  26: { plain:"The biggest single CNOVA purchase allowed in the direct sale, as a share of total supply. An anti-whale cap; 0 = no cap.", label:'Direct Sale Max Tx BPS', hint:'Per-transaction whale cap on CNOVADirectSale, as a % of CNOVA total supply. 0 disables the cap.' },
+  27: { plain:"The most CNOVA one wallet can accumulate through direct-sale purchases, as a share of supply. 0 = no cap.", label:'Direct Sale Max Wallet BPS', hint:'Per-wallet whale cap on CNOVADirectSale, as a % of resulting CNOVA total supply. 0 disables the cap.' },
+  28: { plain:"Controls how each direct-sale purchase's premium is split toward the Stability Fund (rescues) vs the liquidity reserve.", label:'Direct Sale SF Target', hint:'StabilityFund USDC target used to split each purchase\'s premium between SF and the liquidity reserve.' },
+  29: { plain:"Controls how each direct-sale purchase's premium is split toward the liquidity reserve (trading depth) vs the Stability Fund.", label:'Direct Sale LQ Target', hint:'Liquidity reserve USDC target used to split each purchase\'s premium between SF and the liquidity reserve.' },
+  30: { plain:"The share of each entry paid back to members as CNOVA token rewards in the current era.", label:'CNOVA Reward %', hint:'Final Frontier reward percentage paid out per epoch (range 10–75%).' },
+  31: { plain:"How much CNOVA can be minted in one reward era before rewards halve into the next era. Lower = faster halvings.", label:'Epoch Mint Limit', hint:'CNOVA minted in an epoch that triggers the next halving epoch. Lower = faster halvings.' },
+  32: { plain:"How many NEW members can join during one reward era before rewards halve. This is what makes early eras genuinely reward early members.", label:'Epoch Member Limit', hint:'Unique members joined in an epoch that triggers the next halving epoch.' },
+  33: { plain:"The longest a reward era can run even with zero activity - a dormancy backstop, not the main trigger.", label:'Epoch Time Limit', hint:'Maximum time an epoch can run before auto-advancing, even with zero activity.' },
+  34: { plain:"How long newly minted CNOVA stays locked before you can move it. Does not change tokens already vesting.", label:'Vest Duration', hint:'Cliff vesting duration applied to future mints. Does not affect already-vesting batches.' },
+  35: { plain:"The penalty for cashing out vesting CNOVA on day one. It shrinks steadily to zero by the unlock date.", label:'Max Early-Exit Penalty BPS', hint:'Penalty applied at day 0 of vesting if a member exits early, sliding to 0 by the cliff date.' },
+  36: { plain:"The bonus schedule for long-term holders - the longer your CNOVA has been vesting, the higher the boost rate you earn.", label:'CNOVA Boost Table',
         hint:'Staking-duration boost lookup table -- the longer CNOVA has been vesting, the higher the boost rate applied. Pass two empty arrays on-chain to disable; this UI requires at least one row.',
         col1Label: 'CNOVA Threshold (asc)', col2Label: 'Boost Rate BPS',
         col1Hint: 'CNOVA amount breakpoint. Each row after the first must be strictly higher than the previous.',
         col2Hint: 'Boost rate in BPS applied at or above this threshold. Max 10000 (100%).' },
-  37: { label:'Community Genesis Split BPS', hint:'Genesis members\' share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
-  38: { label:'Community Distribute Ratio BPS', hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
-  39: { label:'Community Distribute Interval', hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
+  37: { plain:"Genesis members' share of each monthly community distribution; Pioneer members receive the remainder.", label:'Community Genesis Split BPS', hint:'Genesis members\' share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
+  38: { plain:"How much of the community pool is paid out each month. Whatever is not paid rolls over to next month.", label:'Community Distribute Ratio BPS', hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
+  39: { plain:"How often community distributions happen - and how long you have to claim each one before unclaimed shares return to the pool.", label:'Community Distribute Interval', hint:'Seconds between community pool distributions, and the claim-expiry window for each one.' },
   // V8.26: sfTargetMultiplier[tier] -- independently DAO-governable per tier.
   // Default is flat 20x across all tiers (changed from staircase in V8.26).
   // Each can be voted to any value via DAO proposal.
-  40: { label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1\'s entry fee to compute StabilityFund\'s auto-scaled target when T1 is the highest open tier. V8.26 default: 20x.' },
-  41: { label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2\'s entry fee to compute StabilityFund\'s auto-scaled target when T2 is the highest open tier. V8.26 default: 20x.' },
-  42: { label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3\'s entry fee to compute StabilityFund\'s auto-scaled target when T3 is the highest open tier. V8.26 default: 20x.' },
-  43: { label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4\'s entry fee to compute StabilityFund\'s auto-scaled target when T4 is the highest open tier. V8.26 default: 20x.' },
-  44: { label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5\'s entry fee to compute StabilityFund\'s auto-scaled target when T5 is the highest open tier. V8.26 default: 20x.' },
-  45: { label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6\'s entry fee to compute StabilityFund\'s auto-scaled target when T6 is the highest open tier. V8.26 default: 20x.' },
-  46: { label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7\'s entry fee to compute StabilityFund\'s auto-scaled target when T7 is the highest open tier. V8.26 default: 20x.' },
-  47: { label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8\'s entry fee to compute StabilityFund\'s auto-scaled target when T8 is the highest open tier. V8.26 default: 20x.' },
-  48: { label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9\'s entry fee to compute StabilityFund\'s auto-scaled target when T9 is the highest open tier. V8.26 default: 20x.' },
-  49: { label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.' },
+  40: { plain:"Sets how big the Stability Fund's safety target grows when T1 is the highest open tier (target = T1's entry fee multiplied by this).", label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1\'s entry fee to compute StabilityFund\'s auto-scaled target when T1 is the highest open tier. V8.26 default: 20x.' },
+  41: { plain:"Sets how big the Stability Fund's safety target grows when T2 is the highest open tier (target = T2's entry fee multiplied by this).", label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2\'s entry fee to compute StabilityFund\'s auto-scaled target when T2 is the highest open tier. V8.26 default: 20x.' },
+  42: { plain:"Sets how big the Stability Fund's safety target grows when T3 is the highest open tier (target = T3's entry fee multiplied by this).", label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3\'s entry fee to compute StabilityFund\'s auto-scaled target when T3 is the highest open tier. V8.26 default: 20x.' },
+  43: { plain:"Sets how big the Stability Fund's safety target grows when T4 is the highest open tier (target = T4's entry fee multiplied by this).", label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4\'s entry fee to compute StabilityFund\'s auto-scaled target when T4 is the highest open tier. V8.26 default: 20x.' },
+  44: { plain:"Sets how big the Stability Fund's safety target grows when T5 is the highest open tier (target = T5's entry fee multiplied by this).", label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5\'s entry fee to compute StabilityFund\'s auto-scaled target when T5 is the highest open tier. V8.26 default: 20x.' },
+  45: { plain:"Sets how big the Stability Fund's safety target grows when T6 is the highest open tier (target = T6's entry fee multiplied by this).", label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6\'s entry fee to compute StabilityFund\'s auto-scaled target when T6 is the highest open tier. V8.26 default: 20x.' },
+  46: { plain:"Sets how big the Stability Fund's safety target grows when T7 is the highest open tier (target = T7's entry fee multiplied by this).", label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7\'s entry fee to compute StabilityFund\'s auto-scaled target when T7 is the highest open tier. V8.26 default: 20x.' },
+  47: { plain:"Sets how big the Stability Fund's safety target grows when T8 is the highest open tier (target = T8's entry fee multiplied by this).", label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8\'s entry fee to compute StabilityFund\'s auto-scaled target when T8 is the highest open tier. V8.26 default: 20x.' },
+  48: { plain:"Sets how big the Stability Fund's safety target grows when T9 is the highest open tier (target = T9's entry fee multiplied by this).", label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9\'s entry fee to compute StabilityFund\'s auto-scaled target when T9 is the highest open tier. V8.26 default: 20x.' },
+  49: { plain:"Sets how big the Stability Fund's safety target grows when T10 is the highest open tier (target = T10's entry fee multiplied by this).", label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. V8.26 default: 20x.' },
   // V8.32: SF rescue loan repayment percentage becomes DAO-votable.
-  50: { label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 10000 = 100% (V8.34 default) \u2014 full loan is always repaid across as many cycles as needed. Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
+  50: { plain:"What share of a rescue loan must be repaid from your future earnings (10000 = the full loan, taken off the top of your withdrawals).", label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 10000 = 100% (V8.34 default) \u2014 full loan is always repaid across as many cycles as needed. Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
   // V8.33: extended idle timeout becomes DAO-votable.
-  51: { label:'Extended Idle Timeout (s)', hint:'Seconds a member has in extended idle mode before soft-park triggers. Default: 604800 (7 days). Lower = faster action; higher = more member-friendly grace period.' },
+  51: { plain:"The extra grace time an idle member gets before being soft-parked. Higher = more forgiving.", label:'Extended Idle Timeout (s)', hint:'Seconds a member has in extended idle mode before soft-park triggers. Default: 604800 (7 days). Lower = faster action; higher = more member-friendly grace period.' },
   // V8.35: per-tier whale gate pioneer thresholds
-  52: { label:'Whale Gate Threshold — T5', hint:'Number of T5 first-entry members needed to unlock T2-T5 direct purchases. T2/T3/T4 share this gate. Default: 25 pioneers.' },
-  53: { label:'Whale Gate Threshold — T6', hint:'Pioneers needed in T6 to unlock T6 direct purchases (independent gate). Default: 15.' },
-  54: { label:'Whale Gate Threshold — T7', hint:'Pioneers needed in T7 to unlock T7 direct purchases (independent gate). Default: 10.' },
-  55: { label:'Whale Gate Threshold — T8', hint:'Pioneers needed in T8 to unlock T8 direct purchases (independent gate). Default: 5.' },
-  56: { label:'Whale Gate Threshold — T9', hint:'Pioneers needed in T9 to unlock T9 direct purchases (independent gate). Default: 5.' },
-  57: { label:'Whale Gate Threshold — T10', hint:'Pioneers needed in T10 to unlock T10 direct purchases (independent gate). Default: 5.' },
+  52: { plain:"How many pioneer members T5 needs before T2-T5 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T5', hint:'Number of T5 first-entry members needed to unlock T2-T5 direct purchases. T2/T3/T4 share this gate. Default: 25 pioneers.' },
+  53: { plain:"How many pioneer members T6 needs before T6 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T6', hint:'Pioneers needed in T6 to unlock T6 direct purchases (independent gate). Default: 15.' },
+  54: { plain:"How many pioneer members T7 needs before T7 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T7', hint:'Pioneers needed in T7 to unlock T7 direct purchases (independent gate). Default: 10.' },
+  55: { plain:"How many pioneer members T8 needs before T8 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T8', hint:'Pioneers needed in T8 to unlock T8 direct purchases (independent gate). Default: 5.' },
+  56: { plain:"How many pioneer members T9 needs before T9 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T9', hint:'Pioneers needed in T9 to unlock T9 direct purchases (independent gate). Default: 5.' },
+  57: { plain:"How many pioneer members T10 needs before T10 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T10', hint:'Pioneers needed in T10 to unlock T10 direct purchases (independent gate). Default: 5.' },
 };
 
 function PARAM_META_GET(paramId) {
@@ -851,6 +879,7 @@ function PARAM_META_GET(paramId) {
     target: PARAM_TARGETS[paramId],
     label: t('govPage.params.p' + paramId + '_label', fb.label),
     hint:  t('govPage.params.p' + paramId + '_hint',  fb.hint),
+    plain: t('govPage.params.p' + paramId + '_plain', fb.plain),
   };
   if (arrayKind) {
     meta.isArray   = true;
@@ -875,6 +904,9 @@ const VALUE_LABELS = {
   9:  v => `${v} BPS (${(v/100).toFixed(2)}%)`,
   // V8.21: param 10 (Early Exit Penalty BPS) retired -- no formatter needed.
   13: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
+  // V8.48 item 43: 1e18-scaled CNOVA. Every menu value is k*1e17 with small k, so
+  // Number() is exact here (odd part < 2^53) — same precedent as param 31.
+  58: v => v === 0 ? 'Free (0 CNOVA)' : `${(v/1e18).toLocaleString()} CNOVA (burned)`,
   // V8.20 second wave
   15: v => `${v} members`,
   16: v => v === 0 ? 'Disabled' : `${v} days`,
@@ -939,6 +971,7 @@ const GOV_ABI = [
   'function propose(uint8,address,uint256,string) external returns (uint256)',
   'function proposeBoostTable(address,uint256[],uint256[],string) external returns (uint256)',
   'function castVote(uint256,bool) external',
+  'function proposalFee() external view returns (uint256)',   // V8.48 item 43 — real now; absent on V8.47 (feature-detected)
   'function finalizeVote(uint256) external',
   'function execute(uint256) external',
   'function cancel(uint256) external',
@@ -1022,6 +1055,7 @@ const PARAM_GETTER = {
   4: 'velocityWindow', 5: 'velocityThreshold', 6: 'deflationThreshold',
   7: 'idleSlotTimeout', 8: 'maxItemsPerUpkeep',
   11: 'votingPeriod', 12: 'timelockPeriod', 13: 'quorumBps',
+  58: 'proposalFee',   // V8.48 item 43
   15: 'whaleGateThreshold', 16: 'inactivityDaysThreshold', 17: 'inactivityCyclesThreshold',
   18: 'inactivityGuardEnabled',
   19: 'parkedGracePeriod', 20: 'rescueRatioBps',
@@ -1357,6 +1391,7 @@ function renderProposal(p) {
           ${t('govPage.js.proposer_label','Proposer:')} <span>${String(p.proposer).slice(0,6)}…${String(p.proposer).slice(-4)}</span>
         </div>
         <span class="proposal-param">${meta.label} → ${meta.isArray ? '(array-valued — see contract for full thresholds/values)' : fmtValue(paramId, Number(p.newValue))}</span>
+        ${meta.plain ? `<div class="proposal-plain">💡 ${escHtml(meta.plain)}</div>` : ''}
       </div>
       <span class="pill ${STATE_PILLS[stateN] || 'pill-expired'}">${stateLabel(stateN)}</span>
     </div>
@@ -1472,6 +1507,7 @@ async function onParamChange() {
   arrayRows = [];
   const paramId = parseInt(document.getElementById('param-select').value);
   if (!paramId) {
+    document.getElementById('param-plain').style.display        = 'none';
     document.getElementById('allowed-row').style.display        = 'none';
     document.getElementById('target-row').style.display         = 'none';
     document.getElementById('array-row').style.display          = 'none';
@@ -1482,6 +1518,17 @@ async function onParamChange() {
   }
   const meta = PARAM_META[paramId];
   document.getElementById('target-row').style.display   = 'block';
+
+  // V8.48 member request 2026-08-13: plain-language explanation, shown for every
+  // param the moment it is selected (scalar AND array paths — this sits above
+  // both early returns below on purpose).
+  const plainBox = document.getElementById('param-plain');
+  if (meta.plain) {
+    plainBox.innerHTML = '💡 <strong>' + t('govPage.js.plain_prefix', 'What this means:') + '</strong> ' + escHtml(meta.plain);
+    plainBox.style.display = 'block';
+  } else {
+    plainBox.style.display = 'none';
+  }
 
   if (meta.isArray) {
     // Boost-table params use proposeBoostTable(), not propose() -- no on-chain
@@ -1732,6 +1779,115 @@ function updateProposeGate() {
   btn.disabled = false;
 }
 
+// ── V8.48 item 43: the proposal fee, live ────────────────────────────────────
+// PROPOSAL_FEE: null = could not verify (network), 0n = free, >0n = fee in wei.
+// PROPOSAL_FEE_SUPPORTED: whether the DEPLOYED governance has proposalFee() —
+// false on live V8.47, true after the V8.48 deploy. Every consumer must behave
+// honestly in all three states; a failed read NEVER wears a number
+// (the 2026-08-12 fabricated-fallback rule).
+let PROPOSAL_FEE = null;
+let PROPOSAL_FEE_SUPPORTED = false;
+const fmtCnova = v => (Number(v) / 1e18).toLocaleString();
+
+async function refreshProposalFee() {
+  const el  = document.getElementById('fee-notice-text');
+  const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, getRo());
+  for (let i = 0; i < 3; i++) {
+    try {
+      PROPOSAL_FEE = BigInt(await gov.proposalFee());
+      PROPOSAL_FEE_SUPPORTED = true;
+      _installProposalFeeParam();
+      el.innerHTML = PROPOSAL_FEE === 0n
+        ? 'Submitting a proposal costs only gas — the DAO has set the fee to <strong style="color:#a855f7">0</strong>. Voting is always free.'
+        : 'Submitting a proposal burns <strong style="color:#a855f7">' + fmtCnova(PROPOSAL_FEE) +
+          ' CNOVA</strong> (DAO-votable, param 58). Voting is always free. If needed, your wallet asks for a one-time approval of exactly the fee first.';
+      return;
+    } catch (e) {
+      if (e && e.code === 'CALL_EXCEPTION') {
+        // The deployed governance has no proposalFee() — V8.47. Proposing is
+        // genuinely fee-less there; saying so is the live truth, not a fallback.
+        PROPOSAL_FEE = 0n;
+        PROPOSAL_FEE_SUPPORTED = false;
+        el.innerHTML = 'Submitting a proposal costs only gas — there is <strong style="color:#a855f7">no CNOVA fee and no burn</strong> on the current deployment. Voting is always free.';
+        return;
+      }
+      await new Promise(r => setTimeout(r, 800 * (i + 1)));
+    }
+  }
+  PROPOSAL_FEE = null;   // network failure: say so, never invent
+  el.innerHTML = 'Could not verify the current proposal fee right now — if the DAO has set one, your wallet will ask to approve a CNOVA burn when you submit. Voting is always free.';
+}
+
+// Adds param 58 to the "Governance Self" optgroup ONLY when the deployed contract
+// actually accepts it — the picker must never offer a proposal the chain rejects
+// (the parity rule). Search picks it up too: the index rebuilds from the DOM.
+function _installProposalFeeParam() {
+  const sel = document.getElementById('param-select');
+  if (sel.querySelector('option[value="58"]')) return;
+  const anchorOpt = sel.querySelector('option[value="13"]');   // Quorum, in Governance Self
+  if (!anchorOpt || !anchorOpt.parentElement) return;
+  const o = document.createElement('option');
+  o.value = '58';
+  o.textContent = 'Proposal Fee (CNOVA)';
+  anchorOpt.parentElement.appendChild(o);
+  _paramIndex = null;   // search index rebuilds with the new entry on next use
+}
+
+// ── V8.48 member request 2026-08-13: parameter search ───────────────────────
+// Index is built from the LIVE <select> options + PARAM_META, so a param added
+// to (or retired from) the picker can never disagree with the search — one
+// source of truth, same doctrine as the item-35 view fix.
+let _paramIndex = null;
+function _buildParamIndex() {
+  if (_paramIndex) return _paramIndex;
+  _paramIndex = [];
+  document.querySelectorAll('#param-select optgroup').forEach(g => {
+    g.querySelectorAll('option').forEach(o => {
+      const id = parseInt(o.value);
+      if (!id) return;
+      _paramIndex.push({ id, group: g.label, optionText: o.textContent });
+    });
+  });
+  return _paramIndex;
+}
+
+function onParamSearch() {
+  const box = document.getElementById('param-search-results');
+  const q = document.getElementById('param-search').value.trim().toLowerCase();
+  if (q.length < 2) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  const hits = _buildParamIndex().filter(e => {
+    const meta = PARAM_META[e.id];
+    const hay = [
+      '#' + e.id, e.optionText, e.group,
+      meta ? meta.label : '', meta && meta.plain ? meta.plain : '', meta && meta.hint ? meta.hint : '',
+    ].join(' ').toLowerCase();
+    return q.split(/\s+/).every(w => hay.includes(w));
+  }).slice(0, 12);
+  if (hits.length === 0) {
+    box.innerHTML = `<div class="param-no-results">${t('govPage.js.search_none', 'No parameter matches that — try a different word (e.g. fee, epoch, rescue).')}</div>`;
+    box.style.display = 'block';
+    return;
+  }
+  box.innerHTML = hits.map(e => {
+    const meta = PARAM_META[e.id];
+    const plain = meta && meta.plain ? `<div class="pr-plain">${escHtml(meta.plain)}</div>` : '';
+    return `<div class="param-result" onclick="pickParam(${e.id})">
+      <div class="pr-label">${escHtml(e.optionText)} <span class="pr-group">${escHtml(e.group)} · #${e.id}</span></div>
+      ${plain}
+    </div>`;
+  }).join('');
+  box.style.display = 'block';
+}
+
+function pickParam(id) {
+  const sel = document.getElementById('param-select');
+  sel.value = String(id);
+  document.getElementById('param-search-results').style.display = 'none';
+  document.getElementById('param-search').value = '';
+  onParamChange();                       // async — fire and let it render
+  sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 async function createProposal() {
   if (!signer) return;
   const paramId     = parseInt(document.getElementById('param-select').value);
@@ -1749,6 +1905,27 @@ async function createProposal() {
     // 100e18 out of thin air. Every proposer was made to sign a pointless approve
     // (real gas), told 100 CNOVA had been burned when nothing was, and left with a
     // standing allowance to the governance contract.
+    // V8.48 item 43: the fee is REAL now (param 58) — the audit note above records
+    // the era when it was fabricated. Feature-detected: on V8.47 (no getter) this
+    // block is skipped entirely and proposing costs only gas. The allowance is for
+    // EXACTLY the fee, never unlimited — the V8.34 standing-allowance mistake stays dead.
+    if (PROPOSAL_FEE_SUPPORTED) {
+      try {
+        const fee = BigInt(await new ethers.Contract(GOV_ADDR, GOV_ABI, signer).proposalFee());
+        if (fee > 0n) {
+          const cn = new ethers.Contract(CNOVA_ADDR, ERC20_ABI, signer);
+          const allowance = BigInt(await cn.allowance(userAddr, GOV_ADDR));
+          if (allowance < fee) {
+            setPropStatus(t('govPage.js.approving_fee', 'Step 1 of 2 — approving the proposal fee') + ' (' + fmtCnova(fee) + ' CNOVA)…', 'info');
+            await (await cn.approve(GOV_ADDR, fee)).wait();
+          }
+        }
+      } catch (e) {
+        // Fee preflight failed (RPC?) — proceed. propose() itself is the truth;
+        // if the allowance really is missing, its decoded error says so below.
+        console.warn('fee preflight:', e);
+      }
+    }
     setPropStatus(t('govPage.js.submitting_proposal', 'Submitting proposal… please confirm in wallet.'), 'info');
     const gov = new ethers.Contract(GOV_ADDR, GOV_ABI, signer);
     let tx;
@@ -1790,6 +1967,7 @@ function escHtml(str) {
 // ── Init ────────────────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   loadProposals();
+  refreshProposalFee();                      // V8.48 item 43
   setInterval(loadProposals, 60_000);
 
   const _tryAutoConnect = () => {
