@@ -508,8 +508,8 @@
       var isEarly = h.indexOf('early.') !== -1 || h.indexOf('preview.') !== -1; // preview QA rides the coupon gate (V8.48)
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1785934800000; // V8.48 preview — Wed Aug 5 2026 9:00 AM EDT
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.48 Early Access — Opening 9:00 AM EDT';
+        var EARLY_MS = 1786640400000; // V8.48 preview — Thu Aug 13 2026 1:00 PM (17:00 UTC)
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.48 Early Access — Opening 1:00 PM';
         // Override countdown block text for early domain
         var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.48 — Fresh Matrix Relaunch';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'Leaders &amp; testers — we\'re seeding the new matrix. Back online in:';
@@ -533,8 +533,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.48 — Opening 10:00 AM EDT';
-        var MAIN_MS  = 1785938400000; // V8.48 go-live — Wed Aug 5 2026 10:00 AM EDT
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.48 — Opening 2:00 PM';
+        var MAIN_MS  = 1786644000000; // V8.48 go-live — Thu Aug 13 2026 2:00 PM (18:00 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
