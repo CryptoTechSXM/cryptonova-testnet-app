@@ -7111,29 +7111,71 @@ function getWithdrawRecipient() {
 // 2026-08-10 and nothing on screen could tell her — or an admin — which half happened.
 //
 // Kept in localStorage: this is the member's own record on their own device. No server,
-// no account, and it survives the refresh that follows every withdrawal. Capped at 20
+// and it survives the refresh that follows every withdrawal. Capped at 20 per account
 // so it cannot grow without bound.
-const _WD_HIST_KEY = 'cn_withdraw_history_v1';
+//
+// PER-ACCOUNT since 2026-08-13 (owner-reported bug, same day): v1 used ONE shared key
+// for the whole browser, so switching wallets on the same machine showed the previous
+// wallet's withdrawals ("cross-pollination"). The store is now keyed by the CONNECTED
+// account at record time — not the payee, which can be a custom recipient — and v1
+// records are migrated once per account by payee match (the only attribution v1
+// stored). A v1 record whose payee matches no account that ever connects again stays
+// in the legacy key, invisible — ambiguous history is not shown to the wrong wallet.
+const _WD_HIST_KEY_LEGACY = 'cn_withdraw_history_v1';
+
+function _wdHistKey() {
+  return userAddr ? `cn_withdraw_history_v2:${userAddr.toLowerCase()}` : null;
+}
+
+// One-time claim of v1 records for the connected account: move records whose payee
+// matches this wallet into its v2 key; leave the rest for their own wallets to claim.
+function _migrateWithdrawHistory() {
+  const key = _wdHistKey();
+  if (!key) return;
+  try {
+    const legacy = JSON.parse(localStorage.getItem(_WD_HIST_KEY_LEGACY) || '[]');
+    if (!Array.isArray(legacy) || legacy.length === 0) return;
+    const me = userAddr.toLowerCase();
+    const mine   = legacy.filter(h => (h.payee || '').toLowerCase() === me);
+    const others = legacy.filter(h => (h.payee || '').toLowerCase() !== me);
+    if (mine.length) {
+      const cur = JSON.parse(localStorage.getItem(key) || '[]');
+      // Legacy records are older than any v2 record — append, keep newest first.
+      localStorage.setItem(key, JSON.stringify(cur.concat(mine).slice(0, 20)));
+    }
+    if (others.length) localStorage.setItem(_WD_HIST_KEY_LEGACY, JSON.stringify(others));
+    else localStorage.removeItem(_WD_HIST_KEY_LEGACY);
+  } catch (_) { /* migration is best-effort; never break the page over it */ }
+}
 
 function _loadWithdrawHistory() {
-  try { return JSON.parse(localStorage.getItem(_WD_HIST_KEY) || '[]'); } catch (_) { return []; }
+  const key = _wdHistKey();
+  if (!key) return []; // not connected — no wallet, no history to show
+  try {
+    _migrateWithdrawHistory();
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch (_) { return []; }
 }
 
 function _recordWithdrawAttempt(rec) {
   try {
-    const hist = _loadWithdrawHistory();
-    hist.unshift({
-      t: new Date().toISOString(),
-      mode: rec.mode || 'partial',
-      requested: rec.requested != null ? rec.requested.toString() : null,
-      received:  rec.received  != null ? rec.received.toString()  : null,
-      payee: rec.payee || null,
-      draws: (rec.draws || []).map(d => ({
-        label: d.label, amt: d.amt != null ? d.amt.toString() : null,
-        hash: d.hash || null, block: d.block || null, ok: !!d.ok, why: d.why || null,
-      })),
-    });
-    localStorage.setItem(_WD_HIST_KEY, JSON.stringify(hist.slice(0, 20)));
+    const key = _wdHistKey();
+    if (key) {
+      const hist = _loadWithdrawHistory();
+      hist.unshift({
+        t: new Date().toISOString(),
+        acct: userAddr.toLowerCase(),
+        mode: rec.mode || 'partial',
+        requested: rec.requested != null ? rec.requested.toString() : null,
+        received:  rec.received  != null ? rec.received.toString()  : null,
+        payee: rec.payee || null,
+        draws: (rec.draws || []).map(d => ({
+          label: d.label, amt: d.amt != null ? d.amt.toString() : null,
+          hash: d.hash || null, block: d.block || null, ok: !!d.ok, why: d.why || null,
+        })),
+      });
+      localStorage.setItem(key, JSON.stringify(hist.slice(0, 20)));
+    }
   } catch (_) { /* a full or blocked localStorage must never break a withdrawal */ }
   renderWithdrawHistory();
 }
@@ -7191,9 +7233,21 @@ function copyWithdrawHistory() {
 }
 
 function clearWithdrawHistory() {
-  try { localStorage.removeItem(_WD_HIST_KEY); } catch (_) {}
+  try {
+    const key = _wdHistKey();
+    if (key) localStorage.removeItem(key);
+    // Also purge this wallet's unclaimed v1 records, or they would reappear as a
+    // "migration" on the next load right after the member asked for a clear.
+    if (userAddr) {
+      const me = userAddr.toLowerCase();
+      const legacy = JSON.parse(localStorage.getItem(_WD_HIST_KEY_LEGACY) || '[]');
+      const others = Array.isArray(legacy) ? legacy.filter(h => (h.payee || '').toLowerCase() !== me) : [];
+      if (others.length) localStorage.setItem(_WD_HIST_KEY_LEGACY, JSON.stringify(others));
+      else localStorage.removeItem(_WD_HIST_KEY_LEGACY);
+    }
+  } catch (_) {}
   renderWithdrawHistory();
-  toast('Withdrawal history cleared from this browser.', 'info');
+  toast('Withdrawal history for this wallet cleared from this browser.', 'info');
 }
 
 async function doWithdrawPartial() {
