@@ -8992,9 +8992,19 @@ async function approveBulkUpgrade() {
   const fee    = window._bulkUpgradeFee || 0n;
   try {
     if (btn) btn.disabled = true;
-    if (status) status.textContent = 'Approving USDC…';
+    // V8.48 item 15/O1 (owner: "align in v8.48"): bulkUpgrade now runs the same
+    // debt gate as manualUpgrade — approve Σfees + outstanding rescue loan, and
+    // refuse honestly when the debt read fails (same policy as the manual path).
+    const debtDue = await _upgradeDebtDue(readProvider || (signer && signer.provider)).catch(() => null);
+    if (debtDue === null) {
+      if (status) status.textContent = '⚠️ Could not confirm whether you have an outstanding rescue loan (the bulk upgrade charges fees + loan together). Nothing was sent — please retry in a moment.';
+      if (btn) btn.disabled = false;
+      return;
+    }
+    const totalDue = fee + debtDue;
+    if (status) status.textContent = debtDue > 0n ? `Approving $${(Number(totalDue)/1e6).toFixed(2)} USDC (tier fees + rescue-loan settlement)…` : 'Approving USDC…';
     const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    const tx   = await usdc.approve(ADDRS.tierRouter, fee);
+    const tx   = await usdc.approve(ADDRS.tierRouter, totalDue);
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
     if (status) status.textContent = '✅ Approved. Click Step 2 to bulk upgrade.';
