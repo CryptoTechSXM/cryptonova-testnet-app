@@ -5,7 +5,7 @@
   },
   "banner": {
     "network": "⚡ Base Sepolia Testnet",
-    "subtitle": "· Early Access · V8.11 Contracts"
+    "subtitle": "· Early Access · V8.48 Contracts"
   },
   "hero": {
     "pill": "🔐 Early Registration Open",
@@ -63,7 +63,7 @@
   "footer": {
     "tierrouter": "TierRouter ↗",
     "faq": "FAQ",
-    "tagline": "CryptoNova V8.11 · Base Sepolia Testnet · Entry fees are testnet USDC only"
+    "tagline": "CryptoNova V8.48 · Base Sepolia Testnet · Entry fees are testnet USDC only"
   },
   "js": {
     "no_wallet": "No wallet detected. Install MetaMask or Rabby.",
@@ -80,7 +80,7 @@
     "joining": "Joining CryptoNova…",
     "confirm_tx": "⏳ Confirming transaction on Base Sepolia…",
     "welcome_status": "🎉 Welcome to CryptoNova!",
-    "welcome_toast": "Welcome to CryptoNova V8.11! 🎉",
+    "welcome_toast": "Welcome to CryptoNova V8.48! 🎉",
     "registered": "✅ Registered!",
     "step2_reset": "Step 2: Register ($10 USDC)",
     "copied": "Referral link copied!",
@@ -890,7 +890,7 @@
     "s3_n4_sub": "127 × $1,800 (18%)",
     "s3_p2": "Figures above are the pool flowing through a matrix as its 127 seats fill — distributed across the seated members over the rotations, not paid as a lump to one person. Deeper seats earn the largest shares each rotation, which offsets the wait — that's the \"equalization.\" Faster-filling matrices = more rotations = more frequent pool pay for everyone seated.",
     "s3_p3_b": "Cycle-out &amp; re-entry:",
-    "s3_p3": "at MatA cycle-out you cross into MatB — the crossing costs the full entry fee, funded half by your crossing reserve and half by your accumulated earnings. At MatB cycle-out the V8.43 additive engine automatically re-enters and/or upgrades you from your accumulated funds (re-entry → upgrade → optional double seat) — no manual action required.",
+    "s3_p3": "at MatA cycle-out you cross into MatB — the crossing costs the full entry fee, funded half by your crossing reserve and half by your accumulated earnings. At MatB cycle-out the V8.48 additive engine automatically re-enters and/or upgrades you from your accumulated funds (re-entry → upgrade → optional double seat) — no manual action required.",
     "s4_h": "🪙 Stream 4 &mdash; CNOVA Token Mining",
     "s4_h3_pre": "Minted to your wallet on every entry —",
     "s4_h3_span": "halving epochs",
@@ -966,7 +966,7 @@
     "table_footnote": "Matrix Pool = 127 × entry fee × 18% (= 37.9% pool BPS × 47.5% payout base — flat across all tiers). This is the pool flowing through a full matrix, distributed across seated members each rotation weighted by seat depth — not a lump payout to one member. Direct Ref = entry fee × 5% (L1 slot: 10.5% × 47.5%). Passive L2 = entry fee × 2.7% (L2–L6 each: 5.7% × 47.5%). Additionally: 50% of each entry funds the member's crossing reserve and 2.5% is credited instantly to the joining member. Tier access: T2–T5 unlock together once 25 pioneers reach T5; T6–T10 each unlock at their own pioneer milestone — 15 for T6, 10 for T7, and 5 each for T8, T9 and T10 (Whale Gate, governance-adjustable). Members can also upgrade after completing a cycle or crossing into MatB at their current tier.",
     "table_footnote_b": "Pool distributions require the matrix to fill and rotate — not guaranteed.",
     "split_h": "💰 Where Does the $10 Entry Fee Go?",
-    "split_intro": "Every T1 entry fee is split into three buckets by the smart contract — automatically, with no human intervention:</p>\n    <!-- V8.43 crossing reserve callout -->\n    <div style=\"background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--text2);line-height:1.7\">\n      <strong style=\"color:#a855f7\">🔐 How the 50/2.5/47.5 model works:</strong>\n      50% of your entry fee is held as your personal <em>crossing reserve</em> — when your 127-seat matrix fills, this pre-funds half of your crossing fee (crossings cost the full entry fee); your accumulated earnings cover the rest.\n      2.5% is credited directly to your withdrawable balance the moment you join (instant earn).\n      The remaining 47.5% runs through the BPS payout array below.",
+    "split_intro": "Every T1 entry fee is split into three buckets by the smart contract — automatically, with no human intervention:</p>\n    <!-- V8.48 crossing reserve callout -->\n    <div style=\"background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--text2);line-height:1.7\">\n      <strong style=\"color:#a855f7\">🔐 How the 50/2.5/47.5 model works:</strong>\n      50% of your entry fee is held as your personal <em>crossing reserve</em> — when your 127-seat matrix fills, this pre-funds half of your crossing fee (crossings cost the full entry fee); your accumulated earnings cover the rest.\n      2.5% is credited directly to your withdrawable balance the moment you join (instant earn).\n      The remaining 47.5% runs through the BPS payout array below.",
     "split_l1": "🤝 L1 Direct Referral Bonus (5% flat, l1Bps = 500)",
     "split_chain": "⛓️ Matrix Chain Pay L2–L6 each (2.7% per level, 270 BPS each)",
     "split_pool": "🌀 Equalization Pool",
@@ -1070,7 +1070,7 @@
     "q10_a2": "<strong>Downline</strong> &mdash; members who joined after you and are placed at deeper positions. Each entry they or their downlines make generates chain pay that flows up to you based on BFS depth.",
     "q10_a3": "Your <strong>original referrer</strong> (the wallet that referred you) is a special permanent on-chain relationship separate from your BFS position &mdash; they earn L1 referral bonuses on everything you do.",
     "q11": "How do tier upgrades work?",
-    "q11_a1": "CryptoNova V8.43 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON and auto-upgrade ON. These are locked on while you are getting started — the contract keeps auto-upgrade on until you have completed 5 cycles and auto re-entry on until 2 cycles, so the Dashboard toggles (Member Options) take effect only after those thresholds. Your original referrer is preserved across all tier upgrades.",
+    "q11_a1": "CryptoNova V8.48 uses an <strong>additive automation engine</strong>. When you cycle out of MatB, your accumulated funds buy seats in priority order: <strong>re-entry first, then next-tier upgrade, then an optional double seat</strong> — each step fires only if the remaining funds cover its fee. Defaults: auto re-entry ON and auto-upgrade ON. These are locked on while you are getting started — the contract keeps auto-upgrade on until you have completed 5 cycles and auto re-entry on until 2 cycles, so the Dashboard toggles (Member Options) take effect only after those thresholds. Your original referrer is preserved across all tier upgrades.",
     "q11_a2": "Higher tiers have larger entry fees, larger chain pay amounts, and larger pool flow. You can also upgrade manually once you've completed a cycle or crossed into MatB at your current tier — or anytime the target tier's Whale Gate is open (T2–T5 open together at 25 T5 pioneers; T6–T10 each at their own milestone — 15 for T6, 10 for T7, and 5 each for T8, T9 and T10, all governance-adjustable).",
     "q12": "How do I earn with CryptoNova Matrix?",
     "q12_a1": "Every $10 T1 entry generates income across four streams:",

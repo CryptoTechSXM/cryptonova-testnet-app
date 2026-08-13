@@ -48,7 +48,7 @@ for key in old_flat:
 # ADDRS-block comment line (fill the deploy date in on deploy day):
 REPLACEMENTS.append((
     "V8.47 — deployed 2026-08-05 — member-level rescue-debt ledger (SF), upgrade-gate debt fold, split BPS 100/25/25",
-    "V8.48 — deployed 2026-08-XX — full locked scope: items 1-48 (see V8_48_SCOPE.md); bulk gate, GhostFloor package, calendar distributions, epochs 1000/180d, proposal fee"
+    "V8.48 — deployed 2026-08-13 — full locked scope: items 1-48 (see V8_48_SCOPE.md); bulk gate, GhostFloor package, calendar distributions, epochs 1000/180d, proposal fee"
 ))
 REPLACEMENTS.append(("[v8.47]", "[v8.48]"))
 REPLACEMENTS.append(("v8.47", "v8.48"))

@@ -266,7 +266,7 @@
 </style>
 </head>
 <body>
-<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.31 is live ───────────── -->
+<!-- ── V8.48 MAINTENANCE GATE — remove this block when V8.48 is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -284,9 +284,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.31 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.48 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.31 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
+      V8.48 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -310,7 +310,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.31 Testnet</span>
+    <span id="gate-pill-label">V8.48 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -328,13 +328,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.31 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.48 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.31 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.48 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -655,7 +655,7 @@
     <div id="propose-gate" style="font-size:13px;color:var(--text3);margin-bottom:10px;"></div>
     <!-- V8.34 wrote this notice for a fee that never existed on chain; V8.48 item 43
          made the fee REAL (param 58). The text is populated LIVE from proposalFee() —
-         feature-detected across the V8.47→V8.48 cutover — and the static default is
+         feature-detected across the V8.48→V8.48 cutover — and the static default is
          the honest "checking" state, never an asserted number. -->
     <div style="display:flex;align-items:center;gap:8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);">
       <span style="font-size:16px;">🔥</span>
@@ -722,15 +722,15 @@ async function _getBestRpc() {
   }
   return RPC_URL; // fallback to primary
 }
-const GOV_ADDR    = '0x422a9eEc4bef4295Ac01A3b1d06C648f8989Cc7e'; // V8.31
-const CNOVA_ADDR  = '0x7c2D4F0eeF81D708baB8Ba283326C4e370dc96fC'; // V8.31
-const TIER_ROUTER = '0xE93A931b6C01f120962169a533614d1cC7b0AC9e'; // V8.31
-const MK_ADDR     = '0x07DCaDDEB71a130764e477B29f1401ACC73aCa19'; // V8.31
-// V8.31 — deployed 2026-07-01 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
-const SF_ADDR     = '0xd980E46b4Eee67207702E9d864B7b1614c062415'; // V8.31
-const BBR_ADDR    = '0xF6B67738C088Fc17BDd166E38ef3fC19551F261f'; // V8.31
-const DS_ADDR     = '0xae43bc9578B820cc2a29Ac92dA9806E987aDF8eB'; // V8.31
-const CW_ADDR     = '0x33C9eaB4123Af78AD69ce608FDC97E03032dF030'; // V8.31
+const GOV_ADDR    = '0x0a833d313E8B3e395905A6a422b447506474Ff30'; // V8.48
+const CNOVA_ADDR  = '0xcd3924C2981C6DeCe022eB592B57E0153d4Ab7d1'; // V8.48
+const TIER_ROUTER = '0xD78eD884DE003524c0DeB35b1063c0F86350bf5B'; // V8.48
+const MK_ADDR     = '0x9Ade59F964619Cb9DE7156B383167A2071a26B70'; // V8.48
+// V8.48 — deployed 2026-07-01 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
+const SF_ADDR     = '0xeb36ee741c3884E7D2914672380BE5500112610b'; // V8.48
+const BBR_ADDR    = '0x8ce1AA5a6A9509151307d9a61a5C35c9feF85E6c'; // V8.48
+const DS_ADDR     = '0x926D5C79dD06b24a074C15d8aFFfA0da47e786c2'; // V8.48
+const CW_ADDR     = '0xC786dbA720C04784d66F38AcCE6b2143e6C78bfF'; // V8.48
 
 // Real ethers.Network object for staticNetwork -- passing the literal boolean
 // 'true' throws 'staticNetwork.matches is not a function' in ethers v6.7.1 and
@@ -978,7 +978,7 @@ const GOV_ABI = [
   'function propose(uint8,address,uint256,string) external returns (uint256)',
   'function proposeBoostTable(address,uint256[],uint256[],string) external returns (uint256)',
   'function castVote(uint256,bool) external',
-  'function proposalFee() external view returns (uint256)',   // V8.48 item 43 — real now; absent on V8.47 (feature-detected)
+  'function proposalFee() external view returns (uint256)',   // V8.48 item 43 — real now; absent on V8.48 (feature-detected)
   'function finalizeVote(uint256) external',
   'function execute(uint256) external',
   'function cancel(uint256) external',
@@ -1795,7 +1795,7 @@ function updateProposeGate() {
 // ── V8.48 item 43: the proposal fee, live ────────────────────────────────────
 // PROPOSAL_FEE: null = could not verify (network), 0n = free, >0n = fee in wei.
 // PROPOSAL_FEE_SUPPORTED: whether the DEPLOYED governance has proposalFee() —
-// false on live V8.47, true after the V8.48 deploy. Every consumer must behave
+// false on live V8.48, true after the V8.48 deploy. Every consumer must behave
 // honestly in all three states; a failed read NEVER wears a number
 // (the 2026-08-12 fabricated-fallback rule).
 let PROPOSAL_FEE = null;
@@ -1817,7 +1817,7 @@ async function refreshProposalFee() {
       return;
     } catch (e) {
       if (e && e.code === 'CALL_EXCEPTION') {
-        // The deployed governance has no proposalFee() — V8.47. Proposing is
+        // The deployed governance has no proposalFee() — V8.48. Proposing is
         // genuinely fee-less there; saying so is the live truth, not a fallback.
         PROPOSAL_FEE = 0n;
         PROPOSAL_FEE_SUPPORTED = false;
@@ -1919,7 +1919,7 @@ async function createProposal() {
     // (real gas), told 100 CNOVA had been burned when nothing was, and left with a
     // standing allowance to the governance contract.
     // V8.48 item 43: the fee is REAL now (param 58) — the audit note above records
-    // the era when it was fabricated. Feature-detected: on V8.47 (no getter) this
+    // the era when it was fabricated. Feature-detected: on V8.48 (no getter) this
     // block is skipped entirely and proposing costs only gas. The allowance is for
     // EXACTLY the fee, never unlimited — the V8.34 standing-allowance mistake stays dead.
     if (PROPOSAL_FEE_SUPPORTED) {

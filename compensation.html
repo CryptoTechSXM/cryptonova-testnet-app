@@ -153,7 +153,7 @@
 </style>
 </head>
 <body>
-<!-- ── V8.30 MAINTENANCE GATE — remove this block when V8.30 is live ───────────── -->
+<!-- ── V8.48 MAINTENANCE GATE — remove this block when V8.48 is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -171,9 +171,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.43 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.48 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.43 is live — overflow routing, additive automation &amp; improved stability. Opening in:
+      V8.48 is live — overflow routing, additive automation &amp; improved stability. Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -197,7 +197,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.43 Testnet</span>
+    <span id="gate-pill-label">V8.48 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -215,13 +215,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.43 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.48 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.43 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.48 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -415,7 +415,7 @@ function toggleTheme() {
       <div><div class="big-num yellow">~$228,600</div><div class="num-label"><span data-i18n="compPage.s3_n4_label">T10 matrix pool per full fill</span> <span style="font-size:10px;display:block;color:var(--text3)" data-i18n="compPage.s3_n4_sub">127 × $1,800 (18%)</span></div></div>
     </div>
     <p data-i18n="compPage.s3_p2">Figures above are the pool flowing through a matrix as its 127 seats fill — distributed across the seated members over the rotations, not paid as a lump to one person. Deeper seats earn the largest shares each rotation, which offsets the wait — that's the "equalization." Faster-filling matrices = more rotations = more frequent pool pay for everyone seated.</p>
-    <p><strong data-i18n="compPage.s3_p3_b">Cycle-out &amp; re-entry:</strong> <span data-i18n="compPage.s3_p3">at MatA cycle-out you cross into MatB — the crossing costs the full entry fee, funded half by your crossing reserve and half by your accumulated earnings. At MatB cycle-out the V8.43 additive engine automatically re-enters and/or upgrades you from your accumulated funds (re-entry → upgrade → optional double seat) — no manual action required.</span></p>
+    <p><strong data-i18n="compPage.s3_p3_b">Cycle-out &amp; re-entry:</strong> <span data-i18n="compPage.s3_p3">at MatA cycle-out you cross into MatB — the crossing costs the full entry fee, funded half by your crossing reserve and half by your accumulated earnings. At MatB cycle-out the V8.48 additive engine automatically re-enters and/or upgrades you from your accumulated funds (re-entry → upgrade → optional double seat) — no manual action required.</span></p>
   </div>
 
   <!-- ── Stream 4: CNOVA Mining ── -->
@@ -587,7 +587,7 @@ function toggleTheme() {
   <h2 data-i18n="compPage.split_h">💰 Where Does the $10 Entry Fee Go?</h2>
   <div class="section-card">
     <p data-i18n="compPage.split_intro">Every T1 entry fee is split into three buckets by the smart contract — automatically, with no human intervention:</p>
-    <!-- V8.43 crossing reserve callout -->
+    <!-- V8.48 crossing reserve callout -->
     <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--text2);line-height:1.7">
       <strong style="color:#a855f7">🔐 How the 50/2.5/47.5 model works:</strong>
       50% of your entry fee is held as your personal <em>crossing reserve</em> — when your 127-seat matrix fills, this pre-funds half of your crossing fee (crossings cost the full entry fee); your accumulated earnings cover the rest.
@@ -667,7 +667,7 @@ function toggleTheme() {
 
   <!-- Rescue-advance disclosure. AUDIT 2026-08-07: this page showed the 3%
        Stability Rescue Fund split but never explained what the fund DOES, and
-       never used the words debt, loan or repay — while V8.47 books every rescue
+       never used the words debt, loan or repay — while V8.48 books every rescue
        as a repayable member-level debt. -->
   <div style="margin-top:20px;padding:14px 18px;border-radius:10px;border:1px solid rgba(56,189,248,.28);background:rgba(56,189,248,.07);font-size:13px;color:var(--text2);line-height:1.7">
     <strong style="color:#38bdf8">About the Stability Rescue Fund</strong><br>
