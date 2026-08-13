@@ -2239,6 +2239,8 @@ const TIER_ROUTER_ABI = [
   'function tierGateThreshold(uint8 tierNum) external view returns (uint256)',       // V8.35
   'function isWhaleGateActiveForTier(uint8 tierNum) external view returns (bool)',   // V8.35 — authoritative (admin override included)
   'function reservedFor(address member) external view returns (uint256)',            // authoritative automation reserve
+  'function reservedHeldFor(address member) external view returns (uint256)',        // V8.48 item 2 — held-so-far; feature-detected (absent on V8.47)
+  'function bulkWithdraw(uint256 amount) external',                                  // V8.48 item 3 — one-signature PARTIAL; feature-detected (absent on V8.47)
   'event BulkUpgrade(address indexed member, uint8 fromTier, uint8 toTier, uint256 totalFee)', // V8.35
   'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.11
   // ── V8.47 (2026-07-27): custom errors MUST be declared or ethers cannot decode
@@ -7017,6 +7019,14 @@ async function _claimableAll(rp, blockTag) {
     total += bal;
     byTier[tNum] += bal;
   }));
+  // V8.48 item 2 — FEATURE-DETECTED: reservedHeldFor(member) is the contract's
+  // OWN answer to "how much is actually held toward the reserve target" (one
+  // shared internal with claimableOf, so view == enforcement by construction).
+  // When the getter exists (V8.48), it replaces the local reconstruction above
+  // for the DISPLAYED figure; on V8.47 (CALL_EXCEPTION) the local mirror stands.
+  try {
+    heldNow = BigInt(await tr.reservedHeldFor(userAddr, o));
+  } catch (_) { /* V8.47 — keep the reconstruction */ }
   const net = total > debt ? total - debt : 0n;
   return { ok: true, total, net, debt, reserved, highest, byTier, heldNow };
 }
@@ -7311,6 +7321,48 @@ async function doWithdrawPartial() {
     // "unsourced" while Withdraw All took everything. Same source of truth as
     // the card, MAX and the breakdown (_claimableAll rules, applied per draw).
     const _ptr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+
+    // ── V8.48 item 3 — ONE-SIGNATURE PARTIAL, feature-detected ──────────────
+    // bulkWithdraw(uint256) exists only on V8.48. Version detect uses the
+    // INDEPENDENT V8.48 getter reservedHeldFor(): if it answers we are on
+    // V8.48 and a failing bulk estimate is a REAL refusal (report it, never
+    // fall back to the per-matrix loop and guess); a CALL_EXCEPTION means
+    // V8.47 → the legacy loop below stands. Any other error (RPC drop) also
+    // falls through to the loop, which has its own honest guards.
+    // NOTE ethers-v6 overload ambiguity (scope item-3 row): the overload MUST
+    // be addressed by full signature via getFunction('bulkWithdraw(uint256)').
+    let _v848 = null;
+    try { await _ptr.reservedHeldFor(userAddr); _v848 = true; }
+    catch (e) { _v848 = (e && e.code === 'CALL_EXCEPTION') ? false : null; }
+    if (_v848 === true) {
+      const _fnEst = await retryRead(() =>
+        _ptr.getFunction('bulkWithdraw(uint256)').estimateGas(amtMicro, { from: userAddr }));
+      if (!_fnEst.ok) {
+        setStatus('withdraw-status', friendlyError(_fnEst.error), 'err');
+        return;   // finally{} re-enables the buttons
+      }
+      setStatus('withdraw-status', 'One signature — withdrawing across your tiers in a single transaction…', 'info');
+      const _trPW  = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
+      const _usdcP = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+      const _b0 = await _usdcP.balanceOf(userAddr).catch(() => null);
+      const _tx = await _trPW.getFunction('bulkWithdraw(uint256)')(amtMicro, { gasLimit: _fnEst.value + _fnEst.value / 4n });
+      await _tx.wait();
+      let _got = null;
+      if (_b0 !== null) {
+        const _b1 = await _usdcP.balanceOf(userAddr).catch(() => null);
+        if (_b1 !== null && _b1 > _b0) _got = _b1 - _b0;
+      }
+      setStatus('withdraw-status',
+        _got !== null
+          ? `✅ Withdrew ${fmt6(_got)} — one transaction across every tier.`
+          : '✅ Withdrawal confirmed — one transaction across every tier (amount arriving; check your wallet).', 'ok');
+      if (inp) inp.value = '';
+      await new Promise(r => setTimeout(r, 3500));
+      await loadDashboardData();
+      return;   // finally{} re-enables the buttons
+    }
+    // ── end V8.48 single-signature path — V8.47 per-matrix loop below ───────
+
     // AUDIT 2026-08-08: these three defaulted to 0 on a failed read, and every
     // one of them makes the withdrawal look LARGER than it is — highest/reserved
     // at 0 skips the crossing hold and automation reserve on every matrix, and
@@ -9467,6 +9519,63 @@ async function doLimboReEntry() {
   }
 }
 
+// ── V8.48 item 40 — one-signature self-rescue via EIP-2612 permit ────────────
+// Detection is TWO independent probes, cached per page load:
+//   1. chain version: TierRouter.reservedHeldFor answers only on V8.48
+//      (selfRescueWithPermit ships in the same deploy);
+//   2. the deployed USDC actually supports permit: DOMAIN_SEPARATOR() + nonces()
+//      both answer (the TESTNET MockUSDC may predate permit — Base mainnet's
+//      native USDC is verified EIP-2612, probe_base_usdc_permit.js 2026-08-13).
+// Either probe failing → the classic approve + selfRescue flow stands. Never
+// guess: a wrong permit signature costs the member a wallet prompt for nothing.
+async function _permitRescueAvailable(rp) {
+  if (window._permitRescueOK !== undefined) return window._permitRescueOK;
+  let ok = false;
+  try {
+    const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
+    await tr.reservedHeldFor(userAddr);                       // V8.48 marker
+    const u = new ethers.Contract(ADDRS.usdc, [
+      'function DOMAIN_SEPARATOR() view returns (bytes32)',
+      'function nonces(address) view returns (uint256)',
+    ], rp);
+    await Promise.all([u.DOMAIN_SEPARATOR(), u.nonces(userAddr)]);
+    ok = true;
+  } catch (_) { ok = false; }
+  window._permitRescueOK = ok;
+  return ok;
+}
+
+async function _signRescuePermit(matrixAddr, value) {
+  // EIP-712 domain: prefer the token's own eip712Domain() (EIP-5267, OZ v5);
+  // fall back to name() + version '1' (OZ ERC20Permit default).
+  const rp = readProvider || signer.provider;
+  const u  = new ethers.Contract(ADDRS.usdc, [
+    'function eip712Domain() view returns (bytes1, string, string, uint256, address, bytes32, uint256[])',
+    'function name() view returns (string)',
+    'function nonces(address) view returns (uint256)',
+  ], rp);
+  let domain;
+  try {
+    const d = await u.eip712Domain();
+    domain = { name: d[1], version: d[2], chainId: Number(d[3]), verifyingContract: d[4] };
+  } catch (_) {
+    domain = { name: await u.name(), version: '1', chainId: CHAIN_ID, verifyingContract: ADDRS.usdc };
+  }
+  const owner = await signer.getAddress();
+  const nonce = await u.nonces(owner);
+  const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600); // 1 hour
+  const types = { Permit: [
+    { name: 'owner',    type: 'address' },
+    { name: 'spender',  type: 'address' },
+    { name: 'value',    type: 'uint256' },
+    { name: 'nonce',    type: 'uint256' },
+    { name: 'deadline', type: 'uint256' },
+  ]};
+  const sig = ethers.Signature.from(await signer.signTypedData(domain, types,
+    { owner, spender: matrixAddr, value, nonce, deadline }));
+  return { value, deadline, v: sig.v, r: sig.r, s: sig.s };
+}
+
 async function approveSelfRescue() {
   if (!signer) { toast('Connect your wallet first.', 'error'); return; }
   const shortfall = window._selfRescueShortfall || 0n;
@@ -9474,6 +9583,17 @@ async function approveSelfRescue() {
   const btn    = document.getElementById('btn-self-approve');
   const status = document.getElementById('self-rescue-status');
   if (btn) btn.disabled = true;
+  // V8.48 item 40: when the permit path is available there is nothing to
+  // approve — hand straight to doSelfRescue, which signs the permit (gasless)
+  // and sends ONE transaction. Lavern-Gay's two-click report, retired.
+  try {
+    const rp0 = readProvider || signer.provider;
+    if (await _permitRescueAvailable(rp0)) {
+      if (status) status.textContent = 'No separate approval needed — one signature covers it…';
+      if (btn) btn.disabled = false;
+      return doSelfRescue();
+    }
+  } catch (_) { /* fall through to the classic approve */ }
   if (status) status.textContent = 'Approving USDC…';
   try {
     const matrixAddr = window._parkedMatrixAddr;
@@ -9773,13 +9893,30 @@ async function _paintCopayOption(p, rp) {
     const [bal, floor] = await Promise.all([sf.totalBalance(), sf.stabilityFloor()]);
     ok = bal >= loan + floor;
   } catch (_) { /* leave enabled — the staticCall at press time still protects */ }
+  // V8.48 item 46 — the INSOLVENCY FLOOR surface: when the member's own rescue
+  // debt has hit the floor, the SF refuses new loans ("SF: insolvency floor")
+  // regardless of fund health. FEATURE-DETECTED: loanEligible() exists only on
+  // V8.48 — a CALL_EXCEPTION means V8.47, where the floor does not exist; any
+  // other failure leaves the button enabled (staticCall still protects).
+  let floored = false;
+  try {
+    if (userAddr && p.addr) {
+      const tierIdx = Number(await new ethers.Contract(p.addr,
+        ['function tierIndex() view returns (uint8)'], rp).tierIndex());
+      const sf46 = new ethers.Contract(ADDRS.stabilityFund,
+        ['function loanEligible(address,uint8) view returns (bool)'], rp);
+      floored = (await sf46.loanEligible(userAddr, tierIdx)) === false;
+    }
+  } catch (_) { /* V8.47 (no getter) or dropped read — never fabricate "floored" */ }
   const disp = document.getElementById('copay-loan-display');
   if (disp) disp.textContent = fmt6(loan);
   btn.style.display = ''; note.style.display = '';
-  btn.disabled = !ok;
-  note.textContent = ok
-    ? `Instant re-entry — the fund lends ${fmt6(loan)}, repaid automatically from your future earnings.`
-    : 'The fund is at its protective floor — copay loans are paused while it rebuilds. Use Self Rescue, or wait for the automatic rescue after the grace period.';
+  btn.disabled = !ok || floored;
+  note.textContent = floored
+    ? 'No loan is available for this position — your outstanding rescue debt has reached the insolvency floor (a fund-protection rule). You can Self-Rescue by paying the shortfall yourself; otherwise the position will be evicted and your crossing reserve released back to your withdrawable balance.'
+    : ok
+      ? `Instant re-entry — the fund lends ${fmt6(loan)}, repaid automatically from your future earnings.`
+      : 'The fund is at its protective floor — copay loans are paused while it rebuilds. Use Self Rescue, or wait for the automatic rescue after the grace period.';
 }
 
 async function doCopayRescue() {
@@ -9851,6 +9988,66 @@ async function doSelfRescue() {
       'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
     ];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
+
+    // ── V8.48 item 40 — ONE-TRANSACTION path: permit folded into the rescue ──
+    // Available only when both probes pass (_permitRescueAvailable). The permit
+    // signature is gasless; the single tx replaces approve + selfRescue. On any
+    // pre-send failure here we fall through to the classic flow — the member
+    // loses nothing but the typed-data prompt.
+    try {
+      const _rpP = readProvider || signer.provider;
+      if (await _permitRescueAvailable(_rpP)) {
+        const _meP = await signer.getAddress();
+        const _mrP = new ethers.Contract(matrixAddr, [
+          'function ENTRY_FEE() view returns (uint256)',
+          'function crossingReserveOf(address) view returns (uint256)',
+          'function withdrawableOf(address) view returns (uint256)',
+          'function selfRescueWithPermit(uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external',
+          'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
+          'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
+        ], signer);
+        const [_feeP, _resP, _wdP] = await Promise.all([
+          _mrP.ENTRY_FEE(), _mrP.crossingReserveOf(_meP), _mrP.withdrawableOf(_meP),
+        ]);
+        const _haveP = _resP + _wdP;
+        const _needP = _feeP > _haveP ? _feeP - _haveP : 0n;
+        if (_needP > 0n) {
+          const _balP = BigInt(await new ethers.Contract(ADDRS.usdc, USDC_ABI, _rpP).balanceOf(_meP));
+          if (_balP < _needP) {
+            throw new Error(`⚠️ Re-entry costs ${'$' + (Number(_feeP)/1e6).toFixed(2)}; your reserve + earnings cover ${'$' + (Number(_haveP)/1e6).toFixed(2)}, so ${'$' + (Number(_needP)/1e6).toFixed(2)} comes from your wallet — which holds ${'$' + (Number(_balP)/1e6).toFixed(2)}. Top up and retry. Nothing was sent.`);
+          }
+        }
+        if (status) status.textContent = 'One signature covers the approval — check your wallet…';
+        const p = await _signRescuePermit(matrixAddr, _needP);
+        if (status) status.textContent = 'Submitting self rescue (single transaction)…';
+        await _mrP.selfRescueWithPermit.staticCall(p.value, p.deadline, p.v, p.r, p.s);
+        const _eP = await _mrP.selfRescueWithPermit.estimateGas(p.value, p.deadline, p.v, p.r, p.s);
+        const _gP = _eP + _eP / 7n; // ~1.15x, same ladder as the classic path
+        if (_gP > 15_000_000n) throw new Error('⚠️ This rescue is currently too large for the network to process. The keeper will pick it up shortly, or try again in a few minutes.');
+        const _txP = await _mrP.selfRescueWithPermit(p.value, p.deadline, p.v, p.r, p.s, { gasLimit: _gP });
+        if (status) status.textContent = 'Waiting for confirmation…';
+        await _txP.wait();
+        if (status) { status.style.color = 'var(--green)'; status.textContent = '✅ Self rescue complete — one transaction, no separate approval. You\'re back in the matrix.'; }
+        toast('Self rescue complete — you\'re back in!', 'success');
+        _staggeredDashRefresh();
+        if (btn) btn.disabled = false;
+        return;
+      }
+    } catch (ePermit) {
+      // A member-facing ⚠️ message or an explicit wallet rejection ENDS the
+      // attempt honestly; anything else falls through to the classic flow.
+      const _m = (ePermit && ePermit.message || '').toLowerCase();
+      if ((ePermit.message || '').startsWith('⚠️')) throw ePermit;
+      if (ePermit.code === 'ACTION_REJECTED' || _m.includes('user rejected') || _m.includes('user denied')) {
+        if (status) { status.style.color = 'var(--text2)'; status.textContent = '✋ Signature declined — nothing was sent.'; }
+        if (btn) btn.disabled = false;
+        return;
+      }
+      console.warn('[permit-rescue] falling back to approve+selfRescue:', ePermit.message);
+      window._permitRescueOK = undefined;  // re-probe next time
+    }
+    // ── end permit path — classic approve + selfRescue below (V8.47 / no permit) ──
+
     // 2026-07-28: this used to fall back to a STATIC 15,000,000 whenever the
     // estimate threw. Two problems, and members hit both:
     //   1. 15M is rejected outright by the public RPC ("gas limit too high"),
