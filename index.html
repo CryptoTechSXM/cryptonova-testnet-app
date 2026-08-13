@@ -7359,6 +7359,9 @@ async function doWithdrawPartial() {
       if (inp) inp.value = '';
       await new Promise(r => setTimeout(r, 3500));
       await loadDashboardData();
+      _staggeredDashRefresh();   // V8.48 deploy day: a single post-tx read goes stale when the
+                                 // pool lags the tx block — the member sees the OLD balance and
+                                 // clicks Withdraw again. Same fix as upgrade/rescue (2026-08-06).
       return;   // finally{} re-enables the buttons
     }
     // ── end V8.48 single-signature path — V8.48 per-matrix loop below ───────
@@ -7494,6 +7497,7 @@ async function doWithdrawPartial() {
     onWithdrawAmountInput();
     if (withdrawn) await new Promise(r => setTimeout(r, 3500));
     await loadDashboardData();
+    if (withdrawn) _staggeredDashRefresh();   // see the note in the single-signature path above
   } catch(e) {
     setStatus('withdraw-status', friendlyError(e), 'err');
   } finally {
@@ -7609,6 +7613,7 @@ async function doWithdraw() {
     }
     await new Promise(r => setTimeout(r, 3500)); // let Base Sepolia RPC nodes index the withdrawal
     await loadDashboardData();
+    _staggeredDashRefresh();   // see the note in the single-signature path above
   } catch(e) {
     setStatus('withdraw-status', friendlyError(e), 'err');
   } finally {
