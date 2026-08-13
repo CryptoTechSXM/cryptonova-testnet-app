@@ -119,7 +119,7 @@ Tier multipliers: T1=1×, T2=2×, T3=4×, T4=8×, T5=20×, T6=40×, T7=80×, T8=
 
 ## CNOVA Epochs (from CNOVAToken.sol)
 <b>Global and platform-wide</b> - not per-member. <b>9 epochs total.</b>
-Epoch advances when the FIRST fires: 1M CNOVA minted, 10k new members, or 30 days elapsed.
+Epoch advances when the FIRST fires: 1,000,000 CNOVA minted, 1,000 new members, or 180 days elapsed (V8.48 policy — item 42).
 
 Base T1 rewards: Ep1=50, Ep2=40, Ep3=20, Ep4=10, Ep5=5, Ep6-8=2.5, Ep9=2.5 CNOVA.
 
@@ -133,7 +133,7 @@ Mining stops after all 9 epochs (21M hard cap). Do NOT say "after your 8th cycle
 ## Community Pool
 <b>1% of every entry fee</b> (100 BPS) plus orphan fees (entries with no valid upline). First 1,000 wallets eligible — enrollment automatic and permanent, closes forever at member 1,000.
 Genesis (#1-500) = 60%, Pioneer (#501-1000) = 40%, split evenly within each cohort.
-Every 30 days a distribution can be triggered: half the pool pays out, half rolls over and compounds. Payouts begin at mainnet (policy).
+On the 25TH of every month a distribution can be triggered (calendar-day model, V8.48): half the pool pays out, half rolls over and compounds. Members then have 30 days to claim; unclaimed amounts sweep back into the pool by design. Payouts begin at mainnet (policy).
 
 ## How to Register
 1. Visit <a href="https://crypto-nova.app">crypto-nova.app</a>
@@ -165,8 +165,8 @@ At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out fund
   2. <b>Self-rescue</b> — pay only the shortfall from your wallet. NO loan, NO debt, nothing owed back.
   3. <b>coPayRescue</b> — keeper-driven StabilityFund co-pay for eligible cases; any SF loan portion is repaid gradually from future pool shares.
 - Long-idle parked seats can be cleared by the keeper (slot cleared): tier status and earnings preserved; rejoin by paying the re-entry fee.
-- Saturated pairs (381+ cumulative entries) automatically route ALL overflow — new entries, re-entries, self-rescues — into the next pair's MatA.
-- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy EARLY as a standby buffer — the factory fires when the previous pair reaches 375 cumulative entries OR its MatB hits 90% occupancy, whichever comes first. The new pair then stays empty until the previous pair fully saturates at 381 cumulative entries — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.47 anti-freeze buffer).
+- When the newest pair FILLS, the factory spawns the next pair and overflow routes into it automatically (V8.48 — the old fixed 375/381 entry thresholds are GONE from the contracts; think seats remaining, not entry counts).
+- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy when the newest pair is FULL (V8.48 item 33 — no more fixed entry thresholds). A new pair can sit empty until routing reaches it — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.47 anti-freeze buffer).
 - Do NOT say upgrade is free. Do NOT describe rescue as a loan by default — self-rescue is debt-free.
 
 ## Network Setup (Base Sepolia)
