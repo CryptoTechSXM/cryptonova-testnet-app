@@ -7153,8 +7153,18 @@ function getWithdrawRecipient() {
 // in the legacy key, invisible — ambiguous history is not shown to the wrong wallet.
 const _WD_HIST_KEY_LEGACY = 'cn_withdraw_history_v1';
 
+// V8.48 deploy day 2026-08-13 (owner spotted it during the cutover): the v2 key was
+// per-WALLET but not per-DEPLOYMENT, so after a fresh deploy — where every position
+// resets and the old matrices cease to exist — members opened the new site and saw
+// records from the DEAD deployment: "received $737.78 of $3,291.13 — 17 matrix
+// failed", naming T5.1/T6.1/T7 matrices that are not on this chain any more. Money
+// was never at risk; the alarm was. The key now carries the deployment (TierRouter
+// address is unique per deploy), so pre-cutover records go quiet the same way an
+// ambiguous v1 record does — hidden, never deleted, still there if we need them.
+const _WD_DEPLOY_TAG = (ADDRS && ADDRS.tierRouter ? ADDRS.tierRouter : 'unknown').slice(0, 10).toLowerCase();
+
 function _wdHistKey() {
-  return userAddr ? `cn_withdraw_history_v2:${userAddr.toLowerCase()}` : null;
+  return userAddr ? `cn_withdraw_history_v2:${userAddr.toLowerCase()}:${_WD_DEPLOY_TAG}` : null;
 }
 
 // One-time claim of v1 records for the connected account: move records whose payee
@@ -7182,7 +7192,9 @@ function _loadWithdrawHistory() {
   const key = _wdHistKey();
   if (!key) return []; // not connected — no wallet, no history to show
   try {
-    _migrateWithdrawHistory();
+    // NOT migrating v1 here any more: every v1 record predates the V8.48 cutover by
+    // definition, so pulling it into this deployment's bucket would re-create exactly
+    // the confusion the deployment tag above removes.
     return JSON.parse(localStorage.getItem(key) || '[]');
   } catch (_) { return []; }
 }
