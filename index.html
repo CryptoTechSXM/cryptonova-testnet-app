@@ -2611,6 +2611,21 @@ function _staggeredDashRefresh() {
   }, ms));
 }
 
+// V8.48 deploy day 2026-08-13 — generalised from _staggeredDashRefresh after an audit
+// of EVERY transaction-sending handler in this file. The defect it fixes: a handler
+// sends a tx, waits, re-reads ONCE, and the RPC pool has not yet indexed the tx block —
+// so the member is shown pre-transaction numbers and clicks the button again. The
+// withdraw paths had it, and so did nine more handlers, several of them moving money
+// (redeem, early unlock, community-wallet claim, limbo re-entry).
+// Pass whichever loaders that panel actually uses: _staggerReload(loadRedeemData, loadDashboardData).
+function _staggerReload() {
+  const fns = Array.prototype.slice.call(arguments).filter(f => typeof f === 'function');
+  if (!fns.length || window._clearAllRunning) return;
+  [2000, 8000, 20000].forEach(ms => setTimeout(() => {
+    fns.forEach(f => { try { const p = f(); if (p && p.catch) p.catch(() => {}); } catch (_) {} });
+  }, ms));
+}
+
 function _paintMemberToggles(info) {
   if (!info) return;
   const _set = (chkId, lblId, on) => {
@@ -3309,7 +3324,9 @@ async function doCWClaimAll() {
     // Clear CW cache so next load shows fresh claimable balance
     _cache.del('cw_' + userAddr.toLowerCase());
     // Refresh the panel after 2 seconds
-    setTimeout(() => loadCWData(userAddr, signer, readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) })), 2000);
+    const _cwReload = () => loadCWData(userAddr, signer, readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) }));
+    setTimeout(_cwReload, 2000);
+    _staggerReload(_cwReload);   // claim moves real money — one read can miss the block
   } catch(e) {
     console.error('doCWClaimAll:', e.message);
     const reason = e?.reason || e?.data?.message || e.message || 'Claim failed';
@@ -4858,6 +4875,7 @@ async function doIssueCoupon() {
     if (ba) { ba.disabled = false; ba.textContent = 'Step 1: Approve $10 USDC 🔒'; ba.style.borderColor = '#a855f7'; ba.style.color = '#a855f7'; }
     btn.disabled = true; btn.className = 'btn btn-ghost full-w';
     setTimeout(() => loadMyCoupons(), 3000);
+    _staggerReload(loadMyCoupons);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Issue Coupon 🎟️ ⛽';
     setStatus('coupon-issue-status', friendlyError(e), 'err');
@@ -4873,6 +4891,7 @@ async function doReclaimCoupon(codeHash) {
     await tx.wait();
     toast('✅ USDC reclaimed!', 'success');
     setTimeout(() => loadMyCoupons(), 2000);
+    _staggerReload(loadMyCoupons);
   } catch(e) {
     toast(friendlyError(e), 'error');
   }
@@ -4892,6 +4911,7 @@ async function doCancelCoupon(codeHash) {
     if (_ci !== -1) { _cl[_ci].cancelled = true; localStorage.setItem(_couponKey(), JSON.stringify(_cl)); }
     toast('✅ Coupon cancelled — $10 USDC returned to your wallet!', 'success');
     setTimeout(() => loadMyCoupons(), 2000);
+    _staggerReload(loadMyCoupons);
   } catch(e) {
     toast(friendlyError(e), 'error');
   }
@@ -6168,6 +6188,7 @@ async function doCancelCoupon(codeHash) {
     if (_ci !== -1) { _cl[_ci].cancelled = true; localStorage.setItem(_couponKey(), JSON.stringify(_cl)); }
     toast('✅ Coupon cancelled — $10 USDC returned to your wallet!', 'success');
     setTimeout(() => loadMyCoupons(), 2000);
+    _staggerReload(loadMyCoupons);
   } catch(e) {
     toast(friendlyError(e), 'error');
   }
@@ -6800,7 +6821,14 @@ async function cnovaEarlyUnlock(btn) {
     await tx.wait();
     alert(`Unlocked. ${f(released)} CNOVA is now transferable.`);
     _refreshCnovaPanel();              // indices have shifted — re-read everything
-    if (typeof loadDashboard === 'function') loadDashboard();
+    // V8.48 deploy day 2026-08-13: this line read `if (typeof loadDashboard === 'function')
+    // loadDashboard();` — and there IS NO loadDashboard() in this file, only
+    // loadDashboardData(). The guard was permanently false, so an early unlock — the
+    // single most expensive voluntary action a member can take, up to a 50% penalty —
+    // refreshed NOTHING. The member paid the penalty and watched an unchanged screen.
+    try { loadDashboardData(); } catch (_) {}
+    try { loadRedeemData(); } catch (_) {}
+    _staggerReload(loadDashboardData, loadRedeemData);
   } catch (e) {
     btn.disabled = false;
     btn.textContent = original;
@@ -8385,7 +8413,7 @@ async function loadRedeemData() {
           '<strong style="color:var(--yellow)">⚠️ Early Exit Penalty</strong><br>' +
           'Redeeming now costs <strong style="color:var(--yellow)">' + penaltyPct + '%</strong> of your USDC payout, based on how long you have been a member. ' +
           'It steps down to <strong>0% after 120 days</strong> from your first registration.<br>' +
-          '<span style="color:var(--text3);font-size:11px">80% of the penalty returns to the CNOVA Treasury, supporting the floor for everyone still holding; 20% goes to the Community Wallet. Separately, matrix-minted CNOVA is cliff-vested for ' + vestDays + ' days, which blocks transferring or selling it \u2014 not redeeming.</span>';
+          '<span style="color:var(--text3);font-size:11px">80% of the penalty returns to the CNOVA Treasury, supporting the floor for everyone still holding; 20% goes to the Community Wallet. Separately, matrix-minted CNOVA is cliff-vested for ' + vestDays + ' days, which blocks transferring or selling it \u2014 not redeeming. The vesting <strong>unlock-early</strong> penalty and this <strong>early-exit</strong> penalty are two different charges for two different actions: you can redeem locked CNOVA without unlocking it, so you never pay both.</span>';
         penaltyEl.style.display = 'block';
       } else {
         penaltyEl.innerHTML = '<span style="color:var(--green)">✅ No early-exit penalty on this redemption.</span>'
@@ -8489,6 +8517,7 @@ async function doRedeemAtFloor() {
     await loadRedeemData();
     await loadDashboardData();
     loadHomeStats(); // refresh CNOVA Minted + Total Supply in live stats
+    _staggerReload(loadRedeemData, loadDashboardData, loadHomeStats);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Step 2: Redeem for USDC';
     setStatus('redeem-status',friendlyError(e),'err');
@@ -8526,6 +8555,7 @@ async function doUnlockAll() {
     await new Promise(r => setTimeout(r, 3500));
     await loadRedeemData();
     await loadDashboardData();
+    _staggerReload(loadRedeemData, loadDashboardData);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Max Unlock (early-exit vesting)';
     setStatus('redeem-status', friendlyError(e), 'err');
@@ -9530,6 +9560,7 @@ async function doLimboReEntry() {
     await tx.wait();
     setStatus('limbo-status', '✅ Re-entered! Refreshing dashboard…', 'ok');
     setTimeout(() => loadUserData(), 2000);
+    _staggerReload(loadUserData);
   } catch(e) {
     setStatus('limbo-status', friendlyError(e), 'err');
     if (btn) btn.disabled = false;
