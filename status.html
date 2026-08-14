@@ -823,10 +823,10 @@
   // V8.48 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
-    if (localStorage.getItem('cnova_st_ver') !== 'v8.48-0807c') {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47','cnova_loans_v8_47b']
+    if (localStorage.getItem('cnova_st_ver') !== 'v8.48-live-0813') {
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47','cnova_loans_v8_47b','cnova_loans_v8_47c']
         .forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem('cnova_st_ver','v8.48-0807c');
+      localStorage.setItem('cnova_st_ver','v8.48-live-0813');
     }
   } catch(e) {}
   // Restore cached display state immediately (survives page reload)
@@ -1685,7 +1685,16 @@
       // scan too, so dropped chunks made "repaid" exceed "issued" and outstanding
       // clamped to a confident $0.00 while the chain held $11.03.
       try {
-        const LOAN_KEY        = 'cnova_loans_v8_47c'; // bump suffix on EVERY redeploy + add the old key to the cache-buster list above
+        // V8.48 deploy day 2026-08-13 (owner spotted it): this key said 'v8_47c' and the
+        // manual "bump the suffix on EVERY redeploy" instruction was missed at the
+        // cutover — so the page loaded V8.47's ACCUMULATED loan book and kept adding to
+        // it. It showed 456 borrowing wallets and 220 T4 / 60 T5 loans while T4 and T5
+        // were EMPTY on the new chain. Same defect as the withdrawal-history panel found
+        // the same day: keyed per-wallet but not per-DEPLOYMENT.
+        // The key is now DERIVED from the StabilityFund address — the very contract whose
+        // events this book scans — so a redeploy starts a fresh book automatically and
+        // there is no suffix left for anyone to forget.
+        const LOAN_KEY        = 'cnova_loans:' + (window.ADDRS && ADDRS.stabilityFund ? ADDRS.stabilityFund : 'unknown').slice(0, 10).toLowerCase();
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
         // V8.48 deploy block — the same anchor sf_invariant_check.js uses, so the
