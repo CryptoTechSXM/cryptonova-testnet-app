@@ -2081,6 +2081,43 @@ function pickDefaultSponsor(memberAddr) {
 }
 const RPC_EXTRA    = 'https://sepolia.base.org';
 
+// ── V8.49 item 2: THE RPC WE PUT IN A MEMBER'S WALLET ────────────────────
+//
+// This is NOT the site's read pool. The pool above (5 QuickNode endpoints) is what
+// OUR pages read through. This list is what wallet_addEthereumChain hands to a
+// member's wallet, and it then governs every transaction they SEND — registration,
+// upgrade, withdrawal — for as long as they keep it.
+//
+// ⚠ THE VALUE IS DELIBERATELY UNCHANGED (owner decision 2026-08-16). Only the number of
+// PLACES it is written has changed: two, now one.
+//
+// DO NOT ADD FREE PUBLIC ENDPOINTS HERE. This session proposed exactly that —
+// base-sepolia-rpc.publicnode.com as primary, on the reasoning that sepolia.base.org is
+// Cloudflare-fronted and demonstrably fails (a 502 from it on V8.48 deploy day returned
+// raw HTML that landed in an alert() box). THE OWNER OVERRULED IT FROM OPERATIONAL
+// HISTORY: public RPC endpoints were tried in this site's own read pool, were buggy, and
+// were ALL removed. That is direct experience of these endpoints on this site, and it
+// beats a reliability claim from documentation. Revisit at MAINNET, where the endpoint
+// set is different, and not before.
+//
+// SO ITEM 2 IS STILL OPEN. sepolia.base.org remains the prime suspect for the
+// "Transaction failed on-chain — hard-refresh" report class, the most common in BUGS.md
+// — SUSPECT, never measured. The options that remain live are a DEDICATED QuickNode
+// endpoint kept OUT of the read pool above (costs quota, and lands in page source like
+// the other five), or leaving it until mainnet. Not a free-public list.
+//
+// ⚠ DEFINED ONCE, ON PURPOSE. Both wallet_addEthereumChain call sites read this array;
+// they used to carry their own copies of the URL. That is how a value and its meaning
+// drift apart — the same shape that left a "mainnet default 6h" in three files for a
+// setter capped at 1h (V8.49, contracts repo). Whatever mainnet decides, it is ONE edit
+// here and nowhere else.
+//
+// NOTE ON ORDER: wallets take the FIRST entry. Any others are alternatives the member
+// selects manually; do not rely on automatic failover, it is wallet-specific.
+const WALLET_RPC_URLS = [
+  'https://sepolia.base.org',   // unchanged from V8.48 — see the block above before altering
+];
+
 // eth_getLogs on range-capped providers (QuickNode caps at 10k blocks): walk
 // backward in <=9000-block windows instead of one whole-chain query that gets
 // rejected. Sequential, so it never bursts the per-second rate limit.
@@ -2846,7 +2883,10 @@ async function connectWallet(silent=false) {
         // Attempt addEthereumChain for any error EXCEPT explicit user rejection (4001).
         if (swErr.code !== 4001) {
           try {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
+            // V8.49 item 2: rpcUrls comes from WALLET_RPC_URLS (see CONFIG) — never a
+            // literal here. This is the connect-flow copy; the network-banner copy below
+            // reads the same array.
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x14A34', chainName: 'Base Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: WALLET_RPC_URLS.slice(), blockExplorerUrls: ['https://sepolia.basescan.org'] }] });
             isConnecting = false;
             if (!silent) { btn.disabled = false; btn.textContent = 'Connect Wallet'; btn.classList.remove('connected'); }
             return connectWallet(silent);
@@ -2915,7 +2955,8 @@ async function switchToBaseSepolia() {
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
           chainId:'0x14A34', chainName:'Base Sepolia',
           nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},
-          rpcUrls:['https://sepolia.base.org'],
+          // V8.49 item 2: the network-banner copy. Same array as the connect flow above.
+          rpcUrls: WALLET_RPC_URLS.slice(),
           blockExplorerUrls:['https://sepolia.basescan.org']
         }] });
         hideNetworkBanner(); if (!userAddr) await connectWallet();
