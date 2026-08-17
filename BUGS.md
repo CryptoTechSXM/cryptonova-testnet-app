@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-17] Bug Report Page — Fail to create
+"[From https://sepolia.base.org] gas limit to…
+- **Reporter:** Jacob
+- **Page:** Bug Report Page
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x3fd5936a01d89d465570e4f601d6378365fb6a01
+- **Frequency:** Consistent
+- **What happened:** Fail to create
+"[From https://sepolia.base.org] gas limit too high"
+- **What was expected:** Supposed to load but not.
+- **Submitted:** Mon, 17 Aug 2026 13:10:07 GMT
+
+
 ### [2026-08-13] Other — Withdraw all triggers the contract but no reaction in wallet…
 - **Reporter:** Sherwyn
 - **Page:** Other
