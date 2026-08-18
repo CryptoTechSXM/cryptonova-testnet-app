@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-18] Dashboard (index.html) — The RPC node didn't respond after several retries — this is …
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x788b70fe1453ccc12e3d76ae18c1952046fa02af
+- **Frequency:** Consistent
+- **What happened:** The RPC node didn't respond after several retries — this is NOT a confirmation that you're unregistered. If you've already joined, your data is safe on-chain.
+- **What was expected:** Connect to wallet
+- **Notes:** This happens on several accts
+- **Submitted:** Tue, 18 Aug 2026 22:38:18 GMT
+
+
 ### [2026-08-17] Bug Report Page — Fail to create
 "[From https://sepolia.base.org] gas limit to…
 - **Reporter:** Jacob
