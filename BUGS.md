@@ -37,6 +37,22 @@
 
 ## Open Issues
 
+### [2026-08-19] Dashboard (index.html) — Was disallowed from accessing Dash board. Reason given: "Cou…
+- **Reporter:** @bevmawire
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x0dcd36fb20e7221b18c28372fc65ef90810e3c5a
+- **Frequency:** Consistent
+- **What happened:** Was disallowed from accessing Dash board. Reason given: "Couldn't find your status"
+- **What was expected:** Straight, easy access into; no ifs no buts!. 
+
+Additional notes (optional) tab does not seem to be giving access to "Steps to reproduce, screenshot filename, error message" does not seem to have facility for uploading screenshot either.
+- **Notes:** Additional notes (optional) tab does not seem to be giving access to "Steps to reproduce, screenshot filename, error message" 
+
+In particular, it does not seem to have facility for uploading screenshots either.
+- **Submitted:** Wed, 19 Aug 2026 13:50:13 GMT
+
+
 ### [2026-08-18] Dashboard (index.html) — The RPC node didn't respond after several retries — this is …
 - **Reporter:** Maximum_71
 - **Page:** Dashboard (index.html)
