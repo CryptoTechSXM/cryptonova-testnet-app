@@ -2122,9 +2122,46 @@ const WALLET_RPC_URLS = [
 // backward in <=9000-block windows instead of one whole-chain query that gets
 // rejected. Sequential, so it never bursts the per-second rate limit.
 // Floor for every lifetime-history log scan. Same value _getDirectReferrals uses
-// (TR_DEPLOY_BLOCK). A stale-LOW floor only scans a few extra EMPTY windows -- it can
-// never miss an event -- so on redeploy this may be raised but never needs to be.
-const LOGS_DEPLOY_FLOOR = 44840000;
+// (TR_DEPLOY_BLOCK).
+//
+// == 2026-08-19: RAISED 44,840,000 -> 45,428,000 ON MEASUREMENT. ==
+//
+// The old comment here said a stale-LOW floor "only scans a few extra EMPTY windows".
+// That sentence is why this sat for 19.7 days. IT WAS NOT A FEW. Measured with
+// measure_page_rpc.mjs (this folder) against the live chain on 2026-08-19:
+//
+//     chain head                        45,691,990
+//     old floor                         44,840,000   -> 95 windows per lifetime scan
+//     TRUE creation block, cnova        45,428,148   (binary search on eth_getCode)
+//     TRUE creation block, tierRouter   45,428,223
+//     TRUE creation block, communityWt  45,430,266
+//     new floor                         45,428,000   -> 30 windows per lifetime scan
+//
+// 65 of every 95 windows -- 68% of ALL lifetime history reading this site does --
+// were scanning blocks that PROVABLY contain nothing, because they predate the
+// creation of every contract being queried. Six call sites do a floor-bound scan
+// (:3205 cw, :6194 cnova, :6289 tr, :6677 cnova, :6900 cnova, :8148 tr), so the
+// waste multiplies by six on a full dashboard load. Measured cost 103 ms/window on
+// EP1, 0 failed windows and 0 retries -- the endpoints were never refusing us, the
+// page was simply asking ~3.2x more than it needed to.
+//
+// THE SAFETY ARGUMENT IS A PROPERTY, NOT AN ESTIMATE: a contract cannot emit an
+// event before the block it was created in. 45,428,000 is below the EARLIEST of the
+// three creation blocks above (cnova, 45,428,148) with 148 blocks of slack against
+// an off-by-one in the search, so no call site can miss an event. It is not a
+// guess about traffic or history; it is the floor under which no log can exist.
+//
+// !! THIS VALUE GOES STALE BY DESIGN AND THAT IS THE REAL DEFECT. !!
+// The head moves ~43,200 blocks/day (2s blocks) and this floor does not, so every
+// lifetime scan grows ~4.8 windows/day -- ~29 more requests per dashboard load per
+// day, ~3.0s more wall clock per day, forever. Raising the constant buys ~4 months
+// back and then the same curve resumes. The structural fixes, in order of value:
+//   1. safeGetLogs already takes opts.fromBlock so a deep history is paid ONCE per
+//      wallet and cached; no call site passes it. That is the real fix.
+//   2. Per-contract floors instead of one global one (the three differ by ~2,000).
+// ON REDEPLOY: re-run measure_page_rpc.mjs and set this to just under the earliest
+// creation block it reports. Do not lower it "to be safe" -- that is what cost 68%.
+const LOGS_DEPLOY_FLOOR = 45428000;
 
 async function safeGetLogs(contract, filter, opts) {
   opts = opts || {};
@@ -2414,6 +2451,33 @@ const CNOVA_ABI = [
 
 const SF_ABI = [
   'function totalBalance() external view returns (uint256)',
+  // V8.48 item 46 / V8.49 item 1b. loanHeadroom is "how much MORE may this member borrow
+  // before the insolvency floor refuses them" — StabilityFund.sol says outright: "THE
+  // FRONTEND SHOULD SHOW THIS, not just a yes/no — a member told only 'no loan' cannot
+  // act on it". These are what let a parked member see whether the fund can actually
+  // cover their gap, instead of finding out by being evicted.
+  // ⛔ loanHeadroom IS V8.49+ (commit 40d7843) AND LIVE IS V8.48 — it reverts there with
+  //    "missing revert data", which looks like a network fault and is not one. The pieces
+  //    to derive it DO exist on V8.48, so the code falls back to
+  //    fee * insolvencyFloorBps / 10000 - memberDebt, which is loanHeadroom's own formula.
+  //    Without this fallback every badge on the live chain reads CHECKING and the whole
+  //    feature is inert while looking healthy.
+  'function loanHeadroom(address member, uint8 tierIdx) external view returns (uint256)',
+  'function loanEligible(address member, uint8 tierIdx) external view returns (bool)',
+  'function insolvencyFloorBps() external view returns (uint256)',
+  'function memberDebt(address member) external view returns (uint256)',
+  'function tierEntryFees(uint256 tierIdx) external view returns (uint256)',
+];
+
+// The eviction clock lives on the keeper, not the matrix. 7 days as shipped
+// (MatrixKeeper.sol:372); READ IT, never hardcode — it is DAO-tunable (PARAM 62) and a
+// stale copy here would quote members a deadline that is not the one enforced.
+// ⛔ TWO NAMES, AND THE LIVE CHAIN USES THE OLDER ONE. `evictionGracePeriod` arrived in
+//    V8.49 item 1 (commit b14eba7); V8.48 — what members are on — exposes
+//    `extendedIdleTimeout`, same 604_800 seconds. Ask for both.
+const KEEPER_EVICT_ABI = [
+  'function evictionGracePeriod() external view returns (uint256)',   // V8.49+
+  'function extendedIdleTimeout() external view returns (uint256)',   // V8.48 and earlier
 ];
 
 const USDC_ABI = [
@@ -4977,15 +5041,15 @@ async function _buildAllMatrixObjects(rp) {
         const [matAs, matBs] = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp).allPairsStatus();
         for (let pi = 0; pi < matAs.length; pi++) {
           const _pairSuffix = matAs.length > 1 ? `.${pi + 1}` : '';
-          result.push({ addr: matAs[pi], label: `T${tNum}${_pairSuffix} Matrix A` });
-          result.push({ addr: matBs[pi], label: `T${tNum}${_pairSuffix} Matrix B` });
+          result.push({ addr: matAs[pi], label: `T${tNum}${_pairSuffix} Matrix A`, tierIdx: i });
+          result.push({ addr: matBs[pi], label: `T${tNum}${_pairSuffix} Matrix B`, tierIdx: i });
         }
         added = true;
       } catch(e) {}
     }
     if (!added) {
-      result.push({ addr: ADDRS[t].matA, label: `T${tNum} Matrix A` });
-      result.push({ addr: ADDRS[t].matB, label: `T${tNum} Matrix B` });
+      result.push({ addr: ADDRS[t].matA, label: `T${tNum} Matrix A`, tierIdx: i });
+      result.push({ addr: ADDRS[t].matB, label: `T${tNum} Matrix B`, tierIdx: i });
     }
   }
   return result;
@@ -5257,6 +5321,10 @@ async function loadDashboardData() {
                 crossingReserve: BigInt(res),
                 fee: BigInt(fee),
                 shortfall: BigInt(fee) > effectiveHave ? BigInt(fee) - effectiveHave : 0n,
+                // parkedAt was already read above and thrown away. The eviction clock
+                // starts here, so a member cannot be told how long they have without it.
+                parkedAt: BigInt(parkedAt),
+                tierIdx: (typeof m.tierIdx === 'number' ? m.tierIdx : 0),
               });
             } else if (!parkedInfo && m.label.includes('Matrix A') && member.hasEverJoined) {
               // ONLY A MEMBER WHO ACTUALLY HELD A SLOT HERE CAN HAVE LOST ONE.
@@ -8140,9 +8208,12 @@ async function _getDirectReferrals(addr, rp) {
     // Walk from the TierRouter deploy block (every registration is at/after it) in
     // <=9000-block windows (QuickNode getLogs range cap). Flooring at the deploy block keeps
     // the count COMPLETE regardless of launch age and bounds the scan to this deployment's
-    // history. TR_DEPLOY_BLOCK = v8_46 first-registration floor; on a redeploy, lower it to
-    // the new deploy block — a stale-low value only scans a few extra empty windows, it
-    // never misses events. Each window retries 3x so a dropped read doesn't silently undercount.
+    // history. TR_DEPLOY_BLOCK is LOGS_DEPLOY_FLOOR, RAISED 2026-08-19 to 45,428,000 on
+    // measurement (full write-up at that constant). The claim this comment used to make
+    // -- that a stale-low value "only scans a few extra empty windows" -- was measured
+    // FALSE: it was 65 of 95, 68% of every scan. On a redeploy set it to just under the
+    // earliest contract creation block, which measure_page_rpc.mjs reports exactly.
+    // Each window retries 3x so a dropped read does not silently undercount.
     const TR_DEPLOY_BLOCK = LOGS_DEPLOY_FLOOR;   // AUDIT 2026-08-09: was a second literal 44840000. Two copies of a deploy-block floor is a drift bug waiting for the next redeploy -- one value now.
     const latest = await logRp.getBlockNumber();
     const WINDOW = 9000, FLOOR = Math.max(0, TR_DEPLOY_BLOCK);
@@ -9735,6 +9806,84 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
 
   const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
   const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
+
+  // ── V8.48: PENDING EVICTION vs IN THE RESCUE QUEUE (owner request 2026-08-19) ──────
+  //
+  // A parked member could see they were parked but not whether anything would actually
+  // come for them. Two very different situations looked identical: one is waiting for a
+  // rescue that IS coming, the other is on a 7-day clock to eviction with no loan
+  // available. The second is the only one that needs the member to act, and it was the
+  // one the page did not say.
+  //
+  // ⛔ WHY THIS DOES NOT RE-IMPLEMENT THE KEEPER'S TRIAGE. MatrixKeeperLib._triageParked
+  // returns its reason (EVICT_FLOOR / EVICT_LADDER / EVICT_RATIO / EVICT_GHOST) as an
+  // INTERNAL uint8 — never emitted, never stored, not readable. Copying that arithmetic
+  // here would be a second model of one rule, which is exactly how this codebase once
+  // shipped a dashboard itemising $7,500 while the chain held $10,000. So this reads only
+  // figures the contracts expose EXACTLY and lets the member compare them:
+  //     loanHeadroom(member, tier)  — how much the fund may still lend them (exact)
+  //     their own shortfall          — already computed above from fee/reserve/withdrawable
+  //     evictionGracePeriod()        — the real clock, READ not hardcoded (DAO param 62)
+  // A member whose headroom is below their gap cannot be fully covered by a loan. That is
+  // a statement about two exact numbers, not a prediction of the keeper's branch.
+  //
+  // ⚠ FAILED READS ARE "UNKNOWN", NEVER "FINE". Standing rule in this file: zero is a
+  // legitimate value here, so a failed read rendered as 0 headroom would tell a healthy
+  // member they are about to be evicted. null -> the row says it could not check.
+  let _evictGrace = null, _sfBal = null;
+  try {
+    if (ADDRS.matrixKeeper) {
+      const _k = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_EVICT_ABI, rp);
+      try { _evictGrace = BigInt(await _k.evictionGracePeriod()); }
+      catch (_) { _evictGrace = BigInt(await _k.extendedIdleTimeout()); }
+    }
+  } catch (_) { _evictGrace = null; }
+  try {
+    if (ADDRS.stabilityFund) _sfBal = BigInt(await new ethers.Contract(ADDRS.stabilityFund, SF_ABI, rp).totalBalance());
+  } catch (_) { _sfBal = null; }
+  const _sfC = ADDRS.stabilityFund ? new ethers.Contract(ADDRS.stabilityFund, SF_ABI, rp) : null;
+  const _headroom = await Promise.all(cands.map(async (c) => {
+    if (!_sfC) return null;
+    const _t = c.tierIdx ?? 0;
+    try { return BigInt(await _sfC.loanHeadroom(userAddr, _t)); } catch (_) { /* V8.48: derive it */ }
+    try {
+      const [bps, tfee, owed] = await Promise.all([
+        _sfC.insolvencyFloorBps(), _sfC.tierEntryFees(_t), _sfC.memberDebt(userAddr),
+      ]);
+      const ceiling = (BigInt(tfee) * BigInt(bps)) / 10000n;
+      return ceiling > BigInt(owed) ? ceiling - BigInt(owed) : 0n;
+    } catch (_) { return null; }   // still unknown -> the row says CHECKING, never "fine"
+  }));
+
+  const _nowSec = BigInt(Math.floor(Date.now() / 1000));
+  function _evictInfo(c, headroom) {
+    // returns { badge, colour, line } — badge null means "nothing to say on this row"
+    if (!c.shortfall || c.shortfall === 0n) return { badge: null, colour: '', line: '' };
+    let clock = '';
+    if (_evictGrace !== null && c.parkedAt && c.parkedAt > 0n) {
+      const left = (c.parkedAt + _evictGrace) - _nowSec;
+      if (left <= 0n) clock = 'Eviction window has passed — the keeper may remove this position on its next sweep.';
+      else {
+        const h = Number(left / 3600n);
+        clock = h >= 48 ? `About ${Math.floor(h / 24)} days left before this position can be evicted.`
+              : `Less than ${Math.max(1, h)} hours left before this position can be evicted.`;
+      }
+    }
+    if (headroom === null) {
+      return { badge: 'CHECKING', colour: 'var(--text3)',
+               line: `Could not check whether the fund can help right now — this is NOT a sign either way. ${clock}` };
+    }
+    if (headroom < c.shortfall) {
+      return { badge: 'PENDING EVICTION', colour: '#ef4444',
+               line: `The fund can lend at most ${fmt6(headroom)} toward your ${fmt6(c.shortfall)} gap, so a loan cannot cover this on its own. Self Rescue keeps your position. ${clock}` };
+    }
+    if (_sfBal !== null && _sfBal < c.shortfall) {
+      return { badge: 'WAITING ON FUND', colour: '#f59e0b',
+               line: `You qualify for help, but the Stability Fund holds ${fmt6(_sfBal)} right now against your ${fmt6(c.shortfall)} gap. Self Rescue does not wait on it. ${clock}` };
+    }
+    return { badge: 'IN RESCUE QUEUE', colour: 'var(--green)',
+             line: `You qualify — the fund can lend up to ${fmt6(headroom)} toward your ${fmt6(c.shortfall)} gap. ${clock}` };
+  }
   const held = new Set((activePositions || []).map(p => _pairKeyOf(p.label)));
   // clearAllParked() runs outside this function and needs the same blocked-pair set;
   // recomputing it there would be a second copy of the rule.
@@ -9768,12 +9917,19 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       btns += `<button class="btn" style="flex:1;background:rgba(245,158,11,.12);border:1px solid #f59e0b;color:#f59e0b;font-size:12px;padding:6px" onclick="selectParked(${i},'copay')">🤝 Copay — borrow ${fmt6(c.shortfall)}</button>`;
     }
     const colour = state === 'READY' ? 'var(--green)' : state === 'BLOCKED' ? 'var(--yellow)' : 'var(--text2)';
+    // BLOCKED rows are a seating conflict, not an eviction question — a member holding the
+    // other half of the pair is not on the eviction clock for this position.
+    const ev = (state === 'BLOCKED') ? { badge: null, colour: '', line: '' } : _evictInfo(c, _headroom[i]);
     rows.push(
       `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg3)">
          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
            <span style="font-weight:700;font-size:13px">${c.label}</span>
-           <span style="font-size:11px;font-weight:700;color:${colour}">${state}</span>
+           <span style="display:flex;gap:6px;align-items:center">
+             ${ev.badge ? `<span style="font-size:10px;font-weight:700;color:${ev.colour};border:1px solid ${ev.colour};border-radius:4px;padding:1px 5px">${ev.badge}</span>` : ''}
+             <span style="font-size:11px;font-weight:700;color:${colour}">${state}</span>
+           </span>
          </div>
+         ${ev.line ? `<div style="font-size:11px;color:${ev.colour};line-height:1.5;margin-bottom:4px">${ev.line}</div>` : ''}
          <div style="font-size:11px;color:var(--text3);line-height:1.6">
            Re-entry ${fmt6(c.fee)} = reserve ${fmt6(c.crossingReserve)} + earned ${fmt6(c.withdrawable)}
            ${c.shortfall > 0n ? ` &middot; <strong style="color:var(--text2)">short ${fmt6(c.shortfall)}</strong>` : ' &middot; covered'}
