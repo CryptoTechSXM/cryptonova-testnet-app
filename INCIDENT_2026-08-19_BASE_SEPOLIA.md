@@ -14,6 +14,36 @@ Base Sepolia as UNRELIABLE for the rest of this week, not as "an incident that h
 - **It affects the V8.50 private-deploy plan.** A deploy or a measured bigfill wave on a
   flapping network produces data nobody can defend. Sequence around a clean window.
 
+⛔ **AND THE ONSET WAS DATED TOO NARROWLY — MEMBER REPORTS PREDATE IT.** Found after this
+doc was first written, in BUGS.md via the automated intake:
+- **[2026-08-18] Maximum_71** — *"The RPC node didn't respond after several retries"*
+- **[2026-08-19 13:50 UTC] @bevmawire** — *"Couldn't find your status"*, frequency **Consistent**
+
+The outage measured in this document began at **15:54 UTC on 2026-08-19**. BOTH reports are
+earlier. So the SYMPTOM CLASS is older than the outage that was diagnosed, which corroborates
+the owner's "ongoing for a while, getting worse" and means this document's timeline describes
+ONE EPISODE, not the whole problem.
+
+⚠ **TWO READINGS, NOT YET SEPARATED — do not collapse them:**
+1. Base Sepolia has been intermittently degrading for days, and 15:54 was simply the worst
+   episode and the first one measured.
+2. The earlier reports are the SLOW-SCAN path, not the 503 path. "The RPC node didn't respond
+   after several retries" is the dashboard's own text for `loadUserData` failing, and it
+   fires on the 8-second `rpc()` timeout exactly as readily as on an error. Before the
+   LOGS_DEPLOY_FLOOR fix a lifetime scan was 95 sequential windows at ~103 ms — comfortably
+   enough to blow that budget on a slow day with nothing upstream wrong at all.
+
+**IF (2) IS RIGHT, THE BLOCK-FLOOR FIX IS THE FIX FOR THE EARLIER CLASS** even though it was
+not the fix for the 15:54 outage. That is testable: ship it to admin, then watch whether
+"didn't respond after several retries" reports stop arriving on days with no 503s. Until
+then it is PLAUSIBLE, NOT PROVEN, and must not be written up as the cause.
+
+**SEPARATE DEFECT IN THE SAME REPORT — bug-report.html.** @bevmawire: *"Additional notes
+(optional) tab does not seem to be giving access to 'Steps to reproduce, screenshot filename,
+error message'... it does not seem to have facility for uploading screenshots either."* A
+reporter who cannot attach a screenshot or reach the reproduce fields gives us less to work
+with on every future report. Not triaged; logged here so it is not lost.
+
 **Original status: RESOLVED (upstream).** Not a CryptoNova defect. No code change was required and
 none was made in response to it. Written for the next session of Claude and the owner.
 
