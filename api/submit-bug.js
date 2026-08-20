@@ -35,7 +35,7 @@ async function ghRequest(method, path, body, token) {
 }
 
 // ── Build the markdown entry ──────────────────────────────────────────────────
-function buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, notes }) {
+function buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, steps, notes, screenshotPath, screenshotError }) {
   const date  = new Date().toISOString().slice(0, 10);
   const time  = new Date().toUTCString();
   const title = happened.length > 60 ? happened.slice(0, 60) + '…' : happened;
@@ -50,7 +50,27 @@ function buildEntry({ reporter, page, wallet, walletAddress, frequency, happened
     `- **What happened:** ${happened}`,
     `- **What was expected:** ${expected}`,
   ];
+  // 'steps' is new as of 2026-08-19 (@bevmawire reported the form advertising a
+  // "steps to reproduce" it never had). OLD CLIENTS DO NOT SEND IT, and a cached
+  // bug-report.html will keep not sending it for as long as the browser holds it — so this
+  // stays optional and absent means absent. Do NOT make it required on this side.
+  // Multi-line by nature, so it goes in a fenced block rather than on the bullet line,
+  // where a newline would break the markdown list.
+  if (steps && steps.trim()) {
+    lines.push(`- **Steps to reproduce:**`);
+    lines.push('');
+    lines.push('  ```');
+    for (const ln of steps.trim().split(/\r?\n/)) lines.push('  ' + ln);
+    lines.push('  ```');
+  }
   if (notes && notes.trim()) lines.push(`- **Notes:** ${notes.trim()}`);
+  // A LINK, NOT AN EMBED. `![](...)` would render every screenshot full-size inline and
+  // make BUGS.md unscrollable within a dozen reports.
+  if (screenshotPath) lines.push(`- **Screenshot:** [${screenshotPath.split('/').pop()}](${screenshotPath})`);
+  // ⛔ SAY SO WHEN IT FAILED. The member ticked the box, chose a file and was told the
+  // report went in. If the image did not make it, the report must carry that fact - or the
+  // next person to read this entry concludes no screenshot was ever offered.
+  else if (screenshotError) lines.push(`- **Screenshot:** member attached one but it did not upload (${screenshotError}) - ask them for it`);
   lines.push(`- **Submitted:** ${time}`);
   lines.push('');
   return lines.join('\n');
@@ -93,7 +113,8 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const { action, password, reporter, page, wallet, walletAddress, frequency, happened, expected, notes } = body;
+  const { action, password, reporter, page, wallet, walletAddress, frequency, happened, expected, steps, notes,
+          screenshot, screenshotName } = body;
 
   // ── Auth ──
   if (password !== PASS) return res.status(401).json({ error: 'Incorrect password' });
@@ -110,6 +131,53 @@ export default async function handler(req, res) {
     }
     if (!reporter || !page || !wallet || !frequency || !happened || !expected) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // ── SCREENSHOT UPLOAD (owner decision 2026-08-19: keep it simple, store it in the repo,
+    //    revert later if it ever becomes a problem) ────────────────────────────────────────
+    // ⛔ THE REPORT MUST SURVIVE A FAILED UPLOAD. This runs BEFORE BUGS.md is touched and
+    // NEVER throws: any failure is recorded as screenshotError and the report is written
+    // anyway. A member who took the trouble to attach a picture must not lose their whole
+    // bug report because the image did not go through - and the entry has to SAY the
+    // screenshot is missing, or whoever reads it later concludes none was offered.
+    // Worst case is an orphaned image in bug-screenshots/ if the BUGS.md write then fails,
+    // which is cheap and obvious. The other order would lose reports.
+    let screenshotPath = null, screenshotError = null;
+    if (screenshot && typeof screenshot === 'string' && screenshot.length > 0) {
+      try {
+        // base64 inflates by 4/3. Vercel caps a serverless request body at 4.5MB and the
+        // browser already downscales to ~1200px JPEG, so anything arriving above 3MB did
+        // not come from our form.
+        const approxBytes = Math.round(screenshot.length * 3 / 4);
+        if (approxBytes > 3 * 1024 * 1024) {
+          screenshotError = `too large (${Math.round(approxBytes / 1024)} KB)`;
+        } else if (!/^[A-Za-z0-9+/=\r\n]+$/.test(screenshot)) {
+          // Not base64. Refuse rather than commit whatever it is.
+          screenshotError = 'not valid image data';
+        } else {
+          const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const safe  = String(screenshotName || 'shot')
+            .replace(/\.[A-Za-z0-9]+$/, '')          // drop the original extension
+            .replace(/[^A-Za-z0-9._-]/g, '_')        // path-safe, no traversal
+            .slice(0, 40) || 'shot';
+          const p = `bug-screenshots/${stamp}-${safe}.jpg`;
+          const up = await ghRequest(
+            'PUT',
+            `/repos/${GH_OWNER}/${GH_REPO}/contents/${p}`,
+            {
+              message: `bug-report screenshot (${new Date().toISOString().slice(0, 10)})`,
+              content: screenshot,
+              branch:  GH_BRANCH
+            },
+            TOKEN
+          );
+          if (up.status >= 200 && up.status < 300) screenshotPath = p;
+          else screenshotError = `upload failed (HTTP ${up.status})`;
+        }
+      } catch (e) {
+        screenshotError = 'upload threw';
+        console.error('screenshot upload failed:', e && e.message);
+      }
     }
 
     const getRes = await ghRequest(
@@ -146,7 +214,8 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Could not read BUGS.md from GitHub' });
     }
 
-    const entry   = buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, notes });
+    const entry   = buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, steps, notes,
+                                 screenshotPath, screenshotError });
     const updated = insertEntry(current, entry);
 
     const date      = new Date().toISOString().slice(0, 10);

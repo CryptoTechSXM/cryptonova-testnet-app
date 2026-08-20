@@ -224,8 +224,29 @@
     <label for="expected">What was expected? *</label>
     <textarea id="expected" placeholder="What should have happened instead?"></textarea>
 
-    <label for="notes">Additional notes (optional)</label>
-    <textarea id="notes" placeholder="Steps to reproduce, screenshot filename, error message..." style="min-height:70px"></textarea>
+    <!-- 2026-08-19, @bevmawire: "Additional notes (optional) tab does not seem to be giving
+         access to 'Steps to reproduce, screenshot filename, error message'... it does not
+         seem to have facility for uploading screenshots either."
+         HE WAS RIGHT, AND THE BUG WAS THE WORDING. There was one free-text box whose
+         PLACEHOLDER listed three things, so it read as a section that should open up three
+         fields. It never had them. A form must not advertise what it cannot accept.
+         Fixed by giving him the field it promised rather than by deleting the promise -
+         steps to reproduce is the single most useful thing for triage and it was being
+         asked for in a placeholder nobody could act on. -->
+    <label for="steps">Steps to reproduce (optional)</label>
+    <textarea id="steps" placeholder="1. Opened the Dashboard&#10;2. Connected MetaMask&#10;3. ..." style="min-height:70px"></textarea>
+
+    <label for="notes">Anything else? (optional)</label>
+    <textarea id="notes" placeholder="The exact error message if you saw one, and anything else you think matters." style="min-height:70px"></textarea>
+
+    <label for="shot">Screenshot (optional)</label>
+    <input type="file" id="shot" accept="image/*" onchange="onScreenshotPicked(this)"
+           style="font-size:13px;padding:6px 0">
+    <div style="font-size:12px;line-height:1.6;opacity:.75;margin:2px 0 14px" id="shot-note"></div>
+    <div style="font-size:12px;line-height:1.6;opacity:.6;margin:-10px 0 14px">
+      Resized in your browser before sending, and stored with the project's bug reports.
+      Please crop out anything you would rather not share.
+    </div>
 
     <button class="btn" id="submit-btn" onclick="submitBug()">Submit Bug Report</button>
     <div class="msg" id="form-msg"></div>
@@ -421,6 +442,67 @@
     }
   }
 
+  // ── SCREENSHOT (owner decision 2026-08-19) ──────────────────────────────────────────────
+  // Added because @bevmawire reported the form advertising a screenshot facility it did not
+  // have. Downscaled HERE, in the browser, for three reasons: a phone screenshot is 2-5MB
+  // and Vercel caps a serverless request body at 4.5MB, the repo should not accumulate
+  // full-resolution images, and a member on a phone connection should not upload 5MB to
+  // file a bug. ~1200px JPEG at q0.82 lands around 200-400KB and is still perfectly legible
+  // for reading an error message off a dashboard.
+  var screenshotData = null;   // base64 JPEG, no data: prefix
+  var screenshotName = '';
+
+  function onScreenshotPicked(input) {
+    var note = document.getElementById('shot-note');
+    var f = input.files && input.files[0];
+    screenshotData = null; screenshotName = '';
+    if (!f) { note.textContent = ''; return; }
+    if (!/^image\//.test(f.type)) {
+      note.textContent = 'That does not look like an image file.'; input.value = ''; return;
+    }
+    note.textContent = 'Preparing image...';
+    var reader = new FileReader();
+    reader.onerror = function () { note.textContent = 'Could not read that file.'; input.value = ''; };
+    reader.onload = function () {
+      var img = new Image();
+      // ⛔ AN iPHONE SCREENSHOT MAY BE HEIC, WHICH MOST BROWSERS WILL NOT DECODE INTO A
+      // CANVAS. Say that plainly instead of failing silently - a member whose upload
+      // vanishes with no message will assume the whole form is broken again, which is
+      // exactly the complaint that started this.
+      img.onerror = function () {
+        note.textContent = 'Your browser could not open that image. iPhone screenshots (HEIC) '
+          + 'often do this - save or share it as JPG or PNG and try again.';
+        input.value = '';
+      };
+      img.onload = function () {
+        try {
+          var MAX = 1200, w = img.width, h = img.height;
+          if (!w || !h) { note.textContent = 'That image appears to be empty.'; input.value = ''; return; }
+          if (w > MAX || h > MAX) {
+            var s = Math.min(MAX / w, MAX / h);
+            w = Math.max(1, Math.round(w * s)); h = Math.max(1, Math.round(h * s));
+          }
+          var c = document.createElement('canvas'); c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var b64 = (c.toDataURL('image/jpeg', 0.82).split(',')[1]) || '';
+          var kb  = Math.round(b64.length * 3 / 4 / 1024);
+          if (kb > 2048) {
+            note.textContent = 'Still too large after resizing (' + kb + ' KB). Please crop it and try again.';
+            input.value = ''; return;
+          }
+          screenshotData = b64;
+          screenshotName = (f.name || 'screenshot').replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 60);
+          note.textContent = 'Screenshot ready - ' + kb + ' KB after resizing.';
+        } catch (err) {
+          note.textContent = 'Could not process that image. You can submit without it.';
+          input.value = '';
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(f);
+  }
+
   async function submitBug() {
     var reporter   = document.getElementById('reporter').value.trim();
     var page       = document.getElementById('page-sel').value;
@@ -428,6 +510,7 @@
     var freqEl     = document.querySelector('input[name="freq"]:checked');
     var happened   = document.getElementById('happened').value.trim();
     var expected   = document.getElementById('expected').value.trim();
+    var steps      = document.getElementById('steps').value.trim();
     var notes      = document.getElementById('notes').value.trim();
     var msgEl      = document.getElementById('form-msg');
 
@@ -451,7 +534,8 @@
           reporter: reporter, page: page,
           wallet: walletType, walletAddress: walletAddress,
           frequency: freqEl.value,
-          happened: happened, expected: expected, notes: notes
+          happened: happened, expected: expected, steps: steps, notes: notes,
+          screenshot: screenshotData, screenshotName: screenshotName
         })
       });
       if (r.ok) {
@@ -469,9 +553,19 @@
   }
 
   function resetForm() {
-    ['reporter','happened','expected','notes'].forEach(function(id){
+    // 'steps' added 2026-08-19 with the field itself. Leaving it out here would carry one
+    // report's reproduction steps into the next one submitted from the same page load,
+    // which is worse than not having the field at all.
+    ['reporter','happened','expected','steps','notes'].forEach(function(id){
       var el = document.getElementById(id); if (el) el.value = '';
     });
+    // Same reason as 'steps', but worse if missed: without this the NEXT report would be
+    // filed carrying the PREVIOUS member's screenshot.
+    var shotEl = document.getElementById('shot');
+    if (shotEl) shotEl.value = '';
+    var shotNote = document.getElementById('shot-note');
+    if (shotNote) shotNote.textContent = '';
+    screenshotData = null; screenshotName = '';
     document.getElementById('page-sel').selectedIndex = 0;
     document.getElementById('wallet-type').selectedIndex = 0;
     document.querySelectorAll('input[name="freq"]').forEach(function(r){ r.checked = false; });
