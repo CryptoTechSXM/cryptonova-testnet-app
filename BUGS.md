@@ -37,6 +37,24 @@
 
 ## Open Issues
 
+### [2026-08-20] Dashboard (index.html) — Testing feature
+- **Reporter:** CryptoTech
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x6512e9b5fe1690f2570afee5e7b904ef106c9435
+- **Frequency:** Consistent
+- **What happened:** Testing feature
+- **What was expected:** file uploaded
+- **Steps to reproduce:**
+
+  ```
+  1. we may need to change this info with v8.50
+  ```
+- **Notes:** 1. we may need to change this info with v8.50
+- **Screenshot:** [2026-08-20T01-54-38-741Z-bugtest.jpg](bug-screenshots/2026-08-20T01-54-38-741Z-bugtest.jpg)
+- **Submitted:** Thu, 20 Aug 2026 01:54:39 GMT
+
+
 ### [2026-08-19] Dashboard (index.html) — Was disallowed from accessing Dash board. Reason given: "Cou…
 - **Reporter:** @bevmawire
 - **Page:** Dashboard (index.html)
