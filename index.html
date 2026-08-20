@@ -9801,11 +9801,19 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   const box = document.getElementById('parked-list');
   if (!box || !cands || cands.length === 0) return;
 
-  // One position is the existing card's job; only take over when there are more.
-  if (cands.length < 2) { box.style.display = 'none'; return; }
-
-  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-  const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
+  // ⛔ THE `cands.length < 2` EARLY RETURN USED TO SIT HERE AND IT HID THIS FEATURE FROM
+  // 107 OF 107 PARKED MEMBERS ON LIVE V8.48 (measured 2026-08-19, diag_badge_preview.js).
+  // It now lives further down, AFTER the status reads, so a single-position member still
+  // gets the badge and the eviction clock - just without the per-row buttons their existing
+  // card already provides. See "STATUS-ONLY MODE" below.
+  //
+  // ⚠ THE COST, STATED RATHER THAN DISCOVERED LATER: single-position members now also pay
+  // the status reads - one keeper call, one totalBalance, and up to three SF calls, so ~5
+  // extra eth_calls per dashboard load. Set against the ~30 log windows a lifetime scan
+  // already costs (measure_page_rpc.mjs, 2026-08-19) that is small, and it buys the 100% of
+  // parked members who could not see any of this. If it ever needs cutting, cache the two
+  // chain-wide reads (grace period, SF balance) across the page rather than dropping the
+  // per-member ones - those are the part that differs per member.
 
   // ── V8.48: PENDING EVICTION vs IN THE RESCUE QUEUE (owner request 2026-08-19) ──────
   //
@@ -9830,29 +9838,94 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   // ⚠ FAILED READS ARE "UNKNOWN", NEVER "FINE". Standing rule in this file: zero is a
   // legitimate value here, so a failed read rendered as 0 headroom would tell a healthy
   // member they are about to be evicted. null -> the row says it could not check.
+  // ⛔ "THE FUNCTION IS NOT ON THIS BUILD" AND "THE READ FAILED" ARE DIFFERENT ANSWERS.
+  // A missing selector comes back as an empty return that ethers reports as BAD_DATA or as
+  // a CALL_EXCEPTION with no data; a flapping endpoint throws a network code. They look
+  // alike and they mean opposite things, and treating them alike is the trap that has cost
+  // this project the most (check_rpc.ps1 reported six healthy endpoints during a total
+  // outage). Only an ABSENT function may be substituted for; a FAILED read must stay
+  // unknown. Measured 2026-08-19 with scripts/probe_keeper_views.js against live V8.48:
+  // evictionGracePeriod ABSENT, extendedIdleTimeout EXISTS = 604800, 4/4 controls green.
+  function _isAbsent(e) {
+    const code = (e && e.code) ? String(e.code) : '';
+    const msg  = ((e && (e.shortMessage || e.message)) || '');
+    if (code === 'BAD_DATA') return true;
+    if (code === 'CALL_EXCEPTION' && (e.data === null || e.data === undefined || e.data === '0x')) return true;
+    return /could not decode result data|missing revert data/i.test(msg);
+  }
+
   let _evictGrace = null, _sfBal = null;
+  // ⛔ WHY THE FALLBACK IS GATED ON _isAbsent. evictionGracePeriod (V8.49+) and
+  // extendedIdleTimeout (V8.48) are TWO DIFFERENT DIALS — MatrixKeeper.sol:1066 says in
+  // terms "Do NOT re-point this at extendedIdleTimeout to keep them in step." On V8.48 they
+  // are both 604800 so substituting is correct there. On a V8.49+ chain it is NOT: one
+  // transient failure of the first call would silently render a countdown from the
+  // IDLE-SLOT RECLAIM clock and look completely healthy doing it. So we substitute only
+  // when the chain has actually told us the function is not there.
   try {
     if (ADDRS.matrixKeeper) {
       const _k = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_EVICT_ABI, rp);
-      try { _evictGrace = BigInt(await _k.evictionGracePeriod()); }
-      catch (_) { _evictGrace = BigInt(await _k.extendedIdleTimeout()); }
+      try {
+        _evictGrace = BigInt(await _k.evictionGracePeriod());
+      } catch (e1) {
+        if (_isAbsent(e1)) {
+          try { _evictGrace = BigInt(await _k.extendedIdleTimeout()); } catch (_) { _evictGrace = null; }
+        } else {
+          _evictGrace = null;   // the read failed. We do not know the window. Say nothing.
+        }
+      }
     }
   } catch (_) { _evictGrace = null; }
   try {
     if (ADDRS.stabilityFund) _sfBal = BigInt(await new ethers.Contract(ADDRS.stabilityFund, SF_ABI, rp).totalBalance());
   } catch (_) { _sfBal = null; }
   const _sfC = ADDRS.stabilityFund ? new ethers.Contract(ADDRS.stabilityFund, SF_ABI, rp) : null;
+
+  // Sentinel for loanHeadroom's two "no ceiling applies" branches. Not a number we can
+  // print, and not null (which means "unknown") — a third, distinct state.
+  const _UNLIMITED = Symbol('unlimited');
+
   const _headroom = await Promise.all(cands.map(async (c) => {
     if (!_sfC) return null;
     const _t = c.tierIdx ?? 0;
+    // Exact where it exists (V8.49+).
     try { return BigInt(await _sfC.loanHeadroom(userAddr, _t)); } catch (_) { /* V8.48: derive it */ }
-    try {
-      const [bps, tfee, owed] = await Promise.all([
-        _sfC.insolvencyFloorBps(), _sfC.tierEntryFees(_t), _sfC.memberDebt(userAddr),
-      ]);
-      const ceiling = (BigInt(tfee) * BigInt(bps)) / 10000n;
-      return ceiling > BigInt(owed) ? ceiling - BigInt(owed) : 0n;
-    } catch (_) { return null; }   // still unknown -> the row says CHECKING, never "fine"
+
+    // ── V8.48 DERIVATION — REBUILT 2026-08-19 (session 10) ────────────────────────────
+    // ⛔ IT MUST REPRODUCE loanHeadroom's WHOLE DEFINITION, NOT JUST ITS ARITHMETIC.
+    // StabilityFund.sol:956-964 has THREE outcomes and the previous version of this block
+    // implemented only the third:
+    //     insolvencyFloorBps == 0   -> type(uint256).max   (the floor is DISABLED)
+    //     tierEntryFees[t]   == 0   -> type(uint256).max   (no fee, no estimate to form)
+    //     otherwise                 -> fee*bps/10000 - debt
+    // Both of the first two mean UNLIMITED. Computing `fee * 0 / 10000` for them yields a
+    // ceiling of 0, i.e. headroom 0, i.e. PENDING EVICTION on every parked row — the exact
+    // INVERSE of the truth, and it would fire at the moment the owner reaches for the
+    // documented escape hatch of setting PARAM 59 to 0. Live V8.48 reads 3400 / $10.00
+    // today so the old code was right by luck, not by construction.
+    // This is the "two models of one rule, drifting" failure StabilityFund.sol:938 warns
+    // about by name. The contract keeps ONE copy of the formula; so must this.
+    //
+    // ⛔ AND THE READS ARE SEPARATE, NOT Promise.all. diag_eviction_clock.js shipped the
+    // Promise.all version and 107 of 107 members came back unknown because ONE of the three
+    // views was missing and took the other two down with it. It was rebuilt for that reason
+    // on 2026-08-19; this file still carried the original shape. Read them one at a time and
+    // use the strongest bound each row can actually support.
+    let bps = null, tfee = null, owed = null;
+    try { bps  = BigInt(await _sfC.insolvencyFloorBps()); } catch (_) {}
+    if (bps === 0n) return _UNLIMITED;                 // floor disabled -> no ceiling at all
+    try { tfee = BigInt(await _sfC.tierEntryFees(_t)); } catch (_) {}
+    if (tfee === 0n) return _UNLIMITED;                // no registered fee -> no ceiling
+    if (bps === null || tfee === null) return null;    // cannot form a ceiling -> CHECKING
+    const ceiling = (tfee * bps) / 10000n;
+    try { owed = BigInt(await _sfC.memberDebt(userAddr)); } catch (_) {}
+    // ⛔ debt is NOT required to answer the dangerous half of the question. headroom is
+    // ceiling - debt and debt >= 0, so THE CEILING IS AN UPPER BOUND ON HEADROOM whatever
+    // the debt is. If the gap already exceeds the ceiling, "a loan cannot cover this" is
+    // sound with the debt unknown. Only the reassuring direction needs the real debt, and
+    // that is why an unreadable debt returns the bound rather than a comfortable number.
+    if (owed === null) return { bound: ceiling };      // upper bound only — see _evictInfo
+    return ceiling > owed ? ceiling - owed : 0n;
   }));
 
   const _nowSec = BigInt(Math.floor(Date.now() / 1000));
@@ -9873,6 +9946,35 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       return { badge: 'CHECKING', colour: 'var(--text3)',
                line: `Could not check whether the fund can help right now — this is NOT a sign either way. ${clock}` };
     }
+    // ⛔ ORDER MATTERS AND SO DOES THE TYPE. `headroom` now carries four shapes: null
+    // (unknown), the _UNLIMITED symbol (no ceiling applies), { bound } (upper bound only,
+    // debt unreadable) and a BigInt (exact). The symbol MUST be caught before any `<`
+    // comparison — JavaScript throws a TypeError on Symbol < BigInt, which would take the
+    // whole parked list down with it rather than mislabelling one row.
+    if (headroom === _UNLIMITED) {
+      // insolvencyFloorBps == 0 or the tier has no registered fee. The floor imposes no
+      // ceiling at all, so nothing here can be refused for being over it.
+      if (_sfBal !== null && _sfBal < c.shortfall) {
+        return { badge: 'WAITING ON FUND', colour: '#f59e0b',
+                 line: `You qualify for help — no lending limit applies to you right now — but the Stability Fund holds ${fmt6(_sfBal)} against your ${fmt6(c.shortfall)} gap. Self Rescue does not wait on it. ${clock}` };
+      }
+      return { badge: 'IN RESCUE QUEUE', colour: 'var(--green)',
+               line: `You qualify — there is no lending limit applying to your position right now, so your ${fmt6(c.shortfall)} gap can be covered. ${clock}` };
+    }
+    if (typeof headroom === 'object' && headroom !== null && 'bound' in headroom) {
+      // We could read the ceiling but not this member's existing debt. headroom is
+      // ceiling - debt and debt >= 0, so the ceiling is an UPPER BOUND. That makes only
+      // the bad news sound: if the gap is already above the ceiling no loan can reach it.
+      if (headroom.bound < c.shortfall) {
+        return { badge: 'PENDING EVICTION', colour: '#ef4444',
+                 line: `The most the fund could lend toward a ${fmt6(c.shortfall)} gap at your tier is ${fmt6(headroom.bound)}, so a loan cannot cover this on its own. Self Rescue keeps your position. ${clock}` };
+      }
+      // The ceiling clears the gap, but any loan already outstanding eats into it and we
+      // could not read that. Reporting "you qualify" here would be reporting the absence
+      // of something we did not observe.
+      return { badge: 'CHECKING', colour: 'var(--text3)',
+               line: `Could not fully check whether the fund can help — your tier's limit of ${fmt6(headroom.bound)} would cover your ${fmt6(c.shortfall)} gap, but any rescue loan you already owe could not be read. This is NOT a sign either way. ${clock}` };
+    }
     if (headroom < c.shortfall) {
       return { badge: 'PENDING EVICTION', colour: '#ef4444',
                line: `The fund can lend at most ${fmt6(headroom)} toward your ${fmt6(c.shortfall)} gap, so a loan cannot cover this on its own. Self Rescue keeps your position. ${clock}` };
@@ -9888,6 +9990,55 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   // clearAllParked() runs outside this function and needs the same blocked-pair set;
   // recomputing it there would be a second copy of the rule.
   window._parkedHeld = held;
+
+  // ── STATUS-ONLY MODE — THE SINGLE-POSITION CASE ───────────────────────────────────────
+  // ⛔ MEASURED 2026-08-19 (session 10), scripts/diag_badge_preview.js against live V8.48:
+  // 107 parked positions, 107 DISTINCT MEMBERS, every one of them holding EXACTLY ONE.
+  // The old `if (cands.length < 2) { hide; return; }` therefore hid this feature from
+  // 107 of 107 parked members - 100% of them - while 37 of those members were sitting on a
+  // gap no loan can cover. The whole point of the badge (owner request 2026-08-19: "a
+  // parked member could see they were parked but not whether anything would actually come
+  // for them") was reaching nobody at all.
+  //
+  // The old gate's reasoning was "one position is the existing card's job". That is true of
+  // the ACTION - the card has the Self Rescue / Copay buttons and they work. It was never
+  // true of the STATUS: the card renders label, withdrawable, reserve, fee and shortfall,
+  // and says nothing about the eviction clock or whether the fund can cover the gap.
+  //
+  // So the list no longer hides itself; for a single position it renders the STATUS ONLY -
+  // no per-row buttons, no bulk bar, no "N parked positions" header, and crucially it does
+  // NOT hide the single-position buttons the way the multi-row path does. The member keeps
+  // the card they already know and gains the one thing it never told them.
+  //
+  // ⚠ ONE COPY OF THE RULE. This deliberately reuses _evictInfo and _headroom above rather
+  // than forming its own verdict. StabilityFund.sol:938 names this exact failure - three
+  // copies of one formula is how this codebase once shipped a dashboard itemising $7,500
+  // against a chain holding $10,000.
+  if (cands.length < 2) {
+    const c0 = cands[0];
+    // A position blocked by the other half of its pair is a seating conflict, not an
+    // eviction question - same carve-out the multi-row path makes.
+    const ev0 = held.has(_pairKeyOf(c0.label))
+      ? { badge: null, colour: '', line: '' }
+      : _evictInfo(c0, _headroom[0]);
+    if (!ev0.badge) { box.style.display = 'none'; return; }   // nothing to say - stay quiet
+    box.innerHTML =
+      `<div style="border:1px solid ${ev0.colour};border-radius:8px;padding:10px 12px;background:var(--bg3)">
+         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+           <span style="font-weight:700;font-size:13px">${c0.label}</span>
+           <span style="font-size:10px;font-weight:700;color:${ev0.colour};border:1px solid ${ev0.colour};border-radius:4px;padding:1px 5px">${ev0.badge}</span>
+         </div>
+         <div style="font-size:11px;color:${ev0.colour};line-height:1.5">${ev0.line}</div>
+       </div>`;
+    box.style.display = 'flex';
+    return;   // leave the single-position card and ITS buttons exactly as they are
+  }
+
+  // The wallet balance and the per-row allowances only drive the BUTTON states, which the
+  // status-only path above never renders. Read them here so a single-position member does
+  // not pay for a balance read whose answer is never used.
+  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+  const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
 
   const rows = [];
   for (let i = 0; i < cands.length; i++) {
