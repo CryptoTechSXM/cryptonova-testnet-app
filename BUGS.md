@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-21] Other — Approving of self rescue fail.. On Chain error message displ…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Approving of self rescue fail.. On Chain error message display...
+- **What was expected:** To be self rescued
+- **Notes:** On all my accounts..
+- **Submitted:** Fri, 21 Aug 2026 19:02:20 GMT
+
+
 ### [2026-08-21] Other — Redeeming of CNova tokens.... 1st step of approval no proble…
 - **Reporter:** Sherwyn
 - **Page:** Other
