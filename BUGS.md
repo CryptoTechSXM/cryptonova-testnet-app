@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-21] Bug Report Page — Cancelled last bug report from me...self rescue was approved…
+- **Reporter:** Sherwyn
+- **Page:** Bug Report Page
+- **Wallet Type:** TokenPocket
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Cancelled last bug report from me...self rescue was approved..
+- **What was expected:** Approved
+- **Notes:** All accounts were able to self rescue now... so cancelled last report.
+- **Submitted:** Fri, 21 Aug 2026 19:11:16 GMT
+
+
 ### [2026-08-21] Other — Approving of self rescue fail.. On Chain error message displ…
 - **Reporter:** Sherwyn
 - **Page:** Other
