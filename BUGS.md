@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-21] Other — Redeeming of CNova tokens.... 1st step of approval no proble…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Redeeming of CNova tokens.... 1st step of approval no problem, step 2, redeeming fail asking to do a hard reset which also failed..
+- **What was expected:** Easy redeeming of tokens
+- **Submitted:** Fri, 21 Aug 2026 10:38:03 GMT
+
+
 ### [2026-08-20] Dashboard (index.html) — Testing feature
 - **Reporter:** CryptoTech
 - **Page:** Dashboard (index.html)
