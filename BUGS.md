@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
+- **Reporter:** @bevmawire
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x0dcd36fb20e7221b18c28372fc65ef90810e3c5a
+- **Frequency:** Intermittent
+- **What happened:** WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a sudden, the popup "Couldn't load your status", appeared and immediately not only obliterated access to data on the Platform but also prevented completion of the already begun "RESCUE" process on one of my Accounts.. Pls see hereon attached screenshot..
+- **What was expected:** ACCESS TO DASHBOARD
+- **Notes:** PLS SORT THE GLITCH THAT IS PREVENTING US SEEING DATA ON THE CNOVA PLATFORM
+- **Screenshot:** [2026-08-22T08-59-22-438Z-Could_not_Find_Your_Status_Glitch.jpg](bug-screenshots/2026-08-22T08-59-22-438Z-Could_not_Find_Your_Status_Glitch.jpg)
+- **Submitted:** Sat, 22 Aug 2026 08:59:23 GMT
+
+
 ### [2026-08-21] Bug Report Page — Cancelled last bug report from me...self rescue was approved…
 - **Reporter:** Sherwyn
 - **Page:** Bug Report Page
