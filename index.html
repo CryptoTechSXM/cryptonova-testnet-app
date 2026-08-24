@@ -5894,13 +5894,25 @@ async function loadDashboardData() {
           // than a hidden rescue button.
           const _needsApproval = _alwNow === null ? true : _alwNow < parkedInfo.shortfall;
           if (_selfApproveBtn) _selfApproveBtn.style.display = _needsApproval ? '' : 'none';
+          // ⛔ AND UN-HIDE IT, NOT JUST UN-DIM IT. The multi-position list sets
+          // `display:none` on this button outright (the loop after its `box.innerHTML`)
+          // because it cannot say WHICH position it would act on. NOTHING EVER PUT IT
+          // BACK: every other site touching this button sets opacity/disabled/textContent
+          // only. So a member who cleared two positions down to one saw the status line
+          // "Approved - now click Self Rescue" with no button to click, and neither the
+          // 30s poll nor the in-app Refresh balance could bring it back - only a full
+          // page reload, which rebuilds the DOM from source. Found in the owner's live
+          // QA 2026-08-24, wallet 0x28FC...0887, after the T1 rescue left T3 alone.
+          // This poll is the counterpart to that hide, so it owns `display` for the
+          // rescue button exactly as it already owns it for the approve button above.
+          if (_selfRescueBtn)  _selfRescueBtn.style.display  = '';
           if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = _needsApproval ? '0.5' : '1';
           // The note belongs to the approve button — it must never outlive it on screen.
           if (_approveNoteEl && !_needsApproval) _approveNoteEl.style.display = 'none';
         } else {
           if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
           if (_approveNoteEl)  _approveNoteEl.style.display  = 'none';
-          if (_selfRescueBtn)  { _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
+          if (_selfRescueBtn)  { _selfRescueBtn.style.display = ''; _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
         }
 
         // ── SURPLUS WARNING (interim guard for a CONTRACT bug, found 2026-08-07)
@@ -9831,7 +9843,9 @@ async function approveSelfRescue() {
         : '✅ USDC approved — now click Self Rescue.';
     }
     const rescueBtn = document.getElementById('btn-self-rescue');
-    if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.opacity = '1'; }
+    // `display` too, for the same reason as the poll above: the status line has just
+    // told the member to click this button, so it must be on screen NOW.
+    if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.display = ''; rescueBtn.style.opacity = '1'; }
     if (btn) btn.disabled = false;
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
