@@ -5905,14 +5905,21 @@ async function loadDashboardData() {
           // QA 2026-08-24, wallet 0x28FC...0887, after the T1 rescue left T3 alone.
           // This poll is the counterpart to that hide, so it owns `display` for the
           // rescue button exactly as it already owns it for the approve button above.
-          if (_selfRescueBtn)  _selfRescueBtn.style.display  = '';
+          // ⚠ ONLY WHEN THIS PANEL IS THE ONE IN CHARGE. With 2+ parked positions the
+          // card list renders instead and hides these buttons on purpose — they would
+          // act on whichever position the picker chose last, which is ambiguous once a
+          // list is on screen. Un-hiding unconditionally put a full-width Self Rescue
+          // bar UNDERNEATH the card list (owner's QA, 2026-08-24, 0x28FC…0887: "a
+          // bigger banner at the bottom of the page"). renderParkedList is not awaited,
+          // so which one wins is a race — this gate settles it by count instead.
+          if (_selfRescueBtn && (window._parkedAll || []).length < 2) _selfRescueBtn.style.display = '';
           if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = _needsApproval ? '0.5' : '1';
           // The note belongs to the approve button — it must never outlive it on screen.
           if (_approveNoteEl && !_needsApproval) _approveNoteEl.style.display = 'none';
         } else {
           if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
           if (_approveNoteEl)  _approveNoteEl.style.display  = 'none';
-          if (_selfRescueBtn)  { _selfRescueBtn.style.display = ''; _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
+          if (_selfRescueBtn)  { if ((window._parkedAll || []).length < 2) _selfRescueBtn.style.display = ''; _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
         }
 
         // ── SURPLUS WARNING (interim guard for a CONTRACT bug, found 2026-08-07)
@@ -9853,7 +9860,13 @@ async function approveSelfRescue() {
     const rescueBtn = document.getElementById('btn-self-rescue');
     // `display` too, for the same reason as the poll above: the status line has just
     // told the member to click this button, so it must be on screen NOW.
-    if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.display = ''; rescueBtn.style.opacity = '1'; }
+    // Same gate as the poll: approving FROM A CARD must not raise the single-position
+    // button behind the list. The card's own row flips to READY on the next paint.
+    if (rescueBtn) {
+      rescueBtn.disabled = false;
+      if ((window._parkedAll || []).length < 2) rescueBtn.style.display = '';
+      rescueBtn.style.opacity = '1';
+    }
     if (btn) btn.disabled = false;
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
