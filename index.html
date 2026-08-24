@@ -10122,8 +10122,19 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       btns  = '';
     } else if (c.shortfall > 0n && (alw === null || alw < c.shortfall)) {
       state = 'APPROVE FIRST';
-      note  = `Approve ${fmt6(c.shortfall)} to this matrix, then Self Rescue.`;
-      btns  = `<button class="btn" style="flex:1;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green);font-size:12px;padding:6px" onclick="selectParked(${i},'approve')">Approve ${fmt6(c.shortfall)}</button>`;
+      // ⛔ THE BUTTON MUST NAME THE FIGURE THE WALLET WILL ASK FOR — the same rule the
+      // single-position button follows (see the note by `_approveShown`). `ca66731` made
+      // approveSelfRescue approve the ENTRY FEE instead of the exact shortfall, and fixed
+      // the label on THAT path only. THIS list was missed: it promised "Approve $2.68"
+      // while MetaMask asked for $10.00. Found in the owner's live QA of the main deploy,
+      // 2026-08-24, on the very screen three members had already reported confusion about.
+      // A label that disagrees with the wallet popup is how a member decides the app is
+      // broken and stops using it.
+      const _shown = (c.fee || 0n) > c.shortfall ? c.fee : c.shortfall;
+      note  = _shown > c.shortfall
+        ? `Approve ${fmt6(_shown)} to this matrix — only ${fmt6(c.shortfall)} is taken, the rest stays approved and unspent. Then Self Rescue.`
+        : `Approve ${fmt6(c.shortfall)} to this matrix, then Self Rescue.`;
+      btns  = `<button class="btn" style="flex:1;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green);font-size:12px;padding:6px" onclick="selectParked(${i},'approve')">Approve ${fmt6(_shown)}</button>`;
     } else {
       state = 'READY';
       note  = c.shortfall > 0n ? 'Approved — press Self Rescue.' : 'Your earnings cover it in full.';
