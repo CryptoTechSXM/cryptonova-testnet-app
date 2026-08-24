@@ -37,18 +37,6 @@
 
 ## Open Issues
 
-### [2026-08-24] Dashboard (index.html) — I tried SF. After approving USDC I was promoted to click sel…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x56a832cc5f2617c08e6484c2b04d971edc1ec57f
-- **Frequency:** Consistent
-- **What happened:** I tried SF. After approving USDC I was promoted to click self rescue but the button didn't display.
-- **What was expected:** I should have been able to self rescue.
-- **Notes:** This also happened with another account.
-- **Submitted:** Mon, 24 Aug 2026 00:19:39 GMT
-
-
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
 - **Page:** Dashboard (index.html)
@@ -62,30 +50,6 @@
 - **Submitted:** Sat, 22 Aug 2026 08:59:23 GMT
 
 
-### [2026-08-21] Bug Report Page — Cancelled last bug report from me...self rescue was approved…
-- **Reporter:** Sherwyn
-- **Page:** Bug Report Page
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Cancelled last bug report from me...self rescue was approved..
-- **What was expected:** Approved
-- **Notes:** All accounts were able to self rescue now... so cancelled last report.
-- **Submitted:** Fri, 21 Aug 2026 19:11:16 GMT
-
-
-### [2026-08-21] Other — Approving of self rescue fail.. On Chain error message displ…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** TokenPocket
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Approving of self rescue fail.. On Chain error message display...
-- **What was expected:** To be self rescued
-- **Notes:** On all my accounts..
-- **Submitted:** Fri, 21 Aug 2026 19:02:20 GMT
-
-
 ### [2026-08-21] Other — Redeeming of CNova tokens.... 1st step of approval no proble…
 - **Reporter:** Sherwyn
 - **Page:** Other
@@ -95,40 +59,6 @@
 - **What happened:** Redeeming of CNova tokens.... 1st step of approval no problem, step 2, redeeming fail asking to do a hard reset which also failed..
 - **What was expected:** Easy redeeming of tokens
 - **Submitted:** Fri, 21 Aug 2026 10:38:03 GMT
-
-
-### [2026-08-20] Dashboard (index.html) — Testing feature
-- **Reporter:** CryptoTech
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x6512e9b5fe1690f2570afee5e7b904ef106c9435
-- **Frequency:** Consistent
-- **What happened:** Testing feature
-- **What was expected:** file uploaded
-- **Steps to reproduce:**
-
-  ```
-  1. we may need to change this info with v8.50
-  ```
-- **Notes:** 1. we may need to change this info with v8.50
-- **Screenshot:** [2026-08-20T01-54-38-741Z-bugtest.jpg](bug-screenshots/2026-08-20T01-54-38-741Z-bugtest.jpg)
-- **Submitted:** Thu, 20 Aug 2026 01:54:39 GMT
-
-
-### [2026-08-19] Dashboard (index.html) — Was disallowed from accessing Dash board. Reason given: "Cou…
-- **Reporter:** @bevmawire
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x0dcd36fb20e7221b18c28372fc65ef90810e3c5a
-- **Frequency:** Consistent
-- **What happened:** Was disallowed from accessing Dash board. Reason given: "Couldn't find your status"
-- **What was expected:** Straight, easy access into; no ifs no buts!. 
-
-Additional notes (optional) tab does not seem to be giving access to "Steps to reproduce, screenshot filename, error message" does not seem to have facility for uploading screenshot either.
-- **Notes:** Additional notes (optional) tab does not seem to be giving access to "Steps to reproduce, screenshot filename, error message" 
-
-In particular, it does not seem to have facility for uploading screenshots either.
-- **Submitted:** Wed, 19 Aug 2026 13:50:13 GMT
 
 
 ### [2026-08-18] Dashboard (index.html) — The RPC node didn't respond after several retries — this is …
@@ -166,17 +96,6 @@ In particular, it does not seem to have facility for uploading screenshots eithe
 - **What was expected:** To see a sign and confirmation in wallet to accept.
 - **Notes:** Same on other wallets.. couldn't do withdrawals but CNova worked..
 - **Submitted:** Thu, 13 Aug 2026 02:40:20 GMT
-
-
-### [2026-08-11] Dashboard (index.html) — I had to click both Approval and Self-Rescue several times, …
-- **Reporter:** @Lavern-Gay
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x737c3309c3d6f5702c8f4bb81494568f8d0d1be5
-- **Frequency:** Consistent
-- **What happened:** I had to click both Approval and Self-Rescue several times, even though the transaction was marked as complete.
-- **What was expected:** Once the transaction is marked as completed. I was able to move to the next approval and self-rescue.
-- **Submitted:** Tue, 11 Aug 2026 23:14:42 GMT
 
 
 ### [2026-08-11] Dashboard (index.html) — decided to do a withdrawal.
@@ -338,6 +257,12 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-24 | 2026-08-24 | Dashboard (index.html) | @Koach100 — approved USDC, then the Self Rescue button never appeared ("this also happened with another account"). ROOT CAUSE: `approveSelfRescue` granted the EXACT shortfall, and the button visibility test is `allowance < shortfall`. The shortfall moves while a member is parked because earnings keep landing, so a single cent of drift flipped that test back to true on the next 30-second poll and re-dimmed the Self Rescue button to opacity 0.5 — invisible on a dark phone screen. This is the SAME symptom recorded in the 2026-07-29 in-code note, which was treated as fixed then; the exact-amount approval is what kept re-triggering it. Now approves the full `ENTRY_FEE`, which is the maximum `_selfRescue` can ever pull (`shortfall = entryFee - effectiveContrib`, floored at 0), so the approval cannot go stale. Only the actual shortfall is ever taken. | `ca66731` |
+| 2026-08-21 | 2026-08-24 | Other | Sherwyn — "Approving of self rescue fail.. On Chain error message display... On all my accounts." Same root cause as the 2026-08-24 ticket: an exact-shortfall approval that no longer covered what `safeTransferFrom` pulled, so the rescue reverted on allowance. CONFIRMED INDEPENDENTLY ON-CHAIN 2026-08-24 by `scripts/diag_parked_solvency.js`: of 41 past-grace parked positions, exactly ONE held any allowance at all — $11.88 standing against a $12.50 shortfall, i.e. a member who followed the instructions and was left $0.62 short. | `ca66731` |
+| 2026-08-21 | 2026-08-24 | Bug Report Page | Sherwyn — withdrew his own report nine minutes after filing it ("self rescue was approved.. All accounts were able to self rescue now... so cancelled last report"). WITHDRAWN BY THE REPORTER BUT THE BUG WAS REAL. Intermittent success is exactly what a drifting shortfall produces — sometimes the exact-amount approval still covers it, sometimes it does not — and the same defect recurred for @Koach100 three days later. Closed by the fix rather than as invalid, and the bounty stands. | `ca66731` |
+| 2026-08-20 | 2026-08-20 | Dashboard (index.html) | CryptoTech (owner) — deliberate test of the screenshot-upload path added in `74a1588`. The upload succeeded and the screenshot attached, so the feature works. Not a defect; closed as a test submission. The note carried on it ("we may need to change this info with v8.50") belongs to the V8.50 scope, not to this file. | `74a1588` |
+| 2026-08-19 | 2026-08-24 | Dashboard (index.html) | @bevmawire — TWO issues in one ticket. (a) The bug-report form did not expose "Steps to reproduce / screenshot filename / error message" and offered no screenshot upload: FIXED in `74a1588`, and confirmed by this same reporter successfully attaching a screenshot to their 2026-08-22 ticket. (b) "Couldn't find your status" blocking dashboard access: NOT FIXED and deliberately NOT closed here — it remains open under the 2026-08-22 ticket, which carries the screenshot. This row closes (a) only. | `74a1588` |
+| 2026-08-11 | 2026-08-24 | Dashboard (index.html) | @Lavern-Gay — "had to click both Approval and Self-Rescue several times, even though the transaction was marked as complete." Same root cause as the 2026-08-24 ticket, and the EARLIEST report of it — thirteen days and three reporters before it was diagnosed. Previously treated as retired by the V8.48 permit path (one signature, no separate approve step), but @Koach100 was still prompted to approve on 2026-08-24, which is evidence the permit probe is not succeeding on this deployment. That retirement was an assumption and is now recorded as UNVERIFIED; the report is closed by the approval fix instead. | `ca66731` |
 | 2026-08-08 | 2026-08-08 | Other | Two accounts, 6 cycles vs 1 — NOT A BUG. Cycling is by SEAT, not tier traffic: _cycleOutRoot cycles position 1 and each rotation advances everyone one seat. Both wallets sit in T1.1 but different halves — MatB had 1,786 rotations vs MatA 315. MatB is draining a parked-member backlog (115/115 of its entrants had cycled out of MatA earlier, 111 previously parked, median lag 37.6h), so it runs ~24x faster. Verified with scripts/diag_cycle_rate.js + diag_matb_inflow.js + diag_matb_source.js. | (diagnosis only — no code change) |
 | 2026-08-08 | 2026-08-08 | Other | Main account "stuck" in slow T1 while T2 cycles faster — NOT A BUG, same cause. Seat 12 of 127 in T1.1 MatA, which rotates at real registration throughput (~1 per 33 min) rather than backlog-drain speed; ~11 rotations from cycling. T2 appears faster because it has fewer matrices, so upgrade traffic concentrates. | (diagnosis only — no code change) |
 | 2026-08-07 | 2026-08-08 | Dashboard (upgrade) | Generic red-X on tier upgrade — V8.47 gate pulls fee + outstanding rescue loan from the wallet, UI approved/checked fee only; approve/checks now fee+debt with loan-aware copy, ERC20 errors decode — verified live on two debted wallets (loan settled via upgrade, banner cleared) · Jacob · bounty +1 (first find) | 50c59b1 |
@@ -422,3 +347,4 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 ### Detail — resolved report write-ups
 
 Moved to `archive/BUGS_RESOLVED_DETAIL.md` on 2026-07-30. The summary table above stays current; full per-report write-ups live there.
+
