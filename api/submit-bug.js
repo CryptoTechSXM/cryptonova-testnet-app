@@ -34,6 +34,77 @@ async function ghRequest(method, path, body, token) {
   catch (e) { return { status: r.status, body: {} }; }
 }
 
+// ── Canonical funding list (session 36, 2026-08-24) ───────────────────────────
+// Owner: "any new wallet that submits a bug gets added."
+//
+// WHY THIS EXISTS. Three funding lists had drifted apart — this repo's, the keepers
+// repo's, and the owner's own document — and the wallets that fell through the gaps
+// were the BUG REPORTERS: Sherwyn (more accepted bounties than anyone), @Koach100/
+// June, @queensonnie, Cynthia Brown, CryptoJan22. They found the bugs and they were
+// the ones never funded, and every funding run still printed a clean summary because
+// a run cannot report a wallet it was never told about. Adding the reporter HERE, at
+// the moment they report, is the one point in the system where that cannot be
+// forgotten again.
+//
+// ⛔ BEST-EFFORT, EXACTLY LIKE THE SCREENSHOT UPLOAD ABOVE. This runs AFTER BUGS.md
+//    is saved and NEVER throws. A bug report must never be lost because a list update
+//    failed: an un-added wallet can be added by hand, a lost report cannot be
+//    recovered. Every outcome is logged and none of them blocks the response.
+//
+// ⚠ THE ADDRESS IS USER-SUPPLIED AND THIS PAGE USES ONE SHARED PASSWORD, so anyone
+//   holding it can put any address in here. On testnet that buys mock USDC and
+//   nothing else. Auto-added lines are tagged `# auto <date>` precisely so they can
+//   be reviewed, audited or stripped — do not silently trust them into mainnet.
+const FUND_FILE = 'fund_list.txt';
+
+async function addToFundList(walletAddress, reporter, token) {
+  try {
+    if (!walletAddress || !/^0x[0-9a-fA-F]{40}$/.test(String(walletAddress).trim())) {
+      return 'no valid wallet on the report';
+    }
+    const addr = String(walletAddress).trim();
+
+    // Two attempts: a 409 means another report committed between our GET and PUT.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const get = await ghRequest(
+        'GET',
+        `/repos/${GH_OWNER}/${GH_REPO}/contents/${FUND_FILE}?ref=${GH_BRANCH}`,
+        null,
+        token
+      );
+      if (get.status !== 200) return `list unreadable (${get.status})`;
+      const current = Buffer.from(get.body.content, 'base64').toString('utf8');
+
+      // Case-insensitive: the file mixes EIP-55 and lowercase entries by design.
+      if (current.toLowerCase().includes(addr.toLowerCase())) return 'already listed';
+
+      const date = new Date().toISOString().slice(0, 10);
+      const who  = String(reporter || 'unknown').replace(/[\r\n#]/g, ' ').trim().slice(0, 40);
+      const line = `${addr}  # auto ${date} — bug report by ${who}`;
+      const updated = current.replace(/\s*$/, '\n') + line + '\n';
+
+      const put = await ghRequest(
+        'PUT',
+        `/repos/${GH_OWNER}/${GH_REPO}/contents/${FUND_FILE}`,
+        {
+          message: `fund-list(${date}): add ${addr.slice(0, 10)}… — reported a bug`,
+          content: Buffer.from(updated).toString('base64'),
+          branch:  GH_BRANCH,
+          sha:     get.body.sha
+        },
+        token
+      );
+
+      if (put.status === 200 || put.status === 201) return 'added';
+      if (put.status !== 409) return `put failed (${put.status})`;
+    }
+    return 'conflicted twice — NOT added, add by hand';
+  } catch (e) {
+    console.error('fund-list update failed:', e && e.message);
+    return 'threw — NOT added, add by hand';
+  }
+}
+
 // ── Build the markdown entry ──────────────────────────────────────────────────
 function buildEntry({ reporter, page, wallet, walletAddress, frequency, happened, expected, steps, notes, screenshotPath, screenshotError }) {
   const date  = new Date().toISOString().slice(0, 10);
@@ -237,6 +308,12 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Could not save report — try again' });
     }
 
+    // ── Add the reporter's wallet to the canonical funding list ────────────────
+    // Runs only after BUGS.md is safely committed, so a wallet is never added for a
+    // report that did not survive. Best-effort: the outcome is logged, never thrown.
+    const fundResult = await addToFundList(walletAddress, reporter, TOKEN);
+    console.log(`fund-list: ${fundResult} (${walletAddress || 'no address given'})`);
+
     // ── Telegram admin notification (best-effort — never blocks the response) ──
     const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TG_CHAT  = process.env.TELEGRAM_CHAT_ID;
@@ -251,6 +328,11 @@ export default async function handler(req, res) {
         `💳 <b>Wallet:</b> ${wallet} (${addrShort})`,
         `⚡ <b>Frequency:</b> ${frequency}`,
         `📝 ${shortSummary}`,
+        // Surfaced so an auto-add is VISIBLE. A wallet quietly added to the funding
+        // list is the same silent failure as a wallet quietly missing from it.
+        ...(fundResult === 'added'         ? [``, `✅ <b>Funding list:</b> wallet added`] :
+            fundResult === 'already listed' ? [] :
+                                              [``, `⚠️ <b>Funding list:</b> ${fundResult}`]),
         ``,
         `🔗 <a href="https://admin.crypto-nova.app/reports">View all reports</a>`,
       ].join('\n');
