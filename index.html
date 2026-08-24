@@ -8807,6 +8807,14 @@ function startRescuePolling() {
     const sec = document.getElementById('rescue-section');
     // Stop as soon as the member is no longer parked — no point polling forever.
     if (!sec || sec.style.display === 'none') { stopRescuePolling(); return; }
+    // ⛔ NEVER RE-RENDER WHILE THE MEMBER HAS A WALLET REQUEST OPEN. loadDashboardData
+    // rebuilds the parked card list from scratch, which replaces the button the member
+    // just pressed with a brand-new enabled one. The owner hit this live 2026-08-24:
+    // the rescue popup came back mid-refresh and he pressed it more than once. The
+    // chain was fine (a second selfRescue on a cleared position reverts, and
+    // diag_wallet_charges confirmed no double charge) but a member cannot know that.
+    // Skip this tick; the next one is 30s away and every action refreshes on success.
+    if (window._actionInFlight || window._clearAllRunning) return;
     try { await loadDashboardData(); } catch (_) {}
   }, 30000);
 }
@@ -10811,6 +10819,53 @@ function updateAddrsFromDeployed(d) {
   }
   console.log('[v8.8] ADDRS updated from deployed JSON');
 }
+
+// ── ONE MEMBER ACTION AT A TIME ──────────────────────────────────────────────
+//
+// ⛔ THE CARD-LIST BUTTONS WERE NEVER DISABLED AT ALL. doSelfRescue disables
+// `btn-self-rescue` — the SINGLE-position button. The card list renders its own
+// buttons (`onclick="selectParked(i,'rescue')"`), so in the multi-position path
+// nothing was ever disabled and a member could fire three transactions with three
+// fast clicks. The 30s poll was a second, independent way back to an enabled
+// button. Found in the owner's live QA 2026-08-24; the chain held (the contract
+// reverts a rescue on a cleared position, and diag_wallet_charges.js verified the
+// leftover allowance on all three matrices equalled fee minus EXACTLY ONE
+// shortfall) but repeat wallet popups with no explanation are the same trust
+// failure as a button whose figure disagrees with the popup.
+//
+// WRAPPED AT THE DEFINITION, NOT AT EACH CALL SITE. These are top-level
+// declarations in a classic (non-module) script, so the identifier IS the global
+// property — reassigning it here covers the inline onclick handlers, selectParked's
+// internal calls, and clearAllParked's sequencing, with no edit inside any of the
+// four function bodies and no chance of missing a return path. `finally` releases
+// the lock however the call ends, including a rejected signature.
+// ⛔ clearAllParked IS DELIBERATELY NOT IN THIS LIST, AND THAT IS NOT AN OVERSIGHT.
+// It calls approveSelfRescue / doSelfRescue / doCopayRescue itself, in sequence, for
+// every parked position. Wrapping it would make it take the lock and then have its
+// OWN internal calls refused by that same lock — Clear-all would stop after its first
+// step while reporting nothing wrong. It already carries its own guard
+// (`_clearAllRunning`, checked on its first line), so it is protected without this.
+// ⚠ HONEST LIMIT: between its sequential steps the lock is briefly free, so a click
+// landing exactly in that gap is not refused. The poll is skipped for the whole run
+// (above) so no button is rebuilt underneath the member, and the sequencer re-reads
+// getMember().isInMatrix after every step, so a stray extra call is caught rather
+// than believed. Narrowing that gap further means threading a token through the
+// sequencer's three call sites — worth doing only if it is ever seen in the wild.
+['approveSelfRescue', 'doSelfRescue', 'doCopayRescue'].forEach((_fn) => {
+  const _orig = window[_fn];
+  if (typeof _orig !== 'function') { console.warn('[guard] ' + _fn + ' not found — NOT guarded'); return; }
+  window[_fn] = async function (...args) {
+    if (window._actionInFlight) {
+      // Say which request, so this never reads as the app ignoring them.
+      toast('Still working on your last request — check your wallet.', 'error');
+      return;
+    }
+    window._actionInFlight = true;
+    try { return await _orig.apply(this, args); }
+    finally { window._actionInFlight = false; }
+  };
+});
+console.log('[guard] member actions serialised: approve / self rescue / copay');
 </script>
 <script src="/i18n.js" defer></script>
     <!-- Bug Report Footer -->
