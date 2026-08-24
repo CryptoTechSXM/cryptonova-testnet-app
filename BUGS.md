@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-24] Dashboard (index.html) — I tried SF. After approving USDC I was promoted to click sel…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x56a832cc5f2617c08e6484c2b04d971edc1ec57f
+- **Frequency:** Consistent
+- **What happened:** I tried SF. After approving USDC I was promoted to click self rescue but the button didn't display.
+- **What was expected:** I should have been able to self rescue.
+- **Notes:** This also happened with another account.
+- **Submitted:** Mon, 24 Aug 2026 00:19:39 GMT
+
+
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
 - **Page:** Dashboard (index.html)
