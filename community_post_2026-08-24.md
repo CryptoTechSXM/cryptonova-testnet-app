@@ -52,7 +52,7 @@ We are in building phase, and this is exactly what the phase is for. I'd rather 
 
 - **Self Rescue** — you pay the gap from your own wallet. No loan, nothing owed back.
 - **Copay Rescue** — the Stability Fund puts in only the gap. That one **is a repayable advance**: it stays on your account until it's cleared, and it repays itself automatically out of your future earnings.
-- **Or do nothing at all** — if your *in‑matrix* balance already covers the fee, the system re‑enters you **free, within minutes**. If it falls short, then after the grace period the system re‑enters you automatically with a loan for the gap.
+- **Or do nothing at all** — if your *in‑matrix* balance already covers the fee, the system re‑enters you **free, within minutes**. If it falls short, then after the **24‑hour grace period** the system re‑enters you automatically with a loan for the gap. (That window is a testnet setting — on mainnet you'll get **48 hours** to act on your own terms before the fund steps in.)
 
 You never get left behind 💪 — but the sooner you act, the sooner you're earning again.
 
