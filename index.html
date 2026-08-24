@@ -1351,6 +1351,12 @@
                first. Each row now carries its own numbers and its own buttons. -->
           <div id="parked-list" style="display:none;flex-direction:column;gap:8px"></div>
           <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0.00</span> USDC</button>
+          <!-- 2026-08-24: the approval is now the ENTRY FEE, not the exact shortfall,
+               so a quote that moved between approving and rescuing can no longer
+               strand a member (measured: 0xa0763F34 held $11.88 against a $12.50
+               shortfall and could not rescue). This line stops the larger number on
+               the button from reading as a larger CHARGE. -->
+          <div id="self-approve-note" style="display:none;font-size:11px;color:var(--text3);text-align:center;margin-top:-4px"></div>
           <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
           <button class="btn full-w" id="btn-copay-rescue" onclick="doCopayRescue()" style="display:none;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none">🤝 Copay Rescue — borrow <span id="copay-loan-display">$0.00</span></button>
           <div id="copay-note" style="display:none;font-size:11px;color:var(--text3);text-align:center"></div>
@@ -5841,7 +5847,27 @@ async function loadDashboardData() {
         const _selfApproveBtn = document.getElementById('btn-self-approve');
         const _selfRescueBtn  = document.getElementById('btn-self-rescue');
         const _selfShortfallEl = document.getElementById('self-shortfall-display');
-        if (_selfShortfallEl) _selfShortfallEl.textContent = fmt6(parkedInfo.shortfall);
+        // THE BUTTON MUST NAME THE FIGURE THE WALLET WILL ASK FOR.
+        // approveSelfRescue now approves the ENTRY FEE (the maximum _selfRescue can
+        // ever pull) instead of the exact shortfall, so a stale quote can no longer
+        // strand a member — see the long note there. This label used to print the
+        // SHORTFALL, which would now disagree with the amount in the MetaMask popup.
+        // The member still sees what they actually owe in the "Shortfall" row above,
+        // and the button's own sub-line below says only that much is taken.
+        const _approveShown = (parkedInfo.fee || 0n) > parkedInfo.shortfall
+          ? parkedInfo.fee : parkedInfo.shortfall;
+        if (_selfShortfallEl) _selfShortfallEl.textContent = fmt6(_approveShown);
+        const _approveNoteEl = document.getElementById('self-approve-note');
+        if (_approveNoteEl) {
+          if (_approveShown > parkedInfo.shortfall && parkedInfo.shortfall > 0n) {
+            _approveNoteEl.textContent =
+              `Approving ${fmt6(_approveShown)} — only ${fmt6(parkedInfo.shortfall)} is taken. ` +
+              `The rest stays approved and unspent.`;
+            _approveNoteEl.style.display = '';
+          } else {
+            _approveNoteEl.style.display = 'none';
+          }
+        }
         if (parkedInfo.shortfall > 0n) {
           // DIM ON THE APPROVAL, NOT ON THE SHORTFALL.
           //
@@ -5869,8 +5895,11 @@ async function loadDashboardData() {
           const _needsApproval = _alwNow === null ? true : _alwNow < parkedInfo.shortfall;
           if (_selfApproveBtn) _selfApproveBtn.style.display = _needsApproval ? '' : 'none';
           if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = _needsApproval ? '0.5' : '1';
+          // The note belongs to the approve button — it must never outlive it on screen.
+          if (_approveNoteEl && !_needsApproval) _approveNoteEl.style.display = 'none';
         } else {
           if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
+          if (_approveNoteEl)  _approveNoteEl.style.display  = 'none';
           if (_selfRescueBtn)  { _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
         }
 
@@ -9759,10 +9788,48 @@ async function approveSelfRescue() {
     const matrixAddr = window._parkedMatrixAddr;
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-    const tx   = await usdc.approve(matrixAddr, shortfall);
+
+    // ── APPROVE THE ENTRY FEE, NOT THE EXACT SHORTFALL (2026-08-24) ─────────────
+    //
+    // This used to be `approve(matrixAddr, shortfall)` — the exact amount, to the
+    // cent, with no headroom. The shortfall is a point-in-time quote:
+    //     shortfall = ENTRY_FEE - (crossingReserve + withdrawable)
+    // so ANY movement in the member's reserve or withdrawable between approving and
+    // rescuing raises it, and the approval no longer covers what the contract pulls.
+    // safeTransferFrom then reverts on allowance and the member is stranded holding
+    // an approval that looks right and does not work.
+    //
+    // MEASURED, not theorised. diag_parked_solvency.js, 2026-08-24, all 41 past-grace
+    // parked positions: exactly ONE member holds any allowance at all — 0xa0763F34,
+    // $11.88 approved to T2.1 MatB against a current shortfall of $12.50. The only
+    // member who evidently followed these instructions is $0.62 short and stuck.
+    // (WHY their figure moved between the two is UNVERIFIED — we hold the standing
+    // allowance and the current shortfall, not the history between them.)
+    //
+    // WHY THE ENTRY FEE IS THE RIGHT BOUND, rather than a buffer constant:
+    // _selfRescue (git show d382d37:contracts/MatrixLogicLib.sol:1464) computes
+    //     shortfall = cfg.entryFee > effectiveContrib ? cfg.entryFee - effectiveContrib : 0
+    // which is floored at 0 and can never exceed cfg.entryFee. So ENTRY_FEE is the
+    // mathematical MAXIMUM this contract can ever pull for a self-rescue. Approving it
+    // cannot be too little, and cannot be more than one entry fee. Every other choice
+    // (bigfill's flat $15 RESCUE_APPROVAL, a percentage, a fixed $2 pad) is a guess at
+    // how far the shortfall might drift, and THE TWO RULES say do not build on a guess.
+    // bigfill's own $15 constant carries a comment admitting it was sized for T1 and is
+    // wrong for T3+; this needs no per-tier sizing at all.
+    //
+    // Only the shortfall is ever TAKEN. The remainder stays approved and unspent, and
+    // the member sees the true amount owed in the "Shortfall" row above the button.
+    const _feeCap  = window._parkedFee || 0n;
+    const _approve = _feeCap > shortfall ? _feeCap : shortfall;
+    const tx   = await usdc.approve(matrixAddr, _approve);
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
-    if (status) { status.style.color = 'var(--green)'; status.textContent = '✅ USDC approved — now click Self Rescue.'; }
+    if (status) {
+      status.style.color = 'var(--green)';
+      status.textContent = _approve > shortfall
+        ? `✅ Approved ${fmt6(_approve)} — only ${fmt6(shortfall)} will be taken. Now click Self Rescue.`
+        : '✅ USDC approved — now click Self Rescue.';
+    }
     const rescueBtn = document.getElementById('btn-self-rescue');
     if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.opacity = '1'; }
     if (btn) btn.disabled = false;
@@ -10325,20 +10392,52 @@ async function doCopayRescue() {
     const matrixAddr = window._parkedMatrixAddr;
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const me = await signer.getAddress();
+    // ── withdrawableOf() IS NOT THE FIELD THE RESCUE ARITHMETIC USES (2026-08-24) ──
+    //
+    // THE FULL EXPLANATION LIVES HERE; the other two rescue paths (the permit path
+    // and the classic pre-flight, both in doSelfRescue) carry a one-line pointer back
+    // to it. All three had the same defect and all three are fixed the same way.
+    //
+    // V8.44 item D split the two:
+    //     FigureEightMatrixV8:613  withdrawableOf(m) = members[m].withdrawable
+    //                                                + pendingPoolOf(state, cfg, m)
+    // but BOTH rescue functions in the deployed build read the RAW struct field and
+    // nothing else — verified, not assumed, against the deployment rather than the
+    // working tree (git show d382d37:contracts/MatrixLogicLib.sol):
+    //     _selfRescue  :1464   uint256 withdrawable = self.members[member].withdrawable;
+    //     coPayRescue  :1390   uint256 withdrawable = self.members[member].withdrawable;
+    // Identical arithmetic in both:
+    //     effectiveContrib = crossingReserve + withdrawable
+    //     shortfall        = entryFee > effectiveContrib ? entryFee - effectiveContrib : 0
+    //
+    // So using withdrawableOf() here credits the member with un-settled pool accrual
+    // the contract will NOT count. It OVERSTATES what they have and UNDERSTATES the
+    // shortfall — which means the guard below can wave through a transaction that
+    // reverts, and the number quoted to the member is too small. A guard that fails
+    // permissively is worse than no guard, because it reads as a check that passed.
+    //
+    // Latent rather than live as of 2026-08-24: diag_parked_solvency.js compared both
+    // figures for all 41 past-grace parked positions and found ZERO divergence, i.e.
+    // pendingPoolOf is currently 0 for every one of them. It bites the moment it isn't.
+    //
+    // getMember() returns the Member struct, so ONE call now yields both raw fields
+    // (crossingReserve is field 9, withdrawable field 3 — MatrixLogicLib:50) and this
+    // path makes two RPC calls where it used to make three.
+    const _MEMBER_TUPLE =
+      'function getMember(address) view returns (tuple(uint256 id,address referrer,uint256 joinedAt,' +
+      'uint256 withdrawable,uint256 totalEarned,uint256 totalWithdrawn,uint256 cyclesCompleted,' +
+      'bool isInMatrix,bool hasEverJoined,uint256 crossingReserve))';
     const mr = new ethers.Contract(matrixAddr, [
       'function coPayRescue(address member) external',
       'function ENTRY_FEE() view returns (uint256)',
-      'function crossingReserveOf(address) view returns (uint256)',
-      'function withdrawableOf(address) view returns (uint256)',
+      _MEMBER_TUPLE,
     ], signer);
     // Fresh numbers at press time — earnings arrive continuously while parked,
     // so the loan the member confirms is the loan that actually books.
     let loanTxt = '';
     try {
-      const [fee, res, wd] = await Promise.all([
-        mr.ENTRY_FEE(), mr.crossingReserveOf(me), mr.withdrawableOf(me),
-      ]);
-      const have = res + wd;
+      const [fee, mem] = await Promise.all([mr.ENTRY_FEE(), mr.getMember(me)]);
+      const have = mem.crossingReserve + mem.withdrawable;
       loanTxt = fmt6(fee > have ? fee - have : 0n);
     } catch (_) {}
     await mr.coPayRescue.staticCall(me);   // prove it before spending gas
@@ -10394,17 +10493,19 @@ async function doSelfRescue() {
       const _rpP = readProvider || signer.provider;
       if (await _permitRescueAvailable(_rpP)) {
         const _meP = await signer.getAddress();
+        // RAW STRUCT FIELD, NOT withdrawableOf() — see the long note in doCopayRescue.
+        // _selfRescue reads members[m].withdrawable; withdrawableOf() adds un-settled
+        // pool accrual the contract does not count, which would understate _needP and
+        // make this path sign a permit for LESS than the transfer will pull.
         const _mrP = new ethers.Contract(matrixAddr, [
           'function ENTRY_FEE() view returns (uint256)',
-          'function crossingReserveOf(address) view returns (uint256)',
-          'function withdrawableOf(address) view returns (uint256)',
+          'function getMember(address) view returns (tuple(uint256 id,address referrer,uint256 joinedAt,uint256 withdrawable,uint256 totalEarned,uint256 totalWithdrawn,uint256 cyclesCompleted,bool isInMatrix,bool hasEverJoined,uint256 crossingReserve))',
           'function selfRescueWithPermit(uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external',
           'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
           'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
         ], signer);
-        const [_feeP, _resP, _wdP] = await Promise.all([
-          _mrP.ENTRY_FEE(), _mrP.crossingReserveOf(_meP), _mrP.withdrawableOf(_meP),
-        ]);
+        const [_feeP, _memP] = await Promise.all([_mrP.ENTRY_FEE(), _mrP.getMember(_meP)]);
+        const _resP = _memP.crossingReserve, _wdP = _memP.withdrawable;
         const _haveP = _resP + _wdP;
         const _needP = _feeP > _haveP ? _feeP - _haveP : 0n;
         if (_needP > 0n) {
@@ -10477,14 +10578,17 @@ async function doSelfRescue() {
       // whole shortfall check silently did nothing. Written the same hour I fixed
       // the identical mistake in withdraw_probe.js (`hasEverJoined`), which is
       // why the read is now VERIFIED against the contract rather than assumed.
+      // RAW STRUCT FIELD, NOT withdrawableOf() — see the long note in doCopayRescue.
+      // This is the guard that decides whether to let the transaction through, so
+      // reading the accrual-inclusive figure here made it fail PERMISSIVELY: it
+      // computed a smaller _need, found the allowance sufficient, and waved through
+      // a call that safeTransferFrom would revert.
       const _mr  = new ethers.Contract(matrixAddr, [
         'function ENTRY_FEE() view returns (uint256)',
-        'function crossingReserveOf(address) view returns (uint256)',
-        'function withdrawableOf(address) view returns (uint256)',
+        'function getMember(address) view returns (tuple(uint256 id,address referrer,uint256 joinedAt,uint256 withdrawable,uint256 totalEarned,uint256 totalWithdrawn,uint256 cyclesCompleted,bool isInMatrix,bool hasEverJoined,uint256 crossingReserve))',
       ], signer);
-      const [_fee, _res, _wd] = await Promise.all([
-        _mr.ENTRY_FEE(), _mr.crossingReserveOf(_rme), _mr.withdrawableOf(_rme),
-      ]);
+      const [_fee, _mem] = await Promise.all([_mr.ENTRY_FEE(), _mr.getMember(_rme)]);
+      const _res = _mem.crossingReserve, _wd = _mem.withdrawable;
       const _have = _res + _wd;
       if (_fee > 0n && _have < _fee) {
         const _f    = v => '$' + (Number(v) / 1e6).toFixed(2);
