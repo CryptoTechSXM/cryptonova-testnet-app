@@ -1034,7 +1034,9 @@ const READ_ABI = [
   // CommunityWallet
   'function genesisBps() external view returns (uint256)',
   'function distributeRatioBps() external view returns (uint256)',
-  'function distributeInterval() external view returns (uint256)',
+  // V8.50 G.8: removed. V8.48 replaced the rolling interval with
+  // distributionDayOfMonth; this fragment was declared but never called here
+  // (id 39's label string at ~:1074 is display text, not a call).
   // Matrix instance (param 9 -- per-tier, not protocol-wide; see PARAM_META).
   // withdrawalFeeBps() reads a specific MatA/MatB pair's live value;
   // lastWithdrawalFeeBps() reads the PairManagerV8's last-broadcast value

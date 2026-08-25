@@ -1122,7 +1122,13 @@ const CNOVA_ERC20_ABI = [
   'function allowance(address,address) view returns (uint256)',
 ];
 const DIRECT_SALE_ABI = [
-  'function getFloorPrice() view returns (uint256)',
+  // V8.50 G.8: CNOVADirectSale has NEVER had getFloorPrice() (git log -S over all of
+  // contracts/ returns nothing). The call below has therefore always reverted and the
+  // empty catch blanked the 'vs bonding floor' line on every page load since it was
+  // written. floorPriceE6() is the real getter; it returns treasury.floorPrice(), which
+  // is 6-dec USDC per full CNOVA (CNOVATreasury:213, 30_000 = $0.03), so the /1e6 below
+  // was already correct — only the NAME was wrong.
+  'function floorPriceE6() view returns (uint256)',
 ];
 
 let lpContract, cnovaContract, directSale;
@@ -1162,13 +1168,13 @@ async function refreshAMM() {
 
     // Compare with bonding curve floor
     try {
-      const fp = await directSale.getFloorPrice();
+      const fp = await directSale.floorPriceE6();
       const floor = Number(fp) / 1e6;
       const premium = ((humanPrice / floor) - 1) * 100;
       set('amm-vs-floor',
         `vs bonding floor $${floor.toFixed(6)}: ${premium >= 0 ? '+' : ''}${premium.toFixed(2)}%`
       );
-    } catch (_) { set('amm-vs-floor', ''); }
+    } catch (e) { console.warn('[liquidity] floor comparison unavailable:', e?.shortMessage || e?.message || e); set('amm-vs-floor', ''); }
 
     if (!userAddr) return;
 
