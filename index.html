@@ -2390,7 +2390,14 @@ const COUPON_REGISTRY_ABI = [
 ];
 
 const MATRIX_ABI = [
-  'function getMember(address) external view returns (tuple(uint256 id, address referrer, uint256 joinedAt, uint256 withdrawable, uint256 totalEarned, uint256 totalWithdrawn, uint256 cyclesCompleted, bool isInMatrix, bool hasEverJoined))',
+  // V8.50 G.8 (2026-08-25): widened to the full 10-field struct. FigureEightMatrixV8
+  // returns crossingReserve as field 10 (a V8.31 field), so this declaration has been one
+  // field short for many versions. It DECODED CORRECTLY the whole time — measured with
+  // ethers v6: the first nine fields are identical in order, so the short ABI simply
+  // truncated the last word. No site read crossingReserve off getMember (every one uses
+  // crossingReserveOf below), so nothing changes behaviourally; it is widened so the audit
+  // reads clean and the next reader is not trained to skim its rows.
+  'function getMember(address) external view returns (tuple(uint256 id, address referrer, uint256 joinedAt, uint256 withdrawable, uint256 totalEarned, uint256 totalWithdrawn, uint256 cyclesCompleted, bool isInMatrix, bool hasEverJoined, uint256 crossingReserve))',
   // V8.44 (G3). The number a member can ACTUALLY take right now: it adds
   // un-settled pool accrual and subtracts the crossing and automation locks
   // (FigureEightMatrixV8:616). `withdrawable` on getMember above is the raw
@@ -3226,14 +3233,14 @@ async function loadCWData(userAddr, signer, rp) {
       cw.totalEnrolled().catch(() => 0n),
       cw.lastDistributionTime().catch(() => 0n),
     ]);
-    // SCHEDULE — FEATURE-DETECTED ACROSS THE V8.48 → V8.48 CUTOVER (2026-08-12).
+    // SCHEDULE — FEATURE-DETECTED ACROSS THE V8.47 → V8.48 CUTOVER (2026-08-12).
     // V8.48 replaces the rolling 30-day distributeInterval with a calendar date and
     // exposes nextDistributionTime() as the contract's own answer. But the DEPLOYED
-    // V8.48 CommunityWallet has neither getter (probed on-chain 2026-08-12,
+    // V8.47 CommunityWallet has neither getter (probed on-chain 2026-08-12,
     // scripts/probe_v847_getters.js) — it has distributeInterval(), rolling from
     // lastDistributionTime. So: try the V8.48 getter first (this code is then already
-    // correct the moment V8.48 goes live), and fall back to the V8.48 arithmetic while
-    // V8.48 is what is on chain. Neither branch invents a value: if both reads fail,
+    // correct the moment V8.48 goes live), and fall back to the V8.47 arithmetic while
+    // V8.47 is what is on chain. Neither branch invents a value: if both reads fail,
     // null renders as "schedule unavailable", never as a confident wrong date.
     // KNOWN, ACCEPTED MISMATCH until the V8.48 deploy: static copy on this page says
     // distributions happen on the 25th (the V8.48 policy), while this countdown shows
@@ -3242,7 +3249,9 @@ async function loadCWData(userAddr, signer, rp) {
     // they will be on after the cutover.
     let nextDistTime = await cw.nextDistributionTime().catch(() => null);
     if (nextDistTime === null) {
-      const _interval = await cw.distributeInterval().catch(() => null);   // V8.48 path
+      const _interval = await cw.distributeInterval().catch(() => null);   // V8.47 path  ← G.8 WAIVER: reported MISSING
+      // against V8.50 and that is CORRECT — it is the pre-V8.48 fallback, deliberately kept
+      // while this app serves a live chain. Remove it at the V8.50 cutover, not before.
       if (_interval !== null) {
         // lastDist 0n = no distribution has ever run; keep the dedicated "pending
         // first distribution" rendering below instead of fabricating 1970 + 30 days.
