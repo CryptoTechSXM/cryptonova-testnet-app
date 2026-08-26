@@ -49,7 +49,10 @@ async function notifyTelegram(msg) {
 
 const clean = (s, max) => String(s || '').replace(/[|\r\n<>]/g, ' ').trim().slice(0, max);
 
-module.exports = async (req, res) => {
+// ⛔ This repo is "type":"module" (35.9 lesson): api functions are ESM.
+// `module.exports` here crashed the function on first live test (owner, 2026-08-26)
+// with a generic non-JSON 500 — export default is the working pattern (submit-bug.js).
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -98,4 +101,4 @@ module.exports = async (req, res) => {
     // 409 -> loop retries with fresh sha
   }
   return res.status(502).json({ error: 'busy, try again' });
-};
+}
