@@ -823,10 +823,15 @@
   // V8.50 redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
-    if (localStorage.getItem('cnova_st_ver') !== 'v8.50-live-0813') {
+    // 2026-08-26: the buster used to be a hand-bumped string — forget the bump on a
+    // redeploy and every Status cache paints the OLD chain's numbers over the new one.
+    // Now it is derived from the deployment itself (SF address), so ANY address change
+    // busts automatically and the failure mode is gone.
+    var _ST_VER = 'sf:' + String(ADDRS.stabilityFund || 'unknown').toLowerCase();
+    if (localStorage.getItem('cnova_st_ver') !== _ST_VER) {
       ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47','cnova_loans_v8_47b','cnova_loans_v8_47c']
         .forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem('cnova_st_ver','v8.50-live-0813');
+      localStorage.setItem('cnova_st_ver', _ST_VER);
     }
   } catch(e) {}
   // Restore cached display state immediately (survives page reload)
