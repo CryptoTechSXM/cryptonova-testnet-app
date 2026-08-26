@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pay It Forward — CryptoNova</title>
+<link rel="icon" href="/favicon.svg">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+<style>
+  :root { --bg:#070b14; --bg2:#0d1424; --bg3:#111a2e; --border:#1e2a44; --text:#e6edf7;
+          --text2:#9fb0c9; --text3:#647698; --green:#00e5a0; --green2:#10b981;
+          --purple:#a855f7; --yellow:#eab308; --red:#ef4444; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; }
+  a { color:var(--green); }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:18px; }
+  h1 { font-size:26px; margin-bottom:6px; } h2 { font-size:17px; margin-bottom:10px; }
+  p  { font-size:14px; line-height:1.7; color:var(--text2); }
+  .pill { display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
+          background:rgba(168,85,247,.15); color:var(--purple); border:1px solid rgba(168,85,247,.35); margin-bottom:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer;
+         border-radius:10px; padding:11px 18px; font-size:14px; font-weight:700; }
+  .btn-green { background:linear-gradient(135deg,#10b981,#06b6d4); color:#fff; }
+  .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text2); }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  input, textarea { width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+         border-radius:9px; padding:11px 12px; font-size:14px; margin-bottom:10px; }
+  textarea { resize:vertical; min-height:70px; }
+  label { font-size:12px; color:var(--text3); display:block; margin-bottom:4px; }
+  .row  { border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:10px; background:var(--bg3);
+          display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .muted { color:var(--text3); font-size:12px; }
+  .ok    { color:var(--green); } .warn { color:var(--yellow); } .err { color:var(--red); }
+  .code-box { font-family:monospace; font-size:22px; letter-spacing:2px; text-align:center; background:var(--bg3);
+          border:1.5px dashed var(--green); border-radius:12px; padding:16px; margin:12px 0; color:var(--green); }
+  .status { font-size:13px; margin-top:10px; color:var(--text2); min-height:18px; }
+  .hidden { display:none; }
+  .tag { font-size:11px; font-weight:700; padding:2px 8px; border-radius:12px; }
+  .tag-wait { background:rgba(234,179,8,.15); color:var(--yellow); }
+  .spinner { display:inline-block; width:13px; height:13px; border:2px solid var(--text3); border-top-color:var(--green);
+          border-radius:50%; animation:spin 1s linear infinite; vertical-align:-2px; margin-right:5px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .topnav { font-size:13px; margin-bottom:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topnav"><a href="/">← CryptoNova</a></div>
+
+  <div class="card" style="border-color:rgba(168,85,247,.4)">
+    <span class="pill">🤝 PAY IT FORWARD</span>
+    <h1>Someone opened the door for you. Hold it open for the next person.</h1>
+    <p>PIF is how CryptoNova grows: an existing member <strong>gifts a full entry</strong> (a $10 coupon,
+    funded from their own pocket) to someone who can't afford it or has never touched crypto.
+    No repayment. No debt. One ask only: <strong>when your seats start earning, gift one entry
+    onward</strong> — give someone the opportunity you got.</p>
+  </div>
+
+  <!-- ── DOOR A: I want in ─────────────────────────────────────────────── -->
+  <div class="card">
+    <h2>🙋 I want in, but I can't afford the entry</h2>
+    <p>Leave your details. Members with coupons pick from this list — when someone gifts you an
+    entry, you'll get a coupon code that covers your registration completely.</p>
+    <div style="margin-top:14px">
+      <label>Your wallet address (required — where your seat will live)</label>
+      <input id="req-wallet" placeholder="0x…" maxlength="42">
+      <label>Name or handle</label>
+      <input id="req-name" placeholder="How should we call you?" maxlength="40">
+      <label>One sentence: why do you want in?</label>
+      <textarea id="req-why" maxlength="200" placeholder="Optional, but it helps a gifter choose you"></textarea>
+      <label>Contact (optional — Telegram @, so your gifter can reach you)</label>
+      <input id="req-contact" placeholder="@yourhandle" maxlength="60">
+      <input id="req-website" style="display:none" tabindex="-1" autocomplete="off">
+      <button class="btn btn-green" id="btn-request" onclick="submitRequest()">🙋 Put me on the list</button>
+      <div class="status" id="req-status"></div>
+      <p class="muted" style="margin-top:8px">No wallet yet? Install MetaMask from your app store,
+      create a wallet (free), and paste its address here. When you get your coupon, open the site
+      inside the wallet app's Browser tab to register.</p>
+    </div>
+  </div>
+
+  <!-- ── DOOR B: I want to gift ────────────────────────────────────────── -->
+  <div class="card">
+    <h2>💚 I'm a member — I want to gift an entry</h2>
+    <p>Your $10 funds a coupon on-chain. You choose who gets it — from the list below, or someone
+    you know. They register free with your code and are seated <strong>in your line</strong>: you
+    grow together. One active gift at a time; your next unlocks once the current one is redeemed.</p>
+    <div id="gift-disconnected" style="margin-top:14px">
+      <button class="btn btn-green" onclick="pifConnect()">🔌 Connect wallet</button>
+      <div class="status" id="gift-status"></div>
+    </div>
+    <div id="gift-panel" class="hidden" style="margin-top:14px">
+      <div class="row"><span class="muted">Connected</span><span id="gift-addr" style="font-family:monospace;font-size:13px"></span></div>
+      <div class="row"><span class="muted">Coupon price (your cost)</span><span id="gift-price" class="ok">—</span></div>
+      <div class="row"><span class="muted">Your active PIF gift</span><span id="gift-active">checking…</span></div>
+      <div id="gift-maker">
+        <label style="margin-top:8px">Gift to (wallet from the list below, or leave empty for an open coupon you share privately)</label>
+        <input id="gift-to" placeholder="0x… (optional)" maxlength="42">
+        <label>Add gas for your recipient (optional ETH — pays their first transactions)</label>
+        <input id="gift-gas" placeholder="0.0005" value="0.0005">
+        <button class="btn btn-green" id="btn-gift" onclick="makeGift()">💚 Fund a $10 gift coupon</button>
+        <div class="status" id="make-status"></div>
+      </div>
+      <div id="gift-result" class="hidden">
+        <p class="ok" style="font-weight:700;margin-top:10px">✅ Your gift is live on-chain. This code IS the gift — share it privately, once:</p>
+        <div class="code-box" id="gift-code"></div>
+        <button class="btn btn-ghost" onclick="copyShare()">📋 Copy invite message</button>
+        <p class="muted" style="margin-top:10px">⚠️ Anyone with this code can redeem it — treat it like cash.
+        It expires eventually; if it goes unused you can reclaim your $10. If you made a mistake,
+        the cancel button next to your active gift returns your $10 instantly.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── WAITLIST ──────────────────────────────────────────────────────── -->
+  <div class="card">
+    <h2>⏳ Waiting for a door to open</h2>
+    <div id="waitlist"><span class="spinner"></span> Loading…</div>
+  </div>
+
+  <p class="muted" style="text-align:center">The pledge is the whole rulebook: no repayment, ever —
+  just pay one forward when you can. 🤝</p>
+</div>
+
+<script>
+const ADDRS = {
+  couponRegistry: '0x21063617Bd76B30c884EC3554186096300FBe9C1',
+  tierRouter:     '0x0001660fF100a73134a86Ca1C8cf83977428dca4',
+  usdc:           '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
+};
+const CHAIN_ID = 84532;
+const DEPLOY_BLOCK = 45975000;   // V8.50 community deploy anchor (2026-08-26)
+const REG_ABI = [
+  'function issueCoupon(bytes32 codeHash) external payable',
+  'function cancelCoupon(bytes32 codeHash) external',
+  'function couponAmount() external view returns (uint256)',
+  'function coupons(bytes32) external view returns (address issuer, uint256 amount, uint256 expiry, bool used)',
+  'event CouponIssued(bytes32 indexed codeHash, address indexed issuer, uint256 amount, uint256 expiry)',
+];
+const USDC_ABI = ['function approve(address,uint256) returns (bool)', 'function allowance(address,address) view returns (uint256)', 'function balanceOf(address) view returns (uint256)'];
+const TR_ABI   = ['function memberHighestTier(address) view returns (uint256)'];
+const fmt6 = v => '$' + (Number(v) / 1e6).toFixed(2);
+const say  = (id, msg, cls) => { const el = document.getElementById(id); if (el) { el.className = 'status ' + (cls || ''); el.innerHTML = msg; } };
+
+let provider = null, signer = null, me = null, couponAmt = null, activeCode = null;
+
+// ── Door A ─────────────────────────────────────────────────────────────────
+async function submitRequest() {
+  const wallet = document.getElementById('req-wallet').value.trim();
+  if (!/^0x[0-9a-fA-F]{40}$/.test(wallet)) { say('req-status', 'Please paste a valid wallet address (0x…, 42 characters).', 'err'); return; }
+  const btn = document.getElementById('btn-request');
+  btn.disabled = true; say('req-status', '<span class="spinner"></span> Sending…');
+  try {
+    const r = await fetch('/api/pif-request', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'request', wallet,
+        name: document.getElementById('req-name').value,
+        why: document.getElementById('req-why').value,
+        contact: document.getElementById('req-contact').value,
+        website: document.getElementById('req-website').value })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) { say('req-status', j.note === 'already listed' ? '✅ You are already on the list — hang tight!' : '✅ You are on the list! Check back, or leave a contact so your gifter can find you.', 'ok'); loadWaitlist(); }
+    else say('req-status', '❌ ' + (j.error || 'Could not save — try again in a minute.'), 'err');
+  } catch (e) { say('req-status', '❌ Network hiccup — try again.', 'err'); }
+  btn.disabled = false;
+}
+
+// ── Door B ─────────────────────────────────────────────────────────────────
+async function pifConnect() {
+  if (!window.ethereum) { say('gift-status', '📱 No wallet here. On a phone, open this page inside your wallet app (MetaMask/Rabby → Browser tab). On desktop, install the MetaMask or Rabby extension.', 'warn'); return; }
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum, ethers.Network.from(CHAIN_ID));
+    await provider.send('eth_requestAccounts', []);
+    const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' }).catch(() => '0x0');
+    if (parseInt(chainIdHex, 16) !== CHAIN_ID) { say('gift-status', '⚠️ Switch your wallet to Base Sepolia, then reconnect.', 'warn'); return; }
+    signer = await provider.getSigner();
+    me = await signer.getAddress();
+    document.getElementById('gift-addr').textContent = me.slice(0, 8) + '…' + me.slice(-6);
+    const tr = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
+    const tier = await tr.memberHighestTier(me).catch(() => 0n);
+    if (tier === 0n) { say('gift-status', '⚠️ This wallet is not a registered member yet. Register first — then come back to gift.', 'warn'); return; }
+    document.getElementById('gift-disconnected').classList.add('hidden');
+    document.getElementById('gift-panel').classList.remove('hidden');
+    const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, provider);
+    couponAmt = await reg.couponAmount();
+    document.getElementById('gift-price').textContent = fmt6(couponAmt) + ' USDC';
+    await refreshActiveGift();
+  } catch (e) { say('gift-status', '❌ ' + (e.shortMessage || e.message || 'connect failed').slice(0, 120), 'err'); }
+}
+
+// One active gift per member (owner dial 2): scan my issued coupons, count live ones.
+async function refreshActiveGift() {
+  const el = document.getElementById('gift-active');
+  try {
+    const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, provider);
+    const logs = await reg.queryFilter(reg.filters.CouponIssued(null, me), DEPLOY_BLOCK);
+    const now = Math.floor(Date.now() / 1000);
+    let live = null;
+    for (const lg of logs) {
+      const c = await reg.coupons(lg.args.codeHash);
+      if (!c.used && Number(c.expiry) > now) { live = lg.args.codeHash; break; }
+    }
+    if (live) {
+      el.innerHTML = `<span class="warn">1 active — waiting to be redeemed</span> <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="cancelActive('${live}')">↩ Cancel &amp; refund</button>`;
+      document.getElementById('gift-maker').classList.add('hidden');
+    } else {
+      el.innerHTML = '<span class="ok">none — you can gift ✅</span>';
+      document.getElementById('gift-maker').classList.remove('hidden');
+    }
+  } catch (e) { el.innerHTML = '<span class="muted">could not check — refresh</span>'; }
+}
+
+async function cancelActive(codeHash) {
+  try {
+    const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
+    say('make-status', '<span class="spinner"></span> Cancelling — confirm in wallet…');
+    const tx = await reg.cancelCoupon(codeHash); await tx.wait();
+    say('make-status', '✅ Cancelled — your $10 is back in your wallet.', 'ok');
+    await refreshActiveGift();
+  } catch (e) { say('make-status', '❌ ' + (e.shortMessage || 'cancel failed').slice(0, 120), 'err'); }
+}
+
+function makeCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const buf = new Uint8Array(8); crypto.getRandomValues(buf);
+  let s = ''; for (const b of buf) s += chars[b % chars.length];
+  return 'PIF-' + s.slice(0, 4) + '-' + s.slice(4);
+}
+
+async function makeGift() {
+  if (!signer || !couponAmt) return;
+  const btn = document.getElementById('btn-gift'); btn.disabled = true;
+  try {
+    const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
+    const bal = await usdc.balanceOf(me);
+    if (bal < couponAmt) { say('make-status', `❌ You need ${fmt6(couponAmt)} USDC to fund a gift.`, 'err'); btn.disabled = false; return; }
+    const alw = await usdc.allowance(me, ADDRS.couponRegistry);
+    if (alw < couponAmt) {
+      say('make-status', '<span class="spinner"></span> Step 1/2 — approve ' + fmt6(couponAmt) + ' in your wallet…');
+      const txA = await usdc.approve(ADDRS.couponRegistry, couponAmt); await txA.wait();
+    }
+    const code = makeCode();
+    // Same hashing as the register page: keccak256(utf8 bytes of the exact code).
+    const codeHash = ethers.keccak256(ethers.toUtf8Bytes(code));
+    const gasStr = (document.getElementById('gift-gas').value || '').trim();
+    let value = 0n;
+    try { if (gasStr && Number(gasStr) > 0) value = ethers.parseEther(gasStr); } catch (e) {}
+    say('make-status', '<span class="spinner"></span> Step 2/2 — funding the coupon…');
+    const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
+    const tx = await reg.issueCoupon(codeHash, { value }); await tx.wait();
+    activeCode = code;
+    document.getElementById('gift-code').textContent = code;
+    document.getElementById('gift-result').classList.remove('hidden');
+    say('make-status', '', '');
+    // Mark the waitlist entry gifted (best-effort; open coupons skip this).
+    const to = document.getElementById('gift-to').value.trim();
+    if (/^0x[0-9a-fA-F]{40}$/.test(to)) {
+      fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'gifted', wallet: to, by: me.slice(0, 8) + '…' + me.slice(-4) }) })
+        .then(() => loadWaitlist()).catch(() => {});
+    }
+    await refreshActiveGift();
+    document.getElementById('gift-result').classList.remove('hidden');  // keep visible after refresh hides maker
+  } catch (e) { say('make-status', '❌ ' + (e.shortMessage || e.message || 'failed').slice(0, 140), 'err'); }
+  btn.disabled = false;
+}
+
+function copyShare() {
+  const msg = `🤝 I'm paying it forward — this covers your CryptoNova entry, my gift to you.\n\n1️⃣ Open this link INSIDE your wallet app's browser (MetaMask/Rabby → Browser tab):\nhttps://crypto-nova.app/?coupon=${activeCode}\n2️⃣ Your coupon code fills in automatically — register, it costs you $0\n3️⃣ You'll be seated in my line and we grow together\n\nOne ask, no strings: when your seats start earning, gift one entry to someone else. That's the whole deal. 💚`;
+  try { navigator.clipboard.writeText(msg); say('make-status', '✅ Invite message copied — paste it to your person.', 'ok'); }
+  catch (e) { say('make-status', 'Copy failed — copy the code above by hand.', 'warn'); }
+}
+
+// ── Waitlist ───────────────────────────────────────────────────────────────
+async function loadWaitlist() {
+  const box = document.getElementById('waitlist');
+  try {
+    const r = await fetch('/PIF_WAITLIST.md', { cache: 'no-store' });
+    const txt = await r.text();
+    const rows = txt.split('\n').filter(l => l.startsWith('- [WAITING]'));
+    if (!rows.length) { box.innerHTML = '<p class="muted">Nobody waiting right now — the list starts with the first hand raised. 🙋</p>'; return; }
+    box.innerHTML = rows.map(l => {
+      const parts = l.replace('- [WAITING] ', '').split(' · ');
+      const date = parts[0] || '', wallet = parts[1] || '', name = parts[2] || 'anonymous';
+      const rest = parts.slice(3).join(' · ');
+      return `<div class="row"><div style="flex:1;min-width:200px">
+        <span class="tag tag-wait">WAITING</span> <strong style="font-size:13px">${name}</strong>
+        <div class="muted" style="font-family:monospace">${wallet}</div>
+        ${rest ? `<div class="muted">${rest}</div>` : ''}</div>
+        <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="document.getElementById('gift-to').value='${wallet}';window.scrollTo({top:document.getElementById('gift-panel').offsetTop||400,behavior:'smooth'})">💚 Gift this person</button>
+      </div>`;
+    }).join('') + `<p class="muted">${rows.length} waiting · gifted entries move off this list automatically</p>`;
+  } catch (e) { box.innerHTML = '<p class="muted">Could not load the list — refresh to retry.</p>'; }
+}
+loadWaitlist();
+</script>
+</body>
+</html>
