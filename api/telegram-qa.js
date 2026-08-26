@@ -46,7 +46,7 @@ Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)
 
 1. You join a tier and take the next open seat in <b>MatA</b>. You hold <b>one seat</b> per registration — MatA or MatB, never both.
 2. Once a matrix is full (127), <b>every new entry rotates it</b>: the root (seat 1) cycles out, everyone shifts up one seat, the newcomer takes the back seat. Members advance one at a time — the whole matrix never migrates at once.
-3. When you reach root of <b>MatA</b> and cycle out, you <b>cross into MatB</b>. The crossing costs the FULL entry fee: your crossing reserve (50% of your entry, held for you) covers half, your accumulated earnings cover the rest. If both come up short, you are parked until the gap is covered (see Rescue).
+3. When you reach root of <b>MatA</b> and cycle out, you <b>cross into MatB</b>. The crossing costs the HALF the entry fee (V8.50) — exactly your crossing reserve, which pre-paid it when you entered: nothing is drawn from your earnings, and your earned balance travels with you. Starting the next full cycle after MatB is a new full entry from your accumulated funds; if they come up short, you are parked until the gap is covered (see Rescue).
 4. When you reach root of <b>MatB</b> and cycle out, your accumulated withdrawable funds the additive automation: re-entry first, then next-tier upgrade, then optional double seat (each step only if remaining funds cover it).
 5. You may pass through MatA → MatB multiple times. There is no fixed "254-seat payout event."
 
@@ -778,7 +778,7 @@ export default async function handler(req, res) {
         `• 127-seat matrix rotates → you advance seat by seat\n` +
         `• 18% pool pays every seat per rotation, weighted by depth\n` +
         `• Chain pay: L1 5% direct bonus · L2–L6 2.7% each · 18.5% total\n` +
-        `• 2.5% instant earn on join · 50% crossing reserve (funds half your crossing)\n` +
+        `• 2.5% instant earn on join · 50% crossing reserve (pre-pays your crossing in full — V8.50)\n` +
         `• MatB cycle-out → auto re-entry/upgrade + CNOVA mined on every event\n\n` +
         `Register at T1 and get your referral link: <a href="https://crypto-nova.app">crypto-nova.app</a>`,
         msgId);

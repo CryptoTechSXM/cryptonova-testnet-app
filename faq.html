@@ -409,7 +409,7 @@ function toggleTheme() {
         <p data-i18n="faqPage.q4_a1">Tier 1 (Nova Seed) entry fee is <strong>$10.00 USDC</strong>. Fees scale with each tier up to Tier 10 (SuperNova Apex). You also need a small amount of ETH for gas &mdash; typically under $0.10 on Base.</p>
         <p data-i18n="faqPage.q4_a2">Your $10 T1 entry is split instantly by the smart contract:</p>
         <ul>
-          <li data-i18n="faqPage.q4_li1"><strong>$5.00 (50%)</strong> &mdash; Your crossing reserve — held for you, pre-funds half of your crossing fee when your matrix fills</li>
+          <li data-i18n="faqPage.q4_li1"><strong>$5.00 (50%)</strong> &mdash; Your crossing reserve — held for you, pre-pays your crossing into Matrix B in full when your matrix fills (V8.50)</li>
           <li data-i18n="faqPage.q4_li2"><strong>$0.25 (2.5%)</strong> &mdash; Instant earn — credited to your balance immediately on join</li>
           <li data-i18n="faqPage.q4_li3"><strong>$1.80 (18%)</strong> &mdash; Equalization pool — flat rate at all tiers</li>
           <li data-i18n="faqPage.q4_li4"><strong>$0.50 (5%)</strong> &mdash; L1 direct referral to your sponsor</li>
@@ -468,7 +468,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q8_a1">A cycle completes for a member when they reach <strong>position 1 (root) of a full matrix</strong> and the next entry rotates them out. From MatA, the cycling member crosses into MatB — the crossing costs the full entry fee, funded half by their crossing reserve and half by accumulated earnings. From MatB, the additive engine automatically re-enters and/or upgrades them from their accumulated funds. No manual action required.</p>
+        <p data-i18n="faqPage.q8_a1">A cycle completes for a member when they reach <strong>position 1 (root) of a full matrix</strong> and the next entry rotates them out. From MatA, the cycling member crosses into MatB — the crossing costs half the entry fee — exactly their crossing reserve, so it is pre-paid in full and nothing is drawn from their earnings; their earned balance travels with them (V8.50). From MatB, the additive engine automatically re-enters and/or upgrades them from their accumulated funds. No manual action required.</p>
         <p data-i18n="faqPage.q8_a2">Throughout the cycle, chain pay flows to upline positions as each new member joins &mdash; earnings are continuous, not a single event at cycle completion.</p>
       </div></div>
     </div>
@@ -521,7 +521,7 @@ function toggleTheme() {
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q12_a1">Every $10 T1 entry generates income across four streams:</p>
         <ul>
-          <li data-i18n="faqPage.q12_li1"><strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-funds half of your crossing fee when your 127-seat matrix fills (your earnings cover the rest).</li>
+          <li data-i18n="faqPage.q12_li1"><strong>Crossing reserve &mdash; $5.00 (50%)</strong> &mdash; held in your account; pre-pays your crossing into Matrix B in full when your 127-seat matrix fills — nothing is drawn from your earnings (V8.50).</li>
           <li data-i18n="faqPage.q12_li2"><strong>Instant earn &mdash; $0.25 (2.5%)</strong> &mdash; credited to your withdrawable balance the moment you join.</li>
           <li data-i18n="faqPage.q12_li3"><strong>Referral + chain pay &mdash; $1.85 total (18.5%)</strong> &mdash; L1 (direct referrer) earns $0.50, L2–L6 upline positions each earn $0.27, on every entry below them.</li>
           <li data-i18n="faqPage.q12_li4"><strong>Equalization pool &mdash; $1.80 (18%)</strong> &mdash; flat 18% at every tier; each rotation the pool distributes across all seated members, weighted by seat depth — a continuous drip as the matrix turns.</li>
@@ -586,7 +586,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q17_a1">18% of each entry fee ($1.80 at T1) flows into the equalization pool for that matrix. Each rotation, the pool distributes across all seated members weighted by seat depth — deeper seats receive larger shares, which offsets the wait. When you cycle out, re-entry costs the full entry fee: your crossing reserve covers half and your accumulated earnings the rest, applied automatically &mdash; no action required on your part.</p>
+        <p data-i18n="faqPage.q17_a1">18% of each entry fee ($1.80 at T1) flows into the equalization pool for that matrix. Each rotation, the pool distributes across all seated members weighted by seat depth — deeper seats receive larger shares, which offsets the wait. When you cycle out of MatA, your crossing into MatB is pre-paid in full by your crossing reserve (V8.50) — applied automatically &mdash; no action required on your part.</p>
         <p data-i18n="faqPage.q17_a2">Pool shares are not saved up for one payout event &mdash; they drip continuously. Every rotation of the matrix distributes that rotation's pool across the seated members, weighted by seat depth, and your accumulated share is credited to your in-matrix earnings. Those earnings are what fund your automatic re-entry (together with your crossing reserve) when you cycle out.</p>
       </div></div>
     </div>
@@ -613,7 +613,7 @@ function toggleTheme() {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
-        <p data-i18n="faqPage.q19_a1">Getting back in costs a <strong>full entry fee</strong> for that tier. Your returned crossing reserve covers exactly half of it, and your accumulated earnings go toward the rest. If they still fall short, <strong>Self Rescue</strong> pays the remaining shortfall from your wallet (you approve USDC to the matrix first &mdash; no loan and no debt is created). Connect your wallet, open the Dashboard, and use Self Rescue &mdash; the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.</p>
+        <p data-i18n="faqPage.q19_a1">Getting back in costs a <strong>full entry fee</strong> for that tier. Whatever you hold in-matrix — crossing reserve and accumulated earnings — is applied first. If they still fall short, <strong>Self Rescue</strong> pays the remaining shortfall from your wallet (you approve USDC to the matrix first &mdash; no loan and no debt is created). Connect your wallet, open the Dashboard, and use Self Rescue &mdash; the contract seats you back into the live matrix at the next available slot and chain pay to your position resumes.</p>
         <p data-i18n="faqPage.q19_a2">All your previous USDC earnings and CNOVA are untouched &mdash; re-entry only places you back into the live matrix queue.</p>
       </div></div>
     </div>
