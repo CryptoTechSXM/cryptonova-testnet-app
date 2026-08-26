@@ -2942,10 +2942,45 @@ window.addEventListener('DOMContentLoaded', async () => {
 // ═══════════════════════════════════════════════════════════════════════
 // WALLET
 // ═══════════════════════════════════════════════════════════════════════
+function showNoWalletHelp() {
+  let ov = document.getElementById('no-wallet-help');
+  if (ov) { ov.style.display = 'flex'; return; }
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  ov = document.createElement('div');
+  ov.id = 'no-wallet-help';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  const steps = isMobile
+    ? `<div style="font-size:15px;font-weight:800;margin-bottom:10px">📱 One more step to connect</div>
+       <div style="font-size:13px;line-height:1.7;color:var(--text2)">Your phone's browser can't see a wallet — that's normal. Open this page <strong>inside your wallet app</strong> instead:<br><br>
+       1️⃣ Copy the site link below<br>
+       2️⃣ Open <strong>MetaMask</strong> or <strong>Rabby</strong> (or Trust Wallet)<br>
+       3️⃣ Tap the <strong>Browser</strong> tab inside the app<br>
+       4️⃣ Paste the link and connect ✅<br><br>
+       <span style="color:var(--text3);font-size:12px">No wallet yet? Install MetaMask from your app store, create your wallet, then follow the steps above. Your referral link is preserved when you copy it here.</span></div>`
+    : `<div style="font-size:15px;font-weight:800;margin-bottom:10px">🦊 No wallet extension found</div>
+       <div style="font-size:13px;line-height:1.7;color:var(--text2)">Install the <strong>MetaMask</strong> or <strong>Rabby</strong> browser extension, create your wallet, then refresh this page and press Connect.<br><br>
+       <span style="color:var(--text3);font-size:12px">On your phone instead? Copy the link below and open it inside your wallet app's Browser tab.</span></div>`;
+  ov.innerHTML =
+    `<div style="max-width:420px;width:100%;background:var(--bg2,#111827);border:1px solid var(--border,#333);border-radius:14px;padding:22px" onclick="event.stopPropagation()">
+       ${steps}
+       <div style="display:flex;gap:8px;margin-top:16px">
+         <button class="btn btn-green" style="flex:1" onclick="(function(b){try{navigator.clipboard.writeText(window.location.href);b.textContent='✅ Link copied';}catch(e){b.textContent=window.location.href;}})(this)">📋 Copy site link</button>
+         <button class="btn btn-ghost" style="flex:0 0 auto" onclick="document.getElementById('no-wallet-help').style.display='none'">Close</button>
+       </div>
+     </div>`;
+  ov.addEventListener('click', function(e){ if (e.target === ov) ov.style.display = 'none'; });
+  document.body.appendChild(ov);
+}
+
 async function connectWallet(silent=false) {
   if (isConnecting) return;
   if (!window.ethereum) {
-    if (!silent) toast('No wallet detected. Install MetaMask or Rabby.', 'error');
+    // 2026-08-26 (launch day): the old toast said "Install MetaMask or Rabby" — wrong
+    // advice on a PHONE, where the fix is opening this page inside the wallet app's
+    // own browser. Telegram monitoring showed referral-link visitors (?ref=…) hitting
+    // this repeatedly on mobile (one tried 5x). The overlay keeps their ref link
+    // intact via the copy button so the referral survives the app switch.
+    if (!silent) showNoWalletHelp();
     reportEvent('NO_WALLET', { action: 'connect', error: 'No injected provider' });
     return;
   }
