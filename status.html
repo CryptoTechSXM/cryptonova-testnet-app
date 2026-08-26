@@ -829,7 +829,7 @@
     // busts automatically and the failure mode is gone.
     var _ST_VER = 'sf:' + String(ADDRS.stabilityFund || 'unknown').toLowerCase();
     if (localStorage.getItem('cnova_st_ver') !== _ST_VER) {
-      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47','cnova_loans_v8_47b','cnova_loans_v8_47c']
+      ['cnova_st_loans','cnova_st_parked','cnova_st_parked_stats','cnova_st_rescue','cnova_st_matrix','cnova_st_parked_count','cnova_st_sf','cnova_loans_v8_32','cnova_loans_v8_46','cnova_loans_v8_47','cnova_loans_v8_47b','cnova_loans_v8_47c','cnova_loans:unknown']
         .forEach(function(k){ localStorage.removeItem(k); });
       localStorage.setItem('cnova_st_ver', _ST_VER);
     }
@@ -1699,13 +1699,20 @@
         // The key is now DERIVED from the StabilityFund address — the very contract whose
         // events this book scans — so a redeploy starts a fresh book automatically and
         // there is no suffix left for anyone to forget.
-        const LOAN_KEY        = 'cnova_loans:' + (window.ADDRS && ADDRS.stabilityFund ? ADDRS.stabilityFund : 'unknown').slice(0, 10).toLowerCase();
+        // ⛔ 2026-08-26: the 08-13 fix below NEVER WORKED. `ADDRS` is a top-level
+        // `const` — script-scoped, NOT a window property — so `window.ADDRS` was
+        // always undefined and every deployment shared ONE key: 'cnova_loans:unknown'.
+        // The old chain's whole book painted onto the V8.50 status page through it
+        // (owner's deploy-day QA: 351 borrowers on a chain with zero loans). Direct
+        // reference now — ADDRS is declared above in this same page and cannot be
+        // undefined here. 'cnova_loans:unknown' added to the buster's clear list.
+        const LOAN_KEY        = 'cnova_loans:' + String(ADDRS.stabilityFund || 'unknown').slice(0, 10).toLowerCase();
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
         // V8.50 deploy block — the same anchor sf_invariant_check.js uses, so the
         // book covers the whole life of this deployment rather than a rolling
         // window. Bounded fallback in case the constant is ever stale.
-        const SEED_BLOCK      = 45060000;
+        const SEED_BLOCK      = 45975000;  // V8.50 community deploy 2026-08-26 (~45,975,5xx)
 
         // Accumulated state. `book`/`byTier` make this a LIFETIME per-wallet loan
         // book (2026-08-07): it walks history a few chunks per poll, persists, and
