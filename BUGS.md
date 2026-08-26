@@ -37,6 +37,21 @@
 
 ## Open Issues
 
+### [2026-08-26] Dashboard (index.html) — Action is required because i am parked.
+there is no button t…
+- **Reporter:** CryptoJan
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x55a7ec55276094c16ceb1c7efdb0592e62d81425
+- **Frequency:** Intermittent
+- **What happened:** Action is required because i am parked.
+there is no button to approve usdc.
+It shows self rescue and co pay.
+when i select self rescue it still says i have a short fall.
+- **What was expected:** i expect the shortfall to be paid from my wallet and be entered back into the matrix.
+- **Submitted:** Wed, 26 Aug 2026 10:47:10 GMT
+
+
 ### [2026-08-26] Other — Redeeming of CNova tokens - tokens are being redeemed but no…
 - **Reporter:** Sherwyn
 - **Page:** Other
