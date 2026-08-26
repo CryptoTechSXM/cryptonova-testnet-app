@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-26] Other — Redeeming of CNova tokens - tokens are being redeemed but no…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Redeeming of CNova tokens - tokens are being redeemed but not reflecting in wallet..
+- **What was expected:** To see my usdc amount in wallet increased but not happening..
+- **Submitted:** Wed, 26 Aug 2026 00:50:39 GMT
+
+
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
 - **Page:** Dashboard (index.html)
