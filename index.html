@@ -5913,7 +5913,11 @@ async function loadDashboardData() {
           } catch (_) { _alwNow = null; }
           // A failed read leaves BOTH visible — better a redundant approve button
           // than a hidden rescue button.
-          const _needsApproval = _alwNow === null ? true : _alwNow < parkedInfo.shortfall;
+          // 2026-08-26 (CryptoJan): compare against max(fee, shortfall) — what the approve
+          // grants and the contract's pull ceiling — NOT the moving shortfall, or READY
+          // goes stale between render and click.
+          const _alwBound = (parkedInfo.fee || 0n) > parkedInfo.shortfall ? parkedInfo.fee : parkedInfo.shortfall;
+          const _needsApproval = _alwNow === null ? true : _alwNow < _alwBound;
           if (_selfApproveBtn) _selfApproveBtn.style.display = _needsApproval ? '' : 'none';
           // ⛔ AND UN-HIDE IT, NOT JUST UN-DIM IT. The multi-position list sets
           // `display:none` on this button outright (the loop after its `box.innerHTML`)
@@ -10215,7 +10219,13 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       state = 'NEEDS USDC';
       note  = `Add ${fmt6(c.shortfall - bal)} to your wallet — or use Copay: the fund lends the gap, repaid automatically from your future earnings.`;
       btns  = '';
-    } else if (c.shortfall > 0n && (alw === null || alw < c.shortfall)) {
+    } else if (c.shortfall > 0n && (alw === null || alw < ((c.fee || 0n) > c.shortfall ? c.fee : c.shortfall))) {
+      // ⛔ 2026-08-26, CryptoJan (0x55a7ec55…): the gate used to pass on alw >= SHORTFALL.
+      // The shortfall MOVES (earnings settle while parked — the 08-24 post's own lesson),
+      // so an allowance that covered it at render time fails at click time: the member
+      // sees Self Rescue with no Approve button and "still a shortfall" on click.
+      // The bound is max(fee, shortfall) — exactly what approveSelfRescue grants and the
+      // mathematical MAXIMUM _selfRescue can pull, so READY here can never go stale.
       state = 'APPROVE FIRST';
       // ⛔ THE BUTTON MUST NAME THE FIGURE THE WALLET WILL ASK FOR — the same rule the
       // single-position button follows (see the note by `_approveShown`). `ca66731` made
