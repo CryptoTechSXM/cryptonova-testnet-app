@@ -105,7 +105,7 @@
       <div id="gift-result" class="hidden">
         <p class="ok" style="font-weight:700;margin-top:10px">✅ Your gift is live on-chain. This code IS the gift — share it privately, once:</p>
         <div class="code-box" id="gift-code"></div>
-        <button class="btn btn-ghost" onclick="copyShare()">📋 Copy invite message</button>
+        <button class="btn btn-green" onclick="pifShare()">📤 Share the gift</button>
         <p class="muted" style="margin-top:10px">⚠️ Anyone with this code can redeem it — treat it like cash.
         It expires eventually; if it goes unused you can reclaim your $10. If you made a mistake,
         the cancel button next to your active gift returns your $10 instantly.</p>
@@ -254,6 +254,7 @@ async function makeGift() {
     document.getElementById('gift-code').textContent = code;
     document.getElementById('gift-result').classList.remove('hidden');
     say('make-status', '', '');
+    setTimeout(pifShare, 600);   // pop the share sheet right away, like the dashboard coupon flow
     // Mark the waitlist entry gifted (best-effort; open coupons skip this).
     const to = document.getElementById('gift-to').value.trim();
     if (/^0x[0-9a-fA-F]{40}$/.test(to)) {
@@ -267,10 +268,56 @@ async function makeGift() {
   btn.disabled = false;
 }
 
-function copyShare() {
-  const msg = `🤝 I'm paying it forward — this covers your CryptoNova entry, my gift to you.\n\n1️⃣ Open this link INSIDE your wallet app's browser (MetaMask/Rabby → Browser tab):\nhttps://crypto-nova.app/?coupon=${activeCode}\n2️⃣ Your coupon code fills in automatically — register, it costs you $0\n3️⃣ You'll be seated in my line and we grow together\n\nOne ask, no strings: when your seats start earning, gift one entry to someone else. That's the whole deal. 💚`;
-  try { navigator.clipboard.writeText(msg); say('make-status', '✅ Invite message copied — paste it to your person.', 'ok'); }
-  catch (e) { say('make-status', 'Copy failed — copy the code above by hand.', 'warn'); }
+// Same share overlay as the dashboard's coupon share (_shareCoupon in index.html),
+// PIF-flavoured. Link targets the PUBLIC site (never the protected admin domain) and
+// carries ?coupon= + &ref=<gifter> so the recipient lands pre-filled, in your line.
+function pifShare() {
+  if (!activeCode || !me) return;
+  const shareUrl = 'https://crypto-nova.app/?coupon=' + encodeURIComponent(activeCode) + '&ref=' + me;
+  const shareMsg = "🤝 I'm paying it forward — this covers your CryptoNova entry, my gift to you.\n\n" +
+    "Open this link inside your wallet app's browser (MetaMask/Rabby → Browser tab) — your coupon fills in automatically and registering costs you $0:\n" + shareUrl + "\n\n" +
+    "One ask, no strings: when your seats start earning, gift one entry to someone else. 💚";
+  const old = document.getElementById('pif-share-overlay'); if (old) old.remove();
+  const ov = document.createElement('div');
+  ov.id = 'pif-share-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;width:100%';
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  const mkBtn = (label, clr, bg, bdr, fn) => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'width:100%;background:' + bg + ';border:1px solid ' + bdr + ';border-radius:10px;padding:12px 16px;font-size:14px;color:' + clr + ';cursor:pointer;font-weight:600;text-align:left;margin-bottom:8px';
+    btn.textContent = label; btn.addEventListener('click', fn); return btn;
+  };
+  card.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:4px">🤝 Share your gift: ' + activeCode + '</div>'
+    + '<div style="font-size:13px;color:var(--text3);margin-bottom:14px">Your referral is embedded — your person lands in your line, entry fully paid. Share it with ONE person, privately.</div>'
+    + '<div style="background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:16px">' + shareUrl + '</div>';
+  const wrap = document.createElement('div');
+  // BETTER than the original coupon share: the OS-native share sheet, first, when the
+  // device has one (phones do) — one tap, then whatever app they actually use.
+  if (navigator.share) {
+    wrap.appendChild(mkBtn('📤  Share…  (choose any app)', 'var(--green)', 'rgba(0,229,160,.08)', 'rgba(0,229,160,.35)',
+      () => navigator.share({ title: 'Pay It Forward — CryptoNova', text: shareMsg }).catch(() => {})));
+  }
+  const copyBtn = mkBtn('📋  Copy invite message', 'var(--text)', 'var(--bg3)', 'var(--border)', () => {
+    const done = () => { copyBtn.textContent = '✓ Copied!'; setTimeout(() => { copyBtn.textContent = '📋  Copy invite message'; }, 2000); };
+    navigator.clipboard.writeText(shareMsg).then(done).catch(() => {
+      try { const ta = document.createElement('textarea'); ta.value = shareMsg; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
+      } catch (e) { copyBtn.textContent = 'Copy failed — copy the code by hand'; }
+    });
+  });
+  wrap.appendChild(copyBtn);
+  wrap.appendChild(mkBtn('✈️  Share on Telegram', '#0088cc', 'rgba(0,136,204,.08)', 'rgba(0,136,204,.3)',
+    () => window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent("🤝 Paying it forward — your CryptoNova entry is on me. Coupon: " + activeCode), '_blank')));
+  wrap.appendChild(mkBtn('💬  Share on WhatsApp', '#25D366', 'rgba(37,211,102,.08)', 'rgba(37,211,102,.3)',
+    () => window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg), '_blank')));
+  wrap.appendChild(mkBtn('𝕏  Share on X / Twitter', '#1DA1F2', 'rgba(29,161,242,.1)', 'rgba(29,161,242,.35)',
+    () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareMsg), '_blank')));
+  const closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'width:100%;margin-top:4px;background:none;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13px;color:var(--text3);cursor:pointer';
+  closeBtn.textContent = 'Close'; closeBtn.addEventListener('click', () => ov.remove());
+  card.appendChild(wrap); card.appendChild(closeBtn); ov.appendChild(card); document.body.appendChild(ov);
 }
 
 // ── Waitlist ───────────────────────────────────────────────────────────────
