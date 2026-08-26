@@ -1,0 +1,56 @@
+﻿[
+    {
+        "endpoint":  "EP1 cnova-site   (read pool)",
+        "url":  "https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/",
+        "http":  200,
+        "ms":  127,
+        "chainId":  "0x14a34",
+        "block":  45691785,
+        "note":  ""
+    },
+    {
+        "endpoint":  "EP5 cnova-site-2 (read pool)",
+        "url":  "https://wiser-proportionate-forest.base-sepolia.quiknode.pro/8383659a7c5f035faa091659780d5ba26c50fcf8/",
+        "http":  200,
+        "ms":  333,
+        "chainId":  "0x14a34",
+        "block":  45691785,
+        "note":  ""
+    },
+    {
+        "endpoint":  "EP2              (read pool)",
+        "url":  "https://cosmopolitan-still-fire.base-sepolia.quiknode.pro/3835d77b733a07e6109ec27774ab3231fbb86c6a/",
+        "http":  200,
+        "ms":  156,
+        "chainId":  "0x14a34",
+        "block":  45691786,
+        "note":  ""
+    },
+    {
+        "endpoint":  "EP3              (read pool)",
+        "url":  "https://newest-cold-isle.base-sepolia.quiknode.pro/d1082ae239ca62f4fc938014273539074f377e02/",
+        "http":  200,
+        "ms":  165,
+        "chainId":  "0x14a34",
+        "block":  45691786,
+        "note":  ""
+    },
+    {
+        "endpoint":  "EP4              (read pool)",
+        "url":  "https://side-silent-sheet.base-sepolia.quiknode.pro/4ce4b5665baf27920cda0759814efef5c3172510/",
+        "http":  200,
+        "ms":  323,
+        "chainId":  "0x14a34",
+        "block":  45691786,
+        "note":  ""
+    },
+    {
+        "endpoint":  "sepolia.base.org (WALLET + last resort)",
+        "url":  "https://sepolia.base.org",
+        "http":  200,
+        "ms":  184,
+        "chainId":  "0x14a34",
+        "block":  45691787,
+        "note":  ""
+    }
+]

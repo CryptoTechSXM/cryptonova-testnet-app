@@ -1,0 +1,370 @@
+[
+  {
+    "tier": 1,
+    "pairCount": 2,
+    "activePairIndex": 1,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 1,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0x7154485C8b630d13902CdAeAe80429734f0ac79c",
+        "occ": 127,
+        "size": 127,
+        "rot": 599,
+        "totalJoined": 364,
+        "parked": 26,
+        "chainNext": "0xB83e7F9fAC5757F3A2e6b6d8385796b64640F170"
+      },
+      {
+        "tier": 1,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0xB83e7F9fAC5757F3A2e6b6d8385796b64640F170",
+        "occ": 126,
+        "size": 127,
+        "rot": 447,
+        "totalJoined": 352,
+        "parked": 81,
+        "chainNext": "0xcC4Fc9d68aC8730cF4BEefb2Bb99DCaEb126b0cb"
+      },
+      {
+        "tier": 1,
+        "pair": 1,
+        "half": "MatA",
+        "addr": "0xcC4Fc9d68aC8730cF4BEefb2Bb99DCaEb126b0cb",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x015291f325F67259A511c3a1Cd06c41FbF6196b5"
+      },
+      {
+        "tier": 1,
+        "pair": 1,
+        "half": "MatB",
+        "addr": "0x015291f325F67259A511c3a1Cd06c41FbF6196b5",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x7154485C8b630d13902CdAeAe80429734f0ac79c"
+      }
+    ]
+  },
+  {
+    "tier": 2,
+    "pairCount": 2,
+    "activePairIndex": 1,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 2,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0x1E0A87BC3800Bf01b093B75eff6DF49d4acA8614",
+        "occ": 127,
+        "size": 127,
+        "rot": 124,
+        "totalJoined": 249,
+        "parked": 4,
+        "chainNext": "0x6bC1228F9799D9F2914E65e1A83785657f9fD66d"
+      },
+      {
+        "tier": 2,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x6bC1228F9799D9F2914E65e1A83785657f9fD66d",
+        "occ": 118,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 118,
+        "parked": 0,
+        "chainNext": "0xFeBA92bFbB9697993cF4cF97F718CF9ee3db3Cc3"
+      },
+      {
+        "tier": 2,
+        "pair": 1,
+        "half": "MatA",
+        "addr": "0xFeBA92bFbB9697993cF4cF97F718CF9ee3db3Cc3",
+        "occ": 5,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 5,
+        "parked": 0,
+        "chainNext": "0xC9B7689FC630369809d6607b5350a9a56F4596dD"
+      },
+      {
+        "tier": 2,
+        "pair": 1,
+        "half": "MatB",
+        "addr": "0xC9B7689FC630369809d6607b5350a9a56F4596dD",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x1E0A87BC3800Bf01b093B75eff6DF49d4acA8614"
+      }
+    ]
+  },
+  {
+    "tier": 3,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 3,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0xeA20A88Fb9bc2F571A3E37c6bb07e9ea63D04a1f",
+        "occ": 78,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 78,
+        "parked": 0,
+        "chainNext": "0xdA999c834fDD9F4c4A331541975480E2D2545CEc"
+      },
+      {
+        "tier": 3,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0xdA999c834fDD9F4c4A331541975480E2D2545CEc",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0xeA20A88Fb9bc2F571A3E37c6bb07e9ea63D04a1f"
+      }
+    ]
+  },
+  {
+    "tier": 4,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 4,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0xD1F95e2d06238cC83109BB4714CA2395a5AEc560",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x4c186A3218D391F1cFd94Fc6Ab4F89DD374AC63e"
+      },
+      {
+        "tier": 4,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x4c186A3218D391F1cFd94Fc6Ab4F89DD374AC63e",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0xD1F95e2d06238cC83109BB4714CA2395a5AEc560"
+      }
+    ]
+  },
+  {
+    "tier": 5,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 5,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0xDa060279d184a9385D5ff3587275B0bA1c0Da11E",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x74201dd799D852cBd341F3054BA794397C73184e"
+      },
+      {
+        "tier": 5,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x74201dd799D852cBd341F3054BA794397C73184e",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0xDa060279d184a9385D5ff3587275B0bA1c0Da11E"
+      }
+    ]
+  },
+  {
+    "tier": 6,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 6,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0x7F9CeF0416d12ad0FD73BDC6753894F41f2FD984",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x9e79f2B9245f5407dBd7A013F472D89f733043F6"
+      },
+      {
+        "tier": 6,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x9e79f2B9245f5407dBd7A013F472D89f733043F6",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x7F9CeF0416d12ad0FD73BDC6753894F41f2FD984"
+      }
+    ]
+  },
+  {
+    "tier": 7,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 7,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0xD6f4CBdFE3AeC1D8ba0e36731D1B8F39863a09bf",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x20C6CF29621E412C3c049B859CCA2c34267b6EB2"
+      },
+      {
+        "tier": 7,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x20C6CF29621E412C3c049B859CCA2c34267b6EB2",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0xD6f4CBdFE3AeC1D8ba0e36731D1B8F39863a09bf"
+      }
+    ]
+  },
+  {
+    "tier": 8,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 8,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0x18dA1AeE871f05dbBF1D3Cd7Fa0a9B72a619B4bF",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x98A6F1B1E319834d4470bee5CEC3cf5d9C13b054"
+      },
+      {
+        "tier": 8,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x98A6F1B1E319834d4470bee5CEC3cf5d9C13b054",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x18dA1AeE871f05dbBF1D3Cd7Fa0a9B72a619B4bF"
+      }
+    ]
+  },
+  {
+    "tier": 9,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 9,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0xa26235338a5cfc63453A9fD2a4A0A4F92440a8Ad",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x5c48325befdAbb7abFbe71C216E835daA72c15e7"
+      },
+      {
+        "tier": 9,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x5c48325befdAbb7abFbe71C216E835daA72c15e7",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0xa26235338a5cfc63453A9fD2a4A0A4F92440a8Ad"
+      }
+    ]
+  },
+  {
+    "tier": 10,
+    "pairCount": 1,
+    "activePairIndex": 0,
+    "factoryExpandThresholdBps": 9000,
+    "rows": [
+      {
+        "tier": 10,
+        "pair": 0,
+        "half": "MatA",
+        "addr": "0xfb31dd20B56c37724Cc9Db87da6dE93588d94357",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0x929B24047F8570F1C5cf19e48DF72eF666492A33"
+      },
+      {
+        "tier": 10,
+        "pair": 0,
+        "half": "MatB",
+        "addr": "0x929B24047F8570F1C5cf19e48DF72eF666492A33",
+        "occ": 0,
+        "size": 127,
+        "rot": 0,
+        "totalJoined": 0,
+        "parked": 0,
+        "chainNext": "0xfb31dd20B56c37724Cc9Db87da6dE93588d94357"
+      }
+    ]
+  }
+]

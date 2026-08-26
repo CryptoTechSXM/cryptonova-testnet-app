@@ -1,0 +1,45 @@
+{
+  "floor": 44840000,
+  "head": 45692392,
+  "windowsEach": 95,
+  "elapsed": "26.8",
+  "scanRes": [
+    {
+      "label": "tr.MemberEnrolled",
+      "windows": 95,
+      "failed": 0
+    },
+    {
+      "label": "tr.MemberRegistered",
+      "windows": 95,
+      "failed": 0
+    },
+    {
+      "label": "cnova.Burn",
+      "windows": 95,
+      "failed": 0
+    },
+    {
+      "label": "cnova.In",
+      "windows": 95,
+      "failed": 0
+    },
+    {
+      "label": "cnova.Out",
+      "windows": 95,
+      "failed": 0
+    },
+    {
+      "label": "cnova.All",
+      "windows": 95,
+      "failed": 1
+    }
+  ],
+  "failures": [
+    {
+      "what": "cnova.All getLogs 45566393-45575392",
+      "code": "UNKNOWN_ERROR",
+      "msg": "could not coalesce error"
+    }
+  ]
+}

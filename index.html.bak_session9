@@ -450,7 +450,7 @@
 <body>
 
 
-<!-- ── V8.50 MAINTENANCE GATE — remove this block when V8.50 is live ───────────── -->
+<!-- ── V8.48 MAINTENANCE GATE — remove this block when V8.48 is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -468,7 +468,7 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.50 — Fresh Matrix Relaunch</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.48 — Fresh Matrix Relaunch</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
       We're seeding the new matrix for a clean start. Back online in:
     </p>
@@ -505,13 +505,13 @@
       if (h === 'admin.cryptonova.ai' || h === 'admin.crypto-nova.app' || h.startsWith('admin.')) {
         document.getElementById('maintenance-gate').remove(); return;
       }
-      var isEarly = h.indexOf('early.') !== -1 || h.indexOf('preview.') !== -1; // preview QA rides the coupon gate (V8.50)
+      var isEarly = h.indexOf('early.') !== -1 || h.indexOf('preview.') !== -1; // preview QA rides the coupon gate (V8.48)
       if (isEarly) {
         // Gate: 2026-07-17 1:30 PM EDT (17:30 UTC)
-        var EARLY_MS = 1786640400000; // V8.50 preview — Thu Aug 13 2026 1:00 PM (17:00 UTC)
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.50 Early Access — Opening 1:00 PM';
+        var EARLY_MS = 1786640400000; // V8.48 preview — Thu Aug 13 2026 1:00 PM (17:00 UTC)
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.48 Early Access — Opening 1:00 PM';
         // Override countdown block text for early domain
-        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.50 — Fresh Matrix Relaunch';
+        var cbh = document.querySelector('#gate-countdown-block h1'); if (cbh) cbh.textContent = 'V8.48 — Fresh Matrix Relaunch';
         var cbp = document.querySelector('#gate-countdown-block p'); if (cbp) cbp.innerHTML = 'Leaders &amp; testers — we\'re seeding the new matrix. Back online in:';
         var openEarlyCoupon = function() {
           // localStorage only bypasses gate AFTER the countdown has expired
@@ -533,8 +533,8 @@
         if (EARLY_MS - Date.now() <= 0) { openEarlyCoupon(); } else { earlyTick(); }
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.50 — Opening 2:00 PM';
-        var MAIN_MS  = 1786644000000; // V8.50 go-live — Thu Aug 13 2026 2:00 PM (18:00 UTC)
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.48 — Opening 2:00 PM';
+        var MAIN_MS  = 1786644000000; // V8.48 go-live — Thu Aug 13 2026 2:00 PM (18:00 UTC)
         function tick() {
           var diff = MAIN_MS - Date.now();
           if (diff <= 0) { document.getElementById('maintenance-gate').remove(); return; }
@@ -623,7 +623,7 @@
     <span class="logo-badge" id="network-badge">Base Sepolia</span>
     <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">Testnet</span><span class="vb-m">TestNet</span></span>
     <span id="domain-badge" style="display:none"></span>
-    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.50</span><span class="vb-m">V8.50</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="vb-d">V8.48</span><span class="vb-m">V8.48</span></span>
   </a>
   <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
   <div class="header-meta">
@@ -733,8 +733,8 @@
       <div class="token-card-left">
         <div class="token-icon">CN</div>
         <div>
-          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0x98cCEb35f3C1624258073e6e66aBa1AE2be2F55a" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
-          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0x98cCEb35f3C1624258073e6e66aBa1AE2be2F55a" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0x98cCEb35f3C1624258073e6e66aBa1AE2be2F55a</a> · 18 decimals</div>
+          <div class="token-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg width="28" height="28" style="border-radius:50%;flex-shrink:0"><use href="#cnova-icon"/></svg><a href="https://sepolia.basescan.org/token/0xcd3924C2981C6DeCe022eB592B57E0153d4Ab7d1" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:700">CryptoNOVA Matrix ↗</a> <span class="pill pill-green" style="font-size:10px;vertical-align:middle">CNOVA · ERC-20 · Base</span></div>
+          <div class="token-addr"><a href="https://sepolia.basescan.org/token/0xcd3924C2981C6DeCe022eB592B57E0153d4Ab7d1" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-family:monospace">0xcd3924C2981C6DeCe022eB592B57E0153d4Ab7d1</a> · 18 decimals</div>
           <div style="font-size:12px;color:var(--text2);margin-top:4px" data-i18n="dash.cnova_wallet_note">Earned on every registration you make &mdash; your first entry and every re-entry after a cycle. At the $0.01 launch floor that is 50 CNOVA per T1 entry; the protocol never mints more than your entry&rsquo;s $0.50 Treasury deposit backs, so the token count falls as the floor rises. Add to your wallet to track your balance during testing. <span style="color:var(--yellow)">🔒 Matrix-minted CNOVA vests for 180 days</span> &mdash; use the Buy CNOVA page to acquire immediately transferable CNOVA.</div>
         </div>
       </div>
@@ -1349,40 +1349,8 @@
                away from re-entering, and neither could see it. Members were doing
                rescue → refresh → rescue → refresh, and mostly giving up after the
                first. Each row now carries its own numbers and its own buttons. -->
-          <!-- 2026-08-24 (session 38): THE RE-PARK. Measured, not theorised - 37.4's
-               ledger shows 0xd27170Eb paying THREE distinct matrices, one shortfall each
-               ($1.075859 T1 MatB, $4.75 T1 MatA, $5.306202 T3 MatA), and every leftover
-               allowance equals the entry fee minus EXACTLY ONE shortfall. A member who
-               clears T1 MatB and immediately sees T1 MatA parked reads that as being
-               charged twice for the same tier. It is a different seat. This note exists
-               so the community post can say so: the owner's rule is that the app shows a
-               policy before the announcement does. STATIC on purpose - no id, no display
-               toggling. 37.1 was caused by a hidden element that nothing ever un-hid. -->
-          <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <strong style="color:var(--yellow)">Why a tier can ask again right after you rescue it.</strong>
-            Every tier is a <strong>pair</strong> &#8212; Matrix A and Matrix B &#8212; and the
-            figure&#8209;8 moves you between them. Clearing one half seats you there; the system then
-            moves you on to the other half, and if your <em>in&#8209;matrix</em> balance does not cover
-            that entry, you park there too. So <strong>T1 Matrix A</strong> can appear moments after
-            you cleared <strong>T1 Matrix B</strong>. That is a <strong>new seat, not a second charge
-            for the one you just cleared</strong> &#8212; each rescue only ever takes that one
-            position's shortfall, and every position is listed separately below with its own numbers.
-          </div>
-          <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <strong style="color:var(--yellow)">Why the approval is bigger than the shortfall.</strong>
-            Self Rescue asks your wallet to approve the <strong>full entry fee</strong>, but only your
-            <strong>shortfall</strong> is ever taken &#8212; the rest stays approved and unspent. The
-            approval is deliberately the larger figure so that a quote which moves while you are
-            signing cannot leave you approved for slightly too little to re-enter.
-          </div>
           <div id="parked-list" style="display:none;flex-direction:column;gap:8px"></div>
           <button class="btn full-w" id="btn-self-approve" onclick="approveSelfRescue()" style="display:none;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green)">Step 1: Approve <span id="self-shortfall-display">$0.00</span> USDC</button>
-          <!-- 2026-08-24: the approval is now the ENTRY FEE, not the exact shortfall,
-               so a quote that moved between approving and rescuing can no longer
-               strand a member (measured: 0xa0763F34 held $11.88 against a $12.50
-               shortfall and could not rescue). This line stops the larger number on
-               the button from reading as a larger CHARGE. -->
-          <div id="self-approve-note" style="display:none;font-size:11px;color:var(--text3);text-align:center;margin-top:-4px"></div>
           <button class="btn full-w" id="btn-self-rescue" onclick="doSelfRescue()" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none">🔑 Self Rescue</button>
           <button class="btn full-w" id="btn-copay-rescue" onclick="doCopayRescue()" style="display:none;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none">🤝 Copay Rescue — borrow <span id="copay-loan-display">$0.00</span></button>
           <div id="copay-note" style="display:none;font-size:11px;color:var(--text3);text-align:center"></div>
@@ -1421,11 +1389,11 @@
       <div id="rescue-debt-banner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:10px;border:1.5px solid var(--yellow);background:rgba(234,179,8,.08);align-items:flex-start;gap:12px">
         <span style="font-size:22px;line-height:1">⚡</span>
         <div style="flex:1">
-          <div id="rescue-debt-title" style="font-weight:700;color:var(--yellow);font-size:14px;margin-bottom:4px">SF Rescue Loan Outstanding</div>
+          <div style="font-weight:700;color:var(--yellow);font-size:14px;margin-bottom:4px">SF Rescue Loan Outstanding</div>
           <div style="font-size:13px;color:var(--text2)">
             The Stability Fund has advanced <strong id="rescue-debt-amount" style="color:var(--yellow)">$—</strong> to keep your position moving.
           </div>
-          <!-- V8.50: debt is MEMBER-LEVEL on the SF ledger (memberDebt) — one
+          <!-- V8.48: debt is MEMBER-LEVEL on the SF ledger (memberDebt) — one
                number that follows the member across every tier and pair. The old
                per-matrix breakdown (and its seated/stranded caveats) is obsolete:
                repayment now comes from ANY tier's earnings + the upgrade fold. -->
@@ -1499,7 +1467,7 @@
             <button class="btn btn-ghost" style="flex:1" id="btn-withdraw" onclick="doWithdraw()" disabled>Withdraw All</button>
           </div>
           <div id="withdraw-status" style="margin-top:12px;font-size:13px;color:var(--text2)"></div>
-          <!-- V8.50: withdrawal history, per matrix. A withdrawal walks SEVERAL matrices
+          <!-- V8.48: withdrawal history, per matrix. A withdrawal walks SEVERAL matrices
                and each can succeed or fail on its own, so "it failed" is rarely the whole
                story. This is what the member reads back to an admin, and it is kept in
                this browser only — no server, no account needed. -->
@@ -1877,7 +1845,7 @@
         <div>
           <div class="phase-card active" style="margin-bottom:20px">
             <div class="phase-title">🤝 Community Beta</div>
-            <div class="phase-subtitle">V8.50 live on testnet — additive automation + open whale gate, fresh reset July 31</div>
+            <div class="phase-subtitle">V8.48 live on testnet — additive automation + open whale gate, fresh reset July 31</div>
             <ul class="checklist">
               <li><span class="check-icon check-done">✅</span> Open to initial community (testnet)</li>
               <li><span class="check-icon check-done">✅</span> Multi-wallet support: MetaMask + Rabby tested</li>
@@ -2091,7 +2059,7 @@ const RPC_FALLBACK = 'https://wiser-proportionate-forest.base-sepolia.quiknode.p
 // (support traceability). To change the pool, edit this list and push —
 // every address must already be a REGISTERED member before receiving orphans.
 const DEFAULT_SPONSOR_POOL = [
-  // V8.50 relaunch — first 8 leaders; add more in batches as they register
+  // V8.48 relaunch — first 8 leaders; add more in batches as they register
   '0x6512e9B5FE1690F2570AFEE5E7b904EF106C9435',
   '0x19a59fbD6d2c1289668795D41453e1505B7B8102',
   '0x1D3E33aAFFDb694E5a45d793B6946120467e93AB',
@@ -2125,7 +2093,7 @@ const RPC_EXTRA    = 'https://sepolia.base.org';
 //
 // DO NOT ADD FREE PUBLIC ENDPOINTS HERE. This session proposed exactly that —
 // base-sepolia-rpc.publicnode.com as primary, on the reasoning that sepolia.base.org is
-// Cloudflare-fronted and demonstrably fails (a 502 from it on V8.50 deploy day returned
+// Cloudflare-fronted and demonstrably fails (a 502 from it on V8.48 deploy day returned
 // raw HTML that landed in an alert() box). THE OWNER OVERRULED IT FROM OPERATIONAL
 // HISTORY: public RPC endpoints were tried in this site's own read pool, were buggy, and
 // were ALL removed. That is direct experience of these endpoints on this site, and it
@@ -2147,53 +2115,16 @@ const RPC_EXTRA    = 'https://sepolia.base.org';
 // NOTE ON ORDER: wallets take the FIRST entry. Any others are alternatives the member
 // selects manually; do not rely on automatic failover, it is wallet-specific.
 const WALLET_RPC_URLS = [
-  'https://sepolia.base.org',   // unchanged from V8.50 — see the block above before altering
+  'https://sepolia.base.org',   // unchanged from V8.48 — see the block above before altering
 ];
 
 // eth_getLogs on range-capped providers (QuickNode caps at 10k blocks): walk
 // backward in <=9000-block windows instead of one whole-chain query that gets
 // rejected. Sequential, so it never bursts the per-second rate limit.
 // Floor for every lifetime-history log scan. Same value _getDirectReferrals uses
-// (TR_DEPLOY_BLOCK).
-//
-// == 2026-08-19: RAISED 44,840,000 -> 45,428,000 ON MEASUREMENT. ==
-//
-// The old comment here said a stale-LOW floor "only scans a few extra EMPTY windows".
-// That sentence is why this sat for 19.7 days. IT WAS NOT A FEW. Measured with
-// measure_page_rpc.mjs (this folder) against the live chain on 2026-08-19:
-//
-//     chain head                        45,691,990
-//     old floor                         44,840,000   -> 95 windows per lifetime scan
-//     TRUE creation block, cnova        45,428,148   (binary search on eth_getCode)
-//     TRUE creation block, tierRouter   45,428,223
-//     TRUE creation block, communityWt  45,430,266
-//     new floor                         45,428,000   -> 30 windows per lifetime scan
-//
-// 65 of every 95 windows -- 68% of ALL lifetime history reading this site does --
-// were scanning blocks that PROVABLY contain nothing, because they predate the
-// creation of every contract being queried. Six call sites do a floor-bound scan
-// (:3205 cw, :6194 cnova, :6289 tr, :6677 cnova, :6900 cnova, :8148 tr), so the
-// waste multiplies by six on a full dashboard load. Measured cost 103 ms/window on
-// EP1, 0 failed windows and 0 retries -- the endpoints were never refusing us, the
-// page was simply asking ~3.2x more than it needed to.
-//
-// THE SAFETY ARGUMENT IS A PROPERTY, NOT AN ESTIMATE: a contract cannot emit an
-// event before the block it was created in. 45,428,000 is below the EARLIEST of the
-// three creation blocks above (cnova, 45,428,148) with 148 blocks of slack against
-// an off-by-one in the search, so no call site can miss an event. It is not a
-// guess about traffic or history; it is the floor under which no log can exist.
-//
-// !! THIS VALUE GOES STALE BY DESIGN AND THAT IS THE REAL DEFECT. !!
-// The head moves ~43,200 blocks/day (2s blocks) and this floor does not, so every
-// lifetime scan grows ~4.8 windows/day -- ~29 more requests per dashboard load per
-// day, ~3.0s more wall clock per day, forever. Raising the constant buys ~4 months
-// back and then the same curve resumes. The structural fixes, in order of value:
-//   1. safeGetLogs already takes opts.fromBlock so a deep history is paid ONCE per
-//      wallet and cached; no call site passes it. That is the real fix.
-//   2. Per-contract floors instead of one global one (the three differ by ~2,000).
-// ON REDEPLOY: re-run measure_page_rpc.mjs and set this to just under the earliest
-// creation block it reports. Do not lower it "to be safe" -- that is what cost 68%.
-const LOGS_DEPLOY_FLOOR = 45428000;
+// (TR_DEPLOY_BLOCK). A stale-LOW floor only scans a few extra EMPTY windows -- it can
+// never miss an event -- so on redeploy this may be raised but never needs to be.
+const LOGS_DEPLOY_FLOOR = 44840000;
 
 async function safeGetLogs(contract, filter, opts) {
   opts = opts || {};
@@ -2233,68 +2164,68 @@ async function safeGetLogs(contract, filter, opts) {
 }
 
 const ADDRS = {
-  // V8.50 — deployed 2026-08-26 — the crossing redesign (see V8_50_SCOPE.md): pre-funded crossings (item A), no mid-cycle eviction (B), member-level carry (E1), CW work-order fix, cap-1 keeper, PARAM 59 = 5000
+  // V8.48 — deployed 2026-08-13 — full locked scope: items 1-48 (see V8_48_SCOPE.md); bulk gate, GhostFloor package, calendar distributions, epochs 1000/180d, proposal fee
   usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-  cnova:         '0x98cCEb35f3C1624258073e6e66aBa1AE2be2F55a',
-  treasury:      '0xc1ED39a0FaAd9A6B291A2f3b6CBF165D2027a8D4',
-  stabilityFund: '0xCc6E704814B04bD492AA99e86fCa24e3cA938136',
-  buybackReserve:'0xb19197a0BE1bf44098457fa4C5F836264cd95350',
-  tierRouter:    '0x0001660fF100a73134a86Ca1C8cf83977428dca4',
-  matrixKeeper:  '0xA04aD8Dab09a9a742E0A845FB0c1e1107a86405F',
-  v8Governance:  '0x78DC530Ab3D63FC300e14381e27B6eACeD090951',
-  communityWallet:'0x591d9AB64a56eCe4A1DB9a6767b11C48ed0Ff532',
+  cnova:         '0xcd3924C2981C6DeCe022eB592B57E0153d4Ab7d1',
+  treasury:      '0x576b56bEE01B2Eb1D54902C177bFcc664B7988B8',
+  stabilityFund: '0xeb36ee741c3884E7D2914672380BE5500112610b',
+  buybackReserve:'0x8ce1AA5a6A9509151307d9a61a5C35c9feF85E6c',
+  tierRouter:    '0xD78eD884DE003524c0DeB35b1063c0F86350bf5B',
+  matrixKeeper:  '0x9Ade59F964619Cb9DE7156B383167A2071a26B70',
+  v8Governance:  '0x0a833d313E8B3e395905A6a422b447506474Ff30',
+  communityWallet:'0xC786dbA720C04784d66F38AcCE6b2143e6C78bfF',
   liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-  directSale:    '0x5C12B34b9Ce1eea4CbBE6000a4bb52cD2CaF5c50',
-  couponRegistry:'0x21063617Bd76B30c884EC3554186096300FBe9C1',
+  directSale:    '0x926D5C79dD06b24a074C15d8aFFfA0da47e786c2',
+  couponRegistry:'0xa27A4AE4c2d0112c5099b48bdBa402311E5E180D',
   T1: {
-    pm:   '0x6BEbf2e8ef90fBBf0a0e5f4bb5EF9976b8ceDE2c',
-    matA: '0x387DD94755F04aC16339882E4639604F755586af',
-    matB: '0xb1f621C11a05cc55973018131f942535bF66637E',
+    pm:   '0x1798Bf5146af86654A71F72434b70FB017349C6e',
+    matA: '0x7154485C8b630d13902CdAeAe80429734f0ac79c',
+    matB: '0xB83e7F9fAC5757F3A2e6b6d8385796b64640F170',
   },
   T2: {
-    pm:   '0xf57B6744a694040683A3E22c507e0144d9F696c6',
-    matA: '0x37A99CEB55507ecEeE140EAcD85fae29D3644a49',
-    matB: '0x72e675B747c7317dC20B9E9269765Fee79647Ee2',
+    pm:   '0xb8ce03da75448255a75E7b9Ef279aC6b34a2C267',
+    matA: '0x1E0A87BC3800Bf01b093B75eff6DF49d4acA8614',
+    matB: '0x6bC1228F9799D9F2914E65e1A83785657f9fD66d',
   },
   T3: {
-    pm:   '0xfca8FDee375c44A2c995D5a111680587b3705631',
-    matA: '0xb8DdF0Bf85D0798946fe9b1E44D426AF72B462a7',
-    matB: '0x86d08b22A2e8Ee8EdcB7D172237635c14DbFE531',
+    pm:   '0x6D7558Ecdd2E2Bb3bA3e933317F52b717883DA99',
+    matA: '0xeA20A88Fb9bc2F571A3E37c6bb07e9ea63D04a1f',
+    matB: '0xdA999c834fDD9F4c4A331541975480E2D2545CEc',
   },
   T4: {
-    pm:   '0x32B7354B4460145eC7ae32B1D376E69E157A7597',
-    matA: '0x49f0ee6cE87065BFA798F18cB7E8f154F8AdC031',
-    matB: '0xb212F2445b79dC260b4E97DB07Fa00366876fed2',
+    pm:   '0x6eee163A0704597D0818B35421bA44932d27a06d',
+    matA: '0xD1F95e2d06238cC83109BB4714CA2395a5AEc560',
+    matB: '0x4c186A3218D391F1cFd94Fc6Ab4F89DD374AC63e',
   },
   T5: {
-    pm:   '0x67b32Ce4560b87aF387FDa333823Cc4B6c1789Da',
-    matA: '0x092Aea0D4C40205F9Bbf33f3D0b467cC1361C825',
-    matB: '0x5d0D411eEE38030Fd7a68BFcCd731A6B3d228368',
+    pm:   '0x89E97d95B12c6D74fF145DA64Fc5D4a83398864f',
+    matA: '0xDa060279d184a9385D5ff3587275B0bA1c0Da11E',
+    matB: '0x74201dd799D852cBd341F3054BA794397C73184e',
   },
   T6: {
-    pm:   '0x89BE85CedF44c1963B9C75Bb9d9863240D71b078',
-    matA: '0xb4E35365F0929b5BB390caf52533a8bFE5cA743E',
-    matB: '0x3A62286973CD07b0D4D7Eb80f3D2BD20824416ab',
+    pm:   '0xbE2D2493df444274166964CB1BE999C28f945554',
+    matA: '0x7F9CeF0416d12ad0FD73BDC6753894F41f2FD984',
+    matB: '0x9e79f2B9245f5407dBd7A013F472D89f733043F6',
   },
   T7: {
-    pm:   '0x9509D95296783b0DaB1854f431F89c5BBb72f810',
-    matA: '0x533B547fa585f2dEEBf34D675751Ee974D1184B3',
-    matB: '0x9518FF53b1Bbc13ad7ce516A6a015692f28dfb8a',
+    pm:   '0xf32fBB0323f0e51FCe4d3e55Ec3DBC4D996ea578',
+    matA: '0xD6f4CBdFE3AeC1D8ba0e36731D1B8F39863a09bf',
+    matB: '0x20C6CF29621E412C3c049B859CCA2c34267b6EB2',
   },
   T8: {
-    pm:   '0x7B4d72659Eb7e881E1BB13a80347Db040b62f0fb',
-    matA: '0x7Cbe7CFE2e982a0Ad1188b9ce40cE5f6a1CE6b61',
-    matB: '0x2dEeE6F0D80922EB131b985b8763a36c70A96f0D',
+    pm:   '0x64FDca80Cbb02700E5d28A5359f8556F856c5931',
+    matA: '0x18dA1AeE871f05dbBF1D3Cd7Fa0a9B72a619B4bF',
+    matB: '0x98A6F1B1E319834d4470bee5CEC3cf5d9C13b054',
   },
   T9: {
-    pm:   '0x220A3446345563Bf4C7c9811E83dcdBecC8d8493',
-    matA: '0x23De6A78f0a703C662c31DceaACC52E371A29d76',
-    matB: '0xDBC1B185670e096948f8ba4a4EAcb08A64C92c6D',
+    pm:   '0x69eF800706c15f6F1D292F318446AF8263d586D8',
+    matA: '0xa26235338a5cfc63453A9fD2a4A0A4F92440a8Ad',
+    matB: '0x5c48325befdAbb7abFbe71C216E835daA72c15e7',
   },
   T10: {
-    pm:   '0x03f3E91De443d1726B4eaDfD439b0baE2F73e6BD',
-    matA: '0x3F2Accd8C10D985df94a6167e5a2b27e1e249277',
-    matB: '0x3bd9115Ae9a2Aa4d03Fbd7E2b509A65dDC96EbE1',
+    pm:   '0x7A80F184aE3bCEA953B5575175132bC072aE0Af3',
+    matA: '0xfb31dd20B56c37724Cc9Db87da6dE93588d94357',
+    matB: '0x929B24047F8570F1C5cf19e48DF72eF666492A33',
   },
 };
 
@@ -2311,7 +2242,7 @@ const T10_FEE = 10_000_000_000n;   // $10,000 USDC
 
 // ── ABIs ─────────────────────────────────────────────────────────────
 const TIER_ROUTER_ABI = [
-  // V8.50 (Jacob, bug d212b87): _walletFold pulls the member's outstanding
+  // V8.48 (Jacob, bug d212b87): _walletFold pulls the member's outstanding
   // rescue loan via safeTransferFrom — without these error defs an allowance
   // shortfall decodes to reason=null and the member sees the generic red X.
   'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
@@ -2339,17 +2270,17 @@ const TIER_ROUTER_ABI = [
   'function setMemberOptions(bool disableUpgrade, bool enableReentry, bool enableDouble) external',
   'function tierVelocityGreen(uint8 tierIdx) external view returns (bool)',
   'function globalJoinedCount() external view returns (uint256)',
-  'function registerWithCoupon(address referrer, bytes32 couponCodeHash) external', // V8.50
+  'function registerWithCoupon(address referrer, bytes32 couponCodeHash) external', // V8.48
   'function bulkUpgrade(uint8 targetTierIndex) external',                           // V8.35
   'function tierFirstEntries(uint8 tierNum) external view returns (uint256)',        // V8.35
   'function tierGateThreshold(uint8 tierNum) external view returns (uint256)',       // V8.35
   'function isWhaleGateActiveForTier(uint8 tierNum) external view returns (bool)',   // V8.35 — authoritative (admin override included)
   'function reservedFor(address member) external view returns (uint256)',            // authoritative automation reserve
-  'function reservedHeldFor(address member) external view returns (uint256)',        // V8.50 item 2 — held-so-far; feature-detected (absent on V8.50)
-  'function bulkWithdraw(uint256 amount) external',                                  // V8.50 item 3 — one-signature PARTIAL; feature-detected (absent on V8.50)
+  'function reservedHeldFor(address member) external view returns (uint256)',        // V8.48 item 2 — held-so-far; feature-detected (absent on V8.48)
+  'function bulkWithdraw(uint256 amount) external',                                  // V8.48 item 3 — one-signature PARTIAL; feature-detected (absent on V8.48)
   'event BulkUpgrade(address indexed member, uint8 fromTier, uint8 toTier, uint256 totalFee)', // V8.35
-  'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.50
-  // ── V8.50 (2026-07-27): custom errors MUST be declared or ethers cannot decode
+  'event MemberEnrolled(address indexed member, uint256 joinedCount)',                          // V8.48
+  // ── V8.48 (2026-07-27): custom errors MUST be declared or ethers cannot decode
   // them. V8.44/V8.45 replaced revert strings with custom errors to fit under the
   // EIP-170 size limit, but the ABI was never updated — so every revert arrived
   // with reason=null and the UI fell through to "RPC may be busy" / "Transaction
@@ -2358,7 +2289,7 @@ const TIER_ROUTER_ABI = [
   'error TRBadValue()',  // value outside the allowed menu/range
   'error TRAuth()',      // caller not authorized
   'error TRState()',     // wrong state / not registered / not deployed
-  // V8.50-B: replaced the two long Whale Gate revert STRINGS. Undeclared it
+  // V8.48-B: replaced the two long Whale Gate revert STRINGS. Undeclared it
   // would surface as "unknown custom error" — the exact trap that produced the
   // five reports the block above describes.
   'error TRGate()',      // this tier is not open to you yet
@@ -2367,7 +2298,7 @@ const TIER_ROUTER_ABI = [
   // our own code. Undeclared, these looked like an RPC fault.
   'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
   'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
-  // ── V8.50-B (verified live on-chain 2026-08-03: maxCascadeDepth()==4). The cascade
+  // ── V8.48-B (verified live on-chain 2026-08-03: maxCascadeDepth()==4). The cascade
   // depth cap: when an upgrade's rotation chain reaches the cap the contract PARKS the
   // member on purpose and emits CascadeDepthCapped — this is NOT a gas failure. The UI
   // must read it as "you've been placed; self-rescue to continue", never "try again".
@@ -2390,21 +2321,14 @@ const COUPON_REGISTRY_ABI = [
 ];
 
 const MATRIX_ABI = [
-  // V8.50 G.8 (2026-08-25): widened to the full 10-field struct. FigureEightMatrixV8
-  // returns crossingReserve as field 10 (a V8.50 field), so this declaration has been one
-  // field short for many versions. It DECODED CORRECTLY the whole time — measured with
-  // ethers v6: the first nine fields are identical in order, so the short ABI simply
-  // truncated the last word. No site read crossingReserve off getMember (every one uses
-  // crossingReserveOf below), so nothing changes behaviourally; it is widened so the audit
-  // reads clean and the next reader is not trained to skim its rows.
-  'function getMember(address) external view returns (tuple(uint256 id, address referrer, uint256 joinedAt, uint256 withdrawable, uint256 totalEarned, uint256 totalWithdrawn, uint256 cyclesCompleted, bool isInMatrix, bool hasEverJoined, uint256 crossingReserve))',
+  'function getMember(address) external view returns (tuple(uint256 id, address referrer, uint256 joinedAt, uint256 withdrawable, uint256 totalEarned, uint256 totalWithdrawn, uint256 cyclesCompleted, bool isInMatrix, bool hasEverJoined))',
   // V8.44 (G3). The number a member can ACTUALLY take right now: it adds
   // un-settled pool accrual and subtracts the crossing and automation locks
   // (FigureEightMatrixV8:616). `withdrawable` on getMember above is the raw
   // ledger figure and is NOT the same thing — showing that one is how a member
   // gets quoted a total no single transaction can satisfy.
   'function freeWithdrawable(address) external view returns (uint256)',
-  // V8.50 withdrawCore mirror (_claimableAll) needs the raw pieces: un-settled
+  // V8.48 withdrawCore mirror (_claimableAll) needs the raw pieces: un-settled
   // pool accrual is added to the balance the moment a withdrawal settles it.
   'function pendingPoolOf(address) external view returns (uint256)',
   // The ONLY proof that a slot was actually reclaimed. Emitted by the keeper
@@ -2432,8 +2356,8 @@ const MATRIX_ABI = [
   'function isParked(address) external view returns (bool)',
   'function getParkedCount() external view returns (uint256)',
   'function rescueDebtOf(address) external view returns (uint256)',
-  'function crossingReserveOf(address) external view returns (uint256)',  // V8.50
-  // ── V8.50 (2026-07-27): see the note on TIER_ROUTER_ABI. Self-rescue reverts
+  'function crossingReserveOf(address) external view returns (uint256)',  // V8.48
+  // ── V8.48 (2026-07-27): see the note on TIER_ROUTER_ABI. Self-rescue reverts
   // were reaching members as "Transaction failed on-chain — hard-refresh and try
   // again" because these four were undeclared and ethers returned reason=null.
   'error F8V8_ZeroAddress()',
@@ -2442,7 +2366,7 @@ const MATRIX_ABI = [
   'error F8V8_BadConfig()',
   'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
   'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
-  // ── V8.50 (verified live on-chain 2026-08-03: MatrixLogicLib bytecode-matches the
+  // ── V8.48 (verified live on-chain 2026-08-03: MatrixLogicLib bytecode-matches the
   // build). item 7 rescue-repay settles debt on withdraw and emits RescueDebtRepaid;
   // CycleOutFailed is the item-C signal that replaced the SILENT graduation (the empty
   // catch), so "graduated with no crossing" is now observable; MemberEvicted logs the
@@ -2460,7 +2384,7 @@ const CNOVA_ABI = [
   'function currentEpochNumber() external view returns (uint8)',
   'function epochRewards(uint256) external view returns (uint256)',
   'function TOTAL_EPOCHS() external view returns (uint8)',
-  // V8.50 item 42 — distance to the next halving. All three thresholds are
+  // V8.48 item 42 — distance to the next halving. All three thresholds are
   // live on-chain; epochLeadingTrigger() decides which one is closest, so the
   // page cannot disagree with the contract about what will fire first.
   'function epochMembersRemaining() external view returns (uint256)',
@@ -2490,33 +2414,6 @@ const CNOVA_ABI = [
 
 const SF_ABI = [
   'function totalBalance() external view returns (uint256)',
-  // V8.50 item 46 / V8.49 item 1b. loanHeadroom is "how much MORE may this member borrow
-  // before the insolvency floor refuses them" — StabilityFund.sol says outright: "THE
-  // FRONTEND SHOULD SHOW THIS, not just a yes/no — a member told only 'no loan' cannot
-  // act on it". These are what let a parked member see whether the fund can actually
-  // cover their gap, instead of finding out by being evicted.
-  // ⛔ loanHeadroom IS V8.49+ (commit 40d7843) AND LIVE IS V8.50 — it reverts there with
-  //    "missing revert data", which looks like a network fault and is not one. The pieces
-  //    to derive it DO exist on V8.50, so the code falls back to
-  //    fee * insolvencyFloorBps / 10000 - memberDebt, which is loanHeadroom's own formula.
-  //    Without this fallback every badge on the live chain reads CHECKING and the whole
-  //    feature is inert while looking healthy.
-  'function loanHeadroom(address member, uint8 tierIdx) external view returns (uint256)',
-  'function loanEligible(address member, uint8 tierIdx) external view returns (bool)',
-  'function insolvencyFloorBps() external view returns (uint256)',
-  'function memberDebt(address member) external view returns (uint256)',
-  'function tierEntryFees(uint256 tierIdx) external view returns (uint256)',
-];
-
-// The eviction clock lives on the keeper, not the matrix. 7 days as shipped
-// (MatrixKeeper.sol:372); READ IT, never hardcode — it is DAO-tunable (PARAM 62) and a
-// stale copy here would quote members a deadline that is not the one enforced.
-// ⛔ TWO NAMES, AND THE LIVE CHAIN USES THE OLDER ONE. `evictionGracePeriod` arrived in
-//    V8.49 item 1 (commit b14eba7); V8.50 — what members are on — exposes
-//    `extendedIdleTimeout`, same 604_800 seconds. Ask for both.
-const KEEPER_EVICT_ABI = [
-  'function evictionGracePeriod() external view returns (uint256)',   // V8.49+
-  'function extendedIdleTimeout() external view returns (uint256)',   // V8.50 and earlier
 ];
 
 const USDC_ABI = [
@@ -2555,10 +2452,11 @@ const CW_ABI = [
   'function totalEnrolled() external view returns (uint256)',
   'function lastDistributionTime() external view returns (uint256)',
   'function nextDistributionTime() external view returns (uint256)',
-  // V8.50 original — REPLACED by nextDistributionTime() in V8.50, but still the
+  // V8.48 original — REPLACED by nextDistributionTime() in V8.48, but still the
   // getter that exists on the DEPLOYED contract (probed 2026-08-12,
   // scripts/probe_v847_getters.js). Kept for the feature-detect fallback below;
-  // remove it together with that fallback once V8.50 is live.
+  // remove it together with that fallback once V8.48 is live.
+  'function distributeInterval() external view returns (uint256)',
   'function distributeReady() external view returns (bool)',
   'event MemberEnrolled(address indexed member, uint8 cohort, uint256 enrollmentNumber)',
 ];
@@ -2611,7 +2509,7 @@ function setText(id, val) {
 // data (e.g. BFS Position or Direct Referrals flipping between page loads with no
 // indication anything went wrong). Returns { value, ok } so callers can render an
 // honest "unknown" state instead of a confident-looking but possibly-wrong default.
-// V8.50 item 42 — show the DISTANCE to the next halving, not only the era name.
+// V8.48 item 42 — show the DISTANCE to the next halving, not only the era name.
 //
 // The dashboard has always shown "Epoch 4 — Aurora Zenith" and the current reward,
 // but never how close the next halving is — so a member could not tell whether their
@@ -2673,7 +2571,7 @@ async function retryRead(fn, attempts = 3, delayMs = 400) {
 
 // Small "read failed" badge with a tooltip explaining why — used wherever a retried
 // read still comes back unknown, so the UI never silently shows a wrong number.
-// ── V8.50 item 39: how fast is this matrix actually rotating? ────────────────
+// ── V8.48 item 39: how fast is this matrix actually rotating? ────────────────
 //
 // "87 rotations until you cycle" is only meaningful with a rate attached — 87 at
 // 62/day is a day and a half; 87 in a matrix that has stopped is forever, and that
@@ -2735,12 +2633,12 @@ function unknownBadge(tooltip) {
 // getMemberInfo result. Called EARLY from the cached read so the panel populates on first
 // paint instead of sitting blank ("—") until the main read lands (the "needs a refresh to
 // populate" issue), and again authoritatively when the main read resolves.
-// V8.50 fix (Kira 2026-08-06): post-action dashboard refresh. The old single
+// V8.48 fix (Kira 2026-08-06): post-action dashboard refresh. The old single
 // setTimeout(loadDashboardData, 2s) died silently when the RPC pool lagged the
 // tx block, leaving "Refreshing your dashboard..." hanging until a manual
 // reload. Stagger three attempts; one failure never stops the next.
 function _staggeredDashRefresh() {
-  // V8.50 item 40: Clear-all drives doSelfRescue/doCopayRescue in sequence and each of
+  // V8.48 item 40: Clear-all drives doSelfRescue/doCopayRescue in sequence and each of
   // those calls this on success. Three timers per position would repaint the parked
   // list mid-run — rows shuffling under the member while their wallet is still asking
   // them to sign. The sequencer sets this flag and refreshes ONCE at the end.
@@ -2750,7 +2648,7 @@ function _staggeredDashRefresh() {
   }, ms));
 }
 
-// V8.50 deploy day 2026-08-13 — generalised from _staggeredDashRefresh after an audit
+// V8.48 deploy day 2026-08-13 — generalised from _staggeredDashRefresh after an audit
 // of EVERY transaction-sending handler in this file. The defect it fixes: a handler
 // sends a tx, waits, re-reads ONCE, and the RPC pool has not yet indexed the tx block —
 // so the member is shown pre-transaction numbers and clicks the button again. The
@@ -2771,7 +2669,7 @@ function _paintMemberToggles(info) {
     const chk = document.getElementById(chkId); if (chk) chk.checked = Boolean(on);
     const lbl = document.getElementById(lblId); if (lbl) lbl.textContent = on ? 'Enabled' : 'Disabled';
   };
-  // V8.50 (bug: "toggles need two clicks"): right after a member's own toggle tx,
+  // V8.48 (bug: "toggles need two clicks"): right after a member's own toggle tx,
   // a read served by a pool node one block behind repaints the OLD state — the tick
   // reverts, the member clicks again and pays gas for a no-op. After a confirmed
   // toggle tx we PIN the locally-known state for 45s and ignore chain reads for
@@ -2877,7 +2775,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     readProvider = _mkRpc(RPC_URL);
   }
   // Auto-navigate to tab if arriving from sub-page link
-  // V8.50 (member request): restore ANY valid tab from the hash on load — refresh
+  // V8.48 (member request): restore ANY valid tab from the hash on load — refresh
   // no longer dumps members back on Home/Dashboard (was #dashboard-only).
   (function(){
     var _t = (window.location.hash || '').replace('#', '');
@@ -3232,13 +3130,29 @@ async function loadCWData(userAddr, signer, rp) {
       cw.totalEnrolled().catch(() => 0n),
       cw.lastDistributionTime().catch(() => 0n),
     ]);
-    // SCHEDULE — nextDistributionTime() is the single source of truth (calendar
-    // model, V8.50+). The pre-V8.50 distributeInterval() fallback that lived here —
-    // G.8's one waived MISSING row — was REMOVED at the V8.50 cutover (2026-08-26)
-    // per the runbook: this app now only ever serves V8.50+ contracts. If both the
-    // read and the retry fail, null still renders "schedule unavailable", never a
-    // confident wrong date.
+    // SCHEDULE — FEATURE-DETECTED ACROSS THE V8.48 → V8.48 CUTOVER (2026-08-12).
+    // V8.48 replaces the rolling 30-day distributeInterval with a calendar date and
+    // exposes nextDistributionTime() as the contract's own answer. But the DEPLOYED
+    // V8.48 CommunityWallet has neither getter (probed on-chain 2026-08-12,
+    // scripts/probe_v847_getters.js) — it has distributeInterval(), rolling from
+    // lastDistributionTime. So: try the V8.48 getter first (this code is then already
+    // correct the moment V8.48 goes live), and fall back to the V8.48 arithmetic while
+    // V8.48 is what is on chain. Neither branch invents a value: if both reads fail,
+    // null renders as "schedule unavailable", never as a confident wrong date.
+    // KNOWN, ACCEPTED MISMATCH until the V8.48 deploy: static copy on this page says
+    // distributions happen on the 25th (the V8.48 policy), while this countdown shows
+    // the deployed contract's real rolling date (e.g. Sep 4). The chain wins — a
+    // member acting on the countdown is never early or late; the prose is the policy
+    // they will be on after the cutover.
     let nextDistTime = await cw.nextDistributionTime().catch(() => null);
+    if (nextDistTime === null) {
+      const _interval = await cw.distributeInterval().catch(() => null);   // V8.48 path
+      if (_interval !== null) {
+        // lastDist 0n = no distribution has ever run; keep the dedicated "pending
+        // first distribution" rendering below instead of fabricating 1970 + 30 days.
+        nextDistTime = BigInt(lastDist) === 0n ? 0n : BigInt(lastDist) + BigInt(_interval);
+      }
+    }
 
     // RPC failure on the cohort call — don't flash "not a founding member" incorrectly
     if (cohortVal === null) {
@@ -3278,7 +3192,7 @@ async function loadCWData(userAddr, signer, rp) {
     const isGenesis = cohortNum === 1;
     setText('cw-tranche', isGenesis ? '🌟 Genesis Member' : '🚀 Pioneer Member');
 
-    // V8.50 (owner, 2026-08-06): every member saw the generic "(#1-500)" label because
+    // V8.48 (owner, 2026-08-06): every member saw the generic "(#1-500)" label because
     // the event scan only looked ~11h back — anyone enrolled earlier fell through.
     // Deep-scan back to the deployment ONCE, then cache the number per wallet+CW
     // address (redeploy = new CW address = fresh cache) so it renders instantly after.
@@ -3321,7 +3235,7 @@ async function loadCWData(userAddr, signer, rp) {
 
     // Next distribution countdown — WHICH IS ALSO THE CLAIM DEADLINE.
     //
-    // V8.50 items 28 + calendar. CommunityWallet distributes on a CALENDAR DATE (the
+    // V8.48 items 28 + calendar. CommunityWallet distributes on a CALENDAR DATE (the
     // 25th, one per month) and stamps each share with expiresAt = the NEXT monthly date.
     // So a share expires exactly when its replacement is due, and distribute() sweeps
     // BEFORE creating the new one. There is no grace period.
@@ -3359,7 +3273,7 @@ async function loadCWData(userAddr, signer, rp) {
         // removed because NO SUCH RULE EXISTS ON THE CONTRACT (see the audit note further
         // down) — at the time, distribute() gated on a ROLLING 30-day interval and there
         // was no calendar date anywhere in the contract, so the gate was pure fiction.
-        // V8.50 makes the 25th REAL, and nextDistributionTime() is the contract's own
+        // V8.48 makes the 25th REAL, and nextDistributionTime() is the contract's own
         // answer. Still state the date and keep the count as supporting detail: a bare
         // countdown reading like a date is how the original misunderstanding survived.
         const nextDate = new Date(nextMs).toLocaleDateString(undefined,
@@ -3492,7 +3406,7 @@ async function loadHomeStats() {
       // frontend copy of that logic goes stale the moment the keeper moves it.
       // allPairsStatus()'s `active[]` is the CONTRACT's own flag for the routing
       // pair (V8.40) — one source of truth, and it drops N pairs(i) calls.
-      // V8.50 item 30: routeEntryThreshold is DELETED from the contract. It used to be
+      // V8.48 item 30: routeEntryThreshold is DELETED from the contract. It used to be
       // read here behind `.catch(() => 381n)` — after the cutover that call reverts, the
       // catch swallows it, and the card would quietly report a threshold of 381 that no
       // longer exists anywhere. A swallowed read impersonating a value, aimed at members.
@@ -3517,9 +3431,9 @@ async function loadHomeStats() {
       // bars from, which is the "T1.2 reads 0/127 while the community fills T1.1" bug
       // recorded below, from the other direction.
       //
-      // V8.50 item 35 fixes this at source (_findRoutingPair deleted; all three views read
-      // _findExternalPair). Pinning to 0 here is correct against BOTH the current V8.50
-      // contracts under the live threshold mitigation and V8.50, so this does not need
+      // V8.48 item 35 fixes this at source (_findRoutingPair deleted; all three views read
+      // _findExternalPair). Pinning to 0 here is correct against BOTH the current V8.48
+      // contracts under the live threshold mitigation and V8.48, so this does not need
       // revisiting at cutover. It is not a second copy of contract logic — it is the ONE
       // DOOR design law, which is now the only routing rule there is.
       let _routing = 0;
@@ -3956,7 +3870,7 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, occA
   // One row per pair, each with its own fill bar, plus a tier-wide total.
   // The cards can only ever show ONE pair, so the tier's real fill has to live
   // here or it is invisible: T6 holds 253 members and its card reads 0/127.
-  // V8.50: SEATS, and only seats. The bar used to measure entries against
+  // V8.48: SEATS, and only seats. The bar used to measure entries against
   // routeEntryThreshold — "how close is this pair to opening the next one". That
   // threshold no longer exists (item 30): expansion is driven by OCCUPANCY, and the
   // factory opens the next pair automatically well before this one fills. The question
@@ -3978,7 +3892,7 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, occA
     // entries against routeEntryThreshold, which made T1.3 draw 88% while every
     // one of its 253 seats was taken, and made the owner ask why the denominator
     // was 888 when a pair holds 254. Those are different quantities and a single
-    // bar cannot carry both. Seats fill the bar. V8.50: the entry threshold that used
+    // bar cannot carry both. Seats fill the bar. V8.48: the entry threshold that used
     // to appear in words underneath is deleted — the strip now closes on seats remaining,
     // so every number on this row measures the same thing.
     const pctPair = Math.round((a + b) / 254 * 100);
@@ -4042,7 +3956,7 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, occA
       '<span style="color:var(--green);font-size:11px;min-width:70px;text-align:right">' + pctTier + '% seated</span>' +
     '</div>';
 
-  // V8.50: seats remaining in the pair that is taking new entries.
+  // V8.48: seats remaining in the pair that is taking new entries.
   //
   // This replaced a paragraph about entry thresholds — "T1.2 is already built and starts
   // receiving at N entries". Every version of that sentence has been wrong at least once:
@@ -4095,7 +4009,7 @@ async function loadTiersStats() {
     );
     const statuses = await Promise.all(statusCalls);
 
-    // V8.50 item 30: the two per-tier threshold reads that used to live here are gone
+    // V8.48 item 30: the two per-tier threshold reads that used to live here are gone
     // with the knobs themselves. That also removes 20 RPC calls per page load on a public
     // endpoint we are already rate-limited on.
 
@@ -4530,12 +4444,12 @@ async function validateCouponCode() {
       if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
       _resetApproveBtn(); return;
     }
-    // V8.50: use per-coupon amount (couponData.amount) — falls back to global couponAmount()
+    // V8.48: use per-coupon amount (couponData.amount) — falls back to global couponAmount()
     // The global couponAmount() is the DEFAULT for new coupons; individual coupons may differ.
     const perCouponAmt = couponData.amount ?? couponData[1] ?? couponAmt;
     const couponUsdc   = Number(perCouponAmt) / 1e6;
     const youPay       = Math.max(0, Number(T1_FEE) / 1e6 - couponUsdc);
-    // V8.50: lock referrer = coupon issuer so it cannot be changed
+    // V8.48: lock referrer = coupon issuer so it cannot be changed
     const issuer = couponData.issuer || couponData[0] || ethers.ZeroAddress;
     window._activeCoupon = { code, codeHash, couponAmt: perCouponAmt, youPay, issuer };
     if (refInput && issuer && issuer !== ethers.ZeroAddress) {
@@ -4704,7 +4618,7 @@ async function doRegister() {
   try {
     const refInput = document.getElementById('input-referrer');
     const c = window._activeCoupon;
-    // V8.50: when a coupon is active, always use its issuer as referrer —
+    // V8.48: when a coupon is active, always use its issuer as referrer —
     // the contract enforces this on-chain too, but belt-and-suspenders here.
     const referrer = c && c.issuer && c.issuer !== ethers.ZeroAddress
       ? c.issuer
@@ -4759,7 +4673,7 @@ async function doRegister() {
 
     let tx;
     if (c) {
-      // Coupon path: V8.50 — call registerWithCoupon() on TierRouter so globalJoined is set
+      // Coupon path: V8.48 — call registerWithCoupon() on TierRouter so globalJoined is set
       const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, signer);
       tx = await tr.registerWithCoupon(referrer, c.codeHash, { gasLimit: _gasLimit });
     } else {
@@ -4780,7 +4694,7 @@ async function doRegister() {
     setStatus('reg-status', '🎉 Welcome to CryptoNova! Your journey begins.', 'ok');
     btn.textContent = '✅ Joined!';
     toast('Welcome to CryptoNova V8!', 'success');
-    // V8.50: immediately flip UI to dashboard instead of waiting for full reload
+    // V8.48: immediately flip UI to dashboard instead of waiting for full reload
     try { await loadUserData(); showTab('dashboard'); } catch(_) {}
     setTimeout(() => { window.location.reload(); }, 5000);
   } catch(e) {
@@ -5063,15 +4977,15 @@ async function _buildAllMatrixObjects(rp) {
         const [matAs, matBs] = await new ethers.Contract(ADDRS[t].pm, PM_ABI, rp).allPairsStatus();
         for (let pi = 0; pi < matAs.length; pi++) {
           const _pairSuffix = matAs.length > 1 ? `.${pi + 1}` : '';
-          result.push({ addr: matAs[pi], label: `T${tNum}${_pairSuffix} Matrix A`, tierIdx: i });
-          result.push({ addr: matBs[pi], label: `T${tNum}${_pairSuffix} Matrix B`, tierIdx: i });
+          result.push({ addr: matAs[pi], label: `T${tNum}${_pairSuffix} Matrix A` });
+          result.push({ addr: matBs[pi], label: `T${tNum}${_pairSuffix} Matrix B` });
         }
         added = true;
       } catch(e) {}
     }
     if (!added) {
-      result.push({ addr: ADDRS[t].matA, label: `T${tNum} Matrix A`, tierIdx: i });
-      result.push({ addr: ADDRS[t].matB, label: `T${tNum} Matrix B`, tierIdx: i });
+      result.push({ addr: ADDRS[t].matA, label: `T${tNum} Matrix A` });
+      result.push({ addr: ADDRS[t].matB, label: `T${tNum} Matrix B` });
     }
   }
   return result;
@@ -5301,7 +5215,7 @@ async function loadDashboardData() {
               pos.bfsUnknown = !ok;
             })
           );
-          // V8.50 item 39: seat size + rotation count, so the dashboard can answer
+          // V8.48 item 39: seat size + rotation count, so the dashboard can answer
           // "why haven't I cycled?" with the mechanism instead of leaving the member to
           // guess from their directs — which do not affect cycle rate at all.
           followUps.push(
@@ -5313,7 +5227,7 @@ async function loadDashboardData() {
               pos.rotUnknown = !ok;   // NOT zero — a failed read is not "never rotated"
             })
           );
-          // V8.50: fetch crossing reserve ($5 locked per active member toward next crossing)
+          // V8.48: fetch crossing reserve ($5 locked per active member toward next crossing)
           followUps.push(
             mc.crossingReserveOf(userAddr).catch(() => 0n).then(res => {
               pos.crossingReserve = BigInt(res);
@@ -5325,7 +5239,7 @@ async function loadDashboardData() {
             if (BigInt(parkedAt) > 0n) {
               const fee = await mc.ENTRY_FEE().catch(()=>0n);
               const w   = BigInt(member.withdrawable);
-              // V8.50: crossing reserve is consumed first toward the entry fee.
+              // V8.48: crossing reserve is consumed first toward the entry fee.
               // Shortfall = fee − (crossingReserve + withdrawable), not fee − withdrawable.
               const res = await mc.crossingReserveOf(userAddr).catch(()=>0n);
               const effectiveHave = w + BigInt(res);
@@ -5343,10 +5257,6 @@ async function loadDashboardData() {
                 crossingReserve: BigInt(res),
                 fee: BigInt(fee),
                 shortfall: BigInt(fee) > effectiveHave ? BigInt(fee) - effectiveHave : 0n,
-                // parkedAt was already read above and thrown away. The eviction clock
-                // starts here, so a member cannot be told how long they have without it.
-                parkedAt: BigInt(parkedAt),
-                tierIdx: (typeof m.tierIdx === 'number' ? m.tierIdx : 0),
               });
             } else if (!parkedInfo && m.label.includes('Matrix A') && member.hasEverJoined) {
               // ONLY A MEMBER WHO ACTUALLY HELD A SLOT HERE CAN HAVE LOST ONE.
@@ -5569,11 +5479,11 @@ async function loadDashboardData() {
           const bfsStr = p.bfsUnknown
             ? unknownBadge('Could not read matrix position — try refreshing.')
             : (p.bfs > 0n ? '#' + p.bfs.toString() : '—');
-          // V8.50: show crossing reserve sub-row — $5 locked per active position
+          // V8.48: show crossing reserve sub-row — $5 locked per active position
           const resRow = p.crossingReserve > 0n
             ? `<div class="info-row" style="padding-top:2px;padding-bottom:6px"><span class="info-key" style="color:var(--text3);font-size:12px;padding-left:14px">↳ Crossing Reserve</span><span class="info-val" style="color:#a855f7;font-size:12px" title="Locked toward next matrix crossing — released as earnings when the matrix cycles">${fmt6(p.crossingReserve)}</span></div>`
             : '';
-          // V8.50 item 39 — the line two members asked for independently (Sherwyn
+          // V8.48 item 39 — the line two members asked for independently (Sherwyn
           // 2026-08-08, CryptoJan22 2026-08-10). Both looked at their DIRECTS to explain
           // a low cycle count. Directs do not affect cycle rate at all: _cycleOutRoot
           // moves every member one seat toward position 1 on each rotation, so what
@@ -5689,7 +5599,7 @@ async function loadDashboardData() {
       // would accept manualUpgrade(8), and the dashboard hid the button anyway.
       // The only control left was Bulk Upgrade, whose estimate exceeds the RPC gas
       // ceiling, so the member met "gas limit too high" for an upgrade that had a
-      // perfectly good cheap path. Same shape as the V8.50 contract bug the
+      // perfectly good cheap path. Same shape as the V8.48 contract bug the
       // comment at TierRouter:851 describes, mirrored into the frontend: two
       // buttons, two different eligibility rules, one of them wrong.
       //
@@ -5719,7 +5629,7 @@ async function loadDashboardData() {
         // generic "Next Tier" label. Reuse the complete, already-correct TIER_NAMES array
         // (covers T1-T10) instead of maintaining a second list that can drift out of sync.
         const nextIdx = highestTier;
-        // V8.50 parity audit D1 (2026-08-13): the old `.catch(() => 25_000_000n)`
+        // V8.48 parity audit D1 (2026-08-13): the old `.catch(() => 25_000_000n)`
         // fell back to T2's $25 for ANY next tier — a dropped read at T6 rendered
         // and APPROVED $25 against a $500 fee (guaranteed revert). 6ced4f1 class:
         // retry, then be honestly unknown; approveUSDCForUpgrade refuses on null.
@@ -5819,7 +5729,7 @@ async function loadDashboardData() {
           });
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
-        // V8.50: show crossing reserve row if non-zero (reduces shortfall)
+        // V8.48: show crossing reserve row if non-zero (reduces shortfall)
         const _rescueReserveRow = document.getElementById('rescue-reserve-row');
         if (parkedInfo.crossingReserve > 0n && _rescueReserveRow) {
           setText('rescue-reserve', fmt6(parkedInfo.crossingReserve));
@@ -5828,7 +5738,7 @@ async function loadDashboardData() {
         setText('rescue-fee',          fmt6(parkedInfo.fee));
         setText('rescue-shortfall',    fmt6(parkedInfo.shortfall));
 
-        // V8.50 item 15 (2026-08-13): the old block invented its own co-pay math
+        // V8.48 item 15 (2026-08-13): the old block invented its own co-pay math
         // (`sfShare = withdrawable / 2`, shortfall ignoring the crossing reserve)
         // and could show a nonzero "You pay" — but coPayRescue NEVER pulls from
         // the wallet: the SF lends the ENTIRE shortfall (reserve + earnings
@@ -5838,7 +5748,7 @@ async function loadDashboardData() {
         // Self rescue shortfall tracking
         window._selfRescueShortfall = parkedInfo.shortfall;
 
-        // V8.50 member options: Copay Rescue — instant, the SF lends only the gap.
+        // V8.48 member options: Copay Rescue — instant, the SF lends only the gap.
         // Not awaited: reads SF capacity and must not hold up the dashboard paint.
         _paintCopayOption(parkedInfo, rp).catch(e => console.warn('[copay-opt]', e.message));
 
@@ -5863,27 +5773,7 @@ async function loadDashboardData() {
         const _selfApproveBtn = document.getElementById('btn-self-approve');
         const _selfRescueBtn  = document.getElementById('btn-self-rescue');
         const _selfShortfallEl = document.getElementById('self-shortfall-display');
-        // THE BUTTON MUST NAME THE FIGURE THE WALLET WILL ASK FOR.
-        // approveSelfRescue now approves the ENTRY FEE (the maximum _selfRescue can
-        // ever pull) instead of the exact shortfall, so a stale quote can no longer
-        // strand a member — see the long note there. This label used to print the
-        // SHORTFALL, which would now disagree with the amount in the MetaMask popup.
-        // The member still sees what they actually owe in the "Shortfall" row above,
-        // and the button's own sub-line below says only that much is taken.
-        const _approveShown = (parkedInfo.fee || 0n) > parkedInfo.shortfall
-          ? parkedInfo.fee : parkedInfo.shortfall;
-        if (_selfShortfallEl) _selfShortfallEl.textContent = fmt6(_approveShown);
-        const _approveNoteEl = document.getElementById('self-approve-note');
-        if (_approveNoteEl) {
-          if (_approveShown > parkedInfo.shortfall && parkedInfo.shortfall > 0n) {
-            _approveNoteEl.textContent =
-              `Approving ${fmt6(_approveShown)} — only ${fmt6(parkedInfo.shortfall)} is taken. ` +
-              `The rest stays approved and unspent.`;
-            _approveNoteEl.style.display = '';
-          } else {
-            _approveNoteEl.style.display = 'none';
-          }
-        }
+        if (_selfShortfallEl) _selfShortfallEl.textContent = fmt6(parkedInfo.shortfall);
         if (parkedInfo.shortfall > 0n) {
           // DIM ON THE APPROVAL, NOT ON THE SHORTFALL.
           //
@@ -5910,32 +5800,10 @@ async function loadDashboardData() {
           // than a hidden rescue button.
           const _needsApproval = _alwNow === null ? true : _alwNow < parkedInfo.shortfall;
           if (_selfApproveBtn) _selfApproveBtn.style.display = _needsApproval ? '' : 'none';
-          // ⛔ AND UN-HIDE IT, NOT JUST UN-DIM IT. The multi-position list sets
-          // `display:none` on this button outright (the loop after its `box.innerHTML`)
-          // because it cannot say WHICH position it would act on. NOTHING EVER PUT IT
-          // BACK: every other site touching this button sets opacity/disabled/textContent
-          // only. So a member who cleared two positions down to one saw the status line
-          // "Approved - now click Self Rescue" with no button to click, and neither the
-          // 30s poll nor the in-app Refresh balance could bring it back - only a full
-          // page reload, which rebuilds the DOM from source. Found in the owner's live
-          // QA 2026-08-24, wallet 0x28FC...0887, after the T1 rescue left T3 alone.
-          // This poll is the counterpart to that hide, so it owns `display` for the
-          // rescue button exactly as it already owns it for the approve button above.
-          // ⚠ ONLY WHEN THIS PANEL IS THE ONE IN CHARGE. With 2+ parked positions the
-          // card list renders instead and hides these buttons on purpose — they would
-          // act on whichever position the picker chose last, which is ambiguous once a
-          // list is on screen. Un-hiding unconditionally put a full-width Self Rescue
-          // bar UNDERNEATH the card list (owner's QA, 2026-08-24, 0x28FC…0887: "a
-          // bigger banner at the bottom of the page"). renderParkedList is not awaited,
-          // so which one wins is a race — this gate settles it by count instead.
-          if (_selfRescueBtn && (window._parkedAll || []).length < 2) _selfRescueBtn.style.display = '';
           if (_selfRescueBtn)  _selfRescueBtn.style.opacity  = _needsApproval ? '0.5' : '1';
-          // The note belongs to the approve button — it must never outlive it on screen.
-          if (_approveNoteEl && !_needsApproval) _approveNoteEl.style.display = 'none';
         } else {
           if (_selfApproveBtn) _selfApproveBtn.style.display = 'none';
-          if (_approveNoteEl)  _approveNoteEl.style.display  = 'none';
-          if (_selfRescueBtn)  { if ((window._parkedAll || []).length < 2) _selfRescueBtn.style.display = ''; _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
+          if (_selfRescueBtn)  { _selfRescueBtn.style.opacity = '1'; _selfRescueBtn.textContent = '🔑 Self Rescue (Free — Earnings Cover It)'; }
         }
 
         // ── SURPLUS WARNING (interim guard for a CONTRACT bug, found 2026-08-07)
@@ -5945,7 +5813,7 @@ async function loadDashboardData() {
         // erased from the member's ledger, is not forwarded, and is stranded in the
         // matrix contract — the member simply loses it. Worst of all, the button
         // above reads "Free — Earnings Cover It" precisely when a surplus exists,
-        // which invites the loss. V8.50 credits the excess back; until it ships,
+        // which invites the loss. V8.48 credits the excess back; until it ships,
         // say so plainly so nobody clicks blind.
         try {
           const _rsv  = parkedInfo.crossingReserve || 0n;
@@ -6034,7 +5902,7 @@ async function loadDashboardData() {
       const _infoRead = await retryRead(() => tr.getMemberInfo(userAddr));
       if (!_infoRead.ok) throw new Error('getMemberInfo unavailable');
       const info = _infoRead.value;
-      // V8.50 two-click bug: ALL toggle painting goes through _paintMemberToggles,
+      // V8.48 two-click bug: ALL toggle painting goes through _paintMemberToggles,
       // which honors the post-tx pin — this block used to set the checkboxes (and
       // localStorage) directly, so a lagging pool read repainted stale state right
       // after a member's toggle tx and forced a second (paid) click.
@@ -6055,14 +5923,14 @@ async function loadDashboardData() {
       window._protocolReserved = 0n; // default: reset
 
       if (autoUpgrade || reentry) {
-        // V8.50 parity audit D1 (2026-08-13): were `.catch(() => 10_000_000n)` /
+        // V8.48 parity audit D1 (2026-08-13): were `.catch(() => 10_000_000n)` /
         // `.catch(() => 25_000_000n)` — T1/T2 fees rendered as fact for ANY tier
         // on a dropped read. Same policy as the 2026-08-12 breakdown fix: retry,
         // and if a needed fee is still unknown, show the on-chain TOTAL with an
         // honest "breakdown unverifiable" line instead of an invented itemization.
         const _curFeeRes = await retryRead(() => tr.tierEntryFees(Math.max(highestTier - 1, 0)));
         const curFeeRaw  = _curFeeRes.ok ? _curFeeRes.value : null;
-        // V8.50 fix (Sherwyn+Kira 2026-08-06): read the next-tier fee directly.
+        // V8.48 fix (Sherwyn+Kira 2026-08-06): read the next-tier fee directly.
         // window._dashUpgradeFee is only set when the upgrade panel renders, so a
         // freshly-upgraded member's reserve breakdown fell back to a hardcoded $25.
         let nextFeeRaw = 0n;
@@ -6107,7 +5975,7 @@ async function loadDashboardData() {
         } catch(_) {}
 
         if (reserved > 0n) {
-          // V8.50: freeWithdrawable() already nets the reserve on the highest
+          // V8.48: freeWithdrawable() already nets the reserve on the highest
           // tier — subtracting it again here is what turned $9.50 into $0.00.
           // This is the fast interim paint; the withdrawCore mirror just below
           // repaints with the exact figure.
@@ -6148,7 +6016,7 @@ async function loadDashboardData() {
       }
     } catch(e) { console.warn('reserve calc:', e.message); }
 
-    // V8.50 (owner 2026-08-07): repaint the headline from the withdrawCore
+    // V8.48 (owner 2026-08-07): repaint the headline from the withdrawCore
     // mirror once it lands — same fast-paint/refine pattern as the MAX button.
     _claimableAll(rp).then(res => {
       // res.ok === false means a reserve/tier/debt read failed — the figure would
@@ -6191,7 +6059,7 @@ async function loadDashboardData() {
     try {
       const onChainTier = Number(await tr.memberHighestTier(userAddr).catch(() => 0));
       const numTiers    = Math.max(onChainTier, 1); // always query at least T1
-      // V8.50 item 39: `.catch(() => 0n)` here rendered a CONFIDENT ZERO on an RPC
+      // V8.48 item 39: `.catch(() => 0n)` here rendered a CONFIDENT ZERO on an RPC
       // hiccup — "Tier Cycles 0" to a member who had cycled ten times. That is the
       // number CryptoJan22 questioned on 2026-08-10, and a fabricated zero is worse
       // than a blank because it reads as an answer. retryRead distinguishes "zero" from
@@ -6237,8 +6105,8 @@ async function loadDashboardData() {
     } catch(_) {}
 
     // ── SF Rescue Loan banner ─────────────────────────────────────────────
-    // V8.50 REWRITE: rescue debt no longer lives per-matrix — rescueDebtOf() is
-    // FROZEN at 0 (that is the point of V8.50), which is why this banner went
+    // V8.48 REWRITE: rescue debt no longer lives per-matrix — rescueDebtOf() is
+    // FROZEN at 0 (that is the point of V8.48), which is why this banner went
     // dark after the redeploy while loans booked correctly. The single source
     // of truth is the StabilityFund MEMBER LEDGER: memberDebt(addr) follows the
     // member across every tier and pair, so ONE read replaces the old sweep of
@@ -6261,54 +6129,15 @@ async function loadDashboardData() {
           let pct = 0;
           try { pct = Number(await sf.clawbackBpsFor(userAddr)) / 100; } catch (_) {}
           document.getElementById('rescue-debt-amount').textContent = fmt6(debt);
-          // 42: remember the last seen debt so the CLEARED state below can tell
-          // "repaid" from "never borrowed" without any extra RPC.
-          try { localStorage.setItem('cn_sf_debt_' + userAddr.toLowerCase(), debt.toString()); } catch (_) {}
-          const rdTitle = document.getElementById('rescue-debt-title');
-          if (rdTitle) { rdTitle.textContent = 'SF Rescue Loan Outstanding'; rdTitle.style.color = 'var(--yellow)'; }
-          banner.style.borderColor = 'var(--yellow)';
-          banner.style.background = 'rgba(234,179,8,.08)';
           if (list) list.innerHTML =
             `<div style="margin-top:4px">This is a <strong>repayable advance</strong> that stays on your ` +
             `account until cleared — no action needed. It repays itself automatically: ` +
             `${pct > 0 ? `<strong>${pct}%</strong> of each matrix payout` : 'a share of each matrix payout'} ` +
-            `is applied to the loan, from any tier you earn in. A withdrawal, a tier upgrade, or your ` +
-            `automatic crossing into the next matrix settles as much of the remainder as your balance ` +
-            `covers at that moment — so your available balance can drop right after a crossing while ` +
-            `your loan drops by the same amount. Your seats and earnings keep working normally in the meantime.</div>`;
+            `is applied to the loan, from any tier you earn in, and a tier upgrade settles the remainder ` +
+            `as part of the upgrade cost. Your seats and earnings keep working normally in the meantime.</div>`;
           banner.style.display = 'flex';
         } else {
-          // 42: THE CLEARED-LOAN DISCLOSURE (policy decision 2026-08-25, handoff
-          // SESSION 42). The FINAL repayment usually happens inside a KEEPER
-          // transaction — the crossing sweep in MatrixLogicLib._crossToPartner —
-          // so the member never signs anything: their balance just reads lower
-          // and this banner used to silently vanish with it. Full settlement at
-          // liquidity events is INTENDED, so say it. One-time per clearance,
-          // localStorage-gated, zero extra RPC (memberDebt is already read here).
-          let clearedPrev = null;
-          try {
-            const k = 'cn_sf_debt_' + userAddr.toLowerCase();
-            const prevRaw = localStorage.getItem(k);
-            if (prevRaw && BigInt(prevRaw) > 0n) { clearedPrev = BigInt(prevRaw); localStorage.setItem(k, '0'); }
-          } catch (_) {}
-          if (clearedPrev !== null) {
-            const rdTitle = document.getElementById('rescue-debt-title');
-            if (rdTitle) { rdTitle.textContent = 'SF Rescue Loan Repaid — in full ✅'; rdTitle.style.color = 'var(--green2)'; }
-            document.getElementById('rescue-debt-amount').textContent = fmt6(clearedPrev);
-            banner.style.borderColor = 'var(--green2)';
-            banner.style.background = 'rgba(34,197,94,.08)';
-            if (list) list.innerHTML =
-              `<div style="margin-top:4px">The last payment settled <strong>automatically</strong> — loans repay from a ` +
-              `share of each payout, and in full (up to your balance) at a withdrawal, a tier upgrade, or your ` +
-              `automatic crossing into the next matrix. <strong>If your available balance looked lower right after ` +
-              `a crossing, that is where it went: the same amount came off your loan.</strong> The on-chain record is ` +
-              `the <code>RescueDebtRepaid</code> events on BaseScan. ` +
-              `<a href="#" onclick="event.preventDefault();this.closest('#rescue-debt-banner').style.display='none'" ` +
-              `style="color:var(--text3);text-decoration:underline">dismiss</a></div>`;
-            banner.style.display = 'flex';
-          } else {
-            banner.style.display = 'none';
-          }
+          banner.style.display = 'none';
         }
       }
     } catch(_) {}
@@ -6654,7 +6483,7 @@ async function renderWithdrawableDetail(el, rp) {
     console.warn('[withdrawable] automation reserve unavailable:', e.message);
   }
 
-  // V8.50 (Sherwyn ea89ba8 + owner screenshots 2026-08-07): "Available to
+  // V8.48 (Sherwyn ea89ba8 + owner screenshots 2026-08-07): "Available to
   // Claim" comes from _claimableAll — the line-for-line withdrawCore mirror
   // (crossing hold only where the automation reserve applies, reserve once on
   // the highest tier, rescue debt repaid first). The card and the MAX button
@@ -6678,7 +6507,7 @@ async function renderWithdrawableDetail(el, rp) {
     ${crossingLocked === 0n && autoDeducted > 0n ? `<div class="detail-row"><span class="detail-key" title="Entry fee for your next tier, paid automatically from your earnings">${_t('modal.auto_deducted','Tier Upgrade Fee (from earnings)')}</span><span class="detail-val">− ${fmt6(autoDeducted)}</span></div>` : ''}
     ${accrualExtra > 0n ? `<div class="detail-row"><span class="detail-key" title="Pool earnings accrued to your seats — settled automatically the moment you withdraw">${_t('modal.pending_accrual','+ Pending pool accrual (settles on withdrawal)')}</span><span class="detail-val green">+ ${fmt6(accrualExtra)}</span></div>` : ''}
     ${seatHold > 0n ? `<div class="detail-row"><span class="detail-key" title="While automation is reserving funds, the contract keeps back what your seats need to finish their cycles — released at cycle-out, or turn automation off to release it">${_t('modal.seat_hold','Held for active seats (releases at cycle-out)')}</span><span class="detail-val" style="color:#a855f7">− ${fmt6(seatHold)}</span></div>` : ''}
-    ${debtRepay > 0n ? `<div class="detail-row"><span class="detail-key" title="V8.50: any withdrawal first repays your outstanding rescue loan — see the loan banner on your dashboard">${_t('modal.loan_repay','Rescue loan repayment (repaid first)')}</span><span class="detail-val" style="color:var(--yellow)">− ${fmt6(debtRepay)}</span></div>` : ''}
+    ${debtRepay > 0n ? `<div class="detail-row"><span class="detail-key" title="V8.48: any withdrawal first repays your outstanding rescue loan — see the loan banner on your dashboard">${_t('modal.loan_repay','Rescue loan repayment (repaid first)')}</span><span class="detail-val" style="color:var(--yellow)">− ${fmt6(debtRepay)}</span></div>` : ''}
     <div class="detail-row total"><span class="detail-key">${_t('modal.avail_claim','= Available to Claim')}</span><span class="detail-val green">${fmt6(availToClaim)}</span></div>
     ${(() => {
       const tiers = Object.keys(byTier || {}).map(Number).sort((a,b) => a-b);
@@ -6715,7 +6544,7 @@ async function renderEarnedDetail(el, rp) {
   const earnedTiers = Object.keys(byTier || {}).map(Number).filter(n => n > 0);
   const numTiers = Math.min(10, Math.max(onChainTier, earnedTiers.length ? Math.max(...earnedTiers) : 0, 1));
 
-  // V8.50 item 39: same confident-zero defect as the headline above. A tier that
+  // V8.48 item 39: same confident-zero defect as the headline above. A tier that
   // could not be read is marked, not reported as "0 cycles".
   const [_cycRes2, feeArr] = await Promise.all([
     Promise.all(Array.from({length: numTiers}, (_, i) => retryRead(() => tr.tierCycles(userAddr, i)))),
@@ -6737,7 +6566,7 @@ async function renderEarnedDetail(el, rp) {
     // L1 upgrade commission from a direct. Saying "0 cycles" there reads like an
     // error; name the source instead.
     //
-    // V8.50 item 39: and a tier whose cycle count could not be READ is neither of
+    // V8.48 item 39: and a tier whose cycle count could not be READ is neither of
     // those. It used to fall into the "0 cycles" branch above and be described as
     // "referral commission — not joined", which is a confident and wrong explanation
     // built on a failed RPC call.
@@ -7033,7 +6862,7 @@ async function cnovaEarlyUnlock(btn) {
     await tx.wait();
     alert(`Unlocked. ${f(released)} CNOVA is now transferable.`);
     _refreshCnovaPanel();              // indices have shifted — re-read everything
-    // V8.50 deploy day 2026-08-13: this line read `if (typeof loadDashboard === 'function')
+    // V8.48 deploy day 2026-08-13: this line read `if (typeof loadDashboard === 'function')
     // loadDashboard();` — and there IS NO loadDashboard() in this file, only
     // loadDashboardData(). The guard was permanently false, so an early unlock — the
     // single most expensive voluntary action a member can take, up to a 50% penalty —
@@ -7044,7 +6873,7 @@ async function cnovaEarlyUnlock(btn) {
   } catch (e) {
     btn.disabled = false;
     btn.textContent = original;
-    // V8.50 (Sherwyn ticket, closed 2026-08-06): after a full withdraw/unlock a stale
+    // V8.48 (Sherwyn ticket, closed 2026-08-06): after a full withdraw/unlock a stale
     // batch row can still be on screen — clicking it reverts on-chain and reads like a
     // system failure. If nothing is actually vesting, say so plainly and refresh.
     try {
@@ -7184,17 +7013,17 @@ async function renderCommunityDetail(el, rp) {
     <div class="detail-note">🏛️ The Community Pool collects 1% of every entry fee (orphan fees). First 1,000 members split it on the 25th of every month — Genesis (#1–500) receive 60%, Pioneer (#501–1,000) receive 40%. 50% distributes each month, 50% rolls over and compounds. Distributions begin at mainnet launch.</div>`;
 }
 
-// V8.50 (Koach100 ticket, closed 2026-08-06): the cached max can come from a pool
+// V8.48 (Koach100 ticket, closed 2026-08-06): the cached max can come from a pool
 // node serving an OLDER block (withdrawable grows as rotations settle accrual), so
 // Withdraw All filled an outdated figure while the card showed a newer one and the
 // wallet received a third. Recompute at ONE pinned block at click time.
-// ── V8.50 single source of truth: "what can I actually withdraw?" ────────────
+// ── V8.48 single source of truth: "what can I actually withdraw?" ────────────
 // Line-for-line mirror of MatrixLogicLib.withdrawCore (:992), the only truth:
 //   1. per matrix: balance = raw withdrawable + pendingPoolOf (settled on withdraw)
 //   2. the automation reserve applies ONLY on the member's highest tier
 //      ((highest-1) == tierIndex), and the seated crossing hold is enforced ONLY
 //      where that reserve is active (V8.32 opt-out: automation off = free exit)
-//   3. V8.50: outstanding rescue debt is repaid FIRST out of any withdrawal
+//   3. V8.48: outstanding rescue debt is repaid FIRST out of any withdrawal
 // freeWithdrawable() pre-dates rule 2's opt-out (it still holds the crossing
 // cost on every seated matrix), and the old UI then subtracted the reserve a
 // SECOND time on top of the view — three formulas for one number (owner's
@@ -7259,14 +7088,14 @@ async function _claimableAll(rp, blockTag) {
     total += bal;
     byTier[tNum] += bal;
   }));
-  // V8.50 item 2 — FEATURE-DETECTED: reservedHeldFor(member) is the contract's
+  // V8.48 item 2 — FEATURE-DETECTED: reservedHeldFor(member) is the contract's
   // OWN answer to "how much is actually held toward the reserve target" (one
   // shared internal with claimableOf, so view == enforcement by construction).
-  // When the getter exists (V8.50), it replaces the local reconstruction above
-  // for the DISPLAYED figure; on V8.50 (CALL_EXCEPTION) the local mirror stands.
+  // When the getter exists (V8.48), it replaces the local reconstruction above
+  // for the DISPLAYED figure; on V8.48 (CALL_EXCEPTION) the local mirror stands.
   try {
     heldNow = BigInt(await tr.reservedHeldFor(userAddr, o));
-  } catch (_) { /* V8.50 — keep the reconstruction */ }
+  } catch (_) { /* V8.48 — keep the reconstruction */ }
   const net = total > debt ? total - debt : 0n;
   return { ok: true, total, net, debt, reserved, highest, byTier, heldNow };
 }
@@ -7373,7 +7202,7 @@ function getWithdrawRecipient() {
   return null; // null = use connected wallet (regular withdraw function)
 }
 
-// ── V8.50: withdrawal history (member-visible, admin-readable) ───────────────
+// ── V8.48: withdrawal history (member-visible, admin-readable) ───────────────
 //
 // WHY. A withdrawal is not one action. doWithdrawPartial walks EVERY matrix holding a
 // balance and sends a separate transaction per matrix, so "I tried to withdraw $50 and
@@ -7393,7 +7222,7 @@ function getWithdrawRecipient() {
 // in the legacy key, invisible — ambiguous history is not shown to the wrong wallet.
 const _WD_HIST_KEY_LEGACY = 'cn_withdraw_history_v1';
 
-// V8.50 deploy day 2026-08-13 (owner spotted it during the cutover): the v2 key was
+// V8.48 deploy day 2026-08-13 (owner spotted it during the cutover): the v2 key was
 // per-WALLET but not per-DEPLOYMENT, so after a fresh deploy — where every position
 // resets and the old matrices cease to exist — members opened the new site and saw
 // records from the DEAD deployment: "received $737.78 of $3,291.13 — 17 matrix
@@ -7432,7 +7261,7 @@ function _loadWithdrawHistory() {
   const key = _wdHistKey();
   if (!key) return []; // not connected — no wallet, no history to show
   try {
-    // NOT migrating v1 here any more: every v1 record predates the V8.50 cutover by
+    // NOT migrating v1 here any more: every v1 record predates the V8.48 cutover by
     // definition, so pulling it into this deployment's bucket would re-create exactly
     // the confusion the deployment tag above removes.
     return JSON.parse(localStorage.getItem(key) || '[]');
@@ -7550,7 +7379,7 @@ async function doWithdrawPartial() {
     toast(`Amount exceeds available — max is $${floorUsd2(maxUsd)}`, 'error');
     return;
   }
-  // V8.50 (owner 2026-08-08): a FULL-amount request takes the ONE-TRANSACTION
+  // V8.48 (owner 2026-08-08): a FULL-amount request takes the ONE-TRANSACTION
   // sweep (TierRouter.bulkWithdraw) — the same path as Withdraw All — instead
   // of one signature per matrix. Seven approvals for MAX was the whole
   // complaint. True partial amounts still need per-matrix transactions until
@@ -7567,19 +7396,19 @@ async function doWithdrawPartial() {
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const _matObjs = await _buildAllMatrixObjects(rp);
-    // V8.50 (owner 2026-08-08): per-matrix caps come from the withdrawCore
+    // V8.48 (owner 2026-08-08): per-matrix caps come from the withdrawCore
     // MIRROR — freeWithdrawable() under-caps seated matrices (the V8.32 opt-out
     // lives only in withdrawCore), which left $49.04 of a $168.04 request
     // "unsourced" while Withdraw All took everything. Same source of truth as
     // the card, MAX and the breakdown (_claimableAll rules, applied per draw).
     const _ptr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
 
-    // ── V8.50 item 3 — ONE-SIGNATURE PARTIAL, feature-detected ──────────────
-    // bulkWithdraw(uint256) exists only on V8.50. Version detect uses the
-    // INDEPENDENT V8.50 getter reservedHeldFor(): if it answers we are on
-    // V8.50 and a failing bulk estimate is a REAL refusal (report it, never
+    // ── V8.48 item 3 — ONE-SIGNATURE PARTIAL, feature-detected ──────────────
+    // bulkWithdraw(uint256) exists only on V8.48. Version detect uses the
+    // INDEPENDENT V8.48 getter reservedHeldFor(): if it answers we are on
+    // V8.48 and a failing bulk estimate is a REAL refusal (report it, never
     // fall back to the per-matrix loop and guess); a CALL_EXCEPTION means
-    // V8.50 → the legacy loop below stands. Any other error (RPC drop) also
+    // V8.48 → the legacy loop below stands. Any other error (RPC drop) also
     // falls through to the loop, which has its own honest guards.
     // NOTE ethers-v6 overload ambiguity (scope item-3 row): the overload MUST
     // be addressed by full signature via getFunction('bulkWithdraw(uint256)').
@@ -7611,12 +7440,12 @@ async function doWithdrawPartial() {
       if (inp) inp.value = '';
       await new Promise(r => setTimeout(r, 3500));
       await loadDashboardData();
-      _staggeredDashRefresh();   // V8.50 deploy day: a single post-tx read goes stale when the
+      _staggeredDashRefresh();   // V8.48 deploy day: a single post-tx read goes stale when the
                                  // pool lags the tx block — the member sees the OLD balance and
                                  // clicks Withdraw again. Same fix as upgrade/rescue (2026-08-06).
       return;   // finally{} re-enables the buttons
     }
-    // ── end V8.50 single-signature path — V8.50 per-matrix loop below ───────
+    // ── end V8.48 single-signature path — V8.48 per-matrix loop below ───────
 
     // AUDIT 2026-08-08: these three defaulted to 0 on a failed read, and every
     // one of them makes the withdrawal look LARGER than it is — highest/reserved
@@ -7991,8 +7820,8 @@ async function doGraduatedReenter(tNum) {
       if (btn) btn.disabled = false;
       return;
     }
-    // V8.50 item 15 (2026-08-13): manualUpgrade pulls fee + outstanding rescue
-    // debt (_walletFold) — the V8.50 gate. This flow approved FEE ONLY, the exact
+    // V8.48 item 15 (2026-08-13): manualUpgrade pulls fee + outstanding rescue
+    // debt (_walletFold) — the V8.48 gate. This flow approved FEE ONLY, the exact
     // allowance-revert Jacob hit on the main upgrade path (fixed there in
     // 50c59b1, missed here). Charge basis is fee + memberDebtOf; unknown debt
     // aborts honestly, same policy as approveUSDCForUpgrade.
@@ -8311,12 +8140,9 @@ async function _getDirectReferrals(addr, rp) {
     // Walk from the TierRouter deploy block (every registration is at/after it) in
     // <=9000-block windows (QuickNode getLogs range cap). Flooring at the deploy block keeps
     // the count COMPLETE regardless of launch age and bounds the scan to this deployment's
-    // history. TR_DEPLOY_BLOCK is LOGS_DEPLOY_FLOOR, RAISED 2026-08-19 to 45,428,000 on
-    // measurement (full write-up at that constant). The claim this comment used to make
-    // -- that a stale-low value "only scans a few extra empty windows" -- was measured
-    // FALSE: it was 65 of 95, 68% of every scan. On a redeploy set it to just under the
-    // earliest contract creation block, which measure_page_rpc.mjs reports exactly.
-    // Each window retries 3x so a dropped read does not silently undercount.
+    // history. TR_DEPLOY_BLOCK = v8_46 first-registration floor; on a redeploy, lower it to
+    // the new deploy block — a stale-low value only scans a few extra empty windows, it
+    // never misses events. Each window retries 3x so a dropped read doesn't silently undercount.
     const TR_DEPLOY_BLOCK = LOGS_DEPLOY_FLOOR;   // AUDIT 2026-08-09: was a second literal 44840000. Two copies of a deploy-block floor is a drift bug waiting for the next redeploy -- one value now.
     const latest = await logRp.getBlockNumber();
     const WINDOW = 9000, FLOOR = Math.max(0, TR_DEPLOY_BLOCK);
@@ -8785,7 +8611,7 @@ function showTab(name) {
   document.querySelectorAll('nav button:not(.nav-trigger):not(.btn-connect-mob)').forEach(b => b.classList.remove('active'));
   const panel = document.getElementById('tab-' + name);
   if (panel) panel.classList.add('active');
-  // V8.50 (member request): remember the tab in the URL so a refresh stays put
+  // V8.48 (member request): remember the tab in the URL so a refresh stays put
   // (also makes tabs shareable: index.html#tiers). replaceState = no history spam.
   try { history.replaceState(null, '', '#' + name); } catch (_) {}
   const idx = ['home','register','dashboard','matrix','tiers','roadmap'].indexOf(name);
@@ -8869,14 +8695,6 @@ function startRescuePolling() {
     const sec = document.getElementById('rescue-section');
     // Stop as soon as the member is no longer parked — no point polling forever.
     if (!sec || sec.style.display === 'none') { stopRescuePolling(); return; }
-    // ⛔ NEVER RE-RENDER WHILE THE MEMBER HAS A WALLET REQUEST OPEN. loadDashboardData
-    // rebuilds the parked card list from scratch, which replaces the button the member
-    // just pressed with a brand-new enabled one. The owner hit this live 2026-08-24:
-    // the rescue popup came back mid-refresh and he pressed it more than once. The
-    // chain was fine (a second selfRescue on a cleared position reverts, and
-    // diag_wallet_charges confirmed no double charge) but a member cannot know that.
-    // Skip this tick; the next one is 30s away and every action refreshes on success.
-    if (window._actionInFlight || window._clearAllRunning) return;
     try { await loadDashboardData(); } catch (_) {}
   }, 30000);
 }
@@ -8892,7 +8710,7 @@ function friendlyError(e) {
   const code    = e.code || '';
   const raw     = e.message || String(e);
 
-  // ── V8.50 (2026-07-27): pass through messages we already wrote for members.
+  // ── V8.48 (2026-07-27): pass through messages we already wrote for members.
   // Callers throw pre-formatted, emoji-prefixed errors (balance/allowance checks
   // in doBulkUpgrade, for example). Without this they fall to the generic
   // fallback at the bottom of this function and get cut at 120 chars — the live
@@ -8915,7 +8733,7 @@ function friendlyError(e) {
   // hard-refresh, as the generic fallback did, does not.
   //
   // Nothing dapp-side can prevent this: it happens after we hand off to the
-  // wallet. The permanent fix is V8.50-B's cascade depth cap.
+  // wallet. The permanent fix is V8.48-B's cascade depth cap.
   if (/gas limit too high|gas limit is too high|-32003/i.test(raw + rawDeep)) {
     return '⛽ The network could not fit this transaction right now. Entering a tier ' +
            'sometimes sets off a chain of matrix rotations, and when it does the cost ' +
@@ -8927,7 +8745,7 @@ function friendlyError(e) {
   // Must be FIRST — before any branch that might fall through to raw msg output.
   const _earlyRaw = raw + rawDeep;
 
-  // ── V8.50 (2026-07-27): decoded custom errors. Before this, TierRouter and
+  // ── V8.48 (2026-07-27): decoded custom errors. Before this, TierRouter and
   // matrix reverts arrived with reason=null (the errors were missing from the
   // ABIs) and members were told "RPC may be busy" or "hard-refresh and try
   // again" when the chain had actually said exactly what was wrong. Members
@@ -8951,7 +8769,7 @@ function friendlyError(e) {
       ? `🔓 USDC approval too low — approve at least ${need}, then try again. (Bulk upgrades need the total for every tier at once, not one tier at a time.)`
       : '🔓 Your USDC approval is too low for this amount — approve again, then retry.';
   }
-  // V8.50-B. Phrased as a STATE, not a failure — the member has done nothing
+  // V8.48-B. Phrased as a STATE, not a failure — the member has done nothing
   // wrong and there is nothing to retry. It replaces two revert strings, one of
   // which ("cross to MatB first, or wait for this tier's Whale Gate to open")
   // was already the clearest message in the contract; keep that clarity.
@@ -9314,7 +9132,7 @@ async function approveBulkUpgrade() {
   const fee    = window._bulkUpgradeFee || 0n;
   try {
     if (btn) btn.disabled = true;
-    // V8.50 item 15/O1 (owner: "align in v8.50"): bulkUpgrade now runs the same
+    // V8.48 item 15/O1 (owner: "align in v8.48"): bulkUpgrade now runs the same
     // debt gate as manualUpgrade — approve Σfees + outstanding rescue loan, and
     // refuse honestly when the debt read fails (same policy as the manual path).
     const debtDue = await _upgradeDebtDue(readProvider || (signer && signer.provider)).catch(() => null);
@@ -9395,7 +9213,7 @@ async function doBulkUpgrade() {
         // RPC or balance problem — the same mislabelling this block was written
         // to stop doing.
         if ((estErr.message || '').startsWith('⚠️')) throw estErr;
-        // V8.50 (2026-07-27): this branch used to blame the RPC for every failed
+        // V8.48 (2026-07-27): this branch used to blame the RPC for every failed
         // estimate. Three members reported "T5 upgrade check failed — try again
         // in a moment (RPC may be busy)" on wallets holding $4.86, $12.83 and
         // $13.14 — they had simply run out of USDC, and bulkUpgrade pulls the
@@ -9442,7 +9260,7 @@ async function doBulkUpgrade() {
   }
 }
 
-// V8.50 upgrade gate: manualUpgrade pulls fee + the member's OUTSTANDING
+// V8.48 upgrade gate: manualUpgrade pulls fee + the member's OUTSTANDING
 // RESCUE LOAN from the wallet (_walletFold → SF.receiveDebtRepayment). Every
 // balance/allowance check and the approve amount must use fee + this figure.
 async function _upgradeDebtDue(rp) {
@@ -9468,7 +9286,7 @@ async function approveUSDCForUpgrade() {
     if (stReg)  stReg.textContent  = msg;
     if (stDash) stDash.textContent = msg;
   };
-  // V8.50 parity audit D1 (2026-08-13): was `|| 25_000_000n` — a dropped fee read
+  // V8.48 parity audit D1 (2026-08-13): was `|| 25_000_000n` — a dropped fee read
   // approved T2's $25 for ANY tier (guaranteed revert at T3+). Use the cached fee
   // if the dashboard read succeeded; otherwise re-read LIVE here; if that also
   // fails, refuse honestly — same policy as the debtDue null-check just below.
@@ -9485,7 +9303,7 @@ async function approveUSDCForUpgrade() {
     if (btnDash) btnDash.disabled = false;
     return;
   }
-  // V8.50 gate (Jacob, d212b87): approve fee + outstanding rescue loan — the
+  // V8.48 gate (Jacob, d212b87): approve fee + outstanding rescue loan — the
   // fold's extra pull is what reverted when only the fee was approved.
   const debtDue  = await _upgradeDebtDue(readProvider || (signer && signer.provider)).catch(() => null);
   if (debtDue === null) {
@@ -9594,7 +9412,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
       if (btn) btn.disabled = false;
       return;
     }
-    // V8.50 gate (Jacob, d212b87): the router pulls fee + outstanding rescue
+    // V8.48 gate (Jacob, d212b87): the router pulls fee + outstanding rescue
     // loan in one transaction — both checks must use the combined figure.
     const _required = BigInt(fee) + _updDebt;
     if (Number(highestTier) >= tierIdx + 1) {
@@ -9647,7 +9465,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
       return;
     }
     if (_exGas > 15_000_000) {
-      // With the V8.50-B cascade depth cap live on-chain (maxCascadeDepth==4), a
+      // With the V8.48-B cascade depth cap live on-chain (maxCascadeDepth==4), a
       // legitimate upgrade should no longer quote this much gas — the chain caps the
       // rotation chain and parks instead of running it to the ceiling. If we still see
       // it, something unusual is happening: refuse the doomed tx and ask them to report.
@@ -9661,7 +9479,7 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     const tx = await tr.manualUpgrade(tierIdx, { gasLimit: _exGas });
     _setS('Waiting for confirmation…');
     const _rcpt = await tx.wait();
-    // V8.50-B (cap verified live on-chain 2026-08-03): if the rotation chain hit
+    // V8.48-B (cap verified live on-chain 2026-08-03): if the rotation chain hit
     // maxCascadeDepth, the contract seated this member as far as the cap allows and
     // PARKED the remainder, emitting CascadeDepthCapped(member). That is a SUCCESS, not
     // a gas failure — guide them to Self Rescue instead of the old "too large" error.
@@ -9790,9 +9608,9 @@ async function doLimboReEntry() {
   }
 }
 
-// ── V8.50 item 40 — one-signature self-rescue via EIP-2612 permit ────────────
+// ── V8.48 item 40 — one-signature self-rescue via EIP-2612 permit ────────────
 // Detection is TWO independent probes, cached per page load:
-//   1. chain version: TierRouter.reservedHeldFor answers only on V8.50
+//   1. chain version: TierRouter.reservedHeldFor answers only on V8.48
 //      (selfRescueWithPermit ships in the same deploy);
 //   2. the deployed USDC actually supports permit: DOMAIN_SEPARATOR() + nonces()
 //      both answer (the TESTNET MockUSDC may predate permit — Base mainnet's
@@ -9804,7 +9622,7 @@ async function _permitRescueAvailable(rp) {
   let ok = false;
   try {
     const tr = new ethers.Contract(ADDRS.tierRouter, TIER_ROUTER_ABI, rp);
-    await tr.reservedHeldFor(userAddr);                       // V8.50 marker
+    await tr.reservedHeldFor(userAddr);                       // V8.48 marker
     const u = new ethers.Contract(ADDRS.usdc, [
       'function DOMAIN_SEPARATOR() view returns (bytes32)',
       'function nonces(address) view returns (uint256)',
@@ -9854,7 +9672,7 @@ async function approveSelfRescue() {
   const btn    = document.getElementById('btn-self-approve');
   const status = document.getElementById('self-rescue-status');
   if (btn) btn.disabled = true;
-  // V8.50 item 40: when the permit path is available there is nothing to
+  // V8.48 item 40: when the permit path is available there is nothing to
   // approve — hand straight to doSelfRescue, which signs the permit (gasless)
   // and sends ONE transaction. Lavern-Gay's two-click report, retired.
   try {
@@ -9870,58 +9688,12 @@ async function approveSelfRescue() {
     const matrixAddr = window._parkedMatrixAddr;
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
-
-    // ── APPROVE THE ENTRY FEE, NOT THE EXACT SHORTFALL (2026-08-24) ─────────────
-    //
-    // This used to be `approve(matrixAddr, shortfall)` — the exact amount, to the
-    // cent, with no headroom. The shortfall is a point-in-time quote:
-    //     shortfall = ENTRY_FEE - (crossingReserve + withdrawable)
-    // so ANY movement in the member's reserve or withdrawable between approving and
-    // rescuing raises it, and the approval no longer covers what the contract pulls.
-    // safeTransferFrom then reverts on allowance and the member is stranded holding
-    // an approval that looks right and does not work.
-    //
-    // MEASURED, not theorised. diag_parked_solvency.js, 2026-08-24, all 41 past-grace
-    // parked positions: exactly ONE member holds any allowance at all — 0xa0763F34,
-    // $11.88 approved to T2.1 MatB against a current shortfall of $12.50. The only
-    // member who evidently followed these instructions is $0.62 short and stuck.
-    // (WHY their figure moved between the two is UNVERIFIED — we hold the standing
-    // allowance and the current shortfall, not the history between them.)
-    //
-    // WHY THE ENTRY FEE IS THE RIGHT BOUND, rather than a buffer constant:
-    // _selfRescue (git show d382d37:contracts/MatrixLogicLib.sol:1464) computes
-    //     shortfall = cfg.entryFee > effectiveContrib ? cfg.entryFee - effectiveContrib : 0
-    // which is floored at 0 and can never exceed cfg.entryFee. So ENTRY_FEE is the
-    // mathematical MAXIMUM this contract can ever pull for a self-rescue. Approving it
-    // cannot be too little, and cannot be more than one entry fee. Every other choice
-    // (bigfill's flat $15 RESCUE_APPROVAL, a percentage, a fixed $2 pad) is a guess at
-    // how far the shortfall might drift, and THE TWO RULES say do not build on a guess.
-    // bigfill's own $15 constant carries a comment admitting it was sized for T1 and is
-    // wrong for T3+; this needs no per-tier sizing at all.
-    //
-    // Only the shortfall is ever TAKEN. The remainder stays approved and unspent, and
-    // the member sees the true amount owed in the "Shortfall" row above the button.
-    const _feeCap  = window._parkedFee || 0n;
-    const _approve = _feeCap > shortfall ? _feeCap : shortfall;
-    const tx   = await usdc.approve(matrixAddr, _approve);
+    const tx   = await usdc.approve(matrixAddr, shortfall);
     if (status) status.textContent = 'Waiting for confirmation…';
     await tx.wait();
-    if (status) {
-      status.style.color = 'var(--green)';
-      status.textContent = _approve > shortfall
-        ? `✅ Approved ${fmt6(_approve)} — only ${fmt6(shortfall)} will be taken. Now click Self Rescue.`
-        : '✅ USDC approved — now click Self Rescue.';
-    }
+    if (status) { status.style.color = 'var(--green)'; status.textContent = '✅ USDC approved — now click Self Rescue.'; }
     const rescueBtn = document.getElementById('btn-self-rescue');
-    // `display` too, for the same reason as the poll above: the status line has just
-    // told the member to click this button, so it must be on screen NOW.
-    // Same gate as the poll: approving FROM A CARD must not raise the single-position
-    // button behind the list. The card's own row flips to READY on the next paint.
-    if (rescueBtn) {
-      rescueBtn.disabled = false;
-      if ((window._parkedAll || []).length < 2) rescueBtn.style.display = '';
-      rescueBtn.style.opacity = '1';
-    }
+    if (rescueBtn) { rescueBtn.disabled = false; rescueBtn.style.opacity = '1'; }
     if (btn) btn.disabled = false;
   } catch (e) {
     const msg = (e.message || '').toLowerCase();
@@ -9958,244 +9730,15 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   const box = document.getElementById('parked-list');
   if (!box || !cands || cands.length === 0) return;
 
-  // ⛔ THE `cands.length < 2` EARLY RETURN USED TO SIT HERE AND IT HID THIS FEATURE FROM
-  // 107 OF 107 PARKED MEMBERS ON LIVE V8.50 (measured 2026-08-19, diag_badge_preview.js).
-  // It now lives further down, AFTER the status reads, so a single-position member still
-  // gets the badge and the eviction clock - just without the per-row buttons their existing
-  // card already provides. See "STATUS-ONLY MODE" below.
-  //
-  // ⚠ THE COST, STATED RATHER THAN DISCOVERED LATER: single-position members now also pay
-  // the status reads - one keeper call, one totalBalance, and up to three SF calls, so ~5
-  // extra eth_calls per dashboard load. Set against the ~30 log windows a lifetime scan
-  // already costs (measure_page_rpc.mjs, 2026-08-19) that is small, and it buys the 100% of
-  // parked members who could not see any of this. If it ever needs cutting, cache the two
-  // chain-wide reads (grace period, SF balance) across the page rather than dropping the
-  // per-member ones - those are the part that differs per member.
+  // One position is the existing card's job; only take over when there are more.
+  if (cands.length < 2) { box.style.display = 'none'; return; }
 
-  // ── V8.50: PENDING EVICTION vs IN THE RESCUE QUEUE (owner request 2026-08-19) ──────
-  //
-  // A parked member could see they were parked but not whether anything would actually
-  // come for them. Two very different situations looked identical: one is waiting for a
-  // rescue that IS coming, the other is on a 7-day clock to eviction with no loan
-  // available. The second is the only one that needs the member to act, and it was the
-  // one the page did not say.
-  //
-  // ⛔ WHY THIS DOES NOT RE-IMPLEMENT THE KEEPER'S TRIAGE. MatrixKeeperLib._triageParked
-  // returns its reason (EVICT_FLOOR / EVICT_LADDER / EVICT_RATIO / EVICT_GHOST) as an
-  // INTERNAL uint8 — never emitted, never stored, not readable. Copying that arithmetic
-  // here would be a second model of one rule, which is exactly how this codebase once
-  // shipped a dashboard itemising $7,500 while the chain held $10,000. So this reads only
-  // figures the contracts expose EXACTLY and lets the member compare them:
-  //     loanHeadroom(member, tier)  — how much the fund may still lend them (exact)
-  //     their own shortfall          — already computed above from fee/reserve/withdrawable
-  //     evictionGracePeriod()        — the real clock, READ not hardcoded (DAO param 62)
-  // A member whose headroom is below their gap cannot be fully covered by a loan. That is
-  // a statement about two exact numbers, not a prediction of the keeper's branch.
-  //
-  // ⚠ FAILED READS ARE "UNKNOWN", NEVER "FINE". Standing rule in this file: zero is a
-  // legitimate value here, so a failed read rendered as 0 headroom would tell a healthy
-  // member they are about to be evicted. null -> the row says it could not check.
-  // ⛔ "THE FUNCTION IS NOT ON THIS BUILD" AND "THE READ FAILED" ARE DIFFERENT ANSWERS.
-  // A missing selector comes back as an empty return that ethers reports as BAD_DATA or as
-  // a CALL_EXCEPTION with no data; a flapping endpoint throws a network code. They look
-  // alike and they mean opposite things, and treating them alike is the trap that has cost
-  // this project the most (check_rpc.ps1 reported six healthy endpoints during a total
-  // outage). Only an ABSENT function may be substituted for; a FAILED read must stay
-  // unknown. Measured 2026-08-19 with scripts/probe_keeper_views.js against live V8.50:
-  // evictionGracePeriod ABSENT, extendedIdleTimeout EXISTS = 604800, 4/4 controls green.
-  function _isAbsent(e) {
-    const code = (e && e.code) ? String(e.code) : '';
-    const msg  = ((e && (e.shortMessage || e.message)) || '');
-    if (code === 'BAD_DATA') return true;
-    if (code === 'CALL_EXCEPTION' && (e.data === null || e.data === undefined || e.data === '0x')) return true;
-    return /could not decode result data|missing revert data/i.test(msg);
-  }
-
-  let _evictGrace = null, _sfBal = null;
-  // ⛔ WHY THE FALLBACK IS GATED ON _isAbsent. evictionGracePeriod (V8.49+) and
-  // extendedIdleTimeout (V8.50) are TWO DIFFERENT DIALS — MatrixKeeper.sol:1066 says in
-  // terms "Do NOT re-point this at extendedIdleTimeout to keep them in step." On V8.50 they
-  // are both 604800 so substituting is correct there. On a V8.49+ chain it is NOT: one
-  // transient failure of the first call would silently render a countdown from the
-  // IDLE-SLOT RECLAIM clock and look completely healthy doing it. So we substitute only
-  // when the chain has actually told us the function is not there.
-  try {
-    if (ADDRS.matrixKeeper) {
-      const _k = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_EVICT_ABI, rp);
-      try {
-        _evictGrace = BigInt(await _k.evictionGracePeriod());
-      } catch (e1) {
-        if (_isAbsent(e1)) {
-          try { _evictGrace = BigInt(await _k.extendedIdleTimeout()); } catch (_) { _evictGrace = null; }
-        } else {
-          _evictGrace = null;   // the read failed. We do not know the window. Say nothing.
-        }
-      }
-    }
-  } catch (_) { _evictGrace = null; }
-  try {
-    if (ADDRS.stabilityFund) _sfBal = BigInt(await new ethers.Contract(ADDRS.stabilityFund, SF_ABI, rp).totalBalance());
-  } catch (_) { _sfBal = null; }
-  const _sfC = ADDRS.stabilityFund ? new ethers.Contract(ADDRS.stabilityFund, SF_ABI, rp) : null;
-
-  // Sentinel for loanHeadroom's two "no ceiling applies" branches. Not a number we can
-  // print, and not null (which means "unknown") — a third, distinct state.
-  const _UNLIMITED = Symbol('unlimited');
-
-  const _headroom = await Promise.all(cands.map(async (c) => {
-    if (!_sfC) return null;
-    const _t = c.tierIdx ?? 0;
-    // Exact where it exists (V8.49+).
-    try { return BigInt(await _sfC.loanHeadroom(userAddr, _t)); } catch (_) { /* V8.50: derive it */ }
-
-    // ── V8.50 DERIVATION — REBUILT 2026-08-19 (session 10) ────────────────────────────
-    // ⛔ IT MUST REPRODUCE loanHeadroom's WHOLE DEFINITION, NOT JUST ITS ARITHMETIC.
-    // StabilityFund.sol:956-964 has THREE outcomes and the previous version of this block
-    // implemented only the third:
-    //     insolvencyFloorBps == 0   -> type(uint256).max   (the floor is DISABLED)
-    //     tierEntryFees[t]   == 0   -> type(uint256).max   (no fee, no estimate to form)
-    //     otherwise                 -> fee*bps/10000 - debt
-    // Both of the first two mean UNLIMITED. Computing `fee * 0 / 10000` for them yields a
-    // ceiling of 0, i.e. headroom 0, i.e. PENDING EVICTION on every parked row — the exact
-    // INVERSE of the truth, and it would fire at the moment the owner reaches for the
-    // documented escape hatch of setting PARAM 59 to 0. Live V8.50 reads 3400 / $10.00
-    // today so the old code was right by luck, not by construction.
-    // This is the "two models of one rule, drifting" failure StabilityFund.sol:938 warns
-    // about by name. The contract keeps ONE copy of the formula; so must this.
-    //
-    // ⛔ AND THE READS ARE SEPARATE, NOT Promise.all. diag_eviction_clock.js shipped the
-    // Promise.all version and 107 of 107 members came back unknown because ONE of the three
-    // views was missing and took the other two down with it. It was rebuilt for that reason
-    // on 2026-08-19; this file still carried the original shape. Read them one at a time and
-    // use the strongest bound each row can actually support.
-    let bps = null, tfee = null, owed = null;
-    try { bps  = BigInt(await _sfC.insolvencyFloorBps()); } catch (_) {}
-    if (bps === 0n) return _UNLIMITED;                 // floor disabled -> no ceiling at all
-    try { tfee = BigInt(await _sfC.tierEntryFees(_t)); } catch (_) {}
-    if (tfee === 0n) return _UNLIMITED;                // no registered fee -> no ceiling
-    if (bps === null || tfee === null) return null;    // cannot form a ceiling -> CHECKING
-    const ceiling = (tfee * bps) / 10000n;
-    try { owed = BigInt(await _sfC.memberDebt(userAddr)); } catch (_) {}
-    // ⛔ debt is NOT required to answer the dangerous half of the question. headroom is
-    // ceiling - debt and debt >= 0, so THE CEILING IS AN UPPER BOUND ON HEADROOM whatever
-    // the debt is. If the gap already exceeds the ceiling, "a loan cannot cover this" is
-    // sound with the debt unknown. Only the reassuring direction needs the real debt, and
-    // that is why an unreadable debt returns the bound rather than a comfortable number.
-    if (owed === null) return { bound: ceiling };      // upper bound only — see _evictInfo
-    return ceiling > owed ? ceiling - owed : 0n;
-  }));
-
-  const _nowSec = BigInt(Math.floor(Date.now() / 1000));
-  function _evictInfo(c, headroom) {
-    // returns { badge, colour, line } — badge null means "nothing to say on this row"
-    if (!c.shortfall || c.shortfall === 0n) return { badge: null, colour: '', line: '' };
-    let clock = '';
-    if (_evictGrace !== null && c.parkedAt && c.parkedAt > 0n) {
-      const left = (c.parkedAt + _evictGrace) - _nowSec;
-      if (left <= 0n) clock = 'Eviction window has passed — the keeper may remove this position on its next sweep.';
-      else {
-        const h = Number(left / 3600n);
-        clock = h >= 48 ? `About ${Math.floor(h / 24)} days left before this position can be evicted.`
-              : `Less than ${Math.max(1, h)} hours left before this position can be evicted.`;
-      }
-    }
-    if (headroom === null) {
-      return { badge: 'CHECKING', colour: 'var(--text3)',
-               line: `Could not check whether the fund can help right now — this is NOT a sign either way. ${clock}` };
-    }
-    // ⛔ ORDER MATTERS AND SO DOES THE TYPE. `headroom` now carries four shapes: null
-    // (unknown), the _UNLIMITED symbol (no ceiling applies), { bound } (upper bound only,
-    // debt unreadable) and a BigInt (exact). The symbol MUST be caught before any `<`
-    // comparison — JavaScript throws a TypeError on Symbol < BigInt, which would take the
-    // whole parked list down with it rather than mislabelling one row.
-    if (headroom === _UNLIMITED) {
-      // insolvencyFloorBps == 0 or the tier has no registered fee. The floor imposes no
-      // ceiling at all, so nothing here can be refused for being over it.
-      if (_sfBal !== null && _sfBal < c.shortfall) {
-        return { badge: 'WAITING ON FUND', colour: '#f59e0b',
-                 line: `You qualify for help — no lending limit applies to you right now — but the Stability Fund holds ${fmt6(_sfBal)} against your ${fmt6(c.shortfall)} gap. Self Rescue does not wait on it. ${clock}` };
-      }
-      return { badge: 'IN RESCUE QUEUE', colour: 'var(--green)',
-               line: `You qualify — there is no lending limit applying to your position right now, so your ${fmt6(c.shortfall)} gap can be covered. ${clock}` };
-    }
-    if (typeof headroom === 'object' && headroom !== null && 'bound' in headroom) {
-      // We could read the ceiling but not this member's existing debt. headroom is
-      // ceiling - debt and debt >= 0, so the ceiling is an UPPER BOUND. That makes only
-      // the bad news sound: if the gap is already above the ceiling no loan can reach it.
-      if (headroom.bound < c.shortfall) {
-        return { badge: 'PENDING EVICTION', colour: '#ef4444',
-                 line: `The most the fund could lend toward a ${fmt6(c.shortfall)} gap at your tier is ${fmt6(headroom.bound)}, so a loan cannot cover this on its own. Self Rescue keeps your position. ${clock}` };
-      }
-      // The ceiling clears the gap, but any loan already outstanding eats into it and we
-      // could not read that. Reporting "you qualify" here would be reporting the absence
-      // of something we did not observe.
-      return { badge: 'CHECKING', colour: 'var(--text3)',
-               line: `Could not fully check whether the fund can help — your tier's limit of ${fmt6(headroom.bound)} would cover your ${fmt6(c.shortfall)} gap, but any rescue loan you already owe could not be read. This is NOT a sign either way. ${clock}` };
-    }
-    if (headroom < c.shortfall) {
-      return { badge: 'PENDING EVICTION', colour: '#ef4444',
-               line: `The fund can lend at most ${fmt6(headroom)} toward your ${fmt6(c.shortfall)} gap, so a loan cannot cover this on its own. Self Rescue keeps your position. ${clock}` };
-    }
-    if (_sfBal !== null && _sfBal < c.shortfall) {
-      return { badge: 'WAITING ON FUND', colour: '#f59e0b',
-               line: `You qualify for help, but the Stability Fund holds ${fmt6(_sfBal)} right now against your ${fmt6(c.shortfall)} gap. Self Rescue does not wait on it. ${clock}` };
-    }
-    return { badge: 'IN RESCUE QUEUE', colour: 'var(--green)',
-             line: `You qualify — the fund can lend up to ${fmt6(headroom)} toward your ${fmt6(c.shortfall)} gap. ${clock}` };
-  }
+  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
+  const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
   const held = new Set((activePositions || []).map(p => _pairKeyOf(p.label)));
   // clearAllParked() runs outside this function and needs the same blocked-pair set;
   // recomputing it there would be a second copy of the rule.
   window._parkedHeld = held;
-
-  // ── STATUS-ONLY MODE — THE SINGLE-POSITION CASE ───────────────────────────────────────
-  // ⛔ MEASURED 2026-08-19 (session 10), scripts/diag_badge_preview.js against live V8.50:
-  // 107 parked positions, 107 DISTINCT MEMBERS, every one of them holding EXACTLY ONE.
-  // The old `if (cands.length < 2) { hide; return; }` therefore hid this feature from
-  // 107 of 107 parked members - 100% of them - while 37 of those members were sitting on a
-  // gap no loan can cover. The whole point of the badge (owner request 2026-08-19: "a
-  // parked member could see they were parked but not whether anything would actually come
-  // for them") was reaching nobody at all.
-  //
-  // The old gate's reasoning was "one position is the existing card's job". That is true of
-  // the ACTION - the card has the Self Rescue / Copay buttons and they work. It was never
-  // true of the STATUS: the card renders label, withdrawable, reserve, fee and shortfall,
-  // and says nothing about the eviction clock or whether the fund can cover the gap.
-  //
-  // So the list no longer hides itself; for a single position it renders the STATUS ONLY -
-  // no per-row buttons, no bulk bar, no "N parked positions" header, and crucially it does
-  // NOT hide the single-position buttons the way the multi-row path does. The member keeps
-  // the card they already know and gains the one thing it never told them.
-  //
-  // ⚠ ONE COPY OF THE RULE. This deliberately reuses _evictInfo and _headroom above rather
-  // than forming its own verdict. StabilityFund.sol:938 names this exact failure - three
-  // copies of one formula is how this codebase once shipped a dashboard itemising $7,500
-  // against a chain holding $10,000.
-  if (cands.length < 2) {
-    const c0 = cands[0];
-    // A position blocked by the other half of its pair is a seating conflict, not an
-    // eviction question - same carve-out the multi-row path makes.
-    const ev0 = held.has(_pairKeyOf(c0.label))
-      ? { badge: null, colour: '', line: '' }
-      : _evictInfo(c0, _headroom[0]);
-    if (!ev0.badge) { box.style.display = 'none'; return; }   // nothing to say - stay quiet
-    box.innerHTML =
-      `<div style="border:1px solid ${ev0.colour};border-radius:8px;padding:10px 12px;background:var(--bg3)">
-         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-           <span style="font-weight:700;font-size:13px">${c0.label}</span>
-           <span style="font-size:10px;font-weight:700;color:${ev0.colour};border:1px solid ${ev0.colour};border-radius:4px;padding:1px 5px">${ev0.badge}</span>
-         </div>
-         <div style="font-size:11px;color:${ev0.colour};line-height:1.5">${ev0.line}</div>
-       </div>`;
-    box.style.display = 'flex';
-    return;   // leave the single-position card and ITS buttons exactly as they are
-  }
-
-  // The wallet balance and the per-row allowances only drive the BUTTON states, which the
-  // status-only path above never renders. Read them here so a single-position member does
-  // not pay for a balance read whose answer is never used.
-  const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, rp);
-  const bal  = await usdc.balanceOf(userAddr).catch(() => 0n);
 
   const rows = [];
   for (let i = 0; i < cands.length; i++) {
@@ -10212,43 +9755,25 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
       btns  = '';
     } else if (c.shortfall > 0n && (alw === null || alw < c.shortfall)) {
       state = 'APPROVE FIRST';
-      // ⛔ THE BUTTON MUST NAME THE FIGURE THE WALLET WILL ASK FOR — the same rule the
-      // single-position button follows (see the note by `_approveShown`). `ca66731` made
-      // approveSelfRescue approve the ENTRY FEE instead of the exact shortfall, and fixed
-      // the label on THAT path only. THIS list was missed: it promised "Approve $2.68"
-      // while MetaMask asked for $10.00. Found in the owner's live QA of the main deploy,
-      // 2026-08-24, on the very screen three members had already reported confusion about.
-      // A label that disagrees with the wallet popup is how a member decides the app is
-      // broken and stops using it.
-      const _shown = (c.fee || 0n) > c.shortfall ? c.fee : c.shortfall;
-      note  = _shown > c.shortfall
-        ? `Approve ${fmt6(_shown)} to this matrix — only ${fmt6(c.shortfall)} is taken, the rest stays approved and unspent. Then Self Rescue.`
-        : `Approve ${fmt6(c.shortfall)} to this matrix, then Self Rescue.`;
-      btns  = `<button class="btn" style="flex:1;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green);font-size:12px;padding:6px" onclick="selectParked(${i},'approve')">Approve ${fmt6(_shown)}</button>`;
+      note  = `Approve ${fmt6(c.shortfall)} to this matrix, then Self Rescue.`;
+      btns  = `<button class="btn" style="flex:1;background:rgba(0,229,160,.12);border:1px solid var(--green2);color:var(--green);font-size:12px;padding:6px" onclick="selectParked(${i},'approve')">Approve ${fmt6(c.shortfall)}</button>`;
     } else {
       state = 'READY';
       note  = c.shortfall > 0n ? 'Approved — press Self Rescue.' : 'Your earnings cover it in full.';
       btns  = `<button class="btn" style="flex:1;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;font-size:12px;padding:6px" onclick="selectParked(${i},'rescue')">🔑 Self Rescue</button>`;
     }
-    // V8.50: Copay is offered on any non-blocked row with a real gap — even with
+    // V8.48: Copay is offered on any non-blocked row with a real gap — even with
     // an EMPTY wallet (that is its whole point: the SF lends the gap as a loan).
     if (state !== 'BLOCKED' && c.shortfall > 0n) {
       btns += `<button class="btn" style="flex:1;background:rgba(245,158,11,.12);border:1px solid #f59e0b;color:#f59e0b;font-size:12px;padding:6px" onclick="selectParked(${i},'copay')">🤝 Copay — borrow ${fmt6(c.shortfall)}</button>`;
     }
     const colour = state === 'READY' ? 'var(--green)' : state === 'BLOCKED' ? 'var(--yellow)' : 'var(--text2)';
-    // BLOCKED rows are a seating conflict, not an eviction question — a member holding the
-    // other half of the pair is not on the eviction clock for this position.
-    const ev = (state === 'BLOCKED') ? { badge: null, colour: '', line: '' } : _evictInfo(c, _headroom[i]);
     rows.push(
       `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg3)">
          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
            <span style="font-weight:700;font-size:13px">${c.label}</span>
-           <span style="display:flex;gap:6px;align-items:center">
-             ${ev.badge ? `<span style="font-size:10px;font-weight:700;color:${ev.colour};border:1px solid ${ev.colour};border-radius:4px;padding:1px 5px">${ev.badge}</span>` : ''}
-             <span style="font-size:11px;font-weight:700;color:${colour}">${state}</span>
-           </span>
+           <span style="font-size:11px;font-weight:700;color:${colour}">${state}</span>
          </div>
-         ${ev.line ? `<div style="font-size:11px;color:${ev.colour};line-height:1.5;margin-bottom:4px">${ev.line}</div>` : ''}
          <div style="font-size:11px;color:var(--text3);line-height:1.6">
            Re-entry ${fmt6(c.fee)} = reserve ${fmt6(c.crossingReserve)} + earned ${fmt6(c.withdrawable)}
            ${c.shortfall > 0n ? ` &middot; <strong style="color:var(--text2)">short ${fmt6(c.shortfall)}</strong>` : ' &middot; covered'}
@@ -10267,7 +9792,7 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   const blocked     = cands.length - actionable.length;
   const canSelfAll  = actionable.length > 0 && bal >= actionShort;
 
-  // V8.50 item 40 — one action for the whole set. The per-row buttons stay: a member
+  // V8.48 item 40 — one action for the whole set. The per-row buttons stay: a member
   // who wants to clear one and leave the other must still be able to.
   let bulk = '';
   if (actionable.length > 1) {
@@ -10320,7 +9845,7 @@ function selectParked(i, action) {
   if (action === 'approve') approveSelfRescue(); else if (action === 'copay') doCopayRescue(); else doSelfRescue();
 }
 
-// ── V8.50 item 40: clear every parked position in one go ─────────────────────
+// ── V8.48 item 40: clear every parked position in one go ─────────────────────
 //
 // A member parked in two matrices pays FOUR wallet transactions today (approve +
 // rescue, twice). This sequences them behind one button. It cannot become a single
@@ -10432,7 +9957,7 @@ async function clearAllParked(mode) {
   _staggeredDashRefresh();
 }
 
-// ── V8.50 Copay Rescue (member-facing) ───────────────────────────────────────
+// ── V8.48 Copay Rescue (member-facing) ───────────────────────────────────────
 // coPayRescue(member) is PERMISSIONLESS on the contract (MatrixLogicLib:1207):
 // reserve + withdrawable are consumed first, the SF pays ONLY the shortfall and
 // books it on the member ledger as a repayable advance. Zero shortfall = zero
@@ -10457,10 +9982,10 @@ async function _paintCopayOption(p, rp) {
     const [bal, floor] = await Promise.all([sf.totalBalance(), sf.stabilityFloor()]);
     ok = bal >= loan + floor;
   } catch (_) { /* leave enabled — the staticCall at press time still protects */ }
-  // V8.50 item 46 — the INSOLVENCY FLOOR surface: when the member's own rescue
+  // V8.48 item 46 — the INSOLVENCY FLOOR surface: when the member's own rescue
   // debt has hit the floor, the SF refuses new loans ("SF: insolvency floor")
   // regardless of fund health. FEATURE-DETECTED: loanEligible() exists only on
-  // V8.50 — a CALL_EXCEPTION means V8.50, where the floor does not exist; any
+  // V8.48 — a CALL_EXCEPTION means V8.48, where the floor does not exist; any
   // other failure leaves the button enabled (staticCall still protects).
   let floored = false;
   try {
@@ -10471,7 +9996,7 @@ async function _paintCopayOption(p, rp) {
         ['function loanEligible(address,uint8) view returns (bool)'], rp);
       floored = (await sf46.loanEligible(userAddr, tierIdx)) === false;
     }
-  } catch (_) { /* V8.50 (no getter) or dropped read — never fabricate "floored" */ }
+  } catch (_) { /* V8.48 (no getter) or dropped read — never fabricate "floored" */ }
   const disp = document.getElementById('copay-loan-display');
   if (disp) disp.textContent = fmt6(loan);
   btn.style.display = ''; note.style.display = '';
@@ -10493,52 +10018,20 @@ async function doCopayRescue() {
     const matrixAddr = window._parkedMatrixAddr;
     if (!matrixAddr) throw new Error('Matrix address unknown — refresh the page.');
     const me = await signer.getAddress();
-    // ── withdrawableOf() IS NOT THE FIELD THE RESCUE ARITHMETIC USES (2026-08-24) ──
-    //
-    // THE FULL EXPLANATION LIVES HERE; the other two rescue paths (the permit path
-    // and the classic pre-flight, both in doSelfRescue) carry a one-line pointer back
-    // to it. All three had the same defect and all three are fixed the same way.
-    //
-    // V8.44 item D split the two:
-    //     FigureEightMatrixV8:613  withdrawableOf(m) = members[m].withdrawable
-    //                                                + pendingPoolOf(state, cfg, m)
-    // but BOTH rescue functions in the deployed build read the RAW struct field and
-    // nothing else — verified, not assumed, against the deployment rather than the
-    // working tree (git show d382d37:contracts/MatrixLogicLib.sol):
-    //     _selfRescue  :1464   uint256 withdrawable = self.members[member].withdrawable;
-    //     coPayRescue  :1390   uint256 withdrawable = self.members[member].withdrawable;
-    // Identical arithmetic in both:
-    //     effectiveContrib = crossingReserve + withdrawable
-    //     shortfall        = entryFee > effectiveContrib ? entryFee - effectiveContrib : 0
-    //
-    // So using withdrawableOf() here credits the member with un-settled pool accrual
-    // the contract will NOT count. It OVERSTATES what they have and UNDERSTATES the
-    // shortfall — which means the guard below can wave through a transaction that
-    // reverts, and the number quoted to the member is too small. A guard that fails
-    // permissively is worse than no guard, because it reads as a check that passed.
-    //
-    // Latent rather than live as of 2026-08-24: diag_parked_solvency.js compared both
-    // figures for all 41 past-grace parked positions and found ZERO divergence, i.e.
-    // pendingPoolOf is currently 0 for every one of them. It bites the moment it isn't.
-    //
-    // getMember() returns the Member struct, so ONE call now yields both raw fields
-    // (crossingReserve is field 9, withdrawable field 3 — MatrixLogicLib:50) and this
-    // path makes two RPC calls where it used to make three.
-    const _MEMBER_TUPLE =
-      'function getMember(address) view returns (tuple(uint256 id,address referrer,uint256 joinedAt,' +
-      'uint256 withdrawable,uint256 totalEarned,uint256 totalWithdrawn,uint256 cyclesCompleted,' +
-      'bool isInMatrix,bool hasEverJoined,uint256 crossingReserve))';
     const mr = new ethers.Contract(matrixAddr, [
       'function coPayRescue(address member) external',
       'function ENTRY_FEE() view returns (uint256)',
-      _MEMBER_TUPLE,
+      'function crossingReserveOf(address) view returns (uint256)',
+      'function withdrawableOf(address) view returns (uint256)',
     ], signer);
     // Fresh numbers at press time — earnings arrive continuously while parked,
     // so the loan the member confirms is the loan that actually books.
     let loanTxt = '';
     try {
-      const [fee, mem] = await Promise.all([mr.ENTRY_FEE(), mr.getMember(me)]);
-      const have = mem.crossingReserve + mem.withdrawable;
+      const [fee, res, wd] = await Promise.all([
+        mr.ENTRY_FEE(), mr.crossingReserveOf(me), mr.withdrawableOf(me),
+      ]);
+      const have = res + wd;
       loanTxt = fmt6(fee > have ? fee - have : 0n);
     } catch (_) {}
     await mr.coPayRescue.staticCall(me);   // prove it before spending gas
@@ -10585,7 +10078,7 @@ async function doSelfRescue() {
     ];
     const matrix = new ethers.Contract(matrixAddr, SELF_RESCUE_ABI, signer);
 
-    // ── V8.50 item 40 — ONE-TRANSACTION path: permit folded into the rescue ──
+    // ── V8.48 item 40 — ONE-TRANSACTION path: permit folded into the rescue ──
     // Available only when both probes pass (_permitRescueAvailable). The permit
     // signature is gasless; the single tx replaces approve + selfRescue. On any
     // pre-send failure here we fall through to the classic flow — the member
@@ -10594,19 +10087,17 @@ async function doSelfRescue() {
       const _rpP = readProvider || signer.provider;
       if (await _permitRescueAvailable(_rpP)) {
         const _meP = await signer.getAddress();
-        // RAW STRUCT FIELD, NOT withdrawableOf() — see the long note in doCopayRescue.
-        // _selfRescue reads members[m].withdrawable; withdrawableOf() adds un-settled
-        // pool accrual the contract does not count, which would understate _needP and
-        // make this path sign a permit for LESS than the transfer will pull.
         const _mrP = new ethers.Contract(matrixAddr, [
           'function ENTRY_FEE() view returns (uint256)',
-          'function getMember(address) view returns (tuple(uint256 id,address referrer,uint256 joinedAt,uint256 withdrawable,uint256 totalEarned,uint256 totalWithdrawn,uint256 cyclesCompleted,bool isInMatrix,bool hasEverJoined,uint256 crossingReserve))',
+          'function crossingReserveOf(address) view returns (uint256)',
+          'function withdrawableOf(address) view returns (uint256)',
           'function selfRescueWithPermit(uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external',
           'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
           'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
         ], signer);
-        const [_feeP, _memP] = await Promise.all([_mrP.ENTRY_FEE(), _mrP.getMember(_meP)]);
-        const _resP = _memP.crossingReserve, _wdP = _memP.withdrawable;
+        const [_feeP, _resP, _wdP] = await Promise.all([
+          _mrP.ENTRY_FEE(), _mrP.crossingReserveOf(_meP), _mrP.withdrawableOf(_meP),
+        ]);
         const _haveP = _resP + _wdP;
         const _needP = _feeP > _haveP ? _feeP - _haveP : 0n;
         if (_needP > 0n) {
@@ -10644,7 +10135,7 @@ async function doSelfRescue() {
       console.warn('[permit-rescue] falling back to approve+selfRescue:', ePermit.message);
       window._permitRescueOK = undefined;  // re-probe next time
     }
-    // ── end permit path — classic approve + selfRescue below (V8.50 / no permit) ──
+    // ── end permit path — classic approve + selfRescue below (V8.48 / no permit) ──
 
     // 2026-07-28: this used to fall back to a STATIC 15,000,000 whenever the
     // estimate threw. Two problems, and members hit both:
@@ -10679,17 +10170,14 @@ async function doSelfRescue() {
       // whole shortfall check silently did nothing. Written the same hour I fixed
       // the identical mistake in withdraw_probe.js (`hasEverJoined`), which is
       // why the read is now VERIFIED against the contract rather than assumed.
-      // RAW STRUCT FIELD, NOT withdrawableOf() — see the long note in doCopayRescue.
-      // This is the guard that decides whether to let the transaction through, so
-      // reading the accrual-inclusive figure here made it fail PERMISSIVELY: it
-      // computed a smaller _need, found the allowance sufficient, and waved through
-      // a call that safeTransferFrom would revert.
       const _mr  = new ethers.Contract(matrixAddr, [
         'function ENTRY_FEE() view returns (uint256)',
-        'function getMember(address) view returns (tuple(uint256 id,address referrer,uint256 joinedAt,uint256 withdrawable,uint256 totalEarned,uint256 totalWithdrawn,uint256 cyclesCompleted,bool isInMatrix,bool hasEverJoined,uint256 crossingReserve))',
+        'function crossingReserveOf(address) view returns (uint256)',
+        'function withdrawableOf(address) view returns (uint256)',
       ], signer);
-      const [_fee, _mem] = await Promise.all([_mr.ENTRY_FEE(), _mr.getMember(_rme)]);
-      const _res = _mem.crossingReserve, _wd = _mem.withdrawable;
+      const [_fee, _res, _wd] = await Promise.all([
+        _mr.ENTRY_FEE(), _mr.crossingReserveOf(_rme), _mr.withdrawableOf(_rme),
+      ]);
       const _have = _res + _wd;
       if (_fee > 0n && _have < _fee) {
         const _f    = v => '$' + (Number(v) / 1e6).toFixed(2);
@@ -10887,53 +10375,6 @@ function updateAddrsFromDeployed(d) {
   }
   console.log('[v8.8] ADDRS updated from deployed JSON');
 }
-
-// ── ONE MEMBER ACTION AT A TIME ──────────────────────────────────────────────
-//
-// ⛔ THE CARD-LIST BUTTONS WERE NEVER DISABLED AT ALL. doSelfRescue disables
-// `btn-self-rescue` — the SINGLE-position button. The card list renders its own
-// buttons (`onclick="selectParked(i,'rescue')"`), so in the multi-position path
-// nothing was ever disabled and a member could fire three transactions with three
-// fast clicks. The 30s poll was a second, independent way back to an enabled
-// button. Found in the owner's live QA 2026-08-24; the chain held (the contract
-// reverts a rescue on a cleared position, and diag_wallet_charges.js verified the
-// leftover allowance on all three matrices equalled fee minus EXACTLY ONE
-// shortfall) but repeat wallet popups with no explanation are the same trust
-// failure as a button whose figure disagrees with the popup.
-//
-// WRAPPED AT THE DEFINITION, NOT AT EACH CALL SITE. These are top-level
-// declarations in a classic (non-module) script, so the identifier IS the global
-// property — reassigning it here covers the inline onclick handlers, selectParked's
-// internal calls, and clearAllParked's sequencing, with no edit inside any of the
-// four function bodies and no chance of missing a return path. `finally` releases
-// the lock however the call ends, including a rejected signature.
-// ⛔ clearAllParked IS DELIBERATELY NOT IN THIS LIST, AND THAT IS NOT AN OVERSIGHT.
-// It calls approveSelfRescue / doSelfRescue / doCopayRescue itself, in sequence, for
-// every parked position. Wrapping it would make it take the lock and then have its
-// OWN internal calls refused by that same lock — Clear-all would stop after its first
-// step while reporting nothing wrong. It already carries its own guard
-// (`_clearAllRunning`, checked on its first line), so it is protected without this.
-// ⚠ HONEST LIMIT: between its sequential steps the lock is briefly free, so a click
-// landing exactly in that gap is not refused. The poll is skipped for the whole run
-// (above) so no button is rebuilt underneath the member, and the sequencer re-reads
-// getMember().isInMatrix after every step, so a stray extra call is caught rather
-// than believed. Narrowing that gap further means threading a token through the
-// sequencer's three call sites — worth doing only if it is ever seen in the wild.
-['approveSelfRescue', 'doSelfRescue', 'doCopayRescue'].forEach((_fn) => {
-  const _orig = window[_fn];
-  if (typeof _orig !== 'function') { console.warn('[guard] ' + _fn + ' not found — NOT guarded'); return; }
-  window[_fn] = async function (...args) {
-    if (window._actionInFlight) {
-      // Say which request, so this never reads as the app ignoring them.
-      toast('Still working on your last request — check your wallet.', 'error');
-      return;
-    }
-    window._actionInFlight = true;
-    try { return await _orig.apply(this, args); }
-    finally { window._actionInFlight = false; }
-  };
-});
-console.log('[guard] member actions serialised: approve / self rescue / copay');
 </script>
 <script src="/i18n.js" defer></script>
     <!-- Bug Report Footer -->

@@ -1,0 +1,40 @@
+{
+  "measuredAt": "2026-08-19T15:11:35.908Z",
+  "endpoint": "EP1",
+  "member": "0x6512e9B5FE1690F2570AFEE5E7b904EF106C9435",
+  "head": 45691990,
+  "shippedFloor": 44840000,
+  "windowSize": 9000,
+  "shippedWindows": 95,
+  "creationBlocks": {
+    "cnova": 45428148,
+    "tierRouter": 45428223,
+    "communityWallet": 45430266
+  },
+  "scans": [
+    {
+      "label": "TierRouter MemberEnrolled(member)  [index.html:6289]",
+      "windows": 95,
+      "failedWindows": 0,
+      "retries": 0,
+      "events": 0,
+      "elapsedMs": 9237,
+      "perWindowMs": 97
+    },
+    {
+      "label": "CNOVA Transfer(member -> 0x0) burn [index.html:6900]",
+      "windows": 95,
+      "failedWindows": 0,
+      "retries": 0,
+      "events": 0,
+      "elapsedMs": 10418,
+      "perWindowMs": 110
+    }
+  ],
+  "perWindowMs": 103,
+  "requests": {
+    "issued": 271,
+    "failedWindows": 0,
+    "retriedWindows": 0
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "tier": 2,
+  "rot0B": 0,
+  "occ1A": 5,
+  "rows": [
+    {
+      "pos": 1,
+      "member": "0x4adFfb34eA9BD92EFce1d0Ce5767F192179D1740",
+      "inPair0MatA": "no",
+      "inPair0MatB": "YES",
+      "cycles": "0",
+      "joinedAt": "2026-08-19 00:55"
+    },
+    {
+      "pos": 2,
+      "member": "0x5E93E45c46bAf3e7Af4C53F67f25DbC844d2F2A4",
+      "inPair0MatA": "no",
+      "inPair0MatB": "YES",
+      "cycles": "0",
+      "joinedAt": "2026-08-19 01:15"
+    },
+    {
+      "pos": 3,
+      "member": "0x4Cf7f43A4A2Df2e86fd68D35562Eb96bBE5ea5Cd",
+      "inPair0MatA": "no",
+      "inPair0MatB": "YES",
+      "cycles": "0",
+      "joinedAt": "2026-08-19 02:05"
+    },
+    {
+      "pos": 4,
+      "member": "0xFCAC5282573360Ac51823fD279C1B7B691bA361a",
+      "inPair0MatA": "no",
+      "inPair0MatB": "YES",
+      "cycles": "0",
+      "joinedAt": "2026-08-19 02:55"
+    },
+    {
+      "pos": 5,
+      "member": "0x2BD8013D87D298fCd577E87047aC9d3da7eDA5Ec",
+      "inPair0MatA": "no",
+      "inPair0MatB": "YES",
+      "cycles": "0",
+      "joinedAt": "2026-08-19 03:45"
+    }
+  ]
+}

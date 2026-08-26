@@ -1,0 +1,28 @@
+# 🚀 V8.50 deploys Wednesday — claim your CW payout first
+
+Hey team 👋
+
+## 💰 Do this now
+The monthly **Community Wallet payout is claimable** — Genesis 60%, Pioneer 40%. Open the app → Community Wallet card → **Claim**. V8.50 is a fresh deployment, so **claim and withdraw before noon Wednesday** — after the switch, the site points at the new contracts.
+
+## 📅 Wednesday, August 26
+- **12:00 noon** — site goes offline
+- **1:00 pm** — early access opens
+- **2:00 pm** — open for everyone
+
+## 🧪 Fresh deploy = fresh start
+- Everyone **re-registers** (same as V8.47 → V8.48)
+- Tester wallets get **fresh test USDC**
+- **Founder spots reset**: first 1,000 to register take them — Genesis #1–500 (60%), Pioneer #501–1,000 (40%). Register early to claim yours. 🏛️
+
+## 🔄 What's new in V8.50 (all measured on our private test deployment)
+- **Crossings are pre-funded** — half your entry is reserved for your crossing, so you never get left behind mid-cycle 🛡️
+- **Your money follows you** — your balance travels with you into the next matrix 💼
+- **The 25th means the 25th** — the monthly distribution moves to the front of the keeper's queue
+- **Loans, clearer** — a rescue advance stays a repayable advance; the app now shows every way it repays, and a green "Repaid — in full ✅" note when it clears
+- **Bigger rescue coverage** — the fund's advance ceiling goes up, so fewer parked members get refused
+
+## 🐛 As always
+**$1 bug bounty is always active** — report button at the bottom of every page.
+
+See you on V8.50 🚀
