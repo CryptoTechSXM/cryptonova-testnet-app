@@ -65,7 +65,8 @@ export default async function handler(req, res) {
   if (b.website) return res.status(200).json({ ok: true });   // honeypot: pretend success
   const wallet = clean(b.wallet, 42);
   if (!/^0x[0-9a-fA-F]{40}$/.test(wallet)) return res.status(400).json({ error: 'valid wallet required' });
-  const action = b.action === 'gifted' ? 'gifted' : 'request';
+  const ACTIONS = ['request', 'gifted', 'reserve', 'unreserve'];
+  const action = ACTIONS.includes(b.action) ? b.action : 'request';
 
   // GET-modify-PUT with one retry on 409 (concurrent commit), same as submit-bug.js.
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -82,17 +83,39 @@ export default async function handler(req, res) {
       const contact = clean(b.contact, 60) || '';
       content += `- [WAITING] ${today} · ${wallet} · ${name}${why ? ' · ' + why : ''}${contact ? ' · contact: ' + contact : ''}\n`;
       notifyTelegram(`\u{1F91D} <b>PIF request</b>\n${name} — <code>${wallet}</code>\n${why || '(no note)'}`);
+    } else if (action === 'reserve') {
+      // 2026-08-26 (owner's find): two wallets could fund the SAME waitlist person.
+      // Reserving flips [WAITING] -> [RESERVED by X @epoch] BEFORE any money moves;
+      // the sha-guarded PUT below is compare-and-swap, so concurrent reserves lose
+      // cleanly (409 -> retry -> sees RESERVED -> conflict). A reservation older than
+      // 60 min is re-claimable so abandoned funding never strands a waiting person.
+      const by = clean(b.by, 42);
+      const nowE = Math.floor(Date.now() / 1000);
+      const reW = new RegExp(`^(- )\\[WAITING\\](.*${wallet.slice(2, 10)}.*)$`, 'mi');
+      const reR = new RegExp(`^(- )\\[RESERVED by [^\\]@]+ @(\\d+)\\](.*${wallet.slice(2, 10)}.*)$`, 'mi');
+      if (reW.test(content)) {
+        content = content.replace(reW, `$1[RESERVED by ${by || 'a member'} @${nowE}]$2`);
+      } else {
+        const m = content.match(reR);
+        if (!m) return res.status(404).json({ error: 'not on the waitlist (already gifted?)' });
+        if (nowE - Number(m[2]) < 3600) return res.status(409).json({ error: 'someone is already gifting this person' });
+        content = content.replace(reR, `$1[RESERVED by ${by || 'a member'} @${nowE}]$3`);
+      }
+    } else if (action === 'unreserve') {
+      const reR = new RegExp(`^(- )\\[RESERVED by [^\\]@]+ @\\d+\\](.*${wallet.slice(2, 10)}.*)$`, 'mi');
+      if (!reR.test(content)) return res.status(200).json({ ok: true, note: 'nothing to release' });
+      content = content.replace(reR, `$1[WAITING]$2`);
     } else {
       const by = clean(b.by, 42);
-      const re = new RegExp(`^(- )\\[WAITING\\](.*${wallet.slice(2, 10)}.*)$`, 'mi');
-      if (!re.test(content)) return res.status(404).json({ error: 'no waiting entry for that wallet' });
-      content = content.replace(re, `$1[GIFTED by ${by || 'a member'} ${today}]$2`);
+      // gifted: accepted from WAITING or RESERVED (reserve-first is the normal path now)
+      const reAny = new RegExp(`^(- )\\[(?:WAITING|RESERVED by [^\\]]+)\\](.*${wallet.slice(2, 10)}.*)$`, 'mi');
+      if (!reAny.test(content)) return res.status(404).json({ error: 'no waiting entry for that wallet' });
+      content = content.replace(reAny, `$1[GIFTED by ${by || 'a member'} ${today}]$2`);
       notifyTelegram(`\u{1F49A} <b>PIF gifted</b>\n<code>${wallet}</code> ← ${by}`);
     }
 
     const put = await ghRequest('PUT', `/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
-      message: action === 'request' ? `pif(${today}): request from ${wallet.slice(0, 10)}…`
-                                    : `pif(${today}): ${wallet.slice(0, 10)}… gifted`,
+      message: `pif(${today}): ${action} ${wallet.slice(0, 10)}…`,
       content: Buffer.from(content, 'utf-8').toString('base64'),
       sha: get.body.sha, branch: GH_BRANCH
     }, token);

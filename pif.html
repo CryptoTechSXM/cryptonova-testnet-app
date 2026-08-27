@@ -232,10 +232,35 @@ function makeCode() {
 async function makeGift() {
   if (!signer || !couponAmt) return;
   const btn = document.getElementById('btn-gift'); btn.disabled = true;
+  // 2026-08-26 (owner's find): reserve the waitlist entry BEFORE any money moves, or
+  // two wallets can fund the same person and the second coupon is an orphan. The API's
+  // sha-guarded commit makes this atomic; a reservation is released on failure and
+  // self-expires after 60 min if a gifter walks away mid-funding.
+  const target = document.getElementById('gift-to').value.trim();
+  const targeting = /^0x[0-9a-fA-F]{40}$/.test(target);
+  let reserved = false;
+  if (targeting) {
+    say('make-status', '<span class="spinner"></span> Claiming this person for your gift…');
+    try {
+      const r = await fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reserve', wallet: target, by: me.slice(0, 8) + '…' + me.slice(-4) }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        say('make-status', '⚠️ ' + (j.error || 'Could not claim them') + ' — pick someone else or refresh the list.', 'warn');
+        btn.disabled = false; loadWaitlist(); return;
+      }
+      reserved = true; loadWaitlist();
+    } catch (e) { say('make-status', '⚠️ Could not reach the waitlist — try again.', 'warn'); btn.disabled = false; return; }
+  }
+  const releaseReservation = () => {
+    if (!reserved) return;
+    fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'unreserve', wallet: target }) }).then(() => loadWaitlist()).catch(() => {});
+  };
   try {
     const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
     const bal = await usdc.balanceOf(me);
-    if (bal < couponAmt) { say('make-status', `❌ You need ${fmt6(couponAmt)} USDC to fund a gift.`, 'err'); btn.disabled = false; return; }
+    if (bal < couponAmt) { say('make-status', `❌ You need ${fmt6(couponAmt)} USDC to fund a gift.`, 'err'); releaseReservation(); btn.disabled = false; return; }
     const alw = await usdc.allowance(me, ADDRS.couponRegistry);
     if (alw < couponAmt) {
       say('make-status', '<span class="spinner"></span> Step 1/2 — approve ' + fmt6(couponAmt) + ' in your wallet…');
@@ -256,15 +281,17 @@ async function makeGift() {
     say('make-status', '', '');
     setTimeout(pifShare, 600);   // pop the share sheet right away, like the dashboard coupon flow
     // Mark the waitlist entry gifted (best-effort; open coupons skip this).
-    const to = document.getElementById('gift-to').value.trim();
-    if (/^0x[0-9a-fA-F]{40}$/.test(to)) {
+    if (targeting) {
       fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'gifted', wallet: to, by: me.slice(0, 8) + '…' + me.slice(-4) }) })
+        body: JSON.stringify({ action: 'gifted', wallet: target, by: me.slice(0, 8) + '…' + me.slice(-4) }) })
         .then(() => loadWaitlist()).catch(() => {});
     }
     await refreshActiveGift();
     document.getElementById('gift-result').classList.remove('hidden');  // keep visible after refresh hides maker
-  } catch (e) { say('make-status', '❌ ' + (e.shortMessage || e.message || 'failed').slice(0, 140), 'err'); }
+  } catch (e) {
+    say('make-status', '❌ ' + (e.shortMessage || e.message || 'failed').slice(0, 140), 'err');
+    releaseReservation();   // funding failed or was rejected — put them back on the open list
+  }
   btn.disabled = false;
 }
 
@@ -326,17 +353,18 @@ async function loadWaitlist() {
   try {
     const r = await fetch('/PIF_WAITLIST.md', { cache: 'no-store' });
     const txt = await r.text();
-    const rows = txt.split('\n').filter(l => l.startsWith('- [WAITING]'));
+    const rows = txt.split('\n').filter(l => l.startsWith('- [WAITING]') || l.startsWith('- [RESERVED'));
     if (!rows.length) { box.innerHTML = '<p class="muted">Nobody waiting right now — the list starts with the first hand raised. 🙋</p>'; return; }
     box.innerHTML = rows.map(l => {
-      const parts = l.replace('- [WAITING] ', '').split(' · ');
+      const isReserved = l.startsWith('- [RESERVED');
+      const parts = l.replace(/^- \[(?:WAITING|RESERVED[^\]]*)\] /, '').split(' · ');
       const date = parts[0] || '', wallet = parts[1] || '', name = parts[2] || 'anonymous';
       const rest = parts.slice(3).join(' · ');
       return `<div class="row"><div style="flex:1;min-width:200px">
-        <span class="tag tag-wait">WAITING</span> <strong style="font-size:13px">${name}</strong>
+        <span class="tag tag-wait">${isReserved ? '💛 BEING GIFTED NOW' : 'WAITING'}</span> <strong style="font-size:13px">${name}</strong>
         <div class="muted" style="font-family:monospace">${wallet}</div>
         ${rest ? `<div class="muted">${rest}</div>` : ''}</div>
-        <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="document.getElementById('gift-to').value='${wallet}';window.scrollTo({top:document.getElementById('gift-panel').offsetTop||400,behavior:'smooth'})">💚 Gift this person</button>
+        ${isReserved ? '<span class="muted">a member is funding this gift…</span>' : `<button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="document.getElementById('gift-to').value='${wallet}';window.scrollTo({top:document.getElementById('gift-panel').offsetTop||400,behavior:'smooth'})">💚 Gift this person</button>`}
       </div>`;
     }).join('') + `<p class="muted">${rows.length} waiting · gifted entries move off this list automatically</p>`;
   } catch (e) { box.innerHTML = '<p class="muted">Could not load the list — refresh to retry.</p>'; }
