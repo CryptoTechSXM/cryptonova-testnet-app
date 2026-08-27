@@ -480,6 +480,7 @@ async function makeGift() {
   const target = document.getElementById('gift-to').value.trim();
   const targeting = /^0x[0-9a-fA-F]{40}$/.test(target);
   let reserved = false;
+  let funded = false;   // set the moment the coupon is CONFIRMED on-chain — gates every release
   if (targeting) {
     // Same guard as Door A, on the money path: never fund a coupon a registered
     // member cannot redeem. Catches entries that reached the list before the Door A
@@ -531,23 +532,64 @@ async function makeGift() {
     try { if (gasStr && Number(gasStr) > 0) value = ethers.parseEther(gasStr); } catch (e) {}
     say('make-status', '<span class="spinner"></span> Step 2 of 2 — funding the coupon on-chain…');
     const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
-    const tx = await reg.issueCoupon(codeHash, { value }); await tx.wait();
+    // ── 2026-08-27, owner's double-fund find (PIF 05: reserve→unreserve→reserve→gifted).
+    // The old single `await reg.issueCoupon(...); await tx.wait()` line meant ANY error
+    // after the tx was SENT — including a tx.wait() RPC flake while the coupon actually
+    // minted — fell into the outer catch and RELEASED the reservation. The row went back
+    // to WAITING and a second member could fund the same person. So: a send failure may
+    // release; once a tx exists, confirm it (polling past wait() flakes) before deciding,
+    // and an unconfirmable tx KEEPS the reservation rather than freeing the row.
+    let tx = null;
+    try { tx = await reg.issueCoupon(codeHash, { value }); }
+    catch (e) {
+      say('make-status', '❌ ' + (e.shortMessage || e.message || 'transaction was not sent').slice(0, 140), 'err');
+      releaseReservation();   // nothing reached the chain — safe to free the row
+      btn.disabled = false; return;
+    }
+    let receipt = null;
+    try { receipt = await tx.wait(); }
+    catch (e) {
+      for (let i = 0; i < 10 && !receipt; i++) {   // ~30s: wait() flakes while txs mine
+        await new Promise(r => setTimeout(r, 3000));
+        try { receipt = await provider.getTransactionReceipt(tx.hash); } catch (_) {}
+      }
+    }
+    if (!receipt) {
+      say('make-status', '⚠️ Your funding transaction was sent but could not be confirmed here (tx ' + tx.hash.slice(0, 12) + '…). Check your wallet activity before trying again — the reservation stays in place meanwhile.', 'warn');
+      btn.disabled = false; return;   // deliberately NOT releasing — the coupon may exist
+    }
+    if (receipt.status !== 1) {
+      say('make-status', '❌ The funding transaction reverted on-chain — nothing was charged.', 'err');
+      releaseReservation();   // confirmed failure — safe to free the row
+      btn.disabled = false; return;
+    }
+    funded = true;
     activeCode = code;
     document.getElementById('gift-code').textContent = code;
     document.getElementById('gift-result').classList.remove('hidden');
     say('make-status', '', '');
     setTimeout(pifShare, 600);   // pop the share sheet right away, like the dashboard coupon flow
-    // Mark the waitlist entry gifted (best-effort; open coupons skip this).
+    // Mark the waitlist entry gifted. NOT fire-and-forget any more (2026-08-27): if this
+    // flip fails silently the row sits RESERVED, self-expires in 60 min, and the
+    // double-fund window reopens. Awaited, one retry, and the sponsor is told on failure.
     if (targeting) {
-      fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'gifted', wallet: target, by: me.slice(0, 8) + '…' + me.slice(-4) }) })
-        .then(() => loadWaitlist()).catch(() => {});
+      let flipped = false;
+      for (let i = 0; i < 2 && !flipped; i++) {
+        try {
+          const fr = await fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'gifted', wallet: target, by: me.slice(0, 8) + '…' + me.slice(-4) }) });
+          flipped = fr.ok;
+        } catch (e) { /* retry once */ }
+      }
+      if (!flipped) say('make-status', '⚠️ Your gift is funded, but the waitlist could not be updated — please tell the admin so the list is corrected.', 'warn');
+      loadWaitlist();
     }
     await refreshActiveGift();
     document.getElementById('gift-result').classList.remove('hidden');  // keep visible after refresh hides maker
   } catch (e) {
     say('make-status', '❌ ' + (e.shortMessage || e.message || 'failed').slice(0, 140), 'err');
-    releaseReservation();   // funding failed or was rejected — put them back on the open list
+    if (!funded) releaseReservation();   // pre-send failure — put them back on the open list.
+    // After a confirmed funding, NEVER release: the coupon exists, the row must not reopen.
   }
   btn.disabled = false;
 }
