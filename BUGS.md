@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-27] Onboarding / Registration — I could not change the referral address to register my first…
+- **Reporter:** @Lavern_Gay
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
+- **Frequency:** Consistent
+- **What happened:** I could not change the referral address to register my first direct account. The address https://early.crypto-nova.app/index.html?ref=0x185B19c7D3872692981568985b21AE6F7f6BE2A4, is the address I want to register this account in the COOP. My main account address appears instead.
+- **What was expected:** I expected to register this account using the copied referral address.
+- **Notes:** I also tried to register this account in Rabby, and the same occurred.
+- **Submitted:** Thu, 27 Aug 2026 00:35:13 GMT
+
+
 ### [2026-08-26] Dashboard (index.html) — Action is required because i am parked.
 there is no button t…
 - **Reporter:** CryptoJan
