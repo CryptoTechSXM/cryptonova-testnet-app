@@ -341,7 +341,15 @@ const REG_ABI = [
 ];
 const USDC_ABI = ['function approve(address,uint256) returns (bool)', 'function allowance(address,address) view returns (uint256)', 'function balanceOf(address) view returns (uint256)'];
 const TR_ABI   = ['function memberHighestTier(address) view returns (uint256)'];
-const READ_RPCS = ['https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'];
+// Owner ruling 2026-08-16: free public RPC endpoints were tried in this site's read
+// pool, were buggy, and were removed — QuickNode carries the reads (same endpoints as
+// index.html's pool; the keys are already public in that page's source). Public RPC
+// stays only as the very last resort, matching index's convention.
+const READ_RPCS = [
+  'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/',
+  'https://cosmopolitan-still-fire.base-sepolia.quiknode.pro/3835d77b733a07e6109ec27774ab3231fbb86c6a/',
+  'https://sepolia.base.org',
+];
 // Is this wallet already a registered member? Read-only, works without any wallet
 // installed (Door A visitors often have none). Returns true/false, or null when no
 // RPC answered — callers decide what "unknown" means for their own risk.
@@ -432,9 +440,19 @@ function rememberCode(hash, code) {
 // public read RPCs (never the wallet), chunks under every public cap, and a
 // per-wallet localStorage cache so only NEW blocks are scanned on later visits.
 const SCAN_CHUNK = 9000;
-function roProvider() {
-  for (const url of READ_RPCS) { try { return new ethers.JsonRpcProvider(url, CHAIN_ID); } catch (e) {} }
-  return provider;   // last resort only
+// ⚠ RPC failure happens at CALL time, never in the constructor — a try/catch around
+// `new JsonRpcProvider` is a failover that can never fire (the bug that made the
+// ledger silently die on main/early while admin coasted on its warm cache).
+function roRegistries() {
+  const net = ethers.Network.from(CHAIN_ID);
+  return READ_RPCS.map(u => new ethers.Contract(
+    ADDRS.couponRegistry, REG_ABI,
+    new ethers.JsonRpcProvider(u, net, { staticNetwork: net })));
+}
+async function roCall(regs, fn) {
+  let lastErr = null;
+  for (const reg of regs) { try { return await fn(reg); } catch (e) { lastErr = e; } }
+  throw lastErr || new Error('all read RPCs failed');
 }
 function scanCacheKey() { return 'cnova_pif_scan:' + me.toLowerCase(); }
 function loadScanCache() {
@@ -456,24 +474,29 @@ function markLocal(kind, hash, extra) {
   else c[kind].push(hash);
   saveScanCache(c);
 }
-async function scanCoupons(regRO, latest) {
+async function scanCoupons(regs, latest, onProgress) {
   const cache = loadScanCache();
   const seen = new Set(cache.issued.map(x => x.h));
-  let from = cache.last + 1;
+  const startFrom = cache.last + 1;
+  const totalBlocks = Math.max(1, latest - startFrom + 1);
+  let from = startFrom;
   while (from <= latest) {
     const to = Math.min(from + SCAN_CHUNK - 1, latest);
-    const [iss, red, can, rec] = await Promise.all([
-      regRO.queryFilter(regRO.filters.CouponIssued(null, me),   from, to),
-      regRO.queryFilter(regRO.filters.CouponRedeemed(null, me), from, to),
-      regRO.queryFilter(regRO.filters.CouponCancelled(null, me), from, to),
-      regRO.queryFilter(regRO.filters.CouponReclaimed(null, me), from, to),
-    ]);
+    // per-chunk failover: a chunk that fails on one RPC is retried on the next
+    const [iss, red, can, rec] = await roCall(regs, reg => Promise.all([
+      reg.queryFilter(reg.filters.CouponIssued(null, me),   from, to),
+      reg.queryFilter(reg.filters.CouponRedeemed(null, me), from, to),
+      reg.queryFilter(reg.filters.CouponCancelled(null, me), from, to),
+      reg.queryFilter(reg.filters.CouponReclaimed(null, me), from, to),
+    ]));
     for (const lg of iss) if (!seen.has(lg.args.codeHash)) { seen.add(lg.args.codeHash);
       cache.issued.push({ h: lg.args.codeHash, exp: Number(lg.args.expiry), amt: Number(lg.args.amount) }); }
     for (const lg of red) cache.redeemed.push(lg.args.codeHash);
     for (const lg of can) cache.cancelled.push(lg.args.codeHash);
     for (const lg of rec) cache.reclaimed.push(lg.args.codeHash);
     cache.last = to; from = to + 1;
+    saveScanCache(cache);   // per-chunk, so an interrupted first scan resumes, never restarts
+    if (onProgress) onProgress(Math.min(99, Math.round(((to - startFrom + 1) / totalBlocks) * 100)));
   }
   saveScanCache(cache);
   return cache;
@@ -485,10 +508,11 @@ async function refreshActiveGift() {
   const box = document.getElementById('my-coupons');
   try {
     el.innerHTML = '<span class="muted"><span class="spinner"></span>reading your coupon history…</span>';
-    const ro = roProvider();
-    const regRO = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, ro);
-    const latest = await ro.getBlockNumber();
-    const data = await scanCoupons(regRO, latest);
+    const regs = roRegistries();
+    const latest = await roCall(regs, reg => reg.runner.provider.getBlockNumber());
+    const data = await scanCoupons(regs, latest, pct => {
+      el.innerHTML = '<span class="muted"><span class="spinner"></span>reading your coupon history… ' + pct + '% (first visit on this device scans the whole chain)</span>';
+    });
     const redeemedSet  = new Set(data.redeemed);
     const cancelledSet = new Set(data.cancelled);
     const reclaimedSet = new Set(data.reclaimed);
@@ -538,7 +562,7 @@ async function refreshActiveGift() {
       document.getElementById('gift-maker').classList.remove('hidden');
     }
   } catch (e) {
-    el.innerHTML = '<span class="muted">could not read your coupon history — please refresh</span>';
+    el.innerHTML = '<span class="muted">could not read your coupon history — please refresh (' + String(e && (e.shortMessage || e.message) || 'read failed').slice(0, 60) + ')</span>';
   }
 }
 
