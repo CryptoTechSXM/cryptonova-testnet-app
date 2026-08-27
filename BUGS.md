@@ -37,6 +37,19 @@
 
 ## Open Issues
 
+### [2026-08-27] Onboarding / Registration — REOPENED: could not change the referrer address
+- **Reporter:** @Lavern_Gay
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask AND Rabby (consistent across both)
+- **Frequency:** Consistent
+- **What happened:** could not change the referral address when registering a new account; "my main account address appears instead".
+- **REOPENED 2026-08-27 (session 44).** This was closed the same day it was reported, on the explanation that "a valid coupon locks the referrer to its funder, by design". That mechanism was read out of the code and never checked against her wallet, and the chain does not support it: she is registered under `0x185B19c7…`, which is the referrer she asked for. The closure was wrong, so the report goes back to open.
+- **What we now know, measured:** `repro_referrer.mjs` reproduces six ways a typed referrer was lost or replaced — four of them across a wallet account switch with no page reload, and two with no account switch at all. The one most likely to fit this report needs no switch: `ethers.isAddress()` enforces the EIP-55 checksum, so a CORRECT address pasted with the wrong letter-case counted as invalid, and the page then substituted a rotation-pool default in silence. Both directions are fixed (session 44, commit below); the coupon lock is real but it is a SEPARATE thing and is not what happened here.
+- **Still owed:** ask her whether the account in question still shows the wrong sponsor after the fix ships, and run `diag_referrer.js` on it either way. Do not close this a second time on an explanation that has not been run against her wallet.
+- **FIX IN PROGRESS:** referrer path fixed and re-measured; awaiting her confirmation on the live site.
+
+
+
 ### [2026-08-27] Onboarding / Registration — All CryptoNover accounts opened with different referrer addr…
 - **Reporter:** @ThanksAndPraises
 - **Page:** Onboarding / Registration
@@ -47,6 +60,10 @@
 0x149852b86dF80B960B99BBbF469d0f5219fa1040
 - **What was expected:** the accounts should maintain and show their referral's address as their default registered under address
 - **Submitted:** Thu, 27 Aug 2026 20:32:54 GMT
+- **DIAGNOSED AND FIXED, session 44 (2026-08-27) — it was not a MetaMask bug.** Measured first: `0x3c1755…` is registered on chain under `0x5179A012…`, which is entry #4 of this site's own `DEFAULT_SPONSOR_POOL` — an orphan-rotation default, not anyone he typed. The display theory was tested and refuted (`diag_referrer.js`: TierRouter.memberReferrer, getMemberInfo.referrer and every per-matrix getMember().referrer agree on all three wallets), so the dashboard was honest and the registration itself was wrong.
+- **Reproduced** with `repro_referrer.mjs`, which runs the page's real source rather than a re-typed copy: 6 of 10 scenarios placed a member under the wrong sponsor, 0 after the fix. Two independent causes, and together they explain both halves of the report — (a) the referrer box and the cached default sponsor were never reset when a wallet switches account with no page reload, so every later account inherited the first one's sponsor (that is the "my original Default address" half); (b) `ethers.isAddress()` enforces the EIP-55 checksum, so a CORRECT address pasted with the wrong letter-case counted as invalid and was silently replaced by a pool default — no account switch involved at all.
+- **Still owed before this closes:** a live two-account switch on the preview build, and `diag_referrer.js` on a wallet registered after the fix. His existing placements are on chain and a frontend fix does not move them — decide separately what to do about those.
+- **FIX IN PROGRESS:** shipped to `admin` as `98a0da2`, awaiting live confirmation.
 
 
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
@@ -258,7 +275,6 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
-| 2026-08-27 | 2026-08-27 | Onboarding / Registration | @Lavern_Gay — could not change the referrer when registering a new account; "my main account address appears instead" (MetaMask and Rabby, consistent). BY DESIGN, POORLY EXPLAINED: a valid COUPON locks the referrer to the coupon's issuer — coupon registrations always join the funder's line, and the contract enforces it on-chain, so the UI lock is honest. The defect was silence: the field just refused edits with only a tiny "🔒 Sponsor" tag. Now an explanation renders under the field the moment the lock engages, including the way out (clear the coupon, pay the entry, choose any referrer). To register under 0x185B19c7… they must register WITHOUT a coupon funded by another wallet. | (this commit) |
 | 2026-08-26 | 2026-08-26 | Dashboard (index.html) | CryptoJan — parked, no approve button, "still a shortfall" on click, intermittent. ROOT CAUSE: both ready-gates tested `allowance >= SHORTFALL`, but the shortfall MOVES while parked, so an allowance that covered it at render failed at click — the measured 0xa0763F34 case (08-24 diag: $11.88 vs $12.50) happening to a live member. Both gates now compare against `max(fee, shortfall)`, the contract's actual pull ceiling, so READY can never go stale. Shipped with the V8.50 cutover; his position reset at noon regardless. Reporter added to fund_list (wallet #111). | `1b0ed5f` |
 | 2026-08-26 | 2026-08-26 | Other | Sherwyn — "tokens are being redeemed but not reflecting in wallet". CLOSED BY MEASUREMENT (`scripts/diag_sherwyn_redeem.js`, read-only, refuses non-v8_48 addresses): BOTH redeems succeeded AND paid — $6.571675 (08-25, tx 0xab637c8d…) and $0.566131 (08-26, tx 0xcf03f2b7…). The 45% early-exit penalty (joined <30d) withheld $5.84 of $12.98 gross, and a sub-$7 bump on a wallet holding $30,065 USDC is easy to miss. NOT A BUG — penalty disclosure did its job on-chain; closed on the old chain the morning of the V8.50 cutover. | (diagnosis only — no code change) |
 | 2026-08-21 | 2026-08-26 | Other | Sherwyn — redeem "step 2 fail asking to do a hard reset". Same wallet and path as his 2026-08-26 ticket; superseded by it and closed by the same measurement — the redeems that mattered went through and paid. Old-chain (V8.48) report; the redeem path it exercised retired with that chain at the cutover. | (diagnosis only — no code change) |
