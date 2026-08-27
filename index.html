@@ -646,7 +646,7 @@
   <button onclick="showTab('tiers')" data-i18n="idx.nav_tiers">🏆 Tiers</button>
   <button onclick="showTab('roadmap')" data-i18n="idx.nav_roadmap">🗺️ Roadmap</button>
   <button onclick="window.location.href='status.html'" data-i18n="idx.nav_status">🛡️ Status</button>
-  <button onclick="window.location.href='pif.html'">🤝 Pay It Forward</button>
+  <button id="nav-btn-pif" onclick="window.location.href='pif.html'">🤝 Pay It Forward</button>
   <button id="nav-btn-buy" onclick="window.location.href='buy.html'">💎 Buy CNOVA</button>
   <button id="nav-btn-gov" onclick="window.location.href='governance.html'">⚖️ Governance</button>
   <button id="nav-btn-liq" onclick="window.location.href='liquidity.html'">💧 Liquidity</button>
@@ -657,7 +657,7 @@
   var h=location.hostname;
   var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
   if(!isAdmin){
-    ['nav-btn-buy','nav-btn-gov','nav-btn-liq'].forEach(function(id){
+    ['nav-btn-buy','nav-btn-gov','nav-btn-liq','nav-btn-pif'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='none';
     });
     document.addEventListener('DOMContentLoaded',function(){
