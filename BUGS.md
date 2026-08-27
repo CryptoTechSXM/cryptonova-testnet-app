@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-08-27] Onboarding / Registration — All CryptoNover accounts opened with different referrer addr…
+- **Reporter:** @ThanksAndPraises
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
+- **Frequency:** Consistent
+- **What happened:** All CryptoNover accounts opened with different referrer addresses all revert back to my original Default address:
+0x149852b86dF80B960B99BBbF469d0f5219fa1040
+- **What was expected:** the accounts should maintain and show their referral's address as their default registered under address
+- **Submitted:** Thu, 27 Aug 2026 20:32:54 GMT
+
+
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
 - **Page:** Dashboard (index.html)
