@@ -265,6 +265,14 @@
       <p class="muted" style="margin-top:10px">No wallet yet? Install MetaMask from your device&rsquo;s app
       store and create a wallet — it is free — then paste its address here. When your coupon arrives,
       open this site inside the wallet app&rsquo;s built-in browser to register.</p>
+      <div style="background:var(--yellow-dim);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:12px;color:var(--yellow);line-height:1.6">
+        🔒 <strong>Protect your wallet.</strong> When you create a wallet you will be shown a recovery
+        phrase (also called a seed phrase) and a private key. These are your personal credentials —
+        treat them like your online banking login. <strong>Never share them with anyone</strong>, and
+        never type them into any website. Your sponsor only needs the wallet <em>address</em> (starting
+        with 0x) — nobody from CryptoNova, no sponsor, and no administrator will ever ask for your
+        recovery phrase or private key.
+      </div>
     </div>
   </div>
 
@@ -349,6 +357,21 @@ const REG_ABI = [
 ];
 const USDC_ABI = ['function approve(address,uint256) returns (bool)', 'function allowance(address,address) view returns (uint256)', 'function balanceOf(address) view returns (uint256)'];
 const TR_ABI   = ['function memberHighestTier(address) view returns (uint256)'];
+const READ_RPCS = ['https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'];
+// Is this wallet already a registered member? Read-only, works without any wallet
+// installed (Door A visitors often have none). Returns true/false, or null when no
+// RPC answered — callers decide what "unknown" means for their own risk.
+async function isRegisteredMember(addr) {
+  for (const url of READ_RPCS) {
+    try {
+      const ro = new ethers.JsonRpcProvider(url, CHAIN_ID);
+      const tr = new ethers.Contract(ADDRS.tierRouter, TR_ABI, ro);
+      const tier = await tr.memberHighestTier(addr);
+      return tier > 0n;
+    } catch (e) { /* try the next RPC */ }
+  }
+  return null;
+}
 const fmt6 = v => '$' + (Number(v) / 1e6).toFixed(2);
 const say  = (id, msg, cls) => { const el = document.getElementById(id); if (el) { el.className = 'status ' + (cls || ''); el.innerHTML = msg; } };
 
@@ -359,7 +382,16 @@ async function submitRequest() {
   const wallet = document.getElementById('req-wallet').value.trim();
   if (!/^0x[0-9a-fA-F]{40}$/.test(wallet)) { say('req-status', 'Please paste a valid wallet address (0x…, 42 characters).', 'err'); return; }
   const btn = document.getElementById('btn-request');
-  btn.disabled = true; say('req-status', '<span class="spinner"></span> Sending…');
+  btn.disabled = true; say('req-status', '<span class="spinner"></span> Checking this wallet…');
+  // 2026-08-27 (owner's find in testing): a wallet that is ALREADY a registered member
+  // must not join the waitlist — a coupon funded for it could never be redeemed
+  // (registration reverts), locking the sponsor's $10 until cancel/expiry.
+  const registered = await isRegisteredMember(wallet);
+  if (registered === true) {
+    say('req-status', '⚠️ This wallet is already a registered CryptoNova member — the waitlist is for new entries only. If you meant a different wallet, paste that address instead.', 'warn');
+    btn.disabled = false; return;
+  }
+  say('req-status', '<span class="spinner"></span> Sending…');
   try {
     const r = await fetch('/api/pif-request', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -448,6 +480,22 @@ async function makeGift() {
   const target = document.getElementById('gift-to').value.trim();
   const targeting = /^0x[0-9a-fA-F]{40}$/.test(target);
   let reserved = false;
+  if (targeting) {
+    // Same guard as Door A, on the money path: never fund a coupon a registered
+    // member cannot redeem. Catches entries that reached the list before the Door A
+    // check existed, or through the API directly. Uses the connected provider (we are
+    // connected here), falling back to the public RPCs.
+    say('make-status', '<span class="spinner"></span> Checking the recipient wallet…');
+    let recReg = null;
+    try {
+      const tr0 = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
+      recReg = (await tr0.memberHighestTier(target)) > 0n;
+    } catch (e) { recReg = await isRegisteredMember(target); }
+    if (recReg === true) {
+      say('make-status', '⚠️ That wallet is already a registered member — it cannot redeem an entry coupon. Please choose a different recipient.', 'warn');
+      btn.disabled = false; return;
+    }
+  }
   if (targeting) {
     say('make-status', '<span class="spinner"></span> Reserving this request for your sponsorship…');
     try {
