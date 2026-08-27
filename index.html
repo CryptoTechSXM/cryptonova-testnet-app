@@ -2118,6 +2118,59 @@ function pickDefaultSponsor(memberAddr) {
   } catch(_) {}
   return DEFAULT_SPONSOR_POOL[Math.floor(Math.random() * DEFAULT_SPONSOR_POOL.length)];
 }
+
+// ── REFERRER RESOLUTION HELPERS (V8.50, session 44, 2026-08-27) ─────────────
+// Written after `repro_referrer.mjs` reproduced, off this file's own source, the
+// defect two members reported the same day: "all my accounts revert back to my
+// original default address". A wallet account switch fires accountsChanged ->
+// connectWallet(true) -> loadUserData with NO PAGE RELOAD, so anything cached for
+// the FIRST account outlives it. The old code kept the default sponsor in a
+// page-lifetime global (`window._defaultReferrer`) set once; harness scenarios
+// S4/S5/S6 registered account B under account A's sponsor because of it.
+//
+// Keying the cache on the ADDRESS makes that class of staleness impossible rather
+// than merely unlikely — it cannot go wrong even if the accountsChanged handler
+// never fires (a wallet that reconnects some other way, a future refactor).
+function defaultSponsorFor(memberAddr) {
+  const key = String(memberAddr || '').toLowerCase();
+  const cached = window._defaultReferrerFor;
+  if (cached && cached.key === key) return cached.value;
+  const v = pickDefaultSponsor(memberAddr);
+  window._defaultReferrerFor = { key: key, value: v };
+  window._defaultReferrer = v;   // read-only mirror, kept in sync for older call sites
+  return v;
+}
+
+// AN ADDRESS PASTED WITH THE WRONG LETTER-CASE is a correct address that
+// `ethers.isAddress()` rejects, because isAddress enforces the EIP-55 checksum.
+// Members paste from chat messages, screenshots and hand-retypes, so 40 unambiguous
+// hex digits are treated as the address they are and re-checksummed here. Anything
+// else is a genuine typo — callers must refuse it OUT LOUD and must never swap it
+// for a rotation-pool sponsor the member did not choose (harness S8/S9).
+function normalizeAddressInput(raw) {
+  const v = String(raw == null ? '' : raw).trim().replace(/\s+/g, '');
+  if (!v) return null;
+  if (!/^0x[0-9a-fA-F]{40}$/.test(v)) return null;
+  try { return ethers.getAddress(v.toLowerCase()); } catch(_) { return null; }
+}
+
+// One-line explanation under the referrer box. Silence is what made a bad paste
+// look like a broken button: checkDefaultSponsorWarn used to disable Step 1 and
+// hide the warning at the same time, leaving nothing on screen to read.
+function setReferrerNote(msg) {
+  const inp = document.getElementById('input-referrer');
+  if (!inp || !inp.parentElement) return;
+  let el = document.getElementById('referrer-invalid-note');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'referrer-invalid-note';
+    el.style.cssText = 'font-size:12px;color:var(--red);margin-top:6px;line-height:1.5';
+    inp.parentElement.appendChild(el);
+  }
+  el.textContent = msg || '';
+  el.style.display = msg ? 'block' : 'none';
+}
+// ── end referrer resolution helpers ────────────────────────────────────────
 const RPC_EXTRA    = 'https://sepolia.base.org';
 
 // ── V8.49 item 2: THE RPC WE PUT IN A MEMBER'S WALLET ────────────────────
@@ -2926,13 +2979,35 @@ window.addEventListener('DOMContentLoaded', async () => {
           // else: spurious event — wallet still connected, ignore
         }).catch(() => {});
       } else if (accounts[0].toLowerCase() !== (userAddr||'').toLowerCase()) {
+        // V8.50 / session 44: an account switch re-runs loadUserData WITHOUT a page
+        // reload, so the referrer box and the cached default sponsor still belong to
+        // the PREVIOUS account. Reset both here. A ?ref= link is the sponsor's own
+        // link and is re-applied; anything typed for the old account is NOT inherited
+        // silently, which is what made every later account land on one address.
+        window._defaultReferrerFor = null;
+        window._defaultReferrer    = null;
+        const _ri = document.getElementById('input-referrer');
+        if (_ri && !_ri.readOnly) {   // readOnly = a coupon owns the field; leave it
+          const _urlRef = normalizeAddressInput(new URLSearchParams(window.location.search).get('ref'));
+          const _had    = String(_ri.value || '').trim();
+          _ri.value = _urlRef || '';
+          if (_had && _had.toLowerCase() !== String(_urlRef || '').toLowerCase()) {
+            toast('Wallet changed — enter the sponsor for this wallet', 'info');
+          }
+        }
+        setReferrerNote('');
+        try { checkDefaultSponsorWarn(); } catch(_) {}
         setTimeout(() => connectWallet(true).catch(()=>{}), 300);
       }
     });
   }
   const params = new URLSearchParams(window.location.search);
   if (params.get('ref')) {
-    document.getElementById('input-referrer').value = params.get('ref');
+    // Normalise so a correct address in a sponsor's link that lost its letter-case
+    // (chat apps, screenshots) still validates; keep the raw text when it is not an
+    // address at all, so the member can SEE what the link contained.
+    const _rawRef = params.get('ref');
+    document.getElementById('input-referrer').value = normalizeAddressInput(_rawRef) || _rawRef;
     showTab('register');
   }
   if (params.get('coupon')) {
@@ -4289,15 +4364,14 @@ async function loadUserData() {
     // Auto-fill referrer from URL or T1 MatA root
     const refInput = document.getElementById('input-referrer');
     if (refInput && !refInput.value) {
-      const urlRef = new URLSearchParams(window.location.search).get('ref');
-      if (urlRef && ethers.isAddress(urlRef)) {
+      const urlRef = normalizeAddressInput(new URLSearchParams(window.location.search).get('ref'));
+      if (urlRef) {
         refInput.value = urlRef;
       } else {
         // V8.45: no ?ref= link — assign a sponsor from the rotation pool
         // (deterministic hash of the member's address) so orphan registrations
         // are shared across the founding wallets instead of stacking on W1.
-        const defRef = pickDefaultSponsor(userAddr);
-        window._defaultReferrer = defRef;
+        const defRef = defaultSponsorFor(userAddr);   // V8.50: per WALLET, not per page
         refInput.placeholder = 'Auto: ' + short(defRef) + ' (default sponsor)';
       }
     }
@@ -4511,7 +4585,7 @@ async function loadRegisterTab() {
       } else {
         // Not yet approved — Step 1 is active, check referrer
         const refVal = (document.getElementById('input-referrer')?.value || '').trim();
-        const hasRef = refVal.length > 0 && ethers.isAddress(refVal);
+        const hasRef = refVal.length > 0 && !!normalizeAddressInput(refVal);  // V8.50: case-insensitive
         if (!hasRef) {
           // Show default-sponsor warning instead of activating Step 1 immediately
           document.getElementById('default-sponsor-warn').style.display = 'block';
@@ -4759,13 +4833,24 @@ async function doRegister() {
   try {
     const refInput = document.getElementById('input-referrer');
     const c = window._activeCoupon;
+    // V8.50 / session 44 (harness S8/S9): what a member TYPED is never silently
+    // replaced. A wrong-case paste is re-checksummed and accepted; a real typo stops
+    // the registration with something to read, instead of quietly placing them under
+    // a rotation-pool sponsor they never chose. Placement is money — fail loudly.
+    const _typedRaw = refInput ? String(refInput.value || '').trim() : '';
+    const _typed    = normalizeAddressInput(_typedRaw);
+    if (!c && _typedRaw && !_typed) {
+      btn.disabled = false;
+      btn.textContent = 'Step 2: Register ($10 USDC)';
+      setStatus('reg-status', 'That sponsor address is not valid. Check it and try again, or clear the box to be placed with a default sponsor.', 'err');
+      setReferrerNote('Not a wallet address — it must start with 0x followed by 40 characters.');
+      return;
+    }
     // V8.50: when a coupon is active, always use its issuer as referrer —
     // the contract enforces this on-chain too, but belt-and-suspenders here.
     const referrer = c && c.issuer && c.issuer !== ethers.ZeroAddress
       ? c.issuer
-      : (refInput && ethers.isAddress(refInput.value.trim())
-          ? refInput.value.trim()
-          : (window._defaultReferrer || pickDefaultSponsor(userAddr))); // V8.45: rotation pool, never ZeroAddress
+      : (_typed || defaultSponsorFor(userAddr)); // V8.45 rotation pool, never ZeroAddress; V8.50 resolved per WALLET
 
     // Dry-run via read provider BEFORE sending to wallet.
     // Simulates the full register logic on-chain without submitting a TX.
@@ -7419,16 +7504,40 @@ function onWithdrawDestInput() {
     if (addrEl) addrEl.textContent = userAddr ? (userAddr.slice(0,6)+'…'+userAddr.slice(-4)) : '—';
     return;
   }
-  const valid = ethers.isAddress(val);
+  // V8.50 / session 44: same family as the referrer defect found this session —
+  // ethers.isAddress() enforces the EIP-55 checksum, so a CORRECT destination pasted
+  // with the wrong letter-case read as "not an address" and getWithdrawRecipient()
+  // then quietly fell back to the connected wallet. A red border with no words next
+  // to it is not an explanation. Normalise the case, and say what is wrong when it
+  // genuinely is wrong.
+  const norm = normalizeAddressInput(val);
+  const valid = !!norm;
   if (inp) inp.style.borderColor = valid ? 'var(--green2,#22c55e)' : '#ef4444';
   if (warning) warning.style.display = valid ? 'block' : 'none';
-  if (addrEl && valid) addrEl.textContent = val.slice(0,6)+'…'+val.slice(-4)+' ✎';
+  if (addrEl && valid) addrEl.textContent = norm.slice(0,6)+'…'+norm.slice(-4)+' ✎';
+  let note = document.getElementById('withdraw-dest-note');
+  if (!note && inp && inp.parentElement) {
+    note = document.createElement('div');
+    note.id = 'withdraw-dest-note';
+    note.style.cssText = 'font-size:12px;color:#ef4444;margin-top:6px;line-height:1.5';
+    inp.parentElement.appendChild(note);
+  }
+  if (note) {
+    note.textContent = valid ? '' : 'Not a wallet address — it must start with 0x followed by 40 characters. Leave this box empty to withdraw to your connected wallet.';
+    note.style.display = valid ? 'none' : 'block';
+  }
 }
 
 function getWithdrawRecipient() {
   const inp = document.getElementById('withdraw-dest-input');
   const val = inp ? inp.value.trim() : '';
-  if (val && ethers.isAddress(val) && val.toLowerCase() !== userAddr.toLowerCase()) return val;
+  const norm = normalizeAddressInput(val);
+  // V8.50 / session 44: an unreadable destination used to return null in silence,
+  // which the callers read as "no destination given" — the member typed somewhere to
+  // send money and it went to the connected wallet with nothing said. Empty box is
+  // still a legitimate "send to me"; TEXT THAT IS NOT AN ADDRESS is not, so say so.
+  if (val && !norm) { try { toast('That destination address is not valid — withdrawing to your connected wallet instead', 'error'); } catch(_) {} }
+  if (norm && norm.toLowerCase() !== String(userAddr||'').toLowerCase()) return norm;
   return null; // null = use connected wallet (regular withdraw function)
 }
 
@@ -9187,11 +9296,11 @@ async function useDefaultSponsor() {
   const warn = document.getElementById('default-sponsor-warn');
   const btn  = document.getElementById('btn-approve');
   // V8.45: default sponsor comes from the rotation pool (deterministic by member)
-  let defRef = window._defaultReferrer;
-  if (!defRef || defRef === ethers.ZeroAddress) {
-    defRef = pickDefaultSponsor(typeof userAddr !== 'undefined' ? userAddr : null);
-    window._defaultReferrer = defRef;
-  }
+  // V8.50 / session 44: resolved PER WALLET. This button used to read the
+  // page-lifetime global, so after an account switch it handed account B the sponsor
+  // computed for account A — the button a member clicks to FIX their referrer was
+  // itself handing out the wrong one (harness S4/S6).
+  const defRef = defaultSponsorFor(typeof userAddr !== 'undefined' ? userAddr : null);
   if (inp && defRef && defRef !== ethers.ZeroAddress) {
     inp.value = defRef;
     checkDefaultSponsorWarn();
@@ -9208,15 +9317,21 @@ function checkDefaultSponsorWarn() {
   const btnApprove = document.getElementById('btn-approve');
   if (!warnEl || !btnApprove) return;
   if (btnApprove.textContent.includes('✅')) return;
-  if (val.length > 0 && ethers.isAddress(val)) {
+  // V8.50 / session 44: validate case-insensitively, and when it IS wrong say so.
+  // The old middle branch disabled Step 1 and hid the warning at the same time, so a
+  // mistyped sponsor looked like a dead button with nothing on screen to explain it.
+  if (val.length > 0 && normalizeAddressInput(val)) {
+    setReferrerNote('');
     warnEl.style.display = 'none';
     btnApprove.disabled = false;
     btnApprove.className = 'btn btn-green full-w';
   } else if (val.length > 0) {
+    setReferrerNote('Not a wallet address — it must start with 0x followed by 40 characters.');
     warnEl.style.display = 'none';
     btnApprove.disabled = true;
     btnApprove.className = 'btn btn-ghost full-w';
   } else {
+    setReferrerNote('');
     warnEl.style.display = 'block';
     btnApprove.disabled = true;
     btnApprove.className = 'btn btn-ghost full-w';
