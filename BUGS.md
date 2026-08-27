@@ -37,44 +37,6 @@
 
 ## Open Issues
 
-### [2026-08-27] Onboarding / Registration — I could not change the referral address to register my first…
-- **Reporter:** @Lavern_Gay
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x832b95a579478784fada54ad7b62c7963e21fefb
-- **Frequency:** Consistent
-- **What happened:** I could not change the referral address to register my first direct account. The address https://early.crypto-nova.app/index.html?ref=0x185B19c7D3872692981568985b21AE6F7f6BE2A4, is the address I want to register this account in the COOP. My main account address appears instead.
-- **What was expected:** I expected to register this account using the copied referral address.
-- **Notes:** I also tried to register this account in Rabby, and the same occurred.
-- **Submitted:** Thu, 27 Aug 2026 00:35:13 GMT
-
-
-### [2026-08-26] Dashboard (index.html) — Action is required because i am parked.
-there is no button t…
-- **Reporter:** CryptoJan
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x55a7ec55276094c16ceb1c7efdb0592e62d81425
-- **Frequency:** Intermittent
-- **What happened:** Action is required because i am parked.
-there is no button to approve usdc.
-It shows self rescue and co pay.
-when i select self rescue it still says i have a short fall.
-- **What was expected:** i expect the shortfall to be paid from my wallet and be entered back into the matrix.
-- **Submitted:** Wed, 26 Aug 2026 10:47:10 GMT
-
-
-### [2026-08-26] Other — Redeeming of CNova tokens - tokens are being redeemed but no…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Redeeming of CNova tokens - tokens are being redeemed but not reflecting in wallet..
-- **What was expected:** To see my usdc amount in wallet increased but not happening..
-- **Submitted:** Wed, 26 Aug 2026 00:50:39 GMT
-
-
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
 - **Page:** Dashboard (index.html)
@@ -86,17 +48,6 @@ when i select self rescue it still says i have a short fall.
 - **Notes:** PLS SORT THE GLITCH THAT IS PREVENTING US SEEING DATA ON THE CNOVA PLATFORM
 - **Screenshot:** [2026-08-22T08-59-22-438Z-Could_not_Find_Your_Status_Glitch.jpg](bug-screenshots/2026-08-22T08-59-22-438Z-Could_not_Find_Your_Status_Glitch.jpg)
 - **Submitted:** Sat, 22 Aug 2026 08:59:23 GMT
-
-
-### [2026-08-21] Other — Redeeming of CNova tokens.... 1st step of approval no proble…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Redeeming of CNova tokens.... 1st step of approval no problem, step 2, redeeming fail asking to do a hard reset which also failed..
-- **What was expected:** Easy redeeming of tokens
-- **Submitted:** Fri, 21 Aug 2026 10:38:03 GMT
 
 
 ### [2026-08-18] Dashboard (index.html) — The RPC node didn't respond after several retries — this is …
@@ -295,6 +246,10 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-27 | 2026-08-27 | Onboarding / Registration | @Lavern_Gay — could not change the referrer when registering a new account; "my main account address appears instead" (MetaMask and Rabby, consistent). BY DESIGN, POORLY EXPLAINED: a valid COUPON locks the referrer to the coupon's issuer — coupon registrations always join the funder's line, and the contract enforces it on-chain, so the UI lock is honest. The defect was silence: the field just refused edits with only a tiny "🔒 Sponsor" tag. Now an explanation renders under the field the moment the lock engages, including the way out (clear the coupon, pay the entry, choose any referrer). To register under 0x185B19c7… they must register WITHOUT a coupon funded by another wallet. | (this commit) |
+| 2026-08-26 | 2026-08-26 | Dashboard (index.html) | CryptoJan — parked, no approve button, "still a shortfall" on click, intermittent. ROOT CAUSE: both ready-gates tested `allowance >= SHORTFALL`, but the shortfall MOVES while parked, so an allowance that covered it at render failed at click — the measured 0xa0763F34 case (08-24 diag: $11.88 vs $12.50) happening to a live member. Both gates now compare against `max(fee, shortfall)`, the contract's actual pull ceiling, so READY can never go stale. Shipped with the V8.50 cutover; his position reset at noon regardless. Reporter added to fund_list (wallet #111). | `1b0ed5f` |
+| 2026-08-26 | 2026-08-26 | Other | Sherwyn — "tokens are being redeemed but not reflecting in wallet". CLOSED BY MEASUREMENT (`scripts/diag_sherwyn_redeem.js`, read-only, refuses non-v8_48 addresses): BOTH redeems succeeded AND paid — $6.571675 (08-25, tx 0xab637c8d…) and $0.566131 (08-26, tx 0xcf03f2b7…). The 45% early-exit penalty (joined <30d) withheld $5.84 of $12.98 gross, and a sub-$7 bump on a wallet holding $30,065 USDC is easy to miss. NOT A BUG — penalty disclosure did its job on-chain; closed on the old chain the morning of the V8.50 cutover. | (diagnosis only — no code change) |
+| 2026-08-21 | 2026-08-26 | Other | Sherwyn — redeem "step 2 fail asking to do a hard reset". Same wallet and path as his 2026-08-26 ticket; superseded by it and closed by the same measurement — the redeems that mattered went through and paid. Old-chain (V8.48) report; the redeem path it exercised retired with that chain at the cutover. | (diagnosis only — no code change) |
 | 2026-08-24 | 2026-08-24 | Dashboard (index.html) | @Koach100 — approved USDC, then the Self Rescue button never appeared ("this also happened with another account"). ROOT CAUSE: `approveSelfRescue` granted the EXACT shortfall, and the button visibility test is `allowance < shortfall`. The shortfall moves while a member is parked because earnings keep landing, so a single cent of drift flipped that test back to true on the next 30-second poll and re-dimmed the Self Rescue button to opacity 0.5 — invisible on a dark phone screen. This is the SAME symptom recorded in the 2026-07-29 in-code note, which was treated as fixed then; the exact-amount approval is what kept re-triggering it. Now approves the full `ENTRY_FEE`, which is the maximum `_selfRescue` can ever pull (`shortfall = entryFee - effectiveContrib`, floored at 0), so the approval cannot go stale. Only the actual shortfall is ever taken. | `ca66731` |
 | 2026-08-21 | 2026-08-24 | Other | Sherwyn — "Approving of self rescue fail.. On Chain error message display... On all my accounts." Same root cause as the 2026-08-24 ticket: an exact-shortfall approval that no longer covered what `safeTransferFrom` pulled, so the rescue reverted on allowance. CONFIRMED INDEPENDENTLY ON-CHAIN 2026-08-24 by `scripts/diag_parked_solvency.js`: of 41 past-grace parked positions, exactly ONE held any allowance at all — $11.88 standing against a $12.50 shortfall, i.e. a member who followed the instructions and was left $0.62 short. | `ca66731` |
 | 2026-08-21 | 2026-08-24 | Bug Report Page | Sherwyn — withdrew his own report nine minutes after filing it ("self rescue was approved.. All accounts were able to self rescue now... so cancelled last report"). WITHDRAWN BY THE REPORTER BUT THE BUG WAS REAL. Intermittent success is exactly what a drifting shortfall produces — sometimes the exact-amount approval still covers it, sometimes it does not — and the same defect recurred for @Koach100 three days later. Closed by the fix rather than as invalid, and the bounty stands. | `ca66731` |

@@ -657,7 +657,8 @@
   var h=location.hostname;
   var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
   if(!isAdmin){
-    ['nav-btn-buy','nav-btn-gov','nav-btn-liq','nav-btn-pif'].forEach(function(id){
+    // nav-btn-pif removed 2026-08-27: PIF is LAUNCHED — buy/gov/liq stay gated.
+    ['nav-btn-buy','nav-btn-gov','nav-btn-liq'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='none';
     });
     document.addEventListener('DOMContentLoaded',function(){
@@ -4551,6 +4552,8 @@ async function validateCouponCode() {
   if (youPayRow)   youPayRow.style.display   = 'none';
   // Unlock referrer field whenever coupon is cleared/invalid
   const refInput = document.getElementById('input-referrer');
+  const _lockNote = document.getElementById('coupon-ref-lock-note');
+  if (_lockNote) _lockNote.style.display = 'none';
   if (!code) {
     if (statusEl) statusEl.textContent = '';
     if (refInput) { refInput.readOnly = false; refInput.style.opacity = ''; refInput.style.cursor = ''; }
@@ -4587,6 +4590,17 @@ async function validateCouponCode() {
       // Suppress the no-referrer warning — issuer is the sponsor
       const sponsorWarn = document.getElementById('default-sponsor-warn');
       if (sponsorWarn) sponsorWarn.style.display = 'none';
+      // 2026-08-27 (@Lavern_Gay's report): the lock with no explanation reads as a
+      // BUG to a member trying to set a different referrer. Say why, right here.
+      let lockNote = document.getElementById('coupon-ref-lock-note');
+      if (!lockNote) {
+        lockNote = document.createElement('div');
+        lockNote.id = 'coupon-ref-lock-note';
+        lockNote.style.cssText = 'font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5';
+        refInput.parentElement.appendChild(lockNote);
+      }
+      lockNote.innerHTML = '🔒 This coupon sets your referrer to the member who funded it — coupon registrations always join the sponsor\'s line (enforced on-chain, cannot be edited). To register under a different referrer, clear the coupon code and pay the entry yourself.';
+      lockNote.style.display = '';
     }
     const issuerShort = (issuer && issuer !== ethers.ZeroAddress)
       ? ' &nbsp;<span style="font-size:11px;color:var(--text3)">&#128274; Sponsor: ' + issuer.slice(0,6) + '…' + issuer.slice(-4) + '</span>'

@@ -342,8 +342,9 @@
   var h=location.hostname;
   var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
   if(!isAdmin){
-    ['nav-lnk-buy-m','nav-lnk-gov-m','nav-lnk-liq-m','nav-lnk-pif-m',
-     'nav-lnk-buy','nav-lnk-gov','nav-lnk-liq','nav-lnk-pif'].forEach(function(id){
+    // nav-lnk-pif(+-m) removed 2026-08-27: PIF is LAUNCHED — buy/gov/liq stay gated.
+    ['nav-lnk-buy-m','nav-lnk-gov-m','nav-lnk-liq-m',
+     'nav-lnk-buy','nav-lnk-gov','nav-lnk-liq'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='none';
     });
   }

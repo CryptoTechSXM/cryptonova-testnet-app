@@ -1,0 +1,22 @@
+🤝 NEW: PAY IT FORWARD IS LIVE
+
+Hey team 👋
+
+Today we launch something I am very proud of — Pay It Forward, our community sponsorship program. You will see the new 🤝 Pay It Forward tab in the menu right now.
+
+💡 WHAT IT IS
+Not everyone can afford the $10 entry — and every one of us got our start somewhere. Pay It Forward lets an existing member gift a full entry to someone who cannot yet afford one. It is a gift, not a loan. Nothing is repaid, ever. The only ask: when your position starts earning, gift one entry to the next person on the list.
+
+🙋 NEED AN ENTRY?
+Open the Pay It Forward page and add your wallet to the waitlist. When a member sponsors you, you receive a coupon code that covers your registration completely — you pay $0. No wallet yet? The page walks you through creating one for free.
+
+💚 WANT TO SPONSOR SOMEONE?
+Your $10 funds an entry coupon on-chain. Pick someone from the waitlist, or gift someone you know personally. Your recipient is seated IN YOUR LINE — you grow together. One active gift at a time, and any unused coupon can be cancelled for a full refund. The page shows every coupon you have ever funded and exactly what happened to it.
+
+🔒 STAY SAFE
+Your sponsor only ever needs your wallet ADDRESS (starting with 0x). Nobody from CryptoNova — no sponsor, no admin — will EVER ask for your recovery phrase or private key. Never share them with anyone.
+
+🐛 As always, the $1 bug bounty is active — see something off, hit the report button on any page and get paid.
+
+Open the door. Hold it open for the next person. 🤝
+crypto-nova.app
