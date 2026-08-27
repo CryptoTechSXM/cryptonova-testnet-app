@@ -152,6 +152,13 @@
     .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--text3); border-top-color: var(--green); border-radius: 50%; animation: spin 1s linear infinite; vertical-align: -2px; margin-right: 5px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .pledge { text-align: center; color: var(--text3); font-size: 13px; padding: 24px 16px 4px; line-height: 1.6; }
+
+    /* ── Desktop sub-nav (standard page chrome; hidden on mobile where ☰ takes over) ─── */
+    .sub-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 8px;position:sticky;top:57px;z-index:99;overflow-x:auto;}
+    .sub-nav a{color:var(--text2);text-decoration:none;padding:13px 16px;font-size:14px;font-weight:500;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+    .sub-nav a:hover{color:var(--text);}
+    .sub-nav a.active{color:var(--green);border-bottom-color:var(--green);font-weight:600;}
+    @media(max-width:768px){.sub-nav{display:none;}}
   </style>
 </head>
 <body>
@@ -177,9 +184,34 @@
     <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
     <a href="index.html">🏠 Home</a>
     <a href="pif.html" class="active">🤝 Pay It Forward</a>
+    <a id="nav-lnk-buy-m" href="buy.html">💎 Buy CNOVA</a>
+    <a id="nav-lnk-gov-m" href="governance.html">⚖️ Governance</a>
+    <a id="nav-lnk-liq-m" href="liquidity.html">💧 Liquidity</a>
     <a href="status.html">🛡️ Status</a>
   </div>
 </header>
+
+<nav class="sub-nav">
+  <a href="index.html" class="nav-link">🏠 Home</a>
+  <a href="pif.html" class="nav-link active">🤝 Pay It Forward</a>
+  <a id="nav-lnk-buy" href="buy.html" class="nav-link">💎 Buy CNOVA</a>
+  <a id="nav-lnk-gov" href="governance.html" class="nav-link">⚖️ Governance</a>
+  <a id="nav-lnk-liq" href="liquidity.html" class="nav-link">💧 Liquidity</a>
+  <a href="status.html" class="nav-link">🛡️ Status</a>
+</nav>
+<script>
+/* Feature gate — hide Buy/Governance/Liquidity links on non-admin domains (status.html pattern) */
+(function(){
+  var h=location.hostname;
+  var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
+  if(!isAdmin){
+    ['nav-lnk-buy-m','nav-lnk-gov-m','nav-lnk-liq-m',
+     'nav-lnk-buy','nav-lnk-gov','nav-lnk-liq'].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.style.display='none';
+    });
+  }
+})();
+</script>
 
 <main>
   <!-- ── Hero ─── -->
