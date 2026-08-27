@@ -607,7 +607,7 @@ async function makeGift() {
   // 2026-08-26 (owner's find): reserve the waitlist entry BEFORE any money moves, or
   // two wallets can fund the same person and the second coupon is an orphan. The API's
   // sha-guarded commit makes this atomic; a reservation is released on failure and
-  // self-expires after 60 min if a gifter walks away mid-funding.
+  // self-expires after 15 minutes if a gifter walks away mid-funding.
   const target = document.getElementById('gift-to').value.trim();
   const targeting = /^0x[0-9a-fA-F]{40}$/.test(target);
   let reserved = false;
@@ -703,7 +703,7 @@ async function makeGift() {
     say('make-status', '', '');
     setTimeout(pifShare, 600);   // pop the share sheet right away, like the dashboard coupon flow
     // Mark the waitlist entry gifted. NOT fire-and-forget any more (2026-08-27): if this
-    // flip fails silently the row sits RESERVED, self-expires in 60 min, and the
+    // flip fails silently the row sits RESERVED, self-expires in 15 minutes, and the
     // double-fund window reopens. Awaited, one retry, and the sponsor is told on failure.
     if (targeting) {
       let flipped = false;
@@ -789,14 +789,15 @@ async function loadWaitlist() {
     if (!rows.length) { box.innerHTML = '<p class="muted">No open requests at the moment.</p>'; return; }
     box.innerHTML = rows.map(l => {
       // 2026-08-27 (owner's find: a walked-away funder froze a row on "BEING GIFTED
-      // NOW" forever). The API re-claims a reservation older than 60 min — but this
-      // renderer never applied that clock, so the Sponsor button never returned and
-      // nothing ever re-claimed it. Same 60-min rule here now: a stale reservation
-      // renders as WAITING again, and a fresh one says when it frees.
+      // NOW" forever). The API re-claims a stale reservation — but this renderer
+      // never applied that clock, so the Sponsor button never returned and nothing
+      // ever re-claimed it. Same rule here now (15 MINUTES, owner 2026-08-27 — must
+      // match api/pif-request.js): a stale reservation renders as WAITING again,
+      // and a fresh one says when it frees.
       const mRes = l.match(/^- \[RESERVED by [^\]@]+ @(\d+)\]/);
       const resAge = mRes ? Math.floor(Date.now() / 1000) - Number(mRes[1]) : 0;
-      const isReserved = !!mRes && resAge < 3600;
-      const freesMin = isReserved ? Math.max(1, Math.ceil((3600 - resAge) / 60)) : 0;
+      const isReserved = !!mRes && resAge < 900;
+      const freesMin = isReserved ? Math.max(1, Math.ceil((900 - resAge) / 60)) : 0;
       const parts = l.replace(/^- \[(?:WAITING|RESERVED[^\]]*)\] /, '').split(' · ');
       const date = parts[0] || '', wallet = parts[1] || '', name = parts[2] || 'anonymous';
       const rest = parts.slice(3).join(' · ');

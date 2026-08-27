@@ -88,7 +88,9 @@ export default async function handler(req, res) {
       // Reserving flips [WAITING] -> [RESERVED by X @epoch] BEFORE any money moves;
       // the sha-guarded PUT below is compare-and-swap, so concurrent reserves lose
       // cleanly (409 -> retry -> sees RESERVED -> conflict). A reservation older than
-      // 60 min is re-claimable so abandoned funding never strands a waiting person.
+      // 15 MINUTES is re-claimable (owner, 2026-08-27: an hour-long hold made ready
+      // sponsors wait behind a walkaway; 15 min still covers a slow human working
+      // through the two wallet confirmations, which is what actually spends the clock).
       const by = clean(b.by, 42);
       const nowE = Math.floor(Date.now() / 1000);
       const reW = new RegExp(`^(- )\\[WAITING\\](.*${wallet.slice(2, 10)}.*)$`, 'mi');
@@ -98,7 +100,7 @@ export default async function handler(req, res) {
       } else {
         const m = content.match(reR);
         if (!m) return res.status(404).json({ error: 'not on the waitlist (already gifted?)' });
-        if (nowE - Number(m[2]) < 3600) return res.status(409).json({ error: 'someone is already gifting this person' });
+        if (nowE - Number(m[2]) < 900) return res.status(409).json({ error: 'someone is already gifting this person' });
         content = content.replace(reR, `$1[RESERVED by ${by || 'a member'} @${nowE}]$3`);
       }
     } else if (action === 'unreserve') {
