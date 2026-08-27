@@ -394,7 +394,7 @@ async function submitRequest() {
         website: document.getElementById('req-website').value })
     });
     const j = await r.json().catch(() => ({}));
-    if (r.ok && j.ok) { say('req-status', j.note === 'already listed' ? '✅ You are already on the waitlist.' : '✅ Your request has been added to the waitlist. Adding a contact handle helps your sponsor reach you.', 'ok'); loadWaitlist(); }
+    if (r.ok && j.ok) { say('req-status', j.note === 'already listed' ? '✅ You are already on the waitlist.' : '✅ Your request has been added to the waitlist. Adding a contact handle helps your sponsor reach you.', 'ok'); loadWaitlist(true); }
     else say('req-status', '❌ ' + (j.error || 'Your request could not be saved — please try again shortly.'), 'err');
   } catch (e) { say('req-status', '❌ Network error — please try again.', 'err'); }
   btn.disabled = false;
@@ -639,15 +639,15 @@ async function makeGift() {
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         say('make-status', '⚠️ ' + (j.error || 'This request could not be reserved') + ' — please choose another request or refresh the list.', 'warn');
-        btn.disabled = false; loadWaitlist(); return;
+        btn.disabled = false; loadWaitlist(true); return;
       }
-      reserved = true; loadWaitlist();
+      reserved = true; loadWaitlist(true);
     } catch (e) { say('make-status', '⚠️ The waitlist could not be reached — please try again.', 'warn'); btn.disabled = false; return; }
   }
   const releaseReservation = () => {
     if (!reserved) return;
     fetch('/api/pif-request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'unreserve', wallet: target }) }).then(() => loadWaitlist()).catch(() => {});
+      body: JSON.stringify({ action: 'unreserve', wallet: target }) }).then(() => loadWaitlist(true)).catch(() => {});
   };
   try {
     const usdc = new ethers.Contract(ADDRS.usdc, USDC_ABI, signer);
@@ -718,7 +718,7 @@ async function makeGift() {
         } catch (e) { /* retry once */ }
       }
       if (!flipped) say('make-status', '⚠️ Your gift is funded, but the waitlist could not be updated — please tell the admin so the list is corrected.', 'warn');
-      loadWaitlist();
+      loadWaitlist(true);
     }
     await refreshActiveGift();
     document.getElementById('gift-result').classList.remove('hidden');  // keep visible after refresh hides maker
@@ -783,11 +783,21 @@ function pifShare() {
 }
 
 // ── Waitlist ───────────────────────────────────────────────────────────────
-async function loadWaitlist() {
+async function loadWaitlist(fresh) {
   const box = document.getElementById('waitlist');
   try {
-    const r = await fetch('/PIF_WAITLIST.md', { cache: 'no-store' });
-    const txt = await r.text();
+    // V8.50 / session 44 (handoff 43.10): read the list from the API, which serves
+    // the branch the API also WRITES to. Reading `/PIF_WAITLIST.md` read whatever
+    // static copy this deployment happened to ship — on www that was the launch seed
+    // and the list could never fill. It also failed silently: a 404 returns an HTML
+    // error page, `rows` comes back empty, and the member is told "No open requests"
+    // — a failed read wearing the face of good news, which is the one failure mode
+    // this codebase has a standing rule against.
+    const r = await fetch('/api/pif-request' + (fresh ? '?fresh=1' : ''), { cache: 'no-store' });
+    if (!r.ok) throw new Error('waitlist API ' + r.status);
+    const j = await r.json();
+    if (!j || j.ok !== true || typeof j.content !== 'string') throw new Error('waitlist API returned no list');
+    const txt = j.content;
     const rows = txt.split('\n').filter(l => l.startsWith('- [WAITING]') || l.startsWith('- [RESERVED'));
     if (!rows.length) { box.innerHTML = '<p class="muted">No open requests at the moment.</p>'; return; }
     box.innerHTML = rows.map(l => {
@@ -811,9 +821,15 @@ async function loadWaitlist() {
         ${isReserved ? `<span class="muted">a member is funding this sponsorship… (frees in ~${freesMin} min if not completed)</span>` : `<button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="document.getElementById('gift-to').value='${wallet}';window.scrollTo({top:document.getElementById('gift-panel').offsetTop||400,behavior:'smooth'})">💚 Sponsor</button>`}
       </div>`;
     }).join('') + `<p class="muted">${rows.length} open request(s) · sponsored entries are removed from this list automatically</p>`;
-  } catch (e) { box.innerHTML = '<p class="muted">The list could not be loaded — please refresh to retry.</p>'; }
+  } catch (e) {
+    // Say WHICH of the two it is. "No open requests" and "we could not read the
+    // list" look identical to a member, and only one of them means nobody needs
+    // sponsoring — so an unreadable list must never borrow the empty one's words.
+    console.warn('loadWaitlist failed:', e);
+    box.innerHTML = '<p class="muted">⚠️ The waiting list could not be loaded just now. This is a display problem on our side, not an empty list — please refresh in a moment.</p>';
+  }
 }
-loadWaitlist();
+loadWaitlist();   // first paint may use the 30s shared cache
 </script>
 
     <!-- Bug Report Footer -->

@@ -56,10 +56,33 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST')    return res.status(405).json({ error: 'POST only' });
-
   const token = process.env.GITHUB_TOKEN;
   if (!token) return res.status(500).json({ error: 'server not configured' });
+
+  // ── GET = read the list (V8.50 / session 44, handoff 43.10) ────────────────
+  // ⛔ WHY THIS EXISTS. pif.html used to render `/PIF_WAITLIST.md` — its OWN
+  // deployment's static copy — while every request here commits to GH_BRANCH.
+  // On www (main) that made the waitlist permanently empty: requesters never saw
+  // themselves and sponsors saw nobody to sponsor, on the day PIF was announced.
+  // Requests were being captured the whole time; only the list half was broken.
+  // Pushing admin -> main was a stopgap that re-broke with the very next request.
+  // The list is now served from the same branch it is written to — ONE source of
+  // truth, and it stays correct on whatever branch the page happens to be served
+  // from. If GH_BRANCH ever changes, both halves move together by construction.
+  if (req.method === 'GET') {
+    const get = await ghRequest('GET', `/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}`, null, token);
+    if (get.status !== 200 || !get.body.content) return res.status(502).json({ error: 'waitlist unavailable' });
+    const content = Buffer.from(get.body.content, 'base64').toString('utf-8');
+    // A page load must not cost a GitHub API call every time. 30s of shared cache
+    // is invisible to a member reading the list — but a page that has just changed
+    // the list asks with ?fresh=1 and gets an uncached read, so a member never sees
+    // their own request or reservation missing from the refresh right after it.
+    const fresh = 'fresh' in (req.query || {});
+    res.setHeader('Cache-Control', fresh ? 'no-store' : 's-maxage=30, stale-while-revalidate=120');
+    return res.status(200).json({ ok: true, branch: GH_BRANCH, sha: get.body.sha, content });
+  }
+
+  if (req.method !== 'POST')    return res.status(405).json({ error: 'POST only' });
 
   const b = req.body || {};
   if (b.website) return res.status(200).json({ ok: true });   // honeypot: pretend success
