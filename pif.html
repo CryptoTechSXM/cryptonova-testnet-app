@@ -446,29 +446,80 @@ function rememberCode(hash, code) {
   try { const st = codeStore(); st[hash] = code; localStorage.setItem('cnova_pif_codes', JSON.stringify(st)); } catch (e) {}
 }
 
-// One active gift per member (owner dial 2) + the full ledger, from one scan.
+// ── The scan layer (rebuilt 2026-08-27 after the first ledger deploy failed live) ──
+// The first version queried logs through the WALLET's RPC from DEPLOY_BLOCK in one
+// call. Wallet RPCs hard-cap eth_getLogs ranges, and the range grows ~43k blocks/day,
+// so every connect died with "could not verify" once the chain was a day old. Now:
+// public read RPCs (never the wallet), chunks under every public cap, and a
+// per-wallet localStorage cache so only NEW blocks are scanned on later visits.
+const SCAN_CHUNK = 9000;
+function roProvider() {
+  for (const url of READ_RPCS) { try { return new ethers.JsonRpcProvider(url, CHAIN_ID); } catch (e) {} }
+  return provider;   // last resort only
+}
+function scanCacheKey() { return 'cnova_pif_scan:' + me.toLowerCase(); }
+function loadScanCache() {
+  try { const c = JSON.parse(localStorage.getItem(scanCacheKey()) || 'null');
+        if (c && Array.isArray(c.issued)) return c; } catch (e) {}
+  return { last: DEPLOY_BLOCK - 1, issued: [], redeemed: [], cancelled: [], reclaimed: [] };
+}
+function saveScanCache(c) {
+  c.redeemed  = [...new Set(c.redeemed)];
+  c.cancelled = [...new Set(c.cancelled)];
+  c.reclaimed = [...new Set(c.reclaimed)];
+  try { localStorage.setItem(scanCacheKey(), JSON.stringify(c)); } catch (e) {}
+}
+// Optimistic local marks: a tx this page just confirmed is real regardless of how far
+// the public RPC's view lags — without these, a cancel still shows ACTIVE on refresh.
+function markLocal(kind, hash, extra) {
+  const c = loadScanCache();
+  if (kind === 'issued') { if (!c.issued.some(x => x.h === hash)) c.issued.push({ h: hash, exp: extra.exp, amt: extra.amt }); }
+  else c[kind].push(hash);
+  saveScanCache(c);
+}
+async function scanCoupons(regRO, latest) {
+  const cache = loadScanCache();
+  const seen = new Set(cache.issued.map(x => x.h));
+  let from = cache.last + 1;
+  while (from <= latest) {
+    const to = Math.min(from + SCAN_CHUNK - 1, latest);
+    const [iss, red, can, rec] = await Promise.all([
+      regRO.queryFilter(regRO.filters.CouponIssued(null, me),   from, to),
+      regRO.queryFilter(regRO.filters.CouponRedeemed(null, me), from, to),
+      regRO.queryFilter(regRO.filters.CouponCancelled(null, me), from, to),
+      regRO.queryFilter(regRO.filters.CouponReclaimed(null, me), from, to),
+    ]);
+    for (const lg of iss) if (!seen.has(lg.args.codeHash)) { seen.add(lg.args.codeHash);
+      cache.issued.push({ h: lg.args.codeHash, exp: Number(lg.args.expiry), amt: Number(lg.args.amount) }); }
+    for (const lg of red) cache.redeemed.push(lg.args.codeHash);
+    for (const lg of can) cache.cancelled.push(lg.args.codeHash);
+    for (const lg of rec) cache.reclaimed.push(lg.args.codeHash);
+    cache.last = to; from = to + 1;
+  }
+  saveScanCache(cache);
+  return cache;
+}
+
+// One active gift per member (owner dial 2) + the full ledger, from the cached scan.
 async function refreshActiveGift() {
   const el = document.getElementById('gift-active');
   const box = document.getElementById('my-coupons');
   try {
-    const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, provider);
-    const [issued, redeemed, cancelled, reclaimed] = await Promise.all([
-      reg.queryFilter(reg.filters.CouponIssued(null, me),   DEPLOY_BLOCK),
-      reg.queryFilter(reg.filters.CouponRedeemed(null, me), DEPLOY_BLOCK),
-      reg.queryFilter(reg.filters.CouponCancelled(null, me), DEPLOY_BLOCK),
-      reg.queryFilter(reg.filters.CouponReclaimed(null, me), DEPLOY_BLOCK),
-    ]);
-    const redeemedSet  = new Set(redeemed.map(l => l.args.codeHash));
-    const cancelledSet = new Set(cancelled.map(l => l.args.codeHash));
-    const reclaimedSet = new Set(reclaimed.map(l => l.args.codeHash));
+    el.innerHTML = '<span class="muted"><span class="spinner"></span>reading your coupon history…</span>';
+    const ro = roProvider();
+    const regRO = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, ro);
+    const latest = await ro.getBlockNumber();
+    const data = await scanCoupons(regRO, latest);
+    const redeemedSet  = new Set(data.redeemed);
+    const cancelledSet = new Set(data.cancelled);
+    const reclaimedSet = new Set(data.reclaimed);
     const now = Math.floor(Date.now() / 1000);
     const known = codeStore();
     let liveHash = null;
     const rows = [];
-    for (const lg of issued.slice().reverse()) {   // newest first
-      const hash = lg.args.codeHash;
-      const expiry = Number(lg.args.expiry);
-      const amt = fmt6(lg.args.amount);
+    for (const c of data.issued.slice().reverse()) {   // newest first
+      const hash = c.h, expiry = c.exp;
+      const amt = fmt6(c.amt);
       const expDate = new Date(expiry * 1000).toISOString().slice(0, 10);
       let status, actions = '';
       if (redeemedSet.has(hash)) {
@@ -486,11 +537,12 @@ async function refreshActiveGift() {
         status = '<span class="tag" style="background:var(--yellow-dim);color:var(--yellow)">⌛ EXPIRED — unused</span>';
         actions = `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="reclaimOne('${hash}')">💸 Reclaim ${amt}</button>`;
       }
+      const isOpen = !redeemedSet.has(hash) && !cancelledSet.has(hash) && !reclaimedSet.has(hash);
       const codeLabel = known[hash]
         ? `<span style="font-family:monospace;color:var(--text)">${known[hash]}</span>`
         : `<span style="font-family:monospace" title="the code was shown on the device that created this coupon">${hash.slice(0, 10)}…</span>`;
       rows.push(`<div class="row"><div style="flex:1;min-width:200px">${status} ${codeLabel}
-        <div class="muted">${amt} · ${expiry > now && !redeemedSet.has(hash) && !cancelledSet.has(hash) && !reclaimedSet.has(hash) ? 'expires' : 'expiry was'} ${expDate}</div></div>
+        <div class="muted">${amt} · ${isOpen && expiry > now ? 'expires' : 'expiry was'} ${expDate}</div></div>
         <div>${actions}</div></div>`);
     }
     if (rows.length) {
@@ -506,7 +558,9 @@ async function refreshActiveGift() {
       el.innerHTML = '<span class="ok">None — you can sponsor an entry ✅</span>';
       document.getElementById('gift-maker').classList.remove('hidden');
     }
-  } catch (e) { el.innerHTML = '<span class="muted">could not verify — please refresh</span>'; }
+  } catch (e) {
+    el.innerHTML = '<span class="muted">could not read your coupon history — please refresh</span>';
+  }
 }
 
 // "Redirect to another party": the same code, shared with someone else — the chain
@@ -523,6 +577,7 @@ async function reclaimOne(codeHash) {
     const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
     say('make-status', '<span class="spinner"></span> Reclaiming — confirm in wallet…');
     const tx = await reg.reclaimCoupon(codeHash); await tx.wait();
+    markLocal('reclaimed', codeHash);
     say('make-status', '✅ Reclaimed — your USDC has been returned to your wallet.', 'ok');
     await refreshActiveGift();
   } catch (e) { say('make-status', '❌ ' + (e.shortMessage || 'reclaim failed').slice(0, 120), 'err'); }
@@ -533,6 +588,7 @@ async function cancelActive(codeHash) {
     const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
     say('make-status', '<span class="spinner"></span> Cancelling — confirm in wallet…');
     const tx = await reg.cancelCoupon(codeHash); await tx.wait();
+    markLocal('cancelled', codeHash);
     say('make-status', '✅ Cancelled — your $10.00 has been returned to your wallet.', 'ok');
     await refreshActiveGift();
   } catch (e) { say('make-status', '❌ ' + (e.shortMessage || 'cancel failed').slice(0, 120), 'err'); }
@@ -639,6 +695,7 @@ async function makeGift() {
       btn.disabled = false; return;
     }
     funded = true;
+    markLocal('issued', codeHash, { exp: Math.floor(Date.now() / 1000) + 30 * 86400, amt: Number(couponAmt) });
     activeCode = code;
     rememberCode(codeHash, code);   // per-browser, so "share again" works on return visits
     document.getElementById('gift-code').textContent = code;
