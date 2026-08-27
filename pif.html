@@ -788,7 +788,15 @@ async function loadWaitlist() {
     const rows = txt.split('\n').filter(l => l.startsWith('- [WAITING]') || l.startsWith('- [RESERVED'));
     if (!rows.length) { box.innerHTML = '<p class="muted">No open requests at the moment.</p>'; return; }
     box.innerHTML = rows.map(l => {
-      const isReserved = l.startsWith('- [RESERVED');
+      // 2026-08-27 (owner's find: a walked-away funder froze a row on "BEING GIFTED
+      // NOW" forever). The API re-claims a reservation older than 60 min — but this
+      // renderer never applied that clock, so the Sponsor button never returned and
+      // nothing ever re-claimed it. Same 60-min rule here now: a stale reservation
+      // renders as WAITING again, and a fresh one says when it frees.
+      const mRes = l.match(/^- \[RESERVED by [^\]@]+ @(\d+)\]/);
+      const resAge = mRes ? Math.floor(Date.now() / 1000) - Number(mRes[1]) : 0;
+      const isReserved = !!mRes && resAge < 3600;
+      const freesMin = isReserved ? Math.max(1, Math.ceil((3600 - resAge) / 60)) : 0;
       const parts = l.replace(/^- \[(?:WAITING|RESERVED[^\]]*)\] /, '').split(' · ');
       const date = parts[0] || '', wallet = parts[1] || '', name = parts[2] || 'anonymous';
       const rest = parts.slice(3).join(' · ');
@@ -796,7 +804,7 @@ async function loadWaitlist() {
         <span class="tag tag-wait">${isReserved ? '💛 BEING GIFTED NOW' : 'WAITING'}</span> <strong style="font-size:13px">${name}</strong>
         <div class="muted" style="font-family:monospace">${wallet}</div>
         ${rest ? `<div class="muted">${rest}</div>` : ''}</div>
-        ${isReserved ? '<span class="muted">a member is funding this sponsorship…</span>' : `<button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="document.getElementById('gift-to').value='${wallet}';window.scrollTo({top:document.getElementById('gift-panel').offsetTop||400,behavior:'smooth'})">💚 Sponsor</button>`}
+        ${isReserved ? `<span class="muted">a member is funding this sponsorship… (frees in ~${freesMin} min if not completed)</span>` : `<button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="document.getElementById('gift-to').value='${wallet}';window.scrollTo({top:document.getElementById('gift-panel').offsetTop||400,behavior:'smooth'})">💚 Sponsor</button>`}
       </div>`;
     }).join('') + `<p class="muted">${rows.length} open request(s) · sponsored entries are removed from this list automatically</p>`;
   } catch (e) { box.innerHTML = '<p class="muted">The list could not be loaded — please refresh to retry.</p>'; }
