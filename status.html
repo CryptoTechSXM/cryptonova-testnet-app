@@ -330,7 +330,8 @@
     <button id="btn-connect-m" class="btn-connect-mob" onclick="connectWallet()">Connect Wallet</button>
     <a href="index.html">🏠 Home</a>
     <a href="index.html#dashboard">📊 Dashboard</a>
-    <a id="nav-lnk-buy-m" href="buy.html">💰 Buy CNOVA</a>
+    <a id="nav-lnk-pif-m" href="pif.html">🤝 Pay It Forward</a>
+    <a id="nav-lnk-buy-m" href="buy.html">💎 Buy CNOVA</a>
     <a id="nav-lnk-gov-m" href="governance.html">⚖️ Governance</a>
     <a id="nav-lnk-liq-m" href="liquidity.html">💧 Liquidity</a>
     <a href="status.html" class="active">🛡️ Status</a>
@@ -341,8 +342,8 @@
   var h=location.hostname;
   var isAdmin=h==='admin.crypto-nova.app'||h==='localhost'||h==='127.0.0.1';
   if(!isAdmin){
-    ['nav-lnk-buy-m','nav-lnk-gov-m','nav-lnk-liq-m',
-     'nav-lnk-buy','nav-lnk-gov','nav-lnk-liq'].forEach(function(id){
+    ['nav-lnk-buy-m','nav-lnk-gov-m','nav-lnk-liq-m','nav-lnk-pif-m',
+     'nav-lnk-buy','nav-lnk-gov','nav-lnk-liq','nav-lnk-pif'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='none';
     });
   }
@@ -352,6 +353,7 @@
 <nav class="sub-nav">
   <a href="index.html" class="nav-link">🏠 Home</a>
   <a href="index.html#dashboard" class="nav-link">📊 Dashboard</a>
+  <a id="nav-lnk-pif" href="pif.html" class="nav-link">🤝 Pay It Forward</a>
   <a id="nav-lnk-buy" href="buy.html" class="nav-link">💎 Buy CNOVA</a>
   <a id="nav-lnk-gov" href="governance.html" class="nav-link">⚖️ Governance</a>
   <a id="nav-lnk-liq" href="liquidity.html" class="nav-link">💧 Liquidity</a>
