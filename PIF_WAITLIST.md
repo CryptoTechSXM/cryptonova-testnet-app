@@ -13,4 +13,4 @@ themselves NEVER appear here — they live between gifter and recipient.
 - [WAITING] 2026-08-27 · 0x7a245ED3799D31C0D90BA0cfe3191c0CF9a46FBa · Mers · testing · contact: @mers
 - [GIFTED by 0x8E2d89…aAcC 2026-08-27] 2026-08-27 · 0x2b3a87b814D4Ac14E96c2E6303C9e69aA99089A1 · PIF 05 · Testing PIF · contact: @TestinPIF
 - [GIFTED by 0x439247…9871 2026-08-27] 2026-08-27 · 0xcD3720Bd13a6c56B62b7E83cbb7f00Cf7aF29279 · PIF 06 · PIF 06 Testing · contact: @PIF06
-- [RESERVED by 0xD9D1C6…fF77 @1787858353] 2026-08-27 · 0xcD3720Bd13a6c56B62b7E83cbb7f00Cf7aF29277 · test · test · contact: @trestier
+- [GIFTED by 0xD9D1C6…fF77 2026-08-27] 2026-08-27 · 0xcD3720Bd13a6c56B62b7E83cbb7f00Cf7aF29277 · test · test · contact: @trestier
