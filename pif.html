@@ -299,6 +299,7 @@
         <button class="btn btn-green" id="btn-gift" onclick="makeGift()">💚 Fund a $10 entry coupon</button>
         <div class="status" id="make-status"></div>
       </div>
+      <div id="my-coupons" style="margin-top:18px"></div>
       <div id="gift-result" class="hidden">
         <p class="ok" style="font-weight:700;margin-top:10px">✅ Your sponsorship is live on-chain. This code is the gift — share it privately, with one person:</p>
         <div class="code-box" id="gift-code"></div>
@@ -351,9 +352,13 @@ const DEPLOY_BLOCK = 45975000;   // V8.50 community deploy anchor (2026-08-26)
 const REG_ABI = [
   'function issueCoupon(bytes32 codeHash) external payable',
   'function cancelCoupon(bytes32 codeHash) external',
+  'function reclaimCoupon(bytes32 codeHash) external',
   'function couponAmount() external view returns (uint256)',
   'function coupons(bytes32) external view returns (address issuer, uint256 amount, uint256 expiry, bool used)',
   'event CouponIssued(bytes32 indexed codeHash, address indexed issuer, uint256 amount, uint256 expiry)',
+  'event CouponRedeemed(bytes32 indexed codeHash, address indexed issuer, address indexed newMember, uint256 amount)',
+  'event CouponCancelled(bytes32 indexed codeHash, address indexed issuer, uint256 amount)',
+  'event CouponReclaimed(bytes32 indexed codeHash, address indexed issuer, uint256 amount)',
 ];
 const USDC_ABI = ['function approve(address,uint256) returns (bool)', 'function allowance(address,address) view returns (uint256)', 'function balanceOf(address) view returns (uint256)'];
 const TR_ABI   = ['function memberHighestTier(address) view returns (uint256)'];
@@ -431,26 +436,96 @@ async function pifConnect() {
   } catch (e) { say('gift-status', '❌ ' + (e.shortMessage || e.message || 'connect failed').slice(0, 120), 'err'); }
 }
 
-// One active gift per member (owner dial 2): scan my issued coupons, count live ones.
+// ── The sponsor's coupon ledger (owner ask, 2026-08-27) ────────────────────
+// Every coupon this wallet ever funded, with live status from the chain. The chain
+// stores only the code's HASH, so the code itself for "share again" comes from a
+// per-browser store written at creation time — on another device the coupon still
+// lists with cancel/reclaim, just without its code.
+function codeStore() { try { return JSON.parse(localStorage.getItem('cnova_pif_codes') || '{}'); } catch (e) { return {}; } }
+function rememberCode(hash, code) {
+  try { const st = codeStore(); st[hash] = code; localStorage.setItem('cnova_pif_codes', JSON.stringify(st)); } catch (e) {}
+}
+
+// One active gift per member (owner dial 2) + the full ledger, from one scan.
 async function refreshActiveGift() {
   const el = document.getElementById('gift-active');
+  const box = document.getElementById('my-coupons');
   try {
     const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, provider);
-    const logs = await reg.queryFilter(reg.filters.CouponIssued(null, me), DEPLOY_BLOCK);
+    const [issued, redeemed, cancelled, reclaimed] = await Promise.all([
+      reg.queryFilter(reg.filters.CouponIssued(null, me),   DEPLOY_BLOCK),
+      reg.queryFilter(reg.filters.CouponRedeemed(null, me), DEPLOY_BLOCK),
+      reg.queryFilter(reg.filters.CouponCancelled(null, me), DEPLOY_BLOCK),
+      reg.queryFilter(reg.filters.CouponReclaimed(null, me), DEPLOY_BLOCK),
+    ]);
+    const redeemedSet  = new Set(redeemed.map(l => l.args.codeHash));
+    const cancelledSet = new Set(cancelled.map(l => l.args.codeHash));
+    const reclaimedSet = new Set(reclaimed.map(l => l.args.codeHash));
     const now = Math.floor(Date.now() / 1000);
-    let live = null;
-    for (const lg of logs) {
-      const c = await reg.coupons(lg.args.codeHash);
-      if (!c.used && Number(c.expiry) > now) { live = lg.args.codeHash; break; }
+    const known = codeStore();
+    let liveHash = null;
+    const rows = [];
+    for (const lg of issued.slice().reverse()) {   // newest first
+      const hash = lg.args.codeHash;
+      const expiry = Number(lg.args.expiry);
+      const amt = fmt6(lg.args.amount);
+      const expDate = new Date(expiry * 1000).toISOString().slice(0, 10);
+      let status, actions = '';
+      if (redeemedSet.has(hash)) {
+        status = '<span class="tag" style="background:var(--green-dim);color:var(--green)">✅ REDEEMED</span>';
+      } else if (cancelledSet.has(hash)) {
+        status = '<span class="tag" style="background:var(--bg2);color:var(--text3)">↩ CANCELLED — refunded</span>';
+      } else if (reclaimedSet.has(hash)) {
+        status = '<span class="tag" style="background:var(--bg2);color:var(--text3)">💸 RECLAIMED — refunded</span>';
+      } else if (expiry > now) {
+        status = '<span class="tag tag-wait">🟢 ACTIVE — unused</span>';
+        if (!liveHash) liveHash = hash;
+        actions = `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="cancelActive('${hash}')">↩ Cancel &amp; refund</button>`;
+        if (known[hash]) actions = `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:var(--green);border-color:var(--green2)" onclick="shareAgain('${hash}')">📤 Share again</button> ` + actions;
+      } else {
+        status = '<span class="tag" style="background:var(--yellow-dim);color:var(--yellow)">⌛ EXPIRED — unused</span>';
+        actions = `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="reclaimOne('${hash}')">💸 Reclaim ${amt}</button>`;
+      }
+      const codeLabel = known[hash]
+        ? `<span style="font-family:monospace;color:var(--text)">${known[hash]}</span>`
+        : `<span style="font-family:monospace" title="the code was shown on the device that created this coupon">${hash.slice(0, 10)}…</span>`;
+      rows.push(`<div class="row"><div style="flex:1;min-width:200px">${status} ${codeLabel}
+        <div class="muted">${amt} · ${expiry > now && !redeemedSet.has(hash) && !cancelledSet.has(hash) && !reclaimedSet.has(hash) ? 'expires' : 'expiry was'} ${expDate}</div></div>
+        <div>${actions}</div></div>`);
     }
-    if (live) {
-      el.innerHTML = `<span class="warn">1 active — awaiting redemption</span> <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="cancelActive('${live}')">↩ Cancel &amp; refund</button>`;
+    if (rows.length) {
+      box.innerHTML = '<label style="margin-bottom:8px">Your sponsored coupons</label>' + rows.join('')
+        + '<p class="muted" style="margin-top:4px">An unused coupon can be shared with a different person at any time — the code is the gift, whoever redeems it. Cancelling or reclaiming returns your USDC.</p>';
+    } else {
+      box.innerHTML = '';
+    }
+    if (liveHash) {
+      el.innerHTML = '<span class="warn">1 active — awaiting redemption</span>';
       document.getElementById('gift-maker').classList.add('hidden');
     } else {
       el.innerHTML = '<span class="ok">None — you can sponsor an entry ✅</span>';
       document.getElementById('gift-maker').classList.remove('hidden');
     }
   } catch (e) { el.innerHTML = '<span class="muted">could not verify — please refresh</span>'; }
+}
+
+// "Redirect to another party": the same code, shared with someone else — the chain
+// does not bind a recipient, so re-sharing IS the redirect.
+function shareAgain(hash) {
+  const code = codeStore()[hash];
+  if (!code) return;
+  activeCode = code;
+  pifShare();
+}
+
+async function reclaimOne(codeHash) {
+  try {
+    const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
+    say('make-status', '<span class="spinner"></span> Reclaiming — confirm in wallet…');
+    const tx = await reg.reclaimCoupon(codeHash); await tx.wait();
+    say('make-status', '✅ Reclaimed — your USDC has been returned to your wallet.', 'ok');
+    await refreshActiveGift();
+  } catch (e) { say('make-status', '❌ ' + (e.shortMessage || 'reclaim failed').slice(0, 120), 'err'); }
 }
 
 async function cancelActive(codeHash) {
@@ -565,6 +640,7 @@ async function makeGift() {
     }
     funded = true;
     activeCode = code;
+    rememberCode(codeHash, code);   // per-browser, so "share again" works on return visits
     document.getElementById('gift-code').textContent = code;
     document.getElementById('gift-result').classList.remove('hidden');
     say('make-status', '', '');
