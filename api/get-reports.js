@@ -1,6 +1,6 @@
 /**
  * api/get-reports.js
- * Returns parsed open + resolved bug reports from BUGS.md on the admin branch.
+ * Returns parsed open + resolved bug reports from BUGS.md on the `data` branch.
  * Password-protected (same BUG_REPORT_PASSWORD as submit-bug.js).
  *
  * Required Vercel env vars:
@@ -10,7 +10,18 @@
 
 const GH_OWNER  = 'CryptoTechSXM';
 const GH_REPO   = 'cryptonova-testnet-app';
-const GH_BRANCH = 'admin';
+// ⛔ MEMBER-WRITTEN DATA LIVES ON `data` — A BRANCH VERCEL NEVER DEPLOYS (s45,
+// 2026-08-28). Every write below is a real git commit, so while this pointed at
+// `admin` EVERY member action was a Vercel deployment: 121 of the last 300
+// commits on admin were API-written, which exhausted the Hobby plan's 100
+// deployments/day and silently stopped the real site from updating — pushes
+// succeeded in git and produced no deployment, with no error anywhere.
+// vercel.json sets git.deploymentEnabled:{"data": false}, so these commits now
+// create no deployment at all. ⛔ The Ignored Build Step is NOT the fix — Vercel
+// counts canceled builds as full deployments against the same quota. If this
+// constant is ever pointed back at a deployable branch, the cap comes back with
+// it, and all three API files must move together.
+const GH_BRANCH = 'data';
 const GH_FILE   = 'BUGS.md';
 
 function parseOpenIssues(section) {
