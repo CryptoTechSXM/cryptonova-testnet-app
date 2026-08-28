@@ -1,0 +1,105 @@
+INDIVIDUAL REPLIES — 2026-08-28
+Telegram format. Send each to the reporter named.
+
+═══════════════════════════════════════════════════════════════
+TO: Jacob — "Bug Report Page, fail to create, gas limit too high"  [CLOSING]
+═══════════════════════════════════════════════════════════════
+Hi Jacob 👋
+
+Closing this one out. We checked the bug report page and it does not send any
+blockchain transaction at all — it posts straight to our server, so a wallet gas
+error cannot come from that step any more.
+
+Your report did land with us, which is how we are replying now 🙂 If you ever see
+"fail to create" again, tell us and we will dig in properly.
+
+Thanks for reporting it — the $1 bounty applies. 💵
+
+═══════════════════════════════════════════════════════════════
+TO: CryptoJan22 — "T2 approved but the self rescue button is not showing"  [CLOSING]
+═══════════════════════════════════════════════════════════════
+Hi Jan 👋
+
+Found it and fixed it. The amount you needed to pay was moving while you sat parked —
+your earnings kept arriving — so an approval that covered it when the page loaded no
+longer covered it by the time you clicked. The button read "not ready" and told you
+nothing useful.
+
+Two changes: the approval is now sized to the full entry fee so it can never fall
+short, and there is a Refresh balance button on that panel so you do not have to
+reload the whole page to wake the button up.
+
+You have reported a lot of real issues for us — thank you 🙏 Bounty applies.
+
+═══════════════════════════════════════════════════════════════
+TO: Kira — "tiers page information is a bit ambiguous"  [PART CLOSING]
+═══════════════════════════════════════════════════════════════
+Hi Kira 👋
+
+The display half is fixed — new pairs were showing an empty count while the community
+was actually filling an earlier pair, which made the page look wrong. That is sorted.
+
+Your second point, increasing the T1 numbers to 400 or 500 because the fill feels
+slow, is a design decision rather than a bug, so we have not quietly closed it. It is
+on the list to decide properly and we will come back to you on it.
+
+Thanks — bounty applies 💵
+
+═══════════════════════════════════════════════════════════════
+TO: @Lavern_Gay — referrer address could not be changed  [NEEDS YOUR RETEST]
+═══════════════════════════════════════════════════════════════
+Hi Lavern 👋
+
+Owing you an honest update. We closed this once with an explanation, and when we
+actually checked it against your account the chain did not agree with what we had
+told you. So we reopened it and went looking properly.
+
+We found two real faults and fixed both. It is live on the site now.
+
+Could you try registering again and tell us what happens? If the sponsor still comes
+out wrong we will pull your account's records directly and go from there. We are not
+closing this again until you tell us it works. 🙏
+
+═══════════════════════════════════════════════════════════════
+TO: @ThanksAndPraises — accounts revert to the original default address  [NEEDS RETEST]
+═══════════════════════════════════════════════════════════════
+Hi 👋
+
+You were right and it was not MetaMask. We checked your wallet on chain: it was
+registered under an address from our own automatic sponsor rotation, not anyone you
+typed. That is our bug, not your wallet.
+
+Fixed and live. Please try one more registration and let us know.
+
+One thing we want to be straight about: the placements already made are recorded on
+the blockchain, and a fix to the website does not move them. Let us talk about what
+you would like done there. 🙏
+
+═══════════════════════════════════════════════════════════════
+TO: @ronnienic197 — self rescue takes a very long time  [NEED A RETEST]
+═══════════════════════════════════════════════════════════════
+Hi 👋
+
+We have not forgotten this. We could close it as "network slowness" but we have not
+measured YOUR experience, so that would be a guess.
+
+The system has been redeployed since you reported it. Could you try a self rescue
+again and tell us roughly how long the approval and the rescue each take? With that we
+can tell whether it is the chain, our site, or the wallet. 🙏
+
+═══════════════════════════════════════════════════════════════
+TO: @bevmawire and Maximum_71 — "Couldn't load your status"  [OPEN, SAME CAUSE]
+═══════════════════════════════════════════════════════════════
+Hi both 👋
+
+You are seeing the same thing, and it is a real one we are working on.
+
+That message is deliberate — when the site cannot reach the blockchain we would rather
+say so than tell you that you are not registered when you are. Your data is safe on
+chain either way. But it is appearing too often, and Bev, it interrupting a rescue you
+had already started is not acceptable.
+
+We are doing a full pass over the dashboard so that a failed read can never look like
+real data or block an action in progress. You will hear from us when it ships. 🙏
+
+Bounty applies to both of you 💵

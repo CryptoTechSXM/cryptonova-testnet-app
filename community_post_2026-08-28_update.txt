@@ -1,0 +1,84 @@
+🚀 CryptoNova Update — what we fixed, and what you will see next
+
+Hi team 👋
+
+We have been heads down for a few days closing real problems that some of you
+reported. Here is where we are, in plain language.
+
+🔧 WHAT WE FIXED
+
+✅ The referrer problem is solved.
+Some of you told us that when you typed a sponsor address it "reverted back to my
+original default address". You were right, and it was not a MetaMask bug — it was
+ours. Two separate faults: switching accounts in your wallet without reloading kept
+the first account's sponsor, and a correct address typed with the wrong upper/lower
+case was rejected and quietly replaced. Both are fixed, and we proved it on chain
+with a real registration before saying a word here.
+
+✅ Pay It Forward waitlist now shows properly.
+The list was being written to one place and read from another, so it looked empty
+even when there were people on it.
+
+✅ You can sponsor as many entries as you like.
+The page used to say one active sponsorship at a time. That was never actually
+enforced anywhere in the contract, so the page was telling you something untrue. We
+removed it rather than pretend.
+
+✅ The gas gift now goes where it should.
+Every coupon still includes gas for the new member — that was YOUR idea and it stays.
+It was landing in the wrong wallet. Rewired and confirmed on chain.
+
+✅ Filing a bug report no longer blocks site updates.
+Every report used to consume one of our daily deployment slots, so a busy bug day
+could stop us shipping fixes. Member reports now go somewhere that does not compete
+with releases. Keep them coming 🙏
+
+🐞 BUG REPORT CLEAN-UP
+
+We went through every single open report today — 17 of them. We closed 3 where we
+could point at the exact code that fixes them, and left the rest open with a specific
+next step written down for each.
+
+We deliberately did NOT mass-close the old ones. It would have been easy to say "that
+was on the old test deployment" and wipe the list clean. We closed one report that way
+once before, the chain proved us wrong, and we had to reopen it. Not doing that again.
+
+If your report is still open, it is still open on purpose. A few of you will hear from
+us directly asking you to retest.
+
+🛡️ THE METAMASK WARNING
+
+Some of you saw a "malicious site" warning from MetaMask. That came from a security
+scanner, and the cause was on us: during our last deploy a number of contracts had not
+yet been verified on BaseScan, which is exactly the pattern those scanners flag.
+
+All 46 contracts are now verified and public. We have submitted the de-listing appeal
+with full documentation and we are waiting on their response. We will tell you the
+moment it clears. 💪
+
+📈 SOMETHING YOU WILL NOTICE — SIMULATED GROWTH
+
+Starting today we are running a growth simulation on the test system. You will see the
+member count climb steadily over the coming days.
+
+Please read this part carefully 👇
+
+Those are TEST accounts created by us, not a sudden rush of new people. We are doing
+it on purpose, to load the matrices, the rescue system and the Stability Fund harder
+than the community alone can right now — so that anything that breaks under real
+growth breaks HERE, on testnet, where it costs nobody anything.
+
+Your own positions, earnings and placement are not affected. If you notice anything
+that looks wrong while this is running, that is exactly what we want to hear about.
+
+💵 THE $1 BUG BOUNTY IS ALWAYS ON
+
+Every valid bug report earns $1. It has never been switched off. The referrer fix
+above exists because two members took the time to report it properly — that is worth
+a lot more to us than a dollar.
+
+Report anything through the Bug Report page on the site.
+
+🙏 Thank you for testing with us and for being patient while we fix things properly
+rather than quickly. We are in building phase, and being straight with you about what
+is broken is how we intend to keep doing this.
