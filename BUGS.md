@@ -37,15 +37,244 @@
 
 ## Open Issues
 
-_No open issues._
+### [2026-08-27] Onboarding / Registration — REOPENED: could not change the referrer address
+- **Reporter:** @Lavern_Gay
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask AND Rabby (consistent across both)
+- **Frequency:** Consistent
+- **What happened:** could not change the referral address when registering a new account; "my main account address appears instead".
+- **REOPENED 2026-08-27 (session 44).** This was closed the same day it was reported, on the explanation that "a valid coupon locks the referrer to its funder, by design". That mechanism was read out of the code and never checked against her wallet, and the chain does not support it: she is registered under `0x185B19c7…`, which is the referrer she asked for. The closure was wrong, so the report goes back to open.
+- **What we now know, measured:** `repro_referrer.mjs` reproduces six ways a typed referrer was lost or replaced — four of them across a wallet account switch with no page reload, and two with no account switch at all. The one most likely to fit this report needs no switch: `ethers.isAddress()` enforces the EIP-55 checksum, so a CORRECT address pasted with the wrong letter-case counted as invalid, and the page then substituted a rotation-pool default in silence. Both directions are fixed (session 44, commit below); the coupon lock is real but it is a SEPARATE thing and is not what happened here.
+- **Still owed:** ask her whether the account in question still shows the wrong sponsor after the fix ships, and run `diag_referrer.js` on it either way. Do not close this a second time on an explanation that has not been run against her wallet.
+- **FIX IN PROGRESS:** referrer path fixed and re-measured; awaiting her confirmation on the live site.
+
+
+
+### [2026-08-27] Onboarding / Registration — All CryptoNover accounts opened with different referrer addr…
+- **Reporter:** @ThanksAndPraises
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
+- **Frequency:** Consistent
+- **What happened:** All CryptoNover accounts opened with different referrer addresses all revert back to my original Default address:
+0x149852b86dF80B960B99BBbF469d0f5219fa1040
+- **What was expected:** the accounts should maintain and show their referral's address as their default registered under address
+- **Submitted:** Thu, 27 Aug 2026 20:32:54 GMT
+- **DIAGNOSED AND FIXED, session 44 (2026-08-27) — it was not a MetaMask bug.** Measured first: `0x3c1755…` is registered on chain under `0x5179A012…`, which is entry #4 of this site's own `DEFAULT_SPONSOR_POOL` — an orphan-rotation default, not anyone he typed. The display theory was tested and refuted (`diag_referrer.js`: TierRouter.memberReferrer, getMemberInfo.referrer and every per-matrix getMember().referrer agree on all three wallets), so the dashboard was honest and the registration itself was wrong.
+- **Reproduced** with `repro_referrer.mjs`, which runs the page's real source rather than a re-typed copy: 6 of 10 scenarios placed a member under the wrong sponsor, 0 after the fix. Two independent causes, and together they explain both halves of the report — (a) the referrer box and the cached default sponsor were never reset when a wallet switches account with no page reload, so every later account inherited the first one's sponsor (that is the "my original Default address" half); (b) `ethers.isAddress()` enforces the EIP-55 checksum, so a CORRECT address pasted with the wrong letter-case counted as invalid and was silently replaced by a pool default — no account switch involved at all.
+- **Still owed before this closes:** a live two-account switch on the preview build, and `diag_referrer.js` on a wallet registered after the fix. His existing placements are on chain and a frontend fix does not move them — decide separately what to do about those.
+- **FIX IN PROGRESS:** shipped to `admin` as `98a0da2`, awaiting live confirmation.
+
+
+### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
+- **Reporter:** @bevmawire
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x0dcd36fb20e7221b18c28372fc65ef90810e3c5a
+- **Frequency:** Intermittent
+- **What happened:** WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a sudden, the popup "Couldn't load your status", appeared and immediately not only obliterated access to data on the Platform but also prevented completion of the already begun "RESCUE" process on one of my Accounts.. Pls see hereon attached screenshot..
+- **What was expected:** ACCESS TO DASHBOARD
+- **Notes:** PLS SORT THE GLITCH THAT IS PREVENTING US SEEING DATA ON THE CNOVA PLATFORM
+- **Screenshot:** [2026-08-22T08-59-22-438Z-Could_not_Find_Your_Status_Glitch.jpg](bug-screenshots/2026-08-22T08-59-22-438Z-Could_not_Find_Your_Status_Glitch.jpg)
+- **Submitted:** Sat, 22 Aug 2026 08:59:23 GMT
+
+
+### [2026-08-18] Dashboard (index.html) — The RPC node didn't respond after several retries — this is …
+- **Reporter:** Maximum_71
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x788b70fe1453ccc12e3d76ae18c1952046fa02af
+- **Frequency:** Consistent
+- **What happened:** The RPC node didn't respond after several retries — this is NOT a confirmation that you're unregistered. If you've already joined, your data is safe on-chain.
+- **What was expected:** Connect to wallet
+- **Notes:** This happens on several accts
+- **Submitted:** Tue, 18 Aug 2026 22:38:18 GMT
+
+
+### [2026-08-17] Bug Report Page — Fail to create
+"[From https://sepolia.base.org] gas limit to…
+- **Reporter:** Jacob
+- **Page:** Bug Report Page
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x3fd5936a01d89d465570e4f601d6378365fb6a01
+- **Frequency:** Consistent
+- **What happened:** Fail to create
+"[From https://sepolia.base.org] gas limit too high"
+- **What was expected:** Supposed to load but not.
+- **Submitted:** Mon, 17 Aug 2026 13:10:07 GMT
+
+
+### [2026-08-13] Other — Withdraw all triggers the contract but no reaction in wallet…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Withdraw all triggers the contract but no reaction in wallet for confirmation of the withdrawal.. However, CNova withdrawals went through...
+- **What was expected:** To see a sign and confirmation in wallet to accept.
+- **Notes:** Same on other wallets.. couldn't do withdrawals but CNova worked..
+- **Submitted:** Thu, 13 Aug 2026 02:40:20 GMT
+
+
+### [2026-08-11] Dashboard (index.html) — decided to do a withdrawal.
+It took forever and after clicki…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** decided to do a withdrawal.
+It took forever and after clicking max only 50% went through.
+i tried max again but it did not go through.
+- **What was expected:** at least a reason for the failure.
+- **Submitted:** Tue, 11 Aug 2026 10:46:59 GMT
+
+
+### [2026-08-10] Dashboard (index.html) — Tried withdrawing and it failed,  $50
+- **Reporter:** Deborah
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x0ddb6a96fa15f98e823cd6632f9b14373cd1c74b
+- **Frequency:** Intermittent
+- **What happened:** Tried withdrawing and it failed,  $50
+- **What was expected:** Should go to my wallet
+- **Submitted:** Mon, 10 Aug 2026 23:28:21 GMT
+
+
+### [2026-08-10] Dashboard (index.html) — this account has 5 directs.
+i stsrted with only auto rentry …
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
+- **Frequency:** Consistent
+- **What happened:** this account has 5 directs.
+i stsrted with only auto rentry after a while added double reentry and today added auto upgrade but this account shows that it cycled only 2 times.
+- **What was expected:** i figured there would have been more cycles.
+- **Submitted:** Mon, 10 Aug 2026 00:20:19 GMT
+
+
+### [2026-08-08] Dashboard (index.html) — i got 2 self rescue alerts at the same time.
+t 1 cleared nor…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
+- **Frequency:** Consistent
+- **What happened:** i got 2 self rescue alerts at the same time.
+t 1 cleared normally but although T 2 usdc was approved the self rescue button is not showing.
+- **What was expected:** to click self rescue.and update dashboard.
+- **Submitted:** Sat, 08 Aug 2026 11:41:38 GMT
+
+
+### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
+- **Reporter:** @ronnienic197
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0x75784fe21f201f8b1f909cf9b055ef5e19fb7385
+- **Frequency:** Consistent
+- **What happened:** The self rescue transaction is taking an extremely long time to complete
+Takes  forever for USDC approval and theneven more time spent trying to complete self rescue.
+- **What was expected:** Should be a seamless process but this process is taking up a lot of time. 
+May not be a bug but could this just be my mm. Is anyone else having this issue?
+- **Submitted:** Sat, 08 Aug 2026 10:42:44 GMT
+
+
+### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Withdrew all my CNova tokens but was testing the unlock button after I withdrew and got the error of fail on chain error and hard reset...
+- **What was expected:** A message that states that all CNova tokens had already been withdrawn or no CNova token found or some thing to that effect and not a fail error message...
+- **Notes:** May be a rewording of the message so it doesn't look like a system failure ...
+- **Submitted:** Wed, 05 Aug 2026 02:14:00 GMT
+
+
+### [2026-08-05] Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance on t…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
+- **Frequency:** Intermittent
+- **What happened:** In prep to withdraw my earnings , i checked the balance on the dashboard. In the available for withdrawal  section it $287.83. When clicked withdraw all the amount that populated the space was $152.23
+The amount deposited into my wallet was $302.63 the withdrawn amount on the dashboard was a few dollars more.
+- **What was expected:** I expect for their to be less disparity in the numbers.
+- **Submitted:** Wed, 05 Aug 2026 01:23:20 GMT
+
+
+### [2026-07-29] Rescue panel vanishes silently when a rescue completes
+- **Reporter:** CryptoJan22 (via the second of two reports today)
+- **Page:** Dashboard (index.html)
+- **What happened:** After the co-pay keeper rescued their second position, the Self Rescue button simply disappeared — indistinguishable from a button that never rendered.
+- **STATUS 2026-07-29 — CONFIRMED, frontend work queued.** Needs a short confirmation ("you have been re-entered, nothing pending") instead of an empty panel. Also: the panel re-checks every 30 seconds, so there is a visible lag between an approval confirming and the button activating — refresh on the approval receipt instead of waiting for the next tick.
+
+
+### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
+- **Reporter:** Kira
+- **Page:** Onboarding / Registration
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** The upgrade option is not visibly working. I an bot able to upgrade from that page. Once registered it is non functional, only available on dashboard!
+- **What was expected:** I expected to have the option to upgrade from either places registration and dashboard!
+- **Submitted:** Sun, 26 Jul 2026 23:08:21 GMT
+**CONFIRMED 2026-07-29 — still open.** The upgrade controls exist only on the Dashboard. Adding them to the Registration page is queued as frontend work; no contract change needed. Members can upgrade from the Dashboard meanwhile.
+
+
+### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
+- **Reporter:** @Koach100
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
+- **Frequency:** Consistent
+- **What happened:** T3 has not cycled. It's at 0 . The position in the matrix is #4. All the other tiers have cycled multiple times.
+- **What was expected:** I expected this tier to cycle like the others.
+- **Notes:** this account is upgraded to Tier 7
+- **Submitted:** Mon, 27 Jul 2026 03:30:19 GMT
+
+
+> **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
+> 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
+>
+> **The three "T5 upgrade check failed" reports were diagnosed after the first pass and
+> moved to Fix In Progress** — they are out-of-USDC errors wearing a network error's
+> clothing. `bulkUpgrade` pulls the TOTAL fee for every remaining tier in one
+> `safeTransferFrom` (TierRouter:979), and OpenZeppelin's `ERC20InsufficientBalance` is a
+> custom error that was missing from the frontend ABI, so ethers returned `reason=null`
+> and the UI blamed the RPC. The three reporting wallets held **$4.86 (0x46cc05),
+> $12.83 (0x832b95) and $13.14 (0x185b19)**. Fix committed as `7b3c327`, not yet pushed.
+>
+> **Only 3 reports below are genuinely undiagnosed:**
+> 1. Lavern's "approved funds didn't appear" on 0x145805 — that wallet holds **$8,194**,
+>    so unlike the others it is NOT a balance problem. Needs its own look.
+> 2. @queensonnie's direct-referral count not showing 2.
+> 3. Kira's registration-page upgrade button — likely a design gap rather than a fault
+>    (the upgrade control only exists on the dashboard), so decide the intent first.
+>
+> Separately, Sherwyn observed T5 being offered to an account that never reached T2 —
+> worth checking `_upgradeEligible` against what the dashboard displays.
+- **DIAGNOSED 2026-07-27 — not a fault, but a UX hazard now fixed.** Two separate things: (1) **T3 is at 2 cycles on-chain, not 0** — the dashboard figure he read is wrong and that part is STILL OPEN. (2) He holds seats only in T5-T8 because he switched auto re-entry OFF: `member_history.js` shows his last cycle-out in each of T1/T2/T3/T4 recorded as **PARKED (autoReentry disabled)** — a clean graduation that returns the crossing reserve to withdrawable but does NOT keep the seat. Every earlier cycle-out parked normally with a shortfall. Turning the option back on (it reads true now) does not restore tiers already left; those need 'Graduated tier re-entry'. **UI fix (38605d7):** switching auto re-entry off now requires confirming a dialog that states the consequence explicitly. His trail also surfaced a NINTH silent graduation (tx 0xe9e8067…, T5.1 MatA at block 44668146).
+- **PARTIAL 2026-07-30 — and the tool could not answer the question.** `member_ledger.js` on `0x1ca3316E` shows **T3.1 MatA and MatB both `left`**, so she passed through T3 and out; `memberHighestTier` is now T10. That is consistent with T3 having cycled. But her report was specifically about the *cycle count* reading 0, and `member_ledger` prints state and balances — **not `cyclesCompleted`** — so it cannot see the field the question is about. Adding that column is the next step; guessing from state would be exactly the kind of plausible-but-unverified answer that wasted two hours tonight. **Also flagged: this ticket sat from 2026-07-27 to 2026-07-30 without a reply. That is on us, not the reporter.**
+
+### [2026-07-26] Other — on the tiers page the information is a bit ambiguous.
+- **Reporter:** Kira
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
+- **Frequency:** Consistent
+- **What happened:** on the tiers page the information is a bit ambiguous.
+- **What was expected:** the T1.1/T2.1 new pairs could have the count when new.
+- **Notes:** Also the slow down on T1 is very noticeable maybe we can increase the numbers to 400 or 500?
+- **Submitted:** Sun, 26 Jul 2026 23:20:05 GMT
+- **FIX IN PROGRESS:** accepted, not yet shipped.
+
 
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
-| 2026-08-17 | 2026-08-28 | index.html | Jacob — Bug Report Page — Fail to create
-"[From https://sepolia.base.org] gas limit to…
- | fixed - bug report page sends no on-chain transaction |
 | 2026-08-26 | 2026-08-26 | Dashboard (index.html) | CryptoJan — parked, no approve button, "still a shortfall" on click, intermittent. ROOT CAUSE: both ready-gates tested `allowance >= SHORTFALL`, but the shortfall MOVES while parked, so an allowance that covered it at render failed at click — the measured 0xa0763F34 case (08-24 diag: $11.88 vs $12.50) happening to a live member. Both gates now compare against `max(fee, shortfall)`, the contract's actual pull ceiling, so READY can never go stale. Shipped with the V8.50 cutover; his position reset at noon regardless. Reporter added to fund_list (wallet #111). | `1b0ed5f` |
 | 2026-08-26 | 2026-08-26 | Other | Sherwyn — "tokens are being redeemed but not reflecting in wallet". CLOSED BY MEASUREMENT (`scripts/diag_sherwyn_redeem.js`, read-only, refuses non-v8_48 addresses): BOTH redeems succeeded AND paid — $6.571675 (08-25, tx 0xab637c8d…) and $0.566131 (08-26, tx 0xcf03f2b7…). The 45% early-exit penalty (joined <30d) withheld $5.84 of $12.98 gross, and a sub-$7 bump on a wallet holding $30,065 USDC is easy to miss. NOT A BUG — penalty disclosure did its job on-chain; closed on the old chain the morning of the V8.50 cutover. | (diagnosis only — no code change) |
 | 2026-08-21 | 2026-08-26 | Other | Sherwyn — redeem "step 2 fail asking to do a hard reset". Same wallet and path as his 2026-08-26 ticket; superseded by it and closed by the same measurement — the redeems that mattered went through and paid. Old-chain (V8.48) report; the redeem path it exercised retired with that chain at the cutover. | (diagnosis only — no code change) |
