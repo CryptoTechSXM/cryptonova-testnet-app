@@ -274,7 +274,17 @@
         <label style="margin-top:8px">Recipient (a wallet from the waitlist below — or leave empty for an open coupon you share privately)</label>
         <input id="gift-to" placeholder="0x… (optional)" maxlength="42">
         <label>Include gas for your recipient (optional ETH — covers their first transactions)</label>
-        <input id="gift-gas" placeholder="0.0005" value="0.0005">
+        <!-- V8.50 / session 44: was 0.0005 (~$1.25 at $2,500/ETH), which is FIVE TIMES
+             what index.html:5123 sends for the same purpose (a hardcoded 0.0001, ~$0.25)
+             and five times what the owner intended. Two doors funding the same thing with
+             different amounts, and nothing kept them equal — the same shape as the coupon
+             limit that was enforced on one door only. Aligned to 0.0001 here.
+             ⚠ IF YOU CHANGE ONE, CHANGE BOTH. The other is index.html:5123.
+             NOT pegged to USD: this is denominated in ETH and drifts with the ETH price.
+             Pegging needs a price feed neither page has, and a failed price read that
+             silently produces a wrong amount would be exactly the failure-as-zero family
+             this codebase has a standing rule against. Owner decision pending. -->
+        <input id="gift-gas" placeholder="0.0001" value="0.0001">
         <button class="btn btn-green" id="btn-gift" onclick="makeGift()">💚 Fund a $10 entry coupon</button>
         <div class="status" id="make-status"></div>
       </div>
