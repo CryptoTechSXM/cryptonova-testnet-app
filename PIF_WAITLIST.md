@@ -11,4 +11,4 @@ themselves NEVER appear here — they live between gifter and recipient.
 - [GIFTED by 0x19a59f…8102 2026-08-28] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9912 · tester · tester · contact: @tester
 - [GIFTED by 0x19a59f…8102 2026-08-28] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9869 · test2 · test2 · contact: @test2
 - [GIFTED by 0x19a59f…8102 2026-08-28] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9825 · ererer · ererer · contact: @ererer
-- [WAITING] 2026-08-28 · 0x5179A012b54EE6E6c7db92f820C9b3d8126Eead3 · PIF Tester 01 · Testing PIF · contact: @PIFTESTER
+- [RESERVED by 0x5179A0…ead2 @1787929318] 2026-08-28 · 0x5179A012b54EE6E6c7db92f820C9b3d8126Eead3 · PIF Tester 01 · Testing PIF · contact: @PIFTESTER
