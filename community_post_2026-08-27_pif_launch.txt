@@ -11,7 +11,7 @@ Not everyone can afford the $10 entry — and every one of us got our start some
 Open the Pay It Forward page and add your wallet to the waitlist. When a member sponsors you, you receive a coupon code that covers your registration completely — you pay $0. No wallet yet? The page walks you through creating one for free.
 
 💚 WANT TO SPONSOR SOMEONE?
-Your $10 funds an entry coupon on-chain. Pick someone from the waitlist, or gift someone you know personally. Your recipient is seated IN YOUR LINE — you grow together. One active gift at a time, and any unused coupon can be cancelled for a full refund. The page shows every coupon you have ever funded and exactly what happened to it.
+Your $10 funds an entry coupon on-chain. Pick someone from the waitlist, or gift someone you know personally. Your recipient is seated IN YOUR LINE — you grow together. Sponsor as many entries as you like, and any unused coupon can be cancelled for a full refund. The page shows every coupon you have ever funded and exactly what happened to it.
 
 🔒 STAY SAFE
 Your sponsor only ever needs your wallet ADDRESS (starting with 0x). Nobody from CryptoNova — no sponsor, no admin — will EVER ask for your recovery phrase or private key. Never share them with anyone.

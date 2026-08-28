@@ -260,8 +260,8 @@
     <div class="card-title"><span class="dot"></span>Sponsor an entry — for members</div>
     <p>Your $10 funds an entry coupon on-chain. Choose a recipient from the waitlist below, or
     someone you know personally. The recipient registers free of charge and is placed in your
-    referral line, so you grow together. One active sponsorship at a time — your next unlocks
-    once the current coupon is redeemed.</p>
+    referral line, so you grow together. You can sponsor as many entries as you like — each
+    one costs you $10, and an unused coupon can be cancelled for a full refund at any time.</p>
     <div id="gift-disconnected" style="margin-top:16px">
       <button class="btn btn-green" onclick="pifConnect()">🔌 Connect wallet</button>
       <div class="status" id="gift-status"></div>
@@ -502,7 +502,9 @@ async function scanCoupons(regs, latest, onProgress) {
   return cache;
 }
 
-// One active gift per member (owner dial 2) + the full ledger, from the cached scan.
+// The member's coupon ledger, from the cached scan. NOTE: there is no "one active gift
+// per member" rule any more — it was never enforced anywhere real (see the block at the
+// end of this function), and the copy claiming it was removed 2026-08-28.
 async function refreshActiveGift() {
   const el = document.getElementById('gift-active');
   const box = document.getElementById('my-coupons');
@@ -519,6 +521,7 @@ async function refreshActiveGift() {
     const now = Math.floor(Date.now() / 1000);
     const known = codeStore();
     let liveHash = null;
+    let liveCount = 0;
     const rows = [];
     for (const c of data.issued.slice().reverse()) {   // newest first
       const hash = c.h, expiry = c.exp;
@@ -534,6 +537,7 @@ async function refreshActiveGift() {
       } else if (expiry > now) {
         status = '<span class="tag tag-wait">🟢 ACTIVE — unused</span>';
         if (!liveHash) liveHash = hash;
+        liveCount++;
         actions = `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="cancelActive('${hash}')">↩ Cancel &amp; refund</button>`;
         if (known[hash]) actions = `<button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:var(--green);border-color:var(--green2)" onclick="shareAgain('${hash}')">📤 Share again</button> ` + actions;
       } else {
@@ -554,13 +558,32 @@ async function refreshActiveGift() {
     } else {
       box.innerHTML = '';
     }
-    if (liveHash) {
-      el.innerHTML = '<span class="warn">1 active — awaiting redemption</span>';
-      document.getElementById('gift-maker').classList.add('hidden');
+    // V8.50 / session 44 — MADE TRUTHFUL. Two lies lived here.
+    //
+    // (1) This line printed the LITERAL string "1 active" whenever any live coupon
+    //     existed. The owner had TWO and was told he had one. A number on screen that
+    //     was never computed is the same family as the failure-as-zero rule elsewhere
+    //     in this codebase: it is confident, it is wrong, and nothing surfaces it.
+    //     It counts now.
+    //
+    // (2) The page hid the gift-maker whenever a coupon was live, and the copy above
+    //     promised "one active sponsorship at a time". NEITHER WAS REAL.
+    //     CouponRegistry.issueCoupon has exactly two guards — non-empty hash, and the
+    //     code not already taken (CouponRegistry.sol:117-119). There is no per-issuer
+    //     mapping in the contract at all. And index.html:5124 issues coupons through
+    //     the SAME function with no gate whatsoever, so a member only had to use the
+    //     dashboard instead of this page to walk straight past the rule — which is how
+    //     the owner ended up holding two. Enforcing a promise on one of the two doors
+    //     is not enforcement; it is decoration that misleads the honest member only.
+    //     Owner decision 2026-08-28: drop the claim rather than add on-chain tracking
+    //     to a live deployment — the sponsor funds every coupon themselves, so there
+    //     is no float to protect and the rule bought nothing.
+    if (liveCount > 0) {
+      el.innerHTML = '<span class="warn">' + liveCount + ' active — awaiting redemption</span>';
     } else {
-      el.innerHTML = '<span class="ok">None — you can sponsor an entry ✅</span>';
-      document.getElementById('gift-maker').classList.remove('hidden');
+      el.innerHTML = '<span class="ok">None — sponsor an entry whenever you like ✅</span>';
     }
+    document.getElementById('gift-maker').classList.remove('hidden');
   } catch (e) {
     el.innerHTML = '<span class="muted">could not read your coupon history — please refresh (' + String(e && (e.shortMessage || e.message) || 'read failed').slice(0, 60) + ')</span>';
   }
