@@ -1255,7 +1255,11 @@
           <div class="stat-label"><span data-i18n="dash.withdrawable">Withdrawable</span><span class="tip-badge" tabindex="0">?<span class="tip-popup" data-i18n="dash.withdrawable_tip">USDC you can withdraw to your wallet right now. Includes your 2.5% instant earn, L1 referral bonuses you have earned, and chain pay from members seated on the path above the new entrant.</span></span></div>
           <div class="stat-value green" id="dash-withdrawable">—</div>
           <div id="dash-reserved-badge" style="display:none;color:var(--yellow);font-size:11px;font-weight:600;margin-top:2px"></div>
-          <div class="stat-sub" id="dash-ready-label" data-i18n="dash.ready_to_claim">Ready to claim</div>
+          <!-- NO data-i18n HERE, DELIBERATELY. This label is now COMPUTED (readyToClaimLabel),
+               and i18n.js re-applies data-i18n on every language switch — two writers on one
+               field, which is the shape that produced the reserve/withdrawable mismatches.
+               The helper calls window.t() itself for the empty state, so it still translates. -->
+          <div class="stat-sub" id="dash-ready-label">Ready to claim</div>
           <div class="detail-hint">Details ↗</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('earned',this)" title="Click for tier breakdown">
@@ -1264,10 +1268,15 @@
           <div class="stat-sub" id="dash-total-earned-sub" data-i18n="dash.all_tiers_lifetime" title="Total USDC ever credited to your account. Includes current balance, amounts auto-deducted for tier upgrades, and past withdrawals.">All tiers lifetime</div>
           <div class="detail-hint">Details ↗</div>
         </div>
-        <div class="card-sm" title="Total USDC you have successfully withdrawn to your wallet across all tiers.">
+        <div class="card-sm" title="Total USDC withdrawn across all tiers, counted BEFORE the health fee. withdrawCore adds the gross amount to this total and then transfers that amount minus the fee, so your wallet received slightly less than the figure shown.">
           <div class="stat-label">Total Withdrawn</div>
           <div class="stat-value" id="dash-total-withdrawn">—</div>
-          <div class="stat-sub">Paid out to wallet</div>
+          <!-- NOT "paid out to wallet". MatrixLogicLib.withdrawCore:1444 does
+               `totalWithdrawn += amt` with the GROSS amt and then transfers `amt - fee`
+               (:1447), so this accumulator is ALWAYS above the sum of wallet receipts.
+               That gap is exactly what @Koach100 reported on 2026-08-05 as "the withdrawn
+               amount on the dashboard was a few dollars more". Label it for what it is. -->
+          <div class="stat-sub">Before the health fee</div>
         </div>
         <div class="card-sm clickable" onclick="openDashDetail('cnova',this)" title="Click for CNOVA breakdown">
           <div class="stat-label"><svg width="14" height="14" style="vertical-align:middle;border-radius:50%;margin-right:3px"><use href="#cnova-icon"/></svg><span data-i18n="dash.cnova_balance">CNOVA Balance</span><span class="tip-badge" tabindex="0">?<span class="tip-popup" data-i18n="dash.cnova_balance_tip">Protocol tokens minted to you each time YOU register — your first entry and every re-entry after a cycle. At the $0.01 launch floor that is 50 CNOVA per T1 entry, and fewer as the floor rises, because the amount minted is always backed by your entry&rsquo;s $0.50 Treasury deposit. Redeem at the floor price anytime &mdash; or hold for appreciation.</span></span></div>
@@ -2862,6 +2871,41 @@ function fmt6(raw) {
   if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
   if (n >= 10_000)    return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
   return '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/**
+ * The Withdrawable card's sub-label. THE CARD SHOWS GROSS; THE WALLET RECEIVES NET.
+ *
+ * MEASURED 2026-08-28, V8.50 community chain, block 46089180, `diag_withdraw.js SCAN=1`
+ * over ALL 241 registered members: of the 48 holding a balance, the card figure and the
+ * MAX box agreed on 48/48, `netClaimableOf` and an independent withdrawCore replay agreed
+ * on 48/48, and THE ONLY DISAGREEMENT ANYWHERE IN THE POPULATION was this 1.5% health fee
+ * — every gap exactly 1.5% of the balance. So there is one display defect here, not an
+ * arithmetic one. @Koach100 (2026-08-05) reported it from the other end: "the withdrawn
+ * amount on the dashboard was a few dollars more" than the $302.63 that reached his wallet
+ * (302.63 / 0.985 = 307.24).
+ *
+ * THE BIG NUMBER DELIBERATELY STAYS GROSS. It has to match the MAX box, because that is
+ * the figure a member types into the amount field and `doWithdrawPartial` compares against
+ * at full precision — the 2026-07-29 lesson where MAX handed over a number the same screen
+ * then refused. The fee belongs in the sub-label, not in the headline.
+ *
+ * ⛔ If the fee has not been read from the chain yet, this says nothing about it rather
+ * than quoting a net computed from an assumed 150 bps. A guessed number that looks
+ * measured is the failure-as-zero family (index.html audit 2026-08-07) pointed at the
+ * member's money.
+ */
+function readyToClaimLabel(gross) {
+  const fallback = () => (window.t ? window.t('dash.ready_to_claim', 'Ready to claim') : 'Ready to claim');
+  let g;
+  try { g = BigInt(gross || 0n); } catch (_) { return fallback(); }
+  if (g <= 0n) return fallback();
+  const bps = window._withdrawFeeBps;
+  if (bps === undefined || bps === null) return fallback();   // fee unread — never quote a guessed net
+  const b = BigInt(bps);
+  const net = g - (g * b / 10000n);
+  const pct = (Number(b) / 100).toFixed(1);
+  return `${fmt6(net)} after the ${pct}% health fee`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -5642,6 +5686,10 @@ async function loadDashboardData() {
       const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
       const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
       window._withdrawFeeBps = feeBps;
+      // The fee is known only here, so this is the first point the card can tell the
+      // truth about what will land in the wallet. All three paint sites use one helper.
+      const lbl0 = document.getElementById('dash-ready-label');
+      if (lbl0) lbl0.textContent = readyToClaimLabel(realW);
       const feeAmt = realW * feeBps / 10000n;
       const netAmt = realW - feeAmt;
       const feePct = (Number(feeBps) / 100).toFixed(1);
@@ -6265,7 +6313,7 @@ async function loadDashboardData() {
           const badge = document.getElementById('dash-reserved-badge');
           const lbl   = document.getElementById('dash-ready-label');
           if (badge) { badge.textContent = `⚙ up to ${fmt6(reserved)} reserved`; badge.style.display = 'block'; }
-          if (lbl)   lbl.textContent = `${fmt6(free)} free to claim`;
+          if (lbl)   lbl.textContent = readyToClaimLabel(free);
 
           // Reserve notice banner in withdraw panel
           const notice = document.getElementById('withdraw-reserve-notice');
@@ -6302,9 +6350,7 @@ async function loadDashboardData() {
       setText('dash-withdrawable',    fmt6(res.net));
       setText('dash-withdraw-amount', fmt6(res.net));
       const lbl = document.getElementById('dash-ready-label');
-      if (lbl) lbl.textContent = res.reserved > 0n
-        ? `${fmt6(res.net)} free to claim`
-        : (window.t ? window.t('dash.ready_to_claim','Ready to claim') : 'Ready to claim');
+      if (lbl) lbl.textContent = readyToClaimLabel(res.net);
       // Reserve badge tells the truth: the target, and what is actually held today.
       // The target fences FUTURE highest-tier earnings — it is not carved out of
       // the current balance (that reading implied more money than ever earned).
