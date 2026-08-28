@@ -234,23 +234,11 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 - **DIAGNOSED 2026-07-27 — not a fault, but a UX hazard now fixed.** Two separate things: (1) **T3 is at 2 cycles on-chain, not 0** — the dashboard figure he read is wrong and that part is STILL OPEN. (2) He holds seats only in T5-T8 because he switched auto re-entry OFF: `member_history.js` shows his last cycle-out in each of T1/T2/T3/T4 recorded as **PARKED (autoReentry disabled)** — a clean graduation that returns the crossing reserve to withdrawable but does NOT keep the seat. Every earlier cycle-out parked normally with a shortfall. Turning the option back on (it reads true now) does not restore tiers already left; those need 'Graduated tier re-entry'. **UI fix (38605d7):** switching auto re-entry off now requires confirming a dialog that states the consequence explicitly. His trail also surfaced a NINTH silent graduation (tx 0xe9e8067…, T5.1 MatA at block 44668146).
 - **PARTIAL 2026-07-30 — and the tool could not answer the question.** `member_ledger.js` on `0x1ca3316E` shows **T3.1 MatA and MatB both `left`**, so she passed through T3 and out; `memberHighestTier` is now T10. That is consistent with T3 having cycled. But her report was specifically about the *cycle count* reading 0, and `member_ledger` prints state and balances — **not `cyclesCompleted`** — so it cannot see the field the question is about. Adding that column is the next step; guessing from state would be exactly the kind of plausible-but-unverified answer that wasted two hours tonight. **Also flagged: this ticket sat from 2026-07-27 to 2026-07-30 without a reply. That is on us, not the reporter.**
 
-### [2026-07-26] Other — on the tiers page the information is a bit ambiguous.
-- **Reporter:** Kira
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
-- **Frequency:** Consistent
-- **What happened:** on the tiers page the information is a bit ambiguous.
-- **What was expected:** the T1.1/T2.1 new pairs could have the count when new.
-- **Notes:** Also the slow down on T1 is very noticeable maybe we can increase the numbers to 400 or 500?
-- **Submitted:** Sun, 26 Jul 2026 23:20:05 GMT
-- **FIX IN PROGRESS:** accepted, not yet shipped.
-
-
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-26 | 2026-08-28 | Other | Kira — Other — on the tiers page the information is a bit ambiguous. - **Reporter:** Ki | display fixed - T1 pair sizing remains an open product decision |
 | 2026-08-08 | 2026-08-28 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — i got 2 self rescue alerts at the same time. t 1 cleare | fixed - approval now sized to entry fee, shortfall no longer goes stale |
 | 2026-08-17 | 2026-08-28 | Bug Report Page | Jacob — Bug Report Page — Fail to create "[From https://sepolia.base.org] gas limit to…  | fixed - bug report page sends no on-chain transaction |
 | 2026-08-26 | 2026-08-26 | Dashboard (index.html) | CryptoJan — parked, no approve button, "still a shortfall" on click, intermittent. ROOT CAUSE: both ready-gates tested `allowance >= SHORTFALL`, but the shortfall MOVES while parked, so an allowance that covered it at render failed at click — the measured 0xa0763F34 case (08-24 diag: $11.88 vs $12.50) happening to a live member. Both gates now compare against `max(fee, shortfall)`, the contract's actual pull ceiling, so READY can never go stale. Shipped with the V8.50 cutover; his position reset at noon regardless. Reporter added to fund_list (wallet #111). | `1b0ed5f` |
