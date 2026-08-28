@@ -10,4 +10,4 @@ themselves NEVER appear here — they live between gifter and recipient.
 - [GIFTED by 0xaAda7e…3c15 2026-08-28] 2026-08-28 · 0xaAda7eF0bbF0A08189a39f6d471A1728d3873c16 · PIFFER · Piffer Test · contact: @Piffer
 - [GIFTED by 0x19a59f…8102 2026-08-28] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9912 · tester · tester · contact: @tester
 - [GIFTED by 0x19a59f…8102 2026-08-28] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9869 · test2 · test2 · contact: @test2
-- [WAITING] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9825 · ererer · ererer · contact: @ererer
+- [RESERVED by 0x19a59f…8102 @1787888258] 2026-08-28 · 0x4392471363D2b215c9E0D03C25C06EDd6bFA9825 · ererer · ererer · contact: @ererer
