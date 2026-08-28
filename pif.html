@@ -273,18 +273,33 @@
       <div id="gift-maker">
         <label style="margin-top:8px">Recipient (a wallet from the waitlist below — or leave empty for an open coupon you share privately)</label>
         <input id="gift-to" placeholder="0x… (optional)" maxlength="42">
-        <label>Include gas for your recipient (optional ETH — covers their first transactions)</label>
-        <!-- V8.50 / session 44: was 0.0005 (~$1.25 at $2,500/ETH), which is FIVE TIMES
-             what index.html:5123 sends for the same purpose (a hardcoded 0.0001, ~$0.25)
-             and five times what the owner intended. Two doors funding the same thing with
-             different amounts, and nothing kept them equal — the same shape as the coupon
-             limit that was enforced on one door only. Aligned to 0.0001 here.
-             ⚠ IF YOU CHANGE ONE, CHANGE BOTH. The other is index.html:5123.
-             NOT pegged to USD: this is denominated in ETH and drifts with the ETH price.
-             Pegging needs a price feed neither page has, and a failed price read that
-             silently produces a wrong amount would be exactly the failure-as-zero family
-             this codebase has a standing rule against. Owner decision pending. -->
-        <input id="gift-gas" placeholder="0.0001" value="0.0001">
+        <!-- ── GAS GIFT: ALWAYS INCLUDED, NOT EDITABLE (owner decision 2026-08-28) ──
+             THREE things were wrong with the old optional input and all are fixed here.
+             (1) It defaulted to 0.0005 ETH (~$1.25) — FIVE TIMES index.html:5123, which
+                 sends a hardcoded 0.0001 for the same purpose. Two doors, two amounts,
+                 nothing keeping them equal.
+             (2) It said "for your recipient", which was false: issueCoupon forwards the
+                 ETH to CouponRegistry.gasGiftWallet, not to the recipient. That wallet
+                 was ALSO mis-set to opsWallet until 2026-08-28, so the money reached
+                 nobody at all. Now rewired to the wallet /api/gas-gift pays out from,
+                 which makes the contribution real: it replenishes the pool that hands
+                 every new member their first gas.
+             (3) Optional invited a free ride — the gas pool is a commons, and a member
+                 issuing a hundred coupons could opt out a hundred times. The owner's
+                 first instinct was "optional on your first coupon only"; he took the
+                 simpler route instead, since $0.25 is not worth per-member state:
+                 ALWAYS INCLUDED, matching what index.html has always done.
+             ⚠ IF YOU CHANGE THE AMOUNT, CHANGE BOTH DOORS. The other is index.html:5123.
+             ⚠ Denominated in ETH, so its USD value drifts. NOT pegged to a price feed:
+             neither page has one, and a failed price read that silently produced a wrong
+             amount is the failure-as-zero family this codebase has a standing rule
+             against. Revisit at mainnet with a measured gas cost, not a dollar target. -->
+        <label>Gas for your recipient</label>
+        <div class="muted" style="font-size:13px;line-height:1.6;border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          ⛽ <strong>0.0001 ETH is included with every coupon</strong> — it tops up the pool
+          that gives each new member enough gas to make their first transactions. This part
+          is not refundable: cancelling a coupon returns your $10 USDC, not the gas.
+        </div>
         <button class="btn btn-green" id="btn-gift" onclick="makeGift()">💚 Fund a $10 entry coupon</button>
         <div class="status" id="make-status"></div>
       </div>
@@ -694,9 +709,13 @@ async function makeGift() {
     const code = makeCode();
     // Same hashing as the register page: keccak256(utf8 bytes of the exact code).
     const codeHash = ethers.keccak256(ethers.toUtf8Bytes(code));
-    const gasStr = (document.getElementById('gift-gas').value || '').trim();
-    let value = 0n;
-    try { if (gasStr && Number(gasStr) > 0) value = ethers.parseEther(gasStr); } catch (e) {}
+    // Owner decision 2026-08-28: the gas gift is ALWAYS included and is no longer a
+    // field a member can empty. Read from a constant rather than the DOM — the old code
+    // fell back to 0n whenever the input was blank or unparseable, which meant a stray
+    // keystroke silently issued a coupon with no gas contribution and said nothing.
+    // Must stay equal to index.html:5123 (GAS_GIFT_WEI).
+    const GAS_GIFT_ETH = '0.0001';
+    const value = ethers.parseEther(GAS_GIFT_ETH);
     say('make-status', '<span class="spinner"></span> Step 2 of 2 — funding the coupon on-chain…');
     const reg = new ethers.Contract(ADDRS.couponRegistry, REG_ABI, signer);
     // ── 2026-08-27, owner's double-fund find (PIF 05: reserve→unreserve→reserve→gifted).
