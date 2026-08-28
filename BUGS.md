@@ -142,18 +142,6 @@ i stsrted with only auto rentry after a while added double reentry and today add
 - **Submitted:** Mon, 10 Aug 2026 00:20:19 GMT
 
 
-### [2026-08-08] Dashboard (index.html) — i got 2 self rescue alerts at the same time.
-t 1 cleared nor…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x9e0413a671f48da6317473e81eb089136e9f1273
-- **Frequency:** Consistent
-- **What happened:** i got 2 self rescue alerts at the same time.
-t 1 cleared normally but although T 2 usdc was approved the self rescue button is not showing.
-- **What was expected:** to click self rescue.and update dashboard.
-- **Submitted:** Sat, 08 Aug 2026 11:41:38 GMT
-
 
 ### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
 - **Reporter:** @ronnienic197
@@ -263,6 +251,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-08 | 2026-08-28 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — i got 2 self rescue alerts at the same time. t 1 cleare | fixed - approval now sized to entry fee, shortfall no longer goes stale |
 | 2026-08-17 | 2026-08-28 | Bug Report Page | Jacob — Bug Report Page — Fail to create "[From https://sepolia.base.org] gas limit to…  | fixed - bug report page sends no on-chain transaction |
 | 2026-08-26 | 2026-08-26 | Dashboard (index.html) | CryptoJan — parked, no approve button, "still a shortfall" on click, intermittent. ROOT CAUSE: both ready-gates tested `allowance >= SHORTFALL`, but the shortfall MOVES while parked, so an allowance that covered it at render failed at click — the measured 0xa0763F34 case (08-24 diag: $11.88 vs $12.50) happening to a live member. Both gates now compare against `max(fee, shortfall)`, the contract's actual pull ceiling, so READY can never go stale. Shipped with the V8.50 cutover; his position reset at noon regardless. Reporter added to fund_list (wallet #111). | `1b0ed5f` |
 | 2026-08-26 | 2026-08-26 | Other | Sherwyn — "tokens are being redeemed but not reflecting in wallet". CLOSED BY MEASUREMENT (`scripts/diag_sherwyn_redeem.js`, read-only, refuses non-v8_48 addresses): BOTH redeems succeeded AND paid — $6.571675 (08-25, tx 0xab637c8d…) and $0.566131 (08-26, tx 0xcf03f2b7…). The 45% early-exit penalty (joined <30d) withheld $5.84 of $12.98 gross, and a sub-$7 bump on a wallet holding $30,065 USDC is easy to miss. NOT A BUG — penalty disclosure did its job on-chain; closed on the old chain the morning of the V8.50 cutover. | (diagnosis only — no code change) |
