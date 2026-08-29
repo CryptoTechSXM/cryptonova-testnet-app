@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-29] Other — Continuous self rescue loop - each time I approve and self r…
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Continuous self rescue loop - each time I approve and self rescue, the system says you're back in the matrix but a refresh says that I'm still parked and need to be self rescued again for another amount of funds to be approved. It keeps doing this over and over, Have done it 4 consecutive times and still says I'm parked..
+- **What was expected:** Only to be self rescued once and not just continuous self rescues over and over ..
+- **Submitted:** Sat, 29 Aug 2026 12:28:35 GMT
+
+
 ### [2026-08-27] Onboarding / Registration — REOPENED: could not change the referrer address
 - **Reporter:** @Lavern_Gay
 - **Page:** Onboarding / Registration
