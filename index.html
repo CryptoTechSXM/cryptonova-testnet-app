@@ -2586,6 +2586,7 @@ const SF_ABI = [
 const KEEPER_EVICT_ABI = [
   'function evictionGracePeriod() external view returns (uint256)',   // V8.49+
   'function extendedIdleTimeout() external view returns (uint256)',   // V8.50 and earlier
+  'function parkedGracePeriod() external view returns (uint256)',     // 2026-08-29, see keeperFallbackSentence
 ];
 
 const USDC_ABI = [
@@ -9168,6 +9169,64 @@ function stopRescuePolling() {
   if (_rescuePollTimer) { clearInterval(_rescuePollTimer); _rescuePollTimer = null; }
 }
 
+// ── THE REAL PER-TRANSACTION GAS CEILING — MEASURED 2026-08-29 ──────────────
+// Every "~17.8M" that used to be scattered through this file was a recollection.
+// Nobody had ever measured it, and it was WRONG. It was also load-bearing: it set
+// the 15,000,000 refusal lines and the 16,500,000 caps at five separate call sites,
+// and on 2026-08-29 it waved a member's self-rescue through into a wallet refusal.
+//
+// refusal_layer.js (keepers repo) bisected the real boundary to the unit by sending
+// unfunded probe transactions up a gas ladder: Base Sepolia's transaction-ADMISSION
+// layer accepts 16,777,216 and refuses 16,777,217 with -32003 "gas limit too high".
+// 2^24 exactly. IDENTICAL on sepolia.base.org and on QuickNode, so it is a
+// client-level rule, not one provider's policy — changing RPC buys no headroom.
+// The BLOCK gas limit is 1,200,000,000; the block was never the constraint, and
+// eth_call happily accepts 50,000,000 (a different layer, routinely confused with
+// this one).
+const NODE_TX_GAS_CAP = 16_777_216;
+// ⛔ THE PART THAT LIMITS WHAT THIS FILE CAN DO: the gasLimit we set is ADVISORY.
+// Measured twice — 0xdE5fe7cB 2026-07-29 (ours 14,903,722, the wallet submitted
+// 20,067,248) and 0x8e2d8956 2026-08-29 (ours 16,500,000, the wallet submitted
+// 18,232,497) — the wallet re-estimates at signing time and sends ITS figure with
+// ITS pad. 1.15 is the largest pad observed, 1.05 the smallest. So no constant here
+// can guarantee acceptance; what we can do is refuse only the genuinely impossible,
+// be honest in the band where the wallet's pad decides it, and never promise that
+// retrying will work.
+const WALLET_PAD = 1.15;
+const MAX_SAFE_ESTIMATE = Math.floor(NODE_TX_GAS_CAP / WALLET_PAD); // 14,588,883
+// NEVER CLAMP AN ESTIMATE DOWNWARD (2026-07-28) — but DO clamp to the measured
+// admission cap, because above it the transaction is refused rather than run.
+const capGas = est => Math.min(Math.ceil(Number(est) * WALLET_PAD), NODE_TX_GAS_CAP);
+const gasM = n => (Number(n) / 1e6).toFixed(1) + 'M';
+
+// ── "the keeper will re-enter you" — TRUE, BUT TIMED (measured 2026-08-29) ───
+// copay_rescue reads parkedGracePeriod() FROM THE CHAIN and will not co-pay a
+// member before it expires; on the community deploy that is 86,400s = 24 hours.
+// The keeper log makes this unmistakable: 122 parked, "examined 122 (grace 122)",
+// 0 rescued — nothing failing, everything waiting. A member told "the keeper will
+// get you" with no window hears "in a few minutes" and files a bug when it does
+// not happen, which is how this promise costs more than it gives.
+// ⛔ F1's lesson applies to the number: quote the window ONLY if we actually read
+// it. A guessed "24 hours" that is really 1 hour is the failure-as-zero family
+// pointed at a member's patience.
+let _parkedGraceSecs = null;
+async function readParkedGrace(runner) {
+  if (_parkedGraceSecs !== null) return _parkedGraceSecs;
+  if (!runner || !ADDRS.matrixKeeper) return null;
+  for (let _i = 0; _i < 2; _i++) {
+    try {
+      const _s = Number(await new ethers.Contract(ADDRS.matrixKeeper, KEEPER_EVICT_ABI, runner).parkedGracePeriod());
+      if (_s > 0) { _parkedGraceSecs = _s; return _s; }
+    } catch (_) { await new Promise(r => setTimeout(r, 400)); }
+  }
+  return null;   // never a guess
+}
+function keeperFallbackSentence(secs) {
+  return secs
+    ? `The rescue keeper re-enters parked members automatically about ${Math.round(secs / 3600)} hours after they park, so you can leave this to it — or use the bug report link if you need it sooner.`
+    : `The rescue keeper re-enters parked members automatically after a waiting period — use the bug report link if you would like it done sooner.`;
+}
+
 function friendlyError(e) {
   if (!e) return 'Unknown error';
   // Ethers v6 error shapes — gas estimation failures don't have code=CALL_EXCEPTION,
@@ -9200,11 +9259,17 @@ function friendlyError(e) {
   // Nothing dapp-side can prevent this: it happens after we hand off to the
   // wallet. The permanent fix is V8.50-B's cascade depth cap.
   if (/gas limit too high|gas limit is too high|-32003/i.test(raw + rawDeep)) {
-    return '⛽ The network could not fit this transaction right now. Entering a tier ' +
-           'sometimes sets off a chain of matrix rotations, and when it does the cost ' +
-           'briefly exceeds what one transaction can carry. Nothing was sent and nothing ' +
-           'was charged. Wait a minute and try again — it usually goes through on the ' +
-           'next attempt.';
+    // 2026-08-29: this used to end "wait a minute and try again — it usually goes
+    // through on the next attempt". For the self-rescue that produced the live
+    // refusal that advice was FALSE COMFORT: the estimate was sampled 16 times on
+    // two nodes over ~20 blocks with a spread of ZERO, so the refusal is
+    // deterministic and the member would have pressed the button forever. Say what
+    // is true, and give the two routes that actually work.
+    return '⛽ Your wallet asked the network for more gas than it accepts in a single ' +
+           'transaction — the limit is 16,777,216. Nothing was sent and nothing was ' +
+           'charged. Pressing it again will usually NOT clear this: your wallet works out ' +
+           'the cost itself and adds its own safety margin on top, and that margin is what ' +
+           'pushed it over. ' + keeperFallbackSentence(_parkedGraceSecs);
   }
   // ── EARLY guard: raw ethers v6 tx data leaking (TokenPocket, Rabby, etc.) ─
   // Must be FIRST — before any branch that might fall through to raw msg output.
@@ -9666,18 +9731,20 @@ async function doBulkUpgrade() {
         // Either way a clamp turns "too expensive to send" into a failure with
         // no explanation. Titan hit exactly this on T8 -> T9 (2026-07-28).
         //
-        // Ceiling is 15M, not 17.8M: the chain's per-tx cap is ~17.8M and wallets
-        // pad by up to 15%, so 15M is the largest estimate that still fits AFTER
-        // padding. Above it, say so plainly and send nothing.
-        const _padded = Math.ceil(Number(est) * 1.05);
-        if (_padded > 15_000_000) {
+        // 2026-08-29: the ceiling is NODE_TX_GAS_CAP (measured), not the ~17.8M this
+        // comment used to assert, and the pad we must survive is the WALLET's 1.15,
+        // not the 1.05 assumed here. MAX_SAFE_ESTIMATE is the largest estimate that
+        // still fits after the worst pad observed.
+        if (Number(est) > MAX_SAFE_ESTIMATE) {
           throw new Error(
-            `⚠️ The T${enteringTier} upgrade is currently too large for the network to process ` +
-            `(needs ~${(_padded / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
-            `Nothing was sent and nothing was charged. This happens when entering a tier sets ` +
-            `off a long chain of matrix rotations; it settles on its own. Please try again shortly.`);
+            `⚠️ The T${enteringTier} upgrade needs about ${gasM(est)} gas and the network accepts ` +
+            `at most ${gasM(NODE_TX_GAS_CAP)} in one transaction once your wallet has added its own ` +
+            `safety margin, so it cannot be sent. Nothing was sent and nothing was charged. ` +
+            `This happens when entering a tier sets off a long chain of matrix rotations; it ` +
+            `settles as those complete. Upgrading one tier at a time is usually smaller — try ` +
+            `that, and use the bug report link if it keeps refusing.`);
         }
-        gasLimit = _padded;
+        gasLimit = capGas(est);
       } catch (estErr) {
         // A ceiling message is OURS and already member-readable. Without this the
         // funds-diagnosis below would catch it and relabel a gas problem as an
@@ -9920,30 +9987,32 @@ async function _executeUpgrade(btnId, statusId, tierIdx) {
     //     REVERTS it is telling us the transaction cannot succeed — sending it
     //     anyway with a made-up limit costs the member gas to watch it fail, and
     //     throws away the one thing that explains why.
-    // (2) No ceiling. Base Sepolia refuses a tx above ~17.8M, and wallets pad the
-    //     estimate (Rabby x1.15), so anything over ~15M is either rejected by the
-    //     RPC — "[From sepolia.base.org] gas limit too high", which is the WALLET
-    //     reporting an un-creatable tx, not the contract refusing the member — or
-    //     clamped down into an out-of-gas revert. Titan met exactly this on the
-    //     bulk button (2026-07-28).
+    // (2) No ceiling. MEASURED 2026-08-29: the network refuses a transaction above
+    //     NODE_TX_GAS_CAP = 16,777,216, and the wallet submits its OWN estimate with
+    //     its OWN pad (1.05 to 1.15 observed), so anything over MAX_SAFE_ESTIMATE is
+    //     liable to come back as "[From sepolia.base.org] gas limit too high" — which
+    //     is the WALLET's transaction being refused at admission, not the contract
+    //     refusing the member. Titan met exactly this on the bulk button (2026-07-28).
+    //     This line previously asserted "~17.8M"; that figure was never measured.
     let _exGas = 0;
     try {
       const _exEst = await tr.manualUpgrade.estimateGas(tierIdx);
-      _exGas = Number(_exEst) + Math.ceil(Number(_exEst) * 0.05);
+      _exGas = capGas(_exEst);   // 2026-08-29: clamp to the MEASURED admission cap
     } catch (estErr) {
       _setS(friendlyError(estErr));
       if (btn) btn.disabled = false;
       return;
     }
-    if (_exGas > 15_000_000) {
+    if (_exGas >= NODE_TX_GAS_CAP) {
       // With the V8.50-B cascade depth cap live on-chain (maxCascadeDepth==4), a
       // legitimate upgrade should no longer quote this much gas — the chain caps the
       // rotation chain and parks instead of running it to the ceiling. If we still see
       // it, something unusual is happening: refuse the doomed tx and ask them to report.
       _setS(`⚠️ This upgrade is quoting an unusually large amount of gas ` +
-            `(~${(_exGas / 1e6).toFixed(1)}M vs the chain's ~17.8M limit), so nothing was sent ` +
-            `and nothing was charged. This should be rare now that the network depth cap is live — ` +
-            `please try once more, and use the bug report link if it persists.`);
+            `(~${gasM(_exGas)} against the network's ${gasM(NODE_TX_GAS_CAP)} limit for a single ` +
+            `transaction), so nothing was sent and nothing was charged. This should be rare now ` +
+            `that the network depth cap is live — please use the bug report link so we can look ` +
+            `at it, rather than retrying, because the size will not change on its own.`);
       if (btn) btn.disabled = false;
       return;
     }
@@ -10050,17 +10119,17 @@ async function doLimboReEntry() {
       // The static fallback went (see above) but the DOWNWARD CLAMP stayed, and
       // it fails the same way for the same reason: Math.min(est * 1.15, 16.5M)
       // on a 17M estimate sends 16.5M, which is not enough, so the member pays
-      // gas for an out-of-gas revert. Refuse above the ceiling instead — 15M,
-      // because wallets pad by up to 15% on top and the chain caps at ~17.8M.
-      const _rePad = Math.ceil(Number(_est) * 1.15);
-      if (_rePad > 15_000_000) {
+      // gas for an out-of-gas revert. Refuse above MAX_SAFE_ESTIMATE instead — the
+      // measured cap divided by the worst wallet pad observed. (2026-08-29: the
+      // "~17.8M" this comment used to quote was never measured and was wrong.)
+      if (Number(_est) > MAX_SAFE_ESTIMATE) {
         throw new Error(
-          `⚠️ This re-entry is currently too large for the network to process ` +
-          `(needs ~${(_rePad / 1e6).toFixed(1)}M gas, the chain's limit is ~17.8M). ` +
-          `Nothing was sent and nothing was charged. It settles as the matrix rotations ` +
-          `ahead of you complete — please try again shortly.`);
+          `⚠️ This re-entry needs about ${gasM(_est)} gas and the network accepts at most ` +
+          `${gasM(NODE_TX_GAS_CAP)} in one transaction once your wallet has added its own safety ` +
+          `margin, so it cannot be sent from here. Nothing was sent and nothing was charged. ` +
+          `${keeperFallbackSentence(await readParkedGrace(matA.runner))}`);
       }
-      _reGas = _rePad;
+      _reGas = capGas(_est);
     } catch (estErr) {
       if ((estErr.message || '').startsWith('⚠️')) throw estErr;
       // Same rule as doSelfRescue: never prefix friendlyError's own sentence.
@@ -10940,8 +11009,10 @@ async function doSelfRescue() {
         if (status) status.textContent = 'Submitting self rescue (single transaction)…';
         await _mrP.selfRescueWithPermit.staticCall(p.value, p.deadline, p.v, p.r, p.s);
         const _eP = await _mrP.selfRescueWithPermit.estimateGas(p.value, p.deadline, p.v, p.r, p.s);
-        const _gP = _eP + _eP / 7n; // ~1.15x, same ladder as the classic path
-        if (_gP > 15_000_000n) throw new Error('⚠️ This rescue is currently too large for the network to process. The keeper will pick it up shortly, or try again in a few minutes.');
+        // 2026-08-29: threshold is now the MEASURED admission cap, and the test is on
+        // the ESTIMATE against MAX_SAFE_ESTIMATE so it matches the classic path exactly.
+        if (_eP > BigInt(MAX_SAFE_ESTIMATE)) throw new Error(`⚠️ This rescue needs about ${gasM(_eP)} gas and the network accepts at most ${gasM(NODE_TX_GAS_CAP)} in one transaction once your wallet adds its own safety margin, so it cannot be sent from here. Nothing was sent and nothing was charged. ${keeperFallbackSentence(await readParkedGrace(_mrP.runner))}`);
+        const _gP = BigInt(Math.min(Number(_eP + _eP / 7n), NODE_TX_GAS_CAP));
         const _txP = await _mrP.selfRescueWithPermit(p.value, p.deadline, p.v, p.r, p.s, { gasLimit: _gP });
         if (status) status.textContent = 'Waiting for confirmation…';
         await _txP.wait();
@@ -11055,43 +11126,38 @@ async function doSelfRescue() {
     let _rescueGas;
     try {
       const _est = await matrix.selfRescue.estimateGas({ from: await signer.getAddress() });
-      // 2026-07-28, measured live: an estimate of 17,762,199 came back on a real
-      // member rescue. Base Sepolia refuses a transaction whose gas limit is
-      // above roughly 17.8M, so that rescue CANNOT be sent — and clamping the
-      // limit down to fit would only trade "gas limit too high" for an
-      // out-of-gas revert that costs the member their fee.
+      // ── THE CEILING, MEASURED AT LAST (2026-08-29) ─────────────────────────
+      // What stood here said "Base Sepolia refuses a transaction whose gas limit is
+      // above roughly 17.8M". That was never measured and it was wrong — see
+      // NODE_TX_GAS_CAP above. It mattered: the member on 0x8e2d8956 had a STABLE
+      // estimate of 14,945,951 (16 samples, two nodes, spread 0), which sailed under
+      // the old 15,000,000 line, and their wallet then submitted 18,232,497 and was
+      // refused. The old message told them to wait a minute and press again. It was
+      // never going to work, and two bug reports hang off it.
       //
-      // Say so plainly instead. The keeper's rescue path batches differently and
-      // is not subject to the same single-transaction ceiling, so waiting is a
-      // real answer rather than a brush-off.
-      if (Number(_est) > 15_000_000) {
-        // 2026-07-28: the first wording quoted the estimate and the network
-        // limit side by side — "16.5M gas, network limit ~17.8M" — which reads
-        // as though it should have fitted, and a member said so. It does not:
-        // wallets add their own safety margin on top (Rabby uses ~1.15x), so a
-        // 16.5M estimate is submitted as ~19M and the node refuses it outright.
-        // Quote ONE number and say what it means.
-        // The button above still reads "Free — Earnings Cover It", which is true
-        // about the money and flatly contradicts this message about the network.
-        // A member sees both at once and cannot tell which to believe, so retire
-        // the label the moment this fires.
+      // Three bands now, and the middle one is the honest part:
+      //   est  > NODE_TX_GAS_CAP    impossible under any pad -> refuse, explain, keeper
+      //   est  > MAX_SAFE_ESTIMATE  the WALLET's pad decides -> warn, but still attempt
+      //   else                      send
+      // We attempt in the middle band deliberately: a refusal at the admission layer
+      // happens BEFORE broadcast, so it costs the member nothing, while refusing here
+      // would block a member whose wallet pads by 1.05 and would have gone through.
+      if (Number(_est) > NODE_TX_GAS_CAP) {
+        // The button still reads "Free — Earnings Cover It", which is true about the
+        // money and contradicts this about the network. Retire it the moment this fires.
         const _srb = document.getElementById('btn-self-rescue');
-        if (_srb) { _srb.textContent = '🔑 Self Rescue — try again shortly'; _srb.style.opacity = '0.6'; }
-        // MEASURED 2026-07-29 — the old wording asked the member to file a report,
-        // which was the right thing to say when the cause was unknown. It is known
-        // now: the cost is bimodal (~12.9M when the entry just takes a seat, ~19.1M
-        // when it triggers the rotation cascade), the wallet re-estimates at
-        // signing time, and the next attempt often lands in the cheap mode.
-        // Retrying genuinely works, so say that instead of asking them to wait.
+        if (_srb) { _srb.textContent = '🔑 Self Rescue — the keeper will do this'; _srb.style.opacity = '0.6'; }
         throw new Error(
-          '⚠️ The network could not fit this re-entry right now. Re-entering sometimes ' +
-          'sets off a chain of matrix rotations, and while that is happening the ' +
-          'transaction is briefly too large to send. Nothing was sent, nothing was ' +
-          'charged, and your seats and balances are untouched. Wait a minute and press ' +
-          'Self Rescue again — it usually goes through on the next attempt. The rescue ' +
-          'keeper will also re-enter you automatically if you would rather leave it.');
+          `⚠️ This re-entry needs about ${gasM(_est)} gas and the network accepts at most ` +
+          `${gasM(NODE_TX_GAS_CAP)} in a single transaction, so it cannot be sent from here. ` +
+          `Nothing was sent, nothing was charged, and your seats and balances are untouched. ` +
+          `Pressing the button again will not make it smaller. ` +
+          `${keeperFallbackSentence(await readParkedGrace(matrix.runner))}`);
       }
-      _rescueGas = Math.min(Math.ceil(Number(_est) * 1.15), 16_500_000);
+      if (Number(_est) > MAX_SAFE_ESTIMATE && status) {
+        status.textContent = 'This one is close to the network\'s single-transaction limit — if your wallet refuses it nothing is charged, and the rescue keeper still re-enters you on its own schedule.';
+      }
+      _rescueGas = capGas(_est);
     } catch (estErr) {
       if ((estErr.message || '').startsWith('⚠️')) throw estErr;
       // DO NOT PREFIX friendlyError's OUTPUT. 2026-07-28 (Sherwyn): when the
