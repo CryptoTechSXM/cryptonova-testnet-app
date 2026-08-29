@@ -2895,14 +2895,26 @@ function fmt6(raw) {
  * measured is the failure-as-zero family (index.html audit 2026-08-07) pointed at the
  * member's money.
  */
+// THE WITHDRAWAL FEE IN BPS, OR null WHEN IT HAS NOT BEEN READ. NEVER A GUESS.
+// ⛔ WHY THIS EXISTS (2026-08-29). readyToClaimLabel() below already refused to quote a
+// net when the fee was unknown — but the value it checked was being SET to a guessed
+// 150n by `withdrawalFeeBps().catch(() => 150n)` at the read site, so the guard could
+// never fire and the card printed "after the 1.5% health fee" from a number nobody read.
+// Four more sites did `window._withdrawFeeBps || 150n`, which invents a fee the same way
+// AND rewrites a legitimate 0n fee into 1.5%. One reader, one rule: unknown stays unknown.
+function withdrawFeeBps() {
+  const v = window._withdrawFeeBps;
+  if (v === undefined || v === null) return null;
+  try { return BigInt(v); } catch (_) { return null; }
+}
+
 function readyToClaimLabel(gross) {
   const fallback = () => (window.t ? window.t('dash.ready_to_claim', 'Ready to claim') : 'Ready to claim');
   let g;
   try { g = BigInt(gross || 0n); } catch (_) { return fallback(); }
   if (g <= 0n) return fallback();
-  const bps = window._withdrawFeeBps;
-  if (bps === undefined || bps === null) return fallback();   // fee unread — never quote a guessed net
-  const b = BigInt(bps);
+  const b = withdrawFeeBps();
+  if (b === null) return fallback();   // fee unread — never quote a guessed net
   const net = g - (g * b / 10000n);
   const pct = (Number(b) / 100).toFixed(1);
   return `${fmt6(net)} after the ${pct}% health fee`;
@@ -5335,14 +5347,22 @@ async function loadDashboardData() {
       // Check ANY T1 Matrix A (T1.1, T1.2 …) for hasEverJoined so T1.2 coupon
       // members don't incorrectly see "not registered".
       const t1MatAs = matrices.filter(m => m.label === 'T1 Matrix A');
-      let foundInT1 = false;
+      let foundInT1 = false, couponReadFailed = false;
       for (const m of t1MatAs) {
-        try {
-          const mData = await new ethers.Contract(m.addr, MATRIX_ABI, rp).getMember(userAddr);
-          if (mData.hasEverJoined) { foundInT1 = true; break; }
-        } catch(_) {}
+        const r = await retryRead(() => new ethers.Contract(m.addr, MATRIX_ABI, rp).getMember(userAddr));
+        if (!r.ok) { couponReadFailed = true; continue; }
+        if (r.value.hasEverJoined) { foundInT1 = true; break; }
       }
       if (!foundInT1) {
+        // ⛔ A FAILED READ IS NOT "NOT REGISTERED" (2026-08-29). This loop used
+        // `catch(_) {}`, so one blipped getMember on a T1 MatA read as "not found" and a
+        // coupon-registered member was shown "Not Yet Registered" — a FALSE CLAIM, not
+        // merely missing data. That is the exact defect the 2026-06-20 v8.19 fix removed
+        // from the globalJoined path fifteen lines above; it was still live in this
+        // branch, which is the ONLY path coupon members take.
+        if (couponReadFailed) {
+          hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-content'); showEl('dash-unknown'); return;
+        }
         hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
       }
       // Member is in a T1 MatA via coupon path — proceed with dashboard
@@ -5684,23 +5704,28 @@ async function loadDashboardData() {
     // Withdrawal fee breakdown — read withdrawalFeeBps from T1A (same on all matrices)
     try {
       const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
-      const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
-      window._withdrawFeeBps = feeBps;
+      // ⛔ ONLY PUBLISH A FEE THAT WAS ACTUALLY READ. `.catch(() => 150n)` here stored a
+      // GUESS in the global and made withdrawFeeBps()'s unknown case unreachable. Retry it
+      // like every other money read; on failure leave the global untouched so every
+      // consumer says nothing rather than quoting an assumed 1.5%.
+      const feeRead = await retryRead(() => matFee.withdrawalFeeBps());
+      if (feeRead.ok) window._withdrawFeeBps = BigInt(feeRead.value);
+      const feeBps = withdrawFeeBps();
       // The fee is known only here, so this is the first point the card can tell the
       // truth about what will land in the wallet. All three paint sites use one helper.
       const lbl0 = document.getElementById('dash-ready-label');
       if (lbl0) lbl0.textContent = readyToClaimLabel(realW);
-      const feeAmt = realW * feeBps / 10000n;
-      const netAmt = realW - feeAmt;
-      const feePct = (Number(feeBps) / 100).toFixed(1);
       const breakdown = document.getElementById('withdraw-fee-breakdown');
-      if (realW > 0n) {
-        document.getElementById('wfee-pct').textContent  = feePct;
+      if (realW > 0n && feeBps !== null) {
+        const feeAmt = realW * feeBps / 10000n;
+        document.getElementById('wfee-pct').textContent   = (Number(feeBps) / 100).toFixed(1);
         document.getElementById('wfee-gross').textContent = fmt6(realW);
         document.getElementById('wfee-fee').textContent   = '−' + fmt6(feeAmt);
-        document.getElementById('wfee-net').textContent   = fmt6(netAmt);
+        document.getElementById('wfee-net').textContent   = fmt6(realW - feeAmt);
         if (breakdown) breakdown.style.display = 'block';
       } else {
+        // Nothing to withdraw, or the fee is unknown. Show no split at all rather than a
+        // gross/fee/net breakdown built on a fee that was never read.
         if (breakdown) breakdown.style.display = 'none';
       }
     } catch(_) {}
@@ -6325,15 +6350,18 @@ async function loadDashboardData() {
 
           // Re-render fee breakdown against the free amount
           try {
-            const feeBps = window._withdrawFeeBps || 150n;
-            const feeAmt = free * feeBps / 10000n;
-            const netAmt = free - feeAmt;
+            const feeBps = withdrawFeeBps();
             const breakdown = document.getElementById('withdraw-fee-breakdown');
             if (breakdown) {
-              document.getElementById('wfee-gross').textContent = fmt6(free);
-              document.getElementById('wfee-fee').textContent   = '−' + fmt6(feeAmt);
-              document.getElementById('wfee-net').textContent   = fmt6(netAmt);
-              breakdown.style.display = free > 0n ? 'block' : 'none';
+              if (feeBps === null) {
+                breakdown.style.display = 'none';   // unknown fee -> no split
+              } else {
+                const feeAmt = free * feeBps / 10000n;
+                document.getElementById('wfee-gross').textContent = fmt6(free);
+                document.getElementById('wfee-fee').textContent   = '−' + fmt6(feeAmt);
+                document.getElementById('wfee-net').textContent   = fmt6(free - feeAmt);
+                breakdown.style.display = free > 0n ? 'block' : 'none';
+              }
             }
           } catch(_) {}
         }
@@ -6368,12 +6396,18 @@ async function loadDashboardData() {
         tot.textContent = `Reserve target ${fmt6(res.reserved)} · currently holding ${fmt6(res.heldNow)} from your highest-tier earnings — the rest is guarded from future earnings as they arrive`;
       }
       try {
-        const feeBps = window._withdrawFeeBps || 150n;
-        const feeAmt = res.net * feeBps / 10000n;
+        const feeBps = withdrawFeeBps();
         const g = document.getElementById('wfee-gross'), f = document.getElementById('wfee-fee'), n = document.getElementById('wfee-net');
         if (g) g.textContent = fmt6(res.net);
-        if (f) f.textContent = '−' + fmt6(feeAmt);
-        if (n) n.textContent = fmt6(res.net - feeAmt);
+        if (feeBps === null) {
+          // A fresh gross beside a stale or invented fee is worse than no fee at all.
+          if (f) f.textContent = '—';
+          if (n) n.textContent = '—';
+        } else {
+          const feeAmt = res.net * feeBps / 10000n;
+          if (f) f.textContent = '−' + fmt6(feeAmt);
+          if (n) n.textContent = fmt6(res.net - feeAmt);
+        }
       } catch(_) {}
     }).catch(e => console.warn('[claimable refine]', e.message));
 
@@ -6730,8 +6764,10 @@ async function renderWithdrawableDetail(el, rp) {
   const upgradeDeducted = autoDeducted > crossingLocked ? autoDeducted - crossingLocked : 0n;
 
   const matFee = new ethers.Contract(ADDRS.T1.matA, MATRIX_ABI, rp);
-  const feeBps = await matFee.withdrawalFeeBps().catch(() => 150n);
-  const feePct = (Number(feeBps) / 100).toFixed(1);
+  const _feeRead = await retryRead(() => matFee.withdrawalFeeBps());
+  if (_feeRead.ok) window._withdrawFeeBps = BigInt(_feeRead.value);
+  const feeBps = withdrawFeeBps();
+  const feePct = feeBps === null ? null : (Number(feeBps) / 100).toFixed(1);
 
   const joinDate   = joinedAt > 0n ? new Date(Number(joinedAt) * 1000).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
   const daysSince  = joinedAt > 0n ? Math.floor((Date.now()/1000 - Number(joinedAt)) / 86400) : 0;
@@ -6856,7 +6892,9 @@ async function renderWithdrawableDetail(el, rp) {
   const debtRepay    = _res ? _res.debt  : 0n;
   const seatHold     = totalWithdrawable > grossClaim ? totalWithdrawable - grossClaim : 0n;
   const accrualExtra = grossClaim > totalWithdrawable ? grossClaim - totalWithdrawable : 0n;
-  const feeAmt = availToClaim * feeBps / 10000n;
+  // Unknown fee -> no derived figures at all. The section that shows them is gated on
+  // feePct below, so these stay 0n and are never rendered.
+  const feeAmt = feeBps === null ? 0n : availToClaim * feeBps / 10000n;
   const netAmt = availToClaim - feeAmt;
 
   el.innerHTML = `
@@ -6879,7 +6917,7 @@ async function renderWithdrawableDetail(el, rp) {
         return `<div class="detail-row"><span class="detail-key">T${t}${tb.active > 1 ? ' · ' + tb.active + ' seats' : ''}</span><span class="detail-val green">${fmt6(_tv)}</span></div>`;
       }).join('');
     })()}
-    ${availToClaim > 0n ? `
+    ${availToClaim > 0n && feePct !== null ? `
     <div class="detail-section">${_t('modal.after_fee','After')} ${feePct}% ${_t('modal.withdrawal_fee','Withdrawal Fee')}</div>
     <div class="detail-row"><span class="detail-key">${_t('modal.fee_deducted','Fee Deducted')}</span><span class="detail-val red">− ${fmt6(feeAmt)}</span></div>
     <div class="detail-row total"><span class="detail-key">${_t('modal.you_receive','You Receive')}</span><span class="detail-val green">${fmt6(netAmt)}</span></div>
@@ -7517,11 +7555,17 @@ function onWithdrawAmountInput() {
     if (btnP) btnP.disabled = true;
     return;
   }
-  const feeBps = window._withdrawFeeBps || 150n;
+  const feeBps = withdrawFeeBps();
   const amtMicro = BigInt(Math.round(val * 1e6));
-  const fee = amtMicro * feeBps / 10000n;
-  const net = amtMicro - fee;
-  preview.textContent = `Fee: $${(Number(fee)/1e6).toFixed(4)} · You receive: $${(Number(net)/1e6).toFixed(4)}`;
+  if (feeBps === null) {
+    // ⛔ THIS LINE TELLS THE MEMBER WHAT WILL LAND IN THEIR WALLET. It must never be
+    // computed from an assumed 150 bps. The withdrawal itself is unaffected — only the
+    // preview is withheld, and the panel still discloses the split once the fee reads.
+    preview.textContent = 'Health fee could not be read just now — the exact amount you receive is not shown.';
+  } else {
+    const fee = amtMicro * feeBps / 10000n;
+    preview.textContent = `Fee: $${(Number(fee)/1e6).toFixed(4)} · You receive: $${(Number(amtMicro - fee)/1e6).toFixed(4)}`;
+  }
   if (btnP) btnP.disabled = false;
 }
 
