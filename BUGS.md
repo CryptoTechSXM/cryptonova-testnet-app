@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-08-29] Other — Forgot to add - it looks like everytime I do the continuous …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
+- **Frequency:** Consistent
+- **What happened:** Forgot to add - it looks like everytime I do the continuous self rescue, my CNova amount increases...
+- **What was expected:** Not to be stuck in continuous self rescue loop... and still parked
+- **Submitted:** Sat, 29 Aug 2026 13:18:11 GMT
+
+
 ### [2026-08-29] Other — Continuous self rescue loop - each time I approve and self r…
 - **Reporter:** Sherwyn
 - **Page:** Other
