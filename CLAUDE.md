@@ -95,14 +95,74 @@ Superseded Active-state rows are preserved verbatim in `archive/CLAUDE_HISTORY.m
 
 ## 3-stage deploy order — MANDATORY
 
+⛔ **MEASURED IN THE VERCEL DASHBOARD 2026-08-30 (session 51). This is the mechanism, not a guess.**
+
+| project | Production Branch | Auto-assign custom domains | domains it moves |
+|---|---|---|---|
+| `cryptonova-testnet-app` | **`main`** | Enabled | **crypto-nova.app** · www.crypto-nova.app · v8.crypto-nova.app · cryptonova-testnet-app.vercel.app |
+| `cryptonova-preview` | **`preview`** | Enabled | **early.crypto-nova.app** |
+
+**Both projects watch the SAME repo, so ONE push creates a deployment in BOTH.** Which *environment*
+that deployment gets is decided per project by the table above — that is the whole model.
+
 ```
 Stage 1: git push origin admin
-Stage 2: git push origin admin:preview --force   ← STOP, wait for QA
-Stage 3: git push origin admin:main --force      ← STOP, wait for leader sign-off
+         -> Preview deployment in BOTH projects. NO domain moves. admin.* serves it (gate-free).
+Stage 2: git push origin admin:preview --force   <- STOP, wait for QA
+         -> PRODUCTION in cryptonova-preview  -> early.crypto-nova.app MOVES.
+         -> Preview in cryptonova-testnet-app -> crypto-nova.app does NOT move.
+Stage 3: git push origin admin:main --force      <- STOP, wait for leader sign-off
+         -> PRODUCTION in cryptonova-testnet-app -> crypto-nova.app + 3 domains MOVE.
 ```
 
-**NEVER push to `main` before `preview`. NEVER skip stages.**  
+**NEVER push to `main` before `preview`. NEVER skip stages.**
 **NEVER push to `preview` or `main` without explicit approval.**
+
+### THE PUSH *IS* THE DEPLOY. "Promote" is the manual override, not the normal path.
+
+⛔ **RETRACTED 2026-08-30:** an earlier session recorded *"production only moves by Promote; branch
+refs sit stale by design."* **That is WRONG.** What was genuinely measured then is narrower and still
+true: **a push to `admin` moves no domain**, because `admin` is neither project's production branch.
+The refs sit stale because **nobody ran stages 2 and 3** — the last time anyone did was session 44
+(`2c5c703`). Not by design. ⚠ This error survived two sessions and was told to the owner as fact.
+
+Use **Promote to Production** only to make an *existing* deployment live **without a new push** —
+a rollback, or publishing a build that is already sitting there. ⚠ In that dialog leave
+**"Use project's Ignore Build Step" UNCHECKED**, or the promotion skips its build (45.2).
+
+### VERIFY ON THE DOMAIN — never on the ref, never on the dashboard
+
+A dashboard "Production · Current" is a *claim*. The served file is *evidence*. After stage 2 or 3,
+read a string only the new build has (cache-busted):
+
+```powershell
+$u = "https://early.crypto-nova.app/locales/en.json?v=$(Get-Random)"
+(Invoke-WebRequest -UseBasicParsing $u).Content | Select-String "earn_power"
+```
+```powershell
+$u = "https://crypto-nova.app/locales/en.json?v=$(Get-Random)"
+(Invoke-WebRequest -UseBasicParsing $u).Content | Select-String "earn_power"
+```
+
+✅ **`locales/en.json` IS THE BEST PROBE:** it needs no JavaScript, the maintenance gate never touches
+it, and it is the exact artifact that decides what members actually read. This is how session 51 found
+that `15bdaaa` had removed the flagged ROI copy six days earlier and **not one member had ever seen
+the fix** — both domains were still serving `(~31/41/56% ROI)` and "refer 5 people and earn $2.50
+extra". A commit is not a deploy. **Blockaid re-scans the SITE.**
+
+### Gotchas that have actually bitten
+
+- ⚠ **Vercel sometimes ignores a FORCE push.** If no deployment appears, empty-commit on `admin` and
+  re-run the stage: `git commit --allow-empty -m "trigger deploy"`.
+- ⚠ `vercel.json` sets `git.deploymentEnabled:{"data": false}` — the `data` branch NEVER deploys.
+  That is what stops member bug reports and PIF writes burning the Hobby plan's 100 deployments/day.
+- ⚠ `vercel-ignore-build.sh` exits 0 (SKIP) **only** for commit subjects starting `pif(`,
+  `bug-report(`, `bug-report screenshot (`, `fund-list(`. Everything else BUILDS. A canceled build
+  still counts against the daily quota — the script saves build minutes, not quota.
+- ⛔ **Truncation check after EVERY push, on the REMOTE ref, before anything else:**
+  `git show origin/admin:index.html | Select-Object -Last 3` must end `</body></html>`.
+- ⛔ Never `git add -A` in this repo: `core.autocrlf` is unset and there is no `.gitattributes`, so
+  Windows tools leave CRLF-only files looking permanently modified. Name files explicitly.
 
 ## Timed launch-gate sequence (redeploy / relaunch)
 
