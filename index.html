@@ -5317,6 +5317,9 @@ async function mcGetMember(rp, addrs, user) {
 async function loadDashboardData() {
   if (window._dashLoadInFlight) return;   // prevent concurrent double-loads
   window._dashLoadInFlight = true;
+  // Per-refresh, never sticky: a read that failed last time must not keep warning after it
+  // starts succeeding, and one that fails now must not be masked by a clean previous pass.
+  window._parkedReadFailed = false;
   if (!userAddr) {
     window._dashLoadInFlight = false; // reset guard before early return
     showEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
@@ -5525,13 +5528,34 @@ async function loadDashboardData() {
           );
         } else {
           followUps.push((async () => {
-            const parkedAt = await mc.parkedAt(userAddr).catch(()=>0n);
+            // ⛔ ALL THREE OF THESE WERE `.catch(()=>0n)` (fixed 2026-08-29). Each failure
+            // mode is a FALSE CLAIM, not missing data:
+            //   parkedAt -> 0   a parked member vanishes from the rescue list entirely,
+            //                   with nothing on screen to say a check was even attempted.
+            //   ENTRY_FEE -> 0  shortfall computes to 0, i.e. "your earnings cover it".
+            //   reserve  -> 0   shortfall is OVERSTATED by the whole reserve — the exact
+            //                   2026-08-07 "$10.00 instead of ~$1.60" defect, back again.
+            // An overstated shortfall is also what drives the PENDING EVICTION badge, and
+            // the 2026-08-29 crossing sweep measured ZERO evictions in V8.50's whole life —
+            // so a badge seen on screen came from here, not from the chain.
+            const parkedRead = await retryRead(() => mc.parkedAt(userAddr));
+            if (!parkedRead.ok) { window._parkedReadFailed = true; return; }
+            const parkedAt = parkedRead.value;
             if (BigInt(parkedAt) > 0n) {
-              const fee = await mc.ENTRY_FEE().catch(()=>0n);
-              const w   = BigInt(member.withdrawable);
+              const feeRead = await retryRead(() => mc.ENTRY_FEE());
               // V8.50: crossing reserve is consumed first toward the entry fee.
               // Shortfall = fee − (crossingReserve + withdrawable), not fee − withdrawable.
-              const res = await mc.crossingReserveOf(userAddr).catch(()=>0n);
+              const resRead = await retryRead(() => mc.crossingReserveOf(userAddr));
+              const w   = BigInt(member.withdrawable);
+              // The candidate is still COLLECTED when a read fails — dropping it would hide
+              // a real parked position. It is MARKED instead, and every display that would
+              // state a number derived from the gap checks the mark first. `shortfall` keeps
+              // its BigInt type deliberately: it is read in ~40 places including the approve
+              // bound and the copay pre-flight, and a null there would silently read as
+              // "covered".
+              const shortfallUnknown = !feeRead.ok || !resRead.ok;
+              const fee = feeRead.ok ? BigInt(feeRead.value) : 0n;
+              const res = resRead.ok ? BigInt(resRead.value) : 0n;
               const effectiveHave = w + BigInt(res);
               // COLLECT EVERY PARKED POSITION, choose later.
               // 2026-07-28: this took the FIRST one found and stopped looking
@@ -5547,6 +5571,7 @@ async function loadDashboardData() {
                 crossingReserve: BigInt(res),
                 fee: BigInt(fee),
                 shortfall: BigInt(fee) > effectiveHave ? BigInt(fee) - effectiveHave : 0n,
+                shortfallUnknown,
                 // parkedAt was already read above and thrown away. The eviction clock
                 // starts here, so a member cannot be told how long they have without it.
                 parkedAt: BigInt(parkedAt),
@@ -10220,7 +10245,24 @@ function _pairKeyOf(label) {
 
 async function renderParkedList(userAddr, rp, cands, activePositions) {
   const box = document.getElementById('parked-list');
-  if (!box || !cands || cands.length === 0) return;
+  if (!box) return;
+  if (!cands || cands.length === 0) {
+    // ⛔ NO CANDIDATES HAS TWO CAUSES AND THEY ARE NOT THE SAME THING: nothing is parked,
+    // or parkedAt could not be READ for one or more matrices (set by the collector above).
+    // Returning silently for both is how a member mid-rescue watches their position
+    // disappear with no explanation. Say which one this is.
+    if (window._parkedReadFailed) {
+      box.innerHTML =
+        '<div style="color:var(--yellow);font-size:12px;line-height:1.5">' +
+        '⚠ Could not check all of your positions just now — the RPC node did not answer. ' +
+        'This is NOT a confirmation that nothing needs rescuing. Refresh in a moment.' +
+        '</div>';
+      box.style.display = 'flex';
+    } else {
+      box.style.display = 'none';
+    }
+    return;
+  }
 
   // ⛔ THE `cands.length < 2` EARLY RETURN USED TO SIT HERE AND IT HID THIS FEATURE FROM
   // 107 OF 107 PARKED MEMBERS ON LIVE V8.50 (measured 2026-08-19, diag_badge_preview.js).
@@ -10352,6 +10394,14 @@ async function renderParkedList(userAddr, rp, cands, activePositions) {
   const _nowSec = BigInt(Math.floor(Date.now() / 1000));
   function _evictInfo(c, headroom) {
     // returns { badge, colour, line } — badge null means "nothing to say on this row"
+    // ⛔ AN UNCONFIRMED GAP MUST NOT PRODUCE A VERDICT ABOUT EVICTION. This is checked
+    // BEFORE the zero test, because a failed fee read makes shortfall 0 and a failed
+    // reserve read inflates it — the reassuring answer and the alarming one come from the
+    // same defect, and neither is earned.
+    if (c.shortfallUnknown) {
+      return { badge: 'CHECKING', colour: 'var(--text3)',
+               line: 'Could not read this position\'s entry fee or crossing reserve just now, so the gap shown may be wrong — this is NOT a sign either way. Refresh in a moment.' };
+    }
     if (!c.shortfall || c.shortfall === 0n) return { badge: null, colour: '', line: '' };
     let clock = '';
     if (_evictGrace !== null && c.parkedAt && c.parkedAt > 0n) {
