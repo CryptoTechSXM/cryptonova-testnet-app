@@ -236,9 +236,9 @@
     "referrer_locked": "🔒 已锁定 — 与 Tier 1 相同",
     "upgrade_step1": "第一步：授权 USDC 🔒",
     "upgrade_step2": "第二步：升级层级",
-    "earn_passive": "被动（0 推荐）：<strong style=\"color:var(--text)\">$3.05</strong> 链路收益 + 均等化（约 31% ROI）",
-    "earn_active": "活跃（2 推荐）：<strong style=\"color:var(--text)\">$4.05</strong>（约 41% ROI）",
-    "earn_power": "高效（5 推荐）：<strong style=\"color:var(--text)\">$5.55</strong>（约 56% ROI）",
+ "earn_passive": "被动（0 推荐）：<strong style=\"color:var(--text)\">$3.05</strong> 链路收益 + 均等化",
+ "earn_active": "活跃（2 推荐）：<strong style=\"color:var(--text)\">$4.05</strong>",
+ "earn_power": "高效（5 推荐）：<strong style=\"color:var(--text)\">$5.55</strong>",
     "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {

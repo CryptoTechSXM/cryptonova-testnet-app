@@ -236,9 +236,9 @@
     "referrer_locked": "🔒 Đã Khóa — giống như Cấp 1",
     "upgrade_step1": "Bước 1: Phê Duyệt USDC 🔒",
     "upgrade_step2": "Bước 2: Nâng Cấp Cấp",
-    "earn_passive": "Thụ động (0 giới thiệu): <strong style=\"color:var(--text)\">$3.05</strong> chain pay + equalization mỗi chu kỳ (~31% ROI)",
-    "earn_active": "Năng động (2 giới thiệu): <strong style=\"color:var(--text)\">$4.05</strong> mỗi chu kỳ (~41% ROI)",
-    "earn_power": "Mạnh mẽ (5 giới thiệu): <strong style=\"color:var(--text)\">$5.55</strong> mỗi chu kỳ (~56% ROI)",
+ "earn_passive": "Thụ động (0 giới thiệu): <strong style=\"color:var(--text)\">$3.05</strong> chain pay + equalization mỗi chu kỳ",
+ "earn_active": "Năng động (2 giới thiệu): <strong style=\"color:var(--text)\">$4.05</strong> mỗi chu kỳ",
+ "earn_power": "Mạnh mẽ (5 giới thiệu): <strong style=\"color:var(--text)\">$5.55</strong> mỗi chu kỳ",
     "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {

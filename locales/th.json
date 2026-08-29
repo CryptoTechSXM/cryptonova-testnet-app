@@ -236,9 +236,9 @@
     "referrer_locked": "🔒 ล็อกแล้ว — เหมือนกับ Tier 1",
     "upgrade_step1": "ขั้นตอนที่ 1: อนุมัติ USDC 🔒",
     "upgrade_step2": "ขั้นตอนที่ 2: อัปเกรดระดับ",
-    "earn_passive": "แบบ Passive (0 การแนะนำ): <strong style=\"color:var(--text)\">$3.05</strong> chain pay + equalization ต่อรอบ (~31% ROI)",
-    "earn_active": "แบบ Active (2 การแนะนำ): <strong style=\"color:var(--text)\">$4.05</strong> ต่อรอบ (~41% ROI)",
-    "earn_power": "แบบ Power (5 การแนะนำ): <strong style=\"color:var(--text)\">$5.55</strong> ต่อรอบ (~56% ROI)",
+ "earn_passive": "แบบ Passive (0 การแนะนำ): <strong style=\"color:var(--text)\">$3.05</strong> chain pay + equalization ต่อรอบ",
+ "earn_active": "แบบ Active (2 การแนะนำ): <strong style=\"color:var(--text)\">$4.05</strong> ต่อรอบ",
+ "earn_power": "แบบ Power (5 การแนะนำ): <strong style=\"color:var(--text)\">$5.55</strong> ต่อรอบ",
     "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {

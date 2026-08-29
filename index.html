@@ -1211,11 +1211,12 @@
         </ul>
 
         <div style="margin-top:20px;padding:14px;background:var(--bg3);border-radius:8px;font-size:13px">
-          <div style="color:var(--green);font-weight:700;margin-bottom:6px" ><span data-i18n="reg.earn_title">💡 Tier 1 Earnings Potential (per 127-seat cycle)</span><span class="tip-badge" tabindex="0">?<span class="tip-popup" data-i18n="reg.earn_title_tip">A "cycle" = all 127 seats in your matrix filled by new members. Each seat filled sends chain pay upward. When all 127 fill, the pool pays out and the matrix resets.</span></span></div>
+          <div style="color:var(--green);font-weight:700;margin-bottom:6px" ><span data-i18n="reg.earn_title">💡 Tier 1 worked example (per 127-seat cycle)</span><span class="tip-badge" tabindex="0">?<span class="tip-popup" data-i18n="reg.earn_title_tip">A "cycle" = all 127 seats in your matrix filled by new members. Each seat filled sends chain pay upward. When all 127 fill, the pool pays out and the matrix resets.</span></span></div>
           <div style="color:var(--text2);line-height:1.6">
-            <span data-i18n="reg.earn_passive">Passive (0 referrals): <strong style="color:var(--text)">~$3.00</strong> chain pay per cycle (~30% ROI)</span><br>
-            <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">~$4.00</strong> per cycle (~40% ROI)</span><br>
-            <span data-i18n="reg.earn_power">Power (5 referrals): <strong style="color:var(--text)">~$5.50</strong> per cycle (~55% ROI)</span><br>
+            <span data-i18n="reg.earn_passive">Passive (0 referrals): <strong style="color:var(--text)">~$3.00</strong> chain pay per cycle</span><br>
+            <span data-i18n="reg.earn_active">Active (2 referrals): <strong style="color:var(--text)">~$4.00</strong> per cycle</span><br>
+            <span data-i18n="reg.earn_power">Power (5 referrals): <strong style="color:var(--text)">~$5.50</strong> per cycle</span><br>
+            <span style="display:block;margin-top:8px;padding:8px;border-left:3px solid #f0a020;font-size:12px;color:var(--text2)" data-i18n="reg.earn_illustration">Illustration only, not a forecast. These figures assume the matrix fills completely and every seat pays — that does not always happen, and there is no guaranteed or promised return. What you actually earn depends on how many people join below you.</span>
             <span style="font-size:11px;color:var(--text3)" data-i18n="reg.earn_disclaimer">Plus $0.25 instant earn on join · ~$229 pool payout when your matrix fills. Chain pay: L1 5% · L2–L6 2.7% each (flat rates, all tiers).</span>
           </div>
         </div>
@@ -6056,6 +6057,26 @@ async function loadDashboardData() {
                 'Refresh to try again.</div>';
             }
           });
+        // ── 2026-08-29: THIS PANEL'S OPENING SENTENCE WAS A HARDCODED CLAIM ──────
+        // index.html:1313 read "You cycled out of your matrix but didn't have enough
+        // earnings to auto re-enter" as STATIC MARKUP, shown to EVERY parked member.
+        // Found from a live screenshot: a member who registered minutes earlier, with
+        // "Tier Cycles 0" displayed a few rows further down the same page, was told he
+        // had cycled out. Nothing in this file ever wrote to #rescue-desc — it was
+        // written once and believed ever since, and grep for the id returns only its
+        // own definition. **The page already held the fact that contradicted it.**
+        // A member who reads "you cycled out" minutes after joining concludes the site
+        // has lost track of them, and files a ticket. Say what actually happened.
+        // ⛔ NO data-i18n on this element: it is a COMPUTED value now, and i18n.js
+        // re-applies data-i18n on every language switch — two writers on one field, the
+        // shape behind the F1 fee-label defect. The static line carried no data-i18n
+        // either, so this is not a translation regression; translating it is its own task.
+        const _rDesc = document.getElementById('rescue-desc');
+        if (_rDesc) {
+          _rDesc.textContent = (activeCycles > 0n)
+            ? "You cycled out of your matrix and didn't have enough earnings to auto re-enter, so you're in the rescue queue."
+            : "Your matrix moved you on to the next position, and your in-matrix balance doesn't cover its entry fee yet, so you're in the rescue queue.";
+        }
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
         // V8.50: show crossing reserve row if non-zero (reduces shortfall)

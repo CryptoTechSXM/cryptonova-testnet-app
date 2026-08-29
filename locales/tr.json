@@ -236,9 +236,9 @@
     "referrer_locked": "🔒 Kilitli — Seviye 1 ile aynı",
     "upgrade_step1": "Adım 1: USDC Onayla 🔒",
     "upgrade_step2": "Adım 2: Seviye Yükselt",
-    "earn_passive": "Pasif (0 referans): <strong style=\"color:var(--text)\">$3.05</strong> döngü başına zincir ödemesi + eşitleme (~%31 ROI)",
-    "earn_active": "Aktif (2 referans): <strong style=\"color:var(--text)\">$4.05</strong> döngü başına (~%41 ROI)",
-    "earn_power": "Güçlü (5 referans): <strong style=\"color:var(--text)\">$5.55</strong> döngü başına (~%56 ROI)",
+ "earn_passive": "Pasif (0 referans): <strong style=\"color:var(--text)\">$3.05</strong> döngü başına zincir ödemesi + eşitleme",
+ "earn_active": "Aktif (2 referans): <strong style=\"color:var(--text)\">$4.05</strong> döngü başına",
+ "earn_power": "Güçlü (5 referans): <strong style=\"color:var(--text)\">$5.55</strong> döngü başına",
     "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {

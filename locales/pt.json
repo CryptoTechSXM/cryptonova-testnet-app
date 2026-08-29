@@ -236,9 +236,9 @@
     "referrer_locked": "🔒 Bloqueado — igual ao Nível 1",
     "upgrade_step1": "Passo 1: Aprovar USDC 🔒",
     "upgrade_step2": "Passo 2: Subir de Nível",
-    "earn_passive": "Passivo (0 indicações): <strong style=\"color:var(--text)\">$3.05</strong> pagamento em cadeia + equalização por ciclo (~31% ROI)",
-    "earn_active": "Ativo (2 indicações): <strong style=\"color:var(--text)\">$4.05</strong> por ciclo (~41% ROI)",
-    "earn_power": "Potência (5 indicações): <strong style=\"color:var(--text)\">$5.55</strong> por ciclo (~56% ROI)",
+ "earn_passive": "Passivo (0 indicações): <strong style=\"color:var(--text)\">$3.05</strong> pagamento em cadeia + equalização por ciclo",
+ "earn_active": "Ativo (2 indicações): <strong style=\"color:var(--text)\">$4.05</strong> por ciclo",
+ "earn_power": "Potência (5 indicações): <strong style=\"color:var(--text)\">$5.55</strong> por ciclo",
     "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {

@@ -236,9 +236,9 @@
     "referrer_locked": "🔒 잠금 — 티어 1과 동일",
     "upgrade_step1": "1단계: USDC 승인 🔒",
     "upgrade_step2": "2단계: 티어 업그레이드",
-    "earn_passive": "수동적 (0 추천): <strong style=\"color:var(--text)\">$3.05</strong> 체인 페이 + 균등화 사이클당 (~31% ROI)",
-    "earn_active": "활성 (2 추천): <strong style=\"color:var(--text)\">$4.05</strong> 사이클당 (~41% ROI)",
-    "earn_power": "파워 (5 추천): <strong style=\"color:var(--text)\">$5.55</strong> 사이클당 (~56% ROI)",
+ "earn_passive": "수동적 (0 추천): <strong style=\"color:var(--text)\">$3.05</strong> 체인 페이 + 균등화 사이클당",
+ "earn_active": "활성 (2 추천): <strong style=\"color:var(--text)\">$4.05</strong> 사이클당",
+ "earn_power": "파워 (5 추천): <strong style=\"color:var(--text)\">$5.55</strong> 사이클당",
     "earn_disclaimer": "L1 direct referral bonus: 5% ($0.50/referral). Matrix chain pay: L2–L6 each 2.7% ($0.27 per entry below you). Pool: 18% distributed position-weighted at cycle completion (~$229 total at T1). Upgrade tiers = proportionally larger earnings."
   },
   "chart": {
