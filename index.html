@@ -1250,6 +1250,14 @@
     </div>
 
     <div id="dash-content" style="display:none">
+      <!-- F2 (2026-08-29): shown ONLY when a refresh failed and we are holding the last
+           good figures. No data-i18n — the reason line is computed, and i18n.js re-applies
+           data-i18n on every language switch (the F1 two-writers shape). -->
+      <div id="dash-stale-notice" style="display:none;margin-bottom:16px;padding:10px 12px;border-left:3px solid #e8b339;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--text2)">
+        <strong style="color:#e8b339">Showing your last known figures.</strong>
+        <span id="dash-stale-reason"></span><span id="dash-stale-age"></span>
+        <button class="btn btn-ghost" style="margin-left:8px;padding:2px 10px;font-size:12px" onclick="loadDashboardData()">&#8635; Retry</button>
+      </div>
       <!-- Earnings cards -->
       <div class="grid-4" style="margin-bottom:24px">
         <div class="card-sm clickable" style="border-color:var(--green2)" onclick="openDashDetail('withdrawable',this)" title="Click for breakdown">
@@ -5316,6 +5324,37 @@ async function mcGetMember(rp, addrs, user) {
   const res = await mc.aggregate3(addrs.map(t => ({ target: t, allowFailure: true, callData: data })));
   return res.map(r => { if (!r.success) return null; try { return iface.decodeFunctionResult('getMember', r.returnData)[0]; } catch { return null; } });
 }
+// ── F2 (2026-08-29) — HOLD LAST-GOOD ON A FAILED REFRESH ────────────────────────
+// @bevmawire's mechanism: a blipped read on a REFRESH hid dash-content and showed the
+// warning panel EVEN WHEN THE DASHBOARD WAS ALREADY PAINTED. Rescues fire
+// _staggeredDashRefresh (2s/8s/20s), so one hiccup tore the page down under the member
+// mid-rescue. status.html has held last-good since 2026-08-07; index.html held nothing.
+// THE RULE: only a REFRESH holds last-good. A FIRST paint with no data must still show
+// the honest unknown panel — holding nothing is not the same as holding something stale.
+// The hold is scoped to the ADDRESS it was painted for, so switching to a different and
+// genuinely unregistered wallet still tells the truth.
+function _dashHoldable() {
+  const el = document.getElementById('dash-content');
+  return !!(window._dashPaintedFor && userAddr &&
+            String(window._dashPaintedFor).toLowerCase() === String(userAddr).toLowerCase() &&
+            el && el.style.display !== 'none');
+}
+function _showDashStale(reason) {
+  const box = document.getElementById('dash-stale-notice');
+  if (!box) return;
+  const r = document.getElementById('dash-stale-reason');
+  if (r) r.textContent = ' ' + (reason || "The node didn't answer on the last refresh.");
+  const age = document.getElementById('dash-stale-age');
+  if (age) age.textContent = window._dashPaintedAt
+    ? ' Last updated ' + new Date(window._dashPaintedAt).toLocaleTimeString() + '.'
+    : '';
+  box.style.display = 'block';
+}
+function _clearDashStale() {
+  const box = document.getElementById('dash-stale-notice');
+  if (box) box.style.display = 'none';
+}
+
 async function loadDashboardData() {
   if (window._dashLoadInFlight) return;   // prevent concurrent double-loads
   window._dashLoadInFlight = true;
@@ -5339,6 +5378,12 @@ async function loadDashboardData() {
     const joinedRead = await retryRead(() => tr.globalJoined(userAddr));
 
     if (!joinedRead.ok) {
+      // F2: on a REFRESH, hold the figures we already painted instead of tearing the
+      // dashboard down under the member. First paint still shows the honest unknown.
+      if (_dashHoldable()) {
+        _showDashStale("Your registration check didn't answer on the last refresh, so these figures may be a few moments old.");
+        return;
+      }
       hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-content'); showEl('dash-unknown'); return;
     }
     const joined = joinedRead.value;
@@ -5366,7 +5411,18 @@ async function loadDashboardData() {
         // from the globalJoined path fifteen lines above; it was still live in this
         // branch, which is the ONLY path coupon members take.
         if (couponReadFailed) {
+          if (_dashHoldable()) {
+            _showDashStale("A matrix read didn't answer on the last refresh, so these figures may be a few moments old.");
+            return;
+          }
           hideEl('dash-no-wallet'); hideEl('dash-not-registered'); hideEl('dash-content'); showEl('dash-unknown'); return;
+        }
+        // F2: a wallet that has ALREADY painted a dashboard cannot have become
+        // unregistered — no path un-registers a member. Reaching here for the same
+        // address means the lookup is wrong, not the member. Hold rather than accuse.
+        if (_dashHoldable()) {
+          _showDashStale("Your registration lookup came back empty on the last refresh, which shouldn't happen for a registered wallet.");
+          return;
         }
         hideEl('dash-no-wallet'); showEl('dash-not-registered'); hideEl('dash-unknown'); hideEl('dash-content'); return;
       }
@@ -6588,6 +6644,12 @@ async function loadDashboardData() {
     await loadCWData(userAddr, signer, rp).catch(e => console.error('CW load error:', e.message));
     loadMyCoupons().catch(e => console.error('coupons load error:', e.message));
     updateBountyScore(userAddr); // fire-and-forget — bug bounty footer
+
+    // F2: a COMPLETE pass. Recorded here, at the end, so a pass that threw part-way
+    // through never counts as a paint worth holding.
+    window._dashPaintedFor = userAddr;
+    window._dashPaintedAt = Date.now();
+    _clearDashStale();
 
   } catch(e) { console.error('loadDashboardData:', e.message); }
   finally { window._dashLoadInFlight = false; }
