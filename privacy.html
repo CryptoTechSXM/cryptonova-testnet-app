@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — CryptoNova Matrix V8</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <script src="/i18n.js" defer></script>
+  <style>
+    :root{--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2236;--border:#1f2d47;--green:#00e5a0;--green2:#00b37d;--green-dim:rgba(0,229,160,0.12);--blue:#3b82f6;--yellow:#f59e0b;--red:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;line-height:1.7}
+    body.light{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#e2e8f0;--border:#cbd5e1;--green:#00966a;--green2:#007a56;--green-dim:rgba(0,150,106,0.10);--blue:#2563eb;--yellow:#d97706;--red:#dc2626;--text:#0f172a;--text2:#475569;--text3:#94a3b8}
+    html { overflow-x: hidden; }
+    header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo-text span { color: var(--green); }
+    .logo-text .nm-desktop { color: var(--text); }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .nav-link { color: var(--text2); font-size: 14px; text-decoration: none; padding: 6px 12px; border-radius: 7px; transition: all .2s; }
+    .nav-link:hover { color: var(--text); background: var(--bg3); }
+    .nav-link.active { color: var(--green); }
+    #btn-connect { background: var(--green); color: #000; border: none; border-radius: 8px; padding: 8px 18px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .2s; white-space: nowrap; }
+    #btn-connect:hover { opacity: .85; }
+    #btn-connect.connected { background: var(--bg3); color: var(--green); border: 1px solid var(--green2); }
+    .theme-toggle { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all .2s; }
+    .theme-toggle:hover { color: var(--text); border-color: var(--green); }
+    /* ── Mobile hamburger menu ─── */
+    .nav-trigger { display: none; }
+    .mobile-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg2); border-bottom: 1px solid var(--border); z-index: 300; flex-direction: column; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { display: block; padding: 14px 20px; color: var(--text2); text-decoration: none; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border); transition: background .15s, color .15s; }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .btn-connect-mob { display: none; }
+    .mobile-menu a:hover, .mobile-menu a.active { color: var(--green); background: var(--bg3); }
+    .nm-desktop { }
+    .nm-mobile  { display: none; font-weight: 700; color: var(--green); }
+    .tl { }
+    @media (max-width: 640px) {
+      header { padding: 8px 12px; position: relative; flex-wrap: wrap; gap: 6px; }
+      .nav-link { display: none; }
+      .logo-text { font-size: 13px; }
+      .nm-desktop { display: none; }
+      .nm-mobile  { display: inline; }
+      .pg-badge { display: none; }
+      .theme-toggle { padding: 5px 7px; font-size: 14px; }
+      .header-right { flex: 1; justify-content: flex-end; gap: 6px; }
+      #btn-connect { display: none !important; }
+      .mobile-menu { display: flex !important; flex-direction: row !important; width: 100%; border-top: 1px solid var(--border); align-items: center; }
+      .mobile-menu a { display: none; }
+      .mobile-menu.open { flex-wrap: wrap; }
+      .mobile-menu.open a { display: block; width: 100%; }
+      .btn-connect-mob { display: flex !important; align-items: center; font-size: 12px; padding: 5px 10px; font-weight: 700; background: var(--bg3); color: var(--green); border: 1px solid var(--green2); border-radius: 8px; cursor: pointer; white-space: nowrap; margin: 4px 8px 4px 0; flex-shrink: 0; }
+      .btn-connect-mob.connected { background: var(--bg3); color: var(--green); }
+      .nav-trigger { display: flex !important; flex: 1; justify-content: space-between; align-items: center; padding: 8px 14px; background: none; border: none; color: var(--text2); font-size: 14px; font-weight: 500; cursor: pointer; }
+    }
+    main{max-width:780px;margin:0 auto;padding:24px 24px 24px} main > :last-child{margin-bottom:0 !important}
+    .page-title{font-size:28px;font-weight:800;margin-bottom:6px}
+    .page-title span{color:var(--green)}
+    .last-updated{font-size:13px;color:var(--text3);margin-bottom:40px}
+    .warning-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);border-radius:12px;padding:20px 24px;margin-bottom:40px}
+    .warning-box .warning-title{font-size:15px;font-weight:700;color:#ef4444;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .warning-box p{font-size:14px;color:var(--text2)}
+    h2{font-size:17px;font-weight:700;color:var(--green);margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    p{font-size:14px;color:var(--text2);margin-bottom:14px}
+    ul{padding-left:20px;margin-bottom:14px}
+    li{font-size:14px;color:var(--text2);margin-bottom:6px}
+    strong{color:var(--text)}
+    .section{margin-bottom:8px}
+    .accept-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:48px;text-align:center}
+    .accept-box p{font-size:14px;color:var(--text2);margin-bottom:16px}
+    .accept-btn{display:inline-block;background:var(--green);color:#000;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;transition:opacity .2s}
+    .accept-btn:hover{opacity:.85}
+    footer{background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:13px;color:var(--text3)}
+    footer a{color:var(--text2);text-decoration:none}
+    footer a:hover{color:var(--green)}
+    @media(max-width:640px){main{padding:32px 16px 60px}.page-title{font-size:22px}}
+    .sub-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 8px;position:sticky;top:57px;z-index:99;overflow-x:auto;}
+  .sub-nav a{color:var(--text2);text-decoration:none;padding:13px 16px;font-size:14px;font-weight:500;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+  .sub-nav a:hover{color:var(--text);}
+  .sub-nav a.active{color:var(--green);border-bottom-color:var(--green);font-weight:600;}
+  @media(max-width:768px){.sub-nav{display:none;}}
+</style>
+</head>
+<body>
+
+
+
+<header>
+  <a href="index.html" class="logo">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="19" stroke="#00e5a0" stroke-width="1.5"/>
+      <path d="M20 8 L20 32 M8 20 L32 20 M11.5 11.5 L28.5 28.5 M28.5 11.5 L11.5 28.5" stroke="#00e5a0" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="20" cy="20" r="5" fill="none" stroke="#00e5a0" stroke-width="1.5"/>
+    </svg>
+    <span class="logo-text"><span class="nm-desktop">Crypto<span>Nova</span></span><span class="nm-mobile"><span style="color:var(--text)">C</span>NOVA</span></span>
+    <span class="vbadge" style="background:rgba(0,229,160,.15);color:var(--green);border:1px solid var(--green2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px"><span class="nm-desktop">Testnet</span><span class="nm-mobile">TestNet</span></span>
+    <span id="domain-badge" style="display:none"></span>
+    <span class="vbadge pg-badge" style="background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px">🔒 Privacy</span>
+  </a>
+  <script>(function(){var h=window.location.hostname,b=document.getElementById("domain-badge");if(!b)return;if(h.startsWith("admin.")){b.textContent="Admin";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}else if(h.indexOf("early.")!==-1){b.textContent="Preview";b.setAttribute("style","display:inline-flex;align-items:center;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px");}})()</script>
+  <div class="header-right">
+    <div id="lang-switcher"></div>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span><span class="tl"> Light</span></button>
+    <button id="btn-connect" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="nav-trigger" onclick="toggleMobileMenu()">☰ Menu <span class="nav-arrow">▼</span></button>
+    <button id="btn-connect-m" class="btn-connect-mob" onclick="connectWallet()">Connect Wallet</button>
+    <a href="index.html">🏠 Home</a>
+    <a href="buy.html">💰 Buy CNOVA</a>
+    <a href="governance.html">⚖️ Governance</a>
+    <a href="liquidity.html">💧 Liquidity</a>
+    <a href="status.html">🛡️ Status</a>
+  </div>
+</header>
+<nav class="sub-nav">
+  <a href="index.html" class="nav-link">🏠 Home</a>
+  <a href="buy.html" class="nav-link">💎 Buy CNOVA</a>
+  <a href="governance.html" class="nav-link">⚖️ Governance</a>
+  <a href="liquidity.html" class="nav-link">💧 Liquidity</a>
+  <a href="status.html" class="nav-link">🛡️ Status</a>
+</nav>
+
+<script>
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  const word = window.t ? (isLight ? window.t('common.dark','Dark') : window.t('common.light','Light')) : (isLight ? 'Dark' : 'Light');
+  const _ti = document.getElementById('theme-icon'); if(_ti) _ti.textContent = isLight ? '🌙' : '☀️';
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    document.addEventListener('DOMContentLoaded', () => {
+      const _ti = document.getElementById('theme-icon'); if(_ti) _ti.textContent = '🌙';
+    });
+  }
+})();
+</script>
+
+<main>
+
+  <div class="page-title">Privacy <span>Policy</span></div>
+  <div class="last-updated">Last updated: 30 August 2026 &nbsp;&middot;&nbsp; Base Sepolia Testnet &nbsp;&middot;&nbsp; CryptoNova Matrix V8</div>
+
+  <div class="warning-box">
+    <div class="warning-title">&#128273; The short version</div>
+    <p>CryptoNova has <strong>no accounts, no passwords and no identity checks</strong>. We do not ask for your name, address, date of birth, or any identity document, and we do not run advertising or analytics trackers. What the site mainly handles is your <strong>public wallet address</strong> &mdash; and anything you type into a form yourself. Some of what you submit is <strong>published publicly on purpose</strong>; that is spelled out below so nothing is a surprise.</p>
+  </div>
+
+  <div class="section">
+    <h2>1. Who is responsible for this site</h2>
+    <p>CryptoNova is built and operated by <strong>one individual</strong>. There is <strong>no registered company</strong> behind it, no investor group, and no staff. We say this plainly rather than implying an organisation that does not exist. Enquiries from regulators, security vendors or wallet providers are answered directly and in full.</p>
+    <p>Questions, corrections and removal requests: <a href="mailto:cryptocounsels@gmail.com">cryptocounsels@gmail.com</a>. That address is read by the operator personally.</p>
+  </div>
+
+  <div class="section">
+    <h2>2. What the blockchain records &mdash; and why we cannot change it</h2>
+    <p>CryptoNova is a front end for smart contracts deployed on <strong>Base</strong> (currently the Base Sepolia <em>testnet</em>). When you register, upgrade, withdraw or refer someone, that action is written to the blockchain by <strong>your own wallet</strong>, not by this website. What ends up on chain includes:</p>
+    <ul>
+      <li>your wallet address;</li>
+      <li>every transaction you sign, with its amount and timestamp;</li>
+      <li>the wallet address of the person who referred you, and of the people you refer.</li>
+    </ul>
+    <p><strong>This information is public, permanent, and outside anyone's control &mdash; including ours.</strong> It can be read by anybody using a block explorer. Nobody, including the operator, can edit or erase it. If that is not acceptable to you, do not connect a wallet.</p>
+    <p>A wallet address is not your name, but it is a persistent identifier. If you publish your address elsewhere, or fund it from an exchange account in your name, it can be linked back to you. Using a fresh wallet is the practical way to keep that separation.</p>
+  </div>
+
+  <div class="section">
+    <h2>3. What this website itself receives</h2>
+    <p>This is the complete list. Each item says what is collected, why, and where it goes.</p>
+    <ul>
+      <li><strong>Your wallet address, when you connect.</strong> Used inside your browser to read your position from the contracts. It is not sent to any server of ours and it is not stored on a server.</li>
+      <li><strong>Testnet faucet and gas gift.</strong> If you claim test USDC or a small amount of test ETH, the address you give is held briefly in the server's memory so the same wallet cannot claim twice. It is not written to any database and it is lost whenever the function restarts.</li>
+      <li><strong>Bug reports.</strong> The reporter name or handle you choose, the page, your wallet type, your wallet address if you provide it, and your description. &#9888;&#65039; <strong>These are published in a public file in the project's public GitHub repository</strong> so members can see what has been reported and fixed, and a copy is sent to a private admin channel on Telegram. Do not put anything private in that form.</li>
+      <li><strong>Pay It Forward waitlist.</strong> The wallet address and any name, reason or contact detail you type. &#9888;&#65039; <strong>Also published in a public file in the same public repository</strong>, because the waitlist is meant to be visible to the members who fund the gifts. The coupon code itself is never sent to us.</li>
+      <li><strong>Error reports.</strong> When something breaks, the page path and the error message are sent to a private admin Telegram channel so it can be fixed. No wallet address and no personal detail is attached.</li>
+      <li><strong>Early-access code.</strong> If you enter a preview access code, it is checked against a list and the answer is yes or no. The code is not stored against you.</li>
+      <li><strong>Telegram bot.</strong> If you message the CryptoNova support bot, Telegram delivers your message and your Telegram username to it in the normal way.</li>
+    </ul>
+    <p>We do <strong>not</strong> collect email addresses, phone numbers, postal addresses, identity documents, or payment card details, and there is nothing to collect them with &mdash; the site has no sign-up, no login and no checkout.</p>
+  </div>
+
+  <div class="section">
+    <h2>4. Cookies, tracking and what stays on your device</h2>
+    <p><strong>There are no advertising cookies, no analytics scripts and no tracking pixels on this site.</strong> Nothing here profiles you or follows you to other websites.</p>
+    <p>The site does use your browser's own local storage to remember small preferences and to avoid re-reading the blockchain unnecessarily &mdash; for example your light/dark theme, your chosen language, whether a wallet was connected, whether a preview code was accepted, and short-lived cached figures such as prices and rotation counts. <strong>All of it stays on your own device</strong>, is never transmitted to us, and disappears when you clear your browser data for this site.</p>
+  </div>
+
+  <div class="section">
+    <h2>5. Other companies necessarily involved</h2>
+    <p>Loading this page or using the protocol means these third parties handle a request. They each have their own privacy terms, which we do not control.</p>
+    <ul>
+      <li><strong>Vercel</strong> hosts the website. Like any web host it records standard server request logs, which include IP addresses.</li>
+      <li><strong>A Base RPC endpoint</strong> is contacted to read blockchain data, and will see the requests your browser makes.</li>
+      <li><strong>Your wallet provider</strong> (MetaMask, Rabby, Trust, Coinbase Wallet and so on) handles your keys and your signing. We never see your private key or seed phrase, and we will never ask for either.</li>
+      <li><strong>GitHub</strong> stores the public files that bug reports and the waitlist are written to.</li>
+      <li><strong>Telegram</strong> carries the admin notifications and the support bot.</li>
+    </ul>
+    <p>We do not sell, rent or trade anything to anybody, and there is no advertising on this site.</p>
+  </div>
+
+  <div class="section">
+    <h2>6. How long things are kept</h2>
+    <ul>
+      <li><strong>On-chain records: forever.</strong> This cannot be undone by us or by anyone.</li>
+      <li><strong>Bug reports and waitlist entries:</strong> kept while the project runs, as a public record of what was reported and fixed.</li>
+      <li><strong>Faucet and gas-gift addresses:</strong> held in memory only, and lost on the next restart.</li>
+      <li><strong>Admin Telegram notifications:</strong> kept in that private channel's history.</li>
+      <li><strong>Local storage on your device:</strong> until you clear it.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>7. Your choices, and the honest limits</h2>
+    <ul>
+      <li><strong>You can simply not connect.</strong> All public pages &mdash; this one, the terms, the compensation plan, the FAQ &mdash; are readable without a wallet.</li>
+      <li><strong>Use a wallet you are comfortable being public.</strong> That is the single most effective privacy step available on any blockchain application.</li>
+      <li><strong>Ask us to remove something you submitted.</strong> Email <a href="mailto:cryptocounsels@gmail.com">cryptocounsels@gmail.com</a> and we will take a bug report or waitlist entry out of the current public file.</li>
+      <li>&#9888;&#65039; <strong>But we cannot make it as if it never existed.</strong> Those files live in public version control, so earlier versions remain in the history, and anything already on the blockchain is permanent. We would rather tell you that than promise a deletion we cannot deliver.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>8. Children</h2>
+    <p>This site is not intended for anyone under 18, and the Terms require you to be at least 18 to take part. We do not knowingly collect anything from a child.</p>
+  </div>
+
+  <div class="section">
+    <h2>9. Security</h2>
+    <p>Because there are no accounts and no stored personal records, there is no customer database to breach. The one thing that genuinely protects you is your wallet: <strong>your seed phrase and private keys are yours alone</strong>. No one from CryptoNova will ever ask for them, in any channel, for any reason. Anybody who does is trying to rob you.</p>
+  </div>
+
+  <div class="section">
+    <h2>10. Changes to this policy</h2>
+    <p>If this policy changes, the date at the top of the page changes with it, and material changes will be announced in the community channels. This is a testnet system under active development, so the practices described here may be revised before mainnet.</p>
+  </div>
+
+  <div class="section">
+    <h2>11. Contact</h2>
+    <p>For anything on this page &mdash; a question, a correction, or a removal request &mdash; write to <a href="mailto:cryptocounsels@gmail.com">cryptocounsels@gmail.com</a>.</p>
+    <p style="margin-top:10px">See also the <a href="terms.html">Terms of Use &amp; Risk Disclaimer</a>.</p>
+  </div>
+
+</main>
+
+<footer>
+  <a href="index.html">&#8592; <span data-i18n="footer2.back">Back to CryptoNova</span></a>
+  &nbsp;&middot;&nbsp;
+  <a href="faq.html" data-i18n="footer2.faq">FAQ &amp; Glossary</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://t.me/CryptoNovaMatrix" target="_blank" rel="noopener" data-i18n="footer2.telegram">Telegram</a>
+  &nbsp;&middot;&nbsp;
+  <span data-i18n="footer2.copyright">&copy; 2026 CryptoNova Matrix</span>
+</footer>
+
+<script>
+// Show the convenience-translation disclaimer whenever the active language
+// isn't English -- the English text is the only legally authoritative version.
+// Mirrors i18n.js's own getLang() resolution order exactly (URL ?lang= ->
+// localStorage 'cnova_lang' -> browser language -> 'en'), since i18n.js does
+// not expose a public getter for the resolved language.
+document.addEventListener('DOMContentLoaded', () => {
+  const SUPPORTED = ['en', 'fr', 'es', 'pt', 'de', 'tr'];
+  let lang = 'en';
+  try {
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    if (urlLang && SUPPORTED.includes(urlLang)) {
+      lang = urlLang;
+    } else {
+      const stored = localStorage.getItem('cnova_lang');
+      if (stored && SUPPORTED.includes(stored)) {
+        lang = stored;
+      } else {
+        const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        if (SUPPORTED.includes(browser)) lang = browser;
+      }
+    }
+  } catch (_) {}
+  const notice = document.getElementById('translation-notice');
+  if (notice) notice.style.display = (lang !== 'en') ? 'block' : 'none';
+});
+</script>
+
+<script>
+function detectWalletType() {
+  const e = window.ethereum;
+  if (!e) return '';
+  if (e.isTokenPocket)    return 'TokenPocket';
+  if (e.isRabby)          return 'Rabby';
+  if (e.isCoinbaseWallet) return 'Coinbase Wallet';
+  if (e.isBraveWallet)    return 'Brave Wallet';
+  if (e.isTrust)          return 'Trust Wallet';
+  if (e.isOKExWallet || window.okxwallet) return 'OKX Wallet';
+  if (e.isPhantom)        return 'Phantom';
+  if (e.isMetaMask)       return 'MetaMask';
+  return 'Wallet';
+}
+async function connectWallet(silent = false) {
+  if (!window.ethereum) return;
+  try {
+    let addr;
+    if (silent) {
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) { localStorage.removeItem('cnova_connected'); return; }
+      addr = accs[0];
+    } else {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (!accs.length) return;
+      addr = accs[0];
+    }
+    localStorage.setItem('cnova_connected', '1');
+    const wt = detectWalletType();
+    const label = addr.slice(0,6) + '\u2026' + addr.slice(-4) + (wt ? ' (' + wt + ')' : '');
+    ['btn-connect','btn-connect-m'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) { b.textContent = label; b.classList.add('connected'); }
+    });
+  } catch(e) {}
+}
+function toggleMobileMenu() {
+  const m = document.getElementById('mobile-menu');
+  if (!m) return;
+  m.classList.toggle('open');
+  const arrow = m.querySelector('.nav-arrow');
+  if (arrow) arrow.textContent = m.classList.contains('open') ? ' \u25b2' : ' \u25bc';
+}
+document.addEventListener('click', function(e) {
+  const m = document.getElementById('mobile-menu');
+  const h = document.querySelector('header');
+  if (m && h && !h.contains(e.target)) { m.classList.remove('open'); }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  // Always try eth_accounts — Trust Wallet and similar wallets scope auth per-page,
+  // so eth_accounts may return [] even when connected. Don't gate on cnova_connected.
+  if (window.ethereum) {
+    window.ethereum.request({ method: 'eth_accounts' }).then(a => {
+      if (a.length) connectWallet(true);
+      // empty = per-page scoping, not real disconnect — leave cnova_connected intact
+    }).catch(() => {});
+  }
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', accs => {
+      if (!accs.length) {
+        localStorage.removeItem('cnova_connected');
+        ['btn-connect','btn-connect-m'].forEach(id => {
+          const b = document.getElementById(id);
+          if (b) { b.textContent = 'Connect Wallet'; b.classList.remove('connected'); }
+        });
+      }
+    });
+    window.ethereum.on('chainChanged', (newChainId) => {
+      // Only reload if genuinely switching AWAY from Base Sepolia.
+      // Some wallets (Trust Wallet, TokenPocket) fire spurious chainChanged with
+      // the SAME chainId during connect — blindly reloading causes an infinite loop.
+      if (parseInt(newChainId, 16) !== CHAIN_ID) location.reload();
+      else if (typeof connectWallet === 'function') connectWallet(true).catch(() => {});
+    });
+  }
+});
+</script>
+    <!-- Bug Report Footer -->
+    <div style="text-align:center;padding:24px 0 24px;border-top:1px solid var(--border,#1e3a5f);margin-top:32px">
+      <a href="/bug-report" style="color:#64748b;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">🐛 Found a bug? Report it here</a>
+    </div>
+</body>
+</html>
