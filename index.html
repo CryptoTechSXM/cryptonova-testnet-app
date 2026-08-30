@@ -1349,8 +1349,14 @@
           <strong>wallet</strong> cannot be used automatically; it is only spent when you press
           Self Rescue or Upgrade yourself. So a full wallet does not stop you being parked.
         </div>
-        <div id="rescue-auto-hint" style="margin-top:12px;margin-bottom:4px;padding:10px 14px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);font-size:12px;color:var(--text2);line-height:1.6">
-          <strong style="color:var(--green)">&#9203; Auto-rescue active</strong> &#8212; if your <em>in-matrix</em> balance covers the entry fee, the system re-enters you <strong>free within minutes</strong> &#8212; no loan, no action needed. If it falls short, you can act now (Self Rescue or Copay below), or simply wait: after the 24&#8209;hour grace period the system re-enters you automatically with a loan for the gap.
+        <!-- ⚠ Colour is set from the SAME truth as the text: amber while paused, green when
+     running. The JS that writes the active text also restores the green styling, so
+     flipping RESCUE_AUTOMATION_PAUSED cannot leave a green box with a pause notice. -->
+        <div id="rescue-auto-hint" style="margin-top:12px;margin-bottom:4px;padding:10px 14px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.30);font-size:12px;color:var(--text2);line-height:1.6">
+          <strong style="color:var(--yellow)">&#9208; Automatic rescue is paused right now</strong> &#8212; deliberately, not because anything is broken. We found that a rescue can take your payment and still leave you parked when your pair has no free seat, so we switched the automatic rescues off rather than keep charging members for a seat that might not exist. <strong>That means you stay parked for now, and no advance is being added to your account.</strong> Self Rescue and Copay below still work if you choose to use them &#8212; please read the note underneath first.
+        </div>
+        <div id="rescue-seat-warn" style="margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.35);font-size:12px;color:var(--text2);line-height:1.6">
+          <strong style="color:#ef4444">&#9888;&#65039; A rescue does not always end in a seat.</strong> When both halves of your tier&#8217;s pair are completely full, a rescue can take the payment and still leave you parked, because there is no free seat to hand you. We found this from a member who paid six times and was never seated once &#8212; that was our fault, not his, and not yours. <strong>While your pair is full, paying again is unlikely to change the outcome.</strong> The fix is built and tested and goes out with the next contract release.
         </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
@@ -2099,6 +2105,22 @@ document.addEventListener('DOMContentLoaded', function() {
 // ═══════════════════════════════════════════════════════════════════════
 // CONFIG — V8.1 Figure-8 Matrix (Base Sepolia)
 // ═══════════════════════════════════════════════════════════════════════
+// ⛔⛔ SINGLE SOURCE OF TRUTH FOR THE PARKED PANEL'S AUTOMATION CLAIM.
+// The two rescue keepers (fastlane_rescue.js, copay_rescue.js) were PAUSED in the
+// VPS crontab on 2026-08-29 (lines prefixed #PAUSED20260829) by owner decision: a
+// rescue can take a member's payment and still not seat them when the pair is full,
+// so nobody should accrue a repayable advance for a seat that may not exist.
+// While they are paused, the panel's "Auto-rescue active ... re-enters you free
+// within minutes" AND "after the 24-hour grace period the system re-enters you
+// automatically" are BOTH FALSE, and the surplus warning's "or let the automatic
+// rescue re-enter you" is false with them.
+// ⛔ FLIP THIS BACK TO false IN THE SAME COMMIT THAT RESTORES THE CRONTAB
+// (crontab /root/keeper/crontab.bak_20260829). A static claim about a dynamic state
+// is exactly the defect session 49 found in #rescue-desc, one panel higher.
+// ✅ The markup FAILS TOWARD "paused": the honest text is what ships in the HTML,
+// and JS only ever overwrites it with the active text. If this script never runs,
+// a member sees the cautious message, never a promise we cannot keep.
+const RESCUE_AUTOMATION_PAUSED = true;
 const CHAIN_ID = 84532;
 
 
@@ -6135,6 +6157,22 @@ async function loadDashboardData() {
             ? "You cycled out of your matrix and didn't have enough earnings to auto re-enter, so you're in the rescue queue."
             : "Your matrix moved you on to the next position, and your in-matrix balance doesn't cover its entry fee yet, so you're in the rescue queue.";
         }
+        // Only ever writes the OPTIMISTIC text, and only when the flag says the
+        // keepers are actually running. The HTML already carries the honest version.
+        if (!RESCUE_AUTOMATION_PAUSED) {
+          const _rAuto = document.getElementById('rescue-auto-hint');
+          if (_rAuto) {
+            _rAuto.style.background  = 'rgba(16,185,129,0.08)';
+            _rAuto.style.borderColor = 'rgba(16,185,129,0.25)';
+          }
+          if (_rAuto) _rAuto.innerHTML = '<strong style="color:var(--green)">\u23F3 Auto-rescue active</strong> \u2014 '
+            + 'if your <em>in-matrix</em> balance covers the entry fee, the system re-enters you '
+            + '<strong>free within minutes</strong> \u2014 no loan, no action needed. If it falls short, '
+            + 'you can act now (Self Rescue or Copay below), or simply wait: after the 24-hour grace '
+            + 'period the system re-enters you automatically with a repayable advance for the gap.';
+          const _rSeat = document.getElementById('rescue-seat-warn');
+          if (_rSeat) _rSeat.style.display = 'none';
+        }
         setText('rescue-matrix',      parkedInfo.label);
         setText('rescue-withdrawable', fmt6(parkedInfo.withdrawable));
         // V8.50: show crossing reserve row if non-zero (reduces shortfall)
@@ -6287,8 +6325,11 @@ async function loadDashboardData() {
               + 'Your reserve plus earnings (' + fmt6(_rsv + _wd) + ') exceed the '
               + fmt6(_fee) + ' re-entry fee. On the current contract a manual rescue '
               + 'consumes the whole balance, so the extra <strong>' + fmt6(_surp)
-              + '</strong> would not be returned to you. Withdraw the surplus first, '
-              + 'or let the automatic rescue re-enter you — this is fixed in the next release.';
+              + '</strong> would not be returned to you. Withdraw the surplus first '
+              + (RESCUE_AUTOMATION_PAUSED
+                  ? '— automatic rescue is paused, so waiting will not re-enter you today. '
+                    + 'This is fixed in the next release.'
+                  : 'or let the automatic rescue re-enter you — this is fixed in the next release.');
             _sw.style.display = '';
           } else if (_sw) {
             _sw.style.display = 'none';
