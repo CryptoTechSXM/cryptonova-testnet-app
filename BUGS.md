@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-09-01] Onboarding / Registration — Getting an error when registering
+- **Reporter:** CryptoJan22
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xc63ab89518de0548cc6b12aae6d4e7dcf8144998
+- **Frequency:** Consistent
+- **What happened:** Getting an error when registering
+- **What was expected:** To be able to register
+- **Submitted:** Tue, 01 Sep 2026 18:24:06 GMT
+
+
 ### [2026-08-29] Other — Forgot to add - it looks like everytime I do the continuous …
 - **Reporter:** Sherwyn
 - **Page:** Other
