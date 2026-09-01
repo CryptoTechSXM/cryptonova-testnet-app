@@ -1,0 +1,32 @@
+🚨 IMPORTANT — CryptoNova moves to new contracts TODAY
+
+Team, I promised you advance notice before anything like this, so here it is.
+
+⏰ Today, Tuesday 1 September
+12:00 midday — site goes offline
+1:00 PM — early access opens
+2:00 PM — main site opens
+
+🔧 What we fixed
+We found a seating fault. When a matrix was full, a member arriving could get pushed into the parked queue while the seat they should have taken went to someone else. That is fixed. And when your own pair is full, the system now routes you into a pair that has room instead of parking you.
+
+⚠️ What this does NOT fix — and I want to be straight with you
+This does not stop the parking that happens when you do not have the funds to complete your crossing. That is most of the parking we see, and it is the model working the way it was designed. Referrals are what close that gap. Right now about 300 members are sitting parked, and nearly all of them are waiting on funds to complete their crossing, not on a seat. Those positions clear when we move, because everybody starts fresh.
+
+🔁 What you need to do
+1. Register again on the new contracts after 1:00 PM. Same wallet, same steps — approve and register.
+2. Your USDC stays exactly where it is. Same token, same wallet, nothing to move.
+3. Your CNOVA does NOT carry over to the new contracts.
+
+💰 Cashing out your CNOVA — treat this as practice
+We are on testnet. This is practice money, and this is a good chance to run the cash-out flow end to end before we ever do it for real on mainnet. If you have never done it, do it now while it costs you nothing.
+Two steps on the site: approve CNOVA, then redeem for USDC. The site shows you the exact early-exit penalty before you confirm — read that screen, it is the same screen you will see on mainnet.
+Do it before midday if you want to try it, because after we switch, the site points at the new contracts.
+
+🐛 Bug bounty
+Still live, still $1 per accepted find, always active. Keep them coming. A lot of what we just fixed came from you.
+
+🙏 Thank you
+I know registering again is a pain, and some of you may want to sit back until mainnet. I understand that. We are in the building phase. I would rather fix this properly now than carry it into mainnet and have it break when there is real money on the line.
+
+Questions in the group. I will answer them.
