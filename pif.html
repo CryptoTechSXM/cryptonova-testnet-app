@@ -365,7 +365,7 @@ const REG_ABI = [
   'event CouponReclaimed(bytes32 indexed codeHash, address indexed issuer, uint256 amount)',
 ];
 const USDC_ABI = ['function approve(address,uint256) returns (bool)', 'function allowance(address,address) view returns (uint256)', 'function balanceOf(address) view returns (uint256)'];
-const TR_ABI   = ['function memberHighestTier(address) view returns (uint256)'];
+const TR_ABI   = ['function memberHighestTier(address) view returns (uint8)'];
 // Owner ruling 2026-08-16: free public RPC endpoints were tried in this site's read
 // pool, were buggy, and were removed — QuickNode carries the reads (same endpoints as
 // index.html's pool; the keys are already public in that page's source). Public RPC

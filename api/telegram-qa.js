@@ -9,9 +9,9 @@ import { ethers } from 'ethers';
 
 const BOT_USERNAME      = 'cnova_support_bot';
 const USDC_ADDRESS      = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const TIER_ROUTER       = '0x0001660fF100a73134a86Ca1C8cf83977428dca4'; // V8.50
-const CNOVA_TOKEN       = '0x98cCEb35f3C1624258073e6e66aBa1AE2be2F55a'; // V8.50
-const CNOVA_TREASURY    = '0xc1ED39a0FaAd9A6B291A2f3b6CBF165D2027a8D4'; // V8.50 — floorPrice() lives here
+const TIER_ROUTER       = '0x73772F4f4ACF7DcE64a69060878A92fD272c7CD8'; // V8.51
+const CNOVA_TOKEN       = '0x486580A65A4952Ad79cCC14C1593BE6dB1A62d4B'; // V8.51
+const CNOVA_TREASURY    = '0x31eD4325F0a75FFA061F3ca8de613f8e0df2c6af'; // V8.51 — floorPrice() lives here
 
 // Group moderation — set these in Vercel env vars after creating the groups
 // SUPPORT_GROUP_ID: the numeric chat ID of the support group (e.g. -1001234567890)
@@ -41,12 +41,12 @@ Decentralized matrix platform on Base blockchain. Members pay USDC to join a bin
 
 <b>LAUNCH DATE POLICY (updated 2026-07-23):</b> The mainnet soft launch date is <b>to be determined</b> — it opens when testing proves the system ready, not on a calendar date. No more moving target dates. The <b>official flagship launch is June 19, 2027 (Juneteenth)</b> at cryptonova.ai — that date stands. Meanwhile the FULL experience is live today on testnet at crypto-nova.app (zero risk, every mainnet mechanic). If members ask "when is mainnet?": soft launch = when it's ready (announced in advance); flagship = June 19, 2027.
 
-## The Matrix System (verified from contract, V8.50)
+## The Matrix System (verified from contract, V8.51)
 Each tier has <b>two matrices</b>: <b>Matrix A (MatA)</b> and <b>Matrix B (MatB)</b> — each a 127-seat, 7-level BFS queue. They form a figure-eight: MatA is phase 1, MatB is phase 2 of one full journey.
 
 1. You join a tier and take the next open seat in <b>MatA</b>. You hold <b>one seat</b> per registration — MatA or MatB, never both.
 2. Once a matrix is full (127), <b>every new entry rotates it</b>: the root (seat 1) cycles out, everyone shifts up one seat, the newcomer takes the back seat. Members advance one at a time — the whole matrix never migrates at once.
-3. When you reach root of <b>MatA</b> and cycle out, you <b>cross into MatB</b>. The crossing costs the HALF the entry fee (V8.50) — exactly your crossing reserve, which pre-paid it when you entered: nothing is drawn from your earnings, and your earned balance travels with you. Starting the next full cycle after MatB is a new full entry from your accumulated funds; if they come up short, you are parked until the gap is covered (see Rescue).
+3. When you reach root of <b>MatA</b> and cycle out, you <b>cross into MatB</b>. The crossing costs the HALF the entry fee (V8.51) — exactly your crossing reserve, which pre-paid it when you entered: nothing is drawn from your earnings, and your earned balance travels with you. Starting the next full cycle after MatB is a new full entry from your accumulated funds; if they come up short, you are parked until the gap is covered (see Rescue).
 4. When you reach root of <b>MatB</b> and cycle out, your accumulated withdrawable funds the additive automation: re-entry first, then next-tier upgrade, then optional double seat (each step only if remaining funds cover it).
 5. You may pass through MatA → MatB multiple times. There is no fixed "254-seat payout event."
 
@@ -55,7 +55,7 @@ Key nuances:
 - Do not promise upgrade after exactly one fill or after MatA alone.
 - <b>Exception — Double Entry (see below):</b> a member with Double Entry enabled holds two simultaneous registrations, each progressing independently through MatA→MatB.
 
-## Compensation Plan (verified from contract, V8.50)
+## Compensation Plan (verified from contract, V8.51)
 Every entry fee, at every tier, splits identically:
 - <b>50% crossing reserve</b> — held for the member; pre-funds HALF of their MatA→MatB crossing (the crossing costs the full entry fee; earnings cover the rest).
 - <b>2.5% instant earn</b> — credited to withdrawable the moment they register.
@@ -119,7 +119,7 @@ Tier multipliers: T1=1×, T2=2×, T3=4×, T4=8×, T5=20×, T6=40×, T7=80×, T8=
 
 ## CNOVA Epochs (from CNOVAToken.sol)
 <b>Global and platform-wide</b> - not per-member. <b>9 epochs total.</b>
-Epoch advances when the FIRST fires: 1,000,000 CNOVA minted, 1,000 new members, or 180 days elapsed (V8.50 policy — item 42).
+Epoch advances when the FIRST fires: 1,000,000 CNOVA minted, 1,000 new members, or 180 days elapsed (V8.51 policy — item 42).
 
 Base T1 rewards: Ep1=50, Ep2=40, Ep3=20, Ep4=10, Ep5=5, Ep6-8=2.5, Ep9=2.5 CNOVA.
 
@@ -133,7 +133,7 @@ Mining stops after all 9 epochs (21M hard cap). Do NOT say "after your 8th cycle
 ## Community Pool
 <b>1% of every entry fee</b> (100 BPS) plus orphan fees (entries with no valid upline). First 1,000 wallets eligible — enrollment automatic and permanent, closes forever at member 1,000.
 Genesis (#1-500) = 60%, Pioneer (#501-1000) = 40%, split evenly within each cohort.
-On the 25TH of every month a distribution can be triggered (calendar-day model, V8.50): half the pool pays out, half rolls over and compounds. Members then have 30 days to claim; unclaimed amounts sweep back into the pool by design. Payouts begin at mainnet (policy).
+On the 25TH of every month a distribution can be triggered (calendar-day model, V8.51): half the pool pays out, half rolls over and compounds. Members then have 30 days to claim; unclaimed amounts sweep back into the pool by design. Payouts begin at mainnet (policy).
 
 ## How to Register
 1. Visit <a href="https://crypto-nova.app">crypto-nova.app</a>
@@ -155,7 +155,7 @@ Withdrawable, Total Earned, CNOVA Balance, CNOVA Value, CNOVA Burned, Community 
 ## Withdrawals
 1.5% fee deducted. Instant to Base Sepolia wallet. Can also redeem CNOVA for USDC.
 
-## Upgrades, Re-entry & Rescue (verified from contract, V8.50)
+## Upgrades, Re-entry & Rescue (verified from contract, V8.51)
 At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out funds in priority order: <b>re-entry → next-tier upgrade → double seat</b>. Each step fires only if the remaining funds cover its fee; otherwise it is silently skipped.
 - Defaults: auto re-entry ON, auto-upgrade ON for your first 5 cycles, double OFF. Change anytime via Dashboard toggles (Member Options). Each enabled toggle holds back its fee from withdrawals so your automation stays funded.
 - Fees come from your in-contract funds (crossing reserve + withdrawable) — NOT from your external wallet. Not free — it comes from earnings.
@@ -165,8 +165,8 @@ At MatB cycle-out the <b>additive engine</b> buys seats from your cycle-out fund
   2. <b>Self-rescue</b> — pay only the shortfall from your wallet. NO loan, NO debt, nothing owed back.
   3. <b>coPayRescue</b> — keeper-driven StabilityFund co-pay for eligible cases; any SF loan portion is repaid gradually from future pool shares.
 - Long-idle parked seats can be cleared by the keeper (slot cleared): tier status and earnings preserved; rejoin by paying the re-entry fee.
-- When the newest pair FILLS, the factory spawns the next pair and overflow routes into it automatically (V8.50 — the old fixed 375/381 entry thresholds are GONE from the contracts; think seats remaining, not entry counts).
-- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy when the newest pair is FULL (V8.50 item 33 — no more fixed entry thresholds). A new pair can sit empty until routing reaches it — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.50 anti-freeze buffer).
+- When the newest pair FILLS, the factory spawns the next pair and overflow routes into it automatically (V8.51 — the old fixed 375/381 entry thresholds are GONE from the contracts; think seats remaining, not entry counts).
+- <b>"Why is T1.2 (or any new pair) empty?"</b> New pairs deploy when the newest pair is FULL (V8.51 item 33 — no more fixed entry thresholds). A new pair can sit empty until routing reaches it — only then does new activity flow into it automatically. An empty freshly-deployed pair is the system working correctly: the runway is built before the plane needs it. It is NOT stalled, and nobody is "stuck" in it — reassure members this is by design (V8.51 anti-freeze buffer).
 - Do NOT say upgrade is free. Do NOT describe rescue as a loan by default — self-rescue is debt-free.
 
 ## Network Setup (Base Sepolia)
@@ -190,10 +190,10 @@ The referral system is fully live in the smart contracts.
 - On mainnet, members who use a referral link will show the referrer's wallet address. Members who register directly will always show "Direct" — permanently.
 - Do NOT say referrer will show "Member ID" or "username" — those are not built. Do NOT say "Direct" is only a testnet thing.
 
-## Contracts (Base Sepolia — V8.50)
-TierRouter: <code>0x0001660fF100a73134a86Ca1C8cf83977428dca4</code>
-MatrixKeeper: <code>0xA04aD8Dab09a9a742E0A845FB0c1e1107a86405F</code>
-CNOVA Token: <code>0x98cCEb35f3C1624258073e6e66aBa1AE2be2F55a</code>
+## Contracts (Base Sepolia — V8.51)
+TierRouter: <code>0x73772F4f4ACF7DcE64a69060878A92fD272c7CD8</code>
+MatrixKeeper: <code>0x693519F442cE01633954D9E700B6faC3F96d25FA</code>
+CNOVA Token: <code>0x486580A65A4952Ad79cCC14C1593BE6dB1A62d4B</code>
 USDC: <code>0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a</code>
 
 ## Links
@@ -778,7 +778,7 @@ export default async function handler(req, res) {
         `• 127-seat matrix rotates → you advance seat by seat\n` +
         `• 18% pool pays every seat per rotation, weighted by depth\n` +
         `• Chain pay: L1 5% direct bonus · L2–L6 2.7% each · 18.5% total\n` +
-        `• 2.5% instant earn on join · 50% crossing reserve (pre-pays your crossing in full — V8.50)\n` +
+        `• 2.5% instant earn on join · 50% crossing reserve (pre-pays your crossing in full — V8.51)\n` +
         `• MatB cycle-out → auto re-entry/upgrade + CNOVA mined on every event\n\n` +
         `Register at T1 and get your referral link: <a href="https://crypto-nova.app">crypto-nova.app</a>`,
         msgId);
