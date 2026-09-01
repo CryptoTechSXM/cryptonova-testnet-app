@@ -130,3 +130,4 @@
 0x7B0ad58FC04fFfB74a28cdfe7781619E10801528  # Cynthia Brown
 0x5fc30B093B1728129353D76888E1aF0636a36705  # CryptoJan22
 0x55a7ec55276094c16ceb1c7efdb0592e62d81425  # auto 2026-08-26 — bug report by CryptoJan
+0xc63ab89518de0548cc6b12aae6d4e7dcf8144998  # auto 2026-09-01 — bug report by CryptoJan22
