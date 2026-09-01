@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-09-01] Onboarding / Registration — It says  transaction failed on chain. I restarted my device …
+- **Reporter:** CryptoJan22
+- **Page:** Onboarding / Registration
+- **Wallet Type:** MetaMask
+- **Wallet Address:** 0xec5f81153c4df4b6e7a7ecef56c700a207ca03eb
+- **Frequency:** Consistent
+- **What happened:** It says  transaction failed on chain. I restarted my device and same result.
+- **What was expected:** That i would be able to register my accounts.
+- **Submitted:** Tue, 01 Sep 2026 18:38:26 GMT
+
+
 ### [2026-09-01] Onboarding / Registration — Getting an error when registering
 - **Reporter:** CryptoJan22
 - **Page:** Onboarding / Registration
