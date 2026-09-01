@@ -56,9 +56,26 @@ export default async function handler(req, res) {
 
   // Build a session key for counting
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-  const countKey = `${today}:${type}:${wallet}`;
+  // 56.3: this keyed on `wallet`, which is the wallet BRAND ("MetaMask") from
+  // detectWalletName() — NOT the address. So "Session count for this error: 15" was
+  // 15 failures across ALL MetaMask users, while the alert displayed a single
+  // address, reading as one member retrying. Units-conflation, same class as the
+  // people-vs-positions error in the 09-01 announcement. Key on the address.
+  const countKey = `${today}:${type}:${addr || wallet}`;
   sessionCounts[countKey] = (sessionCounts[countKey] || 0) + 1;
   const count = sessionCounts[countKey];
+
+  // 56.3: V8.49 item 2 ("is sepolia.base.org the cause of the failed-transaction
+  // class?") stayed UNMEASURED for weeks because the one field that would settle it
+  // was thrown away: the error is rendered at slice(0, 200) and the RPC URL sits
+  // past that cut. Extract the endpoint and report it as its own line.
+  // ⛔ HOST ONLY, NEVER THE FULL URL — our QuickNode endpoints carry the API key in
+  // the path, and this message goes to a Telegram channel.
+  let rpcHost = '';
+  try {
+    const m = String(error).match(/https?:\/\/[^\s"'`,)\\]+/);
+    if (m) rpcHost = new URL(m[0]).host;
+  } catch (_) { /* never throw from the reporter */ }
 
   // Emoji by severity
   const icon = type.includes('CRITICAL') ? '🚨'
@@ -79,7 +96,8 @@ export default async function handler(req, res) {
     `👛 Wallet:   ${wallet}`,
     `📱 Device:   ${device}`,
     action  ? `🎯 Action:   ${action}`  : null,
-    error   ? `⚠️ Error:    <code>${escHtml(error.slice(0, 200))}</code>` : null,
+    error   ? `⚠️ Error:    <code>${escHtml(error.slice(0, 600))}</code>` : null,
+    rpcHost ? `📡 RPC host: <code>${escHtml(rpcHost)}</code>` : null,
     network ? `🔗 Network:  chainId ${network}` : null,
     addr    ? `🆔 Address:  ${addr}` : null,
     url     ? `🌐 Page:     ${url}` : null,

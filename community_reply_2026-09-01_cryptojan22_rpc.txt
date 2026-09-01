@@ -1,0 +1,23 @@
+Hi CryptoJan22 🙏
+
+Thanks for both reports, and for including the wallet addresses — that is exactly what let us trace this one. The $1 bug bounty is always active and this report qualifies.
+
+🔎 WHAT ACTUALLY HAPPENED
+The app told you "transaction failed on chain". That wording was wrong, and we are sorry — nothing ever reached the blockchain.
+
+What really happened is that the free public Base Sepolia node refused the request because it was busy. It answered with a "403 - too many requests". So the transaction was never sent, nothing was charged, and your wallet and your funds are completely fine.
+
+Restarting your device could never have fixed it, because the problem was not on your side at all. That one is on us.
+
+🔁 WHAT TO DO NOW
+Wait a few minutes and press the button again. It clears by itself — this is the free test node getting busy on launch day, not a problem with your account or your registration.
+
+If it keeps happening, try Rabby wallet. We have not seen this happen on Rabby so far. That is not a promise, just what we have seen.
+
+🛠️ WHAT WE CHANGED
+We fixed the message. From now on it will tell you the node was busy and to try again in a few minutes, instead of blaming the chain. Your two reports are what made us go and look.
+
+📌 FOR MAINNET
+Mainnet will run on a paid node with redundancy, so this class of error should not follow us there. On testnet we would rather you retry for free than pay for a node today.
+
+Thanks again 🙌

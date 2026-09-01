@@ -9452,6 +9452,37 @@ function friendlyError(e) {
   // tx triggers the rotation cascade. Stale cached pages (pre gas-fix) hit this too.
   if (_earlyRaw.includes('gas limit too high') || _earlyRaw.includes('-32003'))
     return '⛽ Network rejected the transaction size — hard-refresh this page (Ctrl+Shift+R) to load the latest version, then try again.';
+  // ── RPC TRANSPORT FAILURE — MEASURED 2026-09-01, MUST STAY ABOVE THE REVERT
+  // HEURISTIC BELOW ───────────────────────────────────────────────────────────
+  // The revert heuristic below fires on _earlyRaw.includes('"data":'). A JSON-RPC
+  // TRANSPORT error carries its own `"data": { "httpStatus": 403 }` object, so an
+  // HTTP 403 from the endpoint was matching it and members were being told
+  // "Transaction failed on-chain - hard-refresh". PROVEN by running the real
+  // 2026-09-01 19:02 GMT error text through this function: it returned the
+  // on-chain message for a request that never reached the chain.
+  //
+  // That mislabel is why "Transaction failed on-chain - hard-refresh" is the most
+  // common report class in BUGS.md (see the WALLET_RPC_URLS block, ~line 2222):
+  // an unknown share of that class was never on-chain at all. Two defects stacked
+  // - a public endpoint that rate-limits, and a message that blamed the chain.
+  //
+  // Hard-refreshing cannot fix a refused RPC, so the old advice was not just
+  // wrong, it was unactionable. Say what actually happened and what actually helps.
+  const _httpStatus = e.info?.error?.data?.httpStatus ?? e.error?.data?.httpStatus ??
+                      e.data?.httpStatus ?? null;
+  const _isTransport =
+    (typeof _httpStatus === 'number' && _httpStatus >= 400) ||
+    _earlyRaw.includes('-32080') ||
+    _earlyRaw.includes('RPC endpoint returned HTTP') ||
+    /"httpStatus"\s*:\s*(4|5)\d\d/.test(_earlyRaw) ||
+    code === 'SERVER_ERROR' || code === 'NETWORK_ERROR' || code === 'TIMEOUT';
+  if (_isTransport) {
+    return '\uD83C\uDF10 The Base Sepolia network node is busy and refused the request' +
+           (typeof _httpStatus === 'number' ? ' (HTTP ' + _httpStatus + ')' : '') +
+           '. Nothing was sent and nothing was charged - your wallet and funds are fine. ' +
+           'Wait a few minutes and press the button again.';
+  }
+
   if (_earlyRaw.includes('"from":') || _earlyRaw.includes('"to":') ||
       _earlyRaw.includes('"data":') || _earlyRaw.includes('from="') ||
       _earlyRaw.includes('to="') || /^"?0x[0-9a-f]{40,}"?/i.test(raw.trim())) {
