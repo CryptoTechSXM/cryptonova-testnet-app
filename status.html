@@ -484,6 +484,10 @@
           <span class="detail-val blue" id="kp-rescue-count">—</span>
         </div>
         <div class="detail-row">
+          <span class="detail-key" data-i18n="statusPage.row_rescues_fund_assisted">of which fund-assisted (loan)</span>
+          <span class="detail-val" id="kp-loan-count">—</span>
+        </div>
+        <div class="detail-row">
           <span class="detail-key" data-i18n="statusPage.row_last_rescue">Last rescue</span>
           <span class="detail-val green" id="kp-last-rescue">—</span>
         </div>
@@ -979,12 +983,43 @@
       // loadSF(), because "who is being carried by the fund" is a question about
       // a member's whole history, not the last few hours. All this needs is the
       // most recent loan, so one query is enough.
-      let bookRead = true;
-      const loanLogsRaw = await _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk))
-        .catch(() => { bookRead = false; return []; });
-      const allRescueLogs = [...loanLogsRaw].sort((a,b) => a.blockNumber - b.blockNumber);
+      // 2026-09-02 (session 59): THIS ROW COUNTED LOANS AND CALLED THEM RESCUES.
+      // MemberDebtIncreased fires only when the fund ADVANCES money. A rescue the
+      // member funds from their own MatB balance emits none — the fund is a net
+      // RECEIVER in that transaction — so the page read "0 rescues · No rescues yet"
+      // an hour after a real, seated rescue (block 46297808: RescueOverflowed →
+      // MemberEntered → ParkedRescued, cost to the fund $0.00, SF +$0.30).
+      // ~45% of V8.50 rescues cost the fund nothing, so that is the COMMON case,
+      // not an edge. A rescue is now the UNION of both paths, deduped per
+      // transaction+member:
+      //   ParkedRescued        — MatrixKeeper; keeper path, loan or not
+      //   MemberDebtIncreased  — StabilityFund; also the manual_rescue.js path,
+      //                          which never emits ParkedRescued
+      // Neither event alone answers the question, which is why both are read.
+      let keeperRead = true, loanRead = true;
+      const [parkLogsRaw, loanLogsRaw] = await Promise.all([
+        _retry(() => keeper.queryFilter(keeper.filters.ParkedRescued(), fromBlock, blk))
+          .catch(() => { keeperRead = false; return []; }),
+        _retry(() => sf.queryFilter(sf.filters.MemberDebtIncreased(), fromBlock, blk))
+          .catch(() => { loanRead = false; return []; }),
+      ]);
+      // A PARTIAL union UNDERSTATES, which is failure-as-zero in a new costume.
+      // The total may only be claimed when BOTH reads landed.
+      const bookRead = keeperRead && loanRead;
+
+      const _seenRescue = new Set();
+      const allRescueLogs = [...parkLogsRaw, ...loanLogsRaw]
+        .filter(l => {
+          const k = (l.transactionHash || '') + ':' +
+                    String((l.args && l.args.member) || '').toLowerCase();
+          if (_seenRescue.has(k)) return false;
+          _seenRescue.add(k);
+          return true;
+        })
+        .sort((a,b) => a.blockNumber - b.blockNumber);
 
       const rescueCount = allRescueLogs.length;
+      const loanCount   = loanLogsRaw.length;
       let lastRescueTime = null;
       if (rescueCount > 0) {
         const lastLog = allRescueLogs[allRescueLogs.length - 1];
@@ -1033,11 +1068,27 @@
         rescueCountStr = rescueCount.toString();
         lastRescueStr  = lastRescueTime ? elapsed(lastRescueTime)
           : rescueCount === 0 ? t('statusPage.js.no_rescues_yet', 'No rescues yet') : '—';
-        _lastRescueCount = { count: rescueCount, lastTime: lastRescueTime };
+        _lastRescueCount = Object.assign({}, _lastRescueCount,
+          { count: rescueCount, lastTime: lastRescueTime });
+      }
+      // The loan row carries its OWN read flag. The fund's ledger can land when
+      // the keeper's log query does not, and the reverse — a row must never
+      // borrow another row's success, which is how the old single `bookRead`
+      // would have let one failed query silently zero both numbers.
+      let loanCountStr;
+      if (loanRead) {
+        loanCountStr = loanCount.toString();
+        _lastRescueCount = Object.assign({}, _lastRescueCount, { loans: loanCount });
+      } else {
+        loanCountStr = (_lastRescueCount && _lastRescueCount.loans != null)
+          ? String(_lastRescueCount.loans) : '—';
+      }
+      if (bookRead || loanRead) {
         try { localStorage.setItem('cnova_st_rescue', JSON.stringify(_lastRescueCount)); } catch(e) {}
       }
       setText('kp-last-rescue', lastRescueStr);
       setText('kp-rescue-count', rescueCountStr);
+      setText('kp-loan-count', loanCountStr);
 
       // Rescue pill card removed — counts live in the Parked Members dropdown above
       // Update keeper card summary to show last rescue inline
