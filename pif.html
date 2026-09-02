@@ -347,12 +347,14 @@ document.addEventListener('click', e => {
 
 <script>
 const ADDRS = {
-  couponRegistry: '0x21063617Bd76B30c884EC3554186096300FBe9C1',
-  tierRouter:     '0x0001660fF100a73134a86Ca1C8cf83977428dca4',
+  couponRegistry: '0xA0B430Ca510D89d6cD5A629279624879084EFf75',
+  tierRouter:     '0x73772F4f4ACF7DcE64a69060878A92fD272c7CD8',
   usdc:           '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
 };
 const CHAIN_ID = 84532;
-const DEPLOY_BLOCK = 45975000;   // V8.50 community deploy anchor (2026-08-26)
+const DEPLOY_BLOCK = 45975000;   // SAFE LOWER BOUND for log scans, not a V8.51 anchor.
+// V8.51 deployed 2026-09-01T04:00:12Z; this floor PREDATES it, so it can only scan
+// wider, never miss. Raise it only to a block number actually read off chain.
 const REG_ABI = [
   'function issueCoupon(bytes32 codeHash) external payable',
   'function cancelCoupon(bytes32 codeHash) external',

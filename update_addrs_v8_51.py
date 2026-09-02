@@ -110,6 +110,13 @@ if len(REPLACEMENTS) > 8:
 ALL_FILES = [
     "index.html", "status.html", "buy.html", "governance.html", "liquidity.html", "early.html",
     "compensation.html", "faq.html", "terms.html",
+    # pif.html ADDED 2026-09-02 (session 57). It was NOT on this list at the V8.51
+    # cutover, so it kept V8.50's tierRouter + couponRegistry and told a member
+    # "already a registered CryptoNova member" (true on V8.50) while the dashboard,
+    # reading V8.51, said "Not Yet Registered". Same wallet, same app, opposite
+    # answers. The RESIDUE_SWEEP below exists so a hand-kept list can never again
+    # fail silently -- see it before adding any file here.
+    "pif.html",
     "locales/en.json",
     "api/telegram-qa.js",
 ]
@@ -163,5 +170,55 @@ print("   address change in 238,000 lines of CRLF churn. Add ONLY the files list
 print("=" * 78)
 if touched:
     print("\ngit add " + " ".join(touched))
+# ---------------------------------------------------------------------------
+# RESIDUE SWEEP (added 2026-09-02, session 57).
+# ALL_FILES is hand-maintained, so anything not on it is stale BY DEFAULT and
+# nothing says so. pif.html sat on V8.50 addresses through the whole V8.51
+# cutover for exactly that reason: it told a member "already a registered
+# CryptoNova member" (true on V8.50) while the dashboard, reading V8.51, said
+# "Not Yet Registered". This sweep reads every .html and api/*.js in the repo --
+# not a list -- and FAILS if any still carries an address that exists in the OLD
+# book but not the NEW one. A list that cannot detect its own omissions is not a
+# safeguard.
+def _flat_addrs(obj, out):
+    """Addresses live at the top level AND nested under tiers/libraries."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if isinstance(v, str) and v.startswith("0x") and len(v) == 42:
+                out[v.lower()] = k
+            else:
+                _flat_addrs(v, out)
+    elif isinstance(obj, list):
+        for v in obj:
+            _flat_addrs(v, out)
+    return out
+
+def residue_sweep():
+    import glob
+    old_map = _flat_addrs(old_data, {})
+    new_map = _flat_addrs(new_data, {})
+    stale = {a: k for a, k in old_map.items() if a not in new_map}
+    scanned, bad = 0, []
+    for path in sorted(glob.glob(os.path.join(BASE, "*.html"))
+                       + glob.glob(os.path.join(BASE, "api", "*.js"))):
+        try:
+            body = open(path, encoding="utf-8", errors="replace").read().lower()
+        except OSError:
+            continue
+        scanned += 1
+        for addr, key in stale.items():
+            if addr in body:
+                bad.append((os.path.relpath(path, BASE), key))
+    print("\nRESIDUE SWEEP: %d files scanned against %d superseded addresses."
+          % (scanned, len(stale)))
+    if bad:
+        for f, k in sorted(set(bad)):
+            print("  STALE  %-24s still carries the OLD %s" % (f, k))
+        print("  -> add it to ALL_FILES (or fix by hand) and re-run. NOT committing.")
+        sys.exit(1)
+    print("  clean - no file outside ALL_FILES carries a superseded address.")
+
+residue_sweep()
+
 print("\nNEXT: audit_frontend_abi.js (0 MISSING / 0 SHAPE DRIFT) -> commit those files ->")
 print("      git push origin admin -> leaders register at admin.crypto-nova.app (ungated).")
