@@ -759,6 +759,12 @@
     // $1,000), so the page could paint "HEALTHY 100%" green while healthBps()
     // on-chain read ~44%. Grade against the fund's own definition.
     'function sfTarget() external view returns (uint256)',
+    // MEASURED 2026-09-02 (session 58) on 0xb7962158…: stabilityFloor() = $0.00, so
+    // the contract refuses a loan only when the fund genuinely cannot afford it.
+    // The page previously had NO concept of this value and quoted capacity as
+    // balance/5. The floor is DAO-governable (setStabilityFloor, onlyOwnerOrGovernance,
+    // capped at sfTarget()), so it CAN become non-zero — read it, never assume 0.
+    'function stabilityFloor() external view returns (uint256)',
     'function healthBps() external view returns (uint256)',
     'function totalRescueLoaned() external view returns (uint256)',
     'function totalRescueRepaid() external view returns (uint256)',
@@ -813,6 +819,13 @@
   let _lastLoansState  = null; // { issued, repaid, outstanding, outClass }
   let _lastRescueCount = null; // { count, lastTime }
   let _lastParkedStats  = null; // { shortfall, capacity } — prevents flicker between polls
+  // Rescue capacity is computed ONCE, in the parked-members poll, because that is the
+  // only place that knows each waiting member's OWN shortfall. The SF card reads it
+  // from here rather than recomputing — two sites computing one figure by different
+  // rules is exactly how balance/5 survived (see the $10-lock defect: "two wrong
+  // numbers agreeing looks exactly like two right ones"). Stays null until measured;
+  // a null renders as an honest dash, never as a guessed count.
+  let _rescueCap        = null; // { long, short } | null
   let _lastParkedCount  = null; // hold last-good TOTAL parked count so a dropped read can't flash "all clear"
   let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
   let _lastTierData    = null; // full per-tier last-good — hold ALL tiers (not just T1) on a blipped read
@@ -1251,13 +1264,57 @@
       const shortfallTxt = shortfallKnown > 0 ? fmt6(avgShortfall) : (_lastParkedStats ? _lastParkedStats.shortfall : '—');
       setText('pk-shortfall', shortfallTxt);
 
-      // SF rescue capacity
+      // ── SF rescue capacity ───────────────────────────────────────────────────
+      // REWRITTEN 2026-09-02 (session 58). It was `Math.floor(sfBalance / 5)`, which
+      // was wrong three separate ways and printed "$62.55 · CRITICAL · ~12 members can
+      // be rescued" while the true answer was 0:
+      //   1. $5 is T1's crossing price ONLY. A parked T2 member costs $12.50. The same
+      //      hardcoded-fee mistake as the $10 withdrawal lock.
+      //   2. It ignored stabilityFloor. MEASURED: $0.00 today, but DAO-settable, so a
+      //      governance vote could silently make every number on this card overstate.
+      //   3. It answered a hypothetical ("how many $5 rescues fit in the balance")
+      //      instead of the real question ("how many of the people actually waiting
+      //      can the fund cover"), even though this function already holds each
+      //      waiting member's own shortfall.
+      // Now: walk the REAL queue in the REAL rescue order (stillParked is already
+      // sorted longest-waiting-first, which is the order the keeper works) and spend
+      // the spendable balance down member by member.
+      // A member whose shortfall could not be read stops the count — the queue is
+      // ordered, so an unknown cost makes everything behind it unknowable. We then say
+      // "at least N", never a total. (Same doctrine as the direct-referral scan: a
+      // floor is reported as a floor.)
       let capacityTxt = _lastParkedStats ? _lastParkedStats.capacity : '—';
       try {
-        const sfBal = await new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider).totalBalance();
-        const sfNum = Number(BigInt(sfBal)) / 1e6;
-        const estimatedCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0;
-        capacityTxt = `~${estimatedCap} ${t('statusPage.js.members_can_be_rescued', 'members can be rescued')}`;
+        const _sfc = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
+        // Both getters are confirmed present on the deployed SF (sf_floor_probe.js,
+        // 2026-09-02). If either read fails we keep the last-known text rather than
+        // publish a number — CLAUDE.md: never batch UNKNOWN getters, never let a
+        // swallowed read impersonate a finding.
+        const [_sfBalRaw, _floorRaw] = await Promise.all([
+          _sfc.totalBalance(),
+          _sfc.stabilityFloor(),
+        ]);
+        const sfBalB  = BigInt(_sfBalRaw);
+        const floorB  = BigInt(_floorRaw);
+        const spendable = sfBalB > floorB ? sfBalB - floorB : 0n;
+
+        let remaining = spendable, covered = 0, incomplete = false;
+        for (const p of stillParked) {
+          if (p.shortfall === null || p.shortfall === undefined) { incomplete = true; break; }
+          if (p.shortfall > remaining) break;      // ordered queue: this one waits, so does everyone behind it
+          remaining -= p.shortfall;
+          covered++;
+        }
+
+        const waiting = stillParked.length;
+        if (waiting === 0) {
+          capacityTxt = t('statusPage.js.no_members_waiting', 'no members waiting');
+          _rescueCap  = { long: capacityTxt, short: t('statusPage.js.none_waiting', 'none waiting') };
+        } else {
+          const prefix = incomplete ? t('statusPage.js.at_least', 'at least') + ' ' : '';
+          capacityTxt  = `${prefix}${covered} ${t('statusPage.js.of', 'of')} ${waiting} ${t('statusPage.js.waiting_can_be_rescued', 'waiting can be rescued now')}`;
+          _rescueCap   = { long: capacityTxt, short: `${prefix}${covered} ${t('statusPage.js.of', 'of')} ${waiting} ${t('statusPage.js.waiting_suffix', 'waiting')}` };
+        }
       } catch(e) {
         // keep last-known value if RPC fails — no flicker to '—'
       }
@@ -1673,8 +1730,14 @@
 
       setText('sf-bal', fmt6(sfBal));
       setClass('sf-bal', health);
-      const rescueCap = sfNum > 0 ? Math.floor(sfNum / 5) : 0;
-      setText('sf-rescue-cap', `~${rescueCap} ${rescueCap !== 1 ? t('statusPage.js.members_suffix','members') : t('statusPage.js.member_suffix','member')}`);
+      // 2026-09-02 (session 58): was a SECOND `Math.floor(sfNum / 5)`. Both sites are
+      // now fed by the one measurement taken in the parked-members poll, which is the
+      // only place that knows what the waiting members actually cost. Until that poll
+      // has run we show a dash — an honest unknown beats a confident wrong count.
+      const _capLong  = _rescueCap ? _rescueCap.long
+                      : (_lastParkedStats && _lastParkedStats.capacity ? _lastParkedStats.capacity : '—');
+      const _capShort = _rescueCap ? _rescueCap.short : '—';
+      setText('sf-rescue-cap', _capShort);
       setText('sf-pct', pct + '%');
       const bar = document.getElementById('sf-bar');
       if (bar) { bar.style.width = pct + '%'; bar.className = `prog-fill ${health}`; }
@@ -1683,7 +1746,7 @@
       setText('sf-treasury', treaBal  === null ? '—' : fmt6(treaBal));
       setText('sf-buyback',  bbBal    === null ? '—' : fmt6(bbBal));
       setText('sf-cnova',    cnovaSup === null ? '—' : fmt18(cnovaSup) + ' CNOVA');
-      setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ~${rescueCap} ${t('statusPage.js.members_can_be_rescued','members can be rescued')}`);
+      setText('summary-sf', `${fmt6(sfBal)} · ${healthLabel} · ${_capLong}`);
 
       // ── Rescue loan tracking ─────────────────────────────────────────────────
       // MONEY comes from SF contract state (totalRescueLoaned/Repaid) — exact,
