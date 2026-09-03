@@ -4048,17 +4048,30 @@ function renderPairSubRows(t, matrixAs, occupancyA, occupancyB, actives) {
     const isActive = actives[i];
     const occA = Number(occupancyA[i]);
     const occB = Number(occupancyB[i]);
-    // A pair is "full" if MatB also has members (or MatA is 127) AND it is not the active pair
-    const aFull = !isActive && occA >= 127;
-    const status = aFull
+    // V8.51 SESSION 61 FIX. Two defects here, one root cause: MatB's row was rendered
+    // from MatA's state instead of its own.
+    //   was: const aFull  = !isActive && occA >= 127;            -> 'Full' on MatA alone
+    //   was: const fillB  = (aFull || occB > 0) ? (aFull ? '127/127' : ...) : '-';
+    // So a pair whose MatA was full printed MatB as 127/127 REGARDLESS of occB, and was
+    // labelled 'Full'. On 2026-09-03 T1.2 -- MatA 127/127, MatB genuinely 0/127 and NOT
+    // ROTATING -- read '127/127 . Full' to every member, while the pair bar further down
+    // the SAME page read the true 0/127. The page contradicted itself and the wrong half
+    // was the one a member sees first, on the one screen that would have shown the fault.
+    // A pair is FULL only when BOTH halves are full. A full MatA with an empty MatB is not
+    // complete, it is a pair nobody is crossing out of -- say that plainly instead.
+    const bothFull = occA >= 127 && occB >= 127;
+    const noCross  = occA >= 127 && occB === 0;   // full MatA, nobody has crossed into MatB
+    const status = bothFull
       ? '<span style="color:var(--text3);font-size:11px">✅ Full</span>'
       : isActive
         ? '<span style="color:var(--green);font-size:11px">🟢 Active</span>'
-        : (occA === 0 && occB === 0)
-          ? '<span style="color:#fbbf24;font-size:11px" title="Deployed in advance — opens automatically when the previous pair saturates. No action needed.">🟡 Standby buffer</span>'
-          : '<span style="color:var(--text3);font-size:11px">⏳ New</span>';
-    const fillA = aFull ? '127/127' : (occA + '/127');
-    const fillB = (aFull || occB > 0) ? (aFull ? '127/127' : occB + '/127') : '—';
+        : noCross
+          ? '<span style="color:#fbbf24;font-size:11px" title="Matrix A is full but nobody has crossed into Matrix B yet, so this pair is not rotating.">⏳ Awaiting crossings</span>'
+          : (occA === 0 && occB === 0)
+            ? '<span style="color:#fbbf24;font-size:11px" title="Deployed in advance — opens automatically when the previous pair saturates. No action needed.">🟡 Standby buffer</span>'
+            : '<span style="color:var(--text3);font-size:11px">⏳ New</span>';
+    const fillA = occA + '/127';
+    const fillB = occB + '/127';
     const tr = document.createElement('tr');
     tr.className = 'pair-sub-row';
     tr.dataset.tier = t;
