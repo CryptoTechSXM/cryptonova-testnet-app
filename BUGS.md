@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-09-03] Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing is hap…
+- **Reporter:** CryptoJan22
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d9c8db728cf3570313ca01fe149d2ceb6d29635
+- **Frequency:** Consistent
+- **What happened:** Matrix does not seem to be moving. Looks like nothing is happening since yesterday.
+- **What was expected:** To have more cycles at this time.
+- **Submitted:** Thu, 03 Sep 2026 16:10:19 GMT
+
+
 ### [2026-09-01] Onboarding / Registration — It says  transaction failed on chain. I restarted my device …
 - **Reporter:** CryptoJan22
 - **Page:** Onboarding / Registration
