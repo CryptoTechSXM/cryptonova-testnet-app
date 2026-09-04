@@ -2139,17 +2139,19 @@ const RPC_FALLBACK = 'https://wiser-proportionate-forest.base-sepolia.quiknode.p
 // (support traceability). To change the pool, edit this list and push —
 // every address must already be a REGISTERED member before receiving orphans.
 const DEFAULT_SPONSOR_POOL = [
-  // V8.52 relaunch — the owner's 10-leader roster (2026-08-26), IDENTICAL to the
-  // bigfill round-robin list in run_bigfill_rr.ps1 — if you change one, change both.
+  // V8.52 community chain — the owner's 10-leader roster as given 2026-09-04
+  // (session 62; two wallets swapped out, positions 4/5 reordered). The old
+  // pointer to run_bigfill_rr.ps1 is gone: that script was retired in the
+  // keeper census and no sibling copy of this list exists any more.
   // An unregistered sponsor resolves to defaultReferrer (W1) on-chain, so orphans
   // land on W1 until each leader registers on the new chain.
   '0x6512e9B5FE1690F2570AFEE5E7b904EF106C9435',
   '0x19a59fbD6d2c1289668795D41453e1505B7B8102',
   '0x1D3E33aAFFDb694E5a45d793B6946120467e93AB',
-  '0x5179A012b54EE6E6c7db92f820C9b3d8126Eead2',
   '0xaAda7eF0bbF0A08189a39f6d471A1728d3873c15',
-  '0x8fb7ca44D27c67b0cFED5153aeEE4F70F4aed6c2',
-  '0xdFD9e186b8D8A9000cBeE47BE14310a43Bdf602e',
+  '0x5179A012b54EE6E6c7db92f820C9b3d8126Eead2',
+  '0x2Ed62e5B3303CF734e503844d5164eD6994C0A7c',
+  '0x9b856D36bBFcF25A4139277DDbA79087Fd82d995',
   '0xd56e7dF24D182Bc64Bd3Caa322951912A6cEf54c',
   '0x26388a81eb9448DF02144cc765Bb448444e61f9B',
   '0x391ab9edC83960e6ec468bDb7e6abE5858656F68',
