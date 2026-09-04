@@ -251,7 +251,7 @@
   .sub-nav a:hover{color:var(--text);}
   .sub-nav a.active{color:var(--green);border-bottom-color:var(--green);font-weight:600;}
   @media(max-width:768px){.sub-nav{display:none;}}
-/* V8.51 member request 2026-08-13: param search + plain-language explanations */
+/* V8.52 PRIVATE member request 2026-08-13: param search + plain-language explanations */
 .param-search-wrap { position: relative; }
 .param-results { border: 1px solid var(--border); border-radius: 10px; margin-top: 6px; max-height: 260px; overflow-y: auto; background: var(--bg2); }
 .param-result { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border); }
@@ -266,7 +266,7 @@
 </style>
 </head>
 <body>
-<!-- ── V8.51 MAINTENANCE GATE — remove this block when V8.51 is live ───────────── -->
+<!-- ── V8.52 PRIVATE MAINTENANCE GATE — remove this block when V8.52 PRIVATE is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -284,9 +284,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.51 Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52 PRIVATE Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.51 is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
+      V8.52 PRIVATE is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -310,7 +310,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.51 Testnet</span>
+    <span id="gate-pill-label">V8.52 PRIVATE Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -328,13 +328,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.51 Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52 PRIVATE Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.51 Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52 PRIVATE Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -556,7 +556,7 @@
           <option value="22" data-i18n="govPage.params.p22_option">SF Community Carve-Out (BPS)</option>
           <option value="23" data-i18n="govPage.params.p23_option">SF Stability Floor (USDC)</option>
           <option value="50" data-i18n="govPage.params.p50_option">SF Rescue Repay BPS</option>
-          <!-- V8.51 (cutover batch): params 59/60 exist only on V8.51 governance —
+          <!-- V8.52 PRIVATE (cutover batch): params 59/60 exist only on V8.52 PRIVATE governance —
                this whole batch promotes to main WITH the deploy. -->
           <option value="59" data-i18n="govPage.params.p59_option">SF Insolvency Floor (BPS)</option>
           <option value="60" data-i18n="govPage.params.p60_option">SF Community Overflow (BPS)</option>
@@ -657,9 +657,9 @@
     </div>
 
     <div id="propose-gate" style="font-size:13px;color:var(--text3);margin-bottom:10px;"></div>
-    <!-- V8.34 wrote this notice for a fee that never existed on chain; V8.51 item 43
+    <!-- V8.34 wrote this notice for a fee that never existed on chain; V8.52 PRIVATE item 43
          made the fee REAL (param 58). The text is populated LIVE from proposalFee() —
-         feature-detected across the V8.51→V8.51 cutover — and the static default is
+         feature-detected across the V8.52 PRIVATE→V8.52 PRIVATE cutover — and the static default is
          the honest "checking" state, never an asserted number. -->
     <div style="display:flex;align-items:center;gap:8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);">
       <span style="font-size:16px;">🔥</span>
@@ -726,15 +726,15 @@ async function _getBestRpc() {
   }
   return RPC_URL; // fallback to primary
 }
-const GOV_ADDR    = '0x56Ba053e649e1e2E99a131301B39B9F9510A4575'; // V8.51
-const CNOVA_ADDR  = '0x486580A65A4952Ad79cCC14C1593BE6dB1A62d4B'; // V8.51
-const TIER_ROUTER = '0x73772F4f4ACF7DcE64a69060878A92fD272c7CD8'; // V8.51
-const MK_ADDR     = '0x693519F442cE01633954D9E700B6faC3F96d25FA'; // V8.51
-// V8.51 — deployed 2026-07-01 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
-const SF_ADDR     = '0xb7962158FA9DDCB15697d0a0358473c1F34C13FF'; // V8.51
-const BBR_ADDR    = '0x5cDb6b329a10068c2715db87345F40c069FD1fa0'; // V8.51
-const DS_ADDR     = '0x7AFCed3bc59cf1860ed78382fC4dcc4edA35aC61'; // V8.51
-const CW_ADDR     = '0x64ec12541e783b89402fA4983238C0FF4e367C02'; // V8.51
+const GOV_ADDR    = '0x7BD29c4ea3164AFA33b9B5877FdeDbb5a0e14D88'; // V8.52 PRIVATE
+const CNOVA_ADDR  = '0x0DB48e7Aa5a972627bFA2f69f518328c053B0832'; // V8.52 PRIVATE
+const TIER_ROUTER = '0x72DAF5647Dff8E71D0c4ECB768B19E77DcBcba63'; // V8.52 PRIVATE
+const MK_ADDR     = '0xe5Cc6b6A4D780e6B12606940b55dDA5AF18412FB'; // V8.52 PRIVATE
+// V8.52 PRIVATE — deployed 2026-07-01 — selfRescue, isInMatrix fix, CouponRegistry, pure SF rescue loan
+const SF_ADDR     = '0x24507164a2bc854950DB0DB91125Ed3C0ef9313C'; // V8.52 PRIVATE
+const BBR_ADDR    = '0x05b085ab17dE8921dCFe093214DE44B89909253D'; // V8.52 PRIVATE
+const DS_ADDR     = '0xe5d71A037651307DB4B9936c1fDe769cDD3bc122'; // V8.52 PRIVATE
+const CW_ADDR     = '0xC5Fa6ECc7584Ac0718590Db1830A0c15daA09223'; // V8.52 PRIVATE
 
 // Real ethers.Network object for staticNetwork -- passing the literal boolean
 // 'true' throws 'staticNetwork.matches is not a function' in ethers v6.7.1 and
@@ -762,7 +762,7 @@ const PARAM_TARGETS = {
   // Param 10 (Early Exit Penalty BPS) retired entirely -- no target, not proposable.
   9: TIER_ROUTER,
   11: GOV_ADDR, 12: GOV_ADDR, 13: GOV_ADDR,
-  58: GOV_ADDR,   // V8.51 item 43: proposal fee (self param; picker entry installed at runtime iff the deployed governance has proposalFee())
+  58: GOV_ADDR,   // V8.52 PRIVATE item 43: proposal fee (self param; picker entry installed at runtime iff the deployed governance has proposalFee())
   14: MK_ADDR,
   15: TIER_ROUTER, 16: TIER_ROUTER, 17: TIER_ROUTER, 18: TIER_ROUTER,
   // V8.35: per-tier whale gate thresholds (params 52-57)
@@ -816,7 +816,7 @@ const PARAM_FALLBACK = {
   // retirement note for the real (hardcoded) early-exit penalty mechanism,
   // which lives in CNOVATreasury.redeemAtFloor().
   11: { plain:"How long the community gets to vote on each proposal before voting closes.", label:'Voting Period (s)', hint:'Duration of the voting window in seconds.' },
-  58: { plain:"What it costs to put a proposal on the ballot. The fee is burned - removed from supply forever - to keep spam proposals out. It only applies to CREATING proposals; voting is always free. 0 makes proposing free.", label:'Proposal Fee (CNOVA)', hint:'CNOVA burned from the proposer on every proposal (normal and boost-table). Your wallet asks for a one-time approval of exactly the fee before the proposal transaction. V8.51 param 58; menu 0-1000 CNOVA; 0 disables the fee.' },
+  58: { plain:"What it costs to put a proposal on the ballot. The fee is burned - removed from supply forever - to keep spam proposals out. It only applies to CREATING proposals; voting is always free. 0 makes proposing free.", label:'Proposal Fee (CNOVA)', hint:'CNOVA burned from the proposer on every proposal (normal and boost-table). Your wallet asks for a one-time approval of exactly the fee before the proposal transaction. V8.52 PRIVATE param 58; menu 0-1000 CNOVA; 0 disables the fee.' },
   12: { plain:"The safety delay between a proposal passing and the change actually taking effect - time for everyone to see it coming.", label:'Timelock Period (s)', hint:'Delay between proposal passing and execution in seconds.' },
   13: { plain:"How much of all CNOVA must vote for a proposal to count at all (200 = 2%). Higher = harder to pass, safer against low-turnout changes.", label:'Quorum BPS', hint:'Minimum % of CNOVA supply that must vote (200 = 2%).' },
   14: { plain:"Chooses how generous the Stability Fund is when rescuing parked members, based on how much they have already withdrawn. Presets 0-3, from strictest to most generous.", label:'SF Rescue Ladder',
@@ -852,20 +852,20 @@ const PARAM_FALLBACK = {
         col2Hint: 'Boost rate in BPS applied at or above this threshold. Max 10000 (100%).' },
   37: { plain:"Genesis members' share of each monthly community distribution; Pioneer members receive the remainder.", label:'Community Genesis Split BPS', hint:'Genesis members\' share of the monthly community pool (BPS). Pioneer share is the remainder (10,000 − this).' },
   38: { plain:"How much of the community pool is paid out each month. Whatever is not paid rolls over to next month.", label:'Community Distribute Ratio BPS', hint:'Fraction of the community pool paid out each month (BPS). The rest rolls over.' },
-  39: { plain:"Which calendar day of the month community distributions happen on (V8.51: the 25th by default). Claiming stays open 30 days; unclaimed shares return to the pool.", label:'Community Distribution Day', hint:'Day of the month (1–28) each distribution unlocks — V8.51 replaced the rolling seconds interval with a calendar-day model (item 41). The 30-day claim window is fixed, not tied to this param.' },
+  39: { plain:"Which calendar day of the month community distributions happen on (V8.52 PRIVATE: the 25th by default). Claiming stays open 30 days; unclaimed shares return to the pool.", label:'Community Distribution Day', hint:'Day of the month (1–28) each distribution unlocks — V8.52 PRIVATE replaced the rolling seconds interval with a calendar-day model (item 41). The 30-day claim window is fixed, not tied to this param.' },
   // V8.26: sfTargetMultiplier[tier] -- independently DAO-governable per tier.
-  // Default is flat 10x across all tiers (V8.51 item 48; was 20x since V8.26).
+  // Default is flat 10x across all tiers (V8.52 PRIVATE item 48; was 20x since V8.26).
   // Each can be voted to any value via DAO proposal.
-  40: { plain:"Sets how big the Stability Fund's safety target grows when T1 is the highest open tier (target = T1's entry fee multiplied by this).", label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1\'s entry fee to compute StabilityFund\'s auto-scaled target when T1 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  41: { plain:"Sets how big the Stability Fund's safety target grows when T2 is the highest open tier (target = T2's entry fee multiplied by this).", label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2\'s entry fee to compute StabilityFund\'s auto-scaled target when T2 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  42: { plain:"Sets how big the Stability Fund's safety target grows when T3 is the highest open tier (target = T3's entry fee multiplied by this).", label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3\'s entry fee to compute StabilityFund\'s auto-scaled target when T3 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  43: { plain:"Sets how big the Stability Fund's safety target grows when T4 is the highest open tier (target = T4's entry fee multiplied by this).", label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4\'s entry fee to compute StabilityFund\'s auto-scaled target when T4 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  44: { plain:"Sets how big the Stability Fund's safety target grows when T5 is the highest open tier (target = T5's entry fee multiplied by this).", label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5\'s entry fee to compute StabilityFund\'s auto-scaled target when T5 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  45: { plain:"Sets how big the Stability Fund's safety target grows when T6 is the highest open tier (target = T6's entry fee multiplied by this).", label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6\'s entry fee to compute StabilityFund\'s auto-scaled target when T6 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  46: { plain:"Sets how big the Stability Fund's safety target grows when T7 is the highest open tier (target = T7's entry fee multiplied by this).", label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7\'s entry fee to compute StabilityFund\'s auto-scaled target when T7 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  47: { plain:"Sets how big the Stability Fund's safety target grows when T8 is the highest open tier (target = T8's entry fee multiplied by this).", label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8\'s entry fee to compute StabilityFund\'s auto-scaled target when T8 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  48: { plain:"Sets how big the Stability Fund's safety target grows when T9 is the highest open tier (target = T9's entry fee multiplied by this).", label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9\'s entry fee to compute StabilityFund\'s auto-scaled target when T9 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
-  49: { plain:"Sets how big the Stability Fund's safety target grows when T10 is the highest open tier (target = T10's entry fee multiplied by this).", label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. Default: 10x, flat across all tiers (V8.51 item 48 — was 20x). The live on-chain value is shown above.' },
+  40: { plain:"Sets how big the Stability Fund's safety target grows when T1 is the highest open tier (target = T1's entry fee multiplied by this).", label:'SF Target Multiplier — T1', hint:'Multiplier applied to T1\'s entry fee to compute StabilityFund\'s auto-scaled target when T1 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  41: { plain:"Sets how big the Stability Fund's safety target grows when T2 is the highest open tier (target = T2's entry fee multiplied by this).", label:'SF Target Multiplier — T2', hint:'Multiplier applied to T2\'s entry fee to compute StabilityFund\'s auto-scaled target when T2 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  42: { plain:"Sets how big the Stability Fund's safety target grows when T3 is the highest open tier (target = T3's entry fee multiplied by this).", label:'SF Target Multiplier — T3', hint:'Multiplier applied to T3\'s entry fee to compute StabilityFund\'s auto-scaled target when T3 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  43: { plain:"Sets how big the Stability Fund's safety target grows when T4 is the highest open tier (target = T4's entry fee multiplied by this).", label:'SF Target Multiplier — T4', hint:'Multiplier applied to T4\'s entry fee to compute StabilityFund\'s auto-scaled target when T4 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  44: { plain:"Sets how big the Stability Fund's safety target grows when T5 is the highest open tier (target = T5's entry fee multiplied by this).", label:'SF Target Multiplier — T5', hint:'Multiplier applied to T5\'s entry fee to compute StabilityFund\'s auto-scaled target when T5 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  45: { plain:"Sets how big the Stability Fund's safety target grows when T6 is the highest open tier (target = T6's entry fee multiplied by this).", label:'SF Target Multiplier — T6', hint:'Multiplier applied to T6\'s entry fee to compute StabilityFund\'s auto-scaled target when T6 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  46: { plain:"Sets how big the Stability Fund's safety target grows when T7 is the highest open tier (target = T7's entry fee multiplied by this).", label:'SF Target Multiplier — T7', hint:'Multiplier applied to T7\'s entry fee to compute StabilityFund\'s auto-scaled target when T7 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  47: { plain:"Sets how big the Stability Fund's safety target grows when T8 is the highest open tier (target = T8's entry fee multiplied by this).", label:'SF Target Multiplier — T8', hint:'Multiplier applied to T8\'s entry fee to compute StabilityFund\'s auto-scaled target when T8 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  48: { plain:"Sets how big the Stability Fund's safety target grows when T9 is the highest open tier (target = T9's entry fee multiplied by this).", label:'SF Target Multiplier — T9', hint:'Multiplier applied to T9\'s entry fee to compute StabilityFund\'s auto-scaled target when T9 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
+  49: { plain:"Sets how big the Stability Fund's safety target grows when T10 is the highest open tier (target = T10's entry fee multiplied by this).", label:'SF Target Multiplier — T10', hint:'Multiplier applied to T10\'s entry fee to compute StabilityFund\'s auto-scaled target when T10 is the highest open tier. Default: 10x, flat across all tiers (V8.52 PRIVATE item 48 — was 20x). The live on-chain value is shown above.' },
   // V8.32: SF rescue loan repayment percentage becomes DAO-votable.
   50: { plain:"What share of a rescue loan must be repaid from your future earnings (10000 = the full loan, taken off the top of your withdrawals).", label:'SF Rescue Repay BPS', hint:'BPS of the rescue loan the member must repay before withdrawing. 10000 = 100% (V8.34 default) \u2014 full loan is always repaid across as many cycles as needed. Range 0\u201310000. Lower = more member-friendly; higher = faster SF replenishment.' },
   // V8.33: extended idle timeout becomes DAO-votable.
@@ -876,9 +876,9 @@ const PARAM_FALLBACK = {
   54: { plain:"How many pioneer members T7 needs before T7 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T7', hint:'Pioneers needed in T7 to unlock T7 direct purchases (independent gate). Default: 10.' },
   55: { plain:"How many pioneer members T8 needs before T8 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T8', hint:'Pioneers needed in T8 to unlock T8 direct purchases (independent gate). Default: 5.' },
   56: { plain:"How many pioneer members T9 needs before T9 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T9', hint:'Pioneers needed in T9 to unlock T9 direct purchases (independent gate). Default: 5.' },
-  // V8.51 (cutover batch): the GhostFloor package's two governed knobs.
-  59: { plain:"The insolvency floor: when a member's rescue debt is already this large relative to their earnings, the fund stops lending to them (they self-rescue or are evicted with their reserve released). Protects the fund from loans that can only grow.", label:'SF Insolvency Floor (BPS)', hint:'BPS ratio above which payCoRescue refuses a new loan (\"SF: insolvency floor\"). V8.51 default: 3400. 0 disables the floor.' },
-  60: { plain:"What share of the fund's surplus is redirected to the Community Wallet once the Stability Fund is at its target. 10000 = all of it.", label:'SF Community Overflow (BPS)', hint:'BPS of over-target SF inflow redirected to the Community Wallet. V8.51 default: 10000 (100%) — dial down to retain surplus in the fund instead.' },
+  // V8.52 PRIVATE (cutover batch): the GhostFloor package's two governed knobs.
+  59: { plain:"The insolvency floor: when a member's rescue debt is already this large relative to their earnings, the fund stops lending to them (they self-rescue or are evicted with their reserve released). Protects the fund from loans that can only grow.", label:'SF Insolvency Floor (BPS)', hint:'BPS ratio above which payCoRescue refuses a new loan (\"SF: insolvency floor\"). V8.52 PRIVATE default: 3400. 0 disables the floor.' },
+  60: { plain:"What share of the fund's surplus is redirected to the Community Wallet once the Stability Fund is at its target. 10000 = all of it.", label:'SF Community Overflow (BPS)', hint:'BPS of over-target SF inflow redirected to the Community Wallet. V8.52 PRIVATE default: 10000 (100%) — dial down to retain surplus in the fund instead.' },
   57: { plain:"How many pioneer members T10 needs before T10 direct purchases unlock for everyone.", label:'Whale Gate Threshold — T10', hint:'Pioneers needed in T10 to unlock T10 direct purchases (independent gate). Default: 5.' },
 };
 
@@ -915,7 +915,7 @@ const VALUE_LABELS = {
   9:  v => `${v} BPS (${(v/100).toFixed(2)}%)`,
   // V8.21: param 10 (Early Exit Penalty BPS) retired -- no formatter needed.
   13: v => `${v} BPS (${(v/100).toFixed(1)}%)`,
-  // V8.51 item 43: 1e18-scaled CNOVA. Every menu value is k*1e17 with small k, so
+  // V8.52 PRIVATE item 43: 1e18-scaled CNOVA. Every menu value is k*1e17 with small k, so
   // Number() is exact here (odd part < 2^53) — same precedent as param 31.
   58: v => v === 0 ? 'Free (0 CNOVA)' : `${(v/1e18).toLocaleString()} CNOVA (burned)`,
   // V8.20 second wave
@@ -982,7 +982,7 @@ const GOV_ABI = [
   'function propose(uint8,address,uint256,string) external returns (uint256)',
   'function proposeBoostTable(address,uint256[],uint256[],string) external returns (uint256)',
   'function castVote(uint256,bool) external',
-  'function proposalFee() external view returns (uint256)',   // V8.51 item 43 — real now; absent on V8.51 (feature-detected)
+  'function proposalFee() external view returns (uint256)',   // V8.52 PRIVATE item 43 — real now; absent on V8.52 PRIVATE (feature-detected)
   'function finalizeVote(uint256) external',
   'function execute(uint256) external',
   'function cancel(uint256) external',
@@ -1038,7 +1038,7 @@ const READ_ABI = [
   // CommunityWallet
   'function genesisBps() external view returns (uint256)',
   'function distributeRatioBps() external view returns (uint256)',
-  // V8.51 G.8: removed. V8.51 replaced the rolling interval with
+  // V8.52 PRIVATE G.8: removed. V8.52 PRIVATE replaced the rolling interval with
   // distributionDayOfMonth; this fragment was declared but never called here
   // (id 39's label string at ~:1074 is display text, not a call).
   // Matrix instance (param 9 -- per-tier, not protocol-wide; see PARAM_META).
@@ -1068,7 +1068,7 @@ const PARAM_GETTER = {
   4: 'velocityWindow', 5: 'velocityThreshold', 6: 'deflationThreshold',
   7: 'idleSlotTimeout', 8: 'maxItemsPerUpkeep',
   11: 'votingPeriod', 12: 'timelockPeriod', 13: 'quorumBps',
-  58: 'proposalFee',   // V8.51 item 43
+  58: 'proposalFee',   // V8.52 PRIVATE item 43
   15: 'whaleGateThreshold', 16: 'inactivityDaysThreshold', 17: 'inactivityCyclesThreshold',
   18: 'inactivityGuardEnabled',
   19: 'parkedGracePeriod', 20: 'rescueRatioBps',
@@ -1153,7 +1153,7 @@ async function refreshHasVoted() {
     // Vote For / Against to someone who had already voted — guaranteed revert,
     // member pays gas. null = unknown.
     try { p._voted = await gov.hasVoted(p.id, userAddr); }
-    catch { p._voted = null; }   // V8.51 parity audit (2026-08-13): null = unknown, per the audit note above — false re-offered the buttons
+    catch { p._voted = null; }   // V8.52 PRIVATE parity audit (2026-08-13): null = unknown, per the audit note above — false re-offered the buttons
   }));
 }
 
@@ -1288,7 +1288,7 @@ async function _loadProposalsInner() {
   if (userAddr) {
     await Promise.all(allProposals.map(async p => {
       try { p._voted = await _withTimeout(gov.hasVoted(p.id, userAddr), 5000); }
-      catch { p._voted = null; }   // V8.51 parity audit (2026-08-13): null = unknown — false re-offered the buttons
+      catch { p._voted = null; }   // V8.52 PRIVATE parity audit (2026-08-13): null = unknown — false re-offered the buttons
     }));
   }
 
@@ -1538,7 +1538,7 @@ async function onParamChange() {
   const meta = PARAM_META[paramId];
   document.getElementById('target-row').style.display   = 'block';
 
-  // V8.51 member request 2026-08-13: plain-language explanation, shown for every
+  // V8.52 PRIVATE member request 2026-08-13: plain-language explanation, shown for every
   // param the moment it is selected (scalar AND array paths — this sits above
   // both early returns below on purpose).
   const plainBox = document.getElementById('param-plain');
@@ -1798,10 +1798,10 @@ function updateProposeGate() {
   btn.disabled = false;
 }
 
-// ── V8.51 item 43: the proposal fee, live ────────────────────────────────────
+// ── V8.52 PRIVATE item 43: the proposal fee, live ────────────────────────────────────
 // PROPOSAL_FEE: null = could not verify (network), 0n = free, >0n = fee in wei.
 // PROPOSAL_FEE_SUPPORTED: whether the DEPLOYED governance has proposalFee() —
-// false on live V8.51, true after the V8.51 deploy. Every consumer must behave
+// false on live V8.52 PRIVATE, true after the V8.52 PRIVATE deploy. Every consumer must behave
 // honestly in all three states; a failed read NEVER wears a number
 // (the 2026-08-12 fabricated-fallback rule).
 let PROPOSAL_FEE = null;
@@ -1823,7 +1823,7 @@ async function refreshProposalFee() {
       return;
     } catch (e) {
       if (e && e.code === 'CALL_EXCEPTION') {
-        // The deployed governance has no proposalFee() — V8.51. Proposing is
+        // The deployed governance has no proposalFee() — V8.52 PRIVATE. Proposing is
         // genuinely fee-less there; saying so is the live truth, not a fallback.
         PROPOSAL_FEE = 0n;
         PROPOSAL_FEE_SUPPORTED = false;
@@ -1852,7 +1852,7 @@ function _installProposalFeeParam() {
   _paramIndex = null;   // search index rebuilds with the new entry on next use
 }
 
-// ── V8.51 member request 2026-08-13: parameter search ───────────────────────
+// ── V8.52 PRIVATE member request 2026-08-13: parameter search ───────────────────────
 // Index is built from the LIVE <select> options + PARAM_META, so a param added
 // to (or retired from) the picker can never disagree with the search — one
 // source of truth, same doctrine as the item-35 view fix.
@@ -1924,8 +1924,8 @@ async function createProposal() {
     // 100e18 out of thin air. Every proposer was made to sign a pointless approve
     // (real gas), told 100 CNOVA had been burned when nothing was, and left with a
     // standing allowance to the governance contract.
-    // V8.51 item 43: the fee is REAL now (param 58) — the audit note above records
-    // the era when it was fabricated. Feature-detected: on V8.51 (no getter) this
+    // V8.52 PRIVATE item 43: the fee is REAL now (param 58) — the audit note above records
+    // the era when it was fabricated. Feature-detected: on V8.52 PRIVATE (no getter) this
     // block is skipped entirely and proposing costs only gas. The allowance is for
     // EXACTLY the fee, never unlimited — the V8.34 standing-allowance mistake stays dead.
     if (PROPOSAL_FEE_SUPPORTED) {
@@ -1986,7 +1986,7 @@ function escHtml(str) {
 // ── Init ────────────────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   loadProposals();
-  refreshProposalFee();                      // V8.51 item 43
+  refreshProposalFee();                      // V8.52 PRIVATE item 43
   setInterval(loadProposals, 60_000);
 
   const _tryAutoConnect = () => {
