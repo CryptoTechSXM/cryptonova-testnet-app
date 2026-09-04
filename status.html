@@ -197,7 +197,7 @@
 </style>
 </head>
 <body>
-<!-- ── V8.52 PRIVATE MAINTENANCE GATE — remove this block when V8.52 PRIVATE is live ───────────── -->
+<!-- ── V8.52b PRIVATE MAINTENANCE GATE — remove this block when V8.52b PRIVATE is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -215,9 +215,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52 PRIVATE Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52b PRIVATE Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.52 PRIVATE is live — rescue debt now follows the member (repayable advance) + community share doubled.<br>Opening in:
+      V8.52b PRIVATE is live — rescue debt now follows the member (repayable advance) + community share doubled.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -241,7 +241,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.52 PRIVATE Testnet</span>
+    <span id="gate-pill-label">V8.52b PRIVATE Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -259,13 +259,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52 PRIVATE Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52b PRIVATE Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52 PRIVATE Testnet — Opens 10 AM EDT';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52b PRIVATE Testnet — Opens 10 AM EDT';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -542,7 +542,7 @@
           <span class="detail-key" data-i18n="statusPage.row_rescue_capacity_est">Rescue capacity (est.)</span>
           <span class="detail-val" id="sf-rescue-cap">—</span>
         </div>
-        <div class="detail-section">SF Rescue Activity (V8.52 PRIVATE)</div>
+        <div class="detail-section">SF Rescue Activity (V8.52b PRIVATE)</div>
         <div class="detail-row">
           <span class="detail-key">Total loans issued</span>
           <span class="detail-val" id="sf-loans-issued">—</span>
@@ -564,7 +564,7 @@
              not member state.
 
              The three rows above come from the SF contract's own lifetime counters
-             (V8.52 PRIVATE: totalRescueLoaned / totalRescueRepaid — exact, single read).
+             (V8.52b PRIVATE: totalRescueLoaned / totalRescueRepaid — exact, single read).
              The rows below are rebuilt from the fund's MemberDebtIncreased /
              MemberDebtRepaid events over a ~5h window, which is why the totals are
              much smaller. The heading said "last 100k blocks (~56h)" until
@@ -694,20 +694,20 @@
   const ADDRS = {
     // V8.45 — deployed 2026-07-25 — contract-driven cycling: reserve-funded re-entry, park-not-exit, own-pair overflow, pull-based pool, exitSeat
     usdc:          '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
-    cnova:         '0x0DB48e7Aa5a972627bFA2f69f518328c053B0832',
-    treasury:      '0xe023917172Aa120D707FD6a0f447e6266A47c716',
-    stabilityFund: '0x24507164a2bc854950DB0DB91125Ed3C0ef9313C',
-    buybackReserve:'0x05b085ab17dE8921dCFe093214DE44B89909253D',
+    cnova:         '0x40f44Fb299149793Bf3968f7a2b2BC4fdE372EE6',
+    treasury:      '0x268f8542433442a1b138dE9bebf70c5635E64586',
+    stabilityFund: '0x9323CbA18a80A269406eA904ce9EE999297Bf4e8',
+    buybackReserve:'0xc74027F2688528B06A3A92CBC50346b44405C4d4',
     liquidityReserve:'0x961fDE5C78200891f36858B2940a2B6d4F1Af854',
-    tierRouter:    '0x72DAF5647Dff8E71D0c4ECB768B19E77DcBcba63',
-    matrixKeeper:  '0xe5Cc6b6A4D780e6B12606940b55dDA5AF18412FB',
-    T1pm:    '0x3d1B3Ebd8b18D0CFD7b83aDFa00216eDafb20Af8',
-    T1matA:  '0x9879a3f7A6494498499cE432D955087714450278',
-    T1matB:  '0xD7c221ce79E428be1e43651f2A450ad5dBA0FD04',
-    T2matA:  '0x982D6c1F8f6Ae1f1c1643f014dcf44Eedb76ee39',
-    T2matB:  '0x9aB9Db5818669e0B6F54CFb531FE6C157F44840c',
-    T3matA:  '0x3Cd734Ad8203A2B00888C19d789E0815f528ebC9',
-    T3matB:  '0x608670E3F2C4745cD4ebb10b00BcAaD123d59927',
+    tierRouter:    '0xfC95CB575D2728F7db0eEc1E9A6b13385553D3c9',
+    matrixKeeper:  '0x5e7624AA6a6F653A17fd27FcED70223120F198f6',
+    T1pm:    '0x6D49B4E42825c878791569897F335dA07132537c',
+    T1matA:  '0xFd0A9d7dDAe12D100C12657e243516e1C7B550ba',
+    T1matB:  '0xBA0f4811e435e24dAAD48400019CcD5ac17299EF',
+    T2matA:  '0xd64C98d041F0364A2AE33983261c124F742e64Db',
+    T2matB:  '0xd18e3446d879522B5669fB8Dfdce12dDb3927994',
+    T3matA:  '0x36cE59A87A4Bd299D97A34EEBE79F2734cD99798',
+    T3matB:  '0xdb53cCedd2B3680e14293A1eD78D39Fa2C11744B',
     T4matA:  '0xe0C3EAAEFCBEBb53014545dc174994266F1210Cb',
     T4matB:  '0xC4371d1E0580A72Ffe7fba02b98af5D8510d8A25',
     T5matA:  '0xA4Ca9886D1Ef751c909551F0FF6076d363828fe3',
@@ -739,7 +739,7 @@
     'event RescueLoanIssued(address indexed member, uint256 totalLoan, string source)',
     'event RescueDebtRepaid(address indexed member, uint256 repaid, uint256 remaining)',
     'function rescueDebtOf(address member) external view returns (uint256)',
-    'function crossingReserveOf(address) external view returns (uint256)',  // V8.52 PRIVATE
+    'function crossingReserveOf(address) external view returns (uint256)',  // V8.52b PRIVATE
   ];
   const PM_ABI = [
     'function currentMatA() external view returns (address)',
@@ -754,7 +754,7 @@
   ];
   const SF_ABI    = [
     'function totalBalance() external view returns (uint256)',
-    // V8.52 PRIVATE member ledger — the SAME state the hourly sf_invariant_check.js
+    // V8.52b PRIVATE member ledger — the SAME state the hourly sf_invariant_check.js
     // proves conserves (Σ memberDebt == loaned − repaid). Read these instead of
     // reconstructing lifetime totals from event scans (owner report 2026-08-07:
     // the card showed repaid > issued and a confident $0.00 outstanding).
@@ -840,7 +840,7 @@
   // "STABILITY FUND · CRITICAL · $0.00 · ~0 members can be rescued" in red to the
   // whole community. Hold last-good; with no cache at all, show "—", never $0.00.
   let _lastSFVals     = null; // { sfBal, treaBal, bbBal, cnovaSup } as decimal strings
-  // V8.52 PRIVATE redeploy: discard any Status cache left over from a prior deployment,
+  // V8.52b PRIVATE redeploy: discard any Status cache left over from a prior deployment,
   // so old accumulated loan totals / rescue capacity can't paint over live data.
   try {
     // 2026-08-26: the buster used to be a hand-bumped string — forget the bump on a
@@ -953,7 +953,7 @@
       // Works with manual_rescue.js (ParkedRescued on MatrixKeeper is never emitted on that path).
       const fromBlock = Math.max(0, blk - 9000);   // ~5h; under QuickNode's 10k eth_getLogs cap (was 100k → every call rejected)
 
-      // V8.52 PRIVATE: scan EVERY tier, not just T1. The previous version queried only
+      // V8.52b PRIVATE: scan EVERY tier, not just T1. The previous version queried only
       // T1 pairs, so the displayed count excluded every loan issued in T2–T10 —
       // a large undercount, since higher tiers advance far bigger amounts
       // (a T6 shortfall averages ~$83 against T1's ~$2).
@@ -1260,7 +1260,7 @@
           for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
           const addrs = await Promise.all(batch.map(idx => mat.getParkedMember(idx).catch(()=>null)));
           const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
-            // V8.52 PRIVATE: retry each read (rate limits); a FAILED read stays null — it is
+            // V8.52b PRIVATE: retry each read (rate limits); a FAILED read stays null — it is
             // NEVER treated as $0, so we don't print a confidently wrong shortfall.
             const rNull = async (fn, tries) => {
               for (let a = 1; a <= tries; a++) {
@@ -1272,7 +1272,7 @@
             const [parkedTs, withdrawable, crossingReserve] = await Promise.all([
               rNull(() => mat.parkedAt(addr), 3),
               rNull(() => mat.withdrawableOf(addr), 3),
-              rNull(() => mat.crossingReserveOf(addr), 3),  // V8.52 PRIVATE
+              rNull(() => mat.crossingReserveOf(addr), 3),  // V8.52b PRIVATE
             ]);
             return {
               addr,
@@ -1293,9 +1293,9 @@
 
       let shortfallKnown = 0;
       for (const p of stillParked) {
-        // V8.52 PRIVATE: effectiveContrib = crossingReserve + withdrawable
+        // V8.52b PRIVATE: effectiveContrib = crossingReserve + withdrawable
         // crossingReserve is consumed first toward the re-entry fee, so it reduces the SF shortfall.
-        // V8.52 PRIVATE: if a read failed, the shortfall is UNKNOWN — render "…", never compute from $0.
+        // V8.52b PRIVATE: if a read failed, the shortfall is UNKNOWN — render "…", never compute from $0.
         if (p.readFailed) { p.shortfall = null; continue; }
         const effectiveContrib = p.withdrawable + (p.crossingReserve || 0n);
         const shortfall = entryFee > effectiveContrib ? entryFee - effectiveContrib : 0n;
@@ -1666,7 +1666,7 @@
           const cA = _pA >= 95 ? '#f59e0b' : d.color;
           const cB = _pB >= 95 ? '#f59e0b' : d.color;
           const rotTxt = Number(p.rotCount) > 0 ? ` · ${Number(p.rotCount)} rot` : '';
-          // V8.45: p.active flags the ROUTING pair (contract-side since V8.52 PRIVATE).
+          // V8.45: p.active flags the ROUTING pair (contract-side since V8.52b PRIVATE).
           // Empty + NOT routing → pre-deployed standby buffer, waiting behind a
           // previous pair. Empty + routing → it just went live and is about to
           // receive its first entry. Non-empty + routing + multi-pair → "new".
@@ -1807,9 +1807,9 @@
       // scan too, so dropped chunks made "repaid" exceed "issued" and outstanding
       // clamped to a confident $0.00 while the chain held $11.03.
       try {
-        // V8.52 PRIVATE deploy day 2026-08-13 (owner spotted it): this key said 'v8_47c' and the
+        // V8.52b PRIVATE deploy day 2026-08-13 (owner spotted it): this key said 'v8_47c' and the
         // manual "bump the suffix on EVERY redeploy" instruction was missed at the
-        // cutover — so the page loaded V8.52 PRIVATE's ACCUMULATED loan book and kept adding to
+        // cutover — so the page loaded V8.52b PRIVATE's ACCUMULATED loan book and kept adding to
         // it. It showed 456 borrowing wallets and 220 T4 / 60 T5 loans while T4 and T5
         // were EMPTY on the new chain. Same defect as the withdrawal-history panel found
         // the same day: keyed per-wallet but not per-DEPLOYMENT.
@@ -1819,17 +1819,17 @@
         // ⛔ 2026-08-26: the 08-13 fix below NEVER WORKED. `ADDRS` is a top-level
         // `const` — script-scoped, NOT a window property — so `window.ADDRS` was
         // always undefined and every deployment shared ONE key: 'cnova_loans:unknown'.
-        // The old chain's whole book painted onto the V8.52 PRIVATE status page through it
+        // The old chain's whole book painted onto the V8.52b PRIVATE status page through it
         // (owner's deploy-day QA: 351 borrowers on a chain with zero loans). Direct
         // reference now — ADDRS is declared above in this same page and cannot be
         // undefined here. 'cnova_loans:unknown' added to the buster's clear list.
         const LOAN_KEY        = 'cnova_loans:' + String(ADDRS.stabilityFund || 'unknown').slice(0, 10).toLowerCase();
         const CHUNK           = 2000;
         const MAX_CHUNKS_POLL = 3;   // max chunks per poll — keeps RPC calls low
-        // V8.52 PRIVATE deploy block — the same anchor sf_invariant_check.js uses, so the
+        // V8.52b PRIVATE deploy block — the same anchor sf_invariant_check.js uses, so the
         // book covers the whole life of this deployment rather than a rolling
         // window. Bounded fallback in case the constant is ever stale.
-        const SEED_BLOCK      = 45975000;  // V8.52 PRIVATE community deploy 2026-08-26 (~45,975,5xx)
+        const SEED_BLOCK      = 45975000;  // V8.52b PRIVATE community deploy 2026-08-26 (~45,975,5xx)
 
         // Accumulated state. `book`/`byTier` make this a LIFETIME per-wallet loan
         // book (2026-08-07): it walks history a few chunks per poll, persists, and

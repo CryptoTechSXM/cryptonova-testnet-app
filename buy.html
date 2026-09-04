@@ -254,7 +254,7 @@
 </style>
 </head>
 <body>
-<!-- ── V8.52 PRIVATE MAINTENANCE GATE — remove this block when V8.52 PRIVATE is live ───────────── -->
+<!-- ── V8.52b PRIVATE MAINTENANCE GATE — remove this block when V8.52b PRIVATE is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -272,9 +272,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52 PRIVATE Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52b PRIVATE Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.52 PRIVATE is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
+      V8.52b PRIVATE is live — self-rescue, on-chain coupons &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -298,7 +298,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.52 PRIVATE Testnet</span>
+    <span id="gate-pill-label">V8.52b PRIVATE Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -316,13 +316,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52 PRIVATE Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52b PRIVATE Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52 PRIVATE Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52b PRIVATE Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
@@ -517,7 +517,7 @@
 
     <!-- Coming soon note — hidden once contract is live -->
     <div class="coming-soon-note" id="coming-soon-note" style="display:none;" data-i18n="buyPage.coming_soon_note">
-      ⏳ Direct sale contract live — CNOVADirectSale deployed with V8.52 PRIVATE
+      ⏳ Direct sale contract live — CNOVADirectSale deployed with V8.52b PRIVATE
     </div>
   </div>
 
@@ -563,7 +563,7 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — V8.52 PRIVATE (deployed 2026-06-29 — selfRescue, isInMatrix fix, CouponRegistry)
+// CONFIG — V8.52b PRIVATE (deployed 2026-06-29 — selfRescue, isInMatrix fix, CouponRegistry)
 // ─────────────────────────────────────────────────────────────────────────────
 const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 // Real ethers.Network object for staticNetwork — passing the literal boolean
@@ -572,13 +572,13 @@ const CHAIN_ID          = 84532;  // Base Sepolia (switch to 8453 for mainnet)
 const _NET_STATIC      = ethers.Network.from(CHAIN_ID);
 const RPC_URL           = 'https://frequent-misty-meme.base-sepolia.quiknode.pro/a71b4ace5a4da7005c54110096de8e422669824f/';
 
-// V8.52 PRIVATE live addresses
+// V8.52b PRIVATE live addresses
 const USDC_ADDR         = '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a';
-const CNOVA_ADDR        = '0x0DB48e7Aa5a972627bFA2f69f518328c053B0832';
-const TREASURY_ADDR     = '0xe023917172Aa120D707FD6a0f447e6266A47c716';
+const CNOVA_ADDR        = '0x40f44Fb299149793Bf3968f7a2b2BC4fdE372EE6';
+const TREASURY_ADDR     = '0x268f8542433442a1b138dE9bebf70c5635E64586';
 
-// CNOVADirectSale V8.52 PRIVATE
-const DIRECT_SALE_ADDR  = '0xe5d71A037651307DB4B9936c1fDe769cDD3bc122';
+// CNOVADirectSale V8.52b PRIVATE
+const DIRECT_SALE_ADDR  = '0xB005cCCb1973302A61E05cEc78D77Dfbc4D7CBBe';
 
 // ── Bonding curve tiers ─────────────────────────────────────────────────────
 // [label, multiplier (x1000), supply ceiling (CNOVA, 18 dec as string)]
@@ -601,7 +601,7 @@ const ERC20_ABI = [
   'function approve(address,uint256) external returns (bool)',
 ];
 const TREASURY_ABI = [
-  // V8.52 PRIVATE G.8: removed. CNOVADirectSale has no usdcBalance(); this fragment was
+  // V8.52b PRIVATE G.8: removed. CNOVADirectSale has no usdcBalance(); this fragment was
   // never called — refreshWalletState() reads usdc.balanceOf(userAddr) directly.
   'function balanceOf(address) external view returns (uint256)',
 ];

@@ -47,8 +47,11 @@ CONTRACTS_DIR = os.environ.get("CONTRACTS_DIR", r"C:\CryptoNite-Smart-Contracts\
 BASE          = os.environ.get("FRONTEND_DIR",  r"C:\CryptoNova-Testnet-App")
 DRY_RUN       = os.environ.get("DRY_RUN", "") == "1"
 
-OLD_JSON = os.path.join(CONTRACTS_DIR, "scripts", "deployed_addresses_v8_51.json")
-NEW_JSON = os.path.join(CONTRACTS_DIR, "scripts", "deployed_addresses_v8_52_private.json")
+# OLD_BOOK / NEW_BOOK may be overridden from the environment so the same tool can repoint admin
+# from one private chain to the next (e.g. OLD_BOOK=deployed_addresses_v8_52_private.json
+# NEW_BOOK=deployed_addresses_v8_52b_private.json). Defaults are the first private cutover.
+OLD_JSON = os.path.join(CONTRACTS_DIR, "scripts", os.environ.get("OLD_BOOK", "deployed_addresses_v8_51.json"))
+NEW_JSON = os.path.join(CONTRACTS_DIR, "scripts", os.environ.get("NEW_BOOK", "deployed_addresses_v8_52_private.json"))
 
 # The community V8.51 router — the private chain must NOT be this.
 COMMUNITY_TIER_ROUTER = "0x73772f4f4acf7dce64a69060878a92fd272c7cd8"
@@ -131,6 +134,11 @@ REPLACEMENTS.append(("## Contracts (Base Sepolia — V8.51)", "## Contracts (Bas
 REPLACEMENTS.append(("[v8.51]", "[v8.52-private]"))
 REPLACEMENTS.append(("v8.51", "v8.52-private"))
 REPLACEMENTS.append(("V8.51", "V8.52 PRIVATE"))
+if os.environ.get("NEW_BOOK", "").endswith("_v8_52b_private.json"):
+    REPLACEMENTS.append(("V8.52 PRIVATE — deployed 2026-09-03", "V8.52b PRIVATE — deployed 2026-09-04"))
+    REPLACEMENTS.append(("front door = least-rotated FULL MatA (REGRESSION_REGISTER R1)", "ONE DOOR; the circulation enters the full pair that waited longest (R1, owner design)"))
+    REPLACEMENTS.append(("V8.52 PRIVATE", "V8.52b PRIVATE"))
+    REPLACEMENTS.append(("v8.52-private", "v8.52b-private"))
 
 print(f"\n{addr_count} address change(s) + {len(REPLACEMENTS)-addr_count} label/gate change(s):")
 for old, new in REPLACEMENTS[:8]:
