@@ -347,13 +347,13 @@ document.addEventListener('click', e => {
 
 <script>
 const ADDRS = {
-  couponRegistry: '0x56a19C2e334FaB17c63268ea897cfA279CF11390',
-  tierRouter:     '0xfC95CB575D2728F7db0eEc1E9A6b13385553D3c9',
+  couponRegistry: '0x2636f7594d7b59C35e49920b8e6B0d72B305089e',
+  tierRouter:     '0xBacE079aDB755Ea42b32310FE2E414CF036dd318',
   usdc:           '0x2D8B7b5eDec96bE441b6fb0D45D74a2BcE2C639a',
 };
 const CHAIN_ID = 84532;
-const DEPLOY_BLOCK = 45975000;   // SAFE LOWER BOUND for log scans, not a V8.52b PRIVATE anchor.
-// V8.52b PRIVATE deployed 2026-09-01T04:00:12Z; this floor PREDATES it, so it can only scan
+const DEPLOY_BLOCK = 45975000;   // SAFE LOWER BOUND for log scans, not a V8.52 anchor.
+// V8.52 deployed 2026-09-01T04:00:12Z; this floor PREDATES it, so it can only scan
 // wider, never miss. Raise it only to a block number actually read off chain.
 const REG_ABI = [
   'function issueCoupon(bytes32 codeHash) external payable',

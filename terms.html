@@ -84,7 +84,7 @@
 </style>
 </head>
 <body>
-<!-- ── V8.52b PRIVATE MAINTENANCE GATE — remove this block when V8.52b PRIVATE is live ───────────── -->
+<!-- ── V8.52 MAINTENANCE GATE — remove this block when V8.52 is live ───────────── -->
 <div id="maintenance-gate" style="position:fixed;inset:0;z-index:99999;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;">
 
   <!-- logo -->
@@ -102,9 +102,9 @@
 
   <!-- MAIN SITE: countdown block -->
   <div id="gate-countdown-block">
-    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52b PRIVATE Testnet — Opening Soon</h1>
+    <h1 style="color:#e2e8f0;font-size:clamp(20px,4vw,28px);font-weight:700;margin:0 0 12px;">V8.52 Testnet — Opening Soon</h1>
     <p style="color:#94a3b8;font-size:clamp(14px,2vw,16px);max-width:440px;line-height:1.6;margin:0 0 24px;">
-      V8.52b PRIVATE is live — crossing reserve, instant earn &amp; improved stability.<br>Opening in:
+      V8.52 is live — crossing reserve, instant earn &amp; improved stability.<br>Opening in:
     </p>
     <div id="gate-countdown" style="font-size:clamp(48px,10vw,72px);font-weight:800;color:#00e5a0;letter-spacing:4px;margin-bottom:28px;font-variant-numeric:tabular-nums;">--:--</div>
   </div>
@@ -128,7 +128,7 @@
   <!-- status pill -->
   <div style="margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:99px;padding:8px 20px;color:#00e5a0;font-size:14px;font-weight:500;">
     <span style="width:7px;height:7px;border-radius:50%;background:#00e5a0;animation:pulse 1.5s ease-in-out infinite;display:inline-block;"></span>
-    <span id="gate-pill-label">V8.52b PRIVATE Testnet</span>
+    <span id="gate-pill-label">V8.52 Testnet</span>
   </div>
 
   <style>@keyframes ping{75%,100%{transform:scale(1.6);opacity:0}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>
@@ -146,13 +146,13 @@
         // Show coupon form
         document.getElementById('gate-countdown-block').style.display = 'none';
         document.getElementById('gate-coupon-block').style.display = 'flex';
-        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52b PRIVATE Early Access Preview — Closed Access';
+        var pl = document.getElementById('gate-pill-label'); if (pl) pl.textContent = 'V8.52 Early Access Preview — Closed Access';
         // Allow Enter key
         var inp = document.getElementById('gate-coupon-input');
         if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') window._gateSubmit(); });
       } else {
         // Main site countdown
-        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52b PRIVATE Testnet — Community Bug-Bash';
+        var pl2 = document.getElementById('gate-pill-label'); if (pl2) pl2.textContent = 'V8.52 Testnet — Community Bug-Bash';
         var MAIN_MS = 1782786600000;
         function tick() {
           var diff = MAIN_MS - Date.now();
