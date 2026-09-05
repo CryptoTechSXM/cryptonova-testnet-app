@@ -72,19 +72,6 @@
 - **Submitted:** Sat, 29 Aug 2026 12:28:35 GMT
 
 
-### [2026-08-27] Onboarding / Registration — REOPENED: could not change the referrer address
-- **Reporter:** @Lavern_Gay
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask AND Rabby (consistent across both)
-- **Frequency:** Consistent
-- **What happened:** could not change the referral address when registering a new account; "my main account address appears instead".
-- **REOPENED 2026-08-27 (session 44).** This was closed the same day it was reported, on the explanation that "a valid coupon locks the referrer to its funder, by design". That mechanism was read out of the code and never checked against her wallet, and the chain does not support it: she is registered under `0x185B19c7…`, which is the referrer she asked for. The closure was wrong, so the report goes back to open.
-- **What we now know, measured:** `repro_referrer.mjs` reproduces six ways a typed referrer was lost or replaced — four of them across a wallet account switch with no page reload, and two with no account switch at all. The one most likely to fit this report needs no switch: `ethers.isAddress()` enforces the EIP-55 checksum, so a CORRECT address pasted with the wrong letter-case counted as invalid, and the page then substituted a rotation-pool default in silence. Both directions are fixed (session 44, commit below); the coupon lock is real but it is a SEPARATE thing and is not what happened here.
-- **Still owed:** ask her whether the account in question still shows the wrong sponsor after the fix ships, and run `diag_referrer.js` on it either way. Do not close this a second time on an explanation that has not been run against her wallet.
-- **FIX IN PROGRESS:** referrer path fixed and re-measured; awaiting her confirmation on the live site.
-
-
-
 
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
@@ -258,6 +245,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-27 | 2026-09-05 | Onboarding / Registration | @Lavern_Gay — Onboarding / Registration — REOPENED: could not change the referrer address - ** | diag_referrer on V8.52: 0x1458...dC2a registered T1 (id 44) under sponsor 0x1498...1040, not the default and not her own main; fix 98a0da2 live - REOPEN if a NEW account under another link still shows her main address |
 | 2026-08-27 | 2026-09-05 | Onboarding / Registration | @ThanksAndPraises — Onboarding / Registration — All CryptoNover accounts opened with different refer | diag_referrer on V8.52: 0x3c17...bbdd registered T2 (id 138) under sponsor 0x1498...1040, NOT the default, dashboard source agrees with the registration record; per-wallet sponsor cache fix 98a0da2 live |
 | 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — It says transaction failed on chain. I restarted my  | wallet 0xec5f...03eb is registered on V8.52 (T1, id 68, sponsor 0x7d9C...) - registration works for this wallet on the current chain; same class as the 09-01 RPC failures |
 | 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — Getting an error when registering - **Reporter:** Cr | wallet 0xc63a...4998 is registered on V8.52 (T1, id 67, sponsor 0x7d9C...) - registration works for this wallet on the current chain; 09-01 failure was on the retired V8.51 chain via an RPC the wallet supplied |
