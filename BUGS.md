@@ -86,18 +86,6 @@
 - **Submitted:** Sat, 22 Aug 2026 08:59:23 GMT
 
 
-### [2026-08-18] Dashboard (index.html) — The RPC node didn't respond after several retries — this is …
-- **Reporter:** Maximum_71
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x788b70fe1453ccc12e3d76ae18c1952046fa02af
-- **Frequency:** Consistent
-- **What happened:** The RPC node didn't respond after several retries — this is NOT a confirmation that you're unregistered. If you've already joined, your data is safe on-chain.
-- **What was expected:** Connect to wallet
-- **Notes:** This happens on several accts
-- **Submitted:** Tue, 18 Aug 2026 22:38:18 GMT
-
-
 
 ### [2026-08-13] Other — Withdraw all triggers the contract but no reaction in wallet…
 - **Reporter:** Sherwyn
@@ -245,6 +233,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-18 | 2026-09-05 | Dashboard (index.html) | Maximum_71 — Dashboard (index.html) — The RPC node didn't respond after several retries — thi | the quoted text is the deliberate honest read-failed panel (index.html:1246); the failed read now retries instead of giving up (F3, 9a33b90, live on main) |
 | 2026-08-27 | 2026-09-05 | Onboarding / Registration | @Lavern_Gay — Onboarding / Registration — REOPENED: could not change the referrer address - ** | diag_referrer on V8.52: 0x1458...dC2a registered T1 (id 44) under sponsor 0x1498...1040, not the default and not her own main; fix 98a0da2 live - REOPEN if a NEW account under another link still shows her main address |
 | 2026-08-27 | 2026-09-05 | Onboarding / Registration | @ThanksAndPraises — Onboarding / Registration — All CryptoNover accounts opened with different refer | diag_referrer on V8.52: 0x3c17...bbdd registered T2 (id 138) under sponsor 0x1498...1040, NOT the default, dashboard source agrees with the registration record; per-wallet sponsor cache fix 98a0da2 live |
 | 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — It says transaction failed on chain. I restarted my  | wallet 0xec5f...03eb is registered on V8.52 (T1, id 68, sponsor 0x7d9C...) - registration works for this wallet on the current chain; same class as the 09-01 RPC failures |
