@@ -9280,8 +9280,12 @@ async function doUnlockAll() {
   const rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
   try {
     const cnovaR = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, rp);
-    const locked = await cnovaR.lockedBalanceOf(userAddr).catch(()=>0n);
-    if (locked === 0n) { toast('No vesting CNOVA to unlock','info'); return; }
+    // 2026-09-05 (Sherwyn 08-05 ticket, closing pass): this read used to `.catch(()=>0n)`, so a
+    // FAILED read told the member "No vesting CNOVA to unlock" — a claim the chain never made
+    // (frontend-truth F1). null = unread; say so and let them retry.
+    const locked = await cnovaR.lockedBalanceOf(userAddr).catch(()=>null);
+    if (locked === null) { setStatus('redeem-status', '⚠️ Could not read your locked CNOVA balance just now — the network read failed. Nothing was sent; please try again.', 'err'); return; }
+    if (locked === 0n) { toast('No vesting CNOVA to unlock — everything you hold is already unlocked','info'); return; }
     const cnovaW = new ethers.Contract(ADDRS.cnova, CNOVA_ABI, signer);
     let released = 0n, penalty = 0n;
     try { const r = await cnovaW.earlyUnlockAll.staticCall(); released = r[0]; penalty = r[1]; }
