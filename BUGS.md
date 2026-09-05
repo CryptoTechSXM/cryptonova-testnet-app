@@ -163,17 +163,6 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 - **Submitted:** Wed, 05 Aug 2026 02:14:00 GMT
 
 
-### [2026-08-05] Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance on t…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xd4c441c795e86939fd19fc2ed05918bb75f1c905
-- **Frequency:** Intermittent
-- **What happened:** In prep to withdraw my earnings , i checked the balance on the dashboard. In the available for withdrawal  section it $287.83. When clicked withdraw all the amount that populated the space was $152.23
-The amount deposited into my wallet was $302.63 the withdrawn amount on the dashboard was a few dollars more.
-- **What was expected:** I expect for their to be less disparity in the numbers.
-- **Submitted:** Wed, 05 Aug 2026 01:23:20 GMT
-
 
 ### [2026-07-29] Rescue panel vanishes silently when a rescue completes
 - **Reporter:** CryptoJan22 (via the second of two reports today)
@@ -233,6 +222,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-05 | 2026-09-05 | Dashboard (index.html) | @Koach100 — Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance | receipt 302.63 vs Total Withdrawn 307.24 = the 1.5 pct health fee, measured (withdrawCore counts gross, transfers net); fee now labelled on the card (0c0dbe1, owner-verified); the card-vs-MAX gap did not reproduce on two full sweeps (241 and 376 members) |
 | 2026-08-18 | 2026-09-05 | Dashboard (index.html) | Maximum_71 — Dashboard (index.html) — The RPC node didn't respond after several retries — thi | the quoted text is the deliberate honest read-failed panel (index.html:1246); the failed read now retries instead of giving up (F3, 9a33b90, live on main) |
 | 2026-08-27 | 2026-09-05 | Onboarding / Registration | @Lavern_Gay — Onboarding / Registration — REOPENED: could not change the referrer address - ** | diag_referrer on V8.52: 0x1458...dC2a registered T1 (id 44) under sponsor 0x1498...1040, not the default and not her own main; fix 98a0da2 live - REOPEN if a NEW account under another link still shows her main address |
 | 2026-08-27 | 2026-09-05 | Onboarding / Registration | @ThanksAndPraises — Onboarding / Registration — All CryptoNover accounts opened with different refer | diag_referrer on V8.52: 0x3c17...bbdd registered T2 (id 138) under sponsor 0x1498...1040, NOT the default, dashboard source agrees with the registration record; per-wallet sponsor cache fix 98a0da2 live |
