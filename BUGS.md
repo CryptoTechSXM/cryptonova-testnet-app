@@ -134,17 +134,6 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 - **STATUS 2026-07-29 — CONFIRMED, frontend work queued.** Needs a short confirmation ("you have been re-entered, nothing pending") instead of an empty panel. Also: the panel re-checks every 30 seconds, so there is a visible lag between an approval confirming and the button activating — refresh on the approval receipt instead of waiting for the next tick.
 
 
-### [2026-07-26] Onboarding / Registration — The upgrade option is not visibly working. I an bot able to …
-- **Reporter:** Kira
-- **Page:** Onboarding / Registration
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x0f50998163f3dee028a3d72153659d08aede45f3
-- **Frequency:** Consistent
-- **What happened:** The upgrade option is not visibly working. I an bot able to upgrade from that page. Once registered it is non functional, only available on dashboard!
-- **What was expected:** I expected to have the option to upgrade from either places registration and dashboard!
-- **Submitted:** Sun, 26 Jul 2026 23:08:21 GMT
-**CONFIRMED 2026-07-29 — still open.** The upgrade controls exist only on the Dashboard. Adding them to the Registration page is queued as frontend work; no contract change needed. Members can upgrade from the Dashboard meanwhile.
-
 
 ### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
 - **Reporter:** @Koach100
@@ -185,6 +174,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-26 | 2026-09-05 | Onboarding / Registration | Kira — Onboarding / Registration — The upgrade option is not visibly working. I an bot  | BY DESIGN (owner 2026-09-05): the Registration page is for joining only; upgrades, rescues and earnings live on the Dashboard. The already-registered banner now says so explicitly and links there (29bc6c3, live on main) |
 | 2026-08-11 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — decided to do a withdrawal. It took forever and after c | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_withdraw: no position with any credit) - not reproducible; the 50 pct shape matches the MatA crossing reserve that must stay in the matrix, unmeasured for this wallet; reopen if it recurs on the current chain |
 | 2026-08-10 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — this account has 5 directs. i stsrted with only auto re | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_referrer: NOT REGISTERED, no positions, no events) - not reproducible; cycles are driven by matrix fill, not direct count; reopen if it recurs on the current chain |
 | 2026-09-03 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing i | diag_member_positions on the V8.51 book: wallet 0x7d9c...9635 was seated in T1.2 MatA with 0 cycles - the later-pair FREEZE (REGRESSION_REGISTER R1); cured by V8.52 (_fullPairWaitingLongest, contracts 1507c28), community chain 2026-09-04; on V8.52 T1.2 received circulation and rotated on 09-05; member is registered on V8.52 |
