@@ -55,18 +55,6 @@
 
 
 
-### [2026-08-13] Other — Withdraw all triggers the contract but no reaction in wallet…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
-- **Frequency:** Consistent
-- **What happened:** Withdraw all triggers the contract but no reaction in wallet for confirmation of the withdrawal.. However, CNova withdrawals went through...
-- **What was expected:** To see a sign and confirmation in wallet to accept.
-- **Notes:** Same on other wallets.. couldn't do withdrawals but CNova worked..
-- **Submitted:** Thu, 13 Aug 2026 02:40:20 GMT
-
-
 
 ### [2026-08-10] Dashboard (index.html) — Tried withdrawing and it failed,  $50
 - **Reporter:** Deborah
@@ -133,6 +121,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-13 | 2026-09-05 | Other | Sherwyn — Other — Withdraw all triggers the contract but no reaction in wallet… - **Report | FIXED: frontend 41aaa2e (2026-08-12, from this report) - the withdraw-all pre-check no longer hangs or fabricates nothing-to-withdraw; a failing gas estimate shows its reason instead of silence, and unverified balances are reported as unverified, never as zero. Live on all three domains. |
 | 2026-08-05 | 2026-09-05 | Other | Sherwyn — Other — Withdrew all my CNova tokens but was testing the unlock butt… - **Report | FIXED: frontend 6f71565 (2026-08-06) - unlock says nothing is left to unlock instead of the raw revert; 605d884 (2026-09-05) - a FAILED balance read no longer claims there is nothing to unlock, it says the read failed and nothing was sent. Live on all three domains. |
 | 2026-07-29 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 (via the second of two reports today) — Rescue panel vanishes silently when a rescue completes - **Reporter:** CryptoJan | FIXED frontend 4cd678f (2026-09-05, all three domains): when the dashboard has seen the member parked and the next chain read shows them seated, a green Rescue complete card names the seat instead of the orange panel vanishing; shown once per rescue, never to a member who was never parked, never on a failed read. The approval-to-button lag was already fixed: the button enables on the approval receipt. |
 | 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Forgot to add - it looks like everytime I do the continuous … - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
