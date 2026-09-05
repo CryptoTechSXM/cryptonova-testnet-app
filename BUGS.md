@@ -93,19 +93,6 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 - **Submitted:** Sat, 08 Aug 2026 10:42:44 GMT
 
 
-### [2026-08-05] Other — Withdrew all my CNova tokens but was testing the unlock butt…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Withdrew all my CNova tokens but was testing the unlock button after I withdrew and got the error of fail on chain error and hard reset...
-- **What was expected:** A message that states that all CNova tokens had already been withdrawn or no CNova token found or some thing to that effect and not a fail error message...
-- **Notes:** May be a rewording of the message so it doesn't look like a system failure ...
-- **Submitted:** Wed, 05 Aug 2026 02:14:00 GMT
-
-
-
 
 ### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
 - **Reporter:** @Koach100
@@ -146,6 +133,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-05 | 2026-09-05 | Other | Sherwyn — Other — Withdrew all my CNova tokens but was testing the unlock butt… - **Report | FIXED: frontend 6f71565 (2026-08-06) - unlock says nothing is left to unlock instead of the raw revert; 605d884 (2026-09-05) - a FAILED balance read no longer claims there is nothing to unlock, it says the read failed and nothing was sent. Live on all three domains. |
 | 2026-07-29 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 (via the second of two reports today) — Rescue panel vanishes silently when a rescue completes - **Reporter:** CryptoJan | FIXED frontend 4cd678f (2026-09-05, all three domains): when the dashboard has seen the member parked and the next chain read shows them seated, a green Rescue complete card names the seat instead of the orange panel vanishing; shown once per rescue, never to a member who was never parked, never on a failed read. The approval-to-button lag was already fixed: the button enables on the approval receipt. |
 | 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Forgot to add - it looks like everytime I do the continuous … - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
 | 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Continuous self rescue loop - each time I approve and self r… - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
