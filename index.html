@@ -1316,6 +1316,23 @@
       <!-- ── ACTION REQUIRED — shown only when work needs doing, placed prominently ── -->
 
       <!-- Parked / Rescue Section -->
+      <!-- 2026-09-05 (ticket 07-29, CryptoJan22): the POSITIVE empty state. When a parked member's rescue
+           completes, the orange panel used to simply disappear on the next refresh — indistinguishable from a
+           panel that never rendered. This card is shown ONLY when this page has seen the member parked and
+           now sees them seated (window._wasParkedThisSession), so a member who was never parked never sees it. -->
+      <div id="rescue-done" class="card" style="margin-bottom:20px;display:none;border:2px solid var(--green2);background:rgba(16,185,129,0.08)">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="font-size:22px;line-height:1">✅</div>
+          <div style="flex:1">
+            <div style="font-weight:700;color:var(--green);font-size:15px;margin-bottom:4px">Rescue complete — you're back in the matrix</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6">
+              Nothing is pending and no further payment is needed. <span id="rescue-done-pos"></span>
+              Your position is shown in the cards below.
+            </div>
+          </div>
+          <button onclick="document.getElementById('rescue-done').style.display='none'" title="Dismiss" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1">&times;</button>
+        </div>
+      </div>
       <div id="rescue-section" class="card" style="margin-bottom:20px;display:none;border:2px solid #f97316;background:rgba(249,115,22,0.08);animation:pulse-border-orange 2s ease-in-out infinite">
         <div class="section-title" style="margin-bottom:14px;color:#f97316"><div class="dot" style="background:#f97316"></div> ⏳ Action Required — Re-Entry Queue</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:12px" id="rescue-desc">
@@ -6183,6 +6200,8 @@ async function loadDashboardData() {
     if (rescueSection) {
       if (parkedInfo) {
         rescueSection.style.display = 'block';
+        window._wasParkedThisSession = true;   // 2026-09-05: lets the seated branch say "rescue complete"
+        { const _d = document.getElementById('rescue-done'); if (_d) _d.style.display = 'none'; }
         startRescuePolling();   // Kira 2026-07-27: keep the shortfall live while parked
         window._parkedMatrixAddr    = parkedInfo.addr;
         window._parkedMatrixLabel   = parkedInfo.label;
@@ -6438,6 +6457,19 @@ async function loadDashboardData() {
         }
       } else {
         rescueSection.style.display = 'none';
+        // 2026-09-05 (ticket 07-29): the member WAS parked on an earlier render of this page and is
+        // seated now — say so, instead of letting the orange panel vanish without a word. Shown once
+        // per rescue (the flag is consumed); stays until dismissed or the page reloads. Only fires
+        // when the chain read actually shows an active seat — a failed read is not a rescue.
+        if (window._wasParkedThisSession && activePositions.length > 0) {
+          window._wasParkedThisSession = false;
+          const _d = document.getElementById('rescue-done');
+          if (_d) {
+            const _labels = activePositions.map(p => p.label).filter(Boolean);
+            setText('rescue-done-pos', _labels.length ? 'You are seated in ' + _labels.join(', ') + '.' : '');
+            _d.style.display = 'block';
+          }
+        }
       }
     }
 
