@@ -113,19 +113,6 @@ i tried max again but it did not go through.
 - **Submitted:** Mon, 10 Aug 2026 23:28:21 GMT
 
 
-### [2026-08-10] Dashboard (index.html) — this account has 5 directs.
-i stsrted with only auto rentry …
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** this account has 5 directs.
-i stsrted with only auto rentry after a while added double reentry and today added auto upgrade but this account shows that it cycled only 2 times.
-- **What was expected:** i figured there would have been more cycles.
-- **Submitted:** Mon, 10 Aug 2026 00:20:19 GMT
-
-
 
 ### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
 - **Reporter:** @ronnienic197
@@ -211,6 +198,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-10 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — this account has 5 directs. i stsrted with only auto re | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_referrer: NOT REGISTERED, no positions, no events) - not reproducible; cycles are driven by matrix fill, not direct count; reopen if it recurs on the current chain |
 | 2026-09-03 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing i | diag_member_positions on the V8.51 book: wallet 0x7d9c...9635 was seated in T1.2 MatA with 0 cycles - the later-pair FREEZE (REGRESSION_REGISTER R1); cured by V8.52 (_fullPairWaitingLongest, contracts 1507c28), community chain 2026-09-04; on V8.52 T1.2 received circulation and rotated on 09-05; member is registered on V8.52 |
 | 2026-08-05 | 2026-09-05 | Dashboard (index.html) | @Koach100 — Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance | receipt 302.63 vs Total Withdrawn 307.24 = the 1.5 pct health fee, measured (withdrawCore counts gross, transfers net); fee now labelled on the card (0c0dbe1, owner-verified); the card-vs-MAX gap did not reproduce on two full sweeps (241 and 376 members) |
 | 2026-08-18 | 2026-09-05 | Dashboard (index.html) | Maximum_71 — Dashboard (index.html) — The RPC node didn't respond after several retries — thi | the quoted text is the deliberate honest read-failed panel (index.html:1246); the failed read now retries instead of giving up (F3, 9a33b90, live on main) |
