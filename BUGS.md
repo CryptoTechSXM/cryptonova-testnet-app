@@ -37,51 +37,13 @@
 
 ## Open Issues
 
-
-
-
-
-
-
-### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
-- **Reporter:** @Koach100
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1ca3316ebc2f991c073ccdd1a25c68d482589a94
-- **Frequency:** Consistent
-- **What happened:** T3 has not cycled. It's at 0 . The position in the matrix is #4. All the other tiers have cycled multiple times.
-- **What was expected:** I expected this tier to cycle like the others.
-- **Notes:** this account is upgraded to Tier 7
-- **Submitted:** Mon, 27 Jul 2026 03:30:19 GMT
-
-
-> **Triage pass 2026-07-27, ~10 PM EDT — 20 reports.**
-> 9 Resolved · 3 Pending-Responded · 5 Fix In Progress · 3 still Open.
->
-> **The three "T5 upgrade check failed" reports were diagnosed after the first pass and
-> moved to Fix In Progress** — they are out-of-USDC errors wearing a network error's
-> clothing. `bulkUpgrade` pulls the TOTAL fee for every remaining tier in one
-> `safeTransferFrom` (TierRouter:979), and OpenZeppelin's `ERC20InsufficientBalance` is a
-> custom error that was missing from the frontend ABI, so ethers returned `reason=null`
-> and the UI blamed the RPC. The three reporting wallets held **$4.86 (0x46cc05),
-> $12.83 (0x832b95) and $13.14 (0x185b19)**. Fix committed as `7b3c327`, not yet pushed.
->
-> **Only 3 reports below are genuinely undiagnosed:**
-> 1. Lavern's "approved funds didn't appear" on 0x145805 — that wallet holds **$8,194**,
->    so unlike the others it is NOT a balance problem. Needs its own look.
-> 2. @queensonnie's direct-referral count not showing 2.
-> 3. Kira's registration-page upgrade button — likely a design gap rather than a fault
->    (the upgrade control only exists on the dashboard), so decide the intent first.
->
-> Separately, Sherwyn observed T5 being offered to an account that never reached T2 —
-> worth checking `_upgradeEligible` against what the dashboard displays.
-- **DIAGNOSED 2026-07-27 — not a fault, but a UX hazard now fixed.** Two separate things: (1) **T3 is at 2 cycles on-chain, not 0** — the dashboard figure he read is wrong and that part is STILL OPEN. (2) He holds seats only in T5-T8 because he switched auto re-entry OFF: `member_history.js` shows his last cycle-out in each of T1/T2/T3/T4 recorded as **PARKED (autoReentry disabled)** — a clean graduation that returns the crossing reserve to withdrawable but does NOT keep the seat. Every earlier cycle-out parked normally with a shortfall. Turning the option back on (it reads true now) does not restore tiers already left; those need 'Graduated tier re-entry'. **UI fix (38605d7):** switching auto re-entry off now requires confirming a dialog that states the consequence explicitly. His trail also surfaced a NINTH silent graduation (tx 0xe9e8067…, T5.1 MatA at block 44668146).
-- **PARTIAL 2026-07-30 — and the tool could not answer the question.** `member_ledger.js` on `0x1ca3316E` shows **T3.1 MatA and MatB both `left`**, so she passed through T3 and out; `memberHighestTier` is now T10. That is consistent with T3 having cycled. But her report was specifically about the *cycle count* reading 0, and `member_ledger` prints state and balances — **not `cyclesCompleted`** — so it cannot see the field the question is about. Adding that column is the next step; guessing from state would be exactly the kind of plausible-but-unverified answer that wasted two hours tonight. **Also flagged: this ticket sat from 2026-07-27 to 2026-07-30 without a reply. That is on us, not the reporter.**
+_No open issues._
 
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-27 | 2026-09-05 | Dashboard (index.html) | @Koach100 — Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matr | CLOSED ON EVIDENCE (member_history.js, V8.45 book, wallet 0x1ca3316e): entered T3.1 MatA at block 44662447; first T3 cycle-out at block 44678721 (~9h later, around the time of the report), then T3.1 MatB cycle-outs at 44681380 and 44685162. T1/T2 had cycled 4-10 times in the same window because they fill faster. The 0 was a true reading of a slower matrix and resolved on chain within hours - not a bug. |
 | 2026-08-08 | 2026-09-05 | Dashboard (index.html) | @ronnienic197 — Dashboard (index.html) — The self rescue transaction is taking an extremely long | CLOSED ON EVIDENCE (BaseScan, wallet 0x75784fe2): on 2026-08-08 NO transaction from this wallet reached the chain (none between 07-27 and 08-24) - the approval was never broadcast by the wallet/RPC of that period (V8.49 item 2 later replaced the wallet RPC). On 2026-08-24 the same flow completed: approve to self-rescue in 14s, a second in 72s, both OK. On V8.52 self-rescue is a single permit signature, no separate approval step. |
 | 2026-08-22 | 2026-09-05 | Dashboard (index.html) | @bevmawire — Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all o | FIXED: frontend cbeedfd (2026-08-29, F2, from this report) - a refresh whose registration read fails now HOLDS the last good dashboard with a Showing-your-last-known-figures banner and a Retry button; the Could-not-load-your-status card appears only when nothing has ever loaded. Plus af94619 (2026-08-24): the 30s poll no longer re-renders while a rescue signature is open. Live on all three domains (605d884). |
 | 2026-08-10 | 2026-09-05 | Dashboard (index.html) | Deborah — Dashboard (index.html) — Tried withdrawing and it failed, $50 - **Reporter:** De | CLOSED ON EVIDENCE (BaseScan, wallet 0x0ddb6a96): two withdrawPartial txs to V8.47 T4 MatA reverted 2026-08-10 23:14Z and 23:16Z (8.03 and 8.17 USDC, blocks 45317696 / 45317749) - the 50 was the dashboard total across 13 matrices, and the withdraw loop of that day had no per-matrix try/catch and a hardcoded 200k gas, so one reverting matrix reported the whole run as failed after other matrices had paid. FIXED bc96ea2 (2026-08-11, from this report): per-matrix handling, gas estimate, receipt of what ARRIVED, withdrawal history. Live on all three domains. |
