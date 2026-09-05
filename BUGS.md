@@ -42,19 +42,6 @@
 
 
 
-### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
-- **Reporter:** @ronnienic197
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x75784fe21f201f8b1f909cf9b055ef5e19fb7385
-- **Frequency:** Consistent
-- **What happened:** The self rescue transaction is taking an extremely long time to complete
-Takes  forever for USDC approval and theneven more time spent trying to complete self rescue.
-- **What was expected:** Should be a seamless process but this process is taking up a lot of time. 
-May not be a bug but could this just be my mm. Is anyone else having this issue?
-- **Submitted:** Sat, 08 Aug 2026 10:42:44 GMT
-
-
 
 ### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
 - **Reporter:** @Koach100
@@ -95,6 +82,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-08 | 2026-09-05 | Dashboard (index.html) | @ronnienic197 — Dashboard (index.html) — The self rescue transaction is taking an extremely long | CLOSED ON EVIDENCE (BaseScan, wallet 0x75784fe2): on 2026-08-08 NO transaction from this wallet reached the chain (none between 07-27 and 08-24) - the approval was never broadcast by the wallet/RPC of that period (V8.49 item 2 later replaced the wallet RPC). On 2026-08-24 the same flow completed: approve to self-rescue in 14s, a second in 72s, both OK. On V8.52 self-rescue is a single permit signature, no separate approval step. |
 | 2026-08-22 | 2026-09-05 | Dashboard (index.html) | @bevmawire — Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all o | FIXED: frontend cbeedfd (2026-08-29, F2, from this report) - a refresh whose registration read fails now HOLDS the last good dashboard with a Showing-your-last-known-figures banner and a Retry button; the Could-not-load-your-status card appears only when nothing has ever loaded. Plus af94619 (2026-08-24): the 30s poll no longer re-renders while a rescue signature is open. Live on all three domains (605d884). |
 | 2026-08-10 | 2026-09-05 | Dashboard (index.html) | Deborah — Dashboard (index.html) — Tried withdrawing and it failed, $50 - **Reporter:** De | CLOSED ON EVIDENCE (BaseScan, wallet 0x0ddb6a96): two withdrawPartial txs to V8.47 T4 MatA reverted 2026-08-10 23:14Z and 23:16Z (8.03 and 8.17 USDC, blocks 45317696 / 45317749) - the 50 was the dashboard total across 13 matrices, and the withdraw loop of that day had no per-matrix try/catch and a hardcoded 200k gas, so one reverting matrix reported the whole run as failed after other matrices had paid. FIXED bc96ea2 (2026-08-11, from this report): per-matrix handling, gas estimate, receipt of what ARRIVED, withdrawal history. Live on all three domains. |
 | 2026-08-13 | 2026-09-05 | Other | Sherwyn — Other — Withdraw all triggers the contract but no reaction in wallet… - **Report | FIXED: frontend 41aaa2e (2026-08-12, from this report) - the withdraw-all pre-check no longer hangs or fabricates nothing-to-withdraw; a failing gas estimate shows its reason instead of silence, and unverified balances are reported as unverified, never as zero. Live on all three domains. |
