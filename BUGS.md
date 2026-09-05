@@ -106,13 +106,6 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 
 
-### [2026-07-29] Rescue panel vanishes silently when a rescue completes
-- **Reporter:** CryptoJan22 (via the second of two reports today)
-- **Page:** Dashboard (index.html)
-- **What happened:** After the co-pay keeper rescued their second position, the Self Rescue button simply disappeared — indistinguishable from a button that never rendered.
-- **STATUS 2026-07-29 — CONFIRMED, frontend work queued.** Needs a short confirmation ("you have been re-entered, nothing pending") instead of an empty panel. Also: the panel re-checks every 30 seconds, so there is a visible lag between an approval confirming and the button activating — refresh on the approval receipt instead of waiting for the next tick.
-
-
 
 ### [2026-07-27] Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matrix is…
 - **Reporter:** @Koach100
@@ -153,6 +146,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-07-29 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 (via the second of two reports today) — Rescue panel vanishes silently when a rescue completes - **Reporter:** CryptoJan | FIXED frontend 4cd678f (2026-09-05, all three domains): when the dashboard has seen the member parked and the next chain read shows them seated, a green Rescue complete card names the seat instead of the orange panel vanishing; shown once per rescue, never to a member who was never parked, never on a failed read. The approval-to-button lag was already fixed: the button enables on the approval receipt. |
 | 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Forgot to add - it looks like everytime I do the continuous … - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
 | 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Continuous self rescue loop - each time I approve and self r… - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
 | 2026-07-26 | 2026-09-05 | Onboarding / Registration | Kira — Onboarding / Registration — The upgrade option is not visibly working. I an bot  | BY DESIGN (owner 2026-09-05): the Registration page is for joining only; upgrades, rescues and earnings live on the Dashboard. The already-registered banner now says so explicitly and links there (29bc6c3, live on main) |
