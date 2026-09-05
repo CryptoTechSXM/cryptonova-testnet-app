@@ -133,3 +133,4 @@
 0xc63ab89518de0548cc6b12aae6d4e7dcf8144998  # auto 2026-09-01 — bug report by CryptoJan22
 0xec5f81153c4df4b6e7a7ecef56c700a207ca03eb  # auto 2026-09-01 — bug report by CryptoJan22
 0x7d9c8db728cf3570313ca01fe149d2ceb6d29635  # auto 2026-09-03 — bug report by CryptoJan22
+0xfd01b470e1c4035e672b2b96d23e6cca1c748dd7  # auto 2026-09-05 — bug report by Kira
