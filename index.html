@@ -6595,7 +6595,9 @@ async function loadDashboardData() {
       const bdg = document.getElementById('dash-reserved-badge');
       if (bdg) {
         if (res.reserved > 0n) {
-          bdg.textContent = `⚙ Reserve target ${fmt6(res.reserved)} · ${fmt6(res.heldNow)} held from current earnings`;
+          // 2026-09-05 (Kira's ticket): "Reserve target $10" read as a $10 balance she could spend on
+          // re-entry. It is a HOLD on earnings, not cash — say so on the badge itself.
+          bdg.textContent = `⚙ Reserve target ${fmt6(res.reserved)} — a hold on your earnings, not spendable cash · ${fmt6(res.heldNow)} held right now`;
           bdg.style.display = 'block';
         } else {
           bdg.style.display = 'none';
