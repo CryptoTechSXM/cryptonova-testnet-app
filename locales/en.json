@@ -134,6 +134,7 @@
     "total_supply": "CNOVA Total Supply",
     "circulating": "circulating CNOVA",
     "system_cycles": "System Cycles",
+    "system_clock": "🕒 System Clock (UTC)",
     "current_epoch": "Current Epoch",
     "reward_per_entry": "Scheduled CNOVA / Entry",
     "stability_fund": "Stability Rescue Fund",

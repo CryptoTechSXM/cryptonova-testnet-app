@@ -767,7 +767,7 @@
       <div class="card-sm" title="CNOVA Treasury holds 5% of all entry fees — it backs the CNOVA floor price. Floor price = Treasury reserve ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.cnova_treasury">CNOVA USDC Treasury 🏦</div><div class="stat-value green" id="stat-treasury-usdc"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.backing_cnova">backing the CNOVA value</div></div>
       <div class="card-sm" title="Guaranteed minimum redemption price — Treasury USDC ÷ total CNOVA supply."><div class="stat-label" data-i18n="stats.floor_price">CNOVA Floor Price</div><div class="stat-value green" id="stat-floor-price"><span class="spinner" style="color:var(--green)"></span></div><div class="stat-sub" data-i18n="stats.per_cnova">per CNOVA token</div></div>
       <div class="card-sm"><div class="stat-label" data-i18n="stats.total_supply">CNOVA Total Supply</div><div class="stat-value" id="stat-supply"><span class="spinner" style="color:var(--text3)"></span></div><div class="stat-sub" data-i18n="stats.circulating">circulating CNOVA</div></div>
-      <div class="card-sm" style="border-color:rgba(239,68,68,.4)"><div class="stat-label" data-i18n="stats.cnova_burnt">🔥 Total CNOVA Burnt</div><div class="stat-value" id="stat-burned" style="color:var(--red)"><span class="spinner" style="color:var(--red)"></span></div><div class="stat-sub" data-i18n="stats.burnt_sub">all-time redeemed &amp; burned</div></div><div class="card-sm" style="border-color:rgba(245,158,11,.4)"><div class="stat-label" data-i18n="stats.system_cycles">System Cycles</div><div class="stat-value" id="stat-cycles" style="color:var(--yellow)"><span class="spinner" style="color:var(--yellow)"></span></div></div>
+      <div class="card-sm" style="border-color:rgba(239,68,68,.4)"><div class="stat-label" data-i18n="stats.cnova_burnt">🔥 Total CNOVA Burnt</div><div class="stat-value" id="stat-burned" style="color:var(--red)"><span class="spinner" style="color:var(--red)"></span></div><div class="stat-sub" data-i18n="stats.burnt_sub">all-time redeemed &amp; burned</div></div><div class="card-sm" style="border-color:rgba(245,158,11,.4)"><div class="stat-label" data-i18n="stats.system_cycles">System Cycles</div><div class="stat-value" id="stat-cycles" style="color:var(--yellow)"><span class="spinner" style="color:var(--yellow)"></span></div></div><div class="card-sm" style="border-color:rgba(59,130,246,.4)"><div class="stat-label" data-i18n="stats.system_clock">🕒 System Clock (UTC)</div><div class="stat-value" id="stat-clock" style="color:var(--blue);font-variant-numeric:tabular-nums">—</div><div class="stat-sub" id="stat-clock-sub">—</div></div>
     </div>
 
 
@@ -3675,6 +3675,42 @@ async function doCWClaimAll() {
   }
 }
 
+// ── SYSTEM CLOCK CARD (2026-09-05, session 62) ──────────────────────────────────────────
+// Shows the time the SYSTEM runs on (UTC — every keeper, cron slot and gate epoch is UTC),
+// when this deployment started, and how long it has been active. "Started" is READ FROM THE
+// CHAIN — pairs(0).deployedAt on the T1 PairManager, the first pair the deploy created —
+// never a typed date, so a redeploy cannot leave a stale one behind (the R6 class of defect).
+// If the read fails the card says so rather than guessing (frontend-truth rule).
+let _sysClockStarted = false;
+function startSystemClock(pm1) {
+  if (_sysClockStarted) return;
+  _sysClockStarted = true;
+  let startedMs = null, readFailed = false;
+  const pad = (n) => String(n).padStart(2, '0');
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const render = () => {
+    const now = new Date();
+    setText('stat-clock', `${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`);
+    const sub = document.getElementById('stat-clock-sub');
+    if (!sub) return;
+    if (startedMs === null) { sub.textContent = readFailed ? 'start date unavailable (chain read failed)' : 'reading start date…'; return; }
+    const st = new Date(startedMs);
+    const el = Math.max(0, now.getTime() - startedMs);
+    const d = Math.floor(el / 86400000), h = Math.floor((el % 86400000) / 3600000), m = Math.floor((el % 3600000) / 60000);
+    sub.textContent = `started ${st.getUTCDate()} ${MON[st.getUTCMonth()]} ${st.getUTCFullYear()} · active ${d}d ${h}h ${m}m`;
+  };
+  render();
+  setInterval(render, 1000);
+  (async () => {
+    try {
+      const p0 = await pm1.pairs(0);
+      const ts = Number(p0.deployedAt ?? p0[2]);
+      if (ts > 0) startedMs = ts * 1000; else readFailed = true;
+    } catch (_) { readFailed = true; }
+    render();
+  })();
+}
+
 async function loadHomeStats() {
   // Try primary RPC, fall back to blast if it hangs or errors
   let rp = readProvider || new ethers.JsonRpcProvider(RPC_URL, ethers.Network.from(84532), { staticNetwork: ethers.Network.from(84532) });
@@ -3690,6 +3726,7 @@ async function loadHomeStats() {
     // currentMatA made the home card show the empty standby pair (0/127) while the
     // community was still filling pair 1. Resolve the ROUTING pair instead.
     const pm1 = new ethers.Contract(ADDRS.T1.pm, PM_ABI, provider);
+    startSystemClock(pm1);   // V8.52 home card: UTC time + started/active (owner's request 2026-09-05); no-op after the first call
     let activeMatA1addr = ADDRS.T1.matA, activeMatB1addr = ADDRS.T1.matB;
     window._t1PairInfo = null;
     try {
