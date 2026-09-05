@@ -37,16 +37,6 @@
 
 ## Open Issues
 
-### [2026-09-05] Dashboard (index.html) — Just noticed i have a reserve of 10$ but copay says 2$ shoul…
-- **Reporter:** Kira
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0xfd01b470e1c4035e672b2b96d23e6cca1c748dd7
-- **Frequency:** Consistent
-- **What happened:** Just noticed i have a reserve of 10$ but copay says 2$ should be an autorescue...
-- **What was expected:** Fast lane to take me across
-- **Submitted:** Sat, 05 Sep 2026 16:26:28 GMT
-
 
 ### [2026-09-03] Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing is hap…
 - **Reporter:** CryptoJan22
@@ -304,6 +294,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-09-05 | 2026-09-05 | Dashboard (index.html) | Kira — Dashboard (index.html) — Just noticed i have a reserve of 10$ but copay says 2$  | first cycle-out parks by design (reentryMinCycles=2); USD 8 earned + USD 0 reserve vs USD 10 re-entry = USD 2 shortfall, selfRescue simulated OK; Reserve-target badge was read as a balance - reworded 6098934; member re-entered |
 | 2026-07-26 | 2026-08-28 | Other | Kira — Other — on the tiers page the information is a bit ambiguous. - **Reporter:** Ki | display fixed - T1 pair sizing remains an open product decision |
 | 2026-08-08 | 2026-08-28 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — i got 2 self rescue alerts at the same time. t 1 cleare | fixed - approval now sized to entry fee, shortfall no longer goes stale |
 | 2026-08-17 | 2026-08-28 | Bug Report Page | Jacob — Bug Report Page — Fail to create "[From https://sepolia.base.org] gas limit to…  | fixed - bug report page sends no on-chain transaction |
