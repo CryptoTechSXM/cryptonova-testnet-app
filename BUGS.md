@@ -88,19 +88,6 @@
 - **Submitted:** Thu, 13 Aug 2026 02:40:20 GMT
 
 
-### [2026-08-11] Dashboard (index.html) — decided to do a withdrawal.
-It took forever and after clicki…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x79470c63b5421e333ab4149b3206d55a39c17532
-- **Frequency:** Consistent
-- **What happened:** decided to do a withdrawal.
-It took forever and after clicking max only 50% went through.
-i tried max again but it did not go through.
-- **What was expected:** at least a reason for the failure.
-- **Submitted:** Tue, 11 Aug 2026 10:46:59 GMT
-
 
 ### [2026-08-10] Dashboard (index.html) — Tried withdrawing and it failed,  $50
 - **Reporter:** Deborah
@@ -198,6 +185,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-11 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — decided to do a withdrawal. It took forever and after c | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_withdraw: no position with any credit) - not reproducible; the 50 pct shape matches the MatA crossing reserve that must stay in the matrix, unmeasured for this wallet; reopen if it recurs on the current chain |
 | 2026-08-10 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — this account has 5 directs. i stsrted with only auto re | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_referrer: NOT REGISTERED, no positions, no events) - not reproducible; cycles are driven by matrix fill, not direct count; reopen if it recurs on the current chain |
 | 2026-09-03 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing i | diag_member_positions on the V8.51 book: wallet 0x7d9c...9635 was seated in T1.2 MatA with 0 cycles - the later-pair FREEZE (REGRESSION_REGISTER R1); cured by V8.52 (_fullPairWaitingLongest, contracts 1507c28), community chain 2026-09-04; on V8.52 T1.2 received circulation and rotated on 09-05; member is registered on V8.52 |
 | 2026-08-05 | 2026-09-05 | Dashboard (index.html) | @Koach100 — Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance | receipt 302.63 vs Total Withdrawn 307.24 = the 1.5 pct health fee, measured (withdrawCore counts gross, transfers net); fee now labelled on the card (0c0dbe1, owner-verified); the card-vs-MAX gap did not reproduce on two full sweeps (241 and 376 members) |
