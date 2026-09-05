@@ -217,8 +217,8 @@
   },
   "reg": {
     "wallet_warn": "⚠️ Connect your wallet first to register.",
-    "already_pre": "✅ You are already registered! Check your",
-    "already_link": "Dashboard",
+    "already_pre": "✅ You're registered — this page is only for joining. Upgrades, rescues and your earnings all live on your",
+    "already_link": "Dashboard →",
     "ref_label": "🔗 Referrer Address",
     "ref_required": "(required — ask the person who invited you)",
     "ref_placeholder": "0x... paste your referrer's wallet address here",
