@@ -39,27 +39,6 @@
 
 
 
-### [2026-08-29] Other — Forgot to add - it looks like everytime I do the continuous …
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Forgot to add - it looks like everytime I do the continuous self rescue, my CNova amount increases...
-- **What was expected:** Not to be stuck in continuous self rescue loop... and still parked
-- **Submitted:** Sat, 29 Aug 2026 13:18:11 GMT
-
-
-### [2026-08-29] Other — Continuous self rescue loop - each time I approve and self r…
-- **Reporter:** Sherwyn
-- **Page:** Other
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1e8e2dcf876d0d94077c93a7e33bda2ab72ab1f7
-- **Frequency:** Consistent
-- **What happened:** Continuous self rescue loop - each time I approve and self rescue, the system says you're back in the matrix but a refresh says that I'm still parked and need to be self rescued again for another amount of funds to be approved. It keeps doing this over and over, Have done it 4 consecutive times and still says I'm parked..
-- **What was expected:** Only to be self rescued once and not just continuous self rescues over and over ..
-- **Submitted:** Sat, 29 Aug 2026 12:28:35 GMT
-
 
 
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
@@ -174,6 +153,8 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Forgot to add - it looks like everytime I do the continuous … - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
+| 2026-08-29 | 2026-09-05 | Other | Sherwyn — Other — Continuous self rescue loop - each time I approve and self r… - **Report | CLOSED ON EVIDENCE: member_history.js (V8.50 book) shows six MemberCrossedToPartner then MemberParked shortfall 0 in the same tx = MatrixLogicLib:529 no-seat park in a pair full in both halves (T1.1 127/127 A and B). Reproduced line for line in fixture C5/G0b; noseat_witness 105/105 on chain. Cured by item G graduation + item S overflow, live on V8.51/V8.52; 2026-09-05 T1 window NO-SEAT 0. Reply sent 2026-08-30. |
 | 2026-07-26 | 2026-09-05 | Onboarding / Registration | Kira — Onboarding / Registration — The upgrade option is not visibly working. I an bot  | BY DESIGN (owner 2026-09-05): the Registration page is for joining only; upgrades, rescues and earnings live on the Dashboard. The already-registered banner now says so explicitly and links there (29bc6c3, live on main) |
 | 2026-08-11 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — decided to do a withdrawal. It took forever and after c | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_withdraw: no position with any credit) - not reproducible; the 50 pct shape matches the MatA crossing reserve that must stay in the matrix, unmeasured for this wallet; reopen if it recurs on the current chain |
 | 2026-08-10 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — this account has 5 directs. i stsrted with only auto re | wallet 0x7947...7532 never registered on the current V8.52 chain (diag_referrer: NOT REGISTERED, no positions, no events) - not reproducible; cycles are driven by matrix fill, not direct count; reopen if it recurs on the current chain |
