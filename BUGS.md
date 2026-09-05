@@ -49,17 +49,6 @@
 - **Submitted:** Thu, 03 Sep 2026 16:10:19 GMT
 
 
-### [2026-09-01] Onboarding / Registration — It says  transaction failed on chain. I restarted my device …
-- **Reporter:** CryptoJan22
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0xec5f81153c4df4b6e7a7ecef56c700a207ca03eb
-- **Frequency:** Consistent
-- **What happened:** It says  transaction failed on chain. I restarted my device and same result.
-- **What was expected:** That i would be able to register my accounts.
-- **Submitted:** Tue, 01 Sep 2026 18:38:26 GMT
-
-
 
 ### [2026-08-29] Other — Forgot to add - it looks like everytime I do the continuous …
 - **Reporter:** Sherwyn
@@ -284,6 +273,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — It says transaction failed on chain. I restarted my  | wallet 0xec5f...03eb is registered on V8.52 (T1, id 68, sponsor 0x7d9C...) - registration works for this wallet on the current chain; same class as the 09-01 RPC failures |
 | 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — Getting an error when registering - **Reporter:** Cr | wallet 0xc63a...4998 is registered on V8.52 (T1, id 67, sponsor 0x7d9C...) - registration works for this wallet on the current chain; 09-01 failure was on the retired V8.51 chain via an RPC the wallet supplied |
 | 2026-09-05 | 2026-09-05 | Dashboard (index.html) | Kira — Dashboard (index.html) — Just noticed i have a reserve of 10$ but copay says 2$  | first cycle-out parks by design (reentryMinCycles=2); USD 8 earned + USD 0 reserve vs USD 10 re-entry = USD 2 shortfall, selfRescue simulated OK; Reserve-target badge was read as a balance - reworded 6098934; member re-entered |
 | 2026-07-26 | 2026-08-28 | Other | Kira — Other — on the tiers page the information is a bit ambiguous. - **Reporter:** Ki | display fixed - T1 pair sizing remains an open product decision |
