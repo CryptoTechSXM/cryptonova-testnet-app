@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-09-05] Dashboard (index.html) — Just noticed i have a reserve of 10$ but copay says 2$ shoul…
+- **Reporter:** Kira
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0xfd01b470e1c4035e672b2b96d23e6cca1c748dd7
+- **Frequency:** Consistent
+- **What happened:** Just noticed i have a reserve of 10$ but copay says 2$ should be an autorescue...
+- **What was expected:** Fast lane to take me across
+- **Submitted:** Sat, 05 Sep 2026 16:26:28 GMT
+
+
 ### [2026-09-03] Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing is hap…
 - **Reporter:** CryptoJan22
 - **Page:** Dashboard (index.html)
