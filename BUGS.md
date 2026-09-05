@@ -38,17 +38,6 @@
 ## Open Issues
 
 
-### [2026-09-03] Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing is hap…
-- **Reporter:** CryptoJan22
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x7d9c8db728cf3570313ca01fe149d2ceb6d29635
-- **Frequency:** Consistent
-- **What happened:** Matrix does not seem to be moving. Looks like nothing is happening since yesterday.
-- **What was expected:** To have more cycles at this time.
-- **Submitted:** Thu, 03 Sep 2026 16:10:19 GMT
-
-
 
 ### [2026-08-29] Other — Forgot to add - it looks like everytime I do the continuous …
 - **Reporter:** Sherwyn
@@ -222,6 +211,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-09-03 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 — Dashboard (index.html) — Matrix does not seem to be moving. Looks like nothing i | diag_member_positions on the V8.51 book: wallet 0x7d9c...9635 was seated in T1.2 MatA with 0 cycles - the later-pair FREEZE (REGRESSION_REGISTER R1); cured by V8.52 (_fullPairWaitingLongest, contracts 1507c28), community chain 2026-09-04; on V8.52 T1.2 received circulation and rotated on 09-05; member is registered on V8.52 |
 | 2026-08-05 | 2026-09-05 | Dashboard (index.html) | @Koach100 — Dashboard (index.html) — In prep to withdraw my earnings , i checked the balance | receipt 302.63 vs Total Withdrawn 307.24 = the 1.5 pct health fee, measured (withdrawCore counts gross, transfers net); fee now labelled on the card (0c0dbe1, owner-verified); the card-vs-MAX gap did not reproduce on two full sweeps (241 and 376 members) |
 | 2026-08-18 | 2026-09-05 | Dashboard (index.html) | Maximum_71 — Dashboard (index.html) — The RPC node didn't respond after several retries — thi | the quoted text is the deliberate honest read-failed panel (index.html:1246); the failed read now retries instead of giving up (F3, 9a33b90, live on main) |
 | 2026-08-27 | 2026-09-05 | Onboarding / Registration | @Lavern_Gay — Onboarding / Registration — REOPENED: could not change the referrer address - ** | diag_referrer on V8.52: 0x1458...dC2a registered T1 (id 44) under sponsor 0x1498...1040, not the default and not her own main; fix 98a0da2 live - REOPEN if a NEW account under another link still shows her main address |
