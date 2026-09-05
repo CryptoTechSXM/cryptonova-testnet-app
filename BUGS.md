@@ -85,21 +85,6 @@
 
 
 
-### [2026-08-27] Onboarding / Registration — All CryptoNover accounts opened with different referrer addr…
-- **Reporter:** @ThanksAndPraises
-- **Page:** Onboarding / Registration
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x3c17556855cfbd29b6f7a41ebfdbe8e914b7bbdd
-- **Frequency:** Consistent
-- **What happened:** All CryptoNover accounts opened with different referrer addresses all revert back to my original Default address:
-0x149852b86dF80B960B99BBbF469d0f5219fa1040
-- **What was expected:** the accounts should maintain and show their referral's address as their default registered under address
-- **Submitted:** Thu, 27 Aug 2026 20:32:54 GMT
-- **DIAGNOSED AND FIXED, session 44 (2026-08-27) — it was not a MetaMask bug.** Measured first: `0x3c1755…` is registered on chain under `0x5179A012…`, which is entry #4 of this site's own `DEFAULT_SPONSOR_POOL` — an orphan-rotation default, not anyone he typed. The display theory was tested and refuted (`diag_referrer.js`: TierRouter.memberReferrer, getMemberInfo.referrer and every per-matrix getMember().referrer agree on all three wallets), so the dashboard was honest and the registration itself was wrong.
-- **Reproduced** with `repro_referrer.mjs`, which runs the page's real source rather than a re-typed copy: 6 of 10 scenarios placed a member under the wrong sponsor, 0 after the fix. Two independent causes, and together they explain both halves of the report — (a) the referrer box and the cached default sponsor were never reset when a wallet switches account with no page reload, so every later account inherited the first one's sponsor (that is the "my original Default address" half); (b) `ethers.isAddress()` enforces the EIP-55 checksum, so a CORRECT address pasted with the wrong letter-case counted as invalid and was silently replaced by a pool default — no account switch involved at all.
-- **Still owed before this closes:** a live two-account switch on the preview build, and `diag_referrer.js` on a wallet registered after the fix. His existing placements are on chain and a frontend fix does not move them — decide separately what to do about those.
-- **FIX IN PROGRESS:** shipped to `admin` as `98a0da2`, awaiting live confirmation.
-
 
 ### [2026-08-22] Dashboard (index.html) — WAS IN THE PROCESS OF DOING A SECOND "RESCUE" and all of a s…
 - **Reporter:** @bevmawire
@@ -273,6 +258,7 @@ The amount deposited into my wallet was $302.63 the withdrawn amount on the dash
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-27 | 2026-09-05 | Onboarding / Registration | @ThanksAndPraises — Onboarding / Registration — All CryptoNover accounts opened with different refer | diag_referrer on V8.52: 0x3c17...bbdd registered T2 (id 138) under sponsor 0x1498...1040, NOT the default, dashboard source agrees with the registration record; per-wallet sponsor cache fix 98a0da2 live |
 | 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — It says transaction failed on chain. I restarted my  | wallet 0xec5f...03eb is registered on V8.52 (T1, id 68, sponsor 0x7d9C...) - registration works for this wallet on the current chain; same class as the 09-01 RPC failures |
 | 2026-09-01 | 2026-09-05 | Onboarding / Registration | CryptoJan22 — Onboarding / Registration — Getting an error when registering - **Reporter:** Cr | wallet 0xc63a...4998 is registered on V8.52 (T1, id 67, sponsor 0x7d9C...) - registration works for this wallet on the current chain; 09-01 failure was on the retired V8.51 chain via an RPC the wallet supplied |
 | 2026-09-05 | 2026-09-05 | Dashboard (index.html) | Kira — Dashboard (index.html) — Just noticed i have a reserve of 10$ but copay says 2$  | first cycle-out parks by design (reentryMinCycles=2); USD 8 earned + USD 0 reserve vs USD 10 re-entry = USD 2 shortfall, selfRescue simulated OK; Reserve-target badge was read as a balance - reworded 6098934; member re-entered |
