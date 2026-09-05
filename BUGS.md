@@ -56,17 +56,6 @@
 
 
 
-### [2026-08-10] Dashboard (index.html) — Tried withdrawing and it failed,  $50
-- **Reporter:** Deborah
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** MetaMask
-- **Wallet Address:** 0x0ddb6a96fa15f98e823cd6632f9b14373cd1c74b
-- **Frequency:** Intermittent
-- **What happened:** Tried withdrawing and it failed,  $50
-- **What was expected:** Should go to my wallet
-- **Submitted:** Mon, 10 Aug 2026 23:28:21 GMT
-
-
 
 ### [2026-08-08] Dashboard (index.html) — The self rescue transaction is taking an extremely long time…
 - **Reporter:** @ronnienic197
@@ -121,6 +110,7 @@ May not be a bug but could this just be my mm. Is anyone else having this issue?
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-08-10 | 2026-09-05 | Dashboard (index.html) | Deborah — Dashboard (index.html) — Tried withdrawing and it failed, $50 - **Reporter:** De | CLOSED ON EVIDENCE (BaseScan, wallet 0x0ddb6a96): two withdrawPartial txs to V8.47 T4 MatA reverted 2026-08-10 23:14Z and 23:16Z (8.03 and 8.17 USDC, blocks 45317696 / 45317749) - the 50 was the dashboard total across 13 matrices, and the withdraw loop of that day had no per-matrix try/catch and a hardcoded 200k gas, so one reverting matrix reported the whole run as failed after other matrices had paid. FIXED bc96ea2 (2026-08-11, from this report): per-matrix handling, gas estimate, receipt of what ARRIVED, withdrawal history. Live on all three domains. |
 | 2026-08-13 | 2026-09-05 | Other | Sherwyn — Other — Withdraw all triggers the contract but no reaction in wallet… - **Report | FIXED: frontend 41aaa2e (2026-08-12, from this report) - the withdraw-all pre-check no longer hangs or fabricates nothing-to-withdraw; a failing gas estimate shows its reason instead of silence, and unverified balances are reported as unverified, never as zero. Live on all three domains. |
 | 2026-08-05 | 2026-09-05 | Other | Sherwyn — Other — Withdrew all my CNova tokens but was testing the unlock butt… - **Report | FIXED: frontend 6f71565 (2026-08-06) - unlock says nothing is left to unlock instead of the raw revert; 605d884 (2026-09-05) - a FAILED balance read no longer claims there is nothing to unlock, it says the read failed and nothing was sent. Live on all three domains. |
 | 2026-07-29 | 2026-09-05 | Dashboard (index.html) | CryptoJan22 (via the second of two reports today) — Rescue panel vanishes silently when a rescue completes - **Reporter:** CryptoJan | FIXED frontend 4cd678f (2026-09-05, all three domains): when the dashboard has seen the member parked and the next chain read shows them seated, a green Rescue complete card names the seat instead of the orange panel vanishing; shown once per rescue, never to a member who was never parked, never on a failed read. The approval-to-button lag was already fixed: the button enables on the approval receipt. |
