@@ -1451,7 +1451,6 @@
                 <button class="copy-btn" onclick="navigator.clipboard.writeText('${p.addr}')" title="Copy address">⧉</button>
               </td>
               <td class="amount">${p.withdrawable === null ? '<span title="read failed — retrying" style="color:var(--text3)">…</span>' : fmt6(p.withdrawable)}</td>
-              <td class="amount" style="color:#10b981">${p.crossingReserve === null ? '<span title="read failed — retrying" style="color:var(--text3)">…</span>' : (p.crossingReserve > 0n ? fmt6(p.crossingReserve) : '—')}</td>
               <td class="amount" style="color:#f97316">${p.shortfall === null ? '<span title="read failed — retrying" style="color:var(--text3)">…</span>' : (p.shortfall > 0n ? fmt6(p.shortfall) : '—')}</td>
               <td class="time">${p.parkedTs ? elapsed(p.parkedTs) : '—'}</td>
               <td style="font-size:11px;color:${rescueColor}">${rescueStatus}</td>
@@ -1466,7 +1465,6 @@
               <tr>
                 <th>Wallet</th>
                 <th>Withdrawable</th>
-                <th>Reserve</th>
                 <th>Shortfall</th>
                 <th>Parked</th>
                 <th>Rescue Status</th>
