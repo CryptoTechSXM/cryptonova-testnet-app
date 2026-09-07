@@ -3017,7 +3017,7 @@ function readyToClaimLabel(gross) {
   try { g = BigInt(gross || 0n); } catch (_) { return fallback(); }
   if (g <= 0n) return fallback() + ' · $0.00';
   const b = withdrawFeeBps();
-  if (b === null) return fallback();   // fee unread — never quote a guessed net
+  if (b === null) return `${fallback()} · ${fmt6(g)} before the fee`;   // fee unread — quote the gross, never a guessed net
   const net = g - (g * b / 10000n);
   const pct = (Number(b) / 100).toFixed(1);
   return `${fallback()} · ${fmt6(net)} after the ${pct}% fee`;
