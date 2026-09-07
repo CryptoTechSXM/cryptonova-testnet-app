@@ -431,6 +431,8 @@ function toggleTheme() {
       </button>
       <div class="faq-answer"><div class="faq-answer-inner">
         <p data-i18n="faqPage.q5_a1">Any EVM-compatible wallet works &mdash; MetaMask, Coinbase Wallet, Trust Wallet, and Rabby are all supported. Make sure your wallet is connected to the <strong>Base</strong> network (chain ID 8453 for mainnet, 84532 for Sepolia testnet). Never share your seed phrase or private key with anyone.</p>
+        <!-- 62.13 item 4 (2026-09-07): every Rabby user sees this on every CryptoNova tx on Base Sepolia. No data-i18n on purpose. -->
+        <p><strong>Using Rabby on Base Sepolia?</strong> Rabby shows <em>&ldquo;Simulation Not Supported&rdquo;</em>, <em>&ldquo;Unknown Signature Type&rdquo;</em> or <em>&ldquo;Custom Network&rdquo;</em> on every CryptoNova transaction. That is Rabby saying it cannot pre-simulate on this testnet &mdash; it is not a warning about CryptoNova, and it appears on every Base Sepolia dApp. Check the amount and the contract address as you always would, then confirm.</p>
       </div></div>
     </div>
 
