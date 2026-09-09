@@ -740,6 +740,8 @@
     'event RescueDebtRepaid(address indexed member, uint256 repaid, uint256 remaining)',
     'function rescueDebtOf(address member) external view returns (uint256)',
     'function crossingReserveOf(address) external view returns (uint256)',  // V8.52
+    'function getMemberTotalWithdrawn(address) external view returns (uint256)',  // session 69: keeper ratio rule
+    'function isInMatrix(address) external view returns (bool)',                  // session 69: ghost rule
   ];
   const PM_ABI = [
     'function currentMatA() external view returns (address)',
@@ -749,11 +751,18 @@
   const KEEPER_ABI = [
     'function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)',
     'function parkedGracePeriod() external view returns (uint256)',
+    // session 69: the keeper's REFUSAL rules (MatrixKeeperLib._triageParked), read, never assumed
+    'function evictionGracePeriod() external view returns (uint256)',
+    'function rescueRatioBps() external view returns (uint256)',
+    'function crossingBufferBps() external view returns (uint256)',
+    'function sfRescueThresholds(uint256) external view returns (uint256)',
+    'function sfRescueBpsLadder(uint256) external view returns (uint256)',
     'event ParkedRescued(address indexed matrix, address indexed member, uint8 tierIndex)',
     'event WorkItemFailed(uint8 workType, uint8 tierIndex, address addr1, address addr2)',
   ];
   const SF_ABI    = [
     'function totalBalance() external view returns (uint256)',
+    'function loanEligibleFor(address,uint8,uint256) external view returns (bool)',  // session 69: the lender's own answer
     // V8.52 member ledger — the SAME state the hourly sf_invariant_check.js
     // proves conserves (Σ memberDebt == loaned − repaid). Read these instead of
     // reconstructing lifetime totals from event scans (owner report 2026-08-07:
@@ -830,6 +839,12 @@
   // numbers agreeing looks exactly like two right ones"). Stays null until measured;
   // a null renders as an honest dash, never as a guessed count.
   let _rescueCap        = null; // { long, short } | null
+  // SESSION 69: the keeper's triage parameters, read ONCE per page load (they move only by
+  // governance vote). null until read; a member cannot be given a verdict without them.
+  let _triageCfg        = null;
+  let _parkedExpanded   = false; // owner 2026-09-09: 5 rows visible, the rest behind a toggle
+  let _lastParkedRender = null;  // () => void — re-render the list from the last poll without an RPC round-trip
+  window._toggleParkedList = () => { _parkedExpanded = !_parkedExpanded; if (_lastParkedRender) _lastParkedRender(); };
   let _lastParkedCount  = null; // hold last-good TOTAL parked count so a dropped read can't flash "all clear"
   let _lastMatrixFill  = null; // { occA, occB, activeTiers } — hold last good fill on read blip
   let _lastTierData    = null; // full per-tier last-good — hold ALL tiers (not just T1) on a blipped read
@@ -1165,6 +1180,31 @@
       // clear" while the keeper saw hundreds parked. A read that still fails after retries
       // flips _parkedReadFail (it is NOT counted as a real 0); below we hold the last-good
       // total rather than flash a false clear.
+      // SESSION 69 — THE VERDICT. MEASURED 2026-09-09 with diag_parked_verdict.js on V8.52:
+      // 68 parked, 64 RESCUE, 4 refused (ladder) → eviction, while this card said "69 of 69
+      // can be rescued now" from the fund's balance alone. The keeper applies four refusal
+      // rules BEFORE money is considered (MatrixKeeperLib._triageParked, in this order):
+      // ghost (seated) → ratio (withdrawn > rescueRatioBps of ever-claimable) → ladder
+      // (held / crossingCost below the lowest rung) → floor (StabilityFund.loanEligibleFor
+      // on the exact advance). Refused members are EVICTED at evictionGracePeriod. The
+      // parameters are read from the chain here; the per-member reads are below.
+      // NOT replicated: the partner-matrix half of the ghost test (one more read per member
+      // for a case the keeper dequeues within a day) — a ghost seated in the PARTNER shows
+      // as RESCUE until it is dequeued. Everything else mirrors the contract.
+      if (!_triageCfg) {
+        try {
+          const [eg, ratio, buf] = await Promise.all([
+            _retry(() => keeper.evictionGracePeriod()), _retry(() => keeper.rescueRatioBps()), _retry(() => keeper.crossingBufferBps()),
+          ]);
+          const thresholds = [], ladder = [];
+          for (let i = 0; i < 32; i++) {
+            let th; try { th = await keeper.sfRescueThresholds(i); } catch(_) { break; }   // public array: revert = end
+            ladder.push(BigInt(await _retry(() => keeper.sfRescueBpsLadder(i))));
+            thresholds.push(BigInt(th));
+          }
+          _triageCfg = { evictionGrace: Number(eg), ratioBps: BigInt(ratio), bufBps: BigInt(buf), thresholds, ladder };
+        } catch(e) { _triageCfg = null; }   // no cfg → every verdict renders as unknown, never as "rescue"
+      }
       const _pkRead = async (c) => { try { return await _retry(() => c.getParkedCount()); } catch (_) { _parkedReadFail = true; return 0n; } };
       const [parkedCounts, gracePeriod] = await Promise.all([
         Promise.all(allMats.map(m => _pkRead(m.c))),
@@ -1286,17 +1326,25 @@
               }
               return null;
             };
-            const [parkedTs, withdrawable, crossingReserve] = await Promise.all([
+            const [parkedTs, withdrawable, crossingReserve, withdrawn, inMatrix] = await Promise.all([
               rNull(() => mat.parkedAt(addr), 3),
               rNull(() => mat.withdrawableOf(addr), 3),
               rNull(() => mat.crossingReserveOf(addr), 3),  // V8.52
+              rNull(() => mat.getMemberTotalWithdrawn(addr), 3),  // session 69: ratio rule
+              rNull(() => mat.isInMatrix(addr), 3),               // session 69: ghost rule
             ]);
             return {
               addr,
               tier: m.tier, pair: m.pair, side: m.side, fee: matFee,
+              tierIdx: Number(m.tier.slice(1)) - 1,
+              // the PRICE of the crossing, not the fee: a MatA park needs the 50% reserve only
+              // (MatrixKeeperLib._crossingCost / CROSSING_RESERVE_BPS = 5_000)
+              cost: matFee === null ? null : (m.side === 'MatA' ? matFee * 5000n / 10000n : matFee),
               parkedTs: parkedTs === null ? null : Number(parkedTs),
               withdrawable: withdrawable === null ? null : BigInt(withdrawable),
               crossingReserve: crossingReserve === null ? null : BigInt(crossingReserve),
+              withdrawn: withdrawn === null ? null : BigInt(withdrawn),
+              inMatrix: inMatrix,
               readFailed: (withdrawable === null || crossingReserve === null || matFee === null)
             };
           }));
@@ -1311,21 +1359,50 @@
         // V8.52: effectiveContrib = crossingReserve + withdrawable
         // crossingReserve is consumed first toward the re-entry fee, so it reduces the SF shortfall.
         // V8.52: if a read failed, the shortfall is UNKNOWN — render "…", never compute from $0.
-        if (p.readFailed) { p.shortfall = null; continue; }
+        if (p.readFailed) { p.shortfall = null; p.verdict = null; continue; }
         const effectiveContrib = p.withdrawable + (p.crossingReserve || 0n);
-        const shortfall = p.fee > effectiveContrib ? p.fee - effectiveContrib : 0n;
+        const shortfall = p.cost > effectiveContrib ? p.cost - effectiveContrib : 0n;
         p.shortfall = shortfall;
         totalShortfall += shortfall;
         shortfallKnown++;
       }
 
+      // SESSION 69: the keeper's verdict per member, same order as _triageParked. A verdict
+      // that cannot be formed (cfg unread, a read failed) is null → rendered as unknown.
+      // p.advance = what the fund would actually lend (0 for a self-funded crossing).
+      const _sfc0 = new ethers.Contract(ADDRS.stabilityFund, SF_ABI, provider);
+      for (const p of stillParked) {
+        p.verdict = null; p.advance = null; p.why = '';
+        if (p.readFailed || !_triageCfg || p.withdrawn === null || p.inMatrix === null) continue;
+        const cfg = _triageCfg;
+        if (p.inMatrix) { p.verdict = 'GHOST'; p.advance = 0n; p.why = 'seated — will be dequeued'; continue; }
+        const claimableEver = p.withdrawn + p.withdrawable;
+        const ratio = claimableEver > 0n ? p.withdrawn * 10000n / claimableEver : 0n;
+        if (ratio > cfg.ratioBps) { p.verdict = 'RATIO'; p.advance = 0n; p.why = `withdrew ${Number(ratio)/100}% of earnings (limit ${Number(cfg.ratioBps)/100}%)`; continue; }
+        const contrib = p.withdrawable + (p.crossingReserve || 0n);
+        let bps = null;
+        if (cfg.thresholds.length === 0) bps = 10000n;
+        else { const w = contrib * 10000n / p.cost; for (let i = 0; i < cfg.thresholds.length; i++) { if (w >= cfg.thresholds[i]) { bps = cfg.ladder[i]; break; } } }
+        if (bps === null) { p.verdict = 'LADDER'; p.advance = 0n; p.why = `holds ${Number(contrib * 10000n / p.cost)/100}% of ${fmt6(p.cost)} — below the fund's lowest rung`; continue; }
+        let sfShare = p.cost * bps / 10000n;
+        if (sfShare > p.shortfall) sfShare = p.shortfall;
+        const advance = sfShare + p.fee * cfg.bufBps / 10000n;
+        if (advance > 0n) {
+          let ok = null;
+          for (let a = 1; a <= 3; a++) { try { ok = await _sfc0.loanEligibleFor(p.addr, p.tierIdx, advance); break; } catch(e) { if (a < 3) await new Promise(r=>setTimeout(r, 300*a)); } }
+          if (ok === null) { p.why = 'fund answer unread'; continue; }
+          if (!ok) { p.verdict = 'FLOOR'; p.advance = 0n; p.why = `fund refuses a ${fmt6(advance)} advance (debt ceiling)`; continue; }
+        }
+        p.advance = sfShare;
+        if (sfShare === 0n) { p.verdict = 'SELF'; p.why = 'covers own crossing — no loan needed'; }
+        else { p.verdict = 'RESCUE'; p.why = `fund advances ${fmt6(sfShare)}`; }
+      }
+
       // Sort: longest-waiting first (these are next to be rescued)
       stillParked.sort((a, b) => (a.parkedTs ?? Infinity) - (b.parkedTs ?? Infinity));
-      // SESSION 69: 10 → 25. With 68 waiting across five tiers, ten rows sorted by wait
-      // time could show a single tier and read like the old T1-only list.
-      const RESCUE_DISPLAY_LIMIT = 25;
-      const displayParked = stillParked.slice(0, RESCUE_DISPLAY_LIMIT);
-      const hiddenCount   = stillParked.length - displayParked.length;
+      // SESSION 69, owner 2026-09-09: "1st five then an expandable for members who want to
+      // look at the whole list, that way the page is not overtaken by parked members."
+      const RESCUE_DISPLAY_LIMIT = 5;   // displayParked / hiddenCount are computed inside renderList() below
 
       // Avg shortfall
       const avgShortfall = shortfallKnown > 0 ? totalShortfall / BigInt(shortfallKnown) : 0n;
@@ -1370,11 +1447,17 @@
         const floorB  = BigInt(_floorRaw);
         const spendable = sfBalB > floorB ? sfBalB - floorB : 0n;
 
-        let remaining = spendable, covered = 0, incomplete = false;
+        // SESSION 69: walk the VERDICTS, not the shortfalls. A refused member costs the fund
+        // nothing and is never "rescuable"; a RESCUE member costs p.advance (the fund's share,
+        // which the ladder caps). Ghosts are neither. An unknown verdict stops the count.
+        let remaining = spendable, covered = 0, refused = 0, incomplete = false, fundOut = false;
         for (const p of stillParked) {
-          if (p.shortfall === null || p.shortfall === undefined) { incomplete = true; break; }
-          if (p.shortfall > remaining) break;      // ordered queue: this one waits, so does everyone behind it
-          remaining -= p.shortfall;
+          if (p.verdict === null || p.verdict === undefined) { incomplete = true; break; }
+          if (p.verdict === 'GHOST') continue;
+          if (p.verdict === 'RATIO' || p.verdict === 'LADDER' || p.verdict === 'FLOOR') { refused++; continue; }  // counted over the WHOLE queue
+          if (fundOut) continue;
+          if (p.advance > remaining) { fundOut = true; continue; }  // ordered queue: this one waits, so does everyone behind it
+          remaining -= p.advance;
           covered++;
         }
 
@@ -1384,8 +1467,9 @@
           _rescueCap  = { long: capacityTxt, short: t('statusPage.js.none_waiting', 'none waiting') };
         } else {
           const prefix = incomplete ? t('statusPage.js.at_least', 'at least') + ' ' : '';
-          capacityTxt  = `${prefix}${covered} ${t('statusPage.js.of', 'of')} ${waiting} ${t('statusPage.js.waiting_can_be_rescued', 'waiting can be rescued now')}`;
-          _rescueCap   = { long: capacityTxt, short: `${prefix}${covered} ${t('statusPage.js.of', 'of')} ${waiting} ${t('statusPage.js.waiting_suffix', 'waiting')}` };
+          const evictTxt = refused > 0 ? ` · ${refused} ${t('statusPage.js.refused_evict', 'refused → eviction')}` : '';
+          capacityTxt  = `${prefix}${covered} ${t('statusPage.js.of', 'of')} ${waiting} ${t('statusPage.js.waiting_rescuable', 'waiting can be rescued')}${evictTxt}`;
+          _rescueCap   = { long: capacityTxt, short: `${prefix}${covered} ${t('statusPage.js.of', 'of')} ${waiting} ${t('statusPage.js.waiting_suffix', 'waiting')}${evictTxt}` };
         }
       } catch(e) {
         // keep last-known value if RPC fails — no flicker to '—'
@@ -1444,13 +1528,34 @@
           </div>`;
         }
 
+        // SESSION 69: the list is a FUNCTION of the last poll so the show-all toggle can
+        // re-render without another RPC round-trip. displayParked/hiddenCount recomputed here.
+        const renderList = () => {
+        const displayParked = _parkedExpanded ? stillParked : stillParked.slice(0, RESCUE_DISPLAY_LIMIT);
+        const hiddenCount   = stillParked.length - displayParked.length;
         const rows = displayParked.map(p => {
           const eligibleAt   = (p.parkedTs ?? 0) + graceSecs;
           const isEligible   = nowSecs >= eligibleAt;
           const secsLeft     = eligibleAt - nowSecs;
           let rescueStatus, rescueColor;
+          const evictAt   = (p.parkedTs ?? 0) + (_triageCfg ? _triageCfg.evictionGrace : 0);
+          const evictLeft = evictAt - nowSecs;
+          const fmtLeft   = s => s < 3600 ? `${Math.max(1, Math.ceil(s/60))}m` : s < 86400 ? `${Math.ceil(s/3600)}h` : `${Math.floor(s/86400)}d ${Math.ceil((s%86400)/3600)}h`;
           if (p.parkedTs === null) {
             rescueStatus = '…';
+            rescueColor  = 'var(--text3)';
+          } else if (p.verdict === 'RATIO' || p.verdict === 'LADDER' || p.verdict === 'FLOOR') {
+            // SESSION 69: the keeper will NOT rescue this member — say so, and when.
+            rescueStatus = `<span title="${p.why}">⛔ ${evictLeft <= 0 ? 'Eviction due' : 'Eviction in ' + fmtLeft(evictLeft)}</span>`;
+            rescueColor  = '#ef4444';
+          } else if (p.verdict === 'GHOST') {
+            rescueStatus = `<span title="${p.why}">👻 Seated — dequeue pending</span>`;
+            rescueColor  = 'var(--text3)';
+          } else if (p.verdict === 'SELF') {
+            rescueStatus = `<span title="${p.why}">✅ Self-funded re-entry</span>`;
+            rescueColor  = 'var(--green)';
+          } else if (p.verdict === null || p.verdict === undefined) {
+            rescueStatus = `<span title="${p.why || 'verdict could not be formed — retrying'}">… checking</span>`;
             rescueColor  = 'var(--text3)';
           } else if (graceSecs === 0 || isEligible) {
             rescueStatus = '⏳ In rescue queue';
@@ -1495,14 +1600,20 @@
             </thead>
             <tbody>${rows}</tbody>
           </table>
-          <div style="font-size:11px;color:var(--text3);margin-top:8px">
-            ${hiddenCount > 0
-              ? `Showing next ${displayParked.length} of ${stillParked.length} in queue (sorted by wait time) · ${graceLabel}`
+          <div style="font-size:11px;color:var(--text3);margin-top:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <span>${hiddenCount > 0
+              ? `Showing ${displayParked.length} of ${stillParked.length} in queue (sorted by wait time) · ${graceLabel}`
               : `${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue · ${graceLabel}`
-            }
+            }</span>
+            ${stillParked.length > RESCUE_DISPLAY_LIMIT
+              ? `<button type="button" onclick="window._toggleParkedList()" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">${_parkedExpanded ? '▲ Show first ' + RESCUE_DISPLAY_LIMIT : '▼ Show all ' + stillParked.length}</button>`
+              : ''}
           </div>
         `;
         _lastParkedHTML = wrap.innerHTML;
+        };
+        renderList();
+        _lastParkedRender = renderList;
       }
 
     } catch(e) {
