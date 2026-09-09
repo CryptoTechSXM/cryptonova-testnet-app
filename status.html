@@ -495,7 +495,7 @@
         <div id="parked-list-wrap">
           <div class="loading-row" data-i18n="statusPage.js.loading">Loading…</div>
         </div>
-        <div class="info-note" data-i18n="statusPage.parked_info_note"><strong>Parked</strong> members have cycled out of MatB but lacked enough withdrawable balance to re-enter T1 ($10). The Stability Fund contributes to rescue them. The keeper processes rescues automatically.</div>
+        <div class="info-note" data-i18n="statusPage.parked_info_note"><strong>Parked</strong> members have cycled out of MatB but lacked enough withdrawable balance to re-enter their tier (the tier's own entry fee — $10 at T1, $250 at T5). The Stability Fund contributes to rescue them. The keeper processes rescues automatically.</div>
       </div>
     </div>
 
@@ -1111,67 +1111,75 @@
     try {
       const keeper = new ethers.Contract(ADDRS.matrixKeeper, KEEPER_ABI, provider);
 
-      // Discover all T1 pairs via PairManager (handles factory-spawned pairs like T1.2)
-      const pm1 = new ethers.Contract(ADDRS.T1pm, PM_ABI, provider);
-      let allT1Pairs = [];
-      try {
-        const [matAs, matBs] = await pm1.allPairsStatus();
-        for (let pi = 0; pi < matAs.length; pi++) {
-          allT1Pairs.push(
-            new ethers.Contract(matAs[pi], MATRIX_ABI, provider),
-            new ethers.Contract(matBs[pi], MATRIX_ABI, provider),
-          );
-        }
-      } catch(_) {
-        allT1Pairs = [
-          new ethers.Contract(ADDRS.T1matA, MATRIX_ABI, provider),
-          new ethers.Contract(ADDRS.T1matB, MATRIX_ABI, provider),
-        ];
-      }
-      const matA = allT1Pairs[0];   // active pair's MatA (for ENTRY_FEE lookup)
-      const matB = allT1Pairs[1];   // active pair's MatB
+      // SESSION 69 FIX (2026-09-09, owner: "the display for parked members only shows T1
+      // parked members, the other tiers are not visible"). MEASURED on V8.52 with
+      // pair_saturation.js LOGS=0 before this edit: 68 parked — T1 1 · T2 12 · T3 5 · T4 1 ·
+      // T5 49 — and this card listed ONE of them. Two defects, same root:
+      //   (a) T2–T10 counts came from the hard-coded pair-0 addresses only; a spawned
+      //       T2.2 / T3.2 / T4.2 / T5.2 (all exist today) was never read.
+      //   (b) the wallet list, the avg-shortfall row AND the SF-rescue-capacity walk were
+      //       built from the T1 pairs only — capacity was priced off one $10 member while
+      //       49 waited at $250. Frontend-truth family (REGRESSION_REGISTER R5/R6 shape).
+      // Now: EVERY tier's PairManager (TierRouter.tierPairManagers, the same discovery the
+      // tiers table below already uses) → allPairsStatus → every MatA and MatB, each with
+      // its OWN ENTRY_FEE. Nothing here assumes T1.
+      const tr = new ethers.Contract(ADDRS.tierRouter, TR_ABI, provider);
+      const pmAddrs = Array(10).fill(null);
+      pmAddrs[0] = ADDRS.T1pm;
+      await Promise.all(Array.from({length: 9}, async (_, i) => {
+        try {
+          const pmAddr = await _retry(() => tr.tierPairManagers(i + 1));
+          if (pmAddr && pmAddr !== ethers.ZeroAddress) pmAddrs[i + 1] = pmAddr;
+        } catch(_) {}
+      }));
 
-      // Keeper checks all parked members across all pairs — T1 + T2–T10.
+      // allMats: [{ tier:'T3', pair:2, side:'MatB', c:<Contract> }, …] in book order.
+      // A tier whose PM read fails falls back to the book's pair-0 pair so the count can
+      // never silently drop to nothing — and _parkedReadFail is set (a fallback is a
+      // partial read, and a partial read is never allowed to look like a clean 0).
+      const allMats = [];
+      let _parkedReadFail = false;
+      for (let t = 0; t < 10; t++) {
+        const label = `T${t + 1}`;
+        let matAs = null, matBs = null;
+        if (pmAddrs[t]) {
+          try {
+            const pm = new ethers.Contract(pmAddrs[t], PM_ABI, provider);
+            [matAs, matBs] = await _retry(() => pm.allPairsStatus());
+          } catch(_) { matAs = null; }
+        }
+        if (!matAs) {
+          const kA = ADDRS[`${label}matA`], kB = ADDRS[`${label}matB`];
+          if (!kA || !kB) continue;               // tier not in the book at all
+          if (pmAddrs[t]) _parkedReadFail = true; // PM exists but could not be walked
+          matAs = [kA]; matBs = [kB];
+        }
+        for (let pi = 0; pi < matAs.length; pi++) {
+          allMats.push({ tier: label, pair: pi + 1, side: 'MatA', c: new ethers.Contract(matAs[pi], MATRIX_ABI, provider) });
+          allMats.push({ tier: label, pair: pi + 1, side: 'MatB', c: new ethers.Contract(matBs[pi], MATRIX_ABI, provider) });
+        }
+      }
+
       // Each getParkedCount is RETRIED. A single dropped read used to be caught to 0n, which
       // silently undercounted the total — enough drops and this card falsely read "0 — all
       // clear" while the keeper saw hundreds parked. A read that still fails after retries
       // flips _parkedReadFail (it is NOT counted as a real 0); below we hold the last-good
       // total rather than flash a false clear.
-      let _parkedReadFail = false;
       const _pkRead = async (c) => { try { return await _retry(() => c.getParkedCount()); } catch (_) { _parkedReadFail = true; return 0n; } };
       const [parkedCounts, gracePeriod] = await Promise.all([
-        Promise.all(allT1Pairs.map(_pkRead)),
+        Promise.all(allMats.map(m => _pkRead(m.c))),
         // A failed read used to yield 0, which reads as "grace over, everyone is
         // in the rescue queue now" — wrong and member-facing. Fall back to the
         // deployed default (24h) instead of an implied zero.
         keeper.parkedGracePeriod().catch(()=>86400n),
       ]);
-      const parkedCountA = parkedCounts[0] || 0n;
-      const parkedCountB = parkedCounts[1] || 0n;
-      let count = parkedCounts.reduce((s, c) => s + Number(c || 0n), 0);
+      allMats.forEach((m, i) => { m.parked = Number(parkedCounts[i] || 0n); });
+      let count = allMats.reduce((s, m) => s + m.parked, 0);
 
-      // Scan T2–T10 for parked counts (no detailed member list — just counts)
-      const HIGHER_TIER_KEYS = [
-        {label:'T2', matAKey:'T2matA', matBKey:'T2matB'},
-        {label:'T3', matAKey:'T3matA', matBKey:'T3matB'},
-        {label:'T4', matAKey:'T4matA', matBKey:'T4matB'},
-        {label:'T5', matAKey:'T5matA', matBKey:'T5matB'},
-        {label:'T6', matAKey:'T6matA', matBKey:'T6matB'},
-        {label:'T7', matAKey:'T7matA', matBKey:'T7matB'},
-        {label:'T8', matAKey:'T8matA', matBKey:'T8matB'},
-        {label:'T9', matAKey:'T9matA', matBKey:'T9matB'},
-        {label:'T10',matAKey:'T10matA',matBKey:'T10matB'},
-      ];
-      const higherTierParked = [];
-      await Promise.all(HIGHER_TIER_KEYS.map(async tk => {
-        if (!ADDRS[tk.matAKey]) return;
-        const mcA = new ethers.Contract(ADDRS[tk.matAKey], MATRIX_ABI, provider);
-        const mcB = new ethers.Contract(ADDRS[tk.matBKey], MATRIX_ABI, provider);
-        const [pkA, pkB] = await Promise.all([ _pkRead(mcA), _pkRead(mcB) ]);
-        const n = Number(pkA || 0n) + Number(pkB || 0n);
-        if (n > 0) higherTierParked.push({ label: tk.label, n });
-        count += n;
-      }));
+      // Per-tier totals for the "By tier" row — every tier, every pair.
+      const tierTotals = {};
+      for (const m of allMats) tierTotals[m.tier] = (tierTotals[m.tier] || 0) + m.parked;
+      const higherTierParked = Object.keys(tierTotals).filter(k => k !== 'T1' && tierTotals[k] > 0).map(k => ({ label: k, n: tierTotals[k] }));
 
       // Never show a falsely-low total off a partial read: if any read failed, hold the max
       // of the live (undercounted) total and the last-good total. Only a live 0 with EVERY
@@ -1181,7 +1189,7 @@
       else if (!_parkedReadFail) { _lastParkedCount = count; try { localStorage.setItem('cnova_st_parked_count', String(count)); } catch(e){} }
 
       // Tier breakdown text
-      const t1Count = parkedCounts.reduce((s,c)=>s+Number(c||0n),0);
+      const t1Count = tierTotals.T1 || 0;
       const breakdownParts = [];
       if (t1Count > 0) breakdownParts.push(`T1: ${t1Count}`);
       for (const ht of higherTierParked) breakdownParts.push(`${ht.label}: ${ht.n}`);
@@ -1249,12 +1257,21 @@
       } catch { keeperFailRead = false; }
 
       // ── Build live parked list directly from on-chain queue ───────────────
-      // Keeper scans all pairs — fetch from all discovered T1 pairs and merge.
+      // SESSION 69: EVERY matrix of EVERY tier, not the T1 pairs — see the note at the top of
+      // this function. Each matrix's ENTRY_FEE is read once, here, because a parked T5 member
+      // is short against $250, not $10; a fee that cannot be read leaves the shortfall UNKNOWN.
       const stillParked = [];
       let totalShortfall = 0n;
 
       const batchSize = 5;
-      for (const [mat, matCount] of allT1Pairs.map((m, i) => [m, Number(parkedCounts[i] || 0n)])) {
+      for (const m of allMats) {
+        const mat = m.c, matCount = m.parked;
+        if (matCount === 0) continue;
+        let matFee = null;
+        for (let a = 1; a <= 3; a++) {
+          try { matFee = BigInt(await mat.ENTRY_FEE()); break; }
+          catch(e) { if (a < 3) await new Promise(r=>setTimeout(r, 300*a)); }
+        }
         for (let i = 0; i < matCount; i += batchSize) {
           const batch = [];
           for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
@@ -1276,10 +1293,11 @@
             ]);
             return {
               addr,
+              tier: m.tier, pair: m.pair, side: m.side, fee: matFee,
               parkedTs: parkedTs === null ? null : Number(parkedTs),
               withdrawable: withdrawable === null ? null : BigInt(withdrawable),
               crossingReserve: crossingReserve === null ? null : BigInt(crossingReserve),
-              readFailed: (withdrawable === null || crossingReserve === null)
+              readFailed: (withdrawable === null || crossingReserve === null || matFee === null)
             };
           }));
           stillParked.push(...details);
@@ -1287,10 +1305,7 @@
         }
       }
 
-      // Compute shortfall vs entry fee (approximate — fee is same for all T1)
-      let entryFee = 10_000_000n;
-      try { entryFee = await matA.ENTRY_FEE(); } catch {}
-
+      // Shortfall vs the member's OWN matrix fee (p.fee) — was one T1 fee for everyone.
       let shortfallKnown = 0;
       for (const p of stillParked) {
         // V8.52: effectiveContrib = crossingReserve + withdrawable
@@ -1298,7 +1313,7 @@
         // V8.52: if a read failed, the shortfall is UNKNOWN — render "…", never compute from $0.
         if (p.readFailed) { p.shortfall = null; continue; }
         const effectiveContrib = p.withdrawable + (p.crossingReserve || 0n);
-        const shortfall = entryFee > effectiveContrib ? entryFee - effectiveContrib : 0n;
+        const shortfall = p.fee > effectiveContrib ? p.fee - effectiveContrib : 0n;
         p.shortfall = shortfall;
         totalShortfall += shortfall;
         shortfallKnown++;
@@ -1306,7 +1321,9 @@
 
       // Sort: longest-waiting first (these are next to be rescued)
       stillParked.sort((a, b) => (a.parkedTs ?? Infinity) - (b.parkedTs ?? Infinity));
-      const RESCUE_DISPLAY_LIMIT = 10;
+      // SESSION 69: 10 → 25. With 68 waiting across five tiers, ten rows sorted by wait
+      // time could show a single tier and read like the old T1-only list.
+      const RESCUE_DISPLAY_LIMIT = 25;
       const displayParked = stillParked.slice(0, RESCUE_DISPLAY_LIMIT);
       const hiddenCount   = stillParked.length - displayParked.length;
 
@@ -1330,6 +1347,10 @@
       // Now: walk the REAL queue in the REAL rescue order (stillParked is already
       // sorted longest-waiting-first, which is the order the keeper works) and spend
       // the spendable balance down member by member.
+      // SESSION 69: the queue now spans every tier, each member priced at their own
+      // matrix fee. Longest-waiting-first ACROSS tiers is this page's estimate of the
+      // keeper's order — UNVERIFIED against MatrixKeeper's actual cross-tier scan; a
+      // fixed order is still a better estimate than pricing 68 members off one T1 queue.
       // A member whose shortfall could not be read stops the count — the queue is
       // ordered, so an unknown cost makes everything behind it unknowable. We then say
       // "at least N", never a total. (Same doctrine as the direct-referral scan: a
@@ -1446,6 +1467,7 @@
           }
           return `
             <tr>
+              <td style="white-space:nowrap;color:var(--text2)">${p.tier}.${p.pair} ${p.side}</td>
               <td>
                 <span class="addr-short">${shortAddr(p.addr)}</span>
                 <button class="copy-btn" onclick="navigator.clipboard.writeText('${p.addr}')" title="Copy address">⧉</button>
@@ -1463,6 +1485,7 @@
           <table class="parked-table">
             <thead>
               <tr>
+                <th>Tier</th>
                 <th>Wallet</th>
                 <th>Withdrawable</th>
                 <th>Shortfall</th>
