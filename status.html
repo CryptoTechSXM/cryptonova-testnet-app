@@ -1302,6 +1302,10 @@
       // is short against $250, not $10; a fee that cannot be read leaves the shortfall UNKNOWN.
       const stillParked = [];
       let totalShortfall = 0n;
+      // SESSION 69: a getParkedMember read that fails after retries is COUNTED, not dropped.
+      // Live on admin 2026-09-09 the footer read "64 members in queue" under a card saying
+      // 68 — four address reads had been rate-limited and .filter(Boolean) hid them.
+      let _listDropped = 0;
 
       const batchSize = 5;
       for (const m of allMats) {
@@ -1315,7 +1319,13 @@
         for (let i = 0; i < matCount; i += batchSize) {
           const batch = [];
           for (let j = i; j < Math.min(i + batchSize, matCount); j++) batch.push(j);
-          const addrs = await Promise.all(batch.map(idx => mat.getParkedMember(idx).catch(()=>null)));
+          const addrs = await Promise.all(batch.map(async idx => {
+            for (let a = 1; a <= 3; a++) {
+              try { return await mat.getParkedMember(idx); }
+              catch(e) { if (a < 3) await new Promise(r=>setTimeout(r, 300*a)); }
+            }
+            _listDropped++; return null;
+          }));
           const details = await Promise.all(addrs.filter(Boolean).map(async addr => {
             // V8.52: retry each read (rate limits); a FAILED read stays null — it is
             // NEVER treated as $0, so we don't print a confidently wrong shortfall.
@@ -1602,9 +1612,9 @@
           </table>
           <div style="font-size:11px;color:var(--text3);margin-top:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
             <span>${hiddenCount > 0
-              ? `Showing ${displayParked.length} of ${stillParked.length} in queue (sorted by wait time) · ${graceLabel}`
-              : `${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue · ${graceLabel}`
-            }</span>
+              ? `Showing ${displayParked.length} of ${stillParked.length} in queue (sorted by wait time)`
+              : `${stillParked.length} member${stillParked.length !== 1 ? 's' : ''} in queue`
+            }${_listDropped > 0 ? ` · <span style="color:var(--yellow)">${_listDropped} not loaded this poll — retrying</span>` : ''} · ${graceLabel}</span>
             ${stillParked.length > RESCUE_DISPLAY_LIMIT
               ? `<button type="button" onclick="window._toggleParkedList()" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">${_parkedExpanded ? '▲ Show first ' + RESCUE_DISPLAY_LIMIT : '▼ Show all ' + stillParked.length}</button>`
               : ''}
