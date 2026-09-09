@@ -322,7 +322,7 @@
     "row_sf_rescue_capacity": "Rettungskapazität des SF",
     "row_avg_shortfall": "Durchschnittliches Defizit pro Mitglied",
     "section_parked_wallet_list": "Liste Parkierter Wallets",
-    "parked_info_note": "<strong>Parkierte</strong> Mitglieder haben einen Zyklus in MatB abgeschlossen, hatten aber nicht genug abhebbares Guthaben, um bei T1 (10 $) wieder einzutreten. Der Stabilitätsfonds trägt zu ihrer Rettung bei. Der Keeper verarbeitet Rettungen automatisch.",
+    "parked_info_note": "<strong>Parkierte</strong> Mitglieder haben einen Zyklus in MatB abgeschlossen, hatten aber nicht genug abhebbares Guthaben, um in ihre Stufe wieder einzutreten (die Eintrittsgebühr der jeweiligen Stufe — 10 $ bei T1, 250 $ bei T5). Der Stabilitätsfonds trägt zu ihrer Rettung bei. Der Keeper verarbeitet Rettungen automatisch.",
     "matrix_card_title": "Matrix-Füllfortschritt",
     "matrix_summary_default": "T1 Fortschritt MatA → MatB",
     "section_active_matrices": "T1 Stufe — Aktive Matrizen",

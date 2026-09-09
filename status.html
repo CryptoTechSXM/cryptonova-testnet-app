@@ -1808,7 +1808,10 @@
       // has run we show a dash — an honest unknown beats a confident wrong count.
       const _capLong  = _rescueCap ? _rescueCap.long
                       : (_lastParkedStats && _lastParkedStats.capacity ? _lastParkedStats.capacity : '—');
-      const _capShort = _rescueCap ? _rescueCap.short : '—';
+      // SESSION 69: the row fell back to '—' while the header (above) fell back to the
+      // cached text — two sites, one fact, disagreeing on first paint. Same fallback now.
+      const _capShort = _rescueCap ? _rescueCap.short
+                      : (_lastParkedStats && _lastParkedStats.capacity ? _lastParkedStats.capacity : '—');
       setText('sf-rescue-cap', _capShort);
       setText('sf-pct', pct + '%');
       const bar = document.getElementById('sf-bar');

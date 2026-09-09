@@ -322,7 +322,7 @@
     "row_sf_rescue_capacity": "SF kurtarma kapasitesi",
     "row_avg_shortfall": "Üye başına ortalama açık",
     "section_parked_wallet_list": "Bekleyen Cüzdan Listesi",
-    "parked_info_note": "<strong>Bekleyen</strong> üyeler MatB'de bir döngüyü tamamladı ancak T1'e (10 $) yeniden girmek için yeterli çekilebilir bakiyeye sahip değildi. Stabilite Fonu kurtarmalarına katkıda bulunur. Bekçi kurtarmaları otomatik olarak işler.",
+    "parked_info_note": "<strong>Bekleyen</strong> üyeler MatB'de bir döngüyü tamamladı ancak kendi kademelerine yeniden girmek için (o kademenin giriş ücreti — T1'de 10 $, T5'te 250 $) yeterli çekilebilir bakiyeye sahip değildi. Stabilite Fonu kurtarmalarına katkıda bulunur. Bekçi kurtarmaları otomatik olarak işler.",
     "matrix_card_title": "Matris Doluluk İlerlemesi",
     "matrix_summary_default": "T1 İlerlemesi MatA → MatB",
     "section_active_matrices": "T1 Seviyesi — Aktif Matrisler",

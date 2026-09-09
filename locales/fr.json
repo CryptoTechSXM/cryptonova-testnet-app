@@ -322,7 +322,7 @@
     "row_sf_rescue_capacity": "Capacité de sauvetage du SF",
     "row_avg_shortfall": "Déficit moyen par membre",
     "section_parked_wallet_list": "Liste des Portefeuilles en Attente",
-    "parked_info_note": "Les membres <strong>en attente</strong> ont terminé un cycle dans MatB mais n'avaient pas assez de solde retirable pour ré-entrer au T1 (10 $). Le Fonds de Stabilité contribue à leur sauvetage. Le gardien traite les sauvetages automatiquement.",
+    "parked_info_note": "Les membres <strong>en attente</strong> ont terminé un cycle dans MatB mais n'avaient pas assez de solde retirable pour ré-entrer dans leur palier (les frais d'entrée de ce palier — 10 $ au T1, 250 $ au T5). Le Fonds de Stabilité contribue à leur sauvetage. Le gardien traite les sauvetages automatiquement.",
     "matrix_card_title": "Progression de Remplissage de la Matrice",
     "matrix_summary_default": "Progression T1 MatA → MatB",
     "section_active_matrices": "Palier T1 — Matrices Actives",

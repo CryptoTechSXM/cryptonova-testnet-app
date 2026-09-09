@@ -320,7 +320,7 @@
     "row_sf_rescue_capacity": "Khả năng cứu trợ của SF",
     "row_avg_shortfall": "Thiếu hụt trung bình mỗi thành viên",
     "section_parked_wallet_list": "Danh Sách Ví Đang Chờ",
-    "parked_info_note": "<strong>Thành viên đang chờ</strong> đã hoàn thành chu kỳ MatB nhưng không có đủ số dư để tái nhập T1 ($10). Stability Fund đóng góp để cứu trợ họ. Keeper xử lý việc cứu trợ tự động.",
+    "parked_info_note": "<strong>Thành viên đang chờ</strong> đã hoàn thành chu kỳ MatB nhưng không có đủ số dư để tái nhập bậc của mình (phí vào của bậc đó — $10 ở T1, $250 ở T5). Stability Fund đóng góp để cứu trợ họ. Keeper xử lý việc cứu trợ tự động.",
     "matrix_card_title": "Tiến Độ Lấp Đầy Ma Trận",
     "matrix_summary_default": "T1 MatA → Tiến trình MatB",
     "section_active_matrices": "Cấp T1 — Ma Trận Đang Hoạt Động",

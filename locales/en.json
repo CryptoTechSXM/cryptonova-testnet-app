@@ -336,7 +336,7 @@
     "row_sf_rescue_capacity": "SF rescue capacity",
     "row_avg_shortfall": "Avg shortfall per member",
     "section_parked_wallet_list": "Parked Wallet List",
-    "parked_info_note": "<strong>Parked</strong> members have cycled out of MatB but lacked enough withdrawable balance to re-enter T1 ($10). The Stability Fund contributes to rescue them. The keeper processes rescues automatically.",
+    "parked_info_note": "<strong>Parked</strong> members have cycled out of MatB but lacked enough withdrawable balance to re-enter their tier (the tier's own entry fee — $10 at T1, $250 at T5). The Stability Fund contributes to rescue them. The keeper processes rescues automatically.",
     "matrix_card_title": "Matrix Fill Progress",
     "matrix_summary_default": "T1 MatA → MatB progression",
     "section_active_matrices": "T1 Tier — Active Matrices",

@@ -320,7 +320,7 @@
     "row_sf_rescue_capacity": "ความสามารถกู้ภัยของ SF",
     "row_avg_shortfall": "ขาดดุลเฉลี่ยต่อสมาชิก",
     "section_parked_wallet_list": "รายการกระเป๋าที่รอ",
-    "parked_info_note": "<strong>สมาชิกที่รอ</strong> ได้ผ่านรอบ MatB แล้ว แต่ไม่มียอดถอนเพียงพอที่จะเข้าร่วม T1 ใหม่ ($10) Stability Fund มีส่วนร่วมในการกู้ภัย Keeper ดำเนินการกู้ภัยโดยอัตโนมัติ",
+    "parked_info_note": "<strong>สมาชิกที่รอ</strong> ได้ผ่านรอบ MatB แล้ว แต่ไม่มียอดถอนเพียงพอที่จะเข้าร่วมระดับของตนใหม่ (ค่าเข้าร่วมของระดับนั้น — $10 ที่ T1, $250 ที่ T5) Stability Fund มีส่วนร่วมในการกู้ภัย Keeper ดำเนินการกู้ภัยโดยอัตโนมัติ",
     "matrix_card_title": "ความคืบหน้าการเติมเมทริกซ์",
     "matrix_summary_default": "ความก้าวหน้า T1 MatA → MatB",
     "section_active_matrices": "T1 Tier — เมทริกซ์ที่ใช้งาน",

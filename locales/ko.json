@@ -320,7 +320,7 @@
     "row_sf_rescue_capacity": "SF 구조 용량",
     "row_avg_shortfall": "멤버당 평균 부족액",
     "section_parked_wallet_list": "주차된 지갑 목록",
-    "parked_info_note": "<strong>주차된</strong> 멤버는 MatB를 통해 사이클아웃됐지만 T1 ($10)에 재진입하기 위한 출금 가능 잔액이 부족한 상태입니다. Stability Fund가 구조에 기여합니다. Keeper가 자동으로 구조를 처리합니다.",
+    "parked_info_note": "<strong>주차된</strong> 멤버는 MatB를 통해 사이클아웃됐지만 자신의 티어에 재진입하기 위한 (해당 티어의 참가비 — T1 $10, T5 $250) 출금 가능 잔액이 부족한 상태입니다. Stability Fund가 구조에 기여합니다. Keeper가 자동으로 구조를 처리합니다.",
     "matrix_card_title": "매트릭스 채움 진행률",
     "matrix_summary_default": "T1 MatA → MatB 진행",
     "section_active_matrices": "T1 티어 — 활성 매트릭스",

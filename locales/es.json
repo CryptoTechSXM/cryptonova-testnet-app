@@ -322,7 +322,7 @@
     "row_sf_rescue_capacity": "Capacidad de rescate del SF",
     "row_avg_shortfall": "Déficit promedio por miembro",
     "section_parked_wallet_list": "Lista de Billeteras Estacionadas",
-    "parked_info_note": "Los miembros <strong>estacionados</strong> completaron un ciclo en MatB pero no tenían suficiente saldo retirable para reingresar al T1 (10 $). El Fondo de Estabilidad contribuye a su rescate. El guardián procesa los rescates automáticamente.",
+    "parked_info_note": "Los miembros <strong>estacionados</strong> completaron un ciclo en MatB pero no tenían suficiente saldo retirable para reingresar a su nivel (la cuota de entrada de ese nivel — 10 $ en T1, 250 $ en T5). El Fondo de Estabilidad contribuye a su rescate. El guardián procesa los rescates automáticamente.",
     "matrix_card_title": "Progreso de Llenado de la Matriz",
     "matrix_summary_default": "Progreso T1 MatA → MatB",
     "section_active_matrices": "Nivel T1 — Matrices Activas",

@@ -320,7 +320,7 @@
     "row_sf_rescue_capacity": "SF 救援容量",
     "row_avg_shortfall": "每位会员平均缺口",
     "section_parked_wallet_list": "停泊钱包列表",
-    "parked_info_note": "<strong>已停泊</strong>会员已从 MatB 循环退出，但可提取余额不足以重入 T1（$10）。Stability Fund 提供救援资金。Keeper 自动处理救援。",
+    "parked_info_note": "<strong>已停泊</strong>会员已从 MatB 循环退出，但可提取余额不足以重入自己的层级（该层级的入场费——T1 为 $10，T5 为 $250）。Stability Fund 提供救援资金。Keeper 自动处理救援。",
     "matrix_card_title": "矩阵填充进度",
     "matrix_summary_default": "T1 MatA → MatB 进度",
     "section_active_matrices": "T1 层级 — 活跃矩阵",
