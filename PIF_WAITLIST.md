@@ -15,3 +15,4 @@ themselves NEVER appear here — they live between gifter and recipient.
 - [GIFTED by 0x8fb7ca…d6c2 2026-09-02] 2026-09-02 · 0x67757a3a8F6277e8C0B172cF898175f40e00Bf0a · Testers · test · contact: @testers
 - [GIFTED by 0x463432…79f0 2026-09-09] 2026-09-09 · 0xb41A3Cfb7e3125Aa42f938Ed9a8C6807b459617c · MyName · I need help. · contact: @MyName
 - [RESERVED by 0x791df8…14CE @1789127747] 2026-09-11 · 0x44Fa6E3E55Ab8d51c94F0cbC67103B74224c37e0 · Serena · contact: princesslaurelle@hotmail.com
+- [WAITING] 2026-09-11 · 0xD7a187207950e8ebA0a3921c5cA2d7430c22C05d · mers · trial
