@@ -14,4 +14,4 @@ themselves NEVER appear here — they live between gifter and recipient.
 - [GIFTED by 0x5179A0…ead2 2026-08-28] 2026-08-28 · 0x5179A012b54EE6E6c7db92f820C9b3d8126Eead3 · PIF Tester 01 · Testing PIF · contact: @PIFTESTER
 - [GIFTED by 0x8fb7ca…d6c2 2026-09-02] 2026-09-02 · 0x67757a3a8F6277e8C0B172cF898175f40e00Bf0a · Testers · test · contact: @testers
 - [GIFTED by 0x463432…79f0 2026-09-09] 2026-09-09 · 0xb41A3Cfb7e3125Aa42f938Ed9a8C6807b459617c · MyName · I need help. · contact: @MyName
-- [WAITING] 2026-09-11 · 0x44Fa6E3E55Ab8d51c94F0cbC67103B74224c37e0 · Serena · contact: princesslaurelle@hotmail.com
+- [RESERVED by 0x791df8…14CE @1789127747] 2026-09-11 · 0x44Fa6E3E55Ab8d51c94F0cbC67103B74224c37e0 · Serena · contact: princesslaurelle@hotmail.com
