@@ -37,6 +37,17 @@
 
 ## Open Issues
 
+### [2026-09-11] Other — Not certain if a bug but I'm reporting..... my seat in M1.2 …
+- **Reporter:** Sherwyn
+- **Page:** Other
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x7d3c94885d2022200934d4908bca7b47905bbcf6
+- **Frequency:** Consistent
+- **What happened:** Not certain if a bug but I'm reporting..... my seat in M1.2 haven't moved in the last few days.. last time I spoke to you it was at #59 with 454 registered. Now I'm seeing over 600 registered and my position in M1.2 haven't moved,. Are 1.1, 1.2, 1.3 connected to each other or are there separate and need there own registrations to rotate?
+- **What was expected:** To be rotating with new registrations...
+- **Submitted:** Fri, 11 Sep 2026 21:41:26 GMT
+
+
 _No open issues._
 
 ## Resolved Issues
