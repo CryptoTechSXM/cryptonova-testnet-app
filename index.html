@@ -696,6 +696,20 @@
       <h1 data-i18n="idx.hero_h1">CryptoNova Matrix<br><span>on Base Chain</span></h1>
       <p data-i18n="idx.hero_sub">Join the CryptoNova Matrix. Start at T1 ($10 USDC) and auto-upgrade through 10 tiers. Earn referral bonuses, chain pay, and CNOVA tokens — all on Base Chain.</p>
 
+      <!-- ══ G4 — AUDIT DISCLOSURE ══ MAINNET_READINESS.md §1 gate G4. Text approved by the owner
+           2026-09-11 and held verbatim in CryptoNova-Mainnet-App\G4_G5_SITE_TEXT.md §1a — do not
+           soften it, and do not add any word implying review ("safe", "secure", "battle-tested"),
+           or a test-count, which would read as a substitute for the audit this line discloses.
+           ▶ POSITION IS MEASURED, NOT CHOSEN: the doc requires it visible WITHOUT SCROLLING. A
+           screenshot of the live landing view (session 75) put the fold INSIDE the "What is
+           CryptoNova?" card below, so anything after that card fails the requirement. Hence above
+           it, directly under the subtitle. If the hero is ever reordered, re-measure. -->
+      <div style="max-width:760px;margin:18px auto 0;text-align:left;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.35);border-radius:12px;padding:14px 18px">
+        <div style="font-weight:800;font-size:14px;color:var(--yellow);margin-bottom:6px" data-i18n="idx.audit_h">⚠️ Not yet independently audited</div>
+        <div style="color:var(--text2,#94a3b8);font-size:13.5px;line-height:1.55" data-i18n="idx.audit_p">Our contracts are public and verified on BaseScan &mdash; anyone can read every line. They have not yet been independently audited. An audit is planned and will be paid for out of what the project earns. Until then, please only join with what you can genuinely afford to risk.</div>
+        <div style="margin-top:8px;font-size:13px"><a href="faq.html" style="color:var(--blue);text-decoration:none" data-i18n="idx.audit_more">What an audit is, and why we don&rsquo;t have one yet &rarr;</a></div>
+      </div>
+
       <!-- What is CryptoNova? — at-a-glance (owner request 2026-08-06; claims code-verified) -->
       <div style="max-width:760px;margin:24px auto 24px;text-align:left;background:rgba(15,23,42,.55);border:1px solid rgba(51,65,85,.5);border-radius:12px;padding:18px 22px">
         <div style="font-weight:800;font-size:17px;margin-bottom:10px;text-align:center">What is CryptoNova?</div>
@@ -838,6 +852,19 @@
       <div style="margin-top:14px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green2);border-radius:8px;font-size:13px;color:var(--text2)">
         💡 <strong style="color:var(--green)" data-i18n="split.mechanic_label">CryptoNova Matrix mechanic:</strong> <span data-i18n="split.mechanic_body">Fill Matrix A → root crosses to Matrix B → fill B → root auto-upgrades to T2. The loop repeats for each tier.</span>
       </div>
+    </div>
+
+    <!-- ══ G5 — SECURITY BUG BOUNTY ══ MAINNET_READINESS.md §1 gate G5. Text and rules in
+         G4_G5_SITE_TEXT.md §2a/§2b. ⛔ The standing $1 REPORT bounty and the SECURITY bounty are
+         two separate things on purpose (§2): presented as one, $1 becomes the advertised price of
+         draining the fund, which is worse than no bounty. No published security number — the owner
+         decided 2026-09-11 that security rewards are agreed directly with the reporter and paid.
+         ⛔ A bounty is NOT an audit and must never be offered as the answer to "is it audited" —
+         that answer is G4 above and FAQ q24. Full terms live in FAQ q34. -->
+    <div class="card" style="margin-top:24px">
+      <div class="section-title"><div class="dot"></div> <span data-i18n="idx.bounty_h">&#128737;&#65039; Found a security bug? We will pay you for it.</span></div>
+      <div style="color:var(--text2,#94a3b8);font-size:13.5px;line-height:1.6" data-i18n="idx.bounty_p">We would much rather pay you than lose members&rsquo; money. <strong>Ordinary bugs and display problems: $1, always.</strong> For a security issue &mdash; a way to take funds that should not be takeable, to lock funds so they cannot be withdrawn, or to make the contracts pay out something the rules say is not owed &mdash; please email <a href="mailto:cryptocounsels@gmail.com" style="color:var(--blue)">cryptocounsels@gmail.com</a> privately first. We will agree a reward with you directly, and we will pay it in USDC once we have confirmed the issue and shipped the fix. Please do not post it publicly, and please do not drain anything to prove the point &mdash; a clear description, or a demonstration on the test network, is enough.</div>
+      <div style="margin-top:10px;font-size:13px"><a href="faq.html" style="color:var(--blue);text-decoration:none" data-i18n="idx.bounty_more">Full bounty terms in the FAQ &rarr;</a></div>
     </div>
   </div>
 

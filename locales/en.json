@@ -119,7 +119,13 @@
     "how_s4_h": "Register",
     "how_s4_b": "Confirm the register transaction. You'll be placed into the CryptoNova Matrix at the next available seat.",
     "how_s5_h": "Earn & Withdraw",
-    "how_s5_b": "As new members register, USDC flows through the chain to you. Withdraw any time from the Dashboard."
+    "how_s5_b": "As new members register, USDC flows through the chain to you. Withdraw any time from the Dashboard.",
+    "audit_h": "⚠️ Not yet independently audited",
+    "audit_p": "Our contracts are public and verified on BaseScan &mdash; anyone can read every line. They have not yet been independently audited. An audit is planned and will be paid for out of what the project earns. Until then, please only join with what you can genuinely afford to risk.",
+    "audit_more": "What an audit is, and why we don&rsquo;t have one yet &rarr;",
+    "bounty_h": "&#128737;&#65039; Found a security bug? We will pay you for it.",
+    "bounty_p": "We would much rather pay you than lose members&rsquo; money. <strong>Ordinary bugs and display problems: $1, always.</strong> For a security issue &mdash; a way to take funds that should not be takeable, to lock funds so they cannot be withdrawn, or to make the contracts pay out something the rules say is not owed &mdash; please email <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a> privately first. We will agree a reward with you directly, and we will pay it in USDC once we have confirmed the issue and shipped the fix. Please do not post it publicly, and please do not drain anything to prove the point &mdash; a clear description, or a demonstration on the test network, is enough.",
+    "bounty_more": "Full bounty terms in the FAQ &rarr;"
   },
   "stats": {
     "live_title": "Live Stats",
