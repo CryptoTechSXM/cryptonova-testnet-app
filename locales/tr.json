@@ -125,7 +125,8 @@
     "audit_more": "Denetim nedir ve neden henüz yaptırmadık &rarr;",
     "bounty_h": "&#128737;&#65039; Bir güvenlik açığı mı buldunuz? Bunun için ödeme yapıyoruz.",
     "bounty_p": "Üyelerin parasını kaybetmek yerine size ödeme yapmayı çok daha çok isteriz. <strong>Sıradan hatalar ve görüntüleme sorunları: $1, her zaman.</strong> Bir güvenlik açığı için &mdash; çekilebilir olmaması gereken fonları çekmenin, fonları çekilemeyecek şekilde kilitlemenin veya sözleşmelerin kurallara göre borçlu olmadığı bir şeyi ödemesini sağlamanın bir yolu &mdash; lütfen önce özel olarak <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a> adresine yazın. Ödülü doğrudan sizinle kararlaştırır ve sorunu doğrulayıp düzeltmeyi yayınladıktan sonra USDC olarak öderiz. Lütfen herkese açık şekilde paylaşmayın ve kanıtlamak için hiçbir şey çekmeyin &mdash; net bir açıklama ya da test ağında bir gösterim yeterlidir.",
-    "bounty_more": "Tüm koşullar SSS'de &rarr;"
+    "bounty_more": "Tüm koşullar SSS'de &rarr;",
+    "footer_bug": "🐛 Hata mı buldunuz? Buradan bildirin &mdash; sıradan hatalar $1 kazandırır"
   },
   "stats": {
     "live_title": "Canlı İstatistikler",

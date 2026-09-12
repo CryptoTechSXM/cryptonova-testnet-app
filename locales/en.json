@@ -125,7 +125,8 @@
     "audit_more": "What an audit is, and why we don&rsquo;t have one yet &rarr;",
     "bounty_h": "&#128737;&#65039; Found a security bug? We will pay you for it.",
     "bounty_p": "We would much rather pay you than lose members&rsquo; money. <strong>Ordinary bugs and display problems: $1, always.</strong> For a security issue &mdash; a way to take funds that should not be takeable, to lock funds so they cannot be withdrawn, or to make the contracts pay out something the rules say is not owed &mdash; please email <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a> privately first. We will agree a reward with you directly, and we will pay it in USDC once we have confirmed the issue and shipped the fix. Please do not post it publicly, and please do not drain anything to prove the point &mdash; a clear description, or a demonstration on the test network, is enough.",
-    "bounty_more": "Full bounty terms in the FAQ &rarr;"
+    "bounty_more": "Full bounty terms in the FAQ &rarr;",
+    "footer_bug": "🐛 Found a bug? Report it here &mdash; ordinary bugs earn $1"
   },
   "stats": {
     "live_title": "Live Stats",

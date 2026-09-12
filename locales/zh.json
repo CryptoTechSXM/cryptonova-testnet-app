@@ -125,7 +125,8 @@
     "audit_more": "什么是审计，以及我们为何还没有做 &rarr;",
     "bounty_h": "&#128737;&#65039; 发现了安全漏洞？我们会为此付费。",
     "bounty_p": "我们宁愿付钱给您，也不愿让成员的资金遭受损失。<strong>普通漏洞和显示问题：$1，一律如此。</strong> 若是安全问题 &mdash; 可以取走本不应被取走的资金、把资金锁死使其无法提取，或使合约支付出规则上并不应付的金额 &mdash; 请先私下发送邮件至 <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a>。我们会直接与您商定奖励金额，并在确认问题并发布修复之后以 USDC 支付。请不要公开发布，也请不要为了证明而真的取走任何资金 &mdash; 一份清晰的说明，或在测试网络上的演示，就足够了。",
-    "bounty_more": "完整条款见常见问题 &rarr;"
+    "bounty_more": "完整条款见常见问题 &rarr;",
+    "footer_bug": "🐛 发现漏洞？点此报告 &mdash; 普通漏洞可得 $1"
   },
   "stats": {
     "live_title": "实时数据",

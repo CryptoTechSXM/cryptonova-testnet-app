@@ -125,7 +125,8 @@
     "audit_more": "Ce qu'est un audit, et pourquoi nous n'en avons pas encore &rarr;",
     "bounty_h": "&#128737;&#65039; Vous avez trouvé une faille de sécurité ? Nous vous payons pour cela.",
     "bounty_p": "Nous préférons de loin vous payer que perdre l'argent des membres. <strong>Bugs ordinaires et problèmes d'affichage : $1, toujours.</strong> Pour une faille de sécurité &mdash; un moyen de retirer des fonds qui ne devraient pas pouvoir l'être, de bloquer des fonds pour qu'ils ne soient plus retirables, ou de faire verser aux contrats quelque chose qui, selon les règles, n'est pas dû &mdash; écrivez-nous d'abord en privé à <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a>. Nous conviendrons d'une récompense directement avec vous et nous la paierons en USDC une fois le problème confirmé et le correctif déployé. Merci de ne pas le publier, et de ne rien retirer pour le prouver &mdash; une description claire, ou une démonstration sur le réseau de test, suffit.",
-    "bounty_more": "Toutes les conditions dans la FAQ &rarr;"
+    "bounty_more": "Toutes les conditions dans la FAQ &rarr;",
+    "footer_bug": "🐛 Vous avez trouvé un bug ? Signalez-le ici &mdash; les bugs ordinaires rapportent $1"
   },
   "stats": {
     "live_title": "Stats en Direct",

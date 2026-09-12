@@ -125,7 +125,8 @@
     "audit_more": "Was ein Audit ist und warum wir noch keines haben &rarr;",
     "bounty_h": "&#128737;&#65039; Eine Sicherheitslücke gefunden? Wir zahlen dafür.",
     "bounty_p": "Wir zahlen dir viel lieber etwas, als das Geld unserer Mitglieder zu verlieren. <strong>Gewöhnliche Fehler und Anzeigeprobleme: $1, immer.</strong> Bei einer Sicherheitslücke &mdash; ein Weg, Geld abzuziehen, das nicht abziehbar sein sollte, Geld so zu sperren, dass es nicht mehr auszahlbar ist, oder die Verträge dazu zu bringen, etwas auszuzahlen, das nach den Regeln nicht geschuldet ist &mdash; schreib bitte zuerst privat an <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a>. Wir vereinbaren die Belohnung direkt mit dir und zahlen sie in USDC aus, sobald wir das Problem bestätigt und die Korrektur ausgeliefert haben. Bitte veröffentliche es nicht, und zieh bitte nichts ab, um es zu beweisen &mdash; eine klare Beschreibung oder eine Demonstration im Testnetz genügt.",
-    "bounty_more": "Alle Bedingungen im FAQ &rarr;"
+    "bounty_more": "Alle Bedingungen im FAQ &rarr;",
+    "footer_bug": "🐛 Fehler gefunden? Hier melden &mdash; gewöhnliche Fehler bringen $1"
   },
   "stats": {
     "live_title": "Live-Statistiken",

@@ -125,7 +125,8 @@
     "audit_more": "O que é uma auditoria, e por que ainda não temos uma &rarr;",
     "bounty_h": "&#128737;&#65039; Encontrou uma falha de segurança? Nós pagamos por isso.",
     "bounty_p": "Preferimos muito mais pagar você do que perder o dinheiro dos membros. <strong>Bugs comuns e problemas de exibição: $1, sempre.</strong> Em caso de falha de segurança &mdash; uma forma de retirar fundos que não deveriam poder ser retirados, de travar fundos para que não possam ser sacados, ou de fazer os contratos liberarem algo que pelas regras não é devido &mdash; escreva primeiro em privado para <a href=\"mailto:cryptocounsels@gmail.com\" style=\"color:var(--blue)\">cryptocounsels@gmail.com</a>. Combinaremos a recompensa diretamente com você e pagaremos em USDC depois de confirmarmos o problema e publicarmos a correção. Por favor, não publique, e não retire nada para provar &mdash; uma descrição clara, ou uma demonstração na rede de testes, é suficiente.",
-    "bounty_more": "Todas as condições nas perguntas frequentes &rarr;"
+    "bounty_more": "Todas as condições nas perguntas frequentes &rarr;",
+    "footer_bug": "🐛 Encontrou um bug? Relate aqui &mdash; bugs comuns rendem $1"
   },
   "stats": {
     "live_title": "Estatísticas ao Vivo",
