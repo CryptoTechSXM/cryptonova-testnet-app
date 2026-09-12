@@ -1,0 +1,41 @@
+🛡️ Being straight with you — three things now on the site
+
+Hi everyone 👋
+
+We are still in the building phase, and the way I see it, the more open we are with you the fewer problems we have later. So the dev team and I put three things on the site today. None of them are exciting. All of them are things you deserve to be able to read for yourself.
+
+📜 1. Our contracts have NOT been independently audited
+
+You will now see this on the front page, and there is a full answer in the FAQ.
+
+Every contract is public and verified on BaseScan — you can read every line, or have anyone you trust read it. We have written a large automated test suite and we test everything on the public test network before it touches real funds.
+
+What we do NOT have is an independent security audit. That means an outside firm paid to try to break it. Those cost real money and we do not have outside funding. The plan we have committed to is to launch, earn, and pay for that audit out of what the project earns — rather than delay forever, or take investor money to fund it.
+
+The FAQ used to answer "are the contracts audited?" by talking about our testing. Every word of it was true and it still left you with the wrong impression. That was on us, and it is fixed. It now says no, plainly, and then explains what an audit actually is.
+
+🙋 2. Who we are, and what we are not
+
+CryptoNova is built and run by CryptoCounsel — a team of four. We are not a registered company and we do not hold any financial licence or registration. A business licence is something we intend to pursue.
+
+So, said plainly: there is no company standing behind your position, no regulator supervising us, and no deposit protection of any kind. We are not a bank, a broker, an exchange or an investment service, and nothing on the site is financial advice.
+
+I would rather tell you that myself than have you assume otherwise.
+
+🐛 3. We pay for bugs — and now for security findings too
+
+The $1 bug bounty is still active and always has been. Ordinary bugs and display problems: $1, every time. Report them on the bug report page. That has not changed and it is not going away.
+
+What is new is the security side. If you find a way to take funds that should not be takeable, to lock funds so they cannot be withdrawn, or to make the contracts pay out something the rules say is not owed — please email cryptocounsels@gmail.com privately first.
+
+We will agree a reward with you directly, based on how serious the issue is and what the project can afford, and we will pay it in USDC once we have confirmed it and shipped the fix. First report wins. We will tell you what we found and what we changed.
+
+Please do not post it publicly, and please do not drain anything to prove the point. A clear description, or a demonstration on the test network, is enough. We would much rather pay you than lose members' money.
+
+⚠️ And the honest bottom line
+
+Please only join with what you can genuinely afford to risk. That sentence is now on the front page and I mean it.
+
+All three are live right now in all ten languages. Go read them — that is the point of putting them up.
+
+Team CryptoNova
