@@ -4214,17 +4214,57 @@ function renderPairSubRows(t, matrixAs, occupancyA, occupancyB, actives) {
     // TURNING -- members are cycling out of MatA into MatB. Before this it fell through to
     // 'New', which is what the owner saw on his own test chain for the healthiest pair on it.
     const turning  = occA >= MS && occB > 0 && !bothFull;
-    const status = bothFull
-      ? '<span style="color:var(--text3);font-size:11px">✅ Full</span>'
-      : isActive
-        ? '<span style="color:var(--green);font-size:11px">🟢 Active</span>'
-        : noCross
-          ? '<span style="color:#fbbf24;font-size:11px" title="Matrix A is full but nobody has crossed into Matrix B yet, so this pair is not rotating.">⏳ Awaiting crossings</span>'
-          : turning
-            ? '<span style="color:var(--green);font-size:11px" title="Matrix A is full and members are cycling out of it into Matrix B. This pair is rotating.">🔄 Rotating</span>'
-          : (occA === 0 && occB === 0)
-            ? '<span style="color:#fbbf24;font-size:11px" title="Deployed in advance — opens automatically when the previous pair saturates. No action needed.">🟡 Standby buffer</span>'
-            : '<span style="color:var(--text3);font-size:11px">⏳ New</span>';
+    // V8.52 SESSION 83, 2026-09-15 -- HANDOFF 62.57 ITEM 8. 'Awaiting crossings' was a
+    // patient-sounding string standing in front of a pair that cannot receive anything. On
+    // 2026-09-15 it was on screen for T4.3 (127/127 . 0/127, frozen, invariant A CONFIRMED)
+    // telling 127 members to wait for a crossing that could not arrive, and T5.2
+    // (127/127 . 116/127, invariant C2 SUSPECTED) read 'Rotating' while it had not turned.
+    //
+    // WHERE THE HONEST STATES COME FROM. Deduced from PairManagerV8.sol, and from data this
+    // function ALREADY HOLDS -- zero extra RPC:
+    //   * allPairsStatus sets active[i] = (i == _findExternalPair()), and _findExternalPair
+    //     (:977) returns 0. So isActive means EXACTLY 'pair 0, the front door'. Every new
+    //     registration enters pair 0 however full it is; LATER pairs are fed only by the
+    //     overflow / graduation / rescue stream.
+    //   * That stream is _overflowTargetFor (:366): stage 1 _pairWithRoomFor, and only if
+    //     stage 1 finds nothing, stage 2 _fullPairWaitingLongest.
+    //   * Stage 1's test is _hasRoomAndFree (:319) and it reads room on matrixA ONLY, so a
+    //     later pair with a full MatA is invisible to it.
+    //   * Stage 2 skips any pair on 'bOcc >= bSize' (:1012), so a pair full in BOTH halves
+    //     is refused there too.
+    // Therefore, from occupancyA / occupancyB alone:
+    //   (a) later pair, both halves full -> nothing can enter it at all. Structural, and the
+    //       one state where 'no crossing can arrive' is literally true.
+    //   (b) later pair, MatA full, and ANY pair in this tier still has a free MatA seat ->
+    //       stage 1 finds that pair first every time, so stage 2 never runs and this pair
+    //       receives nothing until the other one fills. This is T4.3 held behind T4.4 and
+    //       T5.2 behind T5.3. It is NOT permanent -- so the page must not say 'never', and
+    //       it must not say 'awaiting crossings' either. It must name what it is waiting on.
+    //   (c) later pair, MatA full, NO pair in the tier has room -> stage 2 is live and this
+    //       pair really is in line. Only here is 'awaiting crossings' a true sentence.
+    // roomIdx is -1 when no pair in this tier has a free MatA seat. Every use of it is
+    // gated behind occA >= MS, so an unread MATRIX_SIZE (Infinity, 62.13) can never reach
+    // these branches and nothing is claimed from a failed read.
+    const roomIdx  = occupancyA.findIndex(v => Number(v) < MS);
+    const isLater  = !isActive;                                          // == (i > 0)
+    const blocked  = isLater && bothFull;                                // (a)
+    const queued   = isLater && occA >= MS && !bothFull && roomIdx >= 0; // (b)
+    const roomName = roomIdx >= 0 ? TU + '.' + (roomIdx + 1) : '';
+    const status = blocked
+      ? '<span style="color:var(--red);font-size:11px" title="Both halves of this pair are full, so no new member can be routed into it and no seat can move until one frees up. Nothing is lost - your position and earnings are held on-chain.">&#9940; Full &mdash; not receiving</span>'
+      : bothFull
+        ? '<span style="color:var(--text3);font-size:11px">✅ Full</span>'
+        : queued
+          ? '<span style="color:#fbbf24;font-size:11px" title="Matrix A is full here. While ' + roomName + ' still has free Matrix A seats, every arrival in this tier goes there first, so this pair is not receiving entries and is not rotating. It starts moving again once ' + roomName + ' fills up.">⏸️ Waiting on ' + roomName + '</span>'
+          : isActive
+            ? '<span style="color:var(--green);font-size:11px">🟢 Active</span>'
+            : noCross
+              ? '<span style="color:#fbbf24;font-size:11px" title="Matrix A is full and no pair in this tier has a free Matrix A seat, so arrivals are now routed into full pairs, longest-waiting first. This pair is in line; nobody has crossed into its Matrix B yet.">⏳ Awaiting crossings</span>'
+              : turning
+                ? '<span style="color:var(--green);font-size:11px" title="Matrix A is full and members have crossed into Matrix B, so this pair has rotated. It rotates again each time an entry arrives.">🔄 Rotating</span>'
+                : (occA === 0 && occB === 0)
+                  ? '<span style="color:#fbbf24;font-size:11px" title="Deployed in advance — opens automatically when the previous pair saturates. No action needed.">🟡 Standby buffer</span>'
+                  : '<span style="color:var(--text3);font-size:11px">⏳ New</span>';
     const fillA = occA + '/' + (_MATRIX_SIZE ?? '—');
     const fillB = occB + '/' + (_MATRIX_SIZE ?? '—');
     const tr = document.createElement('tr');
