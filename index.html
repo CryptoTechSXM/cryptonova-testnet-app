@@ -5760,7 +5760,8 @@ async function loadDashboardData() {
         if (member.hasEverJoined) highestTier = Math.max(highestTier, tNum);
         if (member.isInMatrix) {
           const pos = { label: m.label, bfs: 0n, bfsUnknown: false, crossingReserve: 0n,
-                        addr: m.addr, size: 0n, rot: 0n, rotUnknown: false };
+                        addr: m.addr, size: 0n, rot: 0n, rotUnknown: false,
+                        occ: 0n, occUnknown: false };
           activePositions.push(pos);
           if (tNum >= highestTier) activeCycles = BigInt(member.cyclesCompleted);
           followUps.push(
@@ -5779,6 +5780,21 @@ async function loadDashboardData() {
             retryRead(() => mc.rotationCount()).then(({ value, ok }) => {
               pos.rot = ok ? BigInt(value) : 0n;
               pos.rotUnknown = !ok;   // NOT zero — a failed read is not "never rotated"
+            })
+          );
+          // V8.54 item 1 (Sherwyn 2026-09-11, and the reason his seat "hadn't moved"):
+          // OCCUPANCY is the fact this row was missing. MatrixLogicLib:506-517 seats an
+          // arrival in the lowest free slot and rotates NOTHING until occupancy reaches
+          // MATRIX_SIZE, so a matrix that is still filling has not rotated because it
+          // CANNOT. Without this read the page could only offer "measuring this matrix's
+          // rate…", which is what it showed him for six days while nothing was wrong.
+          // ⛔ A FAILED READ IS NOT AN EMPTY MATRIX. occUnknown suppresses the filling
+          // sentence entirely rather than printing "0 of 127 seats taken", which would be
+          // the same false-claim defect this row exists to cure.
+          followUps.push(
+            retryRead(() => mc.occupancy()).then(({ value, ok }) => {
+              pos.occ = ok ? BigInt(value) : 0n;
+              pos.occUnknown = !ok;
             })
           );
           // V8.52: fetch crossing reserve ($5 locked per active member toward next crossing)
@@ -6081,13 +6097,51 @@ async function loadDashboardData() {
           // matters is the seat you hold and whether this matrix is still rotating.
           const _toGo = (!p.bfsUnknown && p.bfs > 1n) ? (p.bfs - 1n) : null;
           const _rate = _rotationRate(p.addr, p.rot, p.rotUnknown);
+          // V8.54: THE THREE STATES THIS ROW HAS TO TELL APART. It previously told apart
+          // only two, and collapsed the worst case into the friendliest sentence:
+          //   1 STILL FILLING  — rotations are not slow, they have not started. Needs
+          //                      occupancy, which the row never read until now.
+          //   2 FULL, NOT TURNING — we have sampled it and the answer is ZERO. The old
+          //                      code hit `_rate.perDay > 0` == false here and fell into
+          //                      the SAME string used when there is no data at all,
+          //                      so a matrix measured as dead for six days reported
+          //                      "measuring this matrix's rate…" forever. That is a false
+          //                      claim in the [[cryptonova-frontend-truth]] class: the page
+          //                      said it was still working something out when it had the
+          //                      answer and the answer was bad news.
+          //   3 FULL AND TURNING — unchanged, the rate line that already worked.
+          // ⚠ State 2 needs a MINIMUM OBSERVATION WINDOW. `_rotationRate` returns a rate
+          // from 29 minutes of samples; "no rotations in the last 29 minutes" is noise, not
+          // a finding, so below a quarter of a day we say "measuring" — which is then TRUE.
+          const _filling = (!p.occUnknown && p.size > 0n && p.occ > 0n && p.occ < p.size);
+          // Answers the question Sherwyn actually asked ("are 1.1, 1.2, 1.3 connected or
+          // separate?"), which no page has ever answered. Kept in a tooltip so the row
+          // stays one line — a long sentence inline here wraps and breaks the layout.
+          const _pairTip = 'T1.1, T1.2 and T1.3 are one system, not three separate ones. '
+            + 'New members always join T1.1; the later pairs fill from members rotating out of the earlier ones. '
+            + 'Each pair has an A half and a B half, and the B half only fills as the A half rotates \u2014 '
+            + 'so a pair takes about 254 members before its B half starts turning.';
           let _cycleRow = '';
           if (_toGo !== null) {
-            const _eta = (_rate && _rate.perDay > 0)
-              ? ` &middot; about ${_fmtEta(Number(_toGo) / _rate.perDay)} at the recent rate (${_rate.perDay.toFixed(0)}/day)`
-              : (p.rotUnknown ? '' : ' &middot; measuring this matrix&rsquo;s rate\u2026');
+            const _seat = `seat ${p.bfs}${p.size > 0n ? ' of ' + p.size : ''}`;
+            const _rots = `${_toGo} rotation${_toGo === 1n ? '' : 's'} until you cycle`;
+            let _body;
+            if (_filling) {
+              _body = `${_seat} &middot; still filling &mdash; ${p.occ} of ${p.size} seats taken &middot; rotations begin when it is full, then ${_rots}`;
+            } else if (_rate && _rate.perDay > 0) {
+              // `_fmtEta` returns "under an hour" and "soon" as well as "2.0 days", and
+              // "about under an hour" is not English. Prefix "about" only when the estimate
+              // actually starts with a number. (Pre-existing since V8.52 item 39; it only
+              // shows at seat 2-3 in a fast matrix, which is why nobody caught it.)
+              const _etaStr = _fmtEta(Number(_toGo) / _rate.perDay);
+              _body = `${_seat} &middot; ${_rots} &middot; ${/^\d/.test(_etaStr) ? 'about ' : ''}${_etaStr} at the recent rate (${_rate.perDay.toFixed(0)}/day)`;
+            } else if (_rate && _rate.overDays >= 0.25) {
+              _body = `${_seat} &middot; ${_rots} &middot; no rotations here in the last ${_fmtEta(_rate.overDays)}`;
+            } else {
+              _body = `${_seat} &middot; ${_rots}` + (p.rotUnknown ? '' : ' &middot; measuring this matrix&rsquo;s rate\u2026');
+            }
             _cycleRow = `<div class="info-row" style="padding-top:2px;padding-bottom:6px">
-              <span class="info-key" style="color:var(--text3);font-size:12px;padding-left:10px">seat ${p.bfs}${p.size > 0n ? ' of ' + p.size : ''} &middot; ${_toGo} rotation${_toGo === 1n ? '' : 's'} until you cycle${_eta}</span></div>`;
+              <span class="info-key" style="color:var(--text3);font-size:12px;padding-left:10px">${_body} <span title="${_pairTip}" style="cursor:help">&#9432;</span></span></div>`;
           } else if (!p.bfsUnknown && p.bfs === 1n) {
             _cycleRow = `<div class="info-row" style="padding-top:2px;padding-bottom:6px">
               <span class="info-key" style="color:var(--green);font-size:12px;padding-left:10px">seat 1 &mdash; you are next to cycle out</span></div>`;
