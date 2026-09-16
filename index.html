@@ -4258,7 +4258,7 @@ function renderPairSubRows(t, matrixAs, occupancyA, occupancyB, actives) {
       'full-both':  ['#fbbf24', '\ud83d\udd04 Full \u2014 rotating on a timer',
         'Both halves of this pair are full, so no new member is routed into it. It still moves: when Matrix B has been idle for about 15 minutes the system rotates it, and each rotation moves everyone up one seat. How often that happens depends on activity across the system. Your position and earnings are held on-chain.'],
       'waiting':    ['#fbbf24', '\u23f8\ufe0f Waiting on ' + waitName,
-        'Matrix A is full here. While ' + waitName + ' still has free Matrix A seats, every arrival in this tier goes there first, so this pair is not receiving entries and is not rotating. It is served again once the pairs ahead of it fill, unless a newer pair opens first and takes the arrivals.'],
+        'Matrix A is full here. While ' + waitName + ' still has free Matrix A seats, new arrivals in this tier are sent there first. Members already in this pair who re-enter still go back into it, so it can keep rotating; how fast depends on them. New arrivals come back to it once the pairs ahead of it fill, unless a newer pair opens first.'],
       'in-line':    ['#fbbf24', '\u23f3 Awaiting crossings',
         'Matrix A is full and no pair in this tier has a free Matrix A seat, so arrivals are now routed into full pairs, longest-waiting first. This pair is in line; nobody has crossed into its Matrix B yet.'],
       'turning':    ['var(--green)', '\ud83d\udd04 Rotating',
