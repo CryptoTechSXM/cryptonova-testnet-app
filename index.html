@@ -1399,8 +1399,8 @@
         <div id="rescue-auto-hint" style="margin-top:12px;margin-bottom:4px;padding:10px 14px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);font-size:12px;color:var(--text2);line-height:1.6">
           <strong style="color:var(--green)">&#9203; Automatic re-entry is running</strong> &#8212; you do not have to do anything. If your <em>in-matrix</em> balance covers the entry fee, the system re-enters you automatically at no cost to you. If it falls short, the Stability Fund can advance the gap for you &#8212; that is a <strong>repayable advance that stays on your account until it is cleared</strong>, not a gift. You can also act yourself with Self Rescue or Copay below &#8212; please read the note underneath first.
         </div>
-        <div id="rescue-seat-warn" style="margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.35);font-size:12px;color:var(--text2);line-height:1.6">
-          <strong style="color:#ef4444">&#9888;&#65039; A rescue does not always end in a seat.</strong> When both halves of your tier&#8217;s pair are completely full, a rescue can take the payment and still leave you parked, because there is no free seat to hand you. We found this from a member who paid six times and was never seated once &#8212; that was our fault, not his, and not yours. <strong>While your pair is full, paying again is unlikely to change the outcome.</strong> The fix is built and tested and goes out with the next contract release.
+        <div id="rescue-seat-warn" style="margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.35);font-size:12px;color:var(--text2);line-height:1.6">
+          <strong style="color:#fbbf24">&#9432;&#65039; If a rescue ever takes payment and leaves you parked, tell us.</strong> Earlier releases had a case where a completely full pair could take a rescue payment without seating the member. The fix went live with V8.51 and our checks since have not found it happening again. If it does happen to you, please send a bug report instead of paying again, so we can check your wallet on-chain.
         </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
           <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-bottom:10px;border-bottom:1px solid var(--border)">
@@ -4209,7 +4209,8 @@ function _pairStateOf(i, occA, occB, activeIdx, MS) {
   if (i === activeIdx)       return { key: 'front-door' };   // the door; never queued
   if (a === 0 && b === 0)    return { key: 'standby' };      // deployed ahead, not open yet
   if (!(a >= size))          return { key: 'filling' };      // stage 1 can still seat here
-  if (b >= size)             return { key: 'full-both' };    // stage 1 and stage 2 both refuse it
+  if (b >= size)             return { key: 'full-both' };    // routing refuses it; the keeper's frozen-MatB
+                                                              // force-rotate still turns it (62.61, measured)
   let roomIdx = -1;
   for (let j = 0; j < occA.length; j++) {
     if (Number(occA[j]) < size) { roomIdx = j; break; }      // stage 1 finds this one first
@@ -4254,10 +4255,10 @@ function renderPairSubRows(t, matrixAs, occupancyA, occupancyB, actives) {
     const LABELS = {
       'front-door': ['var(--green)', '\ud83d\udfe2 Active',
         'This is the pair every new member enters. It keeps taking entries even when its seats are full, because each entry rotates the matrix and moves everyone up one seat.'],
-      'full-both':  ['var(--red)', '\u26d4 Full \u2014 not receiving',
-        'Both halves of this pair are full, so no new member can be routed into it and no seat can move until one frees up. Nothing is lost, your position and earnings are held on-chain.'],
+      'full-both':  ['#fbbf24', '\ud83d\udd04 Full \u2014 rotating on a timer',
+        'Both halves of this pair are full, so no new member is routed into it. It still moves: when Matrix B has been idle for about 15 minutes the system rotates it, and each rotation moves everyone up one seat. How often that happens depends on activity across the system. Your position and earnings are held on-chain.'],
       'waiting':    ['#fbbf24', '\u23f8\ufe0f Waiting on ' + waitName,
-        'Matrix A is full here. While ' + waitName + ' still has free Matrix A seats, every arrival in this tier goes there first, so this pair is not receiving entries and is not rotating. It starts moving again once ' + waitName + ' fills up.'],
+        'Matrix A is full here. While ' + waitName + ' still has free Matrix A seats, every arrival in this tier goes there first, so this pair is not receiving entries and is not rotating. It is served again once the pairs ahead of it fill, unless a newer pair opens first and takes the arrivals.'],
       'in-line':    ['#fbbf24', '\u23f3 Awaiting crossings',
         'Matrix A is full and no pair in this tier has a free Matrix A seat, so arrivals are now routed into full pairs, longest-waiting first. This pair is in line; nobody has crossed into its Matrix B yet.'],
       'turning':    ['var(--green)', '\ud83d\udd04 Rotating',
@@ -4421,7 +4422,7 @@ function renderTierPairHeader(t, tierNum, activeIdx, pairCount, registered, occA
     const st = _pairStateOf(p, occA, occB, activeIdx, MSp);
     const STRIP = {
       'front-door': ['filling now',                             'var(--green)'],
-      'full-both':  ['not receiving',                           'var(--red)'],
+      'full-both':  ['full, rotating on a timer',               '#fbbf24'],
       'waiting':    ['waiting on ' + TU + '.' + st.waitOn,      '#fbbf24'],
       'in-line':    ['in line',                                 '#fbbf24'],
       'turning':    ['turning',                                 'var(--text2)'],
