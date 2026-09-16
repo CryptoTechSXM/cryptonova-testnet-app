@@ -37,6 +37,18 @@
 
 ## Open Issues
 
+### [2026-09-16] Dashboard (index.html) — I have funds in my account/withdrawable but showing pending …
+- **Reporter:** Noah
+- **Page:** Dashboard (index.html)
+- **Wallet Type:** Rabby
+- **Wallet Address:** 0x1acc02252bfb5c7434771bf848f6d77d11f60949
+- **Frequency:** Consistent
+- **What happened:** I have funds in my account/withdrawable but showing pending eviction!
+- **What was expected:** I expected the funds would be deducted from my balance and pay automatically
+- **Notes:** can my balance from any tier cover any reentrance and not tied to one. If my withdrawable balance has 400 usdc and my T1 is going to b evicted something is wrong.
+- **Submitted:** Wed, 16 Sep 2026 20:17:31 GMT
+
+
 _No open issues._
 
 ## Resolved Issues
