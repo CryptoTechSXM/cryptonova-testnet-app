@@ -37,24 +37,13 @@
 
 ## Open Issues
 
-### [2026-09-16] Dashboard (index.html) — I have funds in my account/withdrawable but showing pending …
-- **Reporter:** Noah
-- **Page:** Dashboard (index.html)
-- **Wallet Type:** Rabby
-- **Wallet Address:** 0x1acc02252bfb5c7434771bf848f6d77d11f60949
-- **Frequency:** Consistent
-- **What happened:** I have funds in my account/withdrawable but showing pending eviction!
-- **What was expected:** I expected the funds would be deducted from my balance and pay automatically
-- **Notes:** can my balance from any tier cover any reentrance and not tied to one. If my withdrawable balance has 400 usdc and my T1 is going to b evicted something is wrong.
-- **Submitted:** Wed, 16 Sep 2026 20:17:31 GMT
-
-
 _No open issues._
 
 ## Resolved Issues
 
 | Date Reported | Date Fixed | Page | Summary | Commit |
 |---|---|---|---|---|
+| 2026-09-16 | 2026-09-17 | Dashboard (index.html) | Noah — Dashboard (index.html) — I have funds in my account/withdrawable but showing pen | Measured 09-16 on V8.52 - T1 pair1 LADDER refusal, T4 rescued by keeper, T5 rescue due 09-17. Each tier pays its own re-entry by design. Owner replied. Bounty plus 1 accepted. |
 | 2026-09-11 | 2026-09-15 | Other | Sherwyn — Other — Not certain if a bug but I'm reporting..... my seat in M1.2 … - **Report | NOT A BUG plus a frontend fix from this report. MEASURED (rotation_timeline.js, V8.52 book, blocks 0-46818937, 5203/5203 calls 0 failed, archive probe PASSED): T1.2 MatB capacity 127 read from chain; rotations per day 09-06 to 09-11 all ZERO, first rotation 09-12. A matrix seats arrivals in the lowest free slot and rotates nothing until occupancy reaches MATRIX_SIZE (MatrixLogicLib 506-517), so it had simply not finished filling. Cumulative entries minus 127 equals measured rotations exactly at the 09-12 boundary. He entered at seat 59 when the matrix had zero rotations, and every rotation since has advanced him one seat. The 09-10/09-11 entry drought that stalled the fill at 115/127 is separately measured (path_census v2): T1.1 overflow ran 100 percent into the brand-new T1.3 because _hasRoomAndFree measures room on MatA only; stage-inversion fix proved in fixture V8_54, not yet deployed. FRONTEND FIX: the dashboard cycle row now tells filling, stalled and turning apart instead of showing measuring indefinitely, plus a tooltip explaining that the pairs in a tier are one system and a pair needs about 254 members before its B half turns - frontend 71458d7, live on all domains 2026-09-15. |
 | 2026-07-27 | 2026-09-05 | Dashboard (index.html) | @Koach100 — Dashboard (index.html) — T3 has not cycled. It's at 0 . The position in the matr | CLOSED ON EVIDENCE (member_history.js, V8.45 book, wallet 0x1ca3316e): entered T3.1 MatA at block 44662447; first T3 cycle-out at block 44678721 (~9h later, around the time of the report), then T3.1 MatB cycle-outs at 44681380 and 44685162. T1/T2 had cycled 4-10 times in the same window because they fill faster. The 0 was a true reading of a slower matrix and resolved on chain within hours - not a bug. |
 | 2026-08-08 | 2026-09-05 | Dashboard (index.html) | @ronnienic197 — Dashboard (index.html) — The self rescue transaction is taking an extremely long | CLOSED ON EVIDENCE (BaseScan, wallet 0x75784fe2): on 2026-08-08 NO transaction from this wallet reached the chain (none between 07-27 and 08-24) - the approval was never broadcast by the wallet/RPC of that period (V8.49 item 2 later replaced the wallet RPC). On 2026-08-24 the same flow completed: approve to self-rescue in 14s, a second in 72s, both OK. On V8.52 self-rescue is a single permit signature, no separate approval step. |
