@@ -9888,9 +9888,18 @@ function friendlyError(e) {
   if (msgLow.includes('partner full') ||
       (msg + raw + rawDeep).toLowerCase().includes('partner full'))
     return '⏳ MatB is currently full — the keeper will rescue you automatically within minutes. No action needed.';
-  if (msgLow.includes('f8v8: must keep crossing reserve') ||
-      msgLow.includes('f8v8: balance fully reserved'))
-    return '⏳ Your balance is locked while you hold an active matrix position. The system reserves your entry fee ($10) to fund your next crossing. Once your current matrix cycle completes and pays out, you can withdraw freely. If you have Auto-Reentry disabled, you will not be re-entered and your full balance will be available after the cycle.';
+  // TWO DIFFERENT HOLDS, TWO MESSAGES (2026-09-18, session 91). They shared one message that
+  // blamed an active position, a $10 entry fee and Auto-Reentry. MEASURED 2026-09-18 block
+  // 46986094 (V8_50_HANDOFF 62.67): an EVICTED member (not in any matrix, auto-reentry already
+  // off) hit "balance fully reserved" because the DEFAULT Auto Upgrade reserve ($25 = the T2 fee)
+  // held his whole $3.76. withdrawCore :1361 — that hold is TierRouter.reservedFor, which is 0
+  // once Auto Upgrade AND Auto Re-entry are both off. Eviction neither causes nor clears it.
+  if (msgLow.includes('f8v8: balance fully reserved'))
+    return '⏳ Your balance is being held as your automation reserve — it saves up the entry fee for your next automatic upgrade or re-entry, so it is not claimable yet. To withdraw it now, turn OFF Auto Upgrade and Auto Re-entry in your settings, then withdraw again. Nothing is lost: the money stays yours either way.';
+  // Crossing lock (MatrixLogicLib :1408-1428): only while seated AND automation is on; reverts
+  // when the balance is at or below what the lock needs, whatever amount was asked for.
+  if (msgLow.includes('f8v8: must keep crossing reserve'))
+    return '⏳ Your balance is held as your crossing reserve while you are seated with automation on — it builds the entry fee for your next re-entry. It frees up as your cycle pays out, or turn OFF Auto Upgrade and Auto Re-entry to withdraw it now. The money stays yours either way.';
   if (msgLow.includes('f8v8: nothing to withdraw'))
     return '❌ Nothing to withdraw — earnings from this matrix were used for your upgrade to the next tier.';
 
